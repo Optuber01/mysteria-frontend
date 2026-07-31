@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-commissions-list">
+  <main id="main-content" class="admin-commissions-list" tabindex="-1">
     <!-- Header -->
     <div class="page-header">
       <button class="back-button" @click="router.push('/profile')">
@@ -50,15 +50,15 @@
           </tr>
           </thead>
           <tbody>
-          <tr v-for="c in commissions" :key="c.id" class="commission-row" @click="openDetail(c.id)">
-            <td>{{ c.playerIgn }}</td>
+          <tr v-for="c in commissions" :key="c.id" class="commission-row">
+            <td><RouterLink class="commission-link" :to="`/admin/commissions/${c.id}`">{{ c.playerIgn }}</RouterLink></td>
             <td>
               <span class="type-badge">{{ formatTypeSummary(c) }}</span>
             </td>
             <td class="summary-cell">
               <span>{{ formatTargetSummary(c) }}</span>
               <span v-if="c.touchesExistingCommission" class="warning-badge" title="This target has been commissioned before">
-                <i class="fa-solid fa-triangle-exclamation"></i>
+                <i aria-hidden="true" class="fa-solid fa-triangle-exclamation"></i>
               </span>
             </td>
             <td>
@@ -66,7 +66,7 @@
             </td>
             <td class="date-cell">{{ formatDate(c.createdAt) }}</td>
             <td class="chevron-cell">
-              <i class="fa-solid fa-chevron-right"></i>
+              <RouterLink :aria-label="`Open commission from ${c.playerIgn}`" class="commission-link" :to="`/admin/commissions/${c.id}`"><i aria-hidden="true" class="fa-solid fa-chevron-right"></i></RouterLink>
             </td>
           </tr>
           </tbody>
@@ -82,7 +82,7 @@
         Loading commissions...
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
@@ -145,10 +145,6 @@ const selectStatus = (status: CommissionStatus | '') => {
   loadCommissions();
 };
 
-const openDetail = (id: string) => {
-  router.push(`/admin/commissions/${id}`);
-};
-
 loadCommissions();
 </script>
 
@@ -157,6 +153,11 @@ loadCommissions();
   padding: 24px;
   max-width: 1300px;
   margin: 0 auto;
+  font-family: var(--font-ui);
+}
+
+.admin-commissions-list button {
+  font-family: var(--font-ui);
 }
 
 .page-header {
@@ -175,17 +176,27 @@ loadCommissions();
   padding: 7px 14px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   color: var(--myst-ink-muted);
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
 }
 
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 70%, var(--myst-gold));
   color: var(--myst-ink);
+}
+
+.back-button svg {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.back-button:hover svg {
+  transform: translateX(-2px);
 }
 
 .header-identity {
@@ -202,7 +213,7 @@ loadCommissions();
   height: 36px;
   background: color-mix(in srgb, var(--myst-gold) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
 }
 
@@ -211,6 +222,7 @@ loadCommissions();
   font-size: 22px;
   font-weight: 700;
   color: var(--myst-ink);
+  font-family: var(--font-display);
 }
 
 .section {
@@ -236,12 +248,14 @@ loadCommissions();
   padding: 8px 14px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   color: var(--myst-ink-muted);
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
 }
 
 .status-tab:hover {
@@ -263,16 +277,19 @@ loadCommissions();
   background: var(--myst-gold);
   color: var(--myst-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              opacity var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   white-space: nowrap;
 }
 
 .refresh-btn:hover:not(:disabled) {
   background: var(--myst-gold-soft);
+  transform: translateY(var(--hover-control));
 }
 
 .refresh-btn:disabled {
@@ -283,7 +300,7 @@ loadCommissions();
 .table-wrap {
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -305,8 +322,21 @@ loadCommissions();
 }
 
 .commission-row {
-  cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard);
+}
+
+.commission-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--myst-ink);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+}
+
+.commission-link:hover {
+  text-decoration-color: currentColor;
 }
 
 .commission-row:hover {
@@ -335,7 +365,7 @@ loadCommissions();
 .status-badge {
   display: inline-block;
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -403,7 +433,7 @@ loadCommissions();
   color: var(--myst-ink-muted);
   font-size: 14px;
   background: var(--myst-bg-2);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
   margin-top: 16px;
   display: flex;

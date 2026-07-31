@@ -7,6 +7,7 @@ const ALLOWED_REDIRECT_HOSTS = new Set([
 
 export function isAllowedRedirectUrl(url: string): boolean {
   if (!url) return false
+  if (url.startsWith('/') && !url.startsWith('//')) return true
   try {
     const parsed = new URL(url)
     if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost') return false

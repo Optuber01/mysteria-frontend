@@ -1,6 +1,7 @@
 import {createRouter, createWebHistory} from "vue-router";
 import {useAuthStore} from "@/stores/auth";
 import {nextTick} from "vue";
+import {preferredScrollBehavior} from '@/utils/motion';
 import {
     PERM_ADMIN,
     PERM_BALANCE_MANAGE,
@@ -26,7 +27,7 @@ const router = createRouter({
                 nextTick(() => {
                     resolve({
                         el: to.hash,
-                        behavior: 'smooth',
+                        behavior: preferredScrollBehavior(),
                     });
                 });
             }
@@ -228,7 +229,7 @@ router.beforeEach(async (to, from, next) => {
 
     // Check authentication first
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        next({name: "home"});
+        next({name: "login", query: {redirect: to.fullPath}});
         return;
     }
 

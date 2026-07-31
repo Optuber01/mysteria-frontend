@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Mysterria balance icon"
+      aria-hidden="true"
       class="icon-balance"
       fill="none"
       height="25"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 24 25"
       width="24"
       xmlns="http://www.w3.org/2000/svg"
@@ -49,36 +48,5 @@
   width: 24px;
   height: 25px;
   display: block;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 0 8px rgba(138, 43, 226, 0.3));
-}
-
-.icon-balance:hover {
-  transform: scale(1.1) rotate(5deg);
-  filter: drop-shadow(0 0 12px rgba(138, 43, 226, 0.6));
-}
-
-@keyframes mystical-pulse {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.05);
-  }
-}
-
-.icon-balance circle {
-  animation: mystical-pulse 3s ease-in-out infinite;
-}
-
-.icon-balance circle:nth-of-type(1) {
-  animation-delay: 0s;
-}
-
-.icon-balance circle:nth-of-type(2) {
-  animation-delay: 0.5s;
 }
 </style>

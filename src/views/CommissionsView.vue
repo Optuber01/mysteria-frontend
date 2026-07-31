@@ -2,7 +2,7 @@
   <div class="page-container">
     <HeaderItem/>
 
-    <main class="commissions-main">
+    <main id="main-content" class="commissions-main" tabindex="-1">
       <div class="commissions-view">
         <div class="page-header">
           <button class="back-button" @click="router.push('/profile')">
@@ -103,6 +103,7 @@ const handleSubmitted = () => {
   flex: 1 0 auto;
   background: var(--myst-bg);
   padding: 100px 0 60px;
+  font-family: var(--font-body);
 }
 
 .commissions-view {
@@ -125,12 +126,13 @@ const handleSubmitted = () => {
   padding: 7px 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   color: #888;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
+  font-family: var(--font-ui);
 }
 
 .back-button:hover {
@@ -144,8 +146,10 @@ const handleSubmitted = () => {
 
 .page-title {
   margin: 0 0 4px;
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--myst-offwhite);
 }
 
@@ -159,7 +163,7 @@ const handleSubmitted = () => {
   background: rgba(13, 16, 30, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 32px;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   margin-bottom: 24px;
 }
 
@@ -171,7 +175,7 @@ const handleSubmitted = () => {
 
 .terms-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -190,19 +194,19 @@ const handleSubmitted = () => {
 
 .terms-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 24px;
   color: var(--myst-offwhite);
 }
 
 .terms-price {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   color: #05070a;
   background: var(--myst-gold);
   padding: 4px 12px;
-  border-radius: 3px;
+  border-radius: var(--radius-pill);
   white-space: nowrap;
 }
 
@@ -216,7 +220,7 @@ const handleSubmitted = () => {
 
 .terms-block-title {
   margin: 0 0 10px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
   color: var(--myst-gold);
@@ -290,7 +294,7 @@ const handleSubmitted = () => {
   height: 20px;
   border: 1px solid rgba(200, 178, 115, 0.4);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 600;
   border-radius: 50%;
@@ -308,6 +312,7 @@ const handleSubmitted = () => {
   color: #cdc3a8;
   font-size: 12.5px;
   line-height: 1.5;
+  border-radius: var(--radius-md);
 }
 
 .terms-note i {

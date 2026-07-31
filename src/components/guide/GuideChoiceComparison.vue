@@ -52,6 +52,7 @@ defineProps<{
   position: relative;
   padding: 28px;
   border: 1px solid rgba(245, 245, 247, 0.14);
+  border-radius: var(--radius-lg);
   background: rgba(17, 19, 29, 0.78);
 }
 
@@ -72,18 +73,17 @@ defineProps<{
 
 .micro-label {
   display: block;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.08em;
   line-height: 1.4;
-  text-transform: uppercase;
   color: var(--myst-gold);
 }
 
 h3 {
   margin: 7px 0 0;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 26px;
   font-weight: 600;
 }
@@ -91,10 +91,11 @@ h3 {
 .recommended-tag {
   padding: 5px 8px;
   border: 1px solid rgba(200, 178, 115, 0.45);
+  border-radius: var(--radius-pill);
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 8px;
-  letter-spacing: 0.15em;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -112,10 +113,9 @@ dl > div {
 
 dt {
   color: var(--myst-ink-muted);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 dd {

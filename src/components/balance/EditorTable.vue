@@ -29,10 +29,13 @@
         <td class="num">
           <div class="tune-wrap">
             <input
+                :aria-label="`${a.plainName} ${isPctMode(a) ? 'percentage cost' : 'flat cost'}`"
                 :class="{ changed: isCostChanged(a) }"
                 :step="isPctMode(a) ? '0.1' : '1'"
                 :value="isPctMode(a) ? a.effectiveCostPercentage : a.effectiveFlatCost"
                 min="0"
+                :name="`cost-${a.id}`"
+                autocomplete="off"
                 type="number"
                 @input="onCostInput(a, $event)"
             />
@@ -46,9 +49,12 @@
           <template v-else>
             <div v-if="a._hard.cd >= 0" class="tune-wrap">
               <input
+                  :aria-label="`${a.plainName} cooldown in seconds`"
                   :class="{ changed: a.effectiveCooldownSeconds !== a._hard.cd }"
                   :value="a.effectiveCooldownSeconds"
                   min="0"
+                  :name="`cooldown-${a.id}`"
+                  autocomplete="off"
                   step="1"
                   type="number"
                   @input="onCdInput(a, $event)"
@@ -58,9 +64,12 @@
             <div v-for="cat in Object.keys(a._hard.cats)" :key="cat" class="tune-wrap cat-wrap">
               <span class="key-pill">{{ cat }}</span>
               <input
+                  :aria-label="`${a.plainName} ${cat} cooldown in seconds`"
                   :class="{ changed: a.effectiveCategoryCooldowns[cat] !== a._hard.cats[cat] }"
                   :value="a.effectiveCategoryCooldowns[cat]"
                   min="0"
+                  :name="`cooldown-${a.id}-${cat}`"
+                  autocomplete="off"
                   step="1"
                   type="number"
                   @input="onCatInput(a, cat, $event)"
@@ -79,9 +88,12 @@
                 <template v-if="pmOf(a, k)">◆ </template>{{ k }}<template v-if="k === a._primary"> ★</template>
               </span>
               <input
+                  :aria-label="`${a.plainName} ${k} damage`"
                   :class="{ changed: isDamageChanged(a, k) }"
                   :value="a.damageKeys[k]"
                   min="0"
+                  :name="`damage-${a.id}-${k}`"
+                  autocomplete="off"
                   step="0.1"
                   type="number"
                   @input="onDamageInput(a, k, $event)"
@@ -231,8 +243,13 @@ const obsMult = (a: EnrichedAbility) => {
 </script>
 
 <style scoped>
+.editor-table tbody tr {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48px;
+}
 .editor-table-wrap {
   overflow-x: auto;
+  font-family: var(--font-ui);
 }
 
 .editor-table {
@@ -249,7 +266,7 @@ const obsMult = (a: EnrichedAbility) => {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   padding: 8px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   white-space: nowrap;
@@ -273,7 +290,7 @@ const obsMult = (a: EnrichedAbility) => {
 }
 
 .editor-table tr {
-  transition: background 0.4s ease;
+  transition: background-color var(--motion-slow) var(--ease-standard);
 }
 
 .row-flash {
@@ -285,7 +302,7 @@ const obsMult = (a: EnrichedAbility) => {
 }
 
 .seq-cell {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   color: var(--myst-gold);
   white-space: nowrap;
 }
@@ -304,7 +321,7 @@ const obsMult = (a: EnrichedAbility) => {
   display: inline-block;
   font-size: 9px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 40%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0 6px;
   margin-left: 6px;
   color: var(--myst-ink-muted);
@@ -329,11 +346,12 @@ const obsMult = (a: EnrichedAbility) => {
   background: var(--myst-bg);
   color: var(--myst-ink);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 6px;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--motion-fast) var(--ease-standard),
+              box-shadow var(--motion-fast) var(--ease-standard);
 }
 
 .editor-table input[type="number"]:focus {
@@ -350,15 +368,15 @@ const obsMult = (a: EnrichedAbility) => {
 .unit {
   color: var(--myst-ink-muted);
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
 }
 
 .key-pill {
   display: inline-block;
   font-size: 10px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 1px 8px;
   color: var(--myst-ink-muted);
   white-space: nowrap;
@@ -395,9 +413,9 @@ const obsMult = (a: EnrichedAbility) => {
 
 .assumed-pill {
   font-size: 9px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   border: 1px dashed color-mix(in srgb, var(--myst-ink-muted) 45%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0 7px;
   color: color-mix(in srgb, var(--myst-ink-muted) 80%, transparent);
   white-space: nowrap;
@@ -409,7 +427,7 @@ const obsMult = (a: EnrichedAbility) => {
   flex-wrap: wrap;
   gap: 4px 10px;
   margin: 1px 0 0 4px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
 }
 
@@ -440,7 +458,7 @@ const obsMult = (a: EnrichedAbility) => {
   color: var(--myst-ink-muted);
   font-size: 11px;
   text-decoration: line-through;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 .none-dash {
@@ -448,7 +466,7 @@ const obsMult = (a: EnrichedAbility) => {
 }
 
 .tele {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--myst-ink-muted);
 }

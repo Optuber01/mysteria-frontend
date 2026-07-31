@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка Wikipedia"
+      aria-hidden="true"
       class="icon-wiki"
       fill="currentColor"
       height="20"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 20 20"
       width="20"
       xmlns="http://www.w3.org/2000/svg"
@@ -24,6 +23,6 @@
   width: 20px;
   height: 20px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

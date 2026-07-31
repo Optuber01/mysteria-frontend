@@ -1,12 +1,11 @@
 <template>
   <svg
-      aria-label="Іконка сповіщення"
+      aria-hidden="true"
       class="icon-notification"
       fill="none"
       height="24"
-      role="img"
+      focusable="false"
       stroke="#F0F1F5"
-      tabindex="0"
       viewBox="0 0 24 24"
       width="24"
       xmlns="http://www.w3.org/2000/svg"
@@ -31,6 +30,6 @@
   width: 25px;
   height: 25px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

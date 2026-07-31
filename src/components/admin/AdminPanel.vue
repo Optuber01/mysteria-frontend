@@ -1,13 +1,13 @@
 <template>
-  <div class="admin-panel">
+  <main id="main-content" class="admin-panel" tabindex="-1">
     <!-- Header -->
     <div class="page-header">
-      <button class="back-button" @click="goBack">
-        <svg fill="none" height="16" stroke="currentColor" viewBox="0 0 24 24" width="16">
+      <RouterLink class="back-button" to="/profile">
+        <svg aria-hidden="true" fill="none" height="16" stroke="currentColor" viewBox="0 0 24 24" width="16">
           <path d="m15 18-6-6 6-6"/>
         </svg>
         Back
-      </button>
+      </RouterLink>
       <div class="header-identity">
         <div class="header-badge">
           <svg fill="none" height="18" stroke="currentColor" viewBox="0 0 24 24" width="18" stroke-width="2">
@@ -19,11 +19,18 @@
     </div>
 
     <!-- Tab Navigation -->
-    <div class="admin-tabs">
+    <div aria-label="Admin sections" class="admin-tabs" role="tablist">
       <button
+        id="admin-users-tab"
         :class="{ active: activeTab === 'users' }"
+        :aria-selected="activeTab === 'users'"
+        :tabindex="activeTab === 'users' ? 0 : -1"
+        aria-controls="users-panel"
         class="tab-btn"
-        @click="activeTab = 'users'"
+        role="tab"
+        type="button"
+        @click="setTab('users')"
+        @keydown="handleTabKeydown"
       >
         <svg fill="none" height="15" stroke="currentColor" viewBox="0 0 24 24" width="15" stroke-width="2">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -34,9 +41,16 @@
         Users
       </button>
       <button
+        id="admin-permissions-tab"
         :class="{ active: activeTab === 'permissions' }"
+        :aria-selected="activeTab === 'permissions'"
+        :tabindex="activeTab === 'permissions' ? 0 : -1"
+        aria-controls="permissions-panel"
         class="tab-btn"
-        @click="activeTab = 'permissions'"
+        role="tab"
+        type="button"
+        @click="setTab('permissions')"
+        @keydown="handleTabKeydown"
       >
         <svg fill="none" height="15" stroke="currentColor" viewBox="0 0 24 24" width="15" stroke-width="2">
           <rect height="11" rx="2" ry="2" width="18" x="3" y="11"/>
@@ -47,7 +61,7 @@
     </div>
 
     <!-- Users Tab -->
-    <div v-if="activeTab === 'users'">
+    <div v-if="activeTab === 'users'" id="users-panel" aria-labelledby="admin-users-tab" role="tabpanel">
       <!-- User Selection -->
       <div class="section">
         <h2 class="section-title">User Management</h2>
@@ -55,8 +69,12 @@
         <div class="controls">
           <div class="search-box">
             <input
+                id="admin-user-search"
                 v-model="searchQuery"
+                aria-label="Search users"
+                autocomplete="off"
                 class="search-input"
+                name="user-search"
                 placeholder="Search by nickname, email, or Discord ID..."
                 type="text"
             />
@@ -70,11 +88,12 @@
         </div>
 
         <div class="user-list">
-          <div
+          <button
               v-for="user in users"
               :key="user.id"
               :class="{ 'selected': selectedUser?.id === user.id }"
               class="user-item"
+              type="button"
               @click="selectUser(user)"
           >
             <div class="user-info">
@@ -87,10 +106,10 @@
               <div class="user-details">
                 <span>Discord ID: {{ user.discordId }}</span>
                 <span v-if="user.email">Email: {{ user.email }}</span>
-                <span>Balance: {{ user.balance }}₴</span>
+                <span>Balance: {{ formatCurrency(user.balance) }}</span>
               </div>
             </div>
-          </div>
+          </button>
 
           <div v-if="users.length === 0 && !loading" class="no-users">
             {{ searchQuery ? 'No users found matching your search' : 'No users available' }}
@@ -134,7 +153,7 @@
 
         <div class="form-card">
           <div class="form-group">
-            <label>Selected User</label>
+            <span class="field-label">Selected User</span>
             <div class="selected-user-info">
               <strong>{{ selectedUser.nickname || `User#${selectedUser.discordId}` }}</strong>
               <span>Current Role: <span :class="`role-${selectedUser.role.toLowerCase()}`"
@@ -143,8 +162,8 @@
           </div>
 
           <div class="form-group">
-            <label>New Role *</label>
-            <select v-model="selectedRole" required>
+            <label for="admin-new-role">New Role *</label>
+            <select id="admin-new-role" v-model="selectedRole" name="new-role" required>
               <option value="">Select a role</option>
               <option
                   v-for="role in availableRoles"
@@ -175,25 +194,29 @@
 
         <div class="form-card">
           <div class="form-group">
-            <label>Selected User</label>
+            <span class="field-label">Selected User</span>
             <div class="selected-user-info">
               <strong>{{ selectedUser.nickname || `User#${selectedUser.discordId}` }}</strong>
-              <span>Current Balance: <strong>{{ selectedUser.balance }}₴</strong></span>
+              <span>Current Balance: <strong>{{ formatCurrency(selectedUser.balance) }}</strong></span>
             </div>
           </div>
 
           <div class="form-group">
-            <label>Amount *</label>
+            <label for="admin-balance-amount">Amount *</label>
             <input
+                id="admin-balance-amount"
                 v-model.number="balanceAmount"
+                :aria-invalid="!!validationErrors.balanceAmount"
                 :class="{ 'error': validationErrors.balanceAmount }"
                 placeholder="Positive to add, negative to subtract"
+                name="balance-amount"
+                autocomplete="off"
                 required
                 step="0.01"
                 type="number"
             />
             <small>
-              New balance will be: {{ (selectedUser.balance + (balanceAmount || 0)).toFixed(2) }}₴
+              New balance will be: {{ formatCurrency(selectedUser.balance + (balanceAmount || 0)) }}
             </small>
             <div v-if="validationErrors.balanceAmount" class="field-error">
               {{ validationErrors.balanceAmount }}
@@ -201,11 +224,15 @@
           </div>
 
           <div class="form-group">
-            <label>Reason *</label>
+            <label for="admin-balance-reason">Reason *</label>
             <textarea
+                id="admin-balance-reason"
                 v-model="balanceReason"
+                :aria-invalid="!!validationErrors.balanceReason"
                 :class="{ 'error': validationErrors.balanceReason }"
                 placeholder="Enter the reason for this balance adjustment..."
+                name="balance-reason"
+                autocomplete="off"
                 required
                 rows="3"
             ></textarea>
@@ -235,8 +262,8 @@
       </div>
 
       <!-- Messages -->
-      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
-      <div v-if="error" class="error-message">{{ error }}</div>
+      <div v-if="successMessage" aria-live="polite" class="success-message" role="status">{{ successMessage }}</div>
+      <div v-if="error" class="error-message" role="alert">{{ error }}</div>
       <div v-if="loading && users.length === 0" class="loading">
         <div class="loading-spinner"></div>
         Loading users...
@@ -244,28 +271,30 @@
     </div>
 
     <!-- Role Permissions Tab -->
-    <div v-if="activeTab === 'permissions'">
+    <div v-if="activeTab === 'permissions'" id="permissions-panel" aria-labelledby="admin-permissions-tab" role="tabpanel">
       <div class="section">
         <h2 class="section-title">Role Permissions</h2>
         <p class="section-desc">Toggle permissions per role. Changes are auto-saved after each update.</p>
         <RolePermissionsEditor />
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref, watch} from 'vue';
-import {useRouter} from 'vue-router';
+import {computed, nextTick, onMounted, ref, watch} from 'vue';
+import {useRoute, useRouter} from 'vue-router';
+import type {LocationQueryRaw} from 'vue-router';
 import {adminAPI} from '@/utils/api/admin.ts';
 import {USER_ROLES} from '@/types/admin.ts';
 import type {UserProfileDto} from '@/types/auth.ts';
 import RolePermissionsEditor from '@/components/admin/RolePermissionsEditor.vue';
 
 const router = useRouter();
+const route = useRoute();
 
 // Tab state
-const activeTab = ref<'users' | 'permissions'>('users');
+const activeTab = ref<'users' | 'permissions'>(route.query.tab === 'permissions' ? 'permissions' : 'users');
 
 // State
 const users = ref<UserProfileDto[]>([]);
@@ -273,19 +302,24 @@ const selectedUser = ref<UserProfileDto | null>(null);
 const selectedRole = ref<string>('');
 const balanceAmount = ref<number>(0);
 const balanceReason = ref<string>('');
-const searchQuery = ref<string>('');
+const searchQuery = ref<string>(typeof route.query.search === 'string' ? route.query.search : '');
 const loading = ref(false);
 const error = ref<string>('');
 const successMessage = ref<string>('');
 const validationErrors = ref<Record<string, string>>({});
 
 // Pagination state
-const currentPage = ref<number>(0);
+const pageFromQuery = (value: unknown) => {
+  const parsed = Number(value || 1);
+  return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) - 1 : 0;
+};
+const currentPage = ref<number>(pageFromQuery(route.query.page));
 const pageSize = ref<number>(20);
 const totalPages = ref<number>(0);
 const totalElements = ref<number>(0);
 
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let applyingRouteState = false;
 
 // Computed
 const availableRoles = computed(() => USER_ROLES);
@@ -311,9 +345,30 @@ const showError = (message: string) => {
   successMessage.value = '';
 };
 
-const goBack = () => {
-  router.push('/profile');
+const setTab = (tab: 'users' | 'permissions') => {
+  activeTab.value = tab;
+  void router.push({query: {...route.query, tab}});
 };
+
+const handleTabKeydown = async (event: KeyboardEvent) => {
+  const tabs: Array<'users' | 'permissions'> = ['users', 'permissions'];
+  const current = tabs.indexOf(activeTab.value);
+  let next = current;
+  if (event.key === 'ArrowRight') next = (current + 1) % tabs.length;
+  else if (event.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
+  else if (event.key === 'Home') next = 0;
+  else if (event.key === 'End') next = tabs.length - 1;
+  else return;
+  event.preventDefault();
+  setTab(tabs[next]);
+  await nextTick();
+  document.getElementById(`admin-${tabs[next]}-tab`)?.focus();
+};
+
+const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'UAH',
+}).format(value);
 
 const loadUsers = async (page: number = currentPage.value) => {
   try {
@@ -340,18 +395,40 @@ const loadUsers = async (page: number = currentPage.value) => {
 
 const goToPage = (page: number) => {
   if (page >= 0 && page < totalPages.value) {
-    loadUsers(page);
+    void router.push({query: {...route.query, page: String(page + 1)}});
   }
 };
 
 watch(searchQuery, () => {
+  if (applyingRouteState) return;
   if (searchDebounceTimer) {
     clearTimeout(searchDebounceTimer);
   }
   searchDebounceTimer = setTimeout(() => {
     currentPage.value = 0;
-    loadUsers(0);
+    const query: LocationQueryRaw = {...route.query, page: '1'};
+    if (searchQuery.value) query.search = searchQuery.value;
+    else delete query.search;
+    void router.push({query});
   }, 500);
+});
+
+watch(
+    () => [route.query.tab, route.query.search, route.query.page] as const,
+    ([tab, search, page]) => {
+      applyingRouteState = true;
+      activeTab.value = tab === 'permissions' ? 'permissions' : 'users';
+      searchQuery.value = typeof search === 'string' ? search : '';
+      currentPage.value = pageFromQuery(page);
+      void loadUsers(currentPage.value);
+      setTimeout(() => {
+        applyingRouteState = false;
+      }, 0);
+    },
+);
+
+watch([balanceAmount, balanceReason], () => {
+  if (Object.keys(validationErrors.value).length) validationErrors.value = {};
 });
 
 const selectUser = (user: UserProfileDto) => {
@@ -452,7 +529,7 @@ const clearBalanceForm = () => {
 };
 
 onMounted(() => {
-  loadUsers();
+  void loadUsers(currentPage.value);
 });
 </script>
 
@@ -461,6 +538,24 @@ onMounted(() => {
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  font-family: var(--font-ui);
+}
+
+.user-item {
+  width: 100%;
+  appearance: none;
+  font: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
+  color: inherit;
+  text-align: left;
+}
+
+.admin-panel button,
+.admin-panel input,
+.admin-panel select,
+.admin-panel textarea {
+  font-family: var(--font-ui);
 }
 
 /* Header */
@@ -480,9 +575,11 @@ onMounted(() => {
   padding: 7px 14px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
   font-size: 13px;
   font-weight: 500;
   color: var(--myst-ink-muted);
@@ -491,6 +588,13 @@ onMounted(() => {
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 70%, var(--myst-gold));
   color: var(--myst-ink);
+}
+
+.back-button svg {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.back-button:hover svg {
   transform: translateX(-2px);
 }
 
@@ -508,7 +612,7 @@ onMounted(() => {
   height: 36px;
   background: color-mix(in srgb, var(--myst-gold) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
   flex-shrink: 0;
 }
@@ -519,6 +623,7 @@ onMounted(() => {
   font-weight: 700;
   color: var(--myst-ink);
   letter-spacing: -0.01em;
+  font-family: var(--font-display);
 }
 
 /* Tab Navigation */
@@ -542,8 +647,10 @@ onMounted(() => {
   font-size: 13px;
   font-weight: 600;
   color: var(--myst-ink-muted);
-  border-radius: 6px 6px 0 0;
-  transition: color 0.2s ease, background 0.15s ease;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
 }
 
 .tab-btn:hover {
@@ -567,6 +674,7 @@ onMounted(() => {
   color: var(--myst-ink);
   margin: 0 0 6px;
   letter-spacing: -0.01em;
+  font-family: var(--font-display);
 }
 
 .section-desc {
@@ -589,9 +697,10 @@ onMounted(() => {
   width: 100%;
   padding: 11px 15px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
   background: var(--myst-bg-2);
   color: var(--myst-ink);
   box-sizing: border-box;
@@ -611,17 +720,18 @@ onMounted(() => {
   background: var(--myst-gold);
   color: var(--myst-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   white-space: nowrap;
 }
 
 .refresh-btn:hover:not(:disabled) {
   background: var(--myst-gold-soft);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .refresh-btn:disabled {
@@ -633,7 +743,7 @@ onMounted(() => {
 .user-list {
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   max-height: 380px;
   overflow-y: auto;
@@ -643,7 +753,8 @@ onMounted(() => {
   padding: 14px 18px;
   border-bottom: 1px solid color-mix(in srgb, var(--myst-ink-muted) 15%, transparent);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-fast) var(--ease-standard);
 }
 
 .user-item:hover {
@@ -677,7 +788,7 @@ onMounted(() => {
 .user-badge, .role-badge {
   display: inline-block;
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -733,7 +844,7 @@ onMounted(() => {
 .form-card {
   background: var(--myst-bg-2);
   padding: 22px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
 }
 
@@ -745,7 +856,8 @@ onMounted(() => {
   margin-bottom: 0;
 }
 
-.form-group label {
+.form-group label,
+.field-label {
   display: block;
   font-weight: 600;
   color: var(--myst-ink);
@@ -763,7 +875,7 @@ onMounted(() => {
 .selected-user-info {
   background: color-mix(in srgb, var(--myst-bg) 80%, transparent);
   padding: 10px 14px;
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
   display: flex;
   flex-direction: column;
@@ -786,10 +898,11 @@ onMounted(() => {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
   box-sizing: border-box;
   background: var(--myst-bg);
   color: var(--myst-ink);
@@ -833,11 +946,16 @@ onMounted(() => {
 .action-btn {
   padding: 10px 22px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              opacity var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   display: flex;
   align-items: center;
   gap: 7px;
@@ -850,7 +968,7 @@ onMounted(() => {
 
 .action-btn.primary:hover:not(:disabled) {
   background: #059669;
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
@@ -888,7 +1006,7 @@ onMounted(() => {
   color: var(--myst-ink-muted);
   font-size: 14px;
   background: var(--myst-bg-2);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
   display: flex;
   align-items: center;
@@ -913,7 +1031,7 @@ onMounted(() => {
   background: color-mix(in srgb, #10b981 12%, transparent);
   color: #10b981;
   padding: 14px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #10b981 35%, transparent);
   margin-bottom: 20px;
   font-size: 13px;
@@ -924,7 +1042,7 @@ onMounted(() => {
   background: color-mix(in srgb, #ef4444 12%, transparent);
   color: #ef4444;
   padding: 14px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
   margin-bottom: 20px;
   font-size: 13px;
@@ -941,7 +1059,7 @@ onMounted(() => {
   padding: 14px 18px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .pagination-btn {
@@ -952,16 +1070,18 @@ onMounted(() => {
   background: var(--myst-gold);
   color: var(--myst-bg);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              opacity var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .pagination-btn:hover:not(:disabled) {
   background: var(--myst-gold-soft);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .pagination-btn:disabled {
@@ -986,3 +1106,5 @@ onMounted(() => {
   color: var(--myst-ink-muted);
 }
 </style>
+                name="balance-amount"
+                name="balance-reason"

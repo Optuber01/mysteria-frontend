@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка закриття"
+      aria-hidden="true"
       class="icon-close"
       fill="#F0F1F5"
       height="15"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 14 15"
       width="14"
       xmlns="http://www.w3.org/2000/svg"
@@ -21,6 +20,6 @@
   width: 14px;
   height: 15px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

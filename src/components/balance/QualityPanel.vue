@@ -67,6 +67,7 @@ const orphanCount = computed(() =>
   display: flex;
   flex-direction: column;
   gap: 10px;
+  font-family: var(--font-ui);
 }
 
 .quality-group summary {
@@ -74,8 +75,8 @@ const orphanCount = computed(() =>
   color: var(--myst-ink);
   font-size: 13px;
   padding: 8px 10px;
-  border-radius: 8px;
-  transition: background 0.15s ease;
+  border-radius: var(--radius-md);
+  transition: background-color var(--motion-fast) var(--ease-standard);
   list-style-position: inside;
 }
 
@@ -87,12 +88,12 @@ const orphanCount = computed(() =>
   display: inline-block;
   min-width: 26px;
   text-align: center;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
   color: var(--myst-gold);
   border: 1px solid color-mix(in srgb, var(--myst-gold) 45%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 1px 7px;
   margin-right: 8px;
 }
@@ -120,9 +121,9 @@ const orphanCount = computed(() =>
 .q-pill {
   display: inline-block;
   font-size: 10px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 1px 8px;
   color: var(--myst-ink-muted);
 }
@@ -141,6 +142,6 @@ const orphanCount = computed(() =>
   padding: 10px 12px;
   border-left: 3px solid color-mix(in srgb, var(--myst-gold) 55%, transparent);
   background: color-mix(in srgb, var(--myst-gold) 6%, transparent);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 </style>

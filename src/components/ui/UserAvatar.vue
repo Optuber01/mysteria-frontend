@@ -83,11 +83,10 @@ const handleError = () => {
 }
 
 .avatar-nickname {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   color: #ccc;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-weight: 600;
 }
 
 /* Base Sizing on the wrapper */
@@ -100,11 +99,10 @@ const handleError = () => {
 
 .has-glow .avatar-ritual-frame {
   box-shadow: 0 0 20px rgba(200, 178, 115, 0.3);
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 
 .has-glow:hover .avatar-ritual-frame {
-  box-shadow: 0 0 30px rgba(200, 178, 115, 0.5);
-  transform: scale(1.05);
-  transition: all 0.3s ease;
+  transform: scale(1.025);
 }
 </style>

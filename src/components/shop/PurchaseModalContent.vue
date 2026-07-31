@@ -10,21 +10,31 @@
     </div>
 
     <div v-if="isBulkable" class="ritual-field">
-      <label class="ritual-label">{{ t('amount') || 'Amount' }}</label>
+      <label class="ritual-label" for="purchase-amount">{{ t('amount') || 'Amount' }}</label>
       <div class="amount-stepper">
-        <button class="step-btn" @click="updateAmount(Math.max(1, amount - 1))">-</button>
-        <input :value="amount" class="amount-input" min="1" type="number" @input="handleAmountInput" />
-        <button class="step-btn" @click="updateAmount(amount + 1)">+</button>
+        <button :aria-label="amountLabels.decrease" class="step-btn" type="button" @click="updateAmount(Math.max(1, amount - 1))">−</button>
+        <input id="purchase-amount" :value="amount" autocomplete="off" class="amount-input" inputmode="numeric" min="1" name="amount" type="number" @blur="normalizeAmountInput" @input="handleAmountInput" />
+        <button :aria-label="amountLabels.increase" class="step-btn" type="button" @click="updateAmount(amount + 1)">+</button>
       </div>
     </div>
 
     <div v-if="isGiftable" class="ritual-field">
-      <div class="ritual-checkbox-field" @click="toggleGift">
-        <div :class="{ active: isGift }" class="ritual-checkbox">
+      <label class="ritual-checkbox-field">
+        <input :checked="isGift" class="checkbox-input" type="checkbox" @change="toggleGift">
+        <span :class="{ active: isGift }" class="ritual-checkbox" aria-hidden="true">
           <i v-if="isGift" class="fa-solid fa-check"></i>
-        </div>
+        </span>
         <span class="ritual-label-inline">{{ t('buyAsGift') || 'Purchase as a gift' }}</span>
-      </div>
+      </label>
+    </div>
+
+    <div v-if="requiresServerSelection" class="ritual-field">
+      <label class="ritual-label" for="purchase-server">{{ serverCopy.label }}</label>
+      <select id="purchase-server" :value="selectedServer || ''" class="server-select" name="target-server" @change="updateServer">
+        <option value="">{{ serverCopy.placeholder }}</option>
+        <option v-for="server in availableServers" :key="server" :value="server">{{ server }}</option>
+      </select>
+      <p v-if="!availableServers.length" class="field-error" role="alert">{{ serverCopy.unavailable }}</p>
     </div>
 
     <Transition name="ritual-fade">
@@ -37,6 +47,12 @@
         />
       </div>
     </Transition>
+
+    <div v-if="balanceStore.isBalanceLoading" class="balance-state" role="status">{{ t('loading') }}</div>
+    <div v-else-if="balanceStore.balanceError" class="balance-state balance-error" role="alert">
+      <span>{{ serverCopy.balanceError }}</span>
+      <button type="button" @click="emit('retry-balance')">{{ t('tryAgain') }}</button>
+    </div>
 
     <div class="total-ritual-price">
       <span class="total-label">{{ t('totalCost') || 'Total Cost' }}:</span>
@@ -64,15 +80,20 @@ const props = defineProps<{
   amount: number;
   isGift: boolean;
   recipientId: string;
+  selectedServer?: string;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:amount', value: number): void;
   (e: 'update:isGift', value: boolean): void;
   (e: 'update:recipientId', value: string): void;
+  (e: 'update:selectedServer', value: string): void;
+  (e: 'retry-balance'): void;
 }>();
 
-const {t} = useI18n();
+const {t, currentLanguage} = useI18n();
+const amountLabels = computed(() => currentLanguage.value === 'uk' ? {decrease: 'Зменшити кількість', increase: 'Збільшити кількість'} : {decrease: 'Decrease amount', increase: 'Increase amount'});
+const serverCopy = computed(() => currentLanguage.value === 'uk' ? {label: 'Сервер доставки', placeholder: 'Оберіть сервер', unavailable: 'Для цього товару немає доступних серверів.', balanceError: 'Не вдалося завантажити баланс.'} : {label: 'Delivery server', placeholder: 'Choose a server', unavailable: 'No delivery servers are currently available for this item.', balanceError: 'We could not load your balance.'});
 const {formatCurrency, currentCurrency} = useCurrency();
 const balanceStore = useBalanceStore();
 
@@ -94,6 +115,8 @@ const isGiftable = computed(() => {
   if ('is_giftable' in props.item) return props.item.is_giftable;
   return (props.item as ServiceMarkdownDto).isGiftable;
 });
+const requiresServerSelection = computed(() => 'server_availability' in props.item && props.item.server_availability?.mode === 'selectable');
+const availableServers = computed(() => 'server_availability' in props.item ? (props.item.server_availability?.servers ?? []) : []);
 
 const formattedPrice = computed(() => {
   if (currentCurrency.value === 'POINTS') {
@@ -114,7 +137,7 @@ const formattedTotalPrice = computed(() => {
 });
 
 const insufficientFunds = computed(() => {
-  if (!balanceStore.currentBalance) return true;
+  if (!balanceStore.currentBalance) return false;
   return balanceStore.currentBalance.amount.lessThan(totalPrice.value);
 });
 
@@ -135,10 +158,20 @@ const updateAmount = (val: number) => {
 };
 
 const handleAmountInput = (e: Event) => {
-  const val = parseInt((e.target as HTMLInputElement).value);
+  const input = e.target as HTMLInputElement;
+  const val = parseInt(input.value);
   if (!isNaN(val)) {
     updateAmount(Math.max(1, val));
+  } else if (input.value) {
+    input.value = props.amount.toString();
   }
+};
+const normalizeAmountInput = (event: FocusEvent) => {
+  const input = event.target as HTMLInputElement;
+  const value = Number.parseInt(input.value);
+  const normalized = Number.isFinite(value) ? Math.max(1, value) : props.amount;
+  input.value = normalized.toString();
+  updateAmount(normalized);
 };
 
 const toggleGift = () => {
@@ -148,6 +181,7 @@ const toggleGift = () => {
 const updateRecipient = (val: string) => {
   emit('update:recipientId', val);
 };
+const updateServer = (event: Event) => emit('update:selectedServer', (event.target as HTMLSelectElement).value);
 </script>
 
 <style scoped>
@@ -164,18 +198,18 @@ const updateRecipient = (val: string) => {
   padding: 16px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .item-name {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 18px;
   color: #fff;
   margin: 0 0 4px 0;
 }
 
 .item-price-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: var(--myst-gold);
 }
@@ -187,7 +221,7 @@ const updateRecipient = (val: string) => {
 }
 
 .ritual-label {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -195,12 +229,17 @@ const updateRecipient = (val: string) => {
 }
 
 .ritual-checkbox-field {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
+  min-height: 44px;
   cursor: pointer;
   user-select: none;
 }
+
+.checkbox-input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.checkbox-input:focus-visible + .ritual-checkbox { outline: 2px solid var(--myst-gold); outline-offset: 3px; }
 
 .ritual-checkbox {
   width: 20px;
@@ -212,7 +251,11 @@ const updateRecipient = (val: string) => {
   justify-content: center;
   color: var(--myst-gold);
   font-size: 12px;
-  transition: all 0.3s;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-sm);
 }
 
 .ritual-checkbox.active {
@@ -221,10 +264,16 @@ const updateRecipient = (val: string) => {
 }
 
 .ritual-label-inline {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   color: #aaa;
 }
+
+.server-select { width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid rgba(200, 178, 115, .3); border-radius: var(--radius-md); background: #0b0d16; color: #f2eee6; font: 14px var(--font-ui); }
+.field-error { margin: 8px 0 0; color: #f1a3a3; font-size: 13px; }
+.balance-state { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 14px; border: 1px solid rgba(200, 178, 115, .2); color: #c9c3b9; font-size: 13px; }
+.balance-error { border-color: rgba(239, 100, 100, .3); }
+.balance-state button { min-height: 40px; padding: 0 12px; border: 1px solid var(--myst-gold); border-radius: var(--radius-sm); background: transparent; color: var(--myst-gold); cursor: pointer; }
 
 .amount-stepper {
   display: flex;
@@ -234,7 +283,7 @@ const updateRecipient = (val: string) => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
   padding: 4px;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
 }
 
 .step-btn {
@@ -247,12 +296,17 @@ const updateRecipient = (val: string) => {
   border: none;
   color: #fff;
   cursor: pointer;
-  transition: all 0.3s;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-sm);
 }
 
 .step-btn:hover {
   background: var(--myst-gold);
   color: #000;
+  transform: translateY(var(--hover-control));
 }
 
 .amount-input {
@@ -262,7 +316,7 @@ const updateRecipient = (val: string) => {
   border: none;
   color: #fff;
   text-align: center;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 14px;
 }
 
@@ -282,13 +336,13 @@ const updateRecipient = (val: string) => {
 }
 
 .total-label {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-ui);
   font-size: 16px;
   color: #888;
 }
 
 .total-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 700;
   color: var(--myst-gold);
@@ -303,8 +357,9 @@ const updateRecipient = (val: string) => {
   display: flex;
   align-items: center;
   gap: 10px;
+  border-radius: var(--radius-lg);
 }
 
-.ritual-fade-enter-active, .ritual-fade-leave-active { transition: all 0.3s ease; }
-.ritual-fade-enter-from, .ritual-fade-leave-to { opacity: 0; transform: translateY(-10px); }
+.ritual-fade-enter-active, .ritual-fade-leave-active { transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-enter); }
+.ritual-fade-enter-from, .ritual-fade-leave-to { opacity: 0; transform: translateY(-8px); }
 </style>

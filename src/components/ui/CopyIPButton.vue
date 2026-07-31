@@ -42,15 +42,17 @@ const copyToClipboard = async () => {
   gap: 0;
   background: #05070a;
   border: 1px solid rgba(200, 178, 115, 0.2);
+  border-radius: var(--radius-md);
   padding: 0;
   cursor: pointer;
   position: relative;
-  transition: all 0.3s ease;
+  overflow: visible;
+  transition: border-color var(--motion-base) var(--ease-standard);
 }
 
 .btn-label {
   padding: 10px 20px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   color: var(--myst-gold);
   letter-spacing: 1px;
@@ -62,11 +64,11 @@ const copyToClipboard = async () => {
   border-left: 1px solid rgba(200, 178, 115, 0.2);
   color: var(--myst-gold);
   font-size: 14px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
 .btn-copy-ritual:hover {
   border-color: var(--myst-gold);
-  box-shadow: 0 0 20px rgba(200, 178, 115, 0.1);
 }
 
 .btn-copy-ritual:hover .btn-icon {
@@ -80,9 +82,10 @@ const copyToClipboard = async () => {
   left: 50%;
   transform: translateX(-50%);
   background: var(--myst-gold);
+  border-radius: var(--radius-md);
   color: #05070a;
   padding: 4px 12px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -99,6 +102,6 @@ const copyToClipboard = async () => {
   border-top-color: var(--myst-gold);
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.fade-enter-active, .fade-leave-active { transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter); }
 .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateX(-50%) translateY(5px); }
 </style>

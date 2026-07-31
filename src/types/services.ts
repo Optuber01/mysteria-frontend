@@ -131,6 +131,8 @@ export interface ServiceDto {
     isActive: boolean;
     isGiftable?: boolean;   // NEW: Service can be gifted
     isBulkable?: boolean;   // NEW: Service supports bulk purchases
+    serverAvailability?: ServerAvailability;
+    server_availability?: ServerAvailability;
     createdAt: string;
 }
 
@@ -139,6 +141,7 @@ export interface PurchaseRequest {
     serviceId: number;
     amount: number;        // Required, min 1
     recipientId?: string;  // Optional UUID for gifts
+    targetServers?: string[];
 }
 
 export interface PurchaseDto {
@@ -183,6 +186,7 @@ export interface ServiceMarkdownDto {
     isSubscription: boolean;
     isGiftable?: boolean;   // NEW: Service can be gifted
     isBulkable?: boolean;   // NEW: Service supports bulk purchases
+    server_availability?: ServerAvailability;
     createdAt: string;
     updatedAt: string | null;
     publishedAt?: string | null;

@@ -22,18 +22,17 @@ defineProps<{
 
 .eyebrow {
   display: block;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.08em;
   line-height: 1.4;
-  text-transform: uppercase;
   color: var(--myst-gold);
 }
 
 h2 {
   margin: 10px 0 12px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: clamp(30px, 4vw, 46px);
   font-weight: 600;
   letter-spacing: -0.025em;

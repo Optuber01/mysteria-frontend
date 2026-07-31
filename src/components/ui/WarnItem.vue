@@ -3,22 +3,24 @@
     <div
         v-if="isVisible"
         :class="['notification-ritual-card', type, { clickable: clickable }]"
-        role="alert"
-        @click="handleClick"
+        :role="type === 'error' || type === 'fatal' ? 'alert' : 'status'"
     >
-      <div :class="type" class="notification-ritual-icon">
+      <div :class="type" aria-hidden="true" class="notification-ritual-icon">
         <span v-if="type === 'success'">†</span>
         <span v-else-if="type === 'error' || type === 'fatal'">‡</span>
         <span v-else-if="type === 'warn'">!</span>
         <span v-else>i</span>
       </div>
 
-      <div class="notification-ritual-content">
+      <button v-if="clickable" class="notification-ritual-content notification-action" type="button" @click="handleClick">
         <div class="notification-ritual-message">{{ message }}</div>
-        <i v-if="copyable" class="fa-solid fa-copy copy-ritual-hint"></i>
+        <i v-if="copyable" aria-hidden="true" class="fa-solid fa-copy copy-ritual-hint"></i>
+      </button>
+      <div v-else class="notification-ritual-content">
+        <div class="notification-ritual-message">{{ message }}</div>
       </div>
 
-      <button v-if="!copyable" aria-label="Close notification" class="close-ritual-btn" @click.stop="close">
+      <button aria-label="Close notification" class="close-ritual-btn" type="button" @click.stop="close">
         <IconClose class="icon-close"/>
       </button>
 
@@ -73,11 +75,11 @@ onMounted(() => {
   padding: 16px 20px;
   background: #080a14;
   border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(12px);
   overflow: hidden;
-  transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), opacity var(--motion-base) var(--ease-standard);
 }
 
 .notification-ritual-icon {
@@ -86,7 +88,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Playfair Display', serif;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--myst-gold);
   border: 1px solid rgba(200, 178, 115, 0.3);
@@ -109,7 +112,7 @@ onMounted(() => {
 }
 
 .notification-ritual-message {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   line-height: 1.5;
   color: #ccc;
@@ -124,10 +127,11 @@ onMounted(() => {
 .close-ritual-btn {
   background: none; border: none;
   color: #444; cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--motion-base) var(--ease-standard);
   padding: 4px;
 }
 .close-ritual-btn:hover { color: var(--myst-gold); }
+.close-ritual-btn :deep(path) { stroke: currentColor; }
 
 .ritual-progress {
   position: absolute;
@@ -142,21 +146,31 @@ onMounted(() => {
 
 @keyframes ritualShrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
-/* Transitions */
-.ritual-toast-enter-active {
-  animation: ritualToastIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
+.ritual-toast-enter-active,
 .ritual-toast-leave-active {
-  animation: ritualToastOut 0.3s ease-in forwards;
+  transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter);
 }
 
-@keyframes ritualToastIn {
-  from { opacity: 0; transform: translateX(50px) scale(0.9); }
-  to { opacity: 1; transform: translateX(0) scale(1); }
+.notification-action {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--motion-fast) var(--ease-standard);
 }
 
-@keyframes ritualToastOut {
-  to { opacity: 0; transform: translateX(20px) scale(0.95); }
+.notification-action:hover,
+.notification-action:focus-visible {
+  background: rgba(200, 178, 115, .08);
+}
+
+.ritual-toast-enter-from,
+.ritual-toast-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
 }
 
 @media (max-width: 480px) {

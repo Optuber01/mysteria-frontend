@@ -2,13 +2,15 @@
   <div class="page-container">
     <HeaderItem/>
 
-    <main class="profile-main">
+    <main id="main-content" class="profile-main" tabindex="-1">
       <div class="profile-container">
-        <div class="myst-page-header">
-          <div class="myst-header-decoration" aria-hidden="true"></div>
-          <h1 class="myst-header-label">{{ displayedUser?.nickname || t('profileTitle') }}</h1>
-          <div class="myst-header-decoration" aria-hidden="true"></div>
-        </div>
+        <SectionTitle
+            :eyebrow="currentLanguage === 'uk' ? 'Профіль гравця' : 'Player profile'"
+            :subtitle="currentLanguage === 'uk'
+              ? 'Дані облікового запису, статус і активність у Mysterria.'
+              : 'Account details, status, and activity across Mysterria.'"
+            :title="displayedUser?.nickname || (currentLanguage === 'uk' ? 'Ваш профіль' : 'Your profile')"
+        />
 
         <!-- Loading state -->
         <div v-if="loading" class="profile-loading">
@@ -63,8 +65,9 @@ import CommissionsCard from "@/components/profile/CommissionsCard.vue";
 import type {UserProfileDto} from "@/types/auth";
 import type {BeyonderData, BeyonderResponse} from "@/types/users";
 import BeyonderStatus from "@/components/profile/BeyonderStatus.vue";
+import SectionTitle from "@/components/ui/SectionTitle.vue";
 
-const {t} = useI18n();
+const {t, currentLanguage} = useI18n();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const displayedUser = ref<UserProfileDto | null>(null);
@@ -178,7 +181,7 @@ const loadProfile = async () => {
 };
 
 onMounted(async () => {
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  window.scrollTo({top: 0, behavior: 'auto'});
   await loadProfile();
 });
 </script>
@@ -194,6 +197,7 @@ onMounted(async () => {
 .profile-main {
   background: var(--myst-bg);
   padding: 80px 0;
+  font-family: var(--font-body);
 }
 
 .profile-container {
@@ -233,6 +237,7 @@ onMounted(async () => {
   font-size: 16px;
   font-weight: 500;
   opacity: 0.8;
+  font-family: var(--font-ui);
 }
 
 /* Profile Content */

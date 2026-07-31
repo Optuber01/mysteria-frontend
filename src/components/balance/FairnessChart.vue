@@ -64,7 +64,9 @@ const pow2Ceil = (x: number) => Math.pow(2, Math.ceil(Math.log2(x)));
 function buildOption(): echarts.EChartsCoreOption {
   const c = props.chrome;
   const isIndex = props.mode === 'index';
-  const mono = "'JetBrains Mono', monospace";
+  const rootStyle = getComputedStyle(document.documentElement);
+  const ui = rootStyle.getPropertyValue('--font-ui').trim();
+  const mono = rootStyle.getPropertyValue('--font-mono').trim();
 
   const allVals = props.series.flatMap(s => s.data).filter((v): v is number => v != null && v > 0);
   let yMin: number | 'dataMin' = 'dataMin';
@@ -96,7 +98,7 @@ function buildOption(): echarts.EChartsCoreOption {
       formatter: () => s.name,
       color: c.ink,
       fontSize: 11,
-      fontFamily: mono,
+      fontFamily: ui,
       distance: 8,
     },
     labelLayout: {moveOverlap: 'shiftY' as const},
@@ -110,7 +112,7 @@ function buildOption(): echarts.EChartsCoreOption {
           position: 'insideStartTop' as const,
           color: c.muted,
           fontSize: 10,
-          fontFamily: mono,
+          fontFamily: ui,
         },
         lineStyle: {color: c.axis, type: 'solid' as const, width: 1.5},
         data: [{yAxis: 1}],
@@ -140,7 +142,7 @@ function buildOption(): echarts.EChartsCoreOption {
           formatter: 'before',
           color: c.muted,
           fontSize: 10,
-          fontFamily: mono,
+          fontFamily: ui,
           distance: 8,
         },
       }));
@@ -156,7 +158,7 @@ function buildOption(): echarts.EChartsCoreOption {
     emphasis: {disabled: true},
     endLabel: {
       show: true, formatter: 'median', color: c.muted,
-      fontSize: 10, fontFamily: mono, distance: 8,
+      fontSize: 10, fontFamily: ui, distance: 8,
     },
   }] : [];
 
@@ -170,7 +172,7 @@ function buildOption(): echarts.EChartsCoreOption {
       itemWidth: 12,
       itemHeight: 12,
       data: props.series.map(s => s.name),
-      textStyle: {color: c.ink, fontSize: 11, fontFamily: mono},
+      textStyle: {color: c.ink, fontSize: 11, fontFamily: ui},
       inactiveColor: c.axis,
     },
     tooltip: {
@@ -194,7 +196,7 @@ function buildOption(): echarts.EChartsCoreOption {
         for (const p of rows) {
           const v = p.value;
           if (v == null) continue;
-          const dot = `<span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${p.color};margin-right:6px"></span>`;
+          const dot = `<span style="display:inline-block;width:9px;height:9px;border-radius:var(--radius-xs);background:${p.color};margin-right:6px"></span>`;
           if (p.seriesName === 'median') {
             html += `<div>${dot}median&nbsp;&nbsp;<b>${fmt(v as number)}</b></div>`;
           } else if (props.mode === 'index') {

@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка годинника"
+      aria-hidden="true"
       class="icon-clock"
       fill="none"
       height="50"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 50 50"
       width="50"
       xmlns="http://www.w3.org/2000/svg"
@@ -25,6 +24,6 @@
   width: 50px;
   height: 50px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

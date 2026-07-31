@@ -1,6 +1,8 @@
 <template>
-  <div
+  <main
+      id="main-content"
       class="balance-view"
+      tabindex="-1"
       :style="divergingVars"
       @dragenter.prevent="dragDepth++"
       @dragleave.prevent="dragDepth = Math.max(0, dragDepth - 1)"
@@ -17,12 +19,12 @@
 
     <!-- header -->
     <div class="page-header">
-      <button class="back-button" @click="router.push('/profile')">
+      <RouterLink class="back-button" to="/profile">
         <svg fill="none" height="20" stroke="currentColor" viewBox="0 0 24 24" width="20">
           <path d="m15 18-6-6 6-6"/>
         </svg>
         Back
-      </button>
+      </RouterLink>
       <div class="title-block">
         <h1 class="page-title">Balance Observatory</h1>
         <p class="page-subtitle">Circle of Imagination · pathway tuning instrument</p>
@@ -56,17 +58,18 @@
       <input ref="filePicker" accept=".json,application/json" hidden type="file" @change="onFilePicked"/>
     </div>
 
-    <div v-if="loadError" class="error-banner">{{ loadError }}</div>
+    <div v-if="loadError" class="error-banner" role="alert">{{ loadError }}</div>
 
     <!-- empty state -->
-    <div v-if="!payload" class="empty-state" @click="filePicker?.click()">
+    <div v-if="!payload" class="empty-state">
       <div class="empty-sigil">✦</div>
       <h2>Feed the Observatory</h2>
       <button :disabled="fetchingReport" class="fetch-cta" type="button" @click.stop="fetchFromServer">
         {{ fetchingReport ? 'Consulting the server…' : 'Fetch the latest report from the server' }}
       </button>
       <p class="empty-or">– or load it by hand –</p>
-      <p class="empty-lead">Drop <code>export-latest.json</code> anywhere on this page, or click to browse.</p>
+      <p class="empty-lead">Drop <code>export-latest.json</code> anywhere on this page, or use the browse button.</p>
+      <button class="ghost-btn" type="button" @click="filePicker?.click()">Browse for export</button>
       <ol class="empty-steps">
         <li>On the server, run <code>/coi balance export 30</code></li>
         <li>Fetch <code>plugins/CircleOfImagination/balance/export-latest.json</code></li>
@@ -101,6 +104,7 @@
                 v-for="m in METRICS"
                 :key="m.id"
                 :class="{ active: metric === m.id }"
+                :aria-pressed="metric === m.id"
                 :disabled="m.id === 'empirical' && !telemetryAvailable"
                 :title="m.label"
                 type="button"
@@ -116,6 +120,7 @@
                 v-for="p in allPathways"
                 :key="p"
                 :class="['pathway-chip', { selected: slotOf[p] !== undefined }]"
+                :aria-pressed="slotOf[p] !== undefined"
                 :disabled="slotOf[p] === undefined && selectedPathways.length >= 4"
                 type="button"
                 @click="togglePathway(p)"
@@ -196,15 +201,16 @@
                 v-for="p in allPathways"
                 :key="p"
                 :class="{ 'row-selected': slotOf[p] !== undefined }"
-                @click="togglePathway(p)"
             >
               <td class="rowhead">
-                <span
-                    v-if="slotOf[p] !== undefined"
-                    :style="{ background: seriesPalette[slotOf[p]] }"
-                    class="chip-dot"
-                ></span>
-                {{ p }}
+                <button :aria-pressed="slotOf[p] !== undefined" class="matrix-row-button" type="button" @click="togglePathway(p)">
+                  <span
+                      v-if="slotOf[p] !== undefined"
+                      :style="{ background: seriesPalette[slotOf[p]] }"
+                      class="chip-dot"
+                  ></span>
+                  {{ p }}
+                </button>
               </td>
               <td
                   v-for="s in SEQS"
@@ -333,12 +339,11 @@
         to inspect or preserve them.
       </div>
     </template>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
 import {computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch} from 'vue';
-import {useRouter} from 'vue-router';
 import {useAuthStore} from '@/stores/auth';
 import FairnessChart, {type ChartChrome, type ChartSeries} from '@/components/balance/FairnessChart.vue';
 import AbilityStrip, {type StripRow} from '@/components/balance/AbilityStrip.vue';
@@ -365,8 +370,8 @@ import {
 } from '@/utils/coiBalance/model';
 import {decodeBalanceReport} from '@/utils/coiBalance/normalize';
 import {downloadText, patchedDamageYaml, tuningEntries, tuningYaml} from '@/utils/coiBalance/yaml';
+import {preferredScrollBehavior} from '@/utils/motion';
 
-const router = useRouter();
 
 const STORAGE_KEY = 'mysterria-coi-balance-payload';
 const UI_KEY = 'mysterria-coi-balance-ui';
@@ -566,7 +571,7 @@ const stripRows = computed<StripRow[]>(() => {
 const jumpToAbility = async (id: string) => {
   flashId.value = id;
   await nextTick();
-  document.getElementById(`ability-row-${id}`)?.scrollIntoView({behavior: 'smooth', block: 'center'});
+  document.getElementById(`ability-row-${id}`)?.scrollIntoView({behavior: preferredScrollBehavior(), block: 'center'});
   setTimeout(() => {
     if (flashId.value === id) flashId.value = null;
   }, 1800);
@@ -647,6 +652,7 @@ const hasTuningEntries = computed(() =>
 
 const resetEdits = () => {
   if (!payload.value) return;
+  if ((dmgEditCount.value || tuneEditCount.value) && !window.confirm('Discard all unsaved balance edits?')) return;
   for (const a of payload.value.abilities) {
     a.damageKeys = {...a._orig};
     a.effectiveCooldownSeconds = a._eff0.cd;
@@ -872,6 +878,13 @@ onBeforeUnmount(() => {
   padding: 20px 28px 120px;
   max-width: 1440px;
   margin: 0 auto;
+  font-family: var(--font-ui);
+}
+
+.balance-view button,
+.balance-view input,
+.balance-view select {
+  font-family: var(--font-ui);
 }
 
 /* ---------- header ---------- */
@@ -891,9 +904,11 @@ onBeforeUnmount(() => {
   padding: 8px 16px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
   font-size: 14px;
   color: var(--myst-ink-muted);
   flex-shrink: 0;
@@ -902,6 +917,13 @@ onBeforeUnmount(() => {
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 80%, var(--myst-gold));
   color: var(--myst-ink);
+}
+
+.back-button svg {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.back-button:hover svg {
   transform: translateX(-2px);
 }
 
@@ -913,19 +935,19 @@ onBeforeUnmount(() => {
 
 .page-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 28px;
   font-weight: 700;
   color: var(--myst-ink);
-  letter-spacing: 0.5px;
+  letter-spacing: -0.01em;
 }
 
 .page-subtitle {
   margin: 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.1em;
   color: var(--myst-gold);
   opacity: 0.85;
 }
@@ -943,12 +965,14 @@ onBeforeUnmount(() => {
   padding: 8px 16px;
   background: none;
   border: 1px solid color-mix(in srgb, var(--myst-gold) 45%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
 }
 
 .ghost-btn:hover {
@@ -979,7 +1003,7 @@ onBeforeUnmount(() => {
 
 .drop-overlay-inner {
   border: 2px dashed var(--myst-gold);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 48px 64px;
   font-size: 18px;
   color: var(--myst-ink);
@@ -999,31 +1023,20 @@ onBeforeUnmount(() => {
   padding: 64px 32px;
   text-align: center;
   border: 2px dashed color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--myst-bg-2) 60%, transparent);
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.empty-state:hover {
-  border-color: var(--myst-gold);
-  background: var(--myst-bg-2);
+  transition: border-color var(--motion-base) var(--ease-standard),
+              background-color var(--motion-base) var(--ease-standard);
 }
 
 .empty-sigil {
   font-size: 40px;
   color: var(--myst-gold);
   margin-bottom: 12px;
-  animation: sigil-pulse 3s ease-in-out infinite;
-}
-
-@keyframes sigil-pulse {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
 }
 
 .empty-state h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 24px;
   margin: 0 0 8px;
   color: var(--myst-ink);
@@ -1034,17 +1047,18 @@ onBeforeUnmount(() => {
   background: var(--myst-gold);
   color: var(--myst-bg);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   margin-bottom: 6px;
 }
 
 .fetch-cta:hover:not(:disabled) {
   background: var(--myst-gold-soft);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .fetch-cta:disabled {
@@ -1055,9 +1069,9 @@ onBeforeUnmount(() => {
 .empty-or {
   color: color-mix(in srgb, var(--myst-ink-muted) 70%, transparent);
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.1em;
   margin: 14px 0 10px;
 }
 
@@ -1078,9 +1092,9 @@ onBeforeUnmount(() => {
 .empty-steps code, .empty-lead code, .drop-overlay-inner code {
   background: color-mix(in srgb, var(--myst-gold) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--myst-gold) 30%, transparent);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 1px 6px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--myst-gold);
 }
@@ -1094,11 +1108,11 @@ onBeforeUnmount(() => {
 }
 
 .meta-chip {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-ink-muted);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 28%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 3px 12px;
   background: color-mix(in srgb, var(--myst-bg-2) 70%, transparent);
 }
@@ -1106,6 +1120,7 @@ onBeforeUnmount(() => {
 .meta-chip b {
   color: var(--myst-ink);
   font-weight: 600;
+  font-family: var(--font-mono);
 }
 
 .meta-chip.ok b {
@@ -1120,7 +1135,7 @@ onBeforeUnmount(() => {
 .card {
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 22px 26px;
   margin-bottom: 20px;
 }
@@ -1130,7 +1145,7 @@ onBeforeUnmount(() => {
 }
 
 .card h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 18px;
   font-weight: 700;
   color: var(--myst-ink);
@@ -1138,7 +1153,7 @@ onBeforeUnmount(() => {
 }
 
 .head-metric {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 400;
   color: var(--myst-gold);
@@ -1181,10 +1196,10 @@ onBeforeUnmount(() => {
 }
 
 .control-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.1em;
   color: var(--myst-ink-muted);
 }
 
@@ -1198,7 +1213,7 @@ onBeforeUnmount(() => {
 .segmented {
   display: inline-flex;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -1209,9 +1224,10 @@ onBeforeUnmount(() => {
   border-right: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
   color: var(--myst-ink-muted);
   font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              color var(--motion-fast) var(--ease-standard);
 }
 
 .segmented button:last-child {
@@ -1247,12 +1263,14 @@ onBeforeUnmount(() => {
   padding: 5px 13px;
   background: none;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 32%, transparent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--myst-ink-muted);
   font-size: 12px;
   text-transform: capitalize;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-fast) var(--ease-standard),
+              color var(--motion-fast) var(--ease-standard);
 }
 
 .pathway-chip:hover:not(:disabled) {
@@ -1276,7 +1294,7 @@ onBeforeUnmount(() => {
   display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   flex-shrink: 0;
 }
 
@@ -1307,7 +1325,7 @@ onBeforeUnmount(() => {
   font-weight: 500;
   text-align: right;
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   padding: 6px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   white-space: nowrap;
@@ -1324,8 +1342,7 @@ onBeforeUnmount(() => {
 }
 
 .matrix tbody tr:not(.median-row) {
-  cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard);
 }
 
 .matrix tbody tr:not(.median-row):hover {
@@ -1345,10 +1362,24 @@ onBeforeUnmount(() => {
   gap: 8px;
 }
 
+.matrix-row-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
 .matrix .cell {
   text-align: right;
   min-width: 62px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
@@ -1362,7 +1393,7 @@ onBeforeUnmount(() => {
   border-top: 1px solid color-mix(in srgb, var(--myst-ink-muted) 40%, transparent);
   border-bottom: none;
   text-align: right;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
@@ -1391,7 +1422,7 @@ onBeforeUnmount(() => {
   background: var(--myst-bg);
   color: var(--myst-ink);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   text-transform: capitalize;
 }
@@ -1406,7 +1437,7 @@ onBeforeUnmount(() => {
   margin-bottom: 22px;
   padding: 14px 16px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 18%, transparent);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--myst-bg) 55%, transparent);
 }
 
@@ -1415,7 +1446,7 @@ onBeforeUnmount(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-display);
   color: var(--myst-ink-muted);
   margin: 0 0 10px;
 }
@@ -1438,7 +1469,7 @@ onBeforeUnmount(() => {
 .kill-label {
   color: var(--myst-ink-muted);
   font-size: 12px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1455,12 +1486,12 @@ onBeforeUnmount(() => {
   top: 1px;
   height: 12px;
   background: var(--bal-neg);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   min-width: 2px;
 }
 
 .kill-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--myst-ink);
   font-variant-numeric: tabular-nums;
@@ -1470,7 +1501,7 @@ onBeforeUnmount(() => {
 .method-summary {
   cursor: pointer;
   color: var(--myst-ink);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
 }
@@ -1480,7 +1511,7 @@ onBeforeUnmount(() => {
   color: var(--myst-ink-muted);
   font-size: 12.5px;
   line-height: 1.7;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   margin: 14px 0 0;
 }
 
@@ -1497,7 +1528,7 @@ onBeforeUnmount(() => {
   padding: 12px 20px;
   background: color-mix(in srgb, var(--myst-bg-2) 92%, var(--myst-gold));
   border: 1px solid color-mix(in srgb, var(--myst-gold) 45%, transparent);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(8px);
   max-width: calc(100vw - 40px);
@@ -1505,12 +1536,13 @@ onBeforeUnmount(() => {
 }
 
 .editbar-enter-active, .editbar-leave-active {
-  transition: all 0.25s ease;
+  transition: opacity var(--motion-slow) var(--ease-enter),
+              transform var(--motion-slow) var(--ease-enter);
 }
 
 .editbar-enter-from, .editbar-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(16px);
+  transform: translateX(-50%) translateY(8px);
 }
 
 .edit-bar-info {
@@ -1542,7 +1574,7 @@ onBeforeUnmount(() => {
 .edit-hint {
   color: var(--myst-ink-muted);
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
 }
 
 .edit-bar-actions {
@@ -1555,17 +1587,18 @@ onBeforeUnmount(() => {
   background: var(--myst-gold);
   color: var(--myst-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .dl-btn:hover:not(:disabled) {
   background: var(--myst-gold-soft);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .dl-btn:disabled {
@@ -1595,7 +1628,7 @@ onBeforeUnmount(() => {
   background: color-mix(in srgb, #ef4444 14%, transparent);
   color: #ef4444;
   padding: 14px 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
   margin-bottom: 18px;
   font-size: 14px;

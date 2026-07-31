@@ -30,7 +30,6 @@
         <div class="ethereal-gauge">
           <div class="gauge-track"></div>
           <div :style="{ width: actingPercentage + '%' }" class="gauge-fill">
-            <div class="gauge-light"></div>
           </div>
           <div class="gauge-markers">
             <div v-for="i in 4" :key="i" class="marker"></div>
@@ -77,13 +76,7 @@ const actingPercentage = computed(() => {
   background: linear-gradient(135deg, rgba(13, 16, 30, 0.6) 0%, rgba(8, 10, 20, 0.8) 100%);
   padding: 32px;
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 4px;
-}
-
-.divinity-path:hover {
-  transform: translateY(-5px);
-  background: linear-gradient(135deg, rgba(20, 24, 45, 0.7) 0%, rgba(13, 16, 30, 0.9) 100%);
+  border-radius: var(--radius-lg);
 }
 
 .divinity-frame {
@@ -91,6 +84,7 @@ const actingPercentage = computed(() => {
   inset: 0;
   border: 1px solid rgba(255, 255, 255, 0.03);
   pointer-events: none;
+  border-radius: var(--radius-lg);
 }
 
 .divinity-frame::after {
@@ -137,17 +131,12 @@ const actingPercentage = computed(() => {
   inset: -4px;
   border: 1px solid rgba(200, 178, 115, 0.2);
   border-radius: 50%;
-  animation: pulseEcho 3s ease-out infinite;
-}
-
-@keyframes pulseEcho {
-  0% { transform: scale(0.9); opacity: 1; }
-  100% { transform: scale(1.3); opacity: 0; }
+  opacity: 0.4;
 }
 
 .path-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -157,7 +146,7 @@ const actingPercentage = computed(() => {
 }
 
 .path-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 28px;
   color: var(--myst-offwhite);
   margin: 0;
@@ -184,7 +173,7 @@ const actingPercentage = computed(() => {
 }
 
 .stat-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: #666;
   text-transform: uppercase;
@@ -199,7 +188,7 @@ const actingPercentage = computed(() => {
 }
 
 .stat-value {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
 }
 
 .sequence-val {
@@ -213,7 +202,7 @@ const actingPercentage = computed(() => {
 .acting-val {
   font-size: 14px;
   color: #aaa;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
 }
 
 .ethereal-gauge {
@@ -221,7 +210,7 @@ const actingPercentage = computed(() => {
   height: 6px;
   width: 100%;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 3px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
@@ -229,22 +218,8 @@ const actingPercentage = computed(() => {
   height: 100%;
   background: linear-gradient(90deg, var(--myst-gold) 0%, #4ecdc4 100%);
   position: relative;
-  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
-  border-radius: 3px;
-}
-
-.gauge-light {
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 30px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4));
-  filter: blur(2px);
-  animation: shine 2s linear infinite;
-}
-
-@keyframes shine {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(300%); }
+  transition: width var(--motion-slow) var(--ease-enter);
+  border-radius: inherit;
 }
 
 .gauge-markers {

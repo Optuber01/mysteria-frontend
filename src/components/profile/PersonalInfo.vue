@@ -70,7 +70,6 @@
 <script lang="ts" setup>
 import {computed} from "vue";
 import type {UserResponse} from "@/types/users";
-import {useRoleStore} from "@/stores/roles";
 import {useI18n} from "@/composables/useI18n";
 import UserAvatar from "@/components/ui/UserAvatar.vue";
 
@@ -80,8 +79,6 @@ const props = defineProps<{
 }>();
 
 const {t} = useI18n();
-const roleStore = useRoleStore();
-
 const displayRole = computed(() => {
   if (props.displayedUser?.role) return props.displayedUser.role;
   return "Гравець";
@@ -109,7 +106,7 @@ const getRoleClass = () => {
   padding: 40px;
   min-height: 300px;
   overflow: hidden;
-  transition: all 0.4s ease;
+  border-radius: var(--radius-lg);
 }
 
 .journal-frame {
@@ -117,6 +114,7 @@ const getRoleClass = () => {
   inset: 0;
   border: 1px solid rgba(255, 255, 255, 0.05);
   pointer-events: none;
+  border-radius: var(--radius-lg);
 }
 
 .journal-frame::before {
@@ -124,10 +122,7 @@ const getRoleClass = () => {
   position: absolute;
   top: 10px; left: 10px; bottom: 10px; right: 10px;
   border: 1px solid rgba(200, 178, 115, 0.1);
-}
-
-.journal-entry:hover .journal-frame {
-  border-color: rgba(200, 178, 115, 0.3);
+  border-radius: var(--radius-md);
 }
 
 /* Header Layout */
@@ -154,12 +149,6 @@ const getRoleClass = () => {
   position: relative;
   z-index: 5;
   filter: grayscale(0.2) contrast(1.1);
-  transition: all 0.5s ease;
-}
-
-.journal-entry:hover .profile-avatar {
-  filter: grayscale(0) contrast(1.2);
-  transform: scale(1.05) rotate(2deg);
 }
 
 .seal-glow {
@@ -169,12 +158,6 @@ const getRoleClass = () => {
   border-radius: 50%;
   z-index: 1;
   opacity: 0.5;
-  transition: all 0.5s ease;
-}
-
-.journal-entry:hover .seal-glow {
-  opacity: 1;
-  transform: scale(1.2);
 }
 
 .seal-rings {
@@ -182,18 +165,12 @@ const getRoleClass = () => {
   inset: -8px;
   border: 1px dashed rgba(200, 178, 115, 0.3);
   border-radius: 50%;
-  animation: rotate 20s linear infinite;
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 /* Identity Text */
 .entry-label {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -203,7 +180,7 @@ const getRoleClass = () => {
 }
 
 .profile-name {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 42px;
   color: var(--myst-offwhite);
   margin: 0 0 12px;
@@ -224,7 +201,7 @@ const getRoleClass = () => {
 }
 
 .meta-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 13px;
   color: #888;
 }
@@ -249,7 +226,7 @@ const getRoleClass = () => {
 }
 
 .attr-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: #666;
   text-transform: uppercase;
@@ -264,13 +241,12 @@ const getRoleClass = () => {
 }
 
 .attr-value {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: #aaa;
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.3s ease;
 }
 
 .role-icon, .meta-icon {

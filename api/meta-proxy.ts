@@ -108,7 +108,7 @@ const STATIC_PAGES: Record<string, PageMeta> = {
 
 function generateStaticPageHTML(pageName: string, baseUrl: string): string {
   const meta = STATIC_PAGES[pageName] || {
-    title: 'Mysterria - Lord of The Mysteries Minecraft Server',
+    title: 'Mysterria - Lord of the Mysteries Minecraft Server',
     description: 'Mysterria – A unique Minecraft server inspired by the Lord of the Mysteries web novel. Explore mystical Pathways, brew Potions, advance through Sequences, and immerse yourself in a world of gods and churches.',
     image: '/banner.webp',
   };

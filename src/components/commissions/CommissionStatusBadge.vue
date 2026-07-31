@@ -17,8 +17,8 @@ const label = computed(() => t(`commissions.status.${props.status}`));
 .status-badge {
   display: inline-block;
   padding: 3px 10px;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;

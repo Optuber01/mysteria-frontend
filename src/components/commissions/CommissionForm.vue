@@ -1,25 +1,26 @@
 <template>
-  <div class="commission-form-card">
+  <form class="commission-form-card" @submit.prevent="submit">
     <div class="form-header">
       <span class="form-eyebrow">{{ t('commissions.form.eyebrow') }}</span>
       <h2 class="form-title">{{ t('commissions.form.title') }}</h2>
     </div>
 
     <div v-if="staffNoticeText" class="staff-notice">
-      <i class="fa-solid fa-circle-info"></i>
+      <i aria-hidden="true" class="fa-solid fa-circle-info"></i>
       <div>
         <strong>{{ t('commissions.form.staffNotesLabel') }}</strong>
         <p>{{ staffNoticeText }}</p>
       </div>
     </div>
 
-    <div v-if="loadingSlots" class="state-block">
-      <div class="loading-sigil"></div>
+    <div v-if="loadingSlots" aria-live="polite" class="state-block" role="status">
+      <div aria-hidden="true" class="loading-sigil"></div>
+      <span>{{ t('loading') || 'Loading commission slots...' }}</span>
     </div>
 
     <template v-else>
       <div v-if="buyMoreNeeded > 0" class="buy-more-notice">
-        <i class="fa-solid fa-triangle-exclamation"></i>
+        <i aria-hidden="true" class="fa-solid fa-triangle-exclamation"></i>
         <p>{{ buyMoreMessage }}</p>
         <RouterLink class="buy-more-link" to="/services/spell-rework">
           {{ t('commissions.form.buyMoreCta') }}
@@ -27,12 +28,14 @@
       </div>
 
       <template v-else>
-        <div v-if="slots.length > neededSlotCount" class="form-group">
-          <label>{{ t('commissions.form.slotsLabel') }}</label>
+        <div v-if="slots.length > neededSlotCount" aria-labelledby="commission-slots-label" class="form-group" role="group">
+          <span id="commission-slots-label" class="field-label">{{ t('commissions.form.slotsLabel') }}</span>
           <div class="slot-checklist">
             <label v-for="slot in slots" :key="slot.id" class="slot-check-item">
               <input
                   :checked="selectedSlotIds.includes(slot.id)"
+                  :aria-invalid="!!validationErrors.slots"
+                  :name="`commission-slot-${slot.id}`"
                   type="checkbox"
                   @change="toggleSlot(slot.id)"
               />
@@ -49,7 +52,7 @@
             <span :class="{ over: overBudget }" class="budget-meter-value">{{ budgetUsedText }}</span>
           </div>
           <div class="budget-meter-track">
-            <div :class="{ over: overBudget }" :style="{ width: budgetFillPercent + '%' }" class="budget-meter-fill"></div>
+            <div :class="{ over: overBudget }" :style="{ transform: `scaleX(${budgetFillPercent / 100})` }" class="budget-meter-fill"></div>
           </div>
           <small class="budget-meter-hint">{{ t('commissions.form.budgetHint') }}</small>
         </div>
@@ -70,26 +73,32 @@
                 <span>{{ t('commissions.form.majorChangeLabel') }} #{{ index + 1 }}</span>
                 <span class="row-cost">{{ LIMITS.majorCost }} {{ t('commissions.form.pointsUnit') }}</span>
                 <button class="remove-change-btn" type="button" @click="removeMajorChange(index)">
-                  <i class="fa-solid fa-xmark"></i>
+                  <i aria-hidden="true" class="fa-solid fa-xmark"></i>
+                  <span class="sr-only">Remove major change {{ index + 1 }}</span>
                 </button>
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.targetNameLabel') }} *</label>
+                <label :for="`major-${change.key}-target`">{{ t('commissions.form.targetNameLabel') }} *</label>
                 <input
+                    :id="`major-${change.key}-target`"
                     v-model="change.targetName"
+                    :aria-describedby="validationErrors[`major.${index}.targetName`] ? `major-${change.key}-target-error` : undefined"
+                    :aria-invalid="!!validationErrors[`major.${index}.targetName`]"
                     :class="{ error: validationErrors[`major.${index}.targetName`] }"
                     :maxlength="LIMITS.targetName"
+                    :name="`major-${index}-target-name`"
+                    autocomplete="off"
                     type="text"
                 />
-                <div v-if="validationErrors[`major.${index}.targetName`]" class="field-error">
+                <div v-if="validationErrors[`major.${index}.targetName`]" :id="`major-${change.key}-target-error`" class="field-error">
                   {{ validationErrors[`major.${index}.targetName`] }}
                 </div>
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.majorTypeLabel') }} *</label>
-                <select v-model="change.majorType" :class="{ error: validationErrors[`major.${index}.majorType`] }">
+                <label :for="`major-${change.key}-type`">{{ t('commissions.form.majorTypeLabel') }} *</label>
+                <select :id="`major-${change.key}-type`" v-model="change.majorType" :aria-invalid="!!validationErrors[`major.${index}.majorType`]" :class="{ error: validationErrors[`major.${index}.majorType`] }" :name="`major-${index}-type`">
                   <option :value="null">{{ t('commissions.form.selectPlaceholder') }}</option>
                   <option v-for="opt in MAJOR_TYPES" :key="opt.value" :value="opt.value">
                     {{ t(`commissions.majorType.${opt.value}`) }}
@@ -101,11 +110,14 @@
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.requestedChangeLabel') }} *</label>
+                <label :for="`major-${change.key}-request`">{{ t('commissions.form.requestedChangeLabel') }} *</label>
                 <textarea
+                    :id="`major-${change.key}-request`"
                     v-model="change.requestedChange"
+                    :aria-invalid="!!validationErrors[`major.${index}.requestedChange`]"
                     :class="{ error: validationErrors[`major.${index}.requestedChange`] }"
                     :maxlength="LIMITS.majorRequestedChange"
+                    :name="`major-${index}-requested-change`"
                     rows="4"
                 ></textarea>
                 <small>{{ change.requestedChange.length }} / {{ LIMITS.majorRequestedChange }}</small>
@@ -115,11 +127,14 @@
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.motivationLabel') }} *</label>
+                <label :for="`major-${change.key}-motivation`">{{ t('commissions.form.motivationLabel') }} *</label>
                 <textarea
+                    :id="`major-${change.key}-motivation`"
                     v-model="change.motivation"
+                    :aria-invalid="!!validationErrors[`major.${index}.motivation`]"
                     :class="{ error: validationErrors[`major.${index}.motivation`] }"
                     :maxlength="LIMITS.majorMotivation"
+                    :name="`major-${index}-motivation`"
                     rows="4"
                 ></textarea>
                 <small>{{ change.motivation.length }} / {{ LIMITS.majorMotivation }}</small>
@@ -129,10 +144,12 @@
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.loreReferenceLabel') }}</label>
+                <label :for="`major-${change.key}-lore`">{{ t('commissions.form.loreReferenceLabel') }}</label>
                 <textarea
+                    :id="`major-${change.key}-lore`"
                     v-model="change.loreReference"
                     :maxlength="LIMITS.majorLoreReference"
+                    :name="`major-${index}-lore-reference`"
                     rows="3"
                 ></textarea>
                 <small>{{ change.loreReference.length }} / {{ LIMITS.majorLoreReference }}</small>
@@ -146,7 +163,7 @@
               type="button"
               @click="addMajorChange"
           >
-            <i class="fa-solid fa-plus"></i>
+            <i aria-hidden="true" class="fa-solid fa-plus"></i>
             {{ t('commissions.form.addMajorChange') }}
           </button>
         </div>
@@ -167,16 +184,21 @@
                 <span>{{ t('commissions.form.minorChangeLabel') }} #{{ index + 1 }}</span>
                 <span class="row-cost">{{ LIMITS.minorCost }} {{ t('commissions.form.pointsUnit') }}</span>
                 <button class="remove-change-btn" type="button" @click="removeMinorChange(index)">
-                  <i class="fa-solid fa-xmark"></i>
+                  <i aria-hidden="true" class="fa-solid fa-xmark"></i>
+                  <span class="sr-only">Remove minor change {{ index + 1 }}</span>
                 </button>
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.targetNameLabel') }} *</label>
+                <label :for="`minor-${change.key}-target`">{{ t('commissions.form.targetNameLabel') }} *</label>
                 <input
+                    :id="`minor-${change.key}-target`"
                     v-model="change.targetName"
+                    :aria-invalid="!!validationErrors[`minor.${index}.targetName`]"
                     :class="{ error: validationErrors[`minor.${index}.targetName`] }"
                     :maxlength="LIMITS.targetName"
+                    :name="`minor-${index}-target-name`"
+                    autocomplete="off"
                     type="text"
                 />
                 <div v-if="validationErrors[`minor.${index}.targetName`]" class="field-error">
@@ -185,11 +207,14 @@
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.changeDescriptionLabel') }} *</label>
+                <label :for="`minor-${change.key}-description`">{{ t('commissions.form.changeDescriptionLabel') }} *</label>
                 <textarea
+                    :id="`minor-${change.key}-description`"
                     v-model="change.changeDescription"
+                    :aria-invalid="!!validationErrors[`minor.${index}.changeDescription`]"
                     :class="{ error: validationErrors[`minor.${index}.changeDescription`] }"
                     :maxlength="LIMITS.minorChangeDescription"
+                    :name="`minor-${index}-description`"
                     rows="2"
                 ></textarea>
                 <small>{{ change.changeDescription.length }} / {{ LIMITS.minorChangeDescription }}</small>
@@ -199,11 +224,14 @@
               </div>
 
               <div class="form-group">
-                <label>{{ t('commissions.form.motivationLabel') }} *</label>
+                <label :for="`minor-${change.key}-motivation`">{{ t('commissions.form.motivationLabel') }} *</label>
                 <textarea
+                    :id="`minor-${change.key}-motivation`"
                     v-model="change.motivation"
+                    :aria-invalid="!!validationErrors[`minor.${index}.motivation`]"
                     :class="{ error: validationErrors[`minor.${index}.motivation`] }"
                     :maxlength="LIMITS.minorMotivation"
+                    :name="`minor-${index}-motivation`"
                     rows="2"
                 ></textarea>
                 <small>{{ change.motivation.length }} / {{ LIMITS.minorMotivation }}</small>
@@ -220,32 +248,32 @@
               type="button"
               @click="addMinorChange"
           >
-            <i class="fa-solid fa-plus"></i>
+            <i aria-hidden="true" class="fa-solid fa-plus"></i>
             {{ t('commissions.form.addMinorChange') }}
           </button>
         </div>
 
         <div v-if="totalChanges === 0" class="empty-state-hint">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <i aria-hidden="true" class="fa-solid fa-wand-magic-sparkles"></i>
           {{ t('commissions.form.emptyStateHint') }}
         </div>
 
         <!-- Confirmations -->
         <div class="confirmations">
           <label class="confirm-item">
-            <input v-model="confirmLoreGrounded" type="checkbox"/>
+            <input v-model="confirmLoreGrounded" :aria-invalid="!!validationErrors.confirmations" name="confirm-lore-grounded" type="checkbox"/>
             <span>{{ t('commissions.form.confirmLoreGrounded') }}</span>
           </label>
           <label class="confirm-item">
-            <input v-model="confirmNoFundamentalRework" type="checkbox"/>
+            <input v-model="confirmNoFundamentalRework" :aria-invalid="!!validationErrors.confirmations" name="confirm-no-rework" type="checkbox"/>
             <span>{{ t('commissions.form.confirmNoFundamentalRework') }}</span>
           </label>
           <label class="confirm-item">
-            <input v-model="confirmNoNerfOtherCommission" type="checkbox"/>
+            <input v-model="confirmNoNerfOtherCommission" :aria-invalid="!!validationErrors.confirmations" name="confirm-no-nerf" type="checkbox"/>
             <span>{{ t('commissions.form.confirmNoNerfOtherCommission') }}</span>
           </label>
           <label class="confirm-item">
-            <input v-model="confirmUnderstandsScope" type="checkbox"/>
+            <input v-model="confirmUnderstandsScope" :aria-invalid="!!validationErrors.confirmations" name="confirm-scope" type="checkbox"/>
             <span>{{ t('commissions.form.confirmUnderstandsScope') }}</span>
           </label>
           <div v-if="validationErrors.confirmations" class="field-error">
@@ -253,28 +281,28 @@
           </div>
         </div>
 
-        <div v-if="validationErrors.slots" class="field-error slots-error">
+        <div v-if="validationErrors.slots" class="field-error slots-error" data-validation-error tabindex="-1">
           {{ validationErrors.slots }}
         </div>
 
-        <div v-if="validationErrors.budget" class="field-error slots-error">
+        <div v-if="validationErrors.budget" class="field-error slots-error" data-validation-error tabindex="-1">
           {{ validationErrors.budget }}
         </div>
 
         <div class="form-actions">
-          <button :disabled="submitting || !canSubmit" class="submit-btn" type="button" @click="submit">
+          <button :disabled="submitting" class="submit-btn" type="submit">
             <span v-if="submitting" class="button-spinner"></span>
             {{ submitting ? t('commissions.form.submitting') : t('commissions.form.submit') }}
           </button>
         </div>
       </template>
     </template>
-  </div>
+  </form>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref, watch} from 'vue';
-import {useRoute} from 'vue-router';
+import {computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from 'vue';
+import {onBeforeRouteLeave, useRoute} from 'vue-router';
 import {useI18n} from '@/composables/useI18n';
 import {useNotification} from '@/services/useNotification';
 import {commissionsAPI} from '@/utils/api/commissions';
@@ -337,7 +365,11 @@ const canAddMinor = computed(() =>
     minorChanges.value.length < LIMITS.minorChangesMax
     && budgetUsed.value + LIMITS.minorCost <= LIMITS.budgetMax,
 );
-const canSubmit = computed(() => totalChanges.value > 0 && !overBudget.value);
+const isDirty = computed(() => totalChanges.value > 0
+    || confirmLoreGrounded.value
+    || confirmNoFundamentalRework.value
+    || confirmNoNerfOtherCommission.value
+    || confirmUnderstandsScope.value);
 
 const formatSlotLabel = (slot: CommissionSlotDto): string => {
   const date = new Date(slot.createdAt).toLocaleDateString();
@@ -454,7 +486,11 @@ const validate = (): boolean => {
 };
 
 const submit = async () => {
-  if (!validate()) return;
+  if (!validate()) {
+    await nextTick();
+    document.querySelector<HTMLElement>('.commission-form-card [aria-invalid="true"], .commission-form-card [data-validation-error]')?.focus();
+    return;
+  }
 
   const body: SubmitCommissionRequestDto = {
     majorChanges: majorChanges.value.map((m) => ({
@@ -510,8 +546,21 @@ const applyResubmitQuery = async () => {
 };
 
 onMounted(async () => {
+  window.addEventListener('beforeunload', preventDirtyUnload);
   await loadSlots();
   await applyResubmitQuery();
+});
+
+const preventDirtyUnload = (event: BeforeUnloadEvent) => {
+  if (!isDirty.value || submitting.value) return;
+  event.preventDefault();
+};
+
+onBeforeUnmount(() => window.removeEventListener('beforeunload', preventDirtyUnload));
+
+onBeforeRouteLeave(() => {
+  if (!isDirty.value || submitting.value) return true;
+  return window.confirm('You have unsaved commission changes. Leave this page?');
 });
 
 // Re-applies when a "Resubmit" CTA elsewhere on the page pushes a new ?resubmit= query
@@ -526,7 +575,7 @@ watch(() => route.query.resubmit, () => {
   background: rgba(13, 16, 30, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 32px;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
 }
 
 .form-header {
@@ -537,7 +586,7 @@ watch(() => route.query.resubmit, () => {
 
 .form-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -548,7 +597,7 @@ watch(() => route.query.resubmit, () => {
 
 .form-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 24px;
   color: var(--myst-offwhite);
 }
@@ -562,6 +611,7 @@ watch(() => route.query.resubmit, () => {
   border-left: 3px solid #60a5fa;
   color: #cdd8ea;
   font-size: 13px;
+  border-radius: var(--radius-md);
 }
 
 .staff-notice i {
@@ -612,6 +662,7 @@ watch(() => route.query.resubmit, () => {
   text-align: center;
   background: rgba(239, 68, 68, 0.06);
   border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--radius-md);
 }
 
 .buy-more-notice i {
@@ -630,11 +681,24 @@ watch(() => route.query.resubmit, () => {
   background: var(--myst-gold);
   color: #05070a;
   text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .buy-more-link:hover {
@@ -645,7 +709,8 @@ watch(() => route.query.resubmit, () => {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.form-group label,
+.field-label {
   display: block;
   font-weight: 600;
   color: var(--myst-offwhite);
@@ -667,13 +732,13 @@ watch(() => route.query.resubmit, () => {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 13px;
   background: rgba(0, 0, 0, 0.25);
   color: #eee;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), box-shadow var(--motion-base) var(--ease-standard);
 }
 
 .form-group textarea {
@@ -722,6 +787,7 @@ watch(() => route.query.resubmit, () => {
   font-size: 13px;
   color: #ccc;
   cursor: pointer;
+  border-radius: var(--radius-md);
 }
 
 .budget-meter-group {
@@ -729,6 +795,7 @@ watch(() => route.query.resubmit, () => {
   padding: 18px 20px;
   background: rgba(200, 178, 115, 0.04);
   border: 1px solid rgba(200, 178, 115, 0.15);
+  border-radius: var(--radius-md);
 }
 
 .budget-meter-header {
@@ -739,7 +806,7 @@ watch(() => route.query.resubmit, () => {
 }
 
 .budget-meter-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -747,11 +814,11 @@ watch(() => route.query.resubmit, () => {
 }
 
 .budget-meter-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 700;
   color: var(--myst-offwhite);
-  transition: color 0.2s ease;
+  transition: color var(--motion-base) var(--ease-standard);
 }
 
 .budget-meter-value.over {
@@ -763,12 +830,16 @@ watch(() => route.query.resubmit, () => {
   height: 8px;
   background: rgba(255, 255, 255, 0.06);
   overflow: hidden;
+  border-radius: var(--radius-pill);
 }
 
 .budget-meter-fill {
+  width: 100%;
+  transform-origin: left;
   height: 100%;
   background: var(--myst-gold);
-  transition: width 0.3s ease, background-color 0.2s ease;
+  transition: transform var(--motion-slow) var(--ease-enter), background-color var(--motion-base) var(--ease-standard);
+  border-radius: inherit;
 }
 
 .budget-meter-fill.over {
@@ -799,7 +870,7 @@ watch(() => route.query.resubmit, () => {
 
 .change-section-header h3 {
   margin: 0 0 4px;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
   color: var(--myst-offwhite);
@@ -812,7 +883,7 @@ watch(() => route.query.resubmit, () => {
 
 .section-count {
   flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: #888;
   white-space: nowrap;
@@ -824,6 +895,7 @@ watch(() => route.query.resubmit, () => {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-left: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
 }
 
 .change-row.major-row {
@@ -839,7 +911,7 @@ watch(() => route.query.resubmit, () => {
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -856,6 +928,7 @@ watch(() => route.query.resubmit, () => {
   color: #999;
   font-size: 10px;
   letter-spacing: 0.5px;
+  border-radius: var(--radius-pill);
 }
 
 .remove-change-btn {
@@ -863,7 +936,10 @@ watch(() => route.query.resubmit, () => {
   border: none;
   color: #888;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--motion-base) var(--ease-standard);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
 }
 
 .remove-change-btn:hover {
@@ -879,12 +955,13 @@ watch(() => route.query.resubmit, () => {
   background: transparent;
   border: 1px dashed rgba(200, 178, 115, 0.3);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard);
 }
 
 .add-change-btn:hover {
@@ -903,6 +980,7 @@ watch(() => route.query.resubmit, () => {
   color: #777;
   font-size: 13px;
   text-align: center;
+  border-radius: var(--radius-md);
 }
 
 .empty-state-hint i {
@@ -912,7 +990,7 @@ watch(() => route.query.resubmit, () => {
 
 .row-fade-enter-active,
 .row-fade-leave-active {
-  transition: all 0.25s ease;
+  transition: opacity var(--motion-slow) var(--ease-enter), transform var(--motion-slow) var(--ease-enter);
 }
 
 .row-fade-enter-from,
@@ -937,6 +1015,7 @@ watch(() => route.query.resubmit, () => {
   margin: 24px 0;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
 }
 
 .confirm-item {
@@ -970,7 +1049,9 @@ watch(() => route.query.resubmit, () => {
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
 }
 
 .submit-btn:hover:not(:disabled) {

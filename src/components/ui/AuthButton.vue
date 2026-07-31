@@ -19,7 +19,10 @@
         <!-- Admin Registry Dropdown -->
         <div v-if="canEditAnyContent || canTuneBalance || canManageCommissions" ref="dropdownRef" class="admin-ritual-dropdown">
           <button 
+              :aria-expanded="isDropdownOpen"
+              aria-label="Open admin tools"
               class="admin-ritual-trigger" 
+              type="button"
               @click.stop="isDropdownOpen = !isDropdownOpen"
               :class="{ active: isDropdownOpen }"
           >
@@ -28,29 +31,29 @@
           
           <Transition name="ritual-dropdown">
             <div v-if="isDropdownOpen" class="admin-ritual-menu">
-              <div class="menu-ritual-header">Registry</div>
+              <div class="menu-ritual-header">Admin tools</div>
               
               <RouterLink v-if="canManageNews" class="menu-ritual-item" to="/edit/news" @click="isDropdownOpen = false">
                 <i class="fa-solid fa-pen-nib"></i>
                 <div class="item-meta">
-                  <span class="item-title">Archives</span>
-                  <span class="item-desc">Edit News & Lore</span>
+                  <span class="item-title">News &amp; lore</span>
+                  <span class="item-desc">Edit published content</span>
                 </div>
               </RouterLink>
 
               <RouterLink v-if="canManageShop" class="menu-ritual-item" to="/edit/services" @click="isDropdownOpen = false">
                 <i class="fa-solid fa-gem"></i>
                 <div class="item-meta">
-                  <span class="item-title">Reliquary</span>
-                  <span class="item-desc">Manage Services</span>
+                  <span class="item-title">Services</span>
+                  <span class="item-desc">Manage store services</span>
                 </div>
               </RouterLink>
 
               <RouterLink v-if="canTuneBalance" class="menu-ritual-item" to="/tools/balance" @click="isDropdownOpen = false">
                 <i class="fa-solid fa-scale-balanced"></i>
                 <div class="item-meta">
-                  <span class="item-title">Observatory</span>
-                  <span class="item-desc">Balance Tuning</span>
+                  <span class="item-title">Balance tools</span>
+                  <span class="item-desc">Tune game balance</span>
                 </div>
               </RouterLink>
 
@@ -68,8 +71,8 @@
                 <RouterLink class="menu-ritual-item admin-primary" to="/admin" @click="isDropdownOpen = false">
                   <i class="fa-solid fa-scroll"></i>
                   <div class="item-meta">
-                    <span class="item-title">Full Registry</span>
-                    <span class="item-desc">Admin Dashboard</span>
+                    <span class="item-title">Admin dashboard</span>
+                    <span class="item-desc">Manage the server</span>
                   </div>
                 </RouterLink>
               </template>
@@ -77,14 +80,14 @@
           </Transition>
         </div>
 
-        <button class="logout-ritual-btn" @click="handleLogout" :title="t('logout')">
+        <button :aria-label="t('logout')" class="logout-ritual-btn" type="button" @click="handleLogout" :title="t('logout')">
           <i class="fa-solid fa-sign-out-alt"></i>
         </button>
       </div>
     </template>
 
     <template v-else>
-      <button class="btn-ritual-auth" @click="handleLogin">
+      <button class="btn-ritual-auth" type="button" @click="handleLogin">
         <i class="fa-brands fa-discord"></i>
         <span>{{ t('login') }}</span>
       </button>
@@ -148,24 +151,26 @@ onUnmounted(() => {
 }
 
 .btn-ritual-auth {
+  height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 24px;
-  background: transparent;
-  border: 1px solid var(--myst-gold);
+  padding: 0 17px;
+  background: rgba(255, 255, 255, .025);
+  border: 1px solid rgba(200, 178, 115, .22);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 650;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: .06em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard);
 }
 
 .btn-ritual-auth:hover {
   background: rgba(200, 178, 115, 0.1);
-  box-shadow: 0 0 15px rgba(200, 178, 115, 0.2);
 }
 
 .user-ritual-group {
@@ -175,7 +180,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.02);
   padding: 4px 4px 4px 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   position: relative;
 }
 
@@ -184,7 +189,6 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  transition: all 0.3s ease;
 }
 
 .profile-info {
@@ -193,14 +197,14 @@ onUnmounted(() => {
 }
 
 .profile-nickname {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 14px;
   font-weight: 700;
   color: #fff;
 }
 
 .profile-marks {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -214,16 +218,16 @@ onUnmounted(() => {
 
 .admin-ritual-trigger {
   color: var(--myst-gold);
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(200, 178, 115, 0.1);
   border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .admin-ritual-trigger:hover, .admin-ritual-trigger.active {
@@ -238,14 +242,14 @@ onUnmounted(() => {
   width: 260px;
   background: #080a14;
   border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   z-index: 100;
   padding: 8px;
 }
 
 .menu-ritual-header {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -261,8 +265,8 @@ onUnmounted(() => {
   gap: 16px;
   padding: 12px;
   text-decoration: none;
-  transition: all 0.3s;
-  border-radius: 2px;
+  transition: background-color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
 }
 
 .menu-ritual-item i {
@@ -279,14 +283,14 @@ onUnmounted(() => {
 }
 
 .item-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   font-weight: 700;
   color: #fff;
 }
 
 .item-desc {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 9px;
   color: #555;
   text-transform: uppercase;
@@ -311,13 +315,14 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
   color: #444;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
 }
 
 .logout-ritual-btn:hover {
@@ -326,8 +331,8 @@ onUnmounted(() => {
 }
 
 /* Transitions */
-.ritual-dropdown-enter-active, .ritual-dropdown-leave-active { transition: all 0.3s ease; }
-.ritual-dropdown-enter-from, .ritual-dropdown-leave-to { opacity: 0; transform: translateY(-10px); }
+.ritual-dropdown-enter-active, .ritual-dropdown-leave-active { transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter); }
+.ritual-dropdown-enter-from, .ritual-dropdown-leave-to { opacity: 0; transform: translateY(-8px); }
 
 .ritual-spinner {
   width: 20px;

@@ -6,7 +6,7 @@
         {{ t('backToCategories') }}
       </button>
       <div class="category-context">
-        <span>{{ selectedCategory }}</span>
+        <span>{{ selectedCategoryName }}</span>
         <small>{{ filteredItems.length }} {{ t('itemsCount') || 'items' }}</small>
       </div>
     </div>
@@ -38,6 +38,7 @@ import {useI18n} from "@/composables/useI18n";
 import ShopItemCard from "./ShopItemCard.vue";
 import Decimal from "decimal.js";
 import type {ServiceResponse} from "@/types/services";
+import {useRoute, useRouter} from "vue-router";
 
 const props = defineProps<{
   selectedCategory?: string | null;
@@ -50,9 +51,21 @@ const emit = defineEmits<{
 const shopStore = useBalanceStore();
 const userStore = useUserStore();
 const authStore = useAuthStore();
+const route = useRoute();
+const router = useRouter();
 const {t} = useI18n();
 const items = computed(() => shopStore.items);
 const profile = computed(() => userStore.currentUser);
+const selectedCategoryName = computed(() => {
+  if (!props.selectedCategory) return "";
+  const normalizedId = props.selectedCategory
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join("");
+  const key = `shopCategory${normalizedId}`;
+  const translated = t(key);
+  return translated === key ? props.selectedCategory : translated;
+});
 
 // State management
 const activeTab = ref<string>(props.selectedCategory || 'all');
@@ -63,9 +76,6 @@ watch(() => props.selectedCategory, (newCategory) => {
     activeTab.value = newCategory;
   }
 }, {immediate: true});
-const comparisonItems = ref<Set<string>>(new Set());
-const showComparisonTable = ref(false);
-
 // Filtered items based on active tab
 const filteredItems = computed(() => {
   let filtered: ServiceResponse[];
@@ -81,11 +91,12 @@ const filteredItems = computed(() => {
   return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
 });
 
+const localImages = import.meta.glob('/src/assets/images/**/*.{png,jpg,jpeg,webp,avif,gif,svg}', {eager: true, query: '?url', import: 'default'}) as Record<string, string>;
 const resolveImagePath = (path?: string) => {
   if (!path) return '';
   if (/^https?:\/\//.test(path) || path.startsWith('/')) return path;
-  if (path.startsWith('@/assets/')) return new URL(path.replace('@/assets/', '/src/assets/'), import.meta.url).href;
-  if (path.startsWith('src/')) return new URL(`/${path}`, import.meta.url).href;
+  if (path.startsWith('@/assets/images/')) return localImages[path.replace('@/assets/', '/src/assets/')] || '';
+  if (path.startsWith('src/assets/images/')) return localImages[`/${path}`] || '';
   return path;
 };
 
@@ -105,13 +116,11 @@ const handlePurchase = (itemId: string) => {
 
   // Check if user is authenticated
   if (!authStore.isAuthenticated) {
-    show(
-        t('shopLoginRequired') || "Please log in to make purchases",
-        {
-          type: "warn",
-          duration: 5000,
-        },
-    );
+    const redirect = router.resolve({
+      name: 'shop',
+      query: {...route.query, purchase: itemId},
+    }).fullPath;
+    void router.push({name: 'login', query: {redirect}});
     return;
   }
 
@@ -165,6 +174,18 @@ const handlePurchase = (itemId: string) => {
   };
 };
 
+watch(
+    () => [authStore.isAuthenticated, items.value.length, route.query.purchase, profile.value?.verified] as const,
+    async ([authenticated, itemCount, purchase]) => {
+      if (!authenticated || !itemCount || typeof purchase !== 'string' || !profile.value?.verified) return;
+      const query = {...route.query};
+      delete query.purchase;
+      await router.replace({query});
+      handlePurchase(purchase);
+    },
+    {immediate: true},
+);
+
 </script>
 
 <style scoped>
@@ -197,14 +218,14 @@ const handlePurchase = (itemId: string) => {
   max-width: 55vw;
   overflow: hidden;
   color: var(--myst-offwhite);
-  font: 700 22px/1.2 'Playfair Display', serif;
+  font: 700 22px/1.2 var(--font-display);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .category-context small {
   color: #767c8c;
-  font: 600 10px 'JetBrains Mono', monospace;
+  font: 600 10px var(--font-ui);
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -217,12 +238,16 @@ const handlePurchase = (itemId: string) => {
   padding: 0 17px;
   background: rgba(255, 255, 255, .035);
   border: 1px solid rgba(255, 255, 255, .1);
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   color: var(--myst-ink-strong);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard);
   backdrop-filter: blur(10px);
   will-change: transform;
 }
@@ -230,13 +255,12 @@ const handlePurchase = (itemId: string) => {
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 80%, transparent);
   border-color: color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  transform: translateX(-4px);
   box-shadow: 0 4px 12px color-mix(in srgb, var(--myst-bg) 40%, transparent);
 }
 
 .back-button i {
   font-size: 14px;
-  transition: transform 0.3s ease;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 
 .back-button:hover i {
@@ -256,12 +280,14 @@ const handlePurchase = (itemId: string) => {
 }
 
 .catalog-enter-active, .catalog-leave-active {
-  transition: opacity .3s ease, transform .3s ease;
+  transition:
+    opacity var(--motion-slow) var(--ease-standard),
+    transform var(--motion-slow) var(--ease-enter);
 }
 
 .catalog-enter-from, .catalog-leave-to {
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(8px);
 }
 
 .empty-state {
@@ -272,7 +298,7 @@ const handlePurchase = (itemId: string) => {
   gap: 14px;
   padding: 30px;
   border: 1px dashed rgba(200, 178, 115, .2);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   color: #777d8c;
   text-align: center;
 }
@@ -284,17 +310,6 @@ const handlePurchase = (itemId: string) => {
 
 .empty-state p {
   margin: 0;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Responsive Design */
@@ -342,12 +357,6 @@ const handlePurchase = (itemId: string) => {
     font-size: 19px;
   }
 
-  .back-button:hover {
-    transform: translateY(-2px);
-  }
-
-  .back-button:hover i {
-    transform: translateX(0);
-  }
+  .back-button:hover i { transform: translateX(-2px); }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="service-page">
     <HeaderItem/>
-    <main class="service-detail-container">
+    <main id="main-content" class="service-detail-container" tabindex="-1">
       <div v-if="service" class="service-layout">
         <div class="back-button-container">
           <button class="back-button" @click="goBack">
@@ -49,17 +49,15 @@
               </div>
               <button
                   :class="{ purchasing }"
-                  :disabled="!authStore.isAuthenticated || purchasing"
+                  :disabled="purchasing"
                   class="purchase-btn"
+                  type="button"
                   @click="openPurchaseModal"
               >
                 <i v-if="purchasing" class="fa-solid fa-spinner fa-spin"></i>
                 <i v-else class="fa-solid fa-bag-shopping"></i>
-                {{ purchasing ? t('processing') : t('purchase') }}
+                {{ purchasing ? t('processing') : (!authStore.isAuthenticated ? t('loginToPurchase') : t('purchase')) }}
               </button>
-              <p v-if="!authStore.isAuthenticated" class="auth-notice">
-                <i class="fa-solid fa-lock"></i>{{ t('loginToPurchase') }}
-              </p>
             </div>
           </div>
         </section>
@@ -106,7 +104,9 @@
           v-model:amount="purchaseAmount"
           v-model:isGift="isGift"
           v-model:recipientId="recipientId"
+          v-model:selectedServer="selectedServer"
           :item="service"
+          @retry-balance="balanceStore.fetchBalance"
       />
 
       <template #footer>
@@ -114,7 +114,7 @@
           {{ t('cancel') }}
         </button>
         <button
-          :disabled="purchasing || insufficientFunds || (isGift && !recipientId)"
+          :disabled="purchasing || !balanceStore.currentBalance || insufficientFunds || (isGift && !recipientId) || (requiresServerSelection && !selectedServer)"
           class="btn-ritual-primary"
           @click="confirmPurchase"
         >
@@ -163,6 +163,8 @@ const confirmModal = ref<InstanceType<typeof ModalItem> | null>(null);
 const purchaseAmount = ref(1);
 const isGift = ref(false);
 const recipientId = ref('');
+const selectedServer = ref('');
+const requiresServerSelection = computed(() => service.value?.server_availability?.mode === 'selectable');
 const imageLoaded = ref(false);
 const imageFailed = ref(false);
 
@@ -191,7 +193,7 @@ const totalPrice = computed(() => {
 });
 
 const insufficientFunds = computed(() => {
-  if (!balanceStore.currentBalance) return true;
+  if (!balanceStore.currentBalance) return false;
   return balanceStore.currentBalance.amount.lessThan(totalPrice.value);
 });
 
@@ -216,10 +218,7 @@ const goBack = () => {
 
 const openPurchaseModal = async () => {
   if (!service.value || !authStore.isAuthenticated) {
-    show(
-        t('shopLoginRequired') || 'Log in to your account to access the Shop!',
-        {type: 'warn', duration: 5000}
-    );
+    await router.push({name: 'login', query: {redirect: route.fullPath}});
     return;
   }
 
@@ -239,8 +238,8 @@ const openPurchaseModal = async () => {
   purchaseAmount.value = 1;
   isGift.value = false;
   recipientId.value = '';
-  
-  await balanceStore.fetchBalance();
+  selectedServer.value = '';
+  void balanceStore.fetchBalance();
   confirmModal.value?.showModal({
     title: t('confirmPurchase') || 'Confirm Purchase'
   });
@@ -254,7 +253,8 @@ const confirmPurchase = async () => {
     const success = await balanceStore.initiatePurchase(
       service.value.id.toString(),
       purchaseAmount.value,
-      isGift.value ? recipientId.value : undefined
+      isGift.value ? recipientId.value : undefined,
+      selectedServer.value || undefined
     );
 
     if (success) {
@@ -365,17 +365,31 @@ export default {
   color: var(--myst-ink);
   border: 1px solid var(--myst-ink-muted);
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
   text-decoration: none;
 }
 
 .back-button:hover {
   background: var(--myst-ink-muted);
   color: var(--myst-bg);
+  transform: none;
+}
+
+.back-button i,
+.back-to-shop-btn i {
+  transition: transform var(--motion-base) var(--ease-standard);
+}
+
+.back-button:hover i,
+.back-to-shop-btn:hover i {
   transform: translateX(-2px);
 }
 
@@ -391,7 +405,7 @@ export default {
   flex-shrink: 0;
   width: 200px;
   height: 200px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--myst-bg-2);
   border: 2px solid var(--myst-ink-muted);
@@ -431,7 +445,7 @@ export default {
 .service-price,
 .service-subscription {
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -457,7 +471,7 @@ export default {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: var(--radius-pill);
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -545,7 +559,8 @@ export default {
   background-color: var(--myst-bg-2);
   color: var(--myst-gold);
   padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 0.875rem;
   border: 1px solid var(--myst-ink-muted);
 }
@@ -554,7 +569,8 @@ export default {
   background-color: var(--myst-bg-2);
   color: var(--myst-ink);
   padding: 1rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   overflow-x: auto;
   margin: 1.5rem 0;
   border: 1px solid var(--myst-ink-muted);
@@ -568,7 +584,7 @@ export default {
   gap: 16px;
   padding: 30px;
   background: var(--myst-bg-2);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--myst-ink-muted);
 }
 
@@ -580,18 +596,23 @@ export default {
   color: var(--myst-bg);
   border: none;
   padding: 16px 32px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
   min-width: 200px;
   justify-content: center;
 }
 
 .purchase-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+  transform: translateY(var(--hover-control));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
 }
 
 .purchase-btn:disabled {
@@ -619,14 +640,14 @@ export default {
   color: var(--myst-bg);
   text-decoration: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
 }
 
 .back-to-shop-btn:hover {
   background: var(--myst-gold-soft);
-  transform: translateY(-2px);
+  transform: translateY(var(--hover-control));
 }
 
 /* Loading and error states */
@@ -673,7 +694,7 @@ export default {
 .error-content {
   background: color-mix(in srgb, var(--myst-bg-2) 80%, transparent);
   border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 40px;
   text-align: center;
   max-width: 500px;
@@ -720,174 +741,21 @@ export default {
   }
 }
 
-/* Purchase Ritual Modal Styles */
-.purchase-ritual-modal {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.purchase-item-summary {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-}
-
-.item-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px;
-  color: #fff;
-  margin: 0 0 4px 0;
-}
-
-.item-price-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--myst-gold);
-}
-
-.ritual-field {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ritual-label {
-  font-family: 'Playfair Display', serif;
-  font-size: 14px;
-  color: var(--myst-gold);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.ritual-checkbox-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.ritual-checkbox {
-  width: 20px;
-  height: 20px;
-  border: 1px solid rgba(200, 178, 115, 0.3);
-  background: rgba(255, 255, 255, 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--myst-gold);
-  font-size: 12px;
-  transition: all 0.3s;
-}
-
-.ritual-checkbox.active {
-  background: rgba(200, 178, 115, 0.1);
-  border-color: var(--myst-gold);
-}
-
-.ritual-label-inline {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: #aaa;
-}
-
-.amount-stepper {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  width: fit-content;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.step-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.step-btn:hover {
-  background: var(--myst-gold);
-  color: #000;
-}
-
-.amount-input {
-  width: 60px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  color: #fff;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-}
-
-.amount-input::-webkit-inner-spin-button,
-.amount-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.total-ritual-price {
-  margin-top: 8px;
-  padding: 16px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.total-label {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  color: #888;
-}
-
-.total-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--myst-gold);
-}
-
-.insufficient-funds-warning {
-  padding: 12px;
-  background: rgba(239, 68, 68, 0.1);
-  border-left: 3px solid #ef4444;
-  color: #f87171;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .btn-ritual-primary {
   padding: 12px 24px;
   background: var(--myst-gold);
   color: #05070a;
   border: none;
-  font-family: 'Playfair Display', serif;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
 }
 
 .btn-ritual-primary:hover:not(:disabled) {
   background: #fff;
+  transform: translateY(var(--hover-control));
 }
 
 .btn-ritual-primary:disabled {
@@ -900,14 +768,16 @@ export default {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
-  font-family: 'Playfair Display', serif;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
 }
 
 .btn-ritual-secondary:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
+  transform: translateY(var(--hover-control));
 }
 
 /* Responsive design */
@@ -1001,8 +871,14 @@ export default {
   background: rgba(255, 255, 255, 0.035);
   color: #b9bdc8;
   backdrop-filter: blur(10px);
+  transform: none;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
 }
-.back-button:hover { border-color: rgba(200, 178, 115, 0.38); background: rgba(200, 178, 115, 0.08); color: var(--myst-gold); }
+.back-button:hover { border-color: rgba(200, 178, 115, 0.38); background: rgba(200, 178, 115, 0.08); color: var(--myst-gold); transform: none; }
 .back-button:focus-visible, .purchase-btn:focus-visible { outline: 2px solid var(--myst-gold); outline-offset: 3px; }
 
 .service-hero {
@@ -1011,7 +887,7 @@ export default {
   min-height: 470px;
   overflow: hidden;
   border: 1px solid rgba(200, 178, 115, 0.18);
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   background: linear-gradient(145deg, rgba(24, 28, 47, 0.94), rgba(10, 12, 23, 0.98));
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
 }
@@ -1029,35 +905,35 @@ export default {
 }
 .service-image-placeholder { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(200, 178, 115, 0.28); font-size: 58px; }
 .service-image-wrapper.loaded, .service-image-wrapper.failed { animation: none; background: #111525; }
-.service-image { position: absolute; inset: 0; opacity: 0; filter: saturate(0.88) contrast(1.05); transition: opacity 0.5s ease; }
+.service-image { position: absolute; inset: 0; opacity: 0; filter: saturate(0.88) contrast(1.05); transition: opacity var(--motion-slow) var(--ease-standard); }
 .service-image-wrapper.loaded .service-image { opacity: 1; }
 .service-image-wrapper::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 58%, rgba(10, 12, 23, 0.3)), linear-gradient(0deg, rgba(5, 7, 14, 0.42), transparent 50%); pointer-events: none; }
 
 .service-title-section { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: clamp(30px, 5vw, 58px); }
-.service-eyebrow { margin-bottom: 13px; color: var(--myst-gold); font: 700 11px/1 'JetBrains Mono', monospace; letter-spacing: 2.4px; text-transform: uppercase; }
-.service-title { margin: 0; color: var(--myst-offwhite); font: 700 clamp(36px, 5vw, 58px)/1.04 'Playfair Display', serif; background: none; -webkit-text-fill-color: initial; overflow-wrap: anywhere; }
+.service-eyebrow { margin-bottom: 13px; color: var(--myst-gold); font: 700 11px/1 var(--font-ui); letter-spacing: 2.4px; text-transform: uppercase; }
+.service-title { margin: 0; color: var(--myst-offwhite); font: 700 clamp(36px, 5vw, 58px)/1.04 var(--font-display); background: none; -webkit-text-fill-color: initial; overflow-wrap: anywhere; }
 .service-meta { gap: 9px; margin: 22px 0 0; }
-.service-feature, .service-subscription { padding: 7px 10px; border-radius: 7px; font: 600 11px 'JetBrains Mono', monospace; }
+.service-feature, .service-subscription { padding: 7px 10px; border-radius: var(--radius-pill); font: 600 11px var(--font-ui); }
 .service-feature.giftable, .service-feature.bulkable { border-color: rgba(200, 178, 115, 0.23); background: rgba(200, 178, 115, 0.07); color: #d8cba9; }
 
 .purchase-panel { margin-top: 34px; padding-top: 26px; border-top: 1px solid rgba(255, 255, 255, 0.08); }
 .purchase-price { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
-.purchase-price span { color: #777e8e; font: 600 10px 'JetBrains Mono', monospace; letter-spacing: 1.5px; text-transform: uppercase; }
-.purchase-price strong { color: var(--myst-gold); font: 800 clamp(24px, 3vw, 32px)/1 'JetBrains Mono', monospace; text-align: right; }
-.purchase-btn { width: 100%; min-height: 52px; padding: 0 24px; border: 1px solid var(--myst-gold); border-radius: 10px; background: var(--myst-gold); color: #10121a; font: 800 12px 'JetBrains Mono', monospace; letter-spacing: 1.3px; text-transform: uppercase; }
-.purchase-btn:hover:not(:disabled) { background: #eee4c6; box-shadow: 0 10px 30px rgba(200, 178, 115, 0.2); }
+.purchase-price span { color: #777e8e; font: 600 10px var(--font-ui); letter-spacing: 1.5px; text-transform: uppercase; }
+.purchase-price strong { color: var(--myst-gold); font: 800 clamp(24px, 3vw, 32px)/1 var(--font-ui); text-align: right; }
+.purchase-btn { width: 100%; min-height: 52px; padding: 0 24px; border: 1px solid var(--myst-gold); border-radius: var(--radius-md); background: var(--myst-gold); color: #10121a; font: 800 12px var(--font-ui); letter-spacing: 1.3px; text-transform: uppercase; transform: none; transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), box-shadow var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard); }
+.purchase-btn:hover:not(:disabled) { background: #eee4c6; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24); transform: translateY(var(--hover-control)); }
 .purchase-btn:disabled { border-color: rgba(255, 255, 255, 0.11); background: rgba(255, 255, 255, 0.06); color: #777d8b; }
 .auth-notice { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 12px 0 0; color: #767c8b; font-size: 12px; }
 
-.service-content-card { margin-top: 28px; padding: clamp(24px, 5vw, 58px); border: 1px solid rgba(255, 255, 255, 0.075); border-radius: 18px; background: rgba(16, 19, 32, 0.76); box-shadow: 0 20px 55px rgba(0, 0, 0, 0.2); }
-.content-label { display: flex; align-items: center; gap: 16px; margin-bottom: 36px; color: var(--myst-gold); font: 700 10px 'JetBrains Mono', monospace; letter-spacing: 2px; text-transform: uppercase; }
+.service-content-card { margin-top: 28px; padding: clamp(24px, 5vw, 58px); border: 1px solid rgba(255, 255, 255, 0.075); border-radius: var(--radius-xl); background: rgba(16, 19, 32, 0.76); box-shadow: 0 20px 55px rgba(0, 0, 0, 0.2); }
+.content-label { display: flex; align-items: center; gap: 16px; margin-bottom: 36px; color: var(--myst-gold); font: 700 10px var(--font-ui); letter-spacing: 2px; text-transform: uppercase; }
 .content-label span { height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(200, 178, 115, 0.3)); }
 .content-label span:last-child { transform: scaleX(-1); }
 .service-content { max-width: 780px; margin: 0 auto; color: #b9bdc7; font-size: 16px; line-height: 1.82; }
-.service-content :deep(h1), .service-content :deep(h2), .service-content :deep(h3) { font-family: 'Playfair Display', serif; line-height: 1.25; }
+.service-content :deep(h1), .service-content :deep(h2), .service-content :deep(h3) { font-family: var(--font-display); line-height: 1.25; }
 .service-content :deep(h2) { padding-bottom: 10px; border-bottom: 1px solid rgba(200, 178, 115, 0.14); color: var(--myst-offwhite); }
 .service-content :deep(a) { color: var(--myst-gold); text-underline-offset: 3px; }
-.service-content :deep(img) { display: block; max-width: 100%; height: auto; margin: 26px auto; border-radius: 12px; }
+.service-content :deep(img) { display: block; max-width: 100%; height: auto; margin: 26px auto; border-radius: var(--radius-lg); }
 .service-content :deep(table) { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; }
 .service-content :deep(th), .service-content :deep(td) { padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
 .content-empty { margin: 0; color: #777d8b; text-align: center; }
@@ -1077,7 +953,7 @@ export default {
   .service-detail-container { padding-inline: 10px; }
   .back-button { width: 44px; padding: 0; justify-content: center; font-size: 0; }
   .back-button i { font-size: 14px; }
-  .service-hero, .service-content-card { border-radius: 13px; }
+  .service-hero, .service-content-card { border-radius: var(--radius-lg); }
   .service-image-wrapper { width: auto; height: auto; aspect-ratio: 4 / 3; }
   .service-title-section { padding: 22px 18px; }
   .service-title { font-size: 34px; }
@@ -1089,6 +965,6 @@ export default {
 
 @media (prefers-reduced-motion: reduce) {
   .service-image-wrapper { animation: none; }
-  .service-image, .back-button, .purchase-btn { transition: none; }
+  .service-image, .back-button, .back-button i, .back-to-shop-btn, .back-to-shop-btn i, .purchase-btn { transition: none; }
 }
 </style>

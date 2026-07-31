@@ -2,10 +2,10 @@
   <div class="guide-page">
     <HeaderItem/>
 
-    <main class="guide-main">
+    <main id="main-content" class="guide-main" tabindex="-1">
       <Transition name="guide-page">
       <div v-if="!selectedTopic" key="guide-home" class="guide-home">
-        <section v-reveal class="guide-hero" aria-labelledby="guide-title">
+        <section class="guide-hero" aria-labelledby="guide-title">
           <div class="hero-copy">
             <span class="eyebrow">{{ content.ui.eyebrow }}</span>
             <h1 id="guide-title">{{ content.ui.title }}</h1>
@@ -37,7 +37,7 @@
           </div>
         </section>
 
-        <section v-reveal class="quick-facts" :aria-label="content.ui.quickFactsLabel">
+        <section class="quick-facts" :aria-label="content.ui.quickFactsLabel">
           <div class="quick-facts-label">{{ content.ui.quickFactsLabel }}</div>
           <div v-for="fact in content.facts" :key="fact.label" class="quick-fact">
             <span>{{ fact.label }}</span>
@@ -46,7 +46,7 @@
           </div>
         </section>
 
-        <section v-reveal class="guide-section expectations-section" aria-labelledby="expectations-title">
+        <section class="guide-section expectations-section" aria-labelledby="expectations-title">
           <GuideSectionHeading
             :eyebrow="content.ui.expectationsEyebrow"
             :title="content.ui.expectationsTitle"
@@ -68,7 +68,7 @@
           </div>
         </section>
 
-        <section id="find-answer" v-reveal class="guide-section task-section" aria-labelledby="tasks-title">
+        <section id="find-answer" class="guide-section task-section" aria-labelledby="tasks-title">
           <GuideSectionHeading
             :eyebrow="content.ui.tasksEyebrow"
             :title="content.ui.tasksTitle"
@@ -132,12 +132,19 @@
           </div>
         </section>
 
-        <section id="first-hour" v-reveal class="guide-section first-hour-section" aria-labelledby="first-hour-title">
+        <section id="first-hour" class="guide-section first-hour-section" aria-labelledby="first-hour-title">
           <GuideSectionHeading
             :eyebrow="content.ui.firstHourEyebrow"
             :title="content.ui.firstHourTitle"
             :lede="content.ui.firstHourLede"
           />
+
+          <div class="journey-visuals" :aria-label="content.ui.firstHourTitle">
+            <figure v-for="shot in journeyShots" :key="shot.label">
+              <img :alt="shot.alt" :src="shot.image" loading="lazy">
+              <figcaption><span>{{ shot.index }}</span>{{ shot.label }}</figcaption>
+            </figure>
+          </div>
 
           <ol class="journey-list">
             <li v-for="(step, index) in content.firstHour" :key="step.title" class="journey-step">
@@ -154,7 +161,7 @@
           </ol>
         </section>
 
-        <section v-reveal class="guide-section starter-section" aria-labelledby="starter-title">
+        <section class="guide-section starter-section" aria-labelledby="starter-title">
           <GuideSectionHeading
             :eyebrow="content.ui.starterEyebrow"
             :title="content.ui.starterTitle"
@@ -172,7 +179,7 @@
           </div>
         </section>
 
-        <section v-reveal class="guide-section direction-section" aria-labelledby="direction-title">
+        <section class="guide-section direction-section" aria-labelledby="direction-title">
           <GuideSectionHeading
             :eyebrow="content.ui.directionEyebrow"
             :title="content.ui.directionTitle"
@@ -200,7 +207,7 @@
           </div>
         </section>
 
-        <section v-reveal class="guide-section browse-section" aria-labelledby="browse-title">
+        <section class="guide-section browse-section" aria-labelledby="browse-title">
           <GuideSectionHeading
             :eyebrow="content.ui.browseEyebrow"
             :title="content.ui.browseTitle"
@@ -232,7 +239,7 @@
           </div>
         </section>
 
-        <section v-reveal class="guide-section popular-section" aria-labelledby="popular-title">
+        <section class="guide-section popular-section" aria-labelledby="popular-title">
           <GuideSectionHeading :eyebrow="content.ui.popularEyebrow" :title="content.ui.popularTitle"/>
 
           <div class="question-grid">
@@ -306,7 +313,7 @@
             </div>
           </details>
 
-          <header v-reveal class="topic-header">
+          <header class="topic-header">
             <span class="eyebrow">{{ content.categories[selectedTopic.category] }}</span>
             <div class="topic-title-row">
               <span class="topic-hero-icon"><i :class="selectedTopic.icon" aria-hidden="true"></i></span>
@@ -315,12 +322,12 @@
             <p>{{ selectedTopic.summary }}</p>
           </header>
 
-          <section v-reveal class="quick-answer">
+          <section class="quick-answer">
             <span>{{ content.ui.quickAnswer }}</span>
             <p>{{ selectedTopic.answer }}</p>
           </section>
 
-          <section v-if="selectedTopic.id === 'connect'" v-reveal class="screenshot-section">
+          <section v-if="selectedTopic.id === 'connect'" class="screenshot-section">
             <span class="micro-label">{{ content.ui.screenshotsLabel }}</span>
             <div class="screenshot-grid">
               <figure>
@@ -340,13 +347,12 @@
 
           <GuideChoiceComparison
             v-if="selectedTopic.id === 'starter-choice'"
-            v-reveal
             class="topic-choice-comparison"
             :choices="content.starterChoices"
             :ui="content.ui"
           />
 
-          <nav v-reveal class="section-index" :aria-label="content.ui.onThisPage">
+          <nav class="section-index" :aria-label="content.ui.onThisPage">
             <span>{{ content.ui.onThisPage }}</span>
             <button
               v-for="(section, index) in selectedTopic.sections"
@@ -362,7 +368,6 @@
             v-for="(section, index) in selectedTopic.sections"
             :id="`topic-section-${index}`"
             :key="section.title"
-            v-reveal="index"
             class="topic-section"
           >
             <span class="section-number">{{ String(index + 1).padStart(2, '0') }}</span>
@@ -407,7 +412,7 @@
             </div>
           </section>
 
-          <section v-if="relatedTopics.length" v-reveal class="related-section">
+          <section v-if="relatedTopics.length" class="related-section">
             <span class="eyebrow">{{ content.ui.relatedTopics }}</span>
             <div class="related-grid">
               <button
@@ -435,7 +440,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, nextTick, onBeforeUnmount, ref, watch, type DirectiveBinding} from "vue";
+import {computed, nextTick, ref, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import HeaderItem from "@/components/layout/HeaderItem.vue";
 import FooterItem from "@/components/layout/FooterItem.vue";
@@ -450,6 +455,8 @@ import {
 import ipScreenshot from "@/assets/images/guide/ip.webp";
 import portalScreenshot from "@/assets/images/guide/portal.webp";
 import joinScreenshot from "@/assets/images/guide/join.webp";
+import verifyScreenshot from '@/assets/images/guide/verify.webp';
+import {preferredScrollBehavior} from '@/utils/motion';
 
 const {t, currentLanguage} = useI18n();
 const route = useRoute();
@@ -459,43 +466,15 @@ const content = computed(() => guideContent[currentLanguage.value]);
 const searchQuery = ref("");
 const searchInput = ref<HTMLInputElement | null>(null);
 const isCopied = ref(false);
-let revealObserver: IntersectionObserver | null = null;
-
-type RevealElement = HTMLElement & {__guideRevealDelay?: number};
-
-const vReveal = {
-  mounted(element: RevealElement, binding: DirectiveBinding<number | undefined>) {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
-      element.classList.add("is-revealed");
-      return;
-    }
-
-    const delay = Math.min(Math.max(binding.value ?? 0, 0) * 45, 180);
-    element.__guideRevealDelay = delay;
-    element.style.setProperty("--reveal-delay", `${delay}ms`);
-    element.classList.add("reveal-item");
-
-    if (!revealObserver) {
-      revealObserver = new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add("is-revealed");
-            revealObserver?.unobserve(entry.target);
-          });
-        },
-        {rootMargin: "0px 0px -8% 0px", threshold: 0.08},
-      );
-    }
-
-    revealObserver.observe(element);
-  },
-  unmounted(element: RevealElement) {
-    revealObserver?.unobserve(element);
-    delete element.__guideRevealDelay;
-  },
-};
+const journeyShots = computed(() => currentLanguage.value === 'uk' ? [
+  {index: '01', label: 'Додайте сервер', alt: 'Список серверів Minecraft із Mysterria', image: joinScreenshot},
+  {index: '02', label: 'Оберіть Mysteries', alt: 'Меню вибору сервера Mysterria у Minecraft', image: portalScreenshot},
+  {index: '03', label: 'Підтвердьте профіль', alt: 'Вікно підтвердження профілю Mysterria у Minecraft', image: verifyScreenshot},
+] : [
+  {index: '01', label: 'Add the server', alt: 'Minecraft server list showing Mysterria', image: joinScreenshot},
+  {index: '02', label: 'Choose Mysteries', alt: 'Mysterria server selector inside Minecraft', image: portalScreenshot},
+  {index: '03', label: 'Verify your profile', alt: 'Mysterria profile verification inside Minecraft', image: verifyScreenshot},
+]);
 
 const categoryOrder: GuideCategory[] = ["start", "progression", "world", "community", "help"];
 
@@ -561,11 +540,6 @@ watch(
   {immediate: true},
 );
 
-onBeforeUnmount(() => {
-  revealObserver?.disconnect();
-  revealObserver = null;
-});
-
 function normalizeSearch(value: string): string {
   return value
     .toLocaleLowerCase(currentLanguage.value === "uk" ? "uk-UA" : "en-US")
@@ -584,7 +558,7 @@ function backToGuide() {
 }
 
 function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({behavior: "smooth", block: "start"});
+  document.getElementById(id)?.scrollIntoView({behavior: preferredScrollBehavior(), block: "start"});
 }
 
 async function focusSearch() {
@@ -629,8 +603,8 @@ async function copyIP() {
 
 .guide-page-enter-active {
   transition:
-    opacity 0.24s ease,
-    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--motion-slow) var(--ease-standard),
+    transform var(--motion-slow) var(--ease-enter);
 }
 
 .guide-page-leave-active {
@@ -645,92 +619,12 @@ async function copyIP() {
 
 .guide-page-enter-from {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(8px);
 }
 
 .guide-page-leave-to {
   opacity: 0;
   transform: none;
-}
-
-.reveal-item {
-  opacity: 0;
-  filter: blur(2px);
-  transform: translateY(24px);
-  transition:
-    opacity 0.58s ease var(--reveal-delay, 0ms),
-    filter 0.58s ease var(--reveal-delay, 0ms),
-    transform 0.64s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
-}
-
-.reveal-item.is-revealed {
-  opacity: 1;
-  filter: none;
-  transform: translateY(0);
-}
-
-@keyframes guide-child-reveal {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.reveal-item.is-revealed .expectation-card,
-.reveal-item.is-revealed .task-card,
-.reveal-item.is-revealed .journey-step,
-.reveal-item.is-revealed .direction-card,
-.reveal-item.is-revealed .category-group,
-.reveal-item.is-revealed .question-grid button {
-  animation: guide-child-reveal 0.45s both;
-}
-
-.reveal-item.is-revealed :is(
-  .expectation-card,
-  .task-card,
-  .journey-step,
-  .direction-card,
-  .category-group,
-  .question-grid button
-):nth-child(2) {
-  animation-delay: 55ms;
-}
-
-.reveal-item.is-revealed :is(
-  .expectation-card,
-  .task-card,
-  .journey-step,
-  .direction-card,
-  .category-group,
-  .question-grid button
-):nth-child(3) {
-  animation-delay: 100ms;
-}
-
-.reveal-item.is-revealed :is(
-  .expectation-card,
-  .task-card,
-  .journey-step,
-  .direction-card,
-  .category-group,
-  .question-grid button
-):nth-child(4) {
-  animation-delay: 145ms;
-}
-
-.reveal-item.is-revealed :is(
-  .expectation-card,
-  .task-card,
-  .journey-step,
-  .direction-card,
-  .category-group,
-  .question-grid button
-):nth-child(n + 5) {
-  animation-delay: 180ms;
 }
 
 button,
@@ -745,10 +639,10 @@ button {
 .eyebrow,
 .micro-label {
   display: block;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.26em;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
   line-height: 1.4;
   text-transform: uppercase;
   color: var(--myst-gold);
@@ -759,16 +653,16 @@ button {
   grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
   gap: clamp(40px, 7vw, 96px);
   align-items: center;
-  min-height: 430px;
-  padding: 56px 0 72px;
+  min-height: 370px;
+  padding: 38px 0 54px;
 }
 
 .hero-copy h1,
 .topic-header h1 {
   margin: 14px 0 18px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: clamp(42px, 6vw, 72px);
-  font-weight: 600;
+  font-weight: 750;
   letter-spacing: -0.035em;
   line-height: 1.02;
   color: var(--myst-ink-strong);
@@ -780,7 +674,7 @@ button {
   margin: 0;
   color: var(--myst-ink-muted);
   font-size: clamp(16px, 2vw, 19px);
-  line-height: 1.75;
+  line-height: 1.62;
 }
 
 .hero-actions,
@@ -801,14 +695,17 @@ button {
   min-height: 46px;
   padding: 12px 20px;
   border: 1px solid var(--myst-gold);
-  border-radius: 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    transform var(--motion-base) var(--ease-standard);
 }
 
 .button-primary,
@@ -827,7 +724,7 @@ button {
 .copy-button:hover {
   background: var(--myst-gold-soft);
   color: #080a10;
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .button-secondary:hover {
@@ -837,6 +734,8 @@ button {
 
 .button-primary i,
 .button-secondary i,
+.back-button i,
+.mobile-back i,
 .text-link i,
 .journey-step button i,
 .task-arrow,
@@ -844,15 +743,16 @@ button {
 .category-topics button > i,
 .question-grid button i,
 .related-grid button > i {
-  transition: transform 0.22s ease;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 
 .button-primary:hover i.fa-arrow-down {
-  transform: translateY(3px);
+  transform: translateY(2px);
 }
 
-.button-secondary:hover i.fa-magnifying-glass {
-  transform: scale(1.08);
+.back-button:hover i,
+.mobile-back:hover i {
+  transform: translateX(-2px);
 }
 
 .text-link:hover i,
@@ -862,7 +762,7 @@ button {
 .category-topics button:hover > i,
 .question-grid button:hover i,
 .related-grid button:hover > i {
-  transform: translateX(4px);
+  transform: translateX(2px);
 }
 
 .join-card {
@@ -870,6 +770,7 @@ button {
   padding: 30px;
   overflow: hidden;
   border: 1px solid rgba(200, 178, 115, 0.32);
+  border-radius: var(--radius-xl);
   background:
     linear-gradient(135deg, rgba(200, 178, 115, 0.09), transparent 58%),
     rgba(13, 15, 23, 0.94);
@@ -887,7 +788,7 @@ button {
 
 .server-address {
   margin: 13px 0 22px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: clamp(22px, 3vw, 30px);
   line-height: 1.25;
   color: var(--myst-ink-strong);
@@ -918,6 +819,8 @@ button {
   grid-template-columns: 0.75fr repeat(3, 1fr);
   border-top: 1px solid rgba(245, 245, 247, 0.12);
   border-bottom: 1px solid rgba(245, 245, 247, 0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .quick-facts-label,
@@ -928,9 +831,9 @@ button {
 
 .quick-facts-label {
   align-content: center;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.11em;
   color: var(--myst-gold);
 }
 
@@ -946,15 +849,15 @@ button {
 
 .quick-fact span {
   margin-bottom: 5px;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px;
-  letter-spacing: 0.18em;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.08em;
   color: var(--myst-ink-muted);
 }
 
 .quick-fact strong {
   margin-bottom: 5px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
   color: var(--myst-ink);
@@ -971,6 +874,13 @@ button {
   scroll-margin-top: 88px;
 }
 
+.journey-visuals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 34px 0 42px; }
+.journey-visuals figure { position: relative; min-height: 190px; margin: 0; overflow: hidden; border: 1px solid rgba(200, 178, 115, .18); background: #0d0f17; }
+.journey-visuals img { width: 100%; height: 100%; object-fit: cover; image-rendering: auto; filter: saturate(.72) contrast(1.1) brightness(.72); }
+.journey-visuals figure::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5, 6, 10, .94), transparent 65%); }
+.journey-visuals figcaption { position: absolute; z-index: 1; right: 16px; bottom: 14px; left: 16px; color: #eee9df; font: 700 14px var(--font-ui); }
+.journey-visuals figcaption span { margin-right: 10px; color: var(--myst-gold); font-family: var(--font-mono); font-size: 11px; }
+
 .expectation-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -980,8 +890,9 @@ button {
 .expectation-card {
   grid-column: span 2;
   border: 1px solid rgba(245, 245, 247, 0.13);
+  border-radius: var(--radius-lg);
   background: rgba(17, 19, 29, 0.78);
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), background-color var(--motion-base) var(--ease-standard);
 }
 
 .expectation-card:nth-child(4) {
@@ -1022,6 +933,7 @@ button {
   height: 42px;
   border: 1px solid rgba(200, 178, 115, 0.26);
   background: rgba(200, 178, 115, 0.07);
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
 }
 
@@ -1032,7 +944,7 @@ button {
 
 .expectation-copy strong {
   margin-bottom: 8px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 18px;
   line-height: 1.25;
 }
@@ -1047,7 +959,7 @@ button {
   margin-top: 4px;
   color: var(--myst-ink-muted);
   font-size: 11px;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition: transform var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .expectation-card[open] .expectation-toggle {
@@ -1064,7 +976,7 @@ button {
 }
 
 .expectation-card[open] > p {
-  animation: detail-content-in 0.24s ease both;
+  animation: detail-content-in var(--motion-base) var(--ease-enter) both;
 }
 
 @keyframes detail-content-in {
@@ -1085,6 +997,7 @@ button {
   min-height: 64px;
   padding: 0 20px;
   border: 1px solid rgba(200, 178, 115, 0.34);
+  border-radius: var(--radius-md);
   background: rgba(13, 15, 23, 0.92);
 }
 
@@ -1112,7 +1025,7 @@ button {
   border: 0;
   background: transparent;
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1137,10 +1050,11 @@ button {
   width: 100%;
   padding: 20px;
   border: 1px solid rgba(245, 245, 247, 0.12);
+  border-radius: var(--radius-lg);
   background: rgba(17, 19, 29, 0.72);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), background-color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
 }
 
 .task-card:hover,
@@ -1149,7 +1063,7 @@ button {
 .related-grid button:hover {
   border-color: rgba(200, 178, 115, 0.48);
   background: rgba(24, 26, 38, 0.9);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .task-copy strong,
@@ -1168,7 +1082,7 @@ button {
 .category-topics strong,
 .related-grid strong {
   margin-bottom: 4px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
 }
@@ -1192,7 +1106,7 @@ button {
 
 .results-meta {
   margin: 20px 0 10px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1209,8 +1123,8 @@ button {
 .search-result-leave-active,
 .search-result-move {
   transition:
-    opacity 0.24s ease,
-    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--motion-slow) var(--ease-standard),
+    transform var(--motion-slow) var(--ease-enter);
 }
 
 .search-result-enter-from,
@@ -1231,6 +1145,7 @@ button {
   gap: 8px;
   padding: 44px 20px;
   border: 1px solid rgba(245, 245, 247, 0.1);
+  border-radius: var(--radius-lg);
   color: var(--myst-ink-muted);
   text-align: center;
 }
@@ -1289,13 +1204,13 @@ button {
   border-radius: 50%;
   background: #0d0f17;
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
 }
 
 .journey-copy h3 {
   margin: 0 0 5px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
 }
@@ -1312,11 +1227,12 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-height: 44px;
   padding: 8px 0;
   border: 0;
   background: transparent;
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1331,6 +1247,7 @@ button {
   margin-top: 18px;
   padding: 18px 20px;
   border-left: 2px solid #c9845a;
+  border-radius: var(--radius-lg);
   background: rgba(201, 132, 90, 0.08);
 }
 
@@ -1344,7 +1261,7 @@ button {
 .inline-callout strong {
   display: block;
   margin-bottom: 4px;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 9px;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -1371,6 +1288,7 @@ button {
   min-height: 390px;
   padding: 30px;
   border: 1px solid rgba(245, 245, 247, 0.13);
+  border-radius: var(--radius-lg);
   background: rgba(17, 19, 29, 0.75);
 }
 
@@ -1382,7 +1300,7 @@ button {
 
 .direction-card h3 {
   margin: 5px 0 0;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 25px;
   font-weight: 600;
 }
@@ -1440,14 +1358,14 @@ button {
 
 .category-heading h3 {
   margin: 0 0 4px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: 19px;
   font-weight: 600;
 }
 
 .category-heading span {
   color: var(--myst-ink-muted);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1478,6 +1396,8 @@ button {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   border-top: 1px solid rgba(245, 245, 247, 0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .question-grid button {
@@ -1494,7 +1414,7 @@ button {
   color: var(--myst-ink);
   text-align: left;
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
+  transition: color var(--motion-base) var(--ease-standard), background-color var(--motion-base) var(--ease-standard);
 }
 
 .question-grid button:hover {
@@ -1540,7 +1460,7 @@ button {
   border-bottom: 1px solid rgba(245, 245, 247, 0.13);
   background: transparent;
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 9px;
   letter-spacing: 0.1em;
   text-align: left;
@@ -1556,7 +1476,7 @@ button {
   display: block;
   margin-bottom: 7px;
   color: var(--myst-ink-muted);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 8px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1568,6 +1488,7 @@ button {
   padding: 7px 10px;
   border: 0;
   border-left: 1px solid transparent;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--myst-ink-muted);
   font-size: 12px;
@@ -1619,6 +1540,7 @@ button {
   margin: 32px 0;
   padding: 24px 26px;
   border: 1px solid rgba(200, 178, 115, 0.38);
+  border-radius: var(--radius-xl);
   background:
     linear-gradient(120deg, rgba(200, 178, 115, 0.1), transparent 60%),
     rgba(17, 19, 29, 0.84);
@@ -1629,14 +1551,14 @@ button {
   display: block;
   margin-bottom: 10px;
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 9px;
   letter-spacing: 0.18em;
 }
 
 .quick-answer p {
   margin: 0;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: clamp(18px, 2.5vw, 23px);
   line-height: 1.55;
   color: var(--myst-ink);
@@ -1656,6 +1578,8 @@ button {
 .screenshot-grid figure {
   margin: 0;
   border: 1px solid rgba(245, 245, 247, 0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   background: rgba(17, 19, 29, 0.8);
 }
 
@@ -1669,7 +1593,7 @@ button {
 .screenshot-grid figcaption {
   padding: 10px 12px;
   color: var(--myst-ink-muted);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 8px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1697,6 +1621,7 @@ button {
 .section-index button {
   padding: 7px 10px;
   border: 1px solid rgba(245, 245, 247, 0.14);
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--myst-ink-muted);
   font-size: 11px;
@@ -1720,13 +1645,13 @@ button {
 .section-number {
   padding-top: 5px;
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
 }
 
 .topic-section-content h2 {
   margin: 0 0 20px;
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-display);
   font-size: clamp(25px, 3vw, 33px);
   font-weight: 600;
   line-height: 1.2;
@@ -1769,8 +1694,9 @@ button {
   width: 26px;
   height: 26px;
   border: 1px solid rgba(200, 178, 115, 0.36);
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-ui);
   font-size: 9px;
 }
 
@@ -1797,7 +1723,7 @@ button {
 
 .command-row code {
   color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   overflow-wrap: anywhere;
 }
@@ -1920,6 +1846,8 @@ button {
     display: block;
     margin-bottom: 22px;
     border: 1px solid rgba(245, 245, 247, 0.14);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
   }
 
   .mobile-topic-index summary {
@@ -1928,7 +1856,7 @@ button {
     align-items: center;
     padding: 13px 15px;
     color: var(--myst-gold);
-    font-family: "JetBrains Mono", monospace;
+    font-family: var(--font-ui);
     font-size: 9px;
     letter-spacing: 0.12em;
     list-style: none;
@@ -2080,7 +2008,20 @@ button {
     filter: none !important;
     opacity: 1 !important;
     transform: none !important;
-    transition-duration: 0.01ms !important;
+    transition: none !important;
   }
+}
+.search-wrap:focus-within { border-color: var(--myst-gold); box-shadow: 0 0 0 3px rgba(200, 178, 115, .12); }
+
+@media (max-width: 720px) {
+  .guide-hero { display: flex; flex-direction: column; }
+  .hero-copy { display: contents; }
+  .hero-copy > .eyebrow { order: 1; }
+  .hero-copy > h1 { order: 2; }
+  .hero-copy > p { order: 3; }
+  .join-card { order: 4; width: 100%; margin-top: 14px; }
+  .hero-actions { order: 5; width: 100%; margin-top: 12px; }
+  .journey-visuals { grid-template-columns: 1fr; margin-bottom: 30px; }
+  .journey-visuals figure { min-height: 150px; }
 }
 </style>

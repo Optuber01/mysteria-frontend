@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-commission-detail">
+  <main id="main-content" class="admin-commission-detail" tabindex="-1">
     <div class="page-header">
       <button class="back-button" @click="router.push('/admin/commissions')">
         <svg fill="none" height="16" stroke="currentColor" viewBox="0 0 24 24" width="16">
@@ -174,7 +174,7 @@
         </div>
       </div>
     </template>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
@@ -298,6 +298,13 @@ onMounted(async () => {
   padding: 24px;
   max-width: 900px;
   margin: 0 auto;
+  font-family: var(--font-ui);
+}
+
+.admin-commission-detail button,
+.admin-commission-detail input,
+.admin-commission-detail textarea {
+  font-family: var(--font-ui);
 }
 
 .page-header {
@@ -316,17 +323,27 @@ onMounted(async () => {
   padding: 7px 14px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   color: var(--myst-ink-muted);
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
 }
 
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 70%, var(--myst-gold));
   color: var(--myst-ink);
+}
+
+.back-button svg {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.back-button:hover svg {
+  transform: translateX(-2px);
 }
 
 .header-identity {
@@ -343,7 +360,7 @@ onMounted(async () => {
   height: 36px;
   background: color-mix(in srgb, var(--myst-gold) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
   flex-shrink: 0;
 }
@@ -353,6 +370,7 @@ onMounted(async () => {
   font-size: 20px;
   font-weight: 700;
   color: var(--myst-ink);
+  font-family: var(--font-display);
 }
 
 .loading {
@@ -361,7 +379,7 @@ onMounted(async () => {
   color: var(--myst-ink-muted);
   font-size: 14px;
   background: var(--myst-bg-2);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
   display: flex;
   align-items: center;
@@ -388,7 +406,7 @@ onMounted(async () => {
   background: color-mix(in srgb, #ef4444 12%, transparent);
   color: #ef4444;
   padding: 14px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
   font-size: 13px;
   font-weight: 500;
@@ -403,12 +421,13 @@ onMounted(async () => {
   font-weight: 700;
   color: var(--myst-ink);
   margin: 0 0 16px;
+  font-family: var(--font-display);
 }
 
 .form-card {
   background: var(--myst-bg-2);
   padding: 22px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
 }
 
@@ -426,7 +445,7 @@ onMounted(async () => {
 .status-badge {
   display: inline-block;
   padding: 3px 9px;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -471,12 +490,14 @@ onMounted(async () => {
   padding: 6px 14px;
   background: color-mix(in srgb, #5865f2 18%, transparent);
   border: 1px solid color-mix(in srgb, #5865f2 45%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   color: #a3b1ff;
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
 }
 
 .ticket-link:hover {
@@ -539,7 +560,7 @@ onMounted(async () => {
   padding: 12px 14px;
   background: color-mix(in srgb, var(--myst-gold) 6%, transparent);
   border-left: 2px solid var(--myst-gold);
-  border-radius: 4px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
 .minor-changes-table {
@@ -581,14 +602,14 @@ onMounted(async () => {
   border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
   color: #f59e0b;
   font-size: 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .prior-notes {
   padding: 14px;
   background: color-mix(in srgb, #60a5fa 10%, transparent);
   border-left: 3px solid #60a5fa;
-  border-radius: 4px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
 .prior-notes label {
@@ -622,16 +643,20 @@ onMounted(async () => {
   padding: 10px 18px;
   background: var(--myst-bg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   color: var(--myst-ink-muted);
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .action-select-btn:hover {
   color: var(--myst-ink);
+  transform: translateY(var(--hover-control));
 }
 
 .action-select-btn.approve.active {
@@ -692,13 +717,14 @@ onMounted(async () => {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 13px;
   background: var(--myst-bg);
   color: var(--myst-ink);
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
 }
 
 .form-group input:focus,
@@ -731,11 +757,15 @@ onMounted(async () => {
 .action-btn {
   padding: 10px 22px;
   border: none;
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              opacity var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   display: flex;
   align-items: center;
   gap: 7px;
@@ -748,6 +778,7 @@ onMounted(async () => {
 
 .action-btn.primary:hover:not(:disabled) {
   background: #059669;
+  transform: translateY(var(--hover-control));
 }
 
 .action-btn.secondary {
@@ -758,6 +789,7 @@ onMounted(async () => {
 
 .action-btn.secondary:hover:not(:disabled) {
   color: var(--myst-ink);
+  transform: translateY(var(--hover-control));
 }
 
 .action-btn:disabled {

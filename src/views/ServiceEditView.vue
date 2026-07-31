@@ -1,5 +1,5 @@
 <template>
-  <div class="editor-view">
+  <main id="main-content" class="editor-view" tabindex="-1">
     <div class="page-header">
       <button class="back-button" @click="goBack">
         <svg fill="none" height="20" stroke="currentColor" viewBox="0 0 24 24" width="20">
@@ -94,7 +94,7 @@
       Loading...
     </div>
     <div v-if="error" class="error">{{ error }}</div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
@@ -367,7 +367,14 @@ const cancelEdit = () => {
   padding: 20px;
   max-width: 900px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--font-ui);
+}
+
+.editor-view button,
+.editor-view input,
+.editor-view select,
+.editor-view textarea {
+  font-family: var(--font-ui);
 }
 
 .page-header {
@@ -386,9 +393,11 @@ const cancelEdit = () => {
   padding: 8px 16px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
   font-size: 14px;
   color: var(--myst-ink-muted);
 }
@@ -396,6 +405,13 @@ const cancelEdit = () => {
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 80%, var(--myst-gold));
   color: var(--myst-ink);
+}
+
+.back-button svg {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.back-button:hover svg {
   transform: translateX(-2px);
 }
 
@@ -404,6 +420,7 @@ const cancelEdit = () => {
   font-size: 28px;
   font-weight: 700;
   color: var(--myst-ink);
+  font-family: var(--font-display);
 }
 
 .controls {
@@ -413,7 +430,7 @@ const cancelEdit = () => {
   align-items: center;
   padding: 20px;
   background: var(--myst-bg-2);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
 }
 
@@ -421,11 +438,12 @@ const cancelEdit = () => {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   background: var(--myst-bg);
   color: var(--myst-ink);
-  transition: border-color 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
 }
 
 .controls select:focus {
@@ -437,11 +455,12 @@ const cancelEdit = () => {
 .controls button {
   padding: 12px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .controls button:first-of-type {
@@ -451,7 +470,7 @@ const cancelEdit = () => {
 
 .controls button:first-of-type:hover {
   background: var(--myst-gold-soft);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .delete-btn {
@@ -461,7 +480,7 @@ const cancelEdit = () => {
 
 .delete-btn:hover {
   background: #dc2626 !important;
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .editor-form {
@@ -470,7 +489,7 @@ const cancelEdit = () => {
   gap: 28px;
   background: var(--myst-bg-2);
   padding: 32px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   box-shadow: 0 1px 3px color-mix(in srgb, black 10%, transparent);
 }
@@ -499,10 +518,11 @@ const cancelEdit = () => {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
   box-sizing: border-box;
   background: var(--myst-bg);
   color: var(--myst-ink);
@@ -538,7 +558,7 @@ const cancelEdit = () => {
 .form-group textarea {
   height: 320px;
   resize: vertical;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   line-height: 1.6;
 }
 
@@ -560,16 +580,18 @@ const cancelEdit = () => {
   color: white;
   padding: 14px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .save-btn:hover:not(:disabled) {
   background: #059669;
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
@@ -585,16 +607,17 @@ const cancelEdit = () => {
   color: var(--myst-bg);
   padding: 14px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .cancel-btn:hover {
   background: var(--myst-ink);
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
 }
 
 .loading {
@@ -603,7 +626,7 @@ const cancelEdit = () => {
   color: var(--myst-ink-muted);
   font-size: 14px;
   background: var(--myst-bg-2);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   display: flex;
   align-items: center;
@@ -644,7 +667,7 @@ const cancelEdit = () => {
   background: color-mix(in srgb, #10b981 15%, transparent);
   color: #10b981;
   padding: 16px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #10b981 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
@@ -655,7 +678,7 @@ const cancelEdit = () => {
   background: color-mix(in srgb, #ef4444 15%, transparent);
   color: #ef4444;
   padding: 16px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;

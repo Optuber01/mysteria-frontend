@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="ledger-header">
       <div class="header-main">
-        <span class="ledger-eyebrow">Financial Ledger</span>
+        <span class="ledger-eyebrow">Account activity</span>
         <h3 class="ledger-title">{{ t('transactionHistoryTitle') }}</h3>
       </div>
       
@@ -140,7 +140,7 @@ interface TransactionDto {
   amount: number;
   type: "PURCHASE" | "DONATION" | "VOTE_REWARD" | "ADMIN_ADJUST" | "REFUND" | "SUBSCRIPTION" | "PENALTY" | "REWARD";
   description: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   serverId?: string;
   createdAt: string;
 }
@@ -191,7 +191,7 @@ const fetchTransactions = async (reset = true) => {
     else transactions.value.push(...data.content);
     hasMorePages.value = !data.last;
     currentPage.value++;
-  } catch (error) {
+  } catch {
     show(t("errorLoadingTransactionHistory"), {type: "error"});
   } finally {
     loading.value = false;
@@ -230,13 +230,20 @@ const toggleDetails = (transactionId: string) => {
   if (expandedTransactions.value.has(transactionId)) expandedTransactions.value.delete(transactionId);
   else expandedTransactions.value.add(transactionId);
 };
-const formatMetadata = (metadata: Record<string, any>): string => JSON.stringify(metadata, null, 2);
-const getTransactionQuantity = (transaction: any): number => transaction.metadata?.amount || 1;
-const isGiftTransaction = (transaction: any): boolean => {
-  const userStore = useUserStore();
-  return transaction.metadata?.purchaserId && transaction.metadata?.purchaserId !== userStore.currentUser?.id;
+const formatMetadata = (metadata: Record<string, unknown>): string => JSON.stringify(metadata, null, 2);
+const getTransactionQuantity = (transaction: TransactionDto): number => {
+  const amount = transaction.metadata?.amount;
+  return typeof amount === 'number' ? amount : 1;
 };
-const getGiftSenderName = (transaction: any): string => transaction.metadata?.purchaserName || t('unknown') || 'Unknown';
+const isGiftTransaction = (transaction: TransactionDto): boolean => {
+  const userStore = useUserStore();
+  const purchaserId = transaction.metadata?.purchaserId;
+  return typeof purchaserId === 'string' && purchaserId !== userStore.currentUser?.id;
+};
+const getGiftSenderName = (transaction: TransactionDto): string => {
+  const purchaserName = transaction.metadata?.purchaserName;
+  return typeof purchaserName === 'string' ? purchaserName : t('unknown') || 'Unknown';
+};
 const getNoFilterResultsMessage = (): string => {
   const filterLabel = getTransactionTypeLabel(selectedType.value);
   return t('transactionHistory.noFilterResults').replace('{filter}', filterLabel);
@@ -252,7 +259,8 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   position: relative;
   background: rgba(13, 16, 30, 0.4);
   padding: 40px;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Header */
@@ -267,7 +275,7 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
 
 .ledger-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -277,7 +285,7 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
 }
 
 .ledger-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 28px;
   color: var(--myst-offwhite);
   margin: 0;
@@ -289,13 +297,14 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(200, 178, 115, 0.2);
   padding: 4px 12px;
+  border-radius: var(--radius-md);
 }
 
 .ledger-select {
   background: transparent;
   border: none;
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -340,12 +349,8 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   position: relative;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-}
-
-.ledger-entry:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(200, 178, 115, 0.2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .entry-indicator {
@@ -367,12 +372,12 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
 }
 
 .type-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 4px 10px;
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.05);
   color: #888;
 }
@@ -385,7 +390,7 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
 }
 
 .entry-amount {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 18px;
   font-weight: 700;
 }
@@ -394,14 +399,14 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
 .amount-minus { color: #ff6b6b; }
 
 .entry-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 18px;
   color: var(--myst-offwhite);
   margin: 0 0 12px;
 }
 
 .qty-badge {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: var(--myst-gold);
   margin-left: 12px;
@@ -414,7 +419,7 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   color: #555;
 }
 
-.entry-id { font-family: 'JetBrains Mono', monospace; }
+.entry-id { font-family: var(--font-mono); }
 
 /* Detail Triggers */
 .entry-details {
@@ -430,15 +435,15 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   letter-spacing: 1px;
   cursor: pointer;
   display: flex; align-items: center; gap: 8px;
-  transition: color 0.3s ease;
+  transition: color var(--motion-base) var(--ease-standard);
 }
 
 .details-trigger:hover, .details-trigger.is-active {
   color: var(--myst-gold);
 }
 
-.expand-enter-active, .expand-leave-active { transition: all 0.4s ease; }
-.expand-enter-from, .expand-leave-to { opacity: 0; transform: translateY(-10px); }
+.expand-enter-active, .expand-leave-active { transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter); }
+.expand-enter-from, .expand-leave-to { opacity: 0; transform: translateY(-8px); }
 
 .metadata-scroll {
   margin-top: 16px;
@@ -448,6 +453,8 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   color: #888;
   max-height: 200px;
   overflow-y: auto;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
 }
 
 /* Entry Colors */
@@ -467,12 +474,13 @@ onMounted(() => { if (props.isOwnProfile) fetchTransactions(); });
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #888;
   padding: 12px 32px;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .btn-load-entries:hover {

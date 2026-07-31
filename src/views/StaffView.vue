@@ -1,28 +1,29 @@
 <template>
   <HeaderItem />
-  <main class="staff-page">
+  <main id="main-content" class="staff-page" tabindex="-1">
     <div class="staff-mist" aria-hidden="true"></div>
 
     <div class="staff-container">
       <div class="myst-page-header">
         <div class="myst-header-decoration" aria-hidden="true"></div>
-        <h1 class="myst-header-label">{{ t("staffPage.eyebrow") }}</h1>
+        <p class="myst-header-label">{{ t("staffPage.eyebrow") }}</p>
         <div class="myst-header-decoration" aria-hidden="true"></div>
       </div>
 
       <section class="staff-hero">
         <p class="staff-kicker">{{ t("staffPage.kicker") }}</p>
-        <h2 class="staff-title">{{ t("staffPage.title") }}</h2>
+        <h1 class="staff-title">{{ t("staffPage.title") }}</h1>
         <p class="staff-lede">{{ t("staffPage.subtitle") }}</p>
       </section>
 
-      <div v-if="loading" class="staff-status">
+      <div v-if="loading" aria-live="polite" class="staff-status" role="status">
         <div class="staff-spinner" aria-hidden="true"></div>
         <p>{{ t("loading") }}</p>
       </div>
 
-      <div v-else-if="error" class="staff-status">
+      <div v-else-if="error" class="staff-status" role="alert">
         <p>{{ t("staffPage.loadError") }}</p>
+        <button ref="retryButton" class="staff-retry" type="button" @click="loadMembers(true)">{{ t('tryAgain') || 'Try again' }}</button>
       </div>
 
       <section v-else class="staff-ledger" :aria-label="t('staffPage.listLabel')">
@@ -69,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, nextTick, onMounted, ref} from "vue";
 import HeaderItem from "@/components/layout/HeaderItem.vue";
 import FooterItem from "@/components/layout/FooterItem.vue";
 import {useI18n} from "@/composables/useI18n";
@@ -81,6 +82,7 @@ const {t} = useI18n();
 const members = ref<StaffMember[]>([]);
 const loading = ref(true);
 const error = ref(false);
+const retryButton = ref<HTMLButtonElement | null>(null);
 
 interface MemberGroup {
   position: string;
@@ -100,7 +102,9 @@ const memberGroups = computed<MemberGroup[]>(() => {
   return groups;
 });
 
-onMounted(async () => {
+const loadMembers = async (restoreFocus = false) => {
+  loading.value = true;
+  error.value = false;
   try {
     const response = await membersAPI.getMembers(4);
     members.value = response.data;
@@ -108,8 +112,14 @@ onMounted(async () => {
     error.value = true;
   } finally {
     loading.value = false;
+    if (restoreFocus && error.value) {
+      await nextTick();
+      retryButton.value?.focus();
+    }
   }
-});
+};
+
+onMounted(() => loadMembers());
 </script>
 
 <style scoped>
@@ -147,7 +157,7 @@ onMounted(async () => {
 .staff-kicker,
 .rank-count,
 .member-role {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.22em;
 }
@@ -161,7 +171,7 @@ onMounted(async () => {
 .staff-title {
   margin: 0;
   color: var(--myst-offwhite);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: clamp(34px, 6vw, 64px);
   font-weight: 700;
   line-height: 1.05;
@@ -182,7 +192,7 @@ onMounted(async () => {
   gap: 16px;
   padding: 64px 0;
   color: #aaa;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -212,7 +222,7 @@ onMounted(async () => {
 .rank-section {
   border: 1px solid rgba(200, 178, 115, 0.14);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.018));
-  border-radius: 4px;
+  border-radius: var(--radius-xl);
   padding: 28px;
   box-shadow: 0 22px 50px rgba(0, 0, 0, 0.25);
 }
@@ -235,7 +245,7 @@ onMounted(async () => {
 .rank-title {
   margin: 0;
   color: var(--myst-offwhite);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: clamp(24px, 3vw, 34px);
   line-height: 1.1;
 }
@@ -255,15 +265,18 @@ onMounted(async () => {
   padding: 14px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(0, 0, 0, 0.22);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   color: inherit;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
-.member-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(200, 178, 115, 0.28);
-  background: rgba(200, 178, 115, 0.045);
+.staff-retry {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--myst-gold);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--myst-gold);
+  cursor: pointer;
 }
 
 .member-avatar {
@@ -271,7 +284,7 @@ onMounted(async () => {
   width: 54px;
   height: 54px;
   border: 1px solid rgba(200, 178, 115, 0.3);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   object-fit: cover;
   background: rgba(200, 178, 115, 0.08);
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.24);

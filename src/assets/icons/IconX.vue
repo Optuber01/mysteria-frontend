@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Close icon"
+      aria-hidden="true"
       class="icon-x"
       fill="none"
       height="24"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 24 24"
       width="24"
       xmlns="http://www.w3.org/2000/svg"
@@ -32,6 +31,6 @@
   width: 24px;
   height: 24px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

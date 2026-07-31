@@ -110,7 +110,7 @@ onMounted(load);
 
 .list-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -121,7 +121,7 @@ onMounted(load);
 
 .list-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--myst-offwhite);
 }
@@ -164,6 +164,8 @@ onMounted(load);
   position: relative;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .entry-indicator {
@@ -207,13 +209,14 @@ onMounted(load);
 }
 
 .type-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 4px 10px;
   background: rgba(255, 255, 255, 0.05);
   color: #888;
+  border-radius: var(--radius-pill);
 }
 
 .entry-meta {
@@ -226,7 +229,7 @@ onMounted(load);
 }
 
 .entry-date {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
 }
 
 .entry-details {
@@ -246,7 +249,7 @@ onMounted(load);
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: color 0.3s ease;
+  transition: color var(--motion-base) var(--ease-standard);
 }
 
 .details-trigger:hover,
@@ -261,11 +264,12 @@ onMounted(load);
   font-size: 12px;
   color: #ccc;
   line-height: 1.6;
+  border-radius: var(--radius-md);
 }
 
 .expand-enter-active,
 .expand-leave-active {
-  transition: all 0.3s ease;
+  transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter);
 }
 
 .expand-enter-from,
@@ -283,13 +287,14 @@ onMounted(load);
 .view-details-btn,
 .resubmit-btn {
   padding: 8px 18px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
   text-decoration: none;
+  border-radius: var(--radius-md);
 }
 
 .view-details-btn {

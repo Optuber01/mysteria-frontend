@@ -296,7 +296,7 @@ const translations = {
         errorFetchingBalance: "Error fetching balance",
         errorLoadingBalance: "Failed to load balance",
         errorFetchingServices: "Error fetching services",
-        errorLoadingServicesList: "Error loading services list",
+        errorLoadingServicesList: "Couldn't load shop items. Try again.",
         errorFetchingUserData: "Error fetching user data",
         errorPurchasing: "Error making purchase",
         errorInsufficientBalance: "Insufficient balance",
@@ -424,7 +424,7 @@ const translations = {
         shopCategoryDungeonKeys: "Dungeon Keys",
         shopCategoryDungeonKeysDesc: "Keys to unlock dungeons and special areas",
         shopCategoryBeyonderish: "Beyonderish",
-        shopCategoryBeyonderishDesc: "Services related to the Lord of The Mysteries",
+        shopCategoryBeyonderishDesc: "Services related to the Lord of the Mysteries",
         shopCategoryOther: "Other",
         shopCategoryOtherDesc: "Miscellaneous services",
         shopCategoryAll: "All Items",
@@ -453,7 +453,7 @@ const translations = {
 
         // Shop UI
         shopEyebrow: "Shop",
-        shopTitle: "Wares of the Evernight",
+        shopTitle: "Shop",
         shopSubtitle: "Clean, elegant, and fair. Your support sustains the city's lamps.",
         shopLoading: "Loading shop...",
         shopLoadFailed: "Failed to load shop",
@@ -624,9 +624,9 @@ const translations = {
         setupProfile: "Setup Profile",
         reviewRules: "Review Rules",
 
-        termsViewTitle: "TOS",
-        privacyViewTitle: "Privacy",
-        slaViewTitle: "SLA",
+        termsViewTitle: "Terms of Service",
+        privacyViewTitle: "Privacy Policy",
+        slaViewTitle: "Service Level Agreement",
         uniquePowers: "Variety of Pathways",
         highSequences: "High Sequences",
 
@@ -1189,7 +1189,7 @@ const translations = {
         // Navigation
         navHome: "Головна",
         navShop: "Крамниця",
-        navWiki: "Вікіпедія",
+        navWiki: "Вікі",
         navGame: "Грати!",
         navServices: "Сервіси",
         navForum: "Форум",
@@ -1476,7 +1476,7 @@ const translations = {
         errorFetchingBalance: "Помилка при отриманні балансу",
         errorLoadingBalance: "Не вдалося завантажити баланс",
         errorFetchingServices: "Помилка при отриманні послуг",
-        errorLoadingServicesList: "Помилка при отриманні списку послуг",
+        errorLoadingServicesList: "Не вдалося завантажити товари. Спробуйте ще раз.",
         errorFetchingUserData: "Помилка при отриманні даних користувача",
         errorPurchasing: "Помилка при здійсненні покупки",
         errorInsufficientBalance: "Недостатньо коштів на балансі",
@@ -2065,9 +2065,9 @@ const translations = {
 
         // Rules Page
         navRules: "Правила",
-        termsViewTitle: "TOS",
-        privacyViewTitle: "Приватність",
-        slaViewTitle: "SLA",
+        termsViewTitle: "Умови користування",
+        privacyViewTitle: "Політика конфіденційності",
+        slaViewTitle: "Угода про рівень обслуговування",
 
         lawsOfMysterria: "Закони Містеррії",
         rulesSubtitle:
@@ -2372,6 +2372,7 @@ export function useI18n() {
     const setLanguage = (lang: Language) => {
         currentLanguage.value = lang;
         localStorage.setItem("mysterria-language", lang);
+        document.documentElement.lang = lang;
     };
 
     const t = (key: string): string => {
@@ -2415,6 +2416,7 @@ export function useI18n() {
     if (savedLang && (savedLang === "en" || savedLang === "uk")) {
         currentLanguage.value = savedLang;
     }
+    document.documentElement.lang = currentLanguage.value;
 
     return {
         currentLanguage: computed(() => currentLanguage.value),

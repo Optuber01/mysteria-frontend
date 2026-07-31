@@ -28,7 +28,7 @@
       <div v-else class="ledger-content">
         <!-- The Pillars of Fate (Top Metrics) -->
         <div class="pillars-grid">
-          <div class="pillar-item" v-for="(metric, index) in topMetrics" :key="index" :style="{ '--delay': `${index * 0.1}s` }">
+          <div class="pillar-item" v-for="(metric, index) in topMetrics" :key="index" :style="{ '--delay': `${Math.min(index * 40, 120)}ms` }">
             <div class="pillar-bg"></div>
             <div class="pillar-content">
               <span class="pillar-label">{{ metric.label }}</span>
@@ -53,7 +53,7 @@
                   v-for="(pathway, index) in topPathways"
                   :key="pathway.name"
                   class="sigil-tile"
-                  :style="{ '--delay': `${index * 0.04}s` }"
+                  :style="{ '--delay': `${Math.min(index * 40, 120)}ms` }"
               >
                 <div class="sigil-frame">
                   <img
@@ -201,7 +201,7 @@ onMounted(fetchBeyonderStats);
   padding: 120px 0;
   overflow: hidden;
   color: #e0e0e0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .grain-overlay {
@@ -258,17 +258,17 @@ onMounted(fetchBeyonderStats);
 
 .eyebrow-text {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
+  font-weight: 600;
   color: var(--myst-gold);
-  text-transform: uppercase;
-  letter-spacing: 4px;
+  letter-spacing: 0.08em;
   margin-bottom: 12px;
   opacity: 0.7;
 }
 
 .main-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 4vw, 3rem);
   color: var(--myst-offwhite);
   margin: 0 0 12px;
@@ -298,12 +298,12 @@ onMounted(fetchBeyonderStats);
   padding: 32px 20px;
   text-align: center;
   opacity: 0;
-  animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUpFade var(--motion-slow) var(--ease-enter) forwards;
   animation-delay: var(--delay);
 }
 
 @keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -312,7 +312,7 @@ onMounted(fetchBeyonderStats);
   inset: 0;
   background: linear-gradient(180deg, rgba(200, 178, 115, 0.05) 0%, transparent 100%);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   z-index: -1;
 }
 
@@ -321,13 +321,12 @@ onMounted(fetchBeyonderStats);
   font-size: 12px;
   font-weight: 600;
   color: #777;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.04em;
   margin-bottom: 12px;
 }
 
 .pillar-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 42px;
   font-weight: 700;
   color: var(--myst-gold);
@@ -354,7 +353,7 @@ onMounted(fetchBeyonderStats);
   background: rgba(255, 255, 255, 0.015);
   border: 1px solid rgba(255, 255, 255, 0.04);
   padding: 40px;
-  border-radius: 4px;
+  border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
 }
@@ -364,7 +363,7 @@ onMounted(fetchBeyonderStats);
 }
 
 .panel-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 22px;
   color: var(--myst-offwhite);
   margin-bottom: 12px;
@@ -392,22 +391,10 @@ onMounted(fetchBeyonderStats);
   padding: 12px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   opacity: 0;
-  animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUpFade var(--motion-slow) var(--ease-enter) forwards;
   animation-delay: var(--delay);
-  transition: all 0.3s ease;
-}
-
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.sigil-tile:hover {
-  background: rgba(200, 178, 115, 0.05);
-  border-color: rgba(200, 178, 115, 0.2);
-  transform: translateY(-2px);
 }
 
 .sigil-frame {
@@ -432,11 +419,6 @@ onMounted(fetchBeyonderStats);
   background: radial-gradient(circle, rgba(200, 178, 115, 0.2) 0%, transparent 70%);
   border-radius: 50%;
   opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sigil-tile:hover .sigil-glow {
-  opacity: 1;
 }
 
 .sigil-info {
@@ -449,15 +431,10 @@ onMounted(fetchBeyonderStats);
   font-size: 14px;
   font-weight: 600;
   color: #bbb;
-  transition: color 0.3s ease;
-}
-
-.sigil-tile:hover .sigil-name {
-  color: var(--myst-offwhite);
 }
 
 .sigil-count {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 15px;
   font-weight: 700;
   color: var(--myst-gold);
@@ -489,43 +466,42 @@ onMounted(fetchBeyonderStats);
   background: var(--color);
   opacity: 0.5;
   border-radius: 2px 2px 0 0;
-  transition: all 0.4s ease;
+  transition: opacity var(--motion-base) var(--ease-standard);
   position: relative;
   cursor: pointer;
 }
 
 .stairway-step:hover .step-bar {
   opacity: 1;
-  transform: scaleX(1.1);
-  box-shadow: 0 0 15px var(--color);
+  transform: none;
 }
 
 .step-tooltip {
   position: absolute;
   bottom: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(-10px);
+  transform: translateX(-50%) translateY(-4px);
   background: #0d111a;
   border: 1px solid var(--color);
   padding: 6px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   align-items: center;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
   z-index: 20;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .stairway-step:hover .step-tooltip {
   opacity: 1;
-  transform: translateX(-50%) translateY(-5px);
+  transform: translateX(-50%) translateY(0);
 }
 
 .tooltip-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-weight: 700;
   color: #fff;
   font-size: 14px;
@@ -535,7 +511,6 @@ onMounted(fetchBeyonderStats);
   font-size: 10px;
   color: #888;
   white-space: nowrap;
-  text-transform: uppercase;
 }
 
 .step-label {
@@ -544,6 +519,7 @@ onMounted(fetchBeyonderStats);
   font-weight: 700;
   color: #555;
   text-align: center;
+  font-family: var(--font-mono);
 }
 
 .stairway-footer {
@@ -556,6 +532,7 @@ onMounted(fetchBeyonderStats);
 
 .highlight {
   color: var(--myst-gold);
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 
@@ -581,7 +558,6 @@ onMounted(fetchBeyonderStats);
   background: var(--myst-gold);
   border-radius: 50%;
   filter: blur(8px);
-  animation: orbPulse 2s infinite alternate;
 }
 
 .orb-ring {
@@ -589,29 +565,14 @@ onMounted(fetchBeyonderStats);
   inset: 0;
   border: 2px solid rgba(200, 178, 115, 0.3);
   border-radius: 50%;
-  animation: orbSpin 4s linear infinite;
 }
 
-.orb-ring.secondary {
-  animation-direction: reverse;
-  animation-duration: 6s;
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-@keyframes orbPulse {
-  from { transform: scale(0.8); opacity: 0.5; }
-  to { transform: scale(1.2); opacity: 1; }
-}
-
-@keyframes orbSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+.orb-ring.secondary { inset: 8px; border-color: rgba(255, 255, 255, 0.1); }
 
 .loader-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   color: var(--myst-gold);
-  letter-spacing: 2px;
+  letter-spacing: 0.04em;
   font-size: 14px;
 }
 

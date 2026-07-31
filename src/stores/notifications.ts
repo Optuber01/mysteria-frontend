@@ -13,6 +13,7 @@ interface AccountNotificationsState {
     totalPages: number;
     totalElements: number;
     isLoading: boolean;
+    error: string | null;
 }
 
 export const useAccountNotificationsStore = defineStore('accountNotifications', {
@@ -23,6 +24,7 @@ export const useAccountNotificationsStore = defineStore('accountNotifications', 
         totalPages: 0,
         totalElements: 0,
         isLoading: false,
+        error: null,
     }),
 
     actions: {
@@ -46,6 +48,7 @@ export const useAccountNotificationsStore = defineStore('accountNotifications', 
             if (!authStore.accessToken) return;
 
             this.isLoading = true;
+            this.error = null;
             try {
                 const params = new URLSearchParams({
                     page: page.toString(),
@@ -55,14 +58,14 @@ export const useAccountNotificationsStore = defineStore('accountNotifications', 
                 const response = await fetch(`/api/notifications?${params}`, {
                     headers: {Authorization: `Bearer ${authStore.accessToken}`},
                 });
-                if (!response.ok) return;
+                if (!response.ok) throw new Error(`Unable to load notifications (${response.status})`);
                 const data: Page<NotificationDto> = await response.json();
                 this.items = data.content;
                 this.page = data.number;
                 this.totalPages = data.totalPages;
                 this.totalElements = data.totalElements;
-            } catch {
-                // silently fail
+            } catch (error) {
+                this.error = error instanceof Error ? error.message : 'Unable to load notifications';
             } finally {
                 this.isLoading = false;
             }
@@ -111,6 +114,7 @@ export const useAccountNotificationsStore = defineStore('accountNotifications', 
             this.page = 0;
             this.totalPages = 0;
             this.totalElements = 0;
+            this.error = null;
         },
     },
 });

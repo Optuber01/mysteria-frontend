@@ -1,26 +1,27 @@
 <template>
-  <div class="auth-callback">
+  <main id="main-content" class="auth-callback" tabindex="-1">
     <div class="callback-content">
-      <div v-if="isProcessing" class="processing">
-        <div class="spinner"></div>
-        <h2>{{ t('authCallback.processing') }}</h2>
+      <div v-if="isProcessing" aria-live="polite" class="processing" role="status">
+        <div aria-hidden="true" class="spinner"></div>
+        <h1>{{ t('authCallback.processing') }}</h1>
       </div>
-      <div v-else-if="error" class="error">
-        <h2>{{ t('authCallback.authError') }}</h2>
+      <div v-else-if="error" class="error" role="alert">
+        <h1 ref="resultHeading" tabindex="-1">{{ t('authCallback.authError') }}</h1>
         <p>{{ error }}</p>
-        <button @click="closeWindow">{{ t('close') }}</button>
+        <button type="button" @click="retryLogin">{{ t('login') }}</button>
+        <button type="button" @click="closeWindow">{{ t('close') }}</button>
       </div>
-      <div v-else class="success">
-        <h2>{{ t('authCallback.authSuccess') }}</h2>
+      <div v-else aria-live="polite" class="success" role="status">
+        <h1 ref="resultHeading" tabindex="-1">{{ t('authCallback.authSuccess') }}</h1>
         <p>{{ t('authCallback.closeWindow') }}</p>
-        <button @click="closeWindow">{{ t('close') }}</button>
+        <button type="button" @click="closeWindow">{{ t('close') }}</button>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useAuthStore} from "@/stores/auth";
 import {useI18n} from "@/composables/useI18n";
@@ -31,6 +32,14 @@ const authStore = useAuthStore();
 const {t} = useI18n();
 const isProcessing = ref(true);
 const error = ref("");
+const resultHeading = ref<HTMLElement | null>(null);
+const retryRedirect = ref('');
+
+watch(isProcessing, async (processing) => {
+  if (processing) return;
+  await nextTick();
+  resultHeading.value?.focus();
+});
 
 onMounted(async () => {
   console.log("AuthCallback mounted, query params:", route.query);
@@ -48,6 +57,7 @@ onMounted(async () => {
       try {
         const stateData = JSON.parse(decodeURIComponent(state));
         redirectUrl = stateData.redirect;
+        retryRedirect.value = redirectUrl;
         console.log("Redirect URL from state:", redirectUrl);
       } catch (e) {
         console.warn("Failed to parse state parameter:", e);
@@ -76,10 +86,6 @@ onMounted(async () => {
         }
         setTimeout(() => {
           window.close();
-          // Fallback: if window.close() is blocked (non-popup context / mobile), redirect with token in URL
-          setTimeout(() => {
-            window.location.href = `${redirectUrl}&token=${encodeURIComponent(authStore.currentToken || '')}`;
-          }, 500);
         }, 300);
         return;
       }
@@ -90,11 +96,17 @@ onMounted(async () => {
             {type: "AUTH_SUCCESS"},
             window.location.origin,
         );
+      } else if (window.name === 'Discord Login') {
+        // Discord may clear window.opener during OAuth, but the named popup can still close itself.
+        setTimeout(() => {
+          window.close();
+        }, 300);
+        return;
       } else {
-        // Not in a popup – go home
+        // Direct mobile callback: tokens are stored in this browsing context.
         setTimeout(() => {
           window.location.href = "/";
-        }, 2000);
+        }, 1200);
         return;
       }
 
@@ -119,6 +131,15 @@ const closeWindow = () => {
     window.location.href = "/";
   }
 };
+
+const retryLogin = () => {
+  if (window.opener) {
+    window.close();
+    return;
+  }
+  const query = retryRedirect.value ? `?redirect=${encodeURIComponent(retryRedirect.value)}` : '';
+  window.location.href = `/login${query}`;
+};
 </script>
 
 <style scoped>
@@ -127,25 +148,30 @@ const closeWindow = () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f1419 0%, #1a1d23 100%);
-  color: #ffffff;
-  font-family: inherit;
+  padding: 20px;
+  background:
+      radial-gradient(circle at 50% 20%, rgba(200, 178, 115, 0.13), transparent 35%),
+      linear-gradient(145deg, var(--myst-bg-2), var(--myst-bg) 58%);
+  color: var(--myst-ink);
+  font-family: var(--font-body);
 }
 
 .callback-content {
   text-align: center;
   padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: min(100%, 460px);
+  background: color-mix(in srgb, var(--myst-bg-2) 88%, transparent);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--myst-gold) 28%, transparent);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ee7828;
+  border: 3px solid color-mix(in srgb, var(--myst-gold) 20%, transparent);
+  border-top-color: var(--myst-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
@@ -157,40 +183,45 @@ const closeWindow = () => {
   }
 }
 
-.processing h2,
-.error h2,
-.success h2 {
+.processing h1,
+.error h1,
+.success h1 {
   margin: 0 0 16px 0;
-  font-size: 24px;
+  color: var(--myst-offwhite);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 7vw, 2.75rem);
+  line-height: 1.1;
 }
 
 .processing p,
 .error p,
 .success p {
   margin: 0 0 24px 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--myst-ink-muted);
 }
 
 button {
-  background: #ee7828;
-  color: white;
-  border: none;
+  background: var(--myst-gold);
+  color: #0c0e1a;
+  border: 1px solid var(--myst-gold);
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard);
+  font-family: var(--font-ui);
+  font-weight: 700;
 }
 
 button:hover {
-  background: #f48a3f;
+  background: var(--myst-gold-soft);
 }
 
-.error {
-  color: #ff6b6b;
+.error h1 {
+  color: #fca5a5;
 }
 
-.success {
-  color: #51cf66;
+.success h1 {
+  color: var(--myst-gold);
 }
 </style>

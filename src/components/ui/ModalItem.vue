@@ -2,16 +2,21 @@
   <Teleport to="body">
     <Transition name="ritual-fade">
       <div v-if="localShow" class="modal-ritual-overlay" @click="handleOverlayClick">
-        <div
+         <div
+            ref="dialogRef"
+            :aria-labelledby="titleId"
             :class="[size, { 'has-footer': $slots.footer }]"
             class="modal-ritual-content"
+            role="dialog"
+            aria-modal="true"
+            tabindex="-1"
             @click.stop
-        >
+         >
           <div class="modal-ritual-header">
-            <h3 class="ritual-title">
+             <h3 :id="titleId" class="ritual-title">
               <slot name="header">{{ localTitle }}</slot>
             </h3>
-            <button class="modal-ritual-close" @click="close">†</button>
+             <button :aria-label="t('close')" class="modal-ritual-close" type="button" @click="dismiss">×</button>
           </div>
 
           <div class="modal-ritual-body no-scrollbar">
@@ -29,6 +34,8 @@
 
 <script lang="ts" setup>
 import {ref, watch} from 'vue';
+import {useI18n} from '@/composables/useI18n';
+import {useModalA11y} from '@/composables/useModalA11y';
 
 const props = withDefaults(defineProps<{
   show?: boolean;
@@ -42,6 +49,9 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits(['close', 'confirm', 'cancel']);
+const {t} = useI18n();
+const titleId = 'modal-ritual-title';
+const dialogRef = ref<HTMLElement | null>(null);
 
 const localShow = ref(props.show);
 const localTitle = ref(props.title);
@@ -54,7 +64,7 @@ watch(() => props.show, (newVal) => {
 
 const handleOverlayClick = () => {
   if (props.closeOnOverlay) {
-    close();
+    dismiss();
   }
 };
 
@@ -68,6 +78,11 @@ const showModal = (config: { title?: string, onConfirm?: () => void, onCancel?: 
 const close = () => {
   localShow.value = false;
   emit('close');
+};
+
+const dismiss = () => {
+  close();
+  emit('cancel');
   if (onCancelCallback.value) onCancelCallback.value();
 };
 
@@ -78,8 +93,10 @@ const onConfirm = () => {
 };
 
 const onCancel = () => {
-  close();
+  dismiss();
 };
+
+useModalA11y(localShow, dialogRef, dismiss);
 
 defineExpose({
   showModal,
@@ -106,11 +123,14 @@ defineExpose({
 .modal-ritual-content {
   background: #080a14;
   border: 1px solid rgba(200, 178, 115, 0.2);
+  border-radius: var(--radius-xl);
   width: 100%;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
   position: relative;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .modal-ritual-header {
@@ -122,7 +142,7 @@ defineExpose({
 }
 
 .ritual-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--myst-gold);
   margin: 0;
@@ -130,8 +150,10 @@ defineExpose({
 
 .modal-ritual-close {
   background: none; border: none;
-  color: #444; font-size: 24px;
-  cursor: pointer; transition: color 0.3s;
+  border-radius: var(--radius-md);
+  color: #aaa; font-size: 24px;
+  width: 44px; height: 44px;
+  cursor: pointer; transition: color var(--motion-base) var(--ease-standard);
 }
 .modal-ritual-close:hover { color: var(--myst-gold); }
 
@@ -160,6 +182,12 @@ defineExpose({
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Transitions */
-.ritual-fade-enter-active, .ritual-fade-leave-active { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.ritual-fade-enter-from, .ritual-fade-leave-to { opacity: 0; transform: scale(0.95) translateY(10px); }
+.ritual-fade-enter-active, .ritual-fade-leave-active { transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter); }
+.ritual-fade-enter-from, .ritual-fade-leave-to { opacity: 0; transform: scale(0.98); }
+
+@media (max-width: 560px) {
+  .modal-ritual-overlay { align-items: flex-end; padding: 0; }
+  .modal-ritual-content { max-height: 92dvh; border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
+  .modal-ritual-header, .modal-ritual-body, .modal-ritual-footer { padding: 20px; }
+}
 </style>

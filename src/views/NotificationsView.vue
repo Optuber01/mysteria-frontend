@@ -2,7 +2,7 @@
   <div class="page-container">
     <HeaderItem/>
 
-    <main class="notifications-main">
+    <main id="main-content" class="notifications-main" tabindex="-1">
     <div class="notifications-view">
     <div class="page-header">
       <button class="back-button" @click="router.push('/profile')">
@@ -20,33 +20,41 @@
       </button>
     </div>
 
-    <div v-if="store.isLoading && items.length === 0" class="state-block">
-      <div class="loading-sigil"></div>
+    <div v-if="store.isLoading && items.length === 0" aria-live="polite" class="state-block" role="status">
+      <div aria-hidden="true" class="loading-sigil"></div>
+      <p>{{ t('loading') || 'Loading notifications...' }}</p>
+    </div>
+
+    <div v-else-if="store.error" class="state-block empty" role="alert">
+      <i aria-hidden="true" class="fa-solid fa-triangle-exclamation empty-icon"></i>
+      <p>{{ store.error }}</p>
+      <button ref="retryButton" class="mark-all-btn" type="button" @click="retryPage">{{ t('tryAgain') || 'Try again' }}</button>
     </div>
 
     <div v-else-if="items.length === 0" class="state-block empty">
-      <i class="fa-solid fa-bell-slash empty-icon"></i>
+      <i aria-hidden="true" class="fa-solid fa-bell-slash empty-icon"></i>
       <p>{{ t('notifications.empty') }}</p>
     </div>
 
     <div v-else class="notif-entries">
-      <div
+      <article
           v-for="item in items"
           :key="item.id"
           :class="{ unread: !item.read }"
           class="notif-entry"
-          @click="handleItemClick(item)"
       >
-        <div class="entry-indicator"></div>
-        <i :class="notificationIcon(item.type)" class="entry-icon"></i>
-        <div class="entry-body">
-          <p class="entry-text">{{ buildNotificationText(item, t) }}</p>
-          <span class="entry-date">{{ formatNotificationDate(item.createdAt, locale) }}</span>
-        </div>
+        <button :aria-label="buildNotificationText(item, t)" class="entry-main" type="button" @click="handleItemClick(item)">
+          <div class="entry-indicator"></div>
+          <i :class="notificationIcon(item.type)" aria-hidden="true" class="entry-icon"></i>
+          <span class="entry-body">
+            <span class="entry-text">{{ buildNotificationText(item, t) }}</span>
+            <span class="entry-date">{{ formatNotificationDate(item.createdAt, locale) }}</span>
+          </span>
+        </button>
         <button v-if="item.actionable" class="entry-cta" @click.stop="handleAction(item)">
           {{ notificationCtaLabel(item, t) }}
         </button>
-      </div>
+      </article>
     </div>
 
     <div v-if="store.totalPages > 1" class="pagination">
@@ -85,7 +93,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted} from 'vue';
+import {computed, nextTick, onMounted, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
@@ -106,6 +114,15 @@ const {t, currentLanguage} = useI18n();
 
 const items = computed(() => store.items);
 const locale = computed(() => (currentLanguage.value === 'uk' ? 'uk-UA' : 'en-US'));
+const retryButton = ref<HTMLButtonElement | null>(null);
+
+const retryPage = async () => {
+  await store.fetchPage(store.page, 20);
+  if (store.error) {
+    await nextTick();
+    retryButton.value?.focus();
+  }
+};
 
 const goToPage = (page: number) => {
   if (page >= 0 && page < store.totalPages) {
@@ -141,6 +158,7 @@ onMounted(() => {
   flex: 1 0 auto;
   background: var(--myst-bg);
   padding: 100px 0 60px;
+  font-family: var(--font-body);
 }
 
 .notifications-view {
@@ -165,12 +183,13 @@ onMounted(() => {
   padding: 7px 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   color: #888;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
+  font-family: var(--font-ui);
 }
 
 .back-button:hover {
@@ -188,8 +207,10 @@ onMounted(() => {
 
 .page-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
-  font-size: 26px;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--myst-offwhite);
 }
 
@@ -198,12 +219,13 @@ onMounted(() => {
   background: rgba(200, 178, 115, 0.1);
   border: 1px solid rgba(200, 178, 115, 0.3);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .mark-all-btn:hover {
@@ -214,7 +236,7 @@ onMounted(() => {
 .state-block {
   padding: 80px 0;
   text-align: center;
-  color: #666;
+  color: var(--myst-ink-muted);
 }
 
 .state-block.empty .empty-icon {
@@ -253,8 +275,23 @@ onMounted(() => {
   padding: 18px 20px 18px 24px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.entry-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .notif-entry:hover {
@@ -302,7 +339,7 @@ onMounted(() => {
 }
 
 .entry-date {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   color: #555;
   text-transform: uppercase;
@@ -315,12 +352,13 @@ onMounted(() => {
   background: rgba(200, 178, 115, 0.1);
   border: 1px solid rgba(200, 178, 115, 0.3);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
   white-space: nowrap;
 }
 
@@ -338,6 +376,7 @@ onMounted(() => {
   padding: 14px 18px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
 }
 
 .pagination-btn {
@@ -351,7 +390,9 @@ onMounted(() => {
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
 }
 
 .pagination-btn:hover:not(:disabled) {

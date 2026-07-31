@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка геймпада"
+      aria-hidden="true"
       class="icon-gamepad"
       fill="none"
       height="22"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 32 22"
       width="32"
       xmlns="http://www.w3.org/2000/svg"
@@ -22,6 +21,6 @@
   width: 32px;
   height: 22px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div
       ref="sectionRef"
-      :style="{ animationDelay: delay + 'ms' }"
+      :style="{ transitionDelay: `${Math.min(Math.max(Number(delay) || 0, 0), 260)}ms` }"
       class="fade-section"
   >
     <slot/>
@@ -53,5 +53,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Styles are defined in main.css */
+.fade-section {
+  transition: opacity var(--motion-slow) var(--ease-enter);
+}
 </style>

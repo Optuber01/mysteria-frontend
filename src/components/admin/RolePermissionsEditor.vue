@@ -220,6 +220,12 @@ onMounted(loadData);
   display: flex;
   flex-direction: column;
   gap: 16px;
+  font-family: var(--font-ui);
+}
+
+.rpe button,
+.rpe input {
+  font-family: var(--font-ui);
 }
 
 .rpe-state {
@@ -231,7 +237,7 @@ onMounted(loadData);
   color: var(--myst-ink-muted);
   font-size: 14px;
   background: var(--myst-bg-2);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
 }
 
@@ -272,15 +278,17 @@ onMounted(loadData);
   background: var(--myst-gold);
   color: var(--myst-bg);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
-  transition: background 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .rpe-retry-btn:hover {
   background: var(--myst-gold-soft);
+  transform: translateY(var(--hover-control));
 }
 
 /* Two-column layout */
@@ -288,7 +296,7 @@ onMounted(loadData);
   display: grid;
   grid-template-columns: 220px 1fr;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   min-height: 540px;
 }
@@ -322,11 +330,13 @@ onMounted(loadData);
   padding: 10px 12px;
   border: none;
   border-left: 2px solid transparent;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   background: transparent;
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-fast) var(--ease-standard),
+              color var(--motion-fast) var(--ease-standard);
   color: var(--myst-ink-muted);
 }
 
@@ -361,7 +371,7 @@ onMounted(loadData);
   background: var(--myst-gold);
   color: var(--myst-bg);
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: var(--radius-pill);
 }
 
 .rpe-perm-count {
@@ -371,7 +381,7 @@ onMounted(loadData);
   background: color-mix(in srgb, var(--myst-ink-muted) 15%, transparent);
   min-width: 20px;
   height: 18px;
-  border-radius: 9px;
+  border-radius: var(--radius-pill);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,6 +419,7 @@ onMounted(loadData);
   font-weight: 700;
   color: var(--myst-ink);
   margin: 0 0 4px;
+  font-family: var(--font-display);
 }
 
 .rpe-role-desc {
@@ -445,7 +456,7 @@ onMounted(loadData);
 
 .rpe-group {
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 20%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -478,14 +489,17 @@ onMounted(loadData);
   background: color-mix(in srgb, var(--myst-ink-muted) 15%, transparent);
   color: var(--myst-ink-muted);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              color var(--motion-fast) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .rpe-group-btn:hover {
   background: var(--myst-gold);
   color: var(--myst-bg);
+  transform: translateY(var(--hover-control));
 }
 
 .rpe-perm-list {
@@ -499,9 +513,9 @@ onMounted(loadData);
   align-items: center;
   gap: 9px;
   padding: 7px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background-color var(--motion-fast) var(--ease-standard);
   user-select: none;
 }
 
@@ -531,7 +545,7 @@ onMounted(loadData);
 .rpe-perm-full {
   font-size: 10px;
   color: var(--myst-ink-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   opacity: 0.7;
 }
 
@@ -540,7 +554,7 @@ onMounted(loadData);
   background: color-mix(in srgb, #ef4444 12%, transparent);
   color: #ef4444;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
   font-size: 13px;
   font-weight: 500;

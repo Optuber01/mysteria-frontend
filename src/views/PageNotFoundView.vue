@@ -1,7 +1,7 @@
 <template>
   <div class="ritual-page page-container">
     <HeaderItem/>
-    <main class="pnf-main">
+    <main id="main-content" class="pnf-main" tabindex="-1">
       <div class="mist-overlay"></div>
       
       <div class="pnf-content">
@@ -65,10 +65,11 @@ const router = useRouter();
   border: 1px solid rgba(200, 178, 115, 0.1);
   backdrop-filter: blur(10px);
   max-width: 600px;
+  border-radius: var(--radius-xl);
 }
 
 .glitch-text {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 120px;
   color: var(--myst-gold);
   margin: 0;
@@ -85,16 +86,16 @@ const router = useRouter();
 }
 
 .pnf-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 24px;
   color: #fff;
   margin-bottom: 16px;
 }
 
 .pnf-message {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 14px;
-  color: #666;
+  color: var(--myst-ink-muted);
   line-height: 1.6;
   margin-bottom: 40px;
 }
@@ -107,17 +108,18 @@ const router = useRouter();
   background: transparent;
   border: 1px solid var(--myst-gold);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
 }
 
 .btn-ritual:hover {
   background: rgba(200, 178, 115, 0.1);
-  box-shadow: 0 0 20px rgba(200, 178, 115, 0.2);
+  transform: translateY(var(--hover-control));
 }
 
 @media (max-width: 768px) {

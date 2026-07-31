@@ -1,5 +1,5 @@
 <template>
-  <div :class="['editor-view', { 'split-active': splitView && selectedArticle }]">
+  <main id="main-content" :class="['editor-view', { 'split-active': splitView && selectedArticle }]" tabindex="-1">
     <div class="page-header">
       <button class="back-button" @click="goBack">
         <svg fill="none" height="20" stroke="currentColor" viewBox="0 0 24 24" width="20">
@@ -168,7 +168,7 @@
                 <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
               </svg>
               Pathway Emojis
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" :style="{ transform: showPathwayPicker ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" :style="{ transform: showPathwayPicker ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform var(--motion-base) var(--ease-standard)' }">
                 <path d="m6 9 6 6 6-6"/>
               </svg>
             </button>
@@ -281,7 +281,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
@@ -370,7 +370,8 @@ const checkForDraft = () => {
 
 const restoreDraft = () => {
   if (!pendingDraft.value) return;
-  const {savedAt, ...article} = pendingDraft.value;
+  const article: Partial<NewsArticle> & {savedAt?: string} = {...pendingDraft.value};
+  delete article.savedAt;
   selectedArticle.value = article as NewsArticle;
   if (article.id) selectedArticleId.value = article.id;
   savedSnapshot.value = '';
@@ -394,7 +395,8 @@ const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 onBeforeRouteLeave((to, from, next) => {
   if (isDirty.value) {
     const ok = confirm('You have unsaved changes. Leave this page?');
-    ok ? next() : next(false);
+    if (ok) next();
+    else next(false);
   } else {
     next();
   }
@@ -727,8 +729,15 @@ const cancelEdit = () => {
   padding: 20px;
   max-width: 900px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  transition: max-width 0.3s ease;
+  font-family: var(--font-ui);
+  transition: max-width var(--motion-slow) var(--ease-standard);
+}
+
+.editor-view button,
+.editor-view input,
+.editor-view select,
+.editor-view textarea {
+  font-family: var(--font-ui);
 }
 
 .editor-view.split-active {
@@ -753,9 +762,11 @@ const cancelEdit = () => {
   padding: 8px 16px;
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard);
   font-size: 14px;
   color: var(--myst-ink-muted);
   flex-shrink: 0;
@@ -764,6 +775,13 @@ const cancelEdit = () => {
 .back-button:hover {
   background: color-mix(in srgb, var(--myst-bg-2) 80%, var(--myst-gold));
   color: var(--myst-ink);
+}
+
+.back-button svg {
+  transition: transform var(--motion-fast) var(--ease-standard);
+}
+
+.back-button:hover svg {
   transform: translateX(-2px);
 }
 
@@ -773,6 +791,7 @@ const cancelEdit = () => {
   font-weight: 700;
   color: var(--myst-ink);
   flex-shrink: 0;
+  font-family: var(--font-display);
 }
 
 .header-status {
@@ -817,8 +836,8 @@ const cancelEdit = () => {
   background: var(--myst-bg-2);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 20%, transparent);
   padding: 3px 8px;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
 }
 
 /* Draft restore banner */
@@ -831,7 +850,7 @@ const cancelEdit = () => {
   margin-bottom: 20px;
   background: color-mix(in srgb, #f59e0b 10%, var(--myst-bg-2));
   border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   flex-wrap: wrap;
 }
 
@@ -859,29 +878,33 @@ const cancelEdit = () => {
   background: #f59e0b;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
-.draft-restore-btn:hover { background: #d97706; }
+.draft-restore-btn:hover { background: #d97706; transform: translateY(var(--hover-control)); }
 
 .draft-dismiss-btn {
   padding: 6px 14px;
   background: none;
   color: var(--myst-ink-muted);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .draft-dismiss-btn:hover {
   background: color-mix(in srgb, var(--myst-ink-muted) 10%, transparent);
   color: var(--myst-ink);
+  transform: translateY(var(--hover-control));
 }
 
 /* Controls */
@@ -892,7 +915,7 @@ const cancelEdit = () => {
   align-items: center;
   padding: 20px;
   background: var(--myst-bg-2);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
 }
 
@@ -900,11 +923,12 @@ const cancelEdit = () => {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   background: var(--myst-bg);
   color: var(--myst-ink);
-  transition: border-color 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
 }
 
 .controls select:focus {
@@ -916,19 +940,20 @@ const cancelEdit = () => {
 .controls button {
   padding: 12px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .controls button:first-of-type { background: var(--myst-gold); color: var(--myst-bg); }
-.controls button:first-of-type:hover { background: var(--myst-gold-soft); transform: translateY(-1px); }
+.controls button:first-of-type:hover { background: var(--myst-gold-soft); transform: translateY(var(--hover-control)); }
 .pin-btn { background: #f59e0b !important; color: white !important; }
-.pin-btn:hover { background: #d97706 !important; transform: translateY(-1px); }
+.pin-btn:hover { background: #d97706 !important; transform: translateY(var(--hover-control)); }
 .delete-btn { background: #ef4444 !important; color: white !important; }
-.delete-btn:hover { background: #dc2626 !important; transform: translateY(-1px); }
+.delete-btn:hover { background: #dc2626 !important; transform: translateY(var(--hover-control)); }
 
 /* Split layout */
 .split-layout {
@@ -951,7 +976,7 @@ const cancelEdit = () => {
   max-height: calc(100vh - 60px);
   overflow-y: auto;
   background: var(--myst-bg-2);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   display: flex;
   flex-direction: column;
@@ -975,7 +1000,7 @@ const cancelEdit = () => {
 .live-preview-lang {
   font-size: 11px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--myst-gold) 15%, transparent);
   color: var(--myst-gold);
   font-weight: 700;
@@ -992,6 +1017,7 @@ const cancelEdit = () => {
   color: var(--myst-ink-strong, var(--myst-ink));
   margin: 0 0 12px;
   line-height: 1.3;
+  font-family: var(--font-display);
 }
 
 .live-preview-desc {
@@ -1010,7 +1036,7 @@ const cancelEdit = () => {
   gap: 28px;
   background: var(--myst-bg-2);
   padding: 32px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   box-shadow: 0 1px 3px color-mix(in srgb, black 10%, transparent);
 }
@@ -1039,10 +1065,11 @@ const cancelEdit = () => {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 40%, transparent);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard);
   box-sizing: border-box;
   background: var(--myst-bg);
   color: var(--myst-ink);
@@ -1069,7 +1096,7 @@ const cancelEdit = () => {
 .form-group textarea {
   height: 380px;
   resize: vertical;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-family: var(--font-mono);
   line-height: 1.6;
 }
 
@@ -1089,17 +1116,20 @@ const cancelEdit = () => {
   padding: 5px 12px;
   background: none;
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 35%, transparent);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--myst-ink-muted);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .split-view-btn:hover {
   border-color: var(--myst-gold);
   color: var(--myst-gold);
+  transform: translateY(var(--hover-control));
 }
 
 /* Markdown toolbar */
@@ -1110,7 +1140,7 @@ const cancelEdit = () => {
   padding: 6px 8px;
   background: var(--myst-bg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
-  border-radius: 8px 8px 0 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   border-bottom: none;
   flex-wrap: wrap;
 }
@@ -1124,11 +1154,13 @@ const cancelEdit = () => {
   padding: 0;
   background: none;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--myst-ink-muted);
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-fast) var(--ease-standard),
+              color var(--motion-fast) var(--ease-standard);
 }
 
 .md-toolbar-btn:hover {
@@ -1177,11 +1209,13 @@ const cancelEdit = () => {
   color: white;
   padding: 14px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1189,7 +1223,7 @@ const cancelEdit = () => {
 
 .save-btn:hover:not(:disabled) {
   background: #059669;
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
@@ -1205,14 +1239,18 @@ const cancelEdit = () => {
   color: var(--myst-bg);
   padding: 14px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
-.cancel-btn:hover { background: var(--myst-ink); transform: translateY(-1px); }
+.cancel-btn:hover {
+  background: var(--myst-ink);
+  transform: translateY(var(--hover-control));
+}
 
 .preview-btn {
   display: flex;
@@ -1222,16 +1260,18 @@ const cancelEdit = () => {
   color: white;
   padding: 14px 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              box-shadow var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
 }
 
 .preview-btn:hover:not(:disabled) {
   background: #2563eb;
-  transform: translateY(-1px);
+  transform: translateY(var(--hover-control));
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
@@ -1250,7 +1290,7 @@ const cancelEdit = () => {
   color: var(--myst-ink-muted);
   font-size: 14px;
   background: var(--myst-bg-2);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
   display: flex;
   align-items: center;
@@ -1286,7 +1326,7 @@ const cancelEdit = () => {
   background: color-mix(in srgb, #10b981 15%, transparent);
   color: #10b981;
   padding: 16px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #10b981 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
@@ -1297,7 +1337,7 @@ const cancelEdit = () => {
   background: color-mix(in srgb, #ef4444 15%, transparent);
   color: #ef4444;
   padding: 16px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
@@ -1324,12 +1364,14 @@ const cancelEdit = () => {
   padding: 4px 10px;
   background: none;
   border: 1px solid color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  border-radius: 5px;
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              border-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
 }
 
 .pathway-picker-toggle:hover { background: color-mix(in srgb, var(--myst-gold) 10%, var(--myst-bg)); }
@@ -1355,9 +1397,10 @@ const cancelEdit = () => {
   padding: 6px 8px;
   background: none;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-fast) var(--ease-standard);
   min-width: 52px;
 }
 
@@ -1386,7 +1429,7 @@ const cancelEdit = () => {
   z-index: 9999;
   padding: 20px;
   backdrop-filter: blur(4px);
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn var(--motion-base) var(--ease-standard);
 }
 
 @keyframes fadeIn {
@@ -1396,18 +1439,18 @@ const cancelEdit = () => {
 
 .preview-modal-content {
   background: var(--myst-bg);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   max-width: 900px;
   width: 100%;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease;
+  animation: slideUp var(--motion-slow) var(--ease-enter);
 }
 
 @keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
+  from { transform: translateY(8px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
@@ -1419,16 +1462,18 @@ const cancelEdit = () => {
   border-bottom: 1px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
 }
 
-.preview-header h2 { margin: 0; font-size: 20px; font-weight: 700; color: var(--myst-ink); }
+.preview-header h2 { margin: 0; font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--myst-ink); }
 
 .close-preview-btn {
   background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--myst-ink-muted);
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard),
+              transform var(--motion-fast) var(--ease-standard);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1437,6 +1482,7 @@ const cancelEdit = () => {
 .close-preview-btn:hover {
   background: color-mix(in srgb, var(--myst-ink-muted) 20%, transparent);
   color: var(--myst-ink);
+  transform: translateY(var(--hover-control));
 }
 
 .preview-body { overflow-y: auto; padding: 32px; flex: 1; }
@@ -1449,14 +1495,14 @@ const cancelEdit = () => {
   border-bottom: 2px solid color-mix(in srgb, var(--myst-ink-muted) 30%, transparent);
 }
 
-.preview-article-title { font-size: 32px; font-weight: 700; color: var(--myst-ink); margin: 0 0 16px 0; line-height: 1.2; }
+.preview-article-title { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--myst-ink); margin: 0 0 16px 0; line-height: 1.2; }
 
 .preview-article-meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 
 .preview-language, .preview-status, .preview-pinned {
   display: inline-block;
   padding: 4px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -1469,7 +1515,7 @@ const cancelEdit = () => {
 
 .preview-short-description { font-size: 16px; color: var(--myst-ink-muted); margin-bottom: 24px; line-height: 1.6; font-style: italic; }
 
-.preview-image-wrapper { margin-bottom: 32px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+.preview-image-wrapper { margin-bottom: 32px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 .preview-image { width: 100%; height: auto; display: block; }
 
 /* Shared article content styles (preview modal + live preview) */
@@ -1490,6 +1536,7 @@ const cancelEdit = () => {
   margin-top: 32px;
   margin-bottom: 16px;
   line-height: 1.3;
+  font-family: var(--font-display);
 }
 
 .preview-article-content :deep(h1) { font-size: 28px; color: var(--myst-gold); }
@@ -1497,7 +1544,7 @@ const cancelEdit = () => {
 .preview-article-content :deep(h3) { font-size: 20px; }
 .preview-article-content :deep(h4) { font-size: 18px; }
 .preview-article-content :deep(p) { margin-bottom: 16px; }
-.preview-article-content :deep(a) { color: var(--myst-gold); text-decoration: underline; transition: color 0.2s ease; }
+.preview-article-content :deep(a) { color: var(--myst-gold); text-decoration: underline; transition: color var(--motion-base) var(--ease-standard); }
 .preview-article-content :deep(a:hover) { color: var(--myst-gold-soft); }
 
 .preview-article-content :deep(img.pathway-emoji) {
@@ -1506,13 +1553,13 @@ const cancelEdit = () => {
   height: 1.5em;
   vertical-align: -0.35em;
   margin: 0 0.1em;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
 }
 
 .preview-article-content :deep(img:not(.pathway-emoji)) {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   margin: 24px 0;
   display: block;
 }
@@ -1532,15 +1579,15 @@ const cancelEdit = () => {
 .preview-article-content :deep(code) {
   background: color-mix(in srgb, var(--myst-ink-muted) 20%, transparent);
   padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 14px;
 }
 
 .preview-article-content :deep(pre) {
   background: color-mix(in srgb, var(--myst-ink-muted) 20%, transparent);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow-x: auto;
   margin: 24px 0;
 }

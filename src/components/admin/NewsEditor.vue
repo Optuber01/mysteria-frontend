@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="news-editor">
     <h2>News Editor</h2>
     <select v-model="selectedArticleId" @change="loadArticle">
       <option value="">Select an article to edit</option>
@@ -69,3 +69,25 @@ const saveArticle = async () => {
   }
 };
 </script>
+
+<style scoped>
+.news-editor {
+  font-family: var(--font-ui);
+}
+
+.news-editor h2 {
+  font-family: var(--font-display);
+}
+
+.news-editor select,
+.news-editor input,
+.news-editor textarea,
+.news-editor button {
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+}
+
+.news-editor textarea {
+  font-family: var(--font-mono);
+}
+</style>

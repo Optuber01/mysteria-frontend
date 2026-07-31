@@ -2,7 +2,7 @@
   <div class="page-container">
     <HeaderItem/>
 
-    <main class="commission-detail-main">
+    <main id="main-content" class="commission-detail-main" tabindex="-1">
     <div class="commission-detail-view">
     <div class="page-header">
       <button class="back-button" @click="router.push('/commissions')">
@@ -151,6 +151,7 @@ onMounted(async () => {
   flex: 1 0 auto;
   background: var(--myst-bg);
   padding: 100px 0 60px;
+  font-family: var(--font-body);
 }
 
 .commission-detail-view {
@@ -173,12 +174,13 @@ onMounted(async () => {
   padding: 7px 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
   color: #888;
-  transition: all 0.2s ease;
+  transition: border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
+  font-family: var(--font-ui);
 }
 
 .back-button:hover {
@@ -188,8 +190,10 @@ onMounted(async () => {
 
 .page-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: var(--myst-offwhite);
 }
 
@@ -226,7 +230,7 @@ onMounted(async () => {
   background: rgba(13, 16, 30, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 32px;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
 }
 
 .detail-top-row {
@@ -239,13 +243,14 @@ onMounted(async () => {
 }
 
 .type-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 4px 10px;
   background: rgba(255, 255, 255, 0.05);
   color: #888;
+  border-radius: var(--radius-pill);
 }
 
 .detail-grid {
@@ -306,6 +311,7 @@ onMounted(async () => {
   color: #777;
   font-size: 12.5px;
   text-align: center;
+  border-radius: var(--radius-md);
 }
 
 .staff-notice {
@@ -317,6 +323,7 @@ onMounted(async () => {
   border-left: 3px solid #60a5fa;
   color: #cdd8ea;
   font-size: 13px;
+  border-radius: var(--radius-md);
 }
 
 .staff-notice i {
@@ -342,12 +349,13 @@ onMounted(async () => {
   background: rgba(96, 165, 250, 0.1);
   border: 1px solid rgba(96, 165, 250, 0.3);
   color: #60a5fa;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .resubmit-btn:hover {

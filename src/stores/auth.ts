@@ -116,6 +116,12 @@ export const useAuthStore = defineStore("auth", {
             localStorage.setItem("user_id", authResponse.userId);
         },
 
+        hydrateTokensFromStorage() {
+            this.accessToken = localStorage.getItem("access_token") || this.getCookie("access_token");
+            this.refreshToken = localStorage.getItem("refresh_token");
+            this.token = this.accessToken;
+        },
+
         // Legacy method for compatibility
         clearTokens() {
             this.accessToken = null;
@@ -287,6 +293,7 @@ export const useAuthStore = defineStore("auth", {
         async openDiscordAuth(redirectUrl?: string) {
             const {show} = useNotification();
             const {t} = useI18n();
+            if (this.isLoading) return;
             this.isLoading = true;
             this.error = null;
 
@@ -317,6 +324,7 @@ export const useAuthStore = defineStore("auth", {
                             duration: 7000,
                         },
                     );
+                    this.isLoading = false;
                     return;
                 }
 
@@ -338,7 +346,9 @@ export const useAuthStore = defineStore("auth", {
                         window.removeEventListener("message", messageHandler);
                         clearInterval(checkInterval);
 
-                        await this.refreshUser();
+                        this.hydrateTokensFromStorage();
+                        await this.refreshUser(true);
+                        this.isLoading = false;
 
                         if (this.isAuthenticated) {
                             show(t("authCallback.authSuccess"), {
@@ -369,7 +379,9 @@ export const useAuthStore = defineStore("auth", {
                             window.removeEventListener("message", messageHandler);
 
                             setTimeout(async () => {
-                                await this.refreshUser();
+                                this.hydrateTokensFromStorage();
+                                await this.refreshUser(true);
+                                this.isLoading = false;
 
                                 if (this.isAuthenticated) {
                                     show(t("authCallback.authSuccess"), {
@@ -409,6 +421,7 @@ export const useAuthStore = defineStore("auth", {
                             duration: 5000,
                         });
                     }
+                    this.isLoading = false;
                 }, 300000);
             } catch (error) {
                 const errorMessage =
@@ -418,7 +431,6 @@ export const useAuthStore = defineStore("auth", {
                     duration: 5000,
                 });
                 this.error = errorMessage;
-            } finally {
                 this.isLoading = false;
             }
         },

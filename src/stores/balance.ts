@@ -7,12 +7,9 @@ import {useNotification} from "@/services/useNotification";
 import {useI18n} from "@/composables/useI18n";
 import {useCurrency} from "@/composables/useCurrency";
 import {Decimal} from "decimal.js";
-import {APIError, RequestError} from "@/utils/api/errors";
 import {debounce} from "lodash-es";
-import {shopAPI} from "@/utils/api/shop";
 
 const serviceTransformCache = new Map<string, ServiceResponse>();
-const serviceMarkdownCache = new Map<string, ServiceMarkdownDto>();
 
 function convertServiceDtoToLegacy(service: ServiceDto, lang: string = "uk"): ServiceResponse {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -124,6 +121,7 @@ function convertServiceDtoToLegacy(service: ServiceDto, lang: string = "uk"): Se
         service_metadata: service.metadata ? {data: service.metadata} : undefined,
         is_giftable: service.isGiftable,  // NEW: Map gifting support
         is_bulkable: service.isBulkable,  // NEW: Map bulk purchase support
+        server_availability: service.serverAvailability || service.server_availability,
         created_at: service.createdAt ? new Date(service.createdAt) : undefined,
         // Add consistent slug field for URLs (always use English name or fallback to original name)
         slug_name: service.nameEn || service.name,
@@ -200,6 +198,7 @@ export const useBalanceStore = defineStore("balance", {
         async fetchBalance() {
             this.isLoading = true;
             this.error = null;
+            this.balance = null;
 
             const authStore = useAuthStore();
 
@@ -256,6 +255,7 @@ export const useBalanceStore = defineStore("balance", {
                 };
             } catch (error) {
                 const {t} = useI18n();
+                this.balance = null;
                 this.error =
                     error instanceof Error
                         ? error.message
@@ -317,14 +317,7 @@ export const useBalanceStore = defineStore("balance", {
                         const services = await retryResponse.json();
                         this.services = services.filter((s: ServiceDto) => s.isActive);
 
-                        // Use requestIdleCallback for non-critical transformation work
-                        if ('requestIdleCallback' in window) {
-                            requestIdleCallback(() => {
-                                this.legacyServices = this.services.map(s => convertServiceDtoToLegacy(s, lang));
-                            });
-                        } else {
-                            this.legacyServices = this.services.map(s => convertServiceDtoToLegacy(s, lang));
-                        }
+                        this.legacyServices = this.services.map(s => convertServiceDtoToLegacy(s, lang));
                         return;
                     }
 
@@ -339,21 +332,11 @@ export const useBalanceStore = defineStore("balance", {
                 const services = await response.json();
                 this.services = services.filter((s: ServiceDto) => s.isActive);
 
-                // Convert to legacy format for compatibility with proper internationalization
-                // Use requestIdleCallback for non-critical transformation work
-                if ('requestIdleCallback' in window) {
-                    requestIdleCallback(() => {
-                        this.legacyServices = this.services.map(s => convertServiceDtoToLegacy(s, lang));
-                    });
-                } else {
-                    // Fallback for browsers without requestIdleCallback
-                    this.legacyServices = this.services.map(s => convertServiceDtoToLegacy(s, lang));
-                }
+                this.legacyServices = this.services.map(s => convertServiceDtoToLegacy(s, lang));
             } catch (error) {
                 const {t} = useI18n();
                 console.error(t("errorFetchingServices"), error);
-                const {show} = useNotification();
-                show(t("errorLoadingServicesList"), {type: "error"});
+                throw error;
             }
         },
 
@@ -372,7 +355,7 @@ export const useBalanceStore = defineStore("balance", {
             }
         },
 
-        async initiatePurchase(itemId: string, amount: number = 1, recipientId?: string) {
+        async initiatePurchase(itemId: string, amount: number = 1, recipientId?: string, selectedServer?: string) {
             console.log("initiatePurchase called with itemId:", itemId, "amount:", amount, "recipientId:", recipientId);
             const {t} = useI18n();
             const {formatCurrency, getCurrencySymbol, currentCurrency} = useCurrency();
@@ -411,6 +394,7 @@ export const useBalanceStore = defineStore("balance", {
                         serviceId: service.id.toString(),
                         amount,
                         ...(recipientId && {recipientId}),
+                        ...(selectedServer && {targetServers: [selectedServer]}),
                     }),
                 });
 
@@ -456,7 +440,7 @@ export const useBalanceStore = defineStore("balance", {
                 );
                 const {show} = useNotification();
 
-                if (error instanceof RequestError || error instanceof APIError) {
+                if (error instanceof Error) {
                     // Map common errors to user-friendly messages
                     let errorMessage = error.message;
                     let isServerError = false;
@@ -587,7 +571,11 @@ export function useBalanceWatcher() {
     const debouncedFetchData = debounce(async () => {
         if (authStore.isAuthenticated && authStore.accessToken) {
             await balanceStore.fetchBalance();
-            await balanceStore.fetchServices(true); // Re-fetch with auth for user-specific data
+            try {
+                await balanceStore.fetchServices(true); // Re-fetch with auth for user-specific data
+            } catch {
+                // ShopView owns the persistent recovery UI.
+            }
         }
     }, 300);
 

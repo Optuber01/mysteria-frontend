@@ -1,7 +1,7 @@
 <template>
   <div class="pathways-page">
     <HeaderItem/>
-    <main>
+    <main id="main-content" tabindex="-1">
       <header class="archive-hero">
         <span class="eyebrow">{{ ui.archive }}</span>
         <h1>{{ ui.title }}</h1>
@@ -20,15 +20,15 @@
         </div>
       </header>
       <section class="archive-layout">
-        <aside class="pathway-browser">
+        <aside class="pathway-browser pathway-browser--desktop">
           <label class="search-label"
-                 for="pathway-search">{{ currentLanguage === 'uk' ? 'Пошук в архіві' : 'Search the archive' }}</label>
+                  for="pathway-search-desktop">{{ ui.searchArchive }}</label>
           <label class="search-box">
             <svg viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"/>
               <path d="m20 20-4-4"/>
             </svg>
-            <input id="pathway-search" v-model="query" :placeholder="ui.search" type="search">
+            <input id="pathway-search-desktop" v-model="query" :placeholder="ui.search" autocomplete="off" type="search">
             <button v-if="query" :aria-label="currentLanguage === 'uk' ? 'Очистити пошук' : 'Clear search'"
                     @click="query=''">×
             </button>
@@ -38,8 +38,8 @@
               <div v-if="group.pathways.length" class="browser-heading"><span>{{
                   group.label
                 }}</span><b>{{ group.pathways.length }}</b></div>
-              <button v-for="pathway in group.pathways" :key="pathway.id" :class="{active:pathway.id===selected.id}"
-                      @click="selectPathway(pathway.id)">
+              <button v-for="pathway in group.pathways" :key="pathway.id" :aria-current="pathway.id === selected.id ? 'true' : undefined" :class="{active:pathway.id===selected.id}" type="button"
+                       @click="selectPathway(pathway.id)">
                 <span class="sigil"><img v-if="imageFor(pathway.id)" :src="imageFor(pathway.id)" alt=""><b
                     v-else>{{ pathway.id[0].toUpperCase() }}</b></span>
                 <span><strong>{{ pathwayName(pathway.id) }}</strong><small>{{
@@ -51,17 +51,35 @@
           <p v-if="!filteredPathways.length" class="empty">{{ ui.noResults }}</p>
         </aside>
         <article class="pathway-detail">
+          <div class="mobile-archive-search">
+            <label class="search-label" for="pathway-search-mobile">{{ ui.searchArchive }}</label>
+            <label class="search-box">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+              <input id="pathway-search-mobile" v-model="query" :placeholder="ui.search" autocomplete="off" type="search">
+              <button v-if="query" :aria-label="ui.clearSearch" type="button" @click="query = ''">×</button>
+            </label>
+          </div>
           <div class="pathway-controls">
             <header class="pathway-header">
               <div class="large-sigil"><img v-if="imageFor(selected.id)" :src="imageFor(selected.id)" alt=""><b v-else>{{
                   selected.id[0].toUpperCase()
                 }}</b></div>
-              <div><span>{{ ui.pathway }}</span>
+              <div class="pathway-heading-copy"><span>{{ ui.pathway }}</span>
                 <h2>{{ pathwayName(selected.id) }}</h2>
-                <p>{{ ui.progression }}</p></div>
+                <p>{{ selectedProgression }}</p></div>
+              <button
+                  ref="pathwayPickerTrigger"
+                  :aria-expanded="isPathwayPickerOpen"
+                  aria-controls="pathway-picker-dialog"
+                  aria-haspopup="dialog"
+                  class="pathway-picker-trigger"
+                  type="button"
+                  @click="openPathwayPicker"
+              >{{ ui.changePathway }} <span aria-hidden="true">⌄</span></button>
             </header>
+            <div class="sequence-rail-label"><span>{{ ui.sequences }}</span><span>{{ ui.sequenceHint }}</span></div>
             <div class="sequence-jump">
-              <button v-for="sequence in visibleSequences" :key="sequence.sequence"
+              <button v-for="sequence in visibleSequences" :key="sequence.sequence" :aria-pressed="activeSequence === sequence.sequence" type="button"
                       :class="[sequenceClass(sequence.sequence),{current:activeSequence===sequence.sequence}]"
                       @click="scrollToSequence(sequence.sequence)"><small>{{
                   sequenceRank(sequence.sequence) || ui.seq
@@ -93,6 +111,43 @@
             <p>{{ ui.trySearch }}</p></div>
         </article>
       </section>
+      <dialog
+          id="pathway-picker-dialog"
+          ref="pathwayPickerDialog"
+          aria-labelledby="pathway-picker-title"
+          class="pathway-picker-sheet"
+          @click.self="closePathwayPicker"
+          @close="handlePathwayPickerClosed"
+      >
+        <div class="picker-sheet-head">
+          <div><span class="eyebrow">{{ ui.archive }}</span><h2 id="pathway-picker-title">{{ ui.selectPathway }}</h2></div>
+          <button :aria-label="ui.closePathwayPicker" class="picker-sheet-close" type="button" @click="closePathwayPicker">×</button>
+        </div>
+        <label class="search-label" for="pathway-picker-search">{{ ui.searchPathways }}</label>
+        <label class="search-box picker-search">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="pathway-picker-search" ref="pathwayPickerSearch" v-model="pickerQuery" :placeholder="ui.searchPathways" autocomplete="off" type="search">
+          <button v-if="pickerQuery" :aria-label="ui.clearSearch" type="button" @click="pickerQuery = ''">×</button>
+        </label>
+        <nav class="pathway-list pathway-picker-list" :aria-label="ui.allPathways">
+          <template v-for="group in pickerPathwayGroups" :key="group.id">
+            <div v-if="group.pathways.length" class="browser-heading"><span>{{ group.label }}</span><b>{{ group.pathways.length }}</b></div>
+            <button
+                v-for="pathway in group.pathways"
+                :key="pathway.id"
+                :aria-current="pathway.id === selected.id ? 'true' : undefined"
+                :class="{active: pathway.id === selected.id}"
+                type="button"
+                @click="selectPathwayFromPicker(pathway.id)"
+            >
+              <span class="sigil"><img v-if="imageFor(pathway.id)" :src="imageFor(pathway.id)" alt=""><b v-else>{{ pathway.id[0].toUpperCase() }}</b></span>
+              <span><strong>{{ pathwayName(pathway.id) }}</strong><small>{{ pathway.sequences.length }} {{ ui.sequences }}</small></span>
+              <span aria-hidden="true" class="chevron">›</span>
+            </button>
+          </template>
+        </nav>
+        <p v-if="!pickerFilteredPathways.length" class="empty">{{ ui.noResults }}</p>
+      </dialog>
     </main>
     <FooterItem/>
   </div>
@@ -105,6 +160,7 @@ import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import {useI18n} from '@/composables/useI18n';
 import source from '@/assets/sources/pathway-abilities.json';
+import {preferredScrollBehavior} from '@/utils/motion';
 
 type Localized = { en: string; uk: string };
 type Ability = { id: string; name: Localized; description: Localized };
@@ -181,7 +237,14 @@ const ukNames: Record<string, string> = {
   tyrant: 'Тиран',
   visionary: 'Візіонер',
   aeon: 'Вічний Еон',
+  chaos: 'Хаос',
+  chaosmist: 'Туман Хаосу',
+  condenser: 'Конденсатор',
+  devouring: 'Поглинання',
+  edict: 'Едикт',
+  everlasting: 'Вічність',
   patriarch: 'Патріарх',
+  secondlaw: 'Другий Закон',
   sublunary: 'Підмісячний'
 };
 const copy = {
@@ -195,13 +258,22 @@ const copy = {
     search: 'Search pathways or abilities…',
     allPathways: 'All pathways',
     pathway: 'Pathway',
-    progression: 'Sequence progression · 9 → 0',
+    progression: 'Sequence progression',
     seq: 'SEQ',
     sequence: 'Sequence',
     designation: 'Designation',
     noResults: 'Nothing found in the archive.',
     noAbilities: 'No matching abilities',
-    trySearch: 'Try another search or clear the field.'
+    trySearch: 'Try another search or clear the field.',
+    searchArchive: 'Search the archive',
+    clearSearch: 'Clear search',
+    changePathway: 'Change',
+    selectPathway: 'Choose a Pathway',
+    closePathwayPicker: 'Close Pathway picker',
+    searchPathways: 'Search Pathways…',
+    standardPathways: 'Standard Pathways',
+    boons: 'Boons',
+    sequenceHint: 'Swipe for later Sequences →'
   },
   uk: {
     archive: 'АРХІВ ПОТОЙБІЧНОГО',
@@ -213,22 +285,42 @@ const copy = {
     search: 'Пошук Шляхів або здібностей…',
     allPathways: 'Усі Шляхи',
     pathway: 'Шлях',
-    progression: 'Розвиток Послідовності · 9 → 0',
+    progression: 'Розвиток Послідовності',
     seq: 'ПОСЛ',
     sequence: 'Послідовність',
     designation: 'Назва',
     noResults: 'В архіві нічого не знайдено.',
     noAbilities: 'Здібностей не знайдено',
-    trySearch: 'Спробуйте інший запит або очистьте поле.'
+    trySearch: 'Спробуйте інший запит або очистьте поле.',
+    searchArchive: 'Пошук в архіві',
+    clearSearch: 'Очистити пошук',
+    changePathway: 'Змінити',
+    selectPathway: 'Оберіть Шлях',
+    closePathwayPicker: 'Закрити вибір Шляху',
+    searchPathways: 'Пошук Шляхів…',
+    standardPathways: 'Звичайні Шляхи',
+    boons: 'Благословення',
+    sequenceHint: 'Гортайте наступні Послідовності →'
   }
 };
 const {currentLanguage} = useI18n(), route = useRoute(), router = useRouter(), query = ref(''),
     activeSequence = ref<number>();
+const isPathwayPickerOpen = ref(false);
+const pickerQuery = ref('');
+const pathwayPickerDialog = ref<HTMLDialogElement | null>(null);
+const pathwayPickerTrigger = ref<HTMLButtonElement | null>(null);
+const pathwayPickerSearch = ref<HTMLInputElement | null>(null);
+let previousBodyOverflow = '';
+let previousRootOverflow = '';
 const ui = computed(() => copy[currentLanguage.value]);
 const routeId = computed(() => typeof route.params.pathway === 'string' && pathways.some(p => p.id === route.params.pathway) ? route.params.pathway : pathways[0].id),
     selectedId = ref(routeId.value);
 watch(routeId, id => selectedId.value = id);
 const selected = computed(() => pathways.find(p => p.id === selectedId.value) ?? pathways[0]);
+const selectedProgression = computed(() => {
+  const sequences = selected.value.sequences.map(sequence => sequence.sequence);
+  return `${ui.value.progression} · ${Math.max(...sequences)} → ${Math.min(...sequences)}`;
+});
 const localized = (v: Localized) => v[currentLanguage.value] || v.en;
 const titleCase = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase());
 const pathwayName = (id: string) => currentLanguage.value === 'uk' ? (ukNames[id] || names[id] || titleCase(id)) : (names[id] || titleCase(id));
@@ -241,18 +333,24 @@ const filteredPathways = computed(() => {
   return q ? pathways.filter(p => haystack(p).includes(q)) : pathways
 });
 const boonIds = new Set(['aeon', 'chaos', 'chaosmist', 'condenser', 'devouring', 'edict', 'everlasting', 'patriarch', 'secondlaw', 'sublunary']);
-const pathwayGroups = computed(() => [
+const groupPathways = (items: Pathway[]) => [
   {
     id: 'normal',
-    label: currentLanguage.value === 'uk' ? 'Звичайні Шляхи' : 'Standard Pathways',
-    pathways: filteredPathways.value.filter(p => !boonIds.has(p.id))
+    label: ui.value.standardPathways,
+    pathways: items.filter(p => !boonIds.has(p.id))
   },
   {
     id: 'boons',
-    label: currentLanguage.value === 'uk' ? 'Благословення' : 'Boons',
-    pathways: filteredPathways.value.filter(p => boonIds.has(p.id))
+    label: ui.value.boons,
+    pathways: items.filter(p => boonIds.has(p.id))
   }
-]);
+];
+const pathwayGroups = computed(() => groupPathways(filteredPathways.value));
+const pickerFilteredPathways = computed(() => {
+  const search = pickerQuery.value.trim().toLowerCase();
+  return search ? pathways.filter(pathway => pathwayName(pathway.id).toLowerCase().includes(search)) : pathways;
+});
+const pickerPathwayGroups = computed(() => groupPathways(pickerFilteredPathways.value));
 
 function setMeta(selector: string, attribute: 'name' | 'property', key: string, content: string) {
   let tag = document.head.querySelector<HTMLMetaElement>(selector);
@@ -344,12 +442,41 @@ function selectPathway(id: string) {
   selectedId.value = id;
   activeSequence.value = pathways.find(p => p.id === id)?.sequences[0]?.sequence;
   router.replace({name: 'pathways', params: {pathway: id}});
-  if (innerWidth < 900) requestAnimationFrame(() => document.querySelector('.pathway-detail')?.scrollIntoView({behavior: 'smooth'}))
 }
 
 function scrollToSequence(n: number) {
   activeSequence.value = n;
-  document.getElementById(`sequence-${n}`)?.scrollIntoView({behavior: 'smooth', block: 'start'})
+  document.getElementById(`sequence-${n}`)?.scrollIntoView({behavior: preferredScrollBehavior(), block: 'start'})
+}
+
+async function openPathwayPicker() {
+  const dialog = pathwayPickerDialog.value;
+  if (!dialog || dialog.open) return;
+  previousBodyOverflow = document.body.style.overflow;
+  previousRootOverflow = document.documentElement.style.overflow;
+  document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
+  isPathwayPickerOpen.value = true;
+  dialog.showModal();
+  await nextTick();
+  pathwayPickerSearch.value?.focus();
+}
+
+function closePathwayPicker() {
+  pathwayPickerDialog.value?.close();
+}
+
+function handlePathwayPickerClosed() {
+  document.body.style.overflow = previousBodyOverflow;
+  document.documentElement.style.overflow = previousRootOverflow;
+  isPathwayPickerOpen.value = false;
+  pickerQuery.value = '';
+  nextTick(() => pathwayPickerTrigger.value?.focus({preventScroll: true}));
+}
+
+function selectPathwayFromPicker(id: string) {
+  selectPathway(id);
+  closePathwayPicker();
 }
 
 watch(visibleSequences, sequences => {
@@ -358,7 +485,12 @@ watch(visibleSequences, sequences => {
 }, {immediate: true});
 watch([selected, currentLanguage, () => route.params.pathway], updatePageMeta, {immediate: true});
 onMounted(() => window.addEventListener('scroll', updateActiveSequence, {passive: true}));
-onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateActiveSequence);
+  if (pathwayPickerDialog.value?.open) pathwayPickerDialog.value.close();
+  document.body.style.overflow = previousBodyOverflow;
+  document.documentElement.style.overflow = previousRootOverflow;
+});
 </script>
 
 <style scoped>
@@ -376,14 +508,14 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 }
 
 .eyebrow, .pathway-header span, .sequence-title span {
-  font: 10px 'JetBrains Mono', monospace;
-  letter-spacing: 3px;
+  font: 11px var(--font-ui);
+  letter-spacing: 2px;
   color: var(--myst-gold)
 }
 
 .archive-hero h1 {
   margin: 10px 0 14px;
-  font: 700 clamp(38px, 7vw, 72px) 'Playfair Display', serif
+  font: 700 clamp(38px, 7vw, 72px) var(--font-display)
 }
 
 .archive-hero > p {
@@ -400,7 +532,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   gap: 24px;
   margin-top: 36px;
   color: #777780;
-  font: 11px 'JetBrains Mono', monospace;
+  font: 12px var(--font-ui);
   text-transform: uppercase
 }
 
@@ -433,6 +565,8 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   flex-direction: column
 }
 
+.mobile-archive-search, .pathway-picker-trigger { display: none; }
+
 .search-box {
   height: 46px;
   display: flex;
@@ -440,6 +574,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   gap: 10px;
   padding: 0 13px;
   border: 1px solid #292b34;
+  border-radius: var(--radius-md);
   background: #0d0f17
 }
 
@@ -461,7 +596,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   outline: 0;
   background: none;
   color: #eee;
-  font: 12px 'JetBrains Mono', monospace
+  font: 14px var(--font-ui)
 }
 
 .search-box button {
@@ -477,7 +612,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   justify-content: space-between;
   margin: 22px 4px 10px;
   color: #75757e;
-  font: 10px 'JetBrains Mono', monospace;
+  font: 10px var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 2px
 }
@@ -490,6 +625,8 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   overflow: auto;
   padding-right: 5px
 }
+.pathway-list { scrollbar-width: none; }
+.pathway-list::-webkit-scrollbar { display: none; }
 
 .pathway-list > button {
   width: 100%;
@@ -499,11 +636,15 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   align-items: center;
   padding: 10px;
   border: 1px solid transparent;
+  border-radius: var(--radius-md);
   background: transparent;
   color: #aaa;
   text-align: left;
   cursor: pointer;
-  transition: .2s
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard)
 }
 
 .pathway-list > button:hover {
@@ -523,6 +664,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   display: grid;
   place-items: center;
   border: 1px solid #292b34;
+  border-radius: var(--radius-md);
   background: #090b11
 }
 
@@ -533,19 +675,19 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 }
 
 .sigil b, .large-sigil b {
-  font-family: 'Playfair Display';
+  font-family: var(--font-display);
   color: var(--myst-gold)
 }
 
 .pathway-list strong {
   display: block;
-  font: 600 15px 'Playfair Display', serif
+  font: 600 15px var(--font-display)
 }
 
 .pathway-list small {
   display: block;
   color: #62626b;
-  font: 9px 'JetBrains Mono', monospace;
+  font: 12px var(--font-ui);
   text-transform: uppercase
 }
 
@@ -567,8 +709,14 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   gap: 28px;
   padding: 22px 28px;
   border: 1px solid rgba(200, 178, 115, .22);
+  border-radius: var(--radius-xl);
   background: radial-gradient(circle at 10% 50%, rgba(200, 178, 115, .12), transparent 42%), #0d0f17
 }
+
+.pathway-detail, .pathway-controls { min-width: 0; width: 100%; }
+
+.pathway-heading-copy { min-width: 0; }
+.pathway-picker-trigger { min-height: 44px; margin-left: auto; flex: none; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid rgba(200, 178, 115, .35); border-radius: var(--radius-md); background: rgba(200, 178, 115, .08); color: #eee9dd; font: 700 13px var(--font-ui); cursor: pointer; }
 
 .large-sigil {
   width: 105px;
@@ -591,13 +739,13 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 
 .pathway-header h2 {
   margin: 3px 0 2px;
-  font: 700 clamp(30px, 5vw, 48px) 'Playfair Display', serif
+  font: 700 clamp(30px, 5vw, 48px) var(--font-display)
 }
 
 .pathway-header p {
   margin: 0;
   color: #72727c;
-  font: 11px 'JetBrains Mono', monospace;
+  font: 12px var(--font-ui);
   text-transform: uppercase
 }
 
@@ -612,6 +760,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   min-width: 60px;
   height: 48px;
   border: 1px solid #292b34;
+  border-radius: var(--radius-md);
   background: #0c0e15;
   color: #aaa;
   cursor: pointer
@@ -624,12 +773,12 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 
 .sequence-jump small {
   display: block;
-  font: 8px 'JetBrains Mono', monospace;
-  color: #666
+  font: 10px var(--font-ui);
+  color: #9a979d
 }
 
 .sequence-jump b {
-  font: 20px 'Playfair Display', serif
+  font: 20px var(--font-display)
 }
 
 .sequence-list {
@@ -643,6 +792,8 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   display: grid;
   grid-template-columns:100px 1fr;
   border: 1px solid #22242c;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   background: #0b0d14
 }
 
@@ -656,13 +807,13 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 .sequence-number small {
   display: block;
   color: #707079;
-  font: 8px 'JetBrains Mono', monospace;
+  font: 10px var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 2px
 }
 
 .sequence-number b {
-  font: 700 52px 'Playfair Display', serif;
+  font: 700 52px var(--font-display);
   color: var(--myst-gold)
 }
 
@@ -680,12 +831,12 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 
 .sequence-title h3 {
   margin: 4px 0 0;
-  font: 600 28px 'Playfair Display', serif
+  font: 600 28px var(--font-display)
 }
 
 .sequence-title > small {
-  color: #666;
-  font: 9px 'JetBrains Mono', monospace;
+  color: #a3a0a6;
+  font: 12px var(--font-ui);
   text-transform: uppercase
 }
 
@@ -713,13 +864,13 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 .ability h4 {
   margin: 0 0 4px;
   color: #ddd9ce;
-  font: 600 14px 'Playfair Display', serif
+  font: 600 14px var(--font-display)
 }
 
 .ability p {
   margin: 0;
   color: #85858e;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.6
 }
 
@@ -727,6 +878,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   padding: 100px 20px;
   text-align: center;
   border: 1px solid #22242c;
+  border-radius: var(--radius-lg);
   color: #777
 }
 
@@ -738,6 +890,30 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 .detail-empty h3 {
   color: #ddd
 }
+.sequence-rail-label { display: none; }
+.sequence-jump { scrollbar-width: none; scroll-snap-type: x proximity; }
+.sequence-jump::-webkit-scrollbar { display: none; }
+.sequence-jump button { scroll-snap-align: start; }
+
+.pathway-picker-sheet {
+  width: min(620px, 100%);
+  max-height: min(88dvh, 760px);
+  margin: auto auto 0;
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(200, 178, 115, .25);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  color: #eceae4;
+  background: #0b0d14;
+  box-shadow: 0 -24px 70px rgba(0, 0, 0, .55);
+}
+.pathway-picker-sheet::backdrop { background: rgba(3, 4, 7, .78); backdrop-filter: blur(8px); }
+.picker-sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 22px; }
+.picker-sheet-head h2 { margin: 5px 0 0; font-size: 30px; }
+.picker-sheet-close { width: 44px; height: 44px; flex: none; border: 1px solid #30323b; border-radius: var(--radius-md); background: transparent; color: #d6d2cb; font-size: 25px; cursor: pointer; }
+.picker-search { margin-bottom: 8px; }
+.pathway-picker-list { max-height: none; overflow: visible; padding-right: 0; }
 
 @media (max-width: 900px) {
   .archive-layout {
@@ -745,16 +921,14 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
     padding-top: 30px
   }
 
-  .pathway-browser {
-    position: static;
-    max-height: none
-  }
-
-  .pathway-list {
-    display: grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    max-height: 390px
-  }
+  .pathway-browser--desktop { display: none; }
+  .mobile-archive-search { display: block; margin-bottom: 14px; }
+  .pathway-picker-trigger { display: inline-flex; }
+  .pathway-controls .pathway-header { position: relative; padding-right: 108px; }
+  .pathway-heading-copy { flex: 1; min-width: 0; }
+  .pathway-picker-trigger { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); }
+  .sequence-rail-label { display: flex; justify-content: space-between; gap: 16px; padding-top: 9px; color: #aaa7aa; font: 650 11px var(--font-ui); }
+  .sequence-rail-label span:last-child { color: var(--myst-gold); }
 
   .archive-stats {
     gap: 12px
@@ -777,10 +951,6 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   .archive-layout {
     padding-left: 14px;
     padding-right: 14px
-  }
-
-  .pathway-list {
-    grid-template-columns:1fr
   }
 
   .pathway-header {
@@ -851,7 +1021,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 .search-label {
   margin: 0 0 7px;
   color: var(--myst-gold);
-  font: 700 11px 'JetBrains Mono', monospace;
+  font: 700 11px var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 1.6px
 }
@@ -875,7 +1045,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 
 .search-box kbd {
   color: #777;
-  font: 18px sans-serif
+  font: 18px var(--font-mono)
 }
 
 .browser-heading {
@@ -893,14 +1063,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
     padding-top: 20px
   }
 
-  .pathway-list {
-    display: block;
-    max-height: 430px
-  }
-
-  .pathway-browser {
-    max-height: none
-  }
+  .pathway-browser--desktop { display: none; }
 }
 
 @media (max-width: 560px) {
@@ -1071,7 +1234,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 }
 
 @media (max-width: 560px) {
-  .archive-hero > p, .archive-stats {
+  .archive-hero > p {
     display: none
   }
 
@@ -1081,7 +1244,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 
   .pathway-controls .pathway-header {
     min-height: 70px;
-    padding: 7px 12px
+    padding: 7px 108px 7px 12px
   }
 
   .pathway-controls .large-sigil {
@@ -1092,6 +1255,14 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   .pathway-controls .pathway-header p {
     display: none
   }
+
+  .archive-stats { display: flex; gap: 9px; font-size: 10.5px; }
+  .archive-stats b { font-size: 13px; }
+  .archive-stats span:last-child, .archive-stats i:last-of-type { display: none; }
+  .archive-freshness { font-size: 11px; padding-inline: 8px; }
+  .pathway-picker-trigger { padding-inline: 10px; }
+  .pathway-picker-sheet { width: 100%; height: 100dvh; max-height: none; padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)); border-radius: 0; }
+  .pathway-picker-list > button:hover:not(.active) { background: transparent; color: #aaa; }
 
   .pathway-controls .sequence-jump {
     padding: 6px 0 9px
@@ -1109,8 +1280,8 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 /* Search stays prominent before interaction; current Sequence remains easy to locate. */
 .search-box {
   height: 58px;
-  border-color: var(--myst-gold);
-  box-shadow: 0 0 0 3px rgba(200, 178, 115, .1), 0 8px 24px rgba(0, 0, 0, .18)
+  border-color: #343640;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18)
 }
 
 .search-box:focus-within {
@@ -1122,7 +1293,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   border-color: var(--myst-gold);
   background: linear-gradient(145deg, rgba(200, 178, 115, .27), rgba(200, 178, 115, .07));
   box-shadow: inset 0 0 14px rgba(200, 178, 115, .14), 0 0 9px rgba(200, 178, 115, .13);
-  transform: translateY(-1px)
+  transform: translateY(var(--hover-control))
 }
 
 .sequence-card.current {
@@ -1136,8 +1307,8 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   justify-content: center;
   gap: 7px;
   margin-top: 9px;
-  color: #6f7079;
-  font: 9px 'JetBrains Mono', monospace;
+  color: #a3a0a6;
+  font: 12px var(--font-ui);
   letter-spacing: .35px
 }
 
@@ -1162,7 +1333,10 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
   }
 
   .archive-freshness i {
-    display: none
+    flex-basis: 100%;
+    width: 0;
+    height: 0;
+    overflow: hidden
   }
 }
 </style>

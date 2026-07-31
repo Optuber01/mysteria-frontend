@@ -14,10 +14,18 @@
   <Teleport to="body">
     <Transition name="ritual-fade">
       <div v-if="showCurrencyModal" class="modal-ritual-overlay" @click="closeCurrencyModal">
-        <div class="modal-ritual-content compact" @click.stop>
+         <div
+            ref="currencyDialogRef"
+            aria-labelledby="currency-modal-title"
+            aria-modal="true"
+            class="modal-ritual-content compact"
+            role="dialog"
+            tabindex="-1"
+            @click.stop
+        >
           <div class="modal-ritual-header">
-            <h3 class="ritual-title">{{ t('currencySettings') }}</h3>
-            <button class="modal-ritual-close" @click="closeCurrencyModal">†</button>
+            <h3 id="currency-modal-title" class="ritual-title">{{ t('currencySettings') }}</h3>
+            <button :aria-label="t('close')" class="modal-ritual-close" type="button" @click="closeCurrencyModal">×</button>
           </div>
           
           <div class="modal-ritual-body no-scrollbar">
@@ -28,7 +36,9 @@
                 <button
                     v-for="curr in currencies"
                     :key="curr.code"
-                    :class="['currency-ritual-option', { active: currentCurrency === curr.code }]"
+                     :class="['currency-ritual-option', { active: currentCurrency === curr.code }]"
+                     :aria-pressed="currentCurrency === curr.code"
+                    type="button"
                     @click="selectCurrency(curr.code)"
                 >
                   <span v-if="curr.symbol" class="curr-symbol">{{ curr.symbol }}</span>
@@ -55,12 +65,12 @@
 
             <div v-if="currentLanguage === 'en'" class="ritual-warning-box">
               <p class="warning-ritual-text">
-                † {{ t('donationWarning') }}
+                {{ t('donationWarning') }}
               </p>
             </div>
 
             <div class="modal-ritual-actions">
-              <a :href="topUpUrl" class="btn-ritual-primary" target="_blank">
+              <a :href="topUpUrl" class="btn-ritual-primary" rel="noopener noreferrer" target="_blank">
                 {{ t('topUpBalance') }}
               </a>
             </div>
@@ -78,8 +88,9 @@ import {useI18n} from "@/composables/useI18n";
 import {useCurrency} from "@/composables/useCurrency";
 import {computed, ref} from "vue";
 import IconBalance from "@/assets/icons/IconBalance.vue";
+import {useModalA11y} from '@/composables/useModalA11y';
 
-const props = defineProps<{
+defineProps<{
   iconMode?: boolean;
 }>();
 
@@ -96,6 +107,7 @@ const topUpUrl = computed(() =>
         : donatelloUrl.value
 );
 const showCurrencyModal = ref(false);
+const currencyDialogRef = ref<HTMLElement | null>(null);
 
 const currencies = [
   { code: 'USD', symbol: '$' },
@@ -112,6 +124,7 @@ const getRateText = (code: string) => {
 const closeCurrencyModal = () => {
   showCurrencyModal.value = false;
 };
+useModalA11y(showCurrencyModal, currencyDialogRef, closeCurrencyModal);
 
 const selectCurrency = (currency: 'USD' | 'EUR' | 'POINTS') => {
   setCurrency(currency);
@@ -135,11 +148,11 @@ const handleTopUpClick = () => {
   height: 40px;
   background: rgba(200, 178, 115, 0.1);
   border: 1px solid rgba(200, 178, 115, 0.3);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   color: var(--myst-gold);
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'JetBrains Mono', monospace;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -171,6 +184,10 @@ const handleTopUpClick = () => {
   width: 100%; max-width: 440px;
   display: flex; flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  max-height: calc(100dvh - 40px);
+  overscroll-behavior: contain;
 }
 
 .modal-ritual-header {
@@ -180,28 +197,30 @@ const handleTopUpClick = () => {
 }
 
 .ritual-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 18px; color: var(--myst-gold); margin: 0;
 }
 
 .modal-ritual-close {
   background: none; border: none;
   color: #444; font-size: 20px;
-  cursor: pointer; transition: color 0.3s;
+  cursor: pointer; transition: color var(--motion-base) var(--ease-standard);
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
 }
 .modal-ritual-close:hover { color: var(--myst-gold); }
 
-.modal-ritual-body { padding: 24px; }
+.modal-ritual-body { padding: 24px; overflow-y: auto; }
 
 .ritual-section { margin-bottom: 24px; }
 
 .ritual-section-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 14px; color: #fff; margin-bottom: 6px;
 }
 
 .ritual-section-desc {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px; color: #666; margin-bottom: 12px;
 }
 
@@ -214,7 +233,8 @@ const handleTopUpClick = () => {
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 12px 4px;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  cursor: pointer; transition: all 0.3s;
+  cursor: pointer; transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
 }
 
 .currency-ritual-option:hover { border-color: rgba(200, 178, 115, 0.3); }
@@ -225,12 +245,14 @@ const handleTopUpClick = () => {
 
 .curr-symbol { font-size: 18px; color: #fff; }
 .curr-icon { width: 18px; height: 18px; color: var(--myst-gold); }
-.curr-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #aaa; }
+.curr-name { font-family: var(--font-mono); font-size: 11px; color: #aaa; }
 .curr-rate { font-size: 8px; color: #555; text-align: center; }
 
 .conversion-ledger {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .ledger-row {
@@ -238,13 +260,14 @@ const handleTopUpClick = () => {
   padding: 10px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.ledger-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #888; }
-.ledger-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--myst-gold); }
+.ledger-label { font-family: var(--font-mono); font-size: 12px; color: #888; }
+.ledger-val { font-family: var(--font-mono); font-size: 12px; color: var(--myst-gold); }
 
 .ritual-warning-box {
   background: rgba(200, 178, 115, 0.03);
   border-left: 2px solid var(--myst-gold);
   padding: 12px; margin-bottom: 24px;
+  border-radius: var(--radius-md);
 }
 
 .warning-ritual-text { font-size: 11px; color: #666; line-height: 1.4; margin: 0; }
@@ -252,14 +275,15 @@ const handleTopUpClick = () => {
 .btn-ritual-primary {
   width: 100%; display: flex; align-items: center; justify-content: center;
   padding: 12px; background: var(--myst-gold); color: #05070a;
-  text-decoration: none; font-family: 'Playfair Display', serif;
-  font-size: 16px; font-weight: 700; transition: all 0.3s;
+  border-radius: var(--radius-md);
+  text-decoration: none; font-family: var(--font-ui);
+  font-size: 16px; font-weight: 700; transition: background-color var(--motion-base) var(--ease-standard);
 }
 
 .btn-ritual-primary:hover { background: #fff; }
 
-.ritual-fade-enter-active, .ritual-fade-leave-active { transition: all 0.4s ease; }
-.ritual-fade-enter-from, .ritual-fade-leave-to { opacity: 0; transform: scale(0.95); }
+.ritual-fade-enter-active, .ritual-fade-leave-active { transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter); }
+.ritual-fade-enter-from, .ritual-fade-leave-to { opacity: 0; transform: scale(0.98); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 </style>

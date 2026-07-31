@@ -63,6 +63,7 @@ const {t} = useI18n();
   padding: 60px;
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid rgba(200, 178, 115, 0.1);
+  border-radius: var(--radius-xl);
   backdrop-filter: blur(10px);
   max-width: 500px;
   width: 100%;
@@ -76,7 +77,7 @@ const {t} = useI18n();
 }
 
 .ritual-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 28px;
   color: #fff;
   margin-bottom: 0;
@@ -101,11 +102,9 @@ const {t} = useI18n();
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
 .benefit-item i {

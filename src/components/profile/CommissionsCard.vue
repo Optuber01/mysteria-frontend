@@ -77,7 +77,7 @@ onMounted(load);
   position: relative;
   background: rgba(13, 16, 30, 0.4);
   padding: 28px 32px;
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -89,7 +89,7 @@ onMounted(load);
 
 .card-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -100,7 +100,7 @@ onMounted(load);
 
 .card-title {
   margin: 0;
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--myst-offwhite);
 }
@@ -140,6 +140,7 @@ onMounted(load);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
+  border-radius: var(--radius-md);
 }
 
 .stat.highlight {
@@ -149,7 +150,7 @@ onMounted(load);
 
 .stat-value {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 24px;
   font-weight: 700;
   color: var(--myst-gold);
@@ -176,11 +177,12 @@ onMounted(load);
   border: 1px solid rgba(200, 178, 115, 0.3);
   color: var(--myst-gold);
   text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.2s;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .card-cta:hover {

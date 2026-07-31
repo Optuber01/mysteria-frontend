@@ -16,7 +16,7 @@
         <div class="ritual-pulse"></div>
       </div>
       <div class="header-content">
-        <span class="ritual-eyebrow">Soul Binding</span>
+        <span class="ritual-eyebrow">Account verification</span>
         <h3 class="ritual-title">{{ t("verifyMinecraftAccount") }}</h3>
         <p class="ritual-subtitle">{{ t('verificationDescriptionPre') }} <code>{{ t('verificationDescriptionCommand') }}</code> {{ t('verificationDescriptionPost') }}</p>
       </div>
@@ -32,13 +32,12 @@
       >
         <div v-if="isGenerating" class="btn-loader">
           <div class="spinner"></div>
-          <span>INITIATING...</span>
+          <span>{{ t('processing') }}</span>
         </div>
         <div v-else class="btn-content">
           <i class="fa-solid fa-wand-sparkles"></i>
           <span>{{ t("generateCode") }}</span>
         </div>
-        <div class="btn-flare"></div>
       </button>
 
       <!-- The Engraved Code -->
@@ -113,7 +112,7 @@ const generateCode = async () => {
     if (!response.ok) throw new Error("Failed to generate code");
     verificationCode.value = await response.json();
     show(t("verificationCodeGenerated"), {type: "success"});
-  } catch (error) {
+  } catch {
     show(t("verificationCodeError"), {type: "error"});
   } finally {
     isGenerating.value = false;
@@ -127,7 +126,7 @@ const copyCode = async () => {
     copied.value = true;
     show(t("copySuccess"), {type: "info"});
     setTimeout(() => { copied.value = false; }, 2000);
-  } catch (error) {
+  } catch {
     show(t("copyError"), {type: "error"});
   }
 };
@@ -146,7 +145,7 @@ const formatExpiry = (expiresAt: string) => {
   position: relative;
   background: rgba(13, 16, 30, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   padding: 40px;
 }
@@ -156,6 +155,7 @@ const formatExpiry = (expiresAt: string) => {
   inset: 12px;
   border: 1px solid rgba(200, 178, 115, 0.1);
   pointer-events: none;
+  border-radius: var(--radius-md);
 }
 
 /* Header */
@@ -175,24 +175,19 @@ const formatExpiry = (expiresAt: string) => {
   align-items: center;
   justify-content: center;
   color: var(--myst-gold);
+  border-radius: var(--radius-lg);
 }
 
 .ritual-pulse {
   position: absolute;
   inset: -8px;
   border: 1px solid rgba(200, 178, 115, 0.1);
-  animation: ritualPulse 4s ease-in-out infinite;
-}
-
-@keyframes ritualPulse {
-  0% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.5; }
+  border-radius: var(--radius-xl);
 }
 
 .ritual-eyebrow {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 11px;
   color: var(--myst-gold);
   text-transform: uppercase;
@@ -201,7 +196,7 @@ const formatExpiry = (expiresAt: string) => {
 }
 
 .ritual-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 28px;
   color: var(--myst-offwhite);
   margin: 0 0 12px;
@@ -221,32 +216,19 @@ const formatExpiry = (expiresAt: string) => {
   border: 1px solid var(--myst-gold);
   color: var(--myst-gold);
   padding: 16px 32px;
-  font-family: 'JetBrains Mono', monospace;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
   cursor: pointer;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .btn-activate-ritual:hover:not(:disabled) {
   background: var(--myst-gold);
   color: #000;
-  box-shadow: 0 0 30px rgba(200, 178, 115, 0.3);
-}
-
-.btn-flare {
-  position: absolute;
-  top: 0; left: -100%;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transform: skewX(-25deg);
-  transition: left 0.6s ease;
-}
-
-.btn-activate-ritual:hover .btn-flare {
-  left: 150%;
 }
 
 /* Code Card */
@@ -256,7 +238,8 @@ const formatExpiry = (expiresAt: string) => {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(200, 178, 115, 0.3);
   padding: 32px;
-  animation: reveal Ritual 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .engraving-bg {
@@ -275,7 +258,7 @@ const formatExpiry = (expiresAt: string) => {
 }
 
 .code-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: #666;
   text-transform: uppercase;
@@ -285,12 +268,11 @@ const formatExpiry = (expiresAt: string) => {
   width: 10px; height: 10px;
   border-radius: 50%;
   background: #333;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard);
 }
 
 .status-orb.copied {
   background: var(--myst-gold);
-  box-shadow: 0 0 10px var(--myst-gold);
 }
 
 .code-wrapper {
@@ -300,7 +282,8 @@ const formatExpiry = (expiresAt: string) => {
   text-align: center;
   position: relative;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
 }
 
 .code-wrapper:hover {
@@ -309,7 +292,7 @@ const formatExpiry = (expiresAt: string) => {
 }
 
 .sigil-code {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 32px;
   font-weight: 800;
   color: var(--myst-gold);
@@ -351,20 +334,21 @@ const formatExpiry = (expiresAt: string) => {
   background: #080a14;
   padding: 12px 16px;
   border-left: 2px solid var(--myst-gold);
+  border-radius: var(--radius-md);
 }
 
 .cmd-box code {
   color: var(--myst-offwhite);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 /* Animations */
 .ritual-reveal-enter-active {
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter);
 }
 .ritual-reveal-enter-from {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(8px);
 }
 
 /* Responsive */

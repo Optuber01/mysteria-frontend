@@ -109,7 +109,7 @@ export function useNotification() {
             id: String(Date.now() + 1),
             message: detailsMessage,
             type: "error" as const,
-            duration: 10000,
+            duration: 0,
             clickable: true,
             copyable: true,
             errorDetails: apiError,

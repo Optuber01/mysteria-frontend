@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка замочку"
+      aria-hidden="true"
       class="icon-lock"
       fill="none"
       height="404"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 403 404"
       width="403"
       xmlns="http://www.w3.org/2000/svg"
@@ -34,6 +33,6 @@
   width: 403px;
   height: 404px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

@@ -94,19 +94,15 @@ const handleClick = async () => {
   align-items: center;
   justify-content: center;
   user-select: none;
-  animation: cat-bob 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 6px rgba(200, 178, 115, 0.0));
-  transition: filter 0.3s ease, transform 0.2s ease;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 
 .daily-cat-wrapper:hover {
-  filter: drop-shadow(0 0 10px rgba(200, 178, 115, 0.5));
-  transform: scale(1.08);
-  animation-play-state: paused;
+  transform: scale(1.025);
 }
 
 .daily-cat-wrapper:active {
-  transform: scale(0.96);
+  transform: scale(0.98);
 }
 
 .daily-cat-img {
@@ -114,8 +110,8 @@ const handleClick = async () => {
   height: 64px;
   object-fit: contain;
   opacity: 0.75;
-  transition: opacity 0.3s ease;
-  border-radius: 4px;
+  transition: opacity var(--motion-base) var(--ease-standard);
+  border-radius: var(--radius-md);
 }
 
 .daily-cat-wrapper:hover .daily-cat-img {
@@ -127,35 +123,25 @@ const handleClick = async () => {
   inset: -4px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(200, 178, 115, 0.15) 0%, transparent 70%);
-  animation: glow-pulse 2.5s ease-in-out infinite;
+  opacity: 0.5;
   pointer-events: none;
 }
 
-@keyframes cat-bob {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes glow-pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.15); }
-}
-
 .cat-fade-enter-active {
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter);
 }
 
 .cat-fade-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity var(--motion-base) var(--ease-enter), transform var(--motion-base) var(--ease-enter);
 }
 
 .cat-fade-enter-from {
   opacity: 0;
-  transform: translateY(12px) scale(0.85);
+  transform: translateY(8px) scale(0.98);
 }
 
 .cat-fade-leave-to {
   opacity: 0;
-  transform: scale(0.7);
+  transform: scale(0.98);
 }
 </style>

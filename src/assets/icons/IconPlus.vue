@@ -1,10 +1,10 @@
 <template>
   <svg
-      aria-label="Plus icon"
+      aria-hidden="true"
       class="icon-plus"
       fill="none"
       height="14"
-      role="img"
+      focusable="false"
       viewBox="0 0 24 24"
       width="14"
       xmlns="http://www.w3.org/2000/svg"

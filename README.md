@@ -1,6 +1,6 @@
 # Mysteria Frontend
 
-A modern Vue 3 frontend for Mysteria, a Lord of The Mysteries-inspired Minecraft server. Built with TypeScript, Vite, and Pinia.
+A modern Vue 3 frontend for Mysterria, a Lord of the Mysteries-inspired Minecraft server. Built with TypeScript, Vite, and Pinia.
 
 ## ✨ Features
 

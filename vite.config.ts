@@ -113,7 +113,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
     balanceReportDevEndpointPlugin(env),
     vue(),
     vueJsx(),
-    vueDevTools(),
+    env.VITE_ENABLE_DEVTOOLS === 'true' && vueDevTools(),
     vercel(),
     copyRobotsPlugin(), // Must run before sitemap plugin
     generateSitemap({

@@ -55,6 +55,7 @@ const barStyle = (idx: number) => {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  font-family: var(--font-ui);
 }
 
 .strip-empty {
@@ -67,7 +68,7 @@ const barStyle = (idx: number) => {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   font-size: 10px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   color: color-mix(in srgb, var(--myst-ink-muted) 75%, transparent);
   padding: 0 96px 6px 220px;
 }
@@ -92,10 +93,11 @@ const barStyle = (idx: number) => {
   padding: 4px 6px;
   background: none;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard),
+              border-color var(--motion-fast) var(--ease-standard);
 }
 
 .strip-row:hover {
@@ -134,12 +136,12 @@ const barStyle = (idx: number) => {
 
 .strip-bar.over {
   background: var(--bal-pos, #e34948);
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .strip-bar.under {
   background: var(--bal-neg, #2a78d6);
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
 
 .strip-bar.flagged {
@@ -148,7 +150,7 @@ const barStyle = (idx: number) => {
 }
 
 .strip-val {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--myst-ink);
   font-variant-numeric: tabular-nums;

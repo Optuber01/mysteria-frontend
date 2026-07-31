@@ -58,7 +58,7 @@
 
         <div :style="{ maxHeight: `${maxHeight}px` }" class="dropdown-options no-scrollbar">
           <div
-              v-for="(option, idx) in displayOptions"
+              v-for="option in displayOptions"
               :key="getOptionKey(option)"
               :class="{
               'is-selected': isSelected(option),
@@ -540,10 +540,10 @@ onBeforeUnmount(() => {
   padding: 12px 20px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
   min-height: 48px;
 }
 
@@ -555,7 +555,6 @@ onBeforeUnmount(() => {
 .dropdown-trigger.is-open {
   border-color: var(--myst-gold);
   background: rgba(200, 178, 115, 0.05);
-  box-shadow: 0 0 15px rgba(200, 178, 115, 0.1);
 }
 
 .dropdown-trigger.is-disabled {
@@ -564,23 +563,21 @@ onBeforeUnmount(() => {
 }
 
 .selected-text {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-ui);
   font-size: 16px;
   color: var(--myst-gold);
 }
 
 .placeholder-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   color: #666;
-  text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
 .dropdown-arrow {
   color: #666;
   font-size: 12px;
-  transition: transform 0.3s ease;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 
 .dropdown-trigger.is-open .dropdown-arrow {
@@ -597,14 +594,14 @@ onBeforeUnmount(() => {
 .dropdown-menu {
   background: #080a14;
   border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
   overflow: hidden;
-  animation: ritualEnter 0.2s ease-out;
+  animation: ritualEnter var(--motion-base) var(--ease-enter);
 }
 
 @keyframes ritualEnter {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -619,8 +616,9 @@ onBeforeUnmount(() => {
   padding: 8px 12px;
   background: #05070a;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
   color: #fff;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   outline: none;
 }
@@ -636,7 +634,7 @@ onBeforeUnmount(() => {
 .dropdown-option {
   padding: 12px 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard);
   border-left: 2px solid transparent;
 }
 
@@ -653,7 +651,7 @@ onBeforeUnmount(() => {
 
 .option-text {
   display: block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
   color: #ccc;
   margin-bottom: 2px;
@@ -673,7 +671,7 @@ onBeforeUnmount(() => {
 .dropdown-no-results {
   padding: 20px;
   text-align: center;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   color: #444;
 }
@@ -685,7 +683,7 @@ onBeforeUnmount(() => {
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 12px;
   cursor: pointer;
   text-align: left;

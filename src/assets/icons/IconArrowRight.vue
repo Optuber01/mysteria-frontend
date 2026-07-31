@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка стрілки вправо"
+      aria-hidden="true"
       class="icon-arrow-right"
       fill="none"
       height="25"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 24 25"
       width="24"
       xmlns="http://www.w3.org/2000/svg"
@@ -39,6 +38,6 @@
   height: 25px;
   display: block;
   margin-left: 20px;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

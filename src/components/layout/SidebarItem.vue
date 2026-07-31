@@ -52,7 +52,7 @@
 
         <!-- Admin Section -->
         <div v-if="canEditAnyContent || canTuneBalance" class="nav-ritual-section">
-          <div v-show="!isCollapsed" class="nav-ritual-label">Registry</div>
+          <div v-show="!isCollapsed" class="nav-ritual-label">Admin</div>
           
           <RouterLink
               v-if="canManageNews"
@@ -160,7 +160,7 @@ onBeforeUnmount(() => {
   left: 0;
   background: #080a14;
   border-right: 1px solid rgba(200, 178, 115, 0.1);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: width var(--motion-slow) var(--ease-enter), transform var(--motion-base) var(--ease-standard);
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -189,14 +189,14 @@ onBeforeUnmount(() => {
   padding: 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: var(--radius-lg);
 }
 
 .ritual-logo-icon { width: 32px; height: 32px; color: var(--myst-gold); }
 
 .logo-ritual-text { display: flex; flex-direction: column; }
-.logo-main { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #fff; }
-.logo-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--myst-gold); text-transform: uppercase; letter-spacing: 2px; }
+.logo-main { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: #fff; }
+.logo-sub { font-family: var(--font-ui); font-size: 10px; color: var(--myst-gold); letter-spacing: 0.08em; }
 
 .ritual-nav-area { flex: 1; display: flex; flex-direction: column; gap: 40px; }
 
@@ -204,11 +204,11 @@ onBeforeUnmount(() => {
 .nav-ritual-section.bottom { margin-top: auto; padding-top: 32px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
 
 .nav-ritual-label {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-ui);
   font-size: 12px;
+  font-weight: 600;
   color: var(--myst-gold);
-  text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 0.06em;
   margin-bottom: 12px;
   opacity: 0.6;
 }
@@ -220,18 +220,17 @@ onBeforeUnmount(() => {
   padding: 12px 16px;
   color: #888;
   text-decoration: none;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  transition: background-color var(--motion-base) var(--ease-standard), border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
   border: 1px solid transparent;
 }
 
 .nav-ritual-icon { width: 20px; font-size: 16px; display: flex; justify-content: center; }
 
 .nav-ritual-text {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-weight: 500;
 }
 
 .nav-ritual-item:hover {
@@ -257,7 +256,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   align-self: center;
   margin-top: 16px;
-  transition: all 0.3s;
+  transition: border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard);
 }
 
 .ritual-toggle-btn:hover { color: var(--myst-gold); border-color: var(--myst-gold); }

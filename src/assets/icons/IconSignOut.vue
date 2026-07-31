@@ -1,12 +1,11 @@
 <template>
   <svg
-      aria-label="Вийти"
+      aria-hidden="true"
       class="icon-sign-out"
       fill="none"
       height="25"
-      role="img"
+      focusable="false"
       stroke="#B4BBC5"
-      tabindex="0"
       viewBox="0 0 25 25"
       width="25"
       xmlns="http://www.w3.org/2000/svg"
@@ -37,6 +36,6 @@
   width: 25px;
   height: 25px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

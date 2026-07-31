@@ -1,7 +1,7 @@
 <template>
   <div class="news-ritual-page page-container">
     <HeaderItem/>
-    <main class="news-article-ritual">
+    <main id="main-content" class="news-article-ritual" tabindex="-1">
       <div v-if="article" class="article-ritual-box">
         <!-- Navigation -->
         <div class="article-ritual-nav">
@@ -30,13 +30,16 @@
       </div>
 
       <!-- Loading / Error -->
-      <div v-else-if="loading" class="ritual-loading-area">
-        <div class="ritual-spinner"></div>
-        <p>{{ t('loadingService') || 'Invoking the archives...' }}</p>
+      <div v-else-if="loading" aria-live="polite" class="ritual-loading-area" role="status">
+        <div aria-hidden="true" class="ritual-spinner"></div>
+        <h1>{{ t('loading') || 'Loading article' }}</h1>
+        <p>{{ t('loadingService') || 'Loading article...' }}</p>
       </div>
-      <div v-else class="ritual-error-area">
-        <p>Registry entry not found or restricted.</p>
-        <button class="btn-ritual-back" @click="goBack">RECOVER</button>
+      <div v-else class="ritual-error-area" role="alert">
+        <h1 ref="errorHeading" tabindex="-1">Article unavailable</h1>
+        <p>{{ loadError }}</p>
+        <button class="btn-ritual-back" type="button" @click="loadArticle">Try again</button>
+        <button class="btn-ritual-back" type="button" @click="router.push('/')">Return home</button>
       </div>
     </main>
     <FooterItem/>
@@ -58,6 +61,8 @@ const route = useRoute();
 const router = useRouter();
 const article = ref<NewsArticle | null>(null);
 const loading = ref(true);
+const loadError = ref('');
+const errorHeading = ref<HTMLElement | null>(null);
 const {currentLanguage, setLanguage, t} = useI18n();
 
 const md = new MarkdownIt({
@@ -96,13 +101,19 @@ const loadArticle = async () => {
   if (slug) {
     try {
       loading.value = true;
+      loadError.value = '';
       const response = await newsAPI.getBySlug(lang, slug);
       article.value = response.data;
     } catch (error) {
       console.error('Failed to fetch news article:', error);
       article.value = null;
+      loadError.value = 'This article is unavailable or you do not have access to it.';
     } finally {
       loading.value = false;
+      if (loadError.value) {
+        await nextTick();
+        errorHeading.value?.focus();
+      }
     }
   } else {
     loading.value = false;
@@ -119,8 +130,8 @@ const scrollToTop = () => {
 
 const goBack = () => router.back();
 
-watch(() => route.params.slug, async (newSlug, oldSlug) => {
-  if (newSlug && newSlug !== oldSlug) {
+watch(() => route.fullPath, async (newPath, oldPath) => {
+  if (newPath !== oldPath) {
     scrollToTop();
     await loadArticle();
     await nextTick();
@@ -151,11 +162,12 @@ onMounted(async () => {
 .btn-ritual-back {
   background: transparent; border: 1px solid rgba(255, 255, 255, 0.1);
   color: #666; padding: 10px 24px; cursor: pointer;
-  font-family: 'JetBrains Mono', monospace; font-size: 11px;
-  text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 2px; transition: border-color var(--motion-base) var(--ease-standard), color var(--motion-base) var(--ease-standard), transform var(--motion-base) var(--ease-standard);
 }
 
-.btn-ritual-back:hover { color: var(--myst-gold); border-color: var(--myst-gold); transform: translateX(-4px); }
+.btn-ritual-back:hover { color: var(--myst-gold); border-color: var(--myst-gold); transform: translateX(-2px); }
 
 .article-ritual-header { margin-bottom: 60px; text-align: center; }
 
@@ -164,14 +176,14 @@ onMounted(async () => {
 }
 
 .ritual-date {
-  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  font-family: var(--font-ui); font-size: 13px;
   color: var(--myst-gold); text-transform: uppercase; letter-spacing: 4px;
 }
 
 .ritual-header-line { width: 40px; height: 1px; background: var(--myst-gold); opacity: 0.4; }
 
 .article-ritual-title {
-  font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 5vw, 4rem);
+  font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4rem);
   color: #fff; line-height: 1.1; font-weight: 800; margin: 0;
 }
 
@@ -182,7 +194,7 @@ onMounted(async () => {
 /* Content Styles */
 .article-ritual-content :deep(p) { margin-bottom: 24px; }
 .article-ritual-content :deep(h2), .article-ritual-content :deep(h3) {
-  font-family: 'Playfair Display', serif; color: #fff; margin: 48px 0 20px;
+  font-family: var(--font-display); color: #fff; margin: 48px 0 20px;
 }
 .article-ritual-content :deep(strong) { color: var(--myst-gold); font-weight: 700; }
 
@@ -202,17 +214,19 @@ onMounted(async () => {
   margin: 40px 0; padding: 24px 32px;
   background: rgba(255, 255, 255, 0.02);
   border-left: 2px solid var(--myst-gold);
+  border-radius: var(--radius-lg);
   font-style: italic; color: #888;
 }
 
 .article-ritual-content :deep(img) {
   max-width: 100%; height: auto; margin: 40px auto; display: block;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
 }
 
 .article-ritual-content :deep(code) {
   background: rgba(255, 255, 255, 0.05); color: var(--myst-gold);
-  padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9em;
+  padding: 2px 8px; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.9em;
 }
 
 .article-ritual-content :deep(table) {
@@ -232,7 +246,7 @@ onMounted(async () => {
 .article-ritual-content :deep(th) {
   background: rgba(255, 255, 255, 0.04);
   color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 0.8em;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -244,11 +258,11 @@ onMounted(async () => {
 }
 
 .article-ritual-footer { margin-top: 80px; text-align: center; }
-.ritual-end-mark { font-family: 'Playfair Display', serif; color: var(--myst-gold); font-size: 24px; letter-spacing: 8px; opacity: 0.3; }
+.ritual-end-mark { font-family: var(--font-display); color: var(--myst-gold); font-size: 24px; letter-spacing: 8px; opacity: 0.3; }
 
 .ritual-loading-area, .ritual-error-area {
   min-height: 400px; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 24px; color: #444; font-family: 'JetBrains Mono', monospace;
+  justify-content: center; gap: 24px; color: #777; font-family: var(--font-ui);
 }
 
 .ritual-spinner {

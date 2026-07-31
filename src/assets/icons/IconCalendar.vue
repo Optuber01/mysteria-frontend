@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка календаря"
+      aria-hidden="true"
       class="icon-calendar"
       fill="none"
       height="18"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 18 18"
       width="18"
       xmlns="http://www.w3.org/2000/svg"
@@ -62,6 +61,6 @@
   width: 18px;
   height: 18px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

@@ -1,11 +1,10 @@
 <template>
   <svg
-      aria-label="Іконка меню навігації"
+      aria-hidden="true"
       class="icon-navbar"
       fill="none"
       height="18"
-      role="img"
-      tabindex="0"
+      focusable="false"
       viewBox="0 0 22 18"
       width="22"
       xmlns="http://www.w3.org/2000/svg"
@@ -25,6 +24,6 @@
   width: 22px;
   height: 18px;
   display: block;
-  transition: transform 0.2s;
+  transition: transform var(--motion-base) var(--ease-standard);
 }
 </style>

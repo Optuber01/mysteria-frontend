@@ -1,36 +1,35 @@
 <template>
   <div class="catalog-selector">
-    <!-- Header -->
-    <div class="myst-page-header">
-      <div class="myst-header-decoration" aria-hidden="true"></div>
-      <h2 class="myst-header-label">{{ t('shopTitle') || 'Catalogue' }}</h2>
-      <div class="myst-header-decoration" aria-hidden="true"></div>
+    <div v-if="categories.length === 0" class="catalog-empty" role="status">
+      <span class="empty-dot" aria-hidden="true"></span>
+      <div>
+        <h2 class="empty-title">
+          {{ currentLanguage === 'uk' ? 'Товари в крамниці тимчасово недоступні' : 'Shop items are temporarily unavailable' }}
+        </h2>
+         <p class="empty-copy">
+           {{ currentLanguage === 'uk' ? 'Будь ласка, спробуйте ще раз за мить.' : 'Please try again in a moment.' }}
+         </p>
+         <button class="empty-retry" type="button" @click="emit('retry')">{{ t('tryAgain') }}</button>
+      </div>
     </div>
 
     <!-- Category Grid -->
-    <div class="catalog-grid">
-      <div
-          v-for="(category, index) in categories"
+    <div v-else class="catalog-grid">
+      <button
+          v-for="category in categories"
           :key="category.id"
           class="catalog-card"
-          :style="{ '--delay': `${index * 0.1}s` }"
+          type="button"
           @click="handleCategoryClick(category.id)"
       >
         <!-- Card Background Elements -->
-        <div class="card-glow"></div>
         <div class="card-border-frame"></div>
 
         <!-- Thumbnail Image Section -->
         <div class="card-visual">
           <div class="image-container">
-            <img :alt="category.name" :src="category.thumbnailUrl" class="category-img"/>
+            <img :alt="category.name" :src="category.thumbnailUrl" class="category-img" height="360" width="640"/>
             <div class="image-noise"></div>
-          </div>
-          <div class="visual-overlay">
-            <div class="explore-hint">
-              <span class="hint-text">EXPLORE</span>
-              <div class="hint-arrow"></div>
-            </div>
           </div>
         </div>
 
@@ -45,12 +44,12 @@
           <div class="content-footer">
             <div class="item-stat">
               <span class="stat-value">{{ category.itemCount }}</span>
-              <span class="stat-label">Manifestations</span>
+              <span class="stat-label">{{ currentLanguage === 'uk' ? 'Товари' : 'Items' }}</span>
             </div>
             <div class="footer-decoration"></div>
           </div>
         </div>
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -63,9 +62,10 @@ import type {CategoryInfo} from '@/types/services';
 
 const emit = defineEmits<{
   (e: 'select-category', categoryId: string): void;
+  (e: 'retry'): void;
 }>();
 
-const {t} = useI18n();
+const {t, currentLanguage} = useI18n();
 const shopStore = useBalanceStore();
 const items = computed(() => shopStore.items);
 
@@ -118,42 +118,46 @@ const handleCategoryClick = (categoryId: string) => {
   position: relative;
 }
 
-/* Header Refinement */
-.catalog-header {
+.catalog-empty {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 32px;
-  margin-bottom: 64px;
-  text-align: center;
+  gap: 20px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 32px;
+  border: 1px solid rgba(200, 178, 115, 0.2);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 0 50%, rgba(200, 178, 115, 0.1), transparent 42%),
+    rgba(13, 16, 30, 0.68);
 }
 
-.header-line {
-  flex: 1;
-  height: 1px;
-  max-width: 150px;
-  background: linear-gradient(90deg, transparent, var(--myst-gold), transparent);
+.empty-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--myst-gold);
+  box-shadow: 0 0 20px rgba(200, 178, 115, 0.45);
 }
 
-.eyebrow {
-  display: block;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--myst-gold);
-  text-transform: uppercase;
-  letter-spacing: 5px;
-  margin-bottom: 8px;
-}
-
-.title {
-  font-family: 'Playfair Display', serif;
-  font-size: 28px;
+.empty-title {
+  margin: 0 0 6px;
   color: var(--myst-offwhite);
-  margin: 0;
-  font-weight: 700;
-  max-width: 500px;
-  line-height: 1.3;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 600;
 }
+
+.empty-copy {
+  margin: 0;
+  color: var(--myst-ink-muted);
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+.empty-retry { min-height: 44px; margin-top: 16px; padding: 0 18px; border: 1px solid var(--myst-gold); border-radius: var(--radius-md); background: transparent; color: var(--myst-gold); font: 700 14px var(--font-ui); cursor: pointer; }
+.empty-retry:hover { background: rgba(200, 178, 115, .1); }
 
 /* Catalog Grid */
 .catalog-grid {
@@ -168,24 +172,22 @@ const handleCategoryClick = (categoryId: string) => {
 .catalog-card {
   position: relative;
   background: rgba(13, 16, 30, 0.6);
-  border-radius: 4px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  opacity: 0;
-  animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: var(--delay);
-}
-
-@keyframes cardEntrance {
-  from { opacity: 0; transform: translateY(30px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  width: 100%;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  transition:
+    background-color var(--motion-base) var(--ease-standard);
 }
 
 .catalog-card:hover {
-  transform: translateY(-12px);
   background: rgba(20, 24, 45, 0.8);
 }
 
@@ -196,28 +198,12 @@ const handleCategoryClick = (categoryId: string) => {
   border: 1px solid rgba(255, 255, 255, 0.05);
   pointer-events: none;
   z-index: 5;
-  transition: border-color 0.3s ease;
+  transition: border-color var(--motion-base) var(--ease-standard);
+  border-radius: inherit;
 }
 
 .catalog-card:hover .card-border-frame {
   border-color: rgba(200, 178, 115, 0.3);
-}
-
-.card-glow {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 50% 50%, rgba(200, 178, 115, 0.05) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.catalog-card:hover .card-glow {
-  opacity: 1;
 }
 
 /* Visual Area */
@@ -238,7 +224,6 @@ const handleCategoryClick = (categoryId: string) => {
   height: 100%;
   object-fit: cover;
   filter: saturate(0.8) contrast(1.1) brightness(0.8);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
 }
 
 .image-noise {
@@ -248,65 +233,6 @@ const handleCategoryClick = (categoryId: string) => {
   opacity: 0.15;
   mix-blend-mode: overlay;
   pointer-events: none;
-}
-
-.catalog-card:hover .category-img {
-  transform: scale(1.1);
-  filter: saturate(1.1) contrast(1.2) brightness(1);
-}
-
-/* Overlay Interaction */
-.visual-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(8, 10, 20, 0.8) 0%, transparent 60%);
-  display: flex;
-  align-items: flex-end;
-  padding: 24px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.catalog-card:hover .visual-overlay {
-  opacity: 1;
-}
-
-.explore-hint {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transform: translateY(10px);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.catalog-card:hover .explore-hint {
-  transform: translateY(0);
-}
-
-.hint-text {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--myst-gold);
-  letter-spacing: 3px;
-}
-
-.hint-arrow {
-  width: 30px;
-  height: 1px;
-  background: var(--myst-gold);
-  position: relative;
-}
-
-.hint-arrow::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: -3px;
-  width: 6px;
-  height: 6px;
-  border-top: 1px solid var(--myst-gold);
-  border-right: 1px solid var(--myst-gold);
-  transform: rotate(45deg);
 }
 
 /* Content Area */
@@ -325,25 +251,20 @@ const handleCategoryClick = (categoryId: string) => {
 }
 
 .category-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
   font-size: 22px;
   color: var(--myst-offwhite);
   margin: 0;
   font-weight: 700;
-  transition: color 0.3s ease;
-}
-
-.catalog-card:hover .category-title {
-  color: var(--myst-gold);
 }
 
 .category-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 10px;
   padding: 4px 8px;
   border: 1px solid rgba(200, 178, 115, 0.3);
   color: var(--myst-gold);
-  border-radius: 2px;
+  border-radius: var(--radius-pill);
   text-transform: uppercase;
 }
 
@@ -370,7 +291,7 @@ const handleCategoryClick = (categoryId: string) => {
 }
 
 .stat-value {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-ui);
   font-size: 20px;
   font-weight: 700;
   color: var(--myst-gold);
@@ -397,18 +318,10 @@ const handleCategoryClick = (categoryId: string) => {
     gap: 24px;
   }
   
-  .title {
-    font-size: 24px;
-  }
-
-  .catalog-header {
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 40px;
-  }
-
-  .header-line {
-    max-width: 100px;
+  .catalog-empty {
+    align-items: flex-start;
+    margin: 0 16px;
+    padding: 24px;
   }
 }
 </style>
