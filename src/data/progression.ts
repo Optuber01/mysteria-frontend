@@ -49,6 +49,12 @@ export const progressionStages: ProgressionStage[] = [
         label: 'Ritual formula page',
         detail: 'Records the personalized ritual attached to the target Sequence when one is required.',
       },
+      {
+        id: 'formula-complete',
+        label: 'Complete Seer formula',
+        detail: 'Combine the matching main, supplementary and ritual pages at a crafting table to create the written formula.',
+        tone: 'gold',
+      },
     ],
   },
   {

@@ -8,7 +8,6 @@
       '--journey': progress.toFixed(4),
       '--local': localProgress.toFixed(4),
       '--presence': scenePresence.toFixed(4),
-      '--potion-sprite': `url(${potionSprite})`,
     }"
     aria-labelledby="progression-title"
   >
@@ -41,23 +40,23 @@
         </article>
 
         <div class="scene-shell">
-          <div class="scene" :class="`scene--${activeStage.id}`">
+          <div ref="sceneRef" class="scene" :class="`scene--${activeStage.id}`" @pointerover.capture="captureAnchor" @focusin.capture="captureAnchor" @click.capture="captureAnchor" @keydown.esc.stop="closeDetail">
             <template v-if="activeStage.id === 'formula'">
               <div class="formula-pages" aria-label="Formula page assembly">
                 <button
                   v-for="(page, index) in formulaPages"
                   :key="page.id"
                   class="formula-page scene-item"
+                  :class="{ 'is-assembled': assembledFormulaPages.includes(page.id) }"
                   type="button"
                   :aria-describedby="detailId(page.id)"
-                  :aria-expanded="activeHotspotId === page.id"
-                  aria-controls="scene-detail-panel"
+                  :aria-pressed="assembledFormulaPages.includes(page.id)"
                   :style="{ '--page': String(index) }"
                   @mouseenter="showDetail(page.id)"
                   @mouseleave="clearDetail"
                   @focus="showDetail(page.id)"
                   @blur="clearDetail"
-                  @click="toggleDetail(page.id)"
+                  @click="toggleFormulaPage(page.id)"
                 >
                   <img :src="recipeFragment" alt="" width="16" height="16">
                   <span>{{ page.label }}</span>
@@ -65,28 +64,26 @@
               </div>
               <button
                 class="written-formula scene-item"
+                :class="{ 'is-complete': formulaComplete }"
                 type="button"
-                :aria-describedby="detailId('formula-main')"
-                :aria-expanded="activeHotspotId === 'formula-main'"
-                aria-controls="scene-detail-panel"
-                @mouseenter="showDetail('formula-main')"
+                :aria-describedby="detailId('formula-complete')"
+                @mouseenter="showDetail('formula-complete')"
                 @mouseleave="clearDetail"
-                @focus="showDetail('formula-main')"
+                @focus="showDetail('formula-complete')"
                 @blur="clearDetail"
-                @click="toggleDetail('formula-main')"
+                @click="toggleDetail('formula-complete')"
               >
-                <span class="formula-book">
-                  <i class="formula-book__left">SEQUENCE 9<small>SEER</small></i>
-                  <i class="formula-book__right"><img :src="foolRecipe" alt="" width="16" height="16"></i>
-                </span>
-                <strong>Complete Seer formula</strong>
+                <span class="formula-complete"><img :src="foolRecipe" alt="" width="16" height="16"></span>
+                <strong>Complete Seer formula</strong><small>Combine all three pages</small>
               </button>
             </template>
 
             <RitualAltarScene
               v-else-if="activeStage.id === 'altar'"
               :progress="localProgress"
-              @inspect="id => id ? showDetail(id) : clearDetail()"
+              @inspect="payload => showDetail(payload.id, payload.anchor)"
+              @toggle-inspect="payload => toggleDetail(payload.id, payload.anchor)"
+              @clear="clearDetail"
             />
 
             <template v-else-if="activeStage.id === 'ingredients'">
@@ -97,8 +94,6 @@
                   class="ingredient-card scene-item"
                   type="button"
                   :aria-describedby="detailId(ingredient.id)"
-                  :aria-expanded="activeHotspotId === ingredient.id"
-                  aria-controls="scene-detail-panel"
                   @mouseenter="showDetail(ingredient.id)"
                   @mouseleave="clearDetail"
                   @focus="showDetail(ingredient.id)"
@@ -113,8 +108,6 @@
                   class="ingredient-card ingredient-card--characteristic scene-item"
                   type="button"
                   :aria-describedby="detailId('beyonder-characteristic')"
-                  :aria-expanded="activeHotspotId === 'beyonder-characteristic'"
-                  aria-controls="scene-detail-panel"
                   @mouseenter="showDetail('beyonder-characteristic')"
                   @mouseleave="clearDetail"
                   @focus="showDetail('beyonder-characteristic')"
@@ -133,31 +126,24 @@
                 <div class="brew-interface__header"><span>Ritual Altar interface</span><i>live in-game UI</i></div>
                 <div class="brew-interface__image">
                   <img :src="cauldronInterface" alt="Mysterria Ritual Altar brewing interface" width="636" height="284">
-                  <div class="clean-brew-grid" aria-hidden="true">
-                    <span v-for="cell in 45" :key="cell">
-                      <img v-if="cell === 11" :src="lavosSquidBlood" alt="">
-                      <img v-else-if="cell === 29" :src="foolRecipe" alt="">
-                      <img v-else-if="cell === 17" :src="goldMintLeaves" alt="">
-                    </span>
-                  </div>
-                  <button class="slot-zone slot-zone--main" type="button" aria-label="Main ingredient slots" :aria-describedby="detailId('brew-main-slots')" :aria-expanded="activeHotspotId === 'brew-main-slots'" aria-controls="scene-detail-panel" @mouseenter="showDetail('brew-main-slots')" @mouseleave="clearDetail" @focus="showDetail('brew-main-slots')" @blur="clearDetail" @click="toggleDetail('brew-main-slots')" />
-                  <button class="slot-zone slot-zone--recipe" type="button" aria-label="Written formula slot" :aria-describedby="detailId('brew-recipe-slot')" :aria-expanded="activeHotspotId === 'brew-recipe-slot'" aria-controls="scene-detail-panel" @mouseenter="showDetail('brew-recipe-slot')" @mouseleave="clearDetail" @focus="showDetail('brew-recipe-slot')" @blur="clearDetail" @click="toggleDetail('brew-recipe-slot')" />
-                  <button class="slot-zone slot-zone--supp" type="button" aria-label="Supplementary ingredient slots" :aria-describedby="detailId('brew-supp-slots')" :aria-expanded="activeHotspotId === 'brew-supp-slots'" aria-controls="scene-detail-panel" @mouseenter="showDetail('brew-supp-slots')" @mouseleave="clearDetail" @focus="showDetail('brew-supp-slots')" @blur="clearDetail" @click="toggleDetail('brew-supp-slots')" />
+                  <button class="slot-zone slot-zone--main" type="button" aria-label="Main ingredient slots" :aria-describedby="detailId('brew-main-slots')" @mouseenter="showDetail('brew-main-slots')" @mouseleave="clearDetail" @focus="showDetail('brew-main-slots')" @blur="clearDetail" @click="toggleDetail('brew-main-slots')" />
+                  <button class="slot-zone slot-zone--recipe" type="button" aria-label="Written formula slot" :aria-describedby="detailId('brew-recipe-slot')" @mouseenter="showDetail('brew-recipe-slot')" @mouseleave="clearDetail" @focus="showDetail('brew-recipe-slot')" @blur="clearDetail" @click="toggleDetail('brew-recipe-slot')" />
+                  <button class="slot-zone slot-zone--supp" type="button" aria-label="Supplementary ingredient slots" :aria-describedby="detailId('brew-supp-slots')" @mouseenter="showDetail('brew-supp-slots')" @mouseleave="clearDetail" @focus="showDetail('brew-supp-slots')" @blur="clearDetail" @click="toggleDetail('brew-supp-slots')" />
                 </div>
               </div>
-              <button class="potion-result scene-item" type="button" :aria-describedby="detailId('sequence-potion')" :aria-expanded="activeHotspotId === 'sequence-potion'" aria-controls="scene-detail-panel" @mouseenter="showDetail('sequence-potion')" @mouseleave="clearDetail" @focus="showDetail('sequence-potion')" @blur="clearDetail" @click="toggleDetail('sequence-potion')">
-                <span class="potion-pixel" aria-hidden="true" />
+              <button class="potion-result scene-item" type="button" :aria-describedby="detailId('sequence-potion')" @mouseenter="showDetail('sequence-potion')" @mouseleave="clearDetail" @focus="showDetail('sequence-potion')" @blur="clearDetail" @click="toggleDetail('sequence-potion')">
+                <img class="potion-pixel" :src="sequencePotion" alt="" width="16" height="16">
                 <strong>Sequence 9 potion</strong>
               </button>
             </template>
 
             <template v-else-if="activeStage.id === 'drink'">
               <MinecraftPlayer class="player-rig" mode="drink" :active="visible" />
-              <button class="drink-potion scene-item" type="button" :aria-describedby="detailId('drink-potion')" :aria-expanded="activeHotspotId === 'drink-potion'" aria-controls="scene-detail-panel" @mouseenter="showDetail('drink-potion')" @mouseleave="clearDetail" @focus="showDetail('drink-potion')" @blur="clearDetail" @click="toggleDetail('drink-potion')">
-                <span class="potion-pixel" aria-hidden="true" />
+              <button class="drink-potion scene-item" type="button" :aria-describedby="detailId('drink-potion')" @mouseenter="showDetail('drink-potion')" @mouseleave="clearDetail" @focus="showDetail('drink-potion')" @blur="clearDetail" @click="toggleDetail('drink-potion')">
+                <img class="potion-pixel" :src="sequencePotion" alt="" width="16" height="16">
                 <strong>Sequence 9 · Seer</strong>
               </button>
-              <button class="ability-reveal scene-item" type="button" :aria-describedby="detailId('drink-abilities')" :aria-expanded="activeHotspotId === 'drink-abilities'" aria-controls="scene-detail-panel" @mouseenter="showDetail('drink-abilities')" @mouseleave="clearDetail" @focus="showDetail('drink-abilities')" @blur="clearDetail" @click="toggleDetail('drink-abilities')">
+              <button class="ability-reveal scene-item" type="button" :aria-describedby="detailId('drink-abilities')" @mouseenter="showDetail('drink-abilities')" @mouseleave="clearDetail" @focus="showDetail('drink-abilities')" @blur="clearDetail" @click="toggleDetail('drink-abilities')">
                 <span>Divination</span><span>Spiritualism</span>
               </button>
             </template>
@@ -172,8 +158,6 @@
                   :class="`route-${index + 1}`"
                   type="button"
                   :aria-describedby="detailId(route.id)"
-                  :aria-expanded="activeHotspotId === route.id"
-                  aria-controls="scene-detail-panel"
                   @mouseenter="showDetail(route.id)"
                   @mouseleave="clearDetail"
                   @focus="showDetail(route.id)"
@@ -194,13 +178,13 @@
             <template v-else-if="activeStage.id === 'ritual'">
               <div class="ritual-scene">
                 <img class="magic-circle" :src="magicCircle" alt="" width="256" height="256">
-                <button class="ritual-book scene-item" type="button" :aria-describedby="detailId('ritual-book')" :aria-expanded="activeHotspotId === 'ritual-book'" aria-controls="scene-detail-panel" @mouseenter="showDetail('ritual-book')" @mouseleave="clearDetail" @focus="showDetail('ritual-book')" @blur="clearDetail" @click="toggleDetail('ritual-book')">
+                <button class="ritual-book scene-item" type="button" :aria-describedby="detailId('ritual-book')" @mouseenter="showDetail('ritual-book')" @mouseleave="clearDetail" @focus="showDetail('ritual-book')" @blur="clearDetail" @click="toggleDetail('ritual-book')">
                   <img :src="ritualBook" alt="" width="16" height="16"><span>Personal ritual</span>
                 </button>
-                <button class="ritual-ready scene-item" type="button" :aria-describedby="detailId('ritual-readiness')" :aria-expanded="activeHotspotId === 'ritual-readiness'" aria-controls="scene-detail-panel" @mouseenter="showDetail('ritual-readiness')" @mouseleave="clearDetail" @focus="showDetail('ritual-readiness')" @blur="clearDetail" @click="toggleDetail('ritual-readiness')">
+                <button class="ritual-ready scene-item" type="button" :aria-describedby="detailId('ritual-readiness')" @mouseenter="showDetail('ritual-readiness')" @mouseleave="clearDetail" @focus="showDetail('ritual-readiness')" @blur="clearDetail" @click="toggleDetail('ritual-readiness')">
                   <strong>95%</strong><span>Acting ready</span>
                 </button>
-                <button class="ritual-risk scene-item" type="button" :aria-describedby="detailId('ritual-madness')" :aria-expanded="activeHotspotId === 'ritual-madness'" aria-controls="scene-detail-panel" @mouseenter="showDetail('ritual-madness')" @mouseleave="clearDetail" @focus="showDetail('ritual-madness')" @blur="clearDetail" @click="toggleDetail('ritual-madness')">
+                <button class="ritual-risk scene-item" type="button" :aria-describedby="detailId('ritual-madness')" @mouseenter="showDetail('ritual-madness')" @mouseleave="clearDetail" @focus="showDetail('ritual-madness')" @blur="clearDetail" @click="toggleDetail('ritual-madness')">
                   <strong>Incomplete?</strong><span>Madness cost</span>
                 </button>
               </div>
@@ -211,22 +195,22 @@
                 <img class="magic-circle magic-circle--advance" :src="magicCircle" alt="" width="256" height="256">
                 <div class="advance-beam" aria-hidden="true" />
                 <MinecraftPlayer class="player-rig player-rig--advance" mode="advance" :active="visible" />
-                <button class="sequence-shift scene-item" type="button" :aria-describedby="detailId('advance-sequence')" :aria-expanded="activeHotspotId === 'advance-sequence'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-sequence')" @mouseleave="clearDetail" @focus="showDetail('advance-sequence')" @blur="clearDetail" @click="toggleDetail('advance-sequence')">
+                <button class="sequence-shift scene-item" type="button" :aria-describedby="detailId('advance-sequence')" @mouseenter="showDetail('advance-sequence')" @mouseleave="clearDetail" @focus="showDetail('advance-sequence')" @blur="clearDetail" @click="toggleDetail('advance-sequence')">
                   <span>SEQUENCE</span><strong>9</strong><i /><strong>8</strong>
                 </button>
-                <button class="advance-node node-abilities scene-item" type="button" :aria-describedby="detailId('advance-abilities')" :aria-expanded="activeHotspotId === 'advance-abilities'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-abilities')" @mouseleave="clearDetail" @focus="showDetail('advance-abilities')" @blur="clearDetail" @click="toggleDetail('advance-abilities')">New abilities</button>
-                <button class="advance-node node-spirituality scene-item" type="button" :aria-describedby="detailId('advance-spirituality')" :aria-expanded="activeHotspotId === 'advance-spirituality'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-spirituality')" @mouseleave="clearDetail" @focus="showDetail('advance-spirituality')" @blur="clearDetail" @click="toggleDetail('advance-spirituality')">Resources restored</button>
-                <button class="advance-node node-madness scene-item" type="button" :aria-describedby="detailId('advance-madness')" :aria-expanded="activeHotspotId === 'advance-madness'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-madness')" @mouseleave="clearDetail" @focus="showDetail('advance-madness')" @blur="clearDetail" @click="toggleDetail('advance-madness')">Power has a cost</button>
+                <button class="advance-node node-abilities scene-item" type="button" :aria-describedby="detailId('advance-abilities')" @mouseenter="showDetail('advance-abilities')" @mouseleave="clearDetail" @focus="showDetail('advance-abilities')" @blur="clearDetail" @click="toggleDetail('advance-abilities')">New abilities</button>
+                <button class="advance-node node-spirituality scene-item" type="button" :aria-describedby="detailId('advance-spirituality')" @mouseenter="showDetail('advance-spirituality')" @mouseleave="clearDetail" @focus="showDetail('advance-spirituality')" @blur="clearDetail" @click="toggleDetail('advance-spirituality')">Resources restored</button>
+                <button class="advance-node node-madness scene-item" type="button" :aria-describedby="detailId('advance-madness')" @mouseenter="showDetail('advance-madness')" @mouseleave="clearDetail" @focus="showDetail('advance-madness')" @blur="clearDetail" @click="toggleDetail('advance-madness')">Power has a cost</button>
               </div>
             </template>
 
-            <Transition name="detail-reveal">
-              <aside v-if="activeDetail" id="scene-detail-panel" class="scene-detail">
-                <span>Inspecting</span>
-                <strong>{{ activeDetail.label }}</strong>
-                <p>{{ activeDetail.detail }}</p>
-              </aside>
-            </Transition>
+            <SceneInspectorPopover
+              :open="Boolean(activeDetail && inspectorAnchor)"
+              :anchor="inspectorAnchor"
+              :boundary="sceneRef"
+              :title="activeDetail?.label"
+              :description="activeDetail?.detail"
+            />
           </div>
         </div>
       </div>
@@ -273,9 +257,9 @@ import { useReducedMotion } from '@/composables/useReducedMotion';
 import { progressionStages } from '@/data/progression';
 import RitualAltarScene from './RitualAltarScene.vue';
 import MinecraftPlayer from './MinecraftPlayer.vue';
+import SceneInspectorPopover from './SceneInspectorPopover.vue';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import cauldronInterface from '@/assets/images/home/progression/cauldron-interface.png';
-import potionSprite from '@/assets/images/home/progression/potion-sprite.png';
 import recipeFragment from '@/assets/images/home/progression/recipe-fragment.png';
 import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
 import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
@@ -284,14 +268,19 @@ import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leav
 import actingBottle from '@/assets/images/home/progression/real/acting-bottle-medium.png';
 import ritualBook from '@/assets/images/home/progression/real/ritual-book-tier2.png';
 import magicCircle from '@/assets/images/home/progression/real/magic-circle.png';
+import sequencePotion from '@/assets/images/home/progression/real/sequence-potion.png';
 
 const sectionRef = ref<HTMLElement | null>(null);
+const sceneRef = ref<HTMLElement | null>(null);
 const progress = ref(0);
 const activeIndex = ref(0);
 const localProgress = ref(0);
 const visible = ref(false);
 const activeHotspotId = ref<string | null>(null);
 const pinnedHotspotId = ref<string | null>(null);
+const inspectorAnchor = ref<HTMLElement | null>(null);
+const pinnedAnchor = ref<HTMLElement | null>(null);
+const assembledFormulaPages = ref<string[]>([]);
 const reducedMotion = useReducedMotion();
 let observer: IntersectionObserver | null = null;
 let frame = 0;
@@ -306,7 +295,8 @@ const scenePresence = computed(() => {
 const activeDetail = computed(() => activeStage.value.hotspots.find(hotspot => hotspot.id === activeHotspotId.value) ?? null);
 const digestionValue = computed(() => Math.round(32 + localProgress.value * 63));
 
-const formulaPages = computed(() => activeStage.value.id === 'formula' ? activeStage.value.hotspots : []);
+const formulaPages = computed(() => activeStage.value.id === 'formula' ? activeStage.value.hotspots.slice(0, 3) : []);
+const formulaComplete = computed(() => assembledFormulaPages.value.length === 3);
 const ingredientItems = [
   { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', role: 'Main · Creature drop', src: lavosSquidBlood },
   { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', role: 'Main · Found in loot', src: stellarAquaCrystal },
@@ -322,12 +312,33 @@ const digestRoutes = [
   { id: 'acting-bottle', label: 'Acting bottles', icon: '', asset: actingBottle },
 ];
 
-function showDetail(id: string) { activeHotspotId.value = id; }
-function clearDetail() { activeHotspotId.value = pinnedHotspotId.value; }
-function detailId(id: string, stageId = activeStage.value.id) { return `progression-detail-${stageId}-${id}`; }
-function toggleDetail(id: string) {
-  pinnedHotspotId.value = pinnedHotspotId.value === id ? null : id;
+function captureAnchor(event: Event) {
+  const target = event.target instanceof Element ? event.target.closest<HTMLElement>('[aria-describedby]') : null;
+  if (target && sceneRef.value?.contains(target)) inspectorAnchor.value = target;
+}
+function showDetail(id: string, anchor?: HTMLElement | null) {
+  activeHotspotId.value = id;
+  if (anchor) inspectorAnchor.value = anchor;
+}
+function clearDetail() {
   activeHotspotId.value = pinnedHotspotId.value;
+  inspectorAnchor.value = pinnedAnchor.value;
+}
+function closeDetail() { activeHotspotId.value = null; pinnedHotspotId.value = null; inspectorAnchor.value = null; pinnedAnchor.value = null; }
+function detailId(id: string, stageId = activeStage.value.id) { return `progression-detail-${stageId}-${id}`; }
+function toggleDetail(id: string, anchor?: HTMLElement | null) {
+  if (anchor) inspectorAnchor.value = anchor;
+  const closing = pinnedHotspotId.value === id;
+  pinnedHotspotId.value = closing ? null : id;
+  pinnedAnchor.value = closing ? null : inspectorAnchor.value;
+  activeHotspotId.value = closing ? null : id;
+  if (closing) inspectorAnchor.value = null;
+}
+function toggleFormulaPage(id: string) {
+  assembledFormulaPages.value = assembledFormulaPages.value.includes(id)
+    ? assembledFormulaPages.value.filter(pageId => pageId !== id)
+    : [...assembledFormulaPages.value, id];
+  toggleDetail(id);
 }
 
 function update() {
@@ -341,8 +352,7 @@ function update() {
     const scaled = Math.min(progressionStages.length - .0001, next * progressionStages.length);
     const nextIndex = Math.floor(scaled);
     if (nextIndex !== activeIndex.value) {
-      activeHotspotId.value = null;
-      pinnedHotspotId.value = null;
+      closeDetail();
     }
     progress.value = next;
     activeIndex.value = nextIndex;
@@ -417,25 +427,22 @@ onUnmounted(() => {
 .scene-item { min-width: 44px; min-height: 44px; border: 0; color: inherit; cursor: pointer; }
 .scene-item:focus-visible { outline: 2px solid #f0d38c; outline-offset: 4px; }
 
-.scene-detail { position: absolute; z-index: 50; right: 3%; bottom: 3%; width: min(300px, 70%); padding: 15px 17px; border: 1px solid rgba(223, 185, 104, .35); border-radius: 12px; background: rgba(6, 22, 23, .94); box-shadow: 0 18px 50px rgba(0, 0, 0, .34); backdrop-filter: blur(14px); pointer-events: none; }
-.scene-detail > span { color: #dfb968; font: 650 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
-.scene-detail strong { display: block; margin-top: 7px; font-size: .83rem; }
-.scene-detail p { margin: 7px 0 0; color: rgba(252, 249, 242, .66); font-size: .69rem; line-height: 1.5; }
-.detail-reveal-enter-active, .detail-reveal-leave-active { transition: opacity .24s ease, transform .34s var(--ease-out); }
-.detail-reveal-enter-from, .detail-reveal-leave-to { opacity: 0; transform: translateY(8px) scale(.98); }
-
-.formula-pages { position: absolute; inset: 0; }
-.formula-page { position: absolute; top: calc(18% + var(--page) * 27%); left: calc(4% + var(--page) * 3%); width: 154px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid rgba(223, 185, 104, .28); border-radius: 11px; color: rgba(252, 249, 242, .78); background: rgba(7, 26, 25, .84); font: 600 .57rem/1.3 "IBM Plex Mono", monospace; text-align: left; transform: translateX(calc((1 - var(--local)) * -48px)); }
+.formula-pages { position: absolute; top: 50%; left: 50%; width: min(560px,100%); height: 360px; transform: translate(-50%,-50%); }
+.formula-page { position: absolute; z-index: 2; width: 158px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid rgba(223, 185, 104, .28); border-radius: 11px; color: rgba(252, 249, 242, .78); background: rgba(7, 26, 25, .9); font: 600 .57rem/1.3 "IBM Plex Mono", monospace; text-align: left; transition:transform .28s var(--ease-out),border-color .2s,background-color .2s; }
+.formula-page:nth-child(1){left:4%;top:13%}.formula-page:nth-child(2){right:4%;top:13%}.formula-page:nth-child(3){left:50%;bottom:5%;transform:translateX(-50%)}
 .formula-page img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
-.formula-page:hover, .formula-page:focus-visible { border-color: #dfb968; background: rgba(15, 48, 40, .95); }
-.written-formula { position: relative; width: 310px; display: grid; justify-items: center; gap: 12px; color: #fcf9f2; background: transparent; transform: rotate(calc((.5 - var(--local)) * 4deg)); }
-.formula-book { position: relative; width: 290px; height: 190px; display: flex; filter: drop-shadow(0 28px 22px rgba(0, 0, 0, .56)); transform: rotateX(50deg) rotateZ(-6deg); transform-style: preserve-3d; }
-.formula-book > i { width: 50%; display: grid; place-items: center; border: 1px solid rgba(112, 67, 42, .28); color: #5e2c21; background: repeating-linear-gradient(180deg, transparent 0 15px, rgba(79, 53, 35, .1) 16px), linear-gradient(145deg, #f6e2b9, #d6b57f); font: 700 .61rem/1.3 "IBM Plex Mono", monospace; font-style: normal; }
-.formula-book__left { border-radius: 14px 4px 4px 14px; }
-.formula-book__left small { display: block; margin-top: 7px; font-size: .52rem; letter-spacing: .1em; }
-.formula-book__right { border-radius: 4px 14px 14px 4px; }
-.formula-book__right img { width: 96px; height: 96px; object-fit: contain; image-rendering: pixelated; }
+.formula-page:hover,.formula-page:focus-visible{z-index:5;border-color:#dfb968;background:rgba(15,48,40,.97);transform:translateY(-3px)}
+.formula-page:nth-child(3):hover,.formula-page:nth-child(3):focus-visible{transform:translate(-50%,-3px)}
+.formula-page:nth-child(1).is-assembled{transform:translate(108px,94px) scale(.72);opacity:.52}
+.formula-page:nth-child(2).is-assembled{transform:translate(-108px,94px) scale(.72);opacity:.52}
+.formula-page:nth-child(3).is-assembled{transform:translate(-50%,-86px) scale(.72);opacity:.52}
+.formula-page.is-assembled:hover,.formula-page.is-assembled:focus-visible{opacity:1}
+.written-formula { position: relative; z-index:1; width: 190px; display:grid;justify-items:center;gap:8px;padding:18px;border:1px solid rgba(223,185,104,.26);border-radius:20px;color:#fcf9f2;background:radial-gradient(circle,rgba(42,93,76,.7),rgba(6,24,24,.94));box-shadow:0 22px 50px rgba(0,0,0,.35); }
+.formula-complete{width:128px;height:128px;display:grid;place-items:center;border-radius:18px;background:rgba(1,12,14,.45)}
+.formula-complete img{width:128px;height:128px;object-fit:contain;image-rendering:pixelated}
 .written-formula > strong { font: 650 .67rem/1 "IBM Plex Mono", monospace; }
+.written-formula>small{color:rgba(252,249,242,.5);font:500 .48rem/1.3 "IBM Plex Mono",monospace}
+.written-formula.is-complete{border-color:rgba(223,185,104,.72);box-shadow:0 22px 60px rgba(0,0,0,.38),0 0 34px rgba(198,155,82,.22)}
 
 .ingredient-table { width: min(600px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
 .ingredient-card { min-height: 145px; display: grid; grid-template-columns: 72px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; align-items: center; column-gap: 14px; padding: 16px; border: 1px solid rgba(131, 190, 164, .2); border-radius: 16px; color: #fcf9f2; background: rgba(7, 27, 27, .82); text-align: left; transition: transform .3s var(--ease-out), border-color .25s, background-color .25s; }
@@ -451,9 +458,6 @@ onUnmounted(() => {
 .brew-interface__header i { color: #75af94; font-style: normal; }
 .brew-interface__image { position: relative; }
 .brew-interface__image img { width: 100%; height: auto; display: block; object-fit: contain; image-rendering: auto; }
-.clean-brew-grid { position: absolute; z-index: 1; left: 25%; top: 18%; width: 50.5%; height: 75%; display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(5, 1fr); gap: 3px; padding: 3px; border: 2px solid #a65f4d; background: #d88668; box-shadow: inset 0 0 0 2px rgba(255, 217, 167, .46); }
-.clean-brew-grid > span { min-width: 0; min-height: 0; display: grid; place-items: center; border: 2px solid #f2c29b; border-right-color: #9e594b; border-bottom-color: #8a4b41; background: #c7745c; }
-.clean-brew-grid img { width: 80%; height: 80%; object-fit: contain; image-rendering: pixelated; }
 .slot-zone { position: absolute; min-width: 44px; min-height: 44px; border: 2px solid transparent; border-radius: 8px; background: transparent; cursor: pointer; transition: border-color .25s, background-color .25s; }
 .slot-zone:hover, .slot-zone:focus-visible { border-color: #dfb968; background: rgba(223, 185, 104, .12); }
 .slot-zone--main { z-index: 2; left: 29%; top: 30%; width: 17%; height: 42%; }
@@ -464,7 +468,7 @@ onUnmounted(() => {
 .slot-zone--supp:hover, .slot-zone--supp:focus-visible { border-color: rgba(94, 144, 201, .95); }
 .potion-result { position: absolute; right: 1%; bottom: 1%; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid rgba(131, 190, 164, .35); border-radius: 11px; color: #fcf9f2; background: rgba(5, 27, 25, .95); font: 650 .58rem/1 "IBM Plex Mono", monospace; transform: translateY(calc((1 - var(--local)) * 24px)); }
 
-.potion-pixel { width: 64px; height: 64px; display: block; background-image: var(--potion-sprite); background-repeat: no-repeat; background-size: 64px auto; background-position: 0 42%; image-rendering: pixelated; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, .48)); }
+.potion-pixel { width:64px;height:64px;display:block;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 8px 6px rgba(0,0,0,.48)); }
 .player-rig { width: min(360px, 64%); height: 100%; }
 .drink-potion { position: absolute; left: 4%; top: 28%; display: grid; justify-items: center; gap: 7px; padding: 12px; border: 1px solid rgba(131, 190, 164, .25); border-radius: 14px; color: #fcf9f2; background: rgba(7, 27, 26, .82); font: 650 .56rem/1.2 "IBM Plex Mono", monospace; }
 .drink-potion:hover, .drink-potion:focus-visible { border-color: #dfb968; }
@@ -489,7 +493,7 @@ onUnmounted(() => {
 .digestion-meter > i b { display: block; height: 100%; background: linear-gradient(90deg, #4b9b79, #bddcc8); }
 
 .ritual-scene, .advance-scene { position: relative; width: 100%; height: 100%; display: grid; place-items: center; }
-.magic-circle { width: min(480px, 84%); height: auto; object-fit: contain; filter: drop-shadow(0 0 34px rgba(208, 170, 86, .4)); transform: rotate(calc(-16deg + var(--local) * 28deg)) scale(calc(.72 + var(--local) * .28)); }
+.magic-circle { width:256px;height:256px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 34px rgba(208,170,86,.4)); }
 .ritual-book, .ritual-ready, .ritual-risk { position: absolute; display: grid; justify-items: center; gap: 5px; padding: 10px 12px; border: 1px solid rgba(223, 185, 104, .3); border-radius: 11px; color: #fcf9f2; background: rgba(7, 24, 24, .9); font: 600 .54rem/1.2 "IBM Plex Mono", monospace; }
 .ritual-book { left: 50%; top: 50%; transform: translate(-50%, -50%); }
 .ritual-book img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
@@ -497,7 +501,7 @@ onUnmounted(() => {
 .ritual-risk { right: 2%; bottom: 24%; color: #e6a18a; border-color: rgba(216, 114, 89, .34); }
 .ritual-ready strong, .ritual-risk strong { font-size: .75rem; }
 
-.magic-circle--advance { position: absolute; width: min(570px, 96%); opacity: calc(.5 + var(--local) * .5); transform: rotate(calc(-18deg + var(--local) * 44deg)) scale(calc(.75 + var(--local) * .28)); }
+.magic-circle--advance { position:absolute;opacity:calc(.5 + var(--local)*.5); }
 .advance-beam { position: absolute; top: -8%; bottom: -8%; left: 50%; width: calc(3px + var(--local) * 18px); opacity: clamp(0, calc((var(--local) - .2) * 2), 1); background: linear-gradient(transparent, rgba(244, 220, 160, .86) 31%, #effff6 52%, rgba(82, 168, 131, .72) 70%, transparent); transform: translateX(-50%); filter: blur(calc(var(--local) * 2px)) drop-shadow(0 0 26px rgba(207, 179, 107, .72)); }
 .player-rig--advance { position: relative; z-index: 2; width: min(330px, 58%); }
 .sequence-shift { position: absolute; z-index: 6; top: 3%; left: 50%; display: flex; align-items: center; gap: 10px; padding: 8px 11px; border: 1px solid rgba(223, 185, 104, .32); border-radius: 10px; color: #fcf9f2; background: rgba(7, 24, 24, .88); transform: translateX(-50%); font-family: "IBM Plex Mono", monospace; }
@@ -538,15 +542,14 @@ onUnmounted(() => {
   .stage-copy > p { font-size: .75rem; line-height: 1.46; }
   .fact-line { display: none; }
   .scene-shell { width: 100%; height: 100%; min-height: 250px; }
-  .scene-detail { right: 0; bottom: 0; width: min(280px, 78%); }
   .stage-nav { right: max(8px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); left: max(8px, env(safe-area-inset-left)); grid-template-columns: repeat(8, minmax(44px, 1fr)); border-top: 0; }
   .stage-nav button { min-height: 48px; grid-template-columns: 1fr; gap: 2px; padding: 3px; }
   .stage-nav button > i { width: 5px; height: 5px; }
-  .formula-page { width: 128px; padding: 7px; }
+  .formula-pages { width:min(500px,100%);height:300px; }
+  .formula-page { width: 138px; padding: 7px; }
   .formula-page img { width: 32px; height: 32px; }
-  .written-formula { width: 260px; }
-  .formula-book { width: 240px; height: 150px; }
-  .formula-book__right img { width: 80px; height: 80px; }
+  .written-formula { width: 160px;padding:12px; }
+  .formula-complete,.formula-complete img{width:96px;height:96px}
   .ingredient-table { width: min(520px, 100%); gap: 8px; }
   .ingredient-card { min-height: 104px; grid-template-columns: 55px minmax(0, 1fr); padding: 10px; }
   .ingredient-card > span { width: 55px; height: 55px; }
@@ -564,10 +567,10 @@ onUnmounted(() => {
   .chapter-heading h2 { font-size: .95rem; }
   .chapter-heading p { display: none; }
   .stage-copy h3 { font-size: clamp(2rem, 10vw, 2.85rem); }
+  .formula-pages{height:280px}
   .formula-page { width: 112px; font-size: .48rem; }
-  .formula-page:nth-child(2) { top: 42%; }
-  .formula-page:nth-child(3) { top: 67%; }
-  .written-formula { transform: translateX(34px) rotate(calc((.5 - var(--local)) * 4deg)); }
+  .formula-page:nth-child(1){left:0;top:3%}.formula-page:nth-child(2){right:0;top:3%}.formula-page:nth-child(3){bottom:0}
+  .written-formula{width:145px;padding:10px}
   .ingredient-table { grid-template-columns: 1fr 1fr; }
   .ingredient-card { min-height: 92px; grid-template-columns: 44px 1fr; column-gap: 7px; padding: 8px; }
   .ingredient-card > span { width: 44px; height: 44px; }
@@ -576,7 +579,7 @@ onUnmounted(() => {
   .ingredient-card small { font-size: .625rem; }
   .brew-interface__header { min-height: 32px; font-size: .45rem; }
   .potion-result { right: 0; bottom: -10px; }
-  .potion-pixel { width: 48px; height: 48px; background-size: 48px auto; }
+  .potion-pixel { width:48px;height:48px; }
   .drink-potion { left: 0; top: 24%; padding: 7px; }
   .drink-potion strong { max-width: 86px; font-size: .46rem; }
   .ability-reveal { right: 0; top: 26%; padding: 8px; font-size: .46rem; }
@@ -611,5 +614,13 @@ onUnmounted(() => {
   .static-progression ul li { display: grid; grid-template-columns: minmax(120px, .4fr) 1fr; gap: 12px; padding: 12px 0 0; border-top: 1px solid rgba(252, 249, 242, .1); }
   .static-progression ul b { color: #dfb968; font: 600 .68rem/1.4 "IBM Plex Mono", monospace; }
   .static-progression ul span { color: rgba(252, 249, 242, .7); font-size: .78rem; line-height: 1.5; }
+}
+
+@media (max-width: 320px) {
+  .progression { padding-right: 12px; padding-left: 12px; overflow-wrap: anywhere; }
+  .static-progression, .static-progression li > div { min-width: 0; }
+  .static-progression li, .static-progression ul li { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .static-progression li > span { margin-bottom: 2px; }
+  .static-progression h3 { font-size: clamp(1.7rem, 13vw, 2.5rem); }
 }
 </style>
