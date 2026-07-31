@@ -94,11 +94,11 @@ function copyRobotsPlugin(): Plugin {
     name: 'copy-robots',
     buildEnd() {
       try {
-        if (!fs.existsSync('dist')) {
-          fs.mkdirSync('dist', { recursive: true })
+        if (!fs.existsSync('dist/client')) {
+          fs.mkdirSync('dist/client', { recursive: true })
         }
         const robotsTxt = fs.readFileSync('public/robots.txt', 'utf-8')
-        fs.writeFileSync('dist/robots.txt', robotsTxt)
+        fs.writeFileSync('dist/client/robots.txt', robotsTxt)
       } catch (error) {
         console.error('Error copying robots.txt:', error)
       }
@@ -202,6 +202,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
       allowedHosts: ['api.mysterria.net'],
     },
     build: {
+      outDir: 'dist/client',
       sourcemap: true,
       cssCodeSplit: true,
       rollupOptions: {
