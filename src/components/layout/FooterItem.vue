@@ -76,13 +76,17 @@ const { t } = useI18n();
 }
 
 .footer-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   color: #666;
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .footer-link:hover {

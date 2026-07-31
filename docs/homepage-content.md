@@ -34,12 +34,15 @@ Replace these notes only after the server team verifies the behavior:
   details and approved in-game media
 - Live towns/organizations, world event and discovery feeds
 
-The relevant copy lives in:
+The relevant replacement points live in:
 
 - `ProgressionStory.vue` — the eight-stage progression loop
-- `SystemChapters.vue` — the five system chapters
-- `BeyondPathways.vue` — original world content
-- `LivingWorld.vue` — live information and unavailable states
+- `BeyondPathways.vue` — original world content and integrated live-world HUD
+- `JoinJourney.vue` — connection flow and final portal sequence
+
+Unverified mechanics stay in this document rather than appearing as public
+“content pending” panels. The homepage uses only the verified high-level system
+loop and existing Pathway archive data.
 
 ## Replacing live-world integrations
 

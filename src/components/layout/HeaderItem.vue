@@ -1,8 +1,8 @@
 <template>
   <header class="main-header">
     <div class="header-content">
-      <RouterLink class="header-logo-link" to="/" @click="closeMobileNav">
-        <IconLogo/>
+      <RouterLink aria-label="Mysterria home" class="header-logo-link" to="/" @click="closeMobileNav">
+        <IconLogo aria-hidden="true"/>
       </RouterLink>
 
       <nav ref="navigationRef" class="navigation">
@@ -56,7 +56,7 @@
                   target="_blank"
                   @click="closeServicesDropdown"
               >
-                <component :is="service.icon" class="service-icon"/>
+                <component :is="service.icon" aria-hidden="true" class="service-icon" focusable="false"/>
                 <div class="service-info">
                   <span class="service-name">{{ service.name }}</span>
                   <span class="service-description">{{ service.description }}</span>
@@ -81,12 +81,14 @@
         <NotificationBell class="auth-desktop"/>
         <AuthButton class="auth-desktop"/>
         <button
+            ref="mobileNavToggleRef"
             :aria-expanded="isMobileNavOpen"
+            aria-controls="mobile-navigation-drawer"
             aria-label="Toggle navigation"
             class="mobile-nav-toggle"
             @click="toggleMobileNav"
         >
-          <IconNavbar/>
+          <IconNavbar aria-hidden="true"/>
         </button>
       </div>
     </div>
@@ -96,7 +98,15 @@
     <Transition name="mobile-nav">
       <div v-if="isMobileNavOpen" class="mobile-nav-overlay">
         <div class="mobile-nav-backdrop" @click="closeMobileNav"></div>
-        <nav class="mobile-nav">
+        <nav
+          id="mobile-navigation-drawer"
+          ref="mobileNavRef"
+          aria-label="Mobile navigation"
+          aria-modal="true"
+          class="mobile-nav"
+          role="dialog"
+          @keydown="handleMobileNavKeydown"
+        >
           <div class="mobile-nav-header">
             <button
                 aria-label="Close navigation"
@@ -136,7 +146,7 @@
                   target="_blank"
                   @click="closeMobileNav"
               >
-                <component :is="service.icon" class="mobile-service-icon"/>
+                <component :is="service.icon" aria-hidden="true" class="mobile-service-icon" focusable="false"/>
                 <div class="mobile-service-info">
                   <span class="mobile-service-name">{{ service.name }}</span>
                   <span class="mobile-service-description">{{ service.description }}</span>
@@ -162,7 +172,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onUnmounted, ref, watch} from "vue";
+import {computed, nextTick, onUnmounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import AuthButton from "@/components/ui/AuthButton.vue";
 import BalanceButton from "@/components/ui/BalanceButton.vue";
@@ -188,6 +198,8 @@ interface NavLink {
 const route = useRoute();
 const {t} = useI18n();
 const isMobileNavOpen = ref(false);
+const mobileNavToggleRef = ref<HTMLButtonElement | null>(null);
+const mobileNavRef = ref<HTMLElement | null>(null);
 const isServicesOpen = ref(false);
 let closeDropdownTimeout: NodeJS.Timeout | null = null;
 
@@ -267,6 +279,45 @@ const closeMobileNav = () => {
   isMobileNavOpen.value = false;
 };
 
+const getMobileNavFocusableElements = () => {
+  if (!mobileNavRef.value) return [];
+
+  return Array.from(
+    mobileNavRef.value.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter((element) => element.getClientRects().length > 0);
+};
+
+const handleMobileNavKeydown = (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeMobileNav();
+    return;
+  }
+
+  if (event.key !== "Tab") return;
+
+  const focusableElements = getMobileNavFocusableElements();
+  if (!focusableElements.length) {
+    event.preventDefault();
+    mobileNavRef.value?.focus();
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+  const activeElement = document.activeElement;
+
+  if (event.shiftKey && activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+  } else if (!event.shiftKey && activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  }
+};
+
 const toggleServicesDropdown = () => {
   if (!isServicesOpen.value) {
     markServicesSeen();
@@ -300,16 +351,29 @@ const closeServicesDropdown = () => {
   isServicesOpen.value = false;
 };
 
-watch(isMobileNavOpen, (isOpen) => {
+watch(isMobileNavOpen, async (isOpen) => {
+  const appRoot = document.querySelector<HTMLElement>("#app");
+
   if (isOpen) {
     document.body.style.overflow = "hidden";
+    appRoot?.setAttribute("inert", "");
+    appRoot?.setAttribute("aria-hidden", "true");
+    await nextTick();
+    getMobileNavFocusableElements()[0]?.focus();
   } else {
     document.body.style.overflow = "";
+    appRoot?.removeAttribute("inert");
+    appRoot?.removeAttribute("aria-hidden");
+    await nextTick();
+    mobileNavToggleRef.value?.focus();
   }
 });
 
 onUnmounted(() => {
   document.body.style.overflow = "";
+  const appRoot = document.querySelector<HTMLElement>("#app");
+  appRoot?.removeAttribute("inert");
+  appRoot?.removeAttribute("aria-hidden");
   clearCloseServicesTimeout();
 });
 </script>
@@ -350,7 +414,7 @@ onUnmounted(() => {
   gap: 8px;
   text-decoration: none;
   color: var(--myst-ink);
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .header-logo-link:hover {
@@ -386,7 +450,7 @@ onUnmounted(() => {
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -414,14 +478,14 @@ onUnmounted(() => {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background: color-mix(in srgb, var(--myst-bg) 60%, transparent);
   border: 1px solid color-mix(in srgb, white 15%, transparent);
   color: var(--myst-ink);
   cursor: pointer;
   border-radius: 6px;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   backdrop-filter: blur(8px);
 }
 
@@ -493,15 +557,15 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: 1px solid color-mix(in srgb, white 15%, transparent);
   border-radius: 6px;
   color: var(--myst-ink);
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .mobile-nav-close:hover {
@@ -522,7 +586,7 @@ onUnmounted(() => {
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.3s, background-color 0.3s, border-color 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-left: 4px solid transparent;
   letter-spacing: 0.025em;
 }
@@ -552,6 +616,17 @@ onUnmounted(() => {
   background: rgba(15, 23, 42, 0.5);
 }
 
+.mobile-nav-auth :deep(.lang-ritual-btn) {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.mobile-nav-auth :deep(.btn-ritual-auth),
+.mobile-nav-auth :deep(.logout-ritual-btn),
+.mobile-nav-auth :deep(.admin-ritual-trigger) {
+  min-height: 44px;
+}
+
 .mobile-language-selector {
   margin: 24px 0 16px 0;
 }
@@ -579,7 +654,7 @@ onUnmounted(() => {
 
 .mobile-nav-enter-active,
 .mobile-nav-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   .mobile-nav {
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -649,7 +724,7 @@ onUnmounted(() => {
   gap: 16px;
   padding: 14px 16px;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
   border-radius: 2px;
   border: 1px solid transparent;
 }
@@ -693,7 +768,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   color: #444;
   width: 12px;
-  transition: all 0.3s;
+  transition: color 0.3s, transform 0.3s;
 }
 
 .service-link:hover .external-link-icon {
@@ -704,7 +779,7 @@ onUnmounted(() => {
 /* Dropdown animations */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dropdown-enter-from,
@@ -743,7 +818,7 @@ onUnmounted(() => {
   padding: 14px 28px;
   color: #e2e8f0;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.3s, background-color 0.3s, border-color 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-left: 4px solid transparent;
 }
 

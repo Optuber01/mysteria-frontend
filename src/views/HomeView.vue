@@ -1,13 +1,12 @@
 <template>
   <div class="mysterria-home">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <HeaderItem />
-    <main>
+    <main id="main-content" tabindex="-1">
       <HomeHero :status="serverStatus" />
-      <ProgressionStory />
-      <SystemChapters />
-      <PathwayOrbit />
-      <BeyondPathways />
-      <LivingWorld :status="serverStatus" :latest-update="latestUpdate" />
+      <PathwayOrbit @selected="selectedPathway = $event" />
+      <ProgressionStory :pathway-name="selectedPathway" />
+      <BeyondPathways :status="serverStatus" :latest-update="latestUpdate" />
       <JoinJourney />
     </main>
     <FooterItem />
@@ -20,10 +19,8 @@ import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
 import ProgressionStory from '@/components/home/ProgressionStory.vue';
-import SystemChapters from '@/components/home/SystemChapters.vue';
 import PathwayOrbit from '@/components/home/PathwayOrbit.vue';
 import BeyondPathways from '@/components/home/BeyondPathways.vue';
-import LivingWorld from '@/components/home/LivingWorld.vue';
 import JoinJourney from '@/components/home/JoinJourney.vue';
 import { newsAPI } from '@/utils/api/news';
 import type { NewsArticle } from '@/types/news';
@@ -32,6 +29,7 @@ import { getServerStatus, type ServerStatus } from '@/services/serverStatus';
 
 const { currentLanguage } = useI18n();
 const latestNews = ref<NewsArticle[]>([]);
+const selectedPathway = ref('Abyss');
 const serverStatus = ref<ServerStatus>({
   state: 'loading',
   playersOnline: null,
@@ -110,6 +108,25 @@ onUnmounted(() => {
   outline: 2px solid #c69b52;
   outline-offset: 3px;
 }
+
+.skip-link {
+  position: fixed;
+  z-index: 2000;
+  left: 12px;
+  top: 10px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 9px;
+  color: #102924;
+  background: #fcf9f2;
+  font-size: .78rem;
+  font-weight: 750;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus { transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .mysterria-home :deep(*) {

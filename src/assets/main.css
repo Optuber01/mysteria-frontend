@@ -133,6 +133,7 @@ html {
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    scroll-padding-top: 72px;
 }
 
 img,
@@ -434,6 +435,12 @@ h6,
 
 html {
     scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
 }
 
 /* Simplified background - no complex animations */
