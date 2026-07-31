@@ -5,7 +5,7 @@
       class="icon-logo"
       fetchpriority="high"
       role="presentation"
-      src="@/assets/icons/sources/IconLogo.webp"
+      src="/logo-mark.webp"
   />
 </template>
 

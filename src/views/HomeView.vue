@@ -4,39 +4,60 @@
     <HeaderItem />
     <main id="main-content" tabindex="-1">
       <HomeHero :status="serverStatus" />
-      <PathwayOrbit @selected="selectedPathway = $event" />
       <ProgressionStory :pathway-name="selectedPathway" />
-      <BeyondPathways :status="serverStatus" :latest-update="latestUpdate" />
-      <JoinJourney />
+      <div
+        ref="pathwayTrigger"
+        class="deferred-chapter deferred-chapter--pathways"
+        :class="{ 'is-pending': !pathwayReady }"
+        :aria-busy="!pathwayReady"
+      >
+        <PathwayOrbit v-if="pathwayReady" @selected="selectedPathway = $event" />
+      </div>
+      <div
+        ref="worldTrigger"
+        class="deferred-chapter deferred-chapter--world"
+        :class="{ 'is-pending': !worldReady }"
+        :aria-busy="!worldReady"
+      >
+        <BeyondPathways v-if="worldReady" :status="serverStatus" :latest-update="latestUpdate" />
+      </div>
+      <div
+        ref="joinTrigger"
+        class="deferred-chapter deferred-chapter--join"
+        :class="{ 'is-pending': !joinReady }"
+        :aria-busy="!joinReady"
+      >
+        <JoinJourney v-if="joinReady" />
+      </div>
     </main>
     <FooterItem />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
 import ProgressionStory from '@/components/home/ProgressionStory.vue';
-import PathwayOrbit from '@/components/home/PathwayOrbit.vue';
-import BeyondPathways from '@/components/home/BeyondPathways.vue';
-import JoinJourney from '@/components/home/JoinJourney.vue';
-import { newsAPI } from '@/utils/api/news';
 import type { NewsArticle } from '@/types/news';
-import { useI18n } from '@/composables/useI18n';
-import { getServerStatus, type ServerStatus } from '@/services/serverStatus';
+import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
 
-const { currentLanguage } = useI18n();
 const latestNews = ref<NewsArticle[]>([]);
 const selectedPathway = ref('Abyss');
-const serverStatus = ref<ServerStatus>({
-  state: 'loading',
-  playersOnline: null,
-  checkedAt: null,
-});
-let pollTimer: ReturnType<typeof setInterval> | null = null;
-let controller: AbortController | null = null;
+const pathwayReady = ref(false);
+const worldReady = ref(false);
+const joinReady = ref(false);
+const { status: serverStatus } = useSharedServerStatus();
+const pathwayTrigger = ref<HTMLElement | null>(null);
+const worldTrigger = ref<HTMLElement | null>(null);
+const joinTrigger = ref<HTMLElement | null>(null);
+let newsObserver: IntersectionObserver | null = null;
+let chapterObserver: IntersectionObserver | null = null;
+
+const PathwayOrbit = defineAsyncComponent(() => import('@/components/home/PathwayOrbit.vue'));
+const BeyondPathways = defineAsyncComponent(() => import('@/components/home/BeyondPathways.vue'));
+const JoinJourney = defineAsyncComponent(() => import('@/components/home/JoinJourney.vue'));
 
 const latestUpdate = computed(() => {
   const sorted = [...latestNews.value].sort(
@@ -48,45 +69,58 @@ const latestUpdate = computed(() => {
   return update ? { title: update.title, slug: update.slug } : null;
 });
 
-async function refreshStatus() {
-  controller?.abort();
-  controller = new AbortController();
+async function loadLatestNews() {
+  newsObserver?.disconnect();
+  newsObserver = null;
   try {
-    serverStatus.value = await getServerStatus(controller.signal);
-  } catch (error) {
-    if (!(error instanceof DOMException && error.name === 'AbortError')) {
-      serverStatus.value = {
-        state: 'unavailable',
-        playersOnline: null,
-        checkedAt: new Date(),
-      };
-    }
+    const { newsAPI } = await import('@/utils/api/news');
+    const storedLanguage = localStorage.getItem('mysterria-language');
+    const language = storedLanguage === 'uk' ? 'uk' : 'en';
+    const response = await newsAPI.getLatest(language);
+    latestNews.value = response.data;
+  } catch {
+    latestNews.value = [];
   }
 }
 
-onMounted(async () => {
+function revealAllChapters() {
+  pathwayReady.value = true;
+  worldReady.value = true;
+  joinReady.value = true;
+  chapterObserver?.disconnect();
+}
+
+onMounted(() => {
   document.title = 'Mysterria — Lord of the Mysteries Minecraft RPG Server';
   const description =
     'Brew potions, complete rituals and unlock Pathway abilities in Mysterria, a Lord of the Mysteries-inspired Minecraft RPG server.';
   const descriptionTag = document.head.querySelector<HTMLMetaElement>('meta[name="description"]');
   if (descriptionTag) descriptionTag.content = description;
 
-  void refreshStatus();
-  pollTimer = setInterval(() => {
-    if (document.visibilityState === 'visible') void refreshStatus();
-  }, 60_000);
+  newsObserver = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) void loadLatestNews();
+  }, { rootMargin: '1200px 0px' });
+  if (worldTrigger.value) newsObserver.observe(worldTrigger.value);
 
-  try {
-    const response = await newsAPI.getLatest(currentLanguage.value);
-    latestNews.value = response.data;
-  } catch {
-    latestNews.value = [];
-  }
+  chapterObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      if (entry.target === pathwayTrigger.value) pathwayReady.value = true;
+      if (entry.target === worldTrigger.value) worldReady.value = true;
+      if (entry.target === joinTrigger.value) joinReady.value = true;
+      chapterObserver?.unobserve(entry.target);
+    });
+  }, { rootMargin: '1400px 0px' });
+  [pathwayTrigger.value, worldTrigger.value, joinTrigger.value].forEach((element) => {
+    if (element) chapterObserver?.observe(element);
+  });
+  window.addEventListener('keydown', revealAllChapters, { once: true });
 });
 
 onUnmounted(() => {
-  controller?.abort();
-  if (pollTimer) clearInterval(pollTimer);
+  newsObserver?.disconnect();
+  chapterObserver?.disconnect();
+  window.removeEventListener('keydown', revealAllChapters);
 });
 </script>
 
@@ -105,8 +139,9 @@ onUnmounted(() => {
 }
 
 .mysterria-home :deep(:focus-visible) {
-  outline: 2px solid #c69b52;
+  outline: 3px solid #071f1d;
   outline-offset: 3px;
+  box-shadow: 0 0 0 2px #fcf9f2;
 }
 
 .skip-link {
@@ -127,6 +162,11 @@ onUnmounted(() => {
 }
 
 .skip-link:focus { transform: none; }
+
+.deferred-chapter { min-width: 0; }
+.deferred-chapter--pathways.is-pending { min-height: 560svh; background: #102420; }
+.deferred-chapter--world.is-pending { min-height: 690svh; background: #0d1f22; }
+.deferred-chapter--join.is-pending { min-height: 430svh; background: #071416; }
 
 @media (prefers-reduced-motion: reduce) {
   .mysterria-home :deep(*) {

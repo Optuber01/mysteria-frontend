@@ -1,6 +1,6 @@
 <template>
-  <button class="server-chip" :title="copied ? t('guide.copyAddress') : 'mc.mysterria.net'" @click="copyIp">
-    <span class="status-dot" :class="{ online: isOnline, offline: !isOnline }"></span>
+  <button class="server-chip" :title="copied ? 'Server address copied' : 'Copy mc.mysterria.net'" @click="copyIp">
+    <span class="status-dot" :class="{ online: isOnline, offline: !isOnline }" aria-hidden="true"></span>
     <span class="chip-ip">mc.mysterria.net</span>
     <span v-if="isOnline && playerCount !== null" class="chip-players">
       {{ playerCount }}
@@ -12,29 +12,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useI18n } from '@/composables/useI18n';
+import { computed, ref, onUnmounted } from 'vue';
+import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
 
-const { t } = useI18n();
-
-const isOnline = ref(false);
-const playerCount = ref<number | null>(null);
+const { status } = useSharedServerStatus();
+const isOnline = computed(() => status.value.state === 'online');
+const playerCount = computed(() => status.value.playersOnline);
 const copied = ref(false);
-let pollInterval: ReturnType<typeof setInterval> | null = null;
 let copiedTimeout: ReturnType<typeof setTimeout> | null = null;
-
-async function fetchStatus() {
-  try {
-    const res = await fetch('https://mcapi.us/server/status?ip=mc.mysterria.net');
-    if (!res.ok) return;
-    const data = await res.json();
-    isOnline.value = data.online === true;
-    playerCount.value = isOnline.value ? (data.players?.now ?? 0) : null;
-  } catch {
-    isOnline.value = false;
-    playerCount.value = null;
-  }
-}
 
 async function copyIp() {
   try {
@@ -47,13 +32,7 @@ async function copyIp() {
   }
 }
 
-onMounted(() => {
-  fetchStatus();
-  pollInterval = setInterval(fetchStatus, 60_000);
-});
-
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval);
   if (copiedTimeout) clearTimeout(copiedTimeout);
 });
 </script>

@@ -1,77 +1,117 @@
-# Mysterria homepage content guide
+# Mysterria homepage content and asset guide
 
-The homepage is assembled in `src/views/HomeView.vue` from focused components
-in `src/components/home/`. It uses real project imagery and the existing server
-logo. No generated screenshots or fantasy art are included.
+The homepage is one continuous, object-led journey assembled in
+`src/views/HomeView.vue`:
 
-## Verified data sources
+1. Bright arrival in Mysterria
+2. A player's first potion and advancement
+3. Scroll-assembled Pathways and Boons
+4. Real server world systems
+5. The guided join sequence
 
-- Server address: `src/services/serverStatus.ts`
-- Live online state and player count: `mcapi.us` through
-  `getServerStatus()`. A failed request renders **Unavailable**.
-- Latest update: the existing `newsAPI.getLatest()` response. A failed request
-  renders **Unavailable**.
-- Standard Pathways: `src/data/pathways.ts`, derived from
-  `src/assets/sources/pathway-abilities.json`. The ten boon IDs used by the
-  existing Pathway archive are excluded, leaving the 22 standard Pathways.
-- Pathway strengths and the playstyle preview are derived from the earliest
-  documented ability names in the archive. They are not separate editorial
-  claims.
+Each chapter preserves native scrolling. Sticky visuals enhance the story, while
+reduced-motion and narrow/zoomed layouts retain readable static content.
 
-`createMockServerDataAdapter()` is available for tests and previews. Production
-code uses the live adapter and must never present mock values as live facts.
+## Verified sources
 
-## Content placeholders to replace
+- Server address and status adapter: `src/services/serverStatus.ts`
+- Latest update: `newsAPI.getLatest()` in `src/views/HomeView.vue`
+- Detailed Sequences and abilities:
+  `src/assets/sources/pathway-abilities.json`
+- Compact homepage projection:
+  `src/assets/sources/progression-catalog.json`
+- Projection generator: `scripts/generate-progression-catalog.mjs`
+- Progression and world-system copy: the Mysterria wiki and the corresponding
+  guide topics in `src/data/guideContent.ts`
+- Gameplay textures: the Mysterria resource pack's Circle of Imagination items
+- World captures: the Mysterria wiki repository's approved server imagery
 
-The copy deliberately labels missing details instead of inventing mechanics.
-Replace these notes only after the server team verifies the behavior:
+`npm run build-only` regenerates the compact progression catalog before Vite
+builds. The standard 22 IDs are treated as Pathways; any additional archive
+entry is categorized as a Boon. Starting Sequence, preview abilities, Sequence
+count, and ability count are all derived from the detailed archive. Unknown
+entries receive a safe visual fallback, so a data update cannot silently omit
+them from the homepage.
 
-- Potion recipe sources, brewing interface and digestion feedback
-- Advancement ritual conditions, failure behavior and safeguards
-- Instability causes, thresholds, consequences and recovery
-- Organization creation, territory, permissions and progression
-- Dungeon, creature, location, event, economy, housing and town showcase
-  details and approved in-game media
-- Live towns/organizations, world event and discovery feeds
+The full archive remains the source of truth for `/pathways/:pathway`. Update it,
+then run `npm run generate:progression` when reviewing the homepage locally.
 
-The relevant replacement points live in:
+## Presentation metadata
 
-- `ProgressionStory.vue` — the eight-stage progression loop
-- `BeyondPathways.vue` — original world content and integrated live-world HUD
-- `JoinJourney.vue` — connection flow and final portal sequence
+`src/data/pathways.ts` contains only information missing from the gameplay
+archive: public display names, image aliases, palettes, motifs, and motion
+profiles. Add richer presentation metadata for a new entry when available, but
+do not add Sequence names or abilities there.
 
-Unverified mechanics stay in this document rather than appearing as public
-“content pending” panels. The homepage uses only the verified high-level system
-loop and existing Pathway archive data.
+The LOTM-informed motifs are art direction, not claims about Mysterria
+mechanics. Public gameplay copy must continue to follow the current Mysterria
+wiki and game archive.
 
-## Replacing live-world integrations
+## Asset provenance
 
-Implement `getLivingWorldSnapshot()` in `src/services/serverStatus.ts` when a
-first-party API exists. Keep nullable fields and explicit unavailable UI so a
-partial API response remains honest. If the status provider changes, preserve
-the `ServerStatus` state model (`loading`, `online`, `offline`, `unavailable`).
+- `mysterria-dawn.webp` is promotional artwork created by re-lighting and
+  art-directing an existing Mysterria castle capture. It is a homepage backdrop,
+  not a gameplay screenshot.
+- `home/progression/` uses a real Mysterria brewery capture and COI-owned item
+  textures: potion, ingredient, recipe, cauldron, ritual-book and acting assets.
+- `home/world/` uses repo-backed dungeon, creature, boss, Emporium, economy and
+  town captures. These are shown as distinct locations rather than as repeated
+  crops of the hero.
+- Pathway and Boon sigils remain the existing project assets in
+  `src/assets/images/pathways/` and `public/pathways/`.
 
-## Assets and performance
+Do not publish raw ModelEngine/MEG textures from the resource pack until their
+third-party license is confirmed. Server screenshots that contain those models
+may be used when the server team approves the capture.
 
-Hero and world scenes reuse optimized Minecraft WebP files under
-`src/assets/images/optimized/`. Below-the-fold images use native lazy loading.
-The hero depth and progression story update only while visible; orbit animation
-stops when it reaches its snap target. Reduced-motion mode removes scroll-linked
-transforms and animated transitions.
+When replacing imagery:
 
-When adding replacement images:
-
-1. Use approved in-game captures only.
+1. Prefer an approved real in-game capture or project-owned item/model asset.
 2. Export WebP or AVIF at the actual maximum display size.
-3. Keep the hero image under roughly 300 KB where practical.
-4. Add intrinsic `width` and `height`, and lazy-load below-the-fold media.
+3. Keep the hero under about 300 KB where practical.
+4. Add intrinsic dimensions and lazy-load below-the-fold images.
+5. Preserve alt text when the image communicates content; decorative layers
+   should remain empty-alt and `aria-hidden`.
 
-## Interaction and accessibility checks
+## Honest live-world states
 
-- The Pathway orbit supports drag, pointer position, wheel, arrow keys and
-  previous/next buttons.
-- Mobile supports swipe plus previous/next buttons.
-- The complete Pathway list is always available through the fallback disclosure.
-- Keep all interactive targets at least 44 by 44 CSS pixels.
-- Every hover preview must remain reachable by focus and click/touch.
-- Do not remove the reduced-motion media queries or static content fallbacks.
+The homepage never fills missing server fields with mock facts.
+
+- Player count/status comes from the live status adapter.
+- Latest update comes from the news API.
+- Town/organization, event, and discovery values remain explicitly unavailable
+  until a first-party API exposes them.
+
+Implement `getLivingWorldSnapshot()` in `src/services/serverStatus.ts` when that
+API exists. Preserve nullable fields and the `loading`, `online`, `offline`, and
+`unavailable` state model. `createMockServerDataAdapter()` is for tests and
+previews only and must not be presented as production data.
+
+## Interaction contracts
+
+- Pathways and Boons use the same structured catalog and existing detail route.
+- Desktop assembly is driven by vertical scroll, then supports pointer position,
+  drag, wheel, previous/next controls, and arrow keys with snap behavior.
+- Mobile uses a horizontal snap carousel with controls and a complete list
+  fallback.
+- Hover details must always have focus, click, and touch equivalents.
+- Interactive targets stay at least 44 CSS pixels.
+- Dialogs trap focus, close with Escape, and restore focus to their trigger.
+- At 200% zoom and in reduced-motion mode, complex scenes become editorial,
+  readable layouts rather than requiring animation to understand the content.
+
+## Content replacement checklist
+
+Before changing public mechanics copy, verify it against current plugin behavior
+and the public Mysterria wiki. In particular, confirm:
+
+- ingredient and brewing rules;
+- acting/digestion feedback;
+- personal ritual and Madness behavior;
+- Boon altar progression;
+- organization/town behavior;
+- dungeon, event, economy and housing descriptions;
+- availability and freshness guarantees for live APIs.
+
+If a fact cannot be verified, omit it or show an unavailable state. Do not use a
+future-content promise that would require a later homepage edit.

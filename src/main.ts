@@ -3,24 +3,36 @@ import "./assets/main.css";
 import {createApp} from "vue";
 import {createPinia} from "pinia";
 import VueCookies from "vue-cookies";
-import VueDOMPurifyHTML from 'vue-dompurify-html';
 
 import App from "./App.vue";
 import router from "./router";
-import {useAuthStore} from "@/stores/auth";
 
 const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
+let sanitizerInstalled = false;
+let fontAwesomeInstalled = false;
+router.beforeEach(async (to) => {
+    if (to.path !== '/' && !fontAwesomeInstalled) {
+        const stylesheet = document.createElement('link');
+        stylesheet.rel = 'stylesheet';
+        stylesheet.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css';
+        stylesheet.crossOrigin = 'anonymous';
+        stylesheet.referrerPolicy = 'no-referrer';
+        document.head.append(stylesheet);
+        fontAwesomeInstalled = true;
+    }
+    if (!sanitizerInstalled && /^(news-article|news-article-localized|service-detail|edit-news)$/.test(String(to.name))) {
+        const {default: VueDOMPurifyHTML} = await import('vue-dompurify-html');
+        app.use(VueDOMPurifyHTML);
+        sanitizerInstalled = true;
+    }
+});
 app.use(router);
 app.use(VueCookies);
-app.use(VueDOMPurifyHTML);
 
 window.$cookies = VueCookies.VueCookies;
-
-const authStore = useAuthStore(pinia);
-authStore.init();
 
 app.mount("#app");
 

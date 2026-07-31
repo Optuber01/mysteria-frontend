@@ -156,7 +156,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
         '@data': fileURLToPath(new URL('./src/data', import.meta.url)),
         '@services': fileURLToPath(new URL('./src/services', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        vue: 'vue/dist/vue.esm-bundler.js',
+        vue: 'vue/dist/vue.runtime.esm-bundler.js',
       },
       extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue', '.md', '.mdx'],
     },
@@ -203,7 +203,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
     },
     build: {
       outDir: 'dist/client',
-      sourcemap: true,
+      sourcemap: false,
       cssCodeSplit: true,
       rollupOptions: {
         input: {

@@ -1,34 +1,46 @@
 <template>
   <Analytics/>
   <div class="app">
-    <MysticBackground/>
-    <NotificationContainer/>
+    <MysticBackground v-if="!isHome"/>
+    <NotificationContainer v-if="!isHome"/>
 
     <!-- Main Content -->
     <RouterView/>
   </div>
-  <div ref="cursor" class="cursor-background"></div>
+  <div v-if="!isHome" ref="cursor" class="cursor-background"></div>
 </template>
 
 <script lang="ts" setup>
-import NotificationContainer from "@/components/ui/NotificationContainer.vue";
-import MysticBackground from "@/components/ui/MysticBackground.vue";
-import {onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch} from "vue";
 import {RouterView, useRoute} from "vue-router";
-import {useBalanceWatcher} from "@/stores/balance";
-import {useUserWatcher} from "./stores/user";
-import {useServicesWatcher} from "./stores/services";
-import {useDailyBonusWatcher} from "./stores/dailyBonus";
-import {useAccountNotificationsWatcher} from "./stores/notifications";
 import {Analytics} from '@vercel/analytics/vue';
 
-useUserWatcher();
-useBalanceWatcher();
-useServicesWatcher();
-useDailyBonusWatcher();
-useAccountNotificationsWatcher();
+const NotificationContainer = defineAsyncComponent(() => import('@/components/ui/NotificationContainer.vue'));
+const MysticBackground = defineAsyncComponent(() => import('@/components/ui/MysticBackground.vue'));
 
 const route = useRoute();
+const isHome = computed(() => route.path === '/');
+let routeWatchersStarted = false;
+
+watch(() => route.path, (path) => {
+  if (path === '/' || routeWatchersStarted) return;
+  routeWatchersStarted = true;
+  void Promise.all([
+    import('@/stores/auth'),
+    import('@/stores/user'),
+    import('@/stores/balance'),
+    import('@/stores/services'),
+    import('@/stores/dailyBonus'),
+    import('@/stores/notifications'),
+  ]).then(([auth, user, balance, services, dailyBonus, notifications]) => {
+    void auth.useAuthStore().init();
+    user.useUserWatcher();
+    balance.useBalanceWatcher();
+    services.useServicesWatcher();
+    dailyBonus.useDailyBonusWatcher();
+    notifications.useAccountNotificationsWatcher();
+  });
+}, { immediate: true });
 
 // Force scroll to top on every route change
 watch(() => route.path, () => {
