@@ -106,6 +106,18 @@ function copyRobotsPlugin(): Plugin {
   }
 }
 
+function copySitesWorkerPlugin(): Plugin {
+  return {
+    name: 'copy-sites-worker',
+    closeBundle() {
+      const source = fileURLToPath(new URL('./worker/sites-index.js', import.meta.url))
+      const destination = fileURLToPath(new URL('./dist/server/index.js', import.meta.url))
+      fs.mkdirSync(fileURLToPath(new URL('./dist/server', import.meta.url)), { recursive: true })
+      fs.copyFileSync(source, destination)
+    },
+  }
+}
+
 function createViteConfig({ mode }: ConfigEnv): UserConfig {
   const env = loadEnv(mode, process.cwd(), '')
   const plugins: PluginOption[] = [
@@ -116,6 +128,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
     vueDevTools(),
     vercel(),
     copyRobotsPlugin(), // Must run before sitemap plugin
+    copySitesWorkerPlugin(),
     generateSitemap({
       hostname: 'https://mysterria.net',
       robots: [
