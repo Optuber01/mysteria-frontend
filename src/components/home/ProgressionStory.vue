@@ -1,14 +1,13 @@
 <template>
   <section
     id="progression"
-    ref="section"
+    ref="sectionRef"
     class="progression"
-    :class="`stage-${activeIndex}`"
+    :class="`stage-${activeStage.id}`"
     :style="{
-      '--journey': String(progress),
-      '--local': String(localProgress),
-      '--potion-frame': String(potionFrame),
-      '--potion-position': `${(potionFrame / 182) * 100}%`,
+      '--journey': progress.toFixed(4),
+      '--local': localProgress.toFixed(4),
+      '--presence': scenePresence.toFixed(4),
       '--potion-sprite': `url(${potionSprite})`,
     }"
     aria-labelledby="progression-title"
@@ -16,207 +15,252 @@
     <div class="progression-sticky">
       <div class="brewery-backdrop" aria-hidden="true">
         <img
-          :src="assetsReady ? breweryScene : undefined"
+          :src="breweryScene"
           alt=""
-          width="2048"
-          height="1024"
-          loading="lazy"
+          width="1920"
+          height="1017"
+          fetchpriority="high"
           decoding="async"
-        />
+        >
       </div>
       <div class="scene-grade" aria-hidden="true" />
-      <div class="scene-depth" aria-hidden="true" />
+      <div class="fog-memory" aria-hidden="true" />
 
       <header class="chapter-heading">
         <span>Playable progression</span>
         <h2 id="progression-title">Brew it. Live it. Advance.</h2>
-        <p>{{ pathwayName }} Pathway selected</p>
+        <p>Fool · Sequence 9 example</p>
       </header>
 
-      <div class="artifact-stage" aria-hidden="true">
-        <div class="workbench-shadow" />
+      <div class="stage-layout">
+        <article class="stage-copy">
+          <span>{{ stageNumber }} · {{ activeStage.kicker }}</span>
+          <h3>{{ activeStage.title }}</h3>
+          <p>{{ activeStage.copy }}</p>
+          <div class="fact-line"><i aria-hidden="true" />{{ activeStage.fact }}</div>
+        </article>
 
-        <div class="recipe-assembly">
-          <div class="recipe-aura" />
-          <div class="fragment fragment-a">
-            <img :src="recipeFragment" alt="" />
-          </div>
-          <div class="fragment fragment-b">
-            <img :src="recipeFragment" alt="" />
-          </div>
-          <div class="fragment fragment-c">
-            <img :src="recipeFragment" alt="" />
-          </div>
-          <div class="recipe-book">
-            <div class="book-cover" />
-            <div class="book-page book-page-left" />
-            <div class="book-page book-page-right" />
-            <img class="recipe-icon" :src="recipeIcon" alt="" />
-            <span>{{ pathwayName }}</span>
-          </div>
-          <div class="blueprint-card">
-            <span>Magic Cauldron</span>
-            <i v-for="cell in 20" :key="cell" :class="{ filled: blueprintCells.includes(cell) }" />
-          </div>
-        </div>
+        <div class="scene-shell">
+          <div class="scene" :class="`scene--${activeStage.id}`">
+            <template v-if="activeStage.id === 'formula'">
+              <div class="formula-pages" aria-label="Formula page assembly">
+                <button
+                  v-for="(page, index) in formulaPages"
+                  :key="page.id"
+                  class="formula-page scene-item"
+                  type="button"
+                  :aria-describedby="detailId(page.id)"
+                  :aria-expanded="activeHotspotId === page.id"
+                  aria-controls="scene-detail-panel"
+                  :style="{ '--page': String(index) }"
+                  @mouseenter="showDetail(page.id)"
+                  @mouseleave="clearDetail"
+                  @focus="showDetail(page.id)"
+                  @blur="clearDetail"
+                  @click="toggleDetail(page.id)"
+                >
+                  <img :src="recipeFragment" alt="" width="16" height="16">
+                  <span>{{ page.label }}</span>
+                </button>
+              </div>
+              <button
+                class="written-formula scene-item"
+                type="button"
+                :aria-describedby="detailId('formula-main')"
+                :aria-expanded="activeHotspotId === 'formula-main'"
+                aria-controls="scene-detail-panel"
+                @mouseenter="showDetail('formula-main')"
+                @mouseleave="clearDetail"
+                @focus="showDetail('formula-main')"
+                @blur="clearDetail"
+                @click="toggleDetail('formula-main')"
+              >
+                <span class="formula-book">
+                  <i class="formula-book__left">SEQUENCE 9<small>SEER</small></i>
+                  <i class="formula-book__right"><img :src="foolRecipe" alt="" width="16" height="16"></i>
+                </span>
+                <strong>Complete Seer formula</strong>
+              </button>
+            </template>
 
-        <div class="cauldron-rig">
-          <div class="structure-blocks">
-            <i
-              v-for="(block, index) in structureBlocks"
-              :key="index"
-              class="structure-block"
-              :style="blockStyle(block, index)"
+            <RitualAltarScene
+              v-else-if="activeStage.id === 'altar'"
+              :progress="localProgress"
+              @inspect="id => id ? showDetail(id) : clearDetail()"
             />
-          </div>
 
-          <div class="magic-cauldron">
-            <div class="cauldron-lid"><i /></div>
-            <div class="cauldron-handle cauldron-handle-left" />
-            <div class="cauldron-handle cauldron-handle-right" />
-            <div class="cauldron-rim"><i /></div>
-            <div class="cauldron-liquid">
-              <i class="liquid-sheen" />
-              <i class="liquid-ring ring-one" />
-              <i class="liquid-ring ring-two" />
-            </div>
-            <div class="cauldron-body"><i /></div>
-            <div class="cauldron-feet"><i /><i /></div>
-            <div class="cauldron-fire"><i /><i /><i /></div>
-          </div>
+            <template v-else-if="activeStage.id === 'ingredients'">
+              <div class="ingredient-table" aria-label="Fool Sequence 9 ingredients">
+                <button
+                  v-for="ingredient in ingredientItems"
+                  :key="ingredient.id"
+                  class="ingredient-card scene-item"
+                  type="button"
+                  :aria-describedby="detailId(ingredient.id)"
+                  :aria-expanded="activeHotspotId === ingredient.id"
+                  aria-controls="scene-detail-panel"
+                  @mouseenter="showDetail(ingredient.id)"
+                  @mouseleave="clearDetail"
+                  @focus="showDetail(ingredient.id)"
+                  @blur="clearDetail"
+                  @click="toggleDetail(ingredient.id)"
+                >
+                  <span><img :src="ingredient.src" alt="" width="16" height="16"></span>
+                  <strong>{{ ingredient.label }}</strong>
+                  <small>{{ ingredient.role }}</small>
+                </button>
+                <button
+                  class="ingredient-card ingredient-card--characteristic scene-item"
+                  type="button"
+                  :aria-describedby="detailId('beyonder-characteristic')"
+                  :aria-expanded="activeHotspotId === 'beyonder-characteristic'"
+                  aria-controls="scene-detail-panel"
+                  @mouseenter="showDetail('beyonder-characteristic')"
+                  @mouseleave="clearDetail"
+                  @focus="showDetail('beyonder-characteristic')"
+                  @blur="clearDetail"
+                  @click="toggleDetail('beyonder-characteristic')"
+                >
+                  <span aria-hidden="true"><i /></span>
+                  <strong>Beyonder Characteristic</strong>
+                  <small>Main-set substitute</small>
+                </button>
+              </div>
+            </template>
 
-          <div class="ingredient-rig">
-            <figure
-              v-for="(ingredient, index) in ingredients"
-              :key="ingredient.label"
-              class="ingredient"
-              :class="`ingredient-${ingredient.kind}`"
-              :style="ingredientStyle(ingredient, index)"
-            >
-              <span><img :src="ingredient.src" alt="" /></span>
-              <figcaption>{{ ingredient.label }}</figcaption>
-            </figure>
-          </div>
+            <template v-else-if="activeStage.id === 'brew'">
+              <div class="brew-interface">
+                <div class="brew-interface__header"><span>Ritual Altar interface</span><i>live in-game UI</i></div>
+                <div class="brew-interface__image">
+                  <img :src="cauldronInterface" alt="Mysterria Ritual Altar brewing interface" width="636" height="284">
+                  <div class="clean-brew-grid" aria-hidden="true">
+                    <span v-for="cell in 45" :key="cell">
+                      <img v-if="cell === 11" :src="lavosSquidBlood" alt="">
+                      <img v-else-if="cell === 29" :src="foolRecipe" alt="">
+                      <img v-else-if="cell === 17" :src="goldMintLeaves" alt="">
+                    </span>
+                  </div>
+                  <button class="slot-zone slot-zone--main" type="button" aria-label="Main ingredient slots" :aria-describedby="detailId('brew-main-slots')" :aria-expanded="activeHotspotId === 'brew-main-slots'" aria-controls="scene-detail-panel" @mouseenter="showDetail('brew-main-slots')" @mouseleave="clearDetail" @focus="showDetail('brew-main-slots')" @blur="clearDetail" @click="toggleDetail('brew-main-slots')" />
+                  <button class="slot-zone slot-zone--recipe" type="button" aria-label="Written formula slot" :aria-describedby="detailId('brew-recipe-slot')" :aria-expanded="activeHotspotId === 'brew-recipe-slot'" aria-controls="scene-detail-panel" @mouseenter="showDetail('brew-recipe-slot')" @mouseleave="clearDetail" @focus="showDetail('brew-recipe-slot')" @blur="clearDetail" @click="toggleDetail('brew-recipe-slot')" />
+                  <button class="slot-zone slot-zone--supp" type="button" aria-label="Supplementary ingredient slots" :aria-describedby="detailId('brew-supp-slots')" :aria-expanded="activeHotspotId === 'brew-supp-slots'" aria-controls="scene-detail-panel" @mouseenter="showDetail('brew-supp-slots')" @mouseleave="clearDetail" @focus="showDetail('brew-supp-slots')" @blur="clearDetail" @click="toggleDetail('brew-supp-slots')" />
+                </div>
+              </div>
+              <button class="potion-result scene-item" type="button" :aria-describedby="detailId('sequence-potion')" :aria-expanded="activeHotspotId === 'sequence-potion'" aria-controls="scene-detail-panel" @mouseenter="showDetail('sequence-potion')" @mouseleave="clearDetail" @focus="showDetail('sequence-potion')" @blur="clearDetail" @click="toggleDetail('sequence-potion')">
+                <span class="potion-pixel" aria-hidden="true" />
+                <strong>Sequence 9 potion</strong>
+              </button>
+            </template>
 
-          <div class="cauldron-interface">
-            <div class="interface-label"><span>Cauldron interface</span><i>live in-game UI</i></div>
-            <img
-              :src="assetsReady ? cauldronInterface : undefined"
-              alt=""
-              width="632"
-              height="348"
-              loading="lazy"
-              decoding="async"
-            />
-            <div class="slot-key"><span>Main · left</span><span>Recipe · center</span><span>Supplementary · right</span></div>
-          </div>
-        </div>
+            <template v-else-if="activeStage.id === 'drink'">
+              <MinecraftPlayer class="player-rig" mode="drink" :active="visible" />
+              <button class="drink-potion scene-item" type="button" :aria-describedby="detailId('drink-potion')" :aria-expanded="activeHotspotId === 'drink-potion'" aria-controls="scene-detail-panel" @mouseenter="showDetail('drink-potion')" @mouseleave="clearDetail" @focus="showDetail('drink-potion')" @blur="clearDetail" @click="toggleDetail('drink-potion')">
+                <span class="potion-pixel" aria-hidden="true" />
+                <strong>Sequence 9 · Seer</strong>
+              </button>
+              <button class="ability-reveal scene-item" type="button" :aria-describedby="detailId('drink-abilities')" :aria-expanded="activeHotspotId === 'drink-abilities'" aria-controls="scene-detail-panel" @mouseenter="showDetail('drink-abilities')" @mouseleave="clearDetail" @focus="showDetail('drink-abilities')" @blur="clearDetail" @click="toggleDetail('drink-abilities')">
+                <span>Divination</span><span>Spiritualism</span>
+              </button>
+            </template>
 
-        <div class="potion-rig">
-          <div class="potion-halo" />
-          <div class="potion-bottle">
-            <div class="potion-pixel" />
-          </div>
-          <i class="drink-stream" />
-          <div class="brew-confirmation">
-            <span>BREW RESULT</span>
-            <strong>Sequence potion</strong>
-            <i>Expires after 2 real-time days</i>
-          </div>
-          <div class="block-avatar">
-            <i class="avatar-head" />
-            <i class="avatar-body" />
-            <i class="avatar-arm" />
-          </div>
-        </div>
+            <template v-else-if="activeStage.id === 'digest'">
+              <MinecraftPlayer class="player-rig player-rig--digest" mode="walk" :active="visible" />
+              <div class="activity-orbit" aria-label="Digestion routes">
+                <button
+                  v-for="(route, index) in digestRoutes"
+                  :key="route.id"
+                  class="activity-node scene-item"
+                  :class="`route-${index + 1}`"
+                  type="button"
+                  :aria-describedby="detailId(route.id)"
+                  :aria-expanded="activeHotspotId === route.id"
+                  aria-controls="scene-detail-panel"
+                  @mouseenter="showDetail(route.id)"
+                  @mouseleave="clearDetail"
+                  @focus="showDetail(route.id)"
+                  @blur="clearDetail"
+                  @click="toggleDetail(route.id)"
+                >
+                  <img v-if="route.asset" :src="route.asset" alt="" width="16" height="16">
+                  <svg v-else aria-hidden="true" viewBox="0 0 24 24"><path :d="route.icon" /></svg>
+                  <span>{{ route.label }}</span>
+                </button>
+              </div>
+              <div class="digestion-meter" aria-label="Example digestion progress">
+                <span><strong>Digestion</strong><b>{{ digestionValue }}%</b></span>
+                <i><b :style="{ width: `${digestionValue}%` }" /></i>
+              </div>
+            </template>
 
-        <div class="digestion-rig">
-          <div class="digest-figure">
-            <i class="digest-head" />
-            <i class="digest-body" />
-            <i class="digest-core" />
-            <i class="digest-wave wave-one" />
-            <i class="digest-wave wave-two" />
-          </div>
-          <div class="acting-prompt">
-            <img :src="actingBottle" alt="" />
-            <div><span>ACTION BAR</span><strong>Acting opportunity available</strong></div>
-          </div>
-          <div class="digest-meter">
-            <div><span>Digestion</span><strong>{{ digestionValue }}%</strong></div>
-            <i><b :style="{ width: `${digestionValue}%` }" /></i>
-            <p>Current Sequence methods only</p>
-          </div>
-        </div>
+            <template v-else-if="activeStage.id === 'ritual'">
+              <div class="ritual-scene">
+                <img class="magic-circle" :src="magicCircle" alt="" width="256" height="256">
+                <button class="ritual-book scene-item" type="button" :aria-describedby="detailId('ritual-book')" :aria-expanded="activeHotspotId === 'ritual-book'" aria-controls="scene-detail-panel" @mouseenter="showDetail('ritual-book')" @mouseleave="clearDetail" @focus="showDetail('ritual-book')" @blur="clearDetail" @click="toggleDetail('ritual-book')">
+                  <img :src="ritualBook" alt="" width="16" height="16"><span>Personal ritual</span>
+                </button>
+                <button class="ritual-ready scene-item" type="button" :aria-describedby="detailId('ritual-readiness')" :aria-expanded="activeHotspotId === 'ritual-readiness'" aria-controls="scene-detail-panel" @mouseenter="showDetail('ritual-readiness')" @mouseleave="clearDetail" @focus="showDetail('ritual-readiness')" @blur="clearDetail" @click="toggleDetail('ritual-readiness')">
+                  <strong>95%</strong><span>Acting ready</span>
+                </button>
+                <button class="ritual-risk scene-item" type="button" :aria-describedby="detailId('ritual-madness')" :aria-expanded="activeHotspotId === 'ritual-madness'" aria-controls="scene-detail-panel" @mouseenter="showDetail('ritual-madness')" @mouseleave="clearDetail" @focus="showDetail('ritual-madness')" @blur="clearDetail" @click="toggleDetail('ritual-madness')">
+                  <strong>Incomplete?</strong><span>Madness cost</span>
+                </button>
+              </div>
+            </template>
 
-        <div class="ritual-rig">
-          <div class="ritual-plane">
-            <i class="ritual-ring ritual-ring-outer" />
-            <i class="ritual-ring ritual-ring-inner" />
-            <i class="ritual-axis axis-one" />
-            <i class="ritual-axis axis-two" />
-            <i class="ritual-axis axis-three" />
-            <i v-for="anchor in 6" :key="anchor" class="ritual-anchor" :style="anchorStyle(anchor)" />
-            <div class="ritual-book"><img :src="ritualBook" alt="" /></div>
-            <div class="ritual-potion"><div class="potion-pixel" /></div>
-          </div>
-          <div class="advance-beam" />
-          <div class="sequence-shift"><span>SEQUENCE</span><strong>9</strong><i /><strong>8</strong></div>
-        </div>
+            <template v-else>
+              <div class="advance-scene">
+                <img class="magic-circle magic-circle--advance" :src="magicCircle" alt="" width="256" height="256">
+                <div class="advance-beam" aria-hidden="true" />
+                <MinecraftPlayer class="player-rig player-rig--advance" mode="advance" :active="visible" />
+                <button class="sequence-shift scene-item" type="button" :aria-describedby="detailId('advance-sequence')" :aria-expanded="activeHotspotId === 'advance-sequence'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-sequence')" @mouseleave="clearDetail" @focus="showDetail('advance-sequence')" @blur="clearDetail" @click="toggleDetail('advance-sequence')">
+                  <span>SEQUENCE</span><strong>9</strong><i /><strong>8</strong>
+                </button>
+                <button class="advance-node node-abilities scene-item" type="button" :aria-describedby="detailId('advance-abilities')" :aria-expanded="activeHotspotId === 'advance-abilities'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-abilities')" @mouseleave="clearDetail" @focus="showDetail('advance-abilities')" @blur="clearDetail" @click="toggleDetail('advance-abilities')">New abilities</button>
+                <button class="advance-node node-spirituality scene-item" type="button" :aria-describedby="detailId('advance-spirituality')" :aria-expanded="activeHotspotId === 'advance-spirituality'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-spirituality')" @mouseleave="clearDetail" @focus="showDetail('advance-spirituality')" @blur="clearDetail" @click="toggleDetail('advance-spirituality')">Resources restored</button>
+                <button class="advance-node node-madness scene-item" type="button" :aria-describedby="detailId('advance-madness')" :aria-expanded="activeHotspotId === 'advance-madness'" aria-controls="scene-detail-panel" @mouseenter="showDetail('advance-madness')" @mouseleave="clearDetail" @focus="showDetail('advance-madness')" @blur="clearDetail" @click="toggleDetail('advance-madness')">Power has a cost</button>
+              </div>
+            </template>
 
-        <div class="power-rig">
-          <div class="power-core"><span>{{ pathwayInitial }}</span><i /></div>
-          <div class="power-orbit orbit-one" />
-          <div class="power-orbit orbit-two" />
-          <div class="power-node node-abilities"><i />Abilities</div>
-          <div class="power-node node-spirituality"><i />Spirituality</div>
-          <div class="power-node node-acting"><i />Acting</div>
-          <div class="power-node node-madness"><i />Madness</div>
-          <div class="madness-panel">
-            <div><span>MADNESS</span><strong>{{ madnessValue }}%</strong></div>
-            <i class="madness-track"><b :style="{ width: `${madnessValue}%` }" /></i>
-            <p>Power is something you manage.</p>
+            <Transition name="detail-reveal">
+              <aside v-if="activeDetail" id="scene-detail-panel" class="scene-detail">
+                <span>Inspecting</span>
+                <strong>{{ activeDetail.label }}</strong>
+                <p>{{ activeDetail.detail }}</p>
+              </aside>
+            </Transition>
           </div>
-          <i class="fracture fracture-one" />
-          <i class="fracture fracture-two" />
-          <i class="fracture fracture-three" />
         </div>
       </div>
 
-      <article :key="activeStage.title" class="stage-copy" aria-live="polite">
-        <span>{{ String(activeIndex + 1).padStart(2, '0') }} / {{ String(stages.length).padStart(2, '0') }} · {{ activeStage.kicker }}</span>
-        <h3>{{ activeStage.title }}</h3>
-        <p>{{ stageCopy(activeStage, activeIndex) }}</p>
-        <div class="fact-line"><i />{{ activeStage.fact }}</div>
-      </article>
+      <div class="sr-mechanic-details">
+        <template v-for="stage in progressionStages" :key="`details-${stage.id}`">
+          <span v-for="hotspot in stage.hotspots" :id="detailId(hotspot.id, stage.id)" :key="hotspot.id">{{ hotspot.detail }}</span>
+        </template>
+      </div>
 
       <nav class="stage-nav" aria-label="Advancement steps">
         <button
-          v-for="(stage, index) in stages"
-          :key="stage.title"
+          v-for="(stage, index) in progressionStages"
+          :key="stage.id"
           type="button"
           :class="{ active: activeIndex === index, complete: activeIndex > index }"
           :aria-current="activeIndex === index ? 'step' : undefined"
-          :aria-label="`Step ${index + 1}: ${stage.title}`"
+          :title="`Step ${index + 1}: ${stage.title}`"
           @click="goToStage(index)"
         >
-          <i />
-          <span>{{ String(index + 1).padStart(2, '0') }}</span>
-          <strong>{{ stage.short }}</strong>
+          <i /><span>{{ String(index + 1).padStart(2, '0') }}</span><strong>{{ stage.short }}</strong>
         </button>
       </nav>
-
       <div class="journey-line" aria-hidden="true"><i :style="{ width: `${progress * 100}%` }" /></div>
     </div>
 
     <ol class="static-progression">
-      <li v-for="(stage, index) in stages" :key="stage.title">
+      <li v-for="(stage, index) in progressionStages" :key="stage.id">
         <span>{{ String(index + 1).padStart(2, '0') }}</span>
         <div>
-          <small>{{ stage.kicker }}</small>
-          <h3>{{ stage.title }}</h3>
-          <p>{{ stageCopy(stage, index) }}</p>
-          <strong>{{ stage.fact }}</strong>
+          <small>{{ stage.kicker }}</small><h3>{{ stage.title }}</h3><p>{{ stage.copy }}</p><strong>{{ stage.fact }}</strong>
+          <ul>
+            <li v-for="hotspot in stage.hotspots" :key="hotspot.id"><b>{{ hotspot.label }}</b><span>{{ hotspot.detail }}</span></li>
+          </ul>
         </div>
       </li>
     </ol>
@@ -226,248 +270,102 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
+import { progressionStages } from '@/data/progression';
+import RitualAltarScene from './RitualAltarScene.vue';
+import MinecraftPlayer from './MinecraftPlayer.vue';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import cauldronInterface from '@/assets/images/home/progression/cauldron-interface.png';
 import potionSprite from '@/assets/images/home/progression/potion-sprite.png';
-import actingBottle from '@/assets/images/home/progression/acting-bottle.png';
-import ritualBook from '@/assets/images/home/progression/ritual-book.png';
 import recipeFragment from '@/assets/images/home/progression/recipe-fragment.png';
-import ingredientMainOne from '@/assets/images/home/progression/ingredient-main-1.png';
-import ingredientMainTwo from '@/assets/images/home/progression/ingredient-main-2.png';
-import ingredientSuppOne from '@/assets/images/home/progression/ingredient-supp-1.png';
-import ingredientSuppTwo from '@/assets/images/home/progression/ingredient-supp-2.png';
-import ingredientSuppThree from '@/assets/images/home/progression/ingredient-supp-3.png';
+import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
+import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
+import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
+import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leaves.png';
+import actingBottle from '@/assets/images/home/progression/real/acting-bottle-medium.png';
+import ritualBook from '@/assets/images/home/progression/real/ritual-book-tier2.png';
+import magicCircle from '@/assets/images/home/progression/real/magic-circle.png';
 
-type Stage = {
-  short: string;
-  kicker: string;
-  title: string;
-  copy: string;
-  fact: string;
-};
-type StructureBlock = { x: number; y: number; fromX: number; fromY: number; tone: number };
-type Ingredient = { src: string; label: string; kind: 'main' | 'supplementary'; x: number; y: number };
-
-const props = withDefaults(defineProps<{ pathwayName?: string }>(), { pathwayName: 'Abyss' });
-
-const stages: Stage[] = [
-  {
-    short: 'Recipe',
-    kicker: 'Recover the formula',
-    title: 'Find the recipe.',
-    copy: 'Loot containers can hold a complete recipe or individual pages for main ingredients, supplementary ingredients and the ritual. Collect every subtype, then combine the pages at a crafting table.',
-    fact: 'Recipes and Cauldron blueprints are separate discoveries.',
-  },
-  {
-    short: 'Build',
-    kicker: 'Make the workstation',
-    title: 'Build the Magic Cauldron.',
-    copy: 'Place a Cauldron blueprint and follow the chat instructions to assemble its multi-block structure. Crude, Normal and Advanced tiers each raise the chance of a successful brew.',
-    fact: 'You assemble the workstation in-world before its interface opens.',
-  },
-  {
-    short: 'Gather',
-    kicker: 'Source every component',
-    title: 'Gather the formula.',
-    copy: 'Bring the recipe’s main and supplementary ingredients in the listed order. Ingredients come from exploration, resource nodes and Beyonder Creatures; Beyonder Chars can replace the main set.',
-    fact: 'Main and supplementary ingredients occupy different slot groups.',
-  },
-  {
-    short: 'Brew',
-    kicker: 'Order matters',
-    title: 'Load it. Then brew.',
-    copy: 'Place main ingredients on the left, supplementary ingredients on the right and the recipe in the center. If the order is correct, the finished potion appears in your inventory.',
-    fact: 'A failed brew leaves the ingredients in place and creates no potion.',
-  },
-  {
-    short: 'Drink',
-    kicker: 'Commit to the Pathway',
-    title: 'Drink the potion.',
-    copy: 'Drinking your first Sequence 9 potion makes you a Beyonder and unlocks the Pathway’s abilities. Your inventory gains its Pathway icon so your state is always visible in-game.',
-    fact: 'The first Sequence 9 potion needs no ritual and adds no ritual Madness.',
-  },
-  {
-    short: 'Digest',
-    kicker: 'Progress through play',
-    title: 'Act to digest.',
-    copy: 'Perform actions tied to your current Sequence when the action bar signals an opportunity. Passive play, bounties, acting bottles, dungeons and Cosmos Incursions add other routes to digestion.',
-    fact: 'Casting spells alone does not count, and no single source reaches 100%.',
-  },
-  {
-    short: 'Advance',
-    kicker: 'Meet the next condition',
-    title: 'Complete your ritual.',
-    copy: 'Your ritual is personal and usually appears as an advancement. It is optional—with Madness costs—for Sequences 8 through 6, and required from Sequence 5 onward.',
-    fact: 'Advance only when your acting, ritual and next potion are ready.',
-  },
-  {
-    short: 'Control',
-    kicker: 'Carry the power',
-    title: 'Gain more. Manage more.',
-    copy: 'Each advance expands your Pathway toolkit. Abilities spend Spirituality, while reckless use, unsafe switches and incomplete advancement add Madness that can slow recovery and lock spells.',
-    fact: 'At 100% Madness, Mutation permanently removes Beyonder powers.',
-  },
-];
-
-const blueprintCells = [2, 4, 7, 8, 9, 12, 13, 14, 17, 19];
-const structureBlocks: StructureBlock[] = [
-  { x: -132, y: 94, fromX: -270, fromY: 160, tone: 0 },
-  { x: -88, y: 94, fromX: -220, fromY: -170, tone: 1 },
-  { x: -44, y: 94, fromX: -110, fromY: 220, tone: 2 },
-  { x: 0, y: 94, fromX: 40, fromY: -250, tone: 0 },
-  { x: 44, y: 94, fromX: 160, fromY: 190, tone: 1 },
-  { x: 88, y: 94, fromX: 230, fromY: -130, tone: 2 },
-  { x: 132, y: 94, fromX: 300, fromY: 150, tone: 0 },
-  { x: -132, y: 50, fromX: -280, fromY: -40, tone: 1 },
-  { x: 132, y: 50, fromX: 280, fromY: -80, tone: 2 },
-  { x: -110, y: 6, fromX: -230, fromY: -200, tone: 0 },
-  { x: 110, y: 6, fromX: 250, fromY: 210, tone: 1 },
-  { x: -88, y: -38, fromX: -160, fromY: -220, tone: 2 },
-  { x: 88, y: -38, fromX: 150, fromY: -220, tone: 0 },
-];
-
-const ingredients: Ingredient[] = [
-  { src: ingredientMainOne, label: 'Main · 01', kind: 'main', x: -260, y: -126 },
-  { src: ingredientMainTwo, label: 'Main · 02', kind: 'main', x: -220, y: 80 },
-  { src: ingredientSuppOne, label: 'Supplement · 01', kind: 'supplementary', x: 246, y: -136 },
-  { src: ingredientSuppTwo, label: 'Supplement · 02', kind: 'supplementary', x: 278, y: 22 },
-  { src: ingredientSuppThree, label: 'Supplement · 03', kind: 'supplementary', x: 218, y: 145 },
-];
-
-const recipeFiles = import.meta.glob('/src/assets/images/home/progression/recipes/*.png', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-}) as Record<string, string>;
-
-const pathwayRecipeNames: Record<string, string> = {
-  abyss: 'abyss',
-  'black emperor': 'emperor',
-  chained: 'chained',
-  darkness: 'darkness',
-  death: 'death',
-  demoness: 'demoness',
-  door: 'door',
-  error: 'error',
-  fool: 'fool',
-  'hanged man': 'hanged',
-  hermit: 'hermit',
-  justiciar: 'justiciar',
-  moon: 'moon',
-  mother: 'mother',
-  paragon: 'paragon',
-  'red priest': 'priest',
-  sun: 'sun',
-  'twilight giant': 'giant',
-  tyrant: 'tyrant',
-  visionary: 'visionary',
-  'wheel of fortune': 'fortune',
-  'white tower': 'tower',
-};
-
-const section = ref<HTMLElement | null>(null);
+const sectionRef = ref<HTMLElement | null>(null);
 const progress = ref(0);
 const activeIndex = ref(0);
 const localProgress = ref(0);
+const visible = ref(false);
+const activeHotspotId = ref<string | null>(null);
+const pinnedHotspotId = ref<string | null>(null);
 const reducedMotion = useReducedMotion();
 let observer: IntersectionObserver | null = null;
-let visible = false;
-const assetsReady = ref(false);
 let frame = 0;
 
-const activeStage = computed(() => stages[activeIndex.value]);
-const pathwayInitial = computed(() => props.pathwayName.trim().charAt(0).toUpperCase() || 'M');
-const recipeIcon = computed(() => {
-  const file = pathwayRecipeNames[props.pathwayName.trim().toLowerCase()] ?? 'abyss';
-  return Object.entries(recipeFiles).find(([path]) => path.endsWith(`/${file}.png`))?.[1]
-    ?? Object.values(recipeFiles)[0];
+const activeStage = computed(() => progressionStages[activeIndex.value]);
+const stageNumber = computed(() => `${String(activeIndex.value + 1).padStart(2, '0')} / ${String(progressionStages.length).padStart(2, '0')}`);
+const scenePresence = computed(() => {
+  const enter = Math.min(1, localProgress.value / .12);
+  const leave = Math.min(1, (1 - localProgress.value) / .1);
+  return .72 + Math.min(enter, leave) * .28;
 });
-const potionFrame = computed(() => Math.min(182, Math.round((progress.value * 118 + activeIndex.value * 8) % 183)));
-const digestionValue = computed(() => activeIndex.value < 5 ? 0 : activeIndex.value > 5 ? 100 : Math.round(18 + localProgress.value * 82));
-const madnessValue = computed(() => activeIndex.value < 7 ? 8 : Math.round(8 + localProgress.value * 46));
+const activeDetail = computed(() => activeStage.value.hotspots.find(hotspot => hotspot.id === activeHotspotId.value) ?? null);
+const digestionValue = computed(() => Math.round(32 + localProgress.value * 63));
 
-function stageCopy(stage: Stage, index: number) {
-  return index === 4
-    ? `Drinking your first Sequence 9 ${props.pathwayName} potion makes you a Beyonder and unlocks the Pathway’s abilities. Your inventory gains its Pathway icon so your state is always visible in-game.`
-    : stage.copy;
-}
+const formulaPages = computed(() => activeStage.value.id === 'formula' ? activeStage.value.hotspots : []);
+const ingredientItems = [
+  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', role: 'Main · Creature drop', src: lavosSquidBlood },
+  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', role: 'Main · Found in loot', src: stellarAquaCrystal },
+  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', role: 'Supplement · Mineable', src: goldMintLeaves },
+];
 
-function ease(value: number) {
-  const clamped = Math.min(1, Math.max(0, value));
-  return 1 - Math.pow(1 - clamped, 3);
-}
+const digestRoutes = [
+  { id: 'act-sequence', label: 'Act the Sequence', icon: 'M12 3l2.7 5.5L21 9.4l-4.5 4.4 1.1 6.2-5.6-2.9L6.4 20l1.1-6.2L3 9.4l6.3-.9L12 3z' },
+  { id: 'take-bounty', label: 'Take a bounty', icon: 'M7 3h10v3h3v15H4V6h3V3zm2 3h6V5H9v1zm-1 5h8M8 15h5', asset: undefined },
+  { id: 'hunt-beyonders', label: 'Hunt Beyonders', icon: 'M12 3v18M3 12h18M6 6l12 12M18 6L6 18' },
+  { id: 'explore-gather', label: 'Explore & gather', icon: 'M12 3l7 4v6c0 4.5-3 7-7 8-4-1-7-3.5-7-8V7l7-4zm0 5v8m-4-4h8' },
+  { id: 'crimson-moon', label: 'Crimson Moon', icon: 'M18 15.5A8 8 0 118.5 4 6.5 6.5 0 0018 15.5z' },
+  { id: 'acting-bottle', label: 'Acting bottles', icon: '', asset: actingBottle },
+];
 
-function blockStyle(block: StructureBlock, index: number) {
-  const isBuilt = activeIndex.value > 1;
-  const build = isBuilt ? 1 : activeIndex.value === 1 ? ease(localProgress.value * 1.55 - index * 0.045) : 0;
-  const x = block.fromX + (block.x - block.fromX) * build;
-  const y = block.fromY + (block.y - block.fromY) * build;
-  return {
-    '--tone': String(block.tone),
-    opacity: String(activeIndex.value === 0 ? 0 : Math.max(0, Math.min(1, build * 1.7))),
-    transform: `translate3d(${x}px, ${y}px, 0) rotateX(58deg) rotateZ(45deg) scale(${0.72 + build * 0.28})`,
-  };
-}
-
-function ingredientStyle(ingredient: Ingredient, index: number) {
-  if (activeIndex.value < 2 || activeIndex.value > 3) return { opacity: '0' };
-  const arrive = activeIndex.value === 2 ? ease(localProgress.value * 1.45 - index * 0.08) : 1;
-  const brew = activeIndex.value === 3 ? ease(localProgress.value * 1.7 - index * 0.08) : 0;
-  const slotX = ingredient.kind === 'main' ? -158 + index * 28 : 110 + (index - 2) * 28;
-  const slotY = -6 + (index % 2) * 34;
-  const x = ingredient.x + (slotX - ingredient.x) * arrive + (0 - slotX) * brew;
-  const y = ingredient.y + (slotY - ingredient.y) * arrive + (18 - slotY) * brew;
-  const scale = 0.86 + arrive * 0.14 - brew * 0.6;
-  return {
-    opacity: String(Math.max(0, 1 - brew * 1.28)),
-    transform: `translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${(1 - arrive) * (index % 2 ? 18 : -16) + brew * 40}deg)`,
-  };
-}
-
-function anchorStyle(anchor: number) {
-  const angle = (anchor - 1) * 60;
-  return {
-    '--anchor-angle': `${angle}deg`,
-    '--anchor-angle-negative': `${-angle}deg`,
-    '--anchor-delay': String((anchor - 1) * 0.06),
-  };
+function showDetail(id: string) { activeHotspotId.value = id; }
+function clearDetail() { activeHotspotId.value = pinnedHotspotId.value; }
+function detailId(id: string, stageId = activeStage.value.id) { return `progression-detail-${stageId}-${id}`; }
+function toggleDetail(id: string) {
+  pinnedHotspotId.value = pinnedHotspotId.value === id ? null : id;
+  activeHotspotId.value = pinnedHotspotId.value;
 }
 
 function update() {
-  if (!visible || !section.value || reducedMotion.value || frame) return;
+  if (!visible.value || !sectionRef.value || reducedMotion.value || frame) return;
   frame = requestAnimationFrame(() => {
     frame = 0;
-    const rect = section.value?.getBoundingClientRect();
+    const rect = sectionRef.value?.getBoundingClientRect();
     if (!rect) return;
     const range = Math.max(1, rect.height - innerHeight);
     const next = Math.min(1, Math.max(0, -rect.top / range));
-    const scaled = Math.min(stages.length - 0.0001, next * stages.length);
+    const scaled = Math.min(progressionStages.length - .0001, next * progressionStages.length);
+    const nextIndex = Math.floor(scaled);
+    if (nextIndex !== activeIndex.value) {
+      activeHotspotId.value = null;
+      pinnedHotspotId.value = null;
+    }
     progress.value = next;
-    activeIndex.value = Math.floor(scaled);
-    localProgress.value = scaled - Math.floor(scaled);
+    activeIndex.value = nextIndex;
+    localProgress.value = scaled - nextIndex;
   });
 }
 
 function goToStage(index: number) {
-  if (!section.value) return;
-  activeIndex.value = index;
-  localProgress.value = 0.22;
-  progress.value = (index + 0.22) / stages.length;
-  if (reducedMotion.value) return;
-  const range = section.value.offsetHeight - innerHeight;
-  const top = section.value.getBoundingClientRect().top + window.scrollY;
-  window.scrollTo({ top: top + range * progress.value, behavior: 'smooth' });
+  if (!sectionRef.value) return;
+  const range = sectionRef.value.offsetHeight - innerHeight;
+  const top = sectionRef.value.getBoundingClientRect().top + scrollY;
+  const targetProgress = (index + .18) / progressionStages.length;
+  scrollTo({ top: top + range * targetProgress, behavior: reducedMotion.value ? 'auto' : 'smooth' });
 }
 
 onMounted(() => {
   observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    if (visible) {
-      assetsReady.value = true;
+    visible.value = entry.isIntersecting;
+    if (visible.value) {
       update();
     }
-  }, { rootMargin: '80px 0px' });
-  if (section.value) observer.observe(section.value);
+  }, { rootMargin: '100px 0px' });
+  if (sectionRef.value) observer.observe(sectionRef.value);
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', update, { passive: true });
 });
@@ -478,766 +376,240 @@ onUnmounted(() => {
   removeEventListener('resize', update);
   if (frame) cancelAnimationFrame(frame);
 });
-
 </script>
 
 <style scoped>
 .progression {
+  --journey: 0;
+  --local: 0;
+  --presence: 0;
   --ease-out: cubic-bezier(.22, 1, .36, 1);
   position: relative;
-  min-height: 760svh;
+  min-height: 860svh;
   color: #fcf9f2;
-  background: #071316;
+  background: #071416;
   isolation: isolate;
 }
 
-.progression-sticky {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  min-height: 660px;
-  overflow: hidden;
-  background: #0b191b;
-}
-
-.brewery-backdrop,
-.scene-grade,
-.scene-depth {
-  position: absolute;
-  inset: 0;
-}
-
-.brewery-backdrop {
-  transform: scale(calc(1.055 + var(--journey) * .16)) translate3d(calc((.5 - var(--journey)) * 2.5%), calc(var(--journey) * -3%), 0);
-  transform-origin: 52% 58%;
-  will-change: transform;
-}
-
-.brewery-backdrop img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 58%;
-  filter: saturate(.68) contrast(1.08) brightness(.44);
-}
-
-.scene-grade {
-  z-index: 1;
-  background:
-    linear-gradient(90deg, rgba(3, 12, 14, .88) 0%, rgba(3, 12, 14, .35) 38%, rgba(3, 12, 14, .24) 66%, rgba(3, 12, 14, .72) 100%),
-    linear-gradient(180deg, rgba(2, 9, 11, .72), transparent 28%, transparent 68%, rgba(2, 9, 11, .9)),
-    radial-gradient(circle at 51% 52%, rgba(198, 155, 82, .12), transparent 36%);
-  transition: background .8s var(--ease-out);
-}
-
-.stage-4 .scene-grade,
-.stage-5 .scene-grade {
-  background:
-    linear-gradient(90deg, rgba(4, 15, 17, .9), rgba(5, 19, 20, .34) 52%, rgba(4, 14, 17, .72)),
-    radial-gradient(circle at 54% 46%, rgba(47, 125, 103, .34), transparent 33%),
-    linear-gradient(180deg, rgba(2, 9, 11, .72), transparent 34%, rgba(2, 9, 11, .86));
-}
-
-.stage-6 .scene-grade,
-.stage-7 .scene-grade {
-  background:
-    linear-gradient(90deg, rgba(2, 10, 12, .92), rgba(4, 17, 18, .55) 52%, rgba(3, 12, 15, .88)),
-    radial-gradient(circle at 54% 52%, rgba(198, 155, 82, .24), transparent 36%),
-    linear-gradient(180deg, rgba(2, 8, 10, .78), transparent 34%, rgba(2, 8, 10, .9));
-}
-
-.scene-depth {
-  z-index: 2;
-  opacity: .34;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 99px, rgba(255, 255, 255, .025) 100px),
-    repeating-linear-gradient(0deg, transparent 0 99px, rgba(255, 255, 255, .02) 100px);
-  mask-image: radial-gradient(circle at 52% 52%, #000 0 36%, transparent 75%);
-}
-
-.chapter-heading {
-  position: absolute;
-  z-index: 20;
-  top: clamp(72px, 9vh, 98px);
-  left: clamp(22px, 4vw, 64px);
-  display: grid;
-  gap: 6px;
-}
-
-.chapter-heading span,
-.stage-copy > span {
-  color: #dfb968;
-  font: 650 .66rem/1 "IBM Plex Mono", monospace;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-
-.chapter-heading h2 {
-  margin: 0;
-  color: rgba(252, 249, 242, .9);
-  font: 600 clamp(1.1rem, 1.6vw, 1.45rem)/1 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -.02em;
-}
-
-.chapter-heading p {
-  margin: 2px 0 0;
-  color: rgba(252, 249, 242, .72);
-  font: 500 .62rem/1 "IBM Plex Mono", monospace;
-}
-
-.artifact-stage {
-  position: absolute;
-  z-index: 5;
-  top: 49%;
-  left: 55%;
-  width: min(62vw, 880px);
-  height: min(70vh, 700px);
-  transform: translate(-50%, -50%);
-  perspective: 1100px;
-}
-
-.workbench-shadow {
-  position: absolute;
-  left: 50%;
-  bottom: 7%;
-  width: 64%;
-  height: 18%;
-  border-radius: 50%;
-  opacity: .68;
-  background: radial-gradient(ellipse, rgba(0, 0, 0, .72), transparent 68%);
-  transform: translateX(-50%);
-  filter: blur(12px);
-}
-
-.recipe-assembly,
-.cauldron-rig,
-.potion-rig,
-.digestion-rig,
-.ritual-rig,
-.power-rig {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.recipe-assembly {
-  opacity: 0;
-  transform: translateY(20px) scale(.9);
-  transition: opacity .45s var(--ease-out), transform .7s var(--ease-out);
-}
-
-.stage-0 .recipe-assembly {
-  opacity: 1;
-  transform: translateY(calc((.5 - var(--local)) * 20px)) scale(calc(.92 + var(--local) * .08));
-}
-
-.stage-1 .recipe-assembly {
-  opacity: calc(.62 - var(--local) * .62);
-  transform: translate3d(-34%, -28%, 0) scale(.48) rotate(-7deg);
-}
-
-.recipe-aura {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 360px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(198, 155, 82, .24), rgba(33, 100, 77, .12) 46%, transparent 72%);
-  transform: translate(-50%, -50%) scale(calc(.72 + var(--local) * .28));
-  filter: blur(12px);
-}
-
-.recipe-book {
-  position: absolute;
-  top: 46%;
-  left: 50%;
-  width: 280px;
-  height: 190px;
-  transform: translate(-50%, -50%) rotateX(53deg) rotateZ(-7deg);
-  transform-style: preserve-3d;
-  filter: drop-shadow(0 34px 26px rgba(0, 0, 0, .56));
-}
-
-.book-cover,
-.book-page {
-  position: absolute;
-  inset: 0;
-  border-radius: 9px 18px 18px 9px;
-}
-
-.book-cover {
-  background: linear-gradient(145deg, #5c281e, #2b1514 66%);
-  border: 3px solid rgba(221, 166, 89, .58);
-  transform: translateZ(-12px) translate(5px, 9px);
-}
-
-.book-page {
-  width: 50%;
-  border: 1px solid rgba(112, 67, 42, .25);
-  background:
-    repeating-linear-gradient(180deg, transparent 0 15px, rgba(79, 53, 35, .12) 16px),
-    linear-gradient(145deg, #f6e2b9, #d6b57f);
-  box-shadow: inset 0 0 24px rgba(105, 61, 34, .18);
-}
-
-.book-page-left { left: 0; border-radius: 14px 4px 4px 14px; transform: rotateY(calc(-5deg - var(--local) * 8deg)); transform-origin: right; }
-.book-page-right { right: 0; left: auto; border-radius: 4px 14px 14px 4px; transform: rotateY(calc(5deg + var(--local) * 8deg)); transform-origin: left; }
-
-.recipe-icon {
-  position: absolute;
-  z-index: 2;
-  top: 48%;
-  right: 18%;
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  image-rendering: pixelated;
-  transform: translateY(-50%) translateZ(8px) scale(1.35);
-  filter: drop-shadow(0 8px 4px rgba(61, 23, 15, .32));
-}
-
-.recipe-book > span {
-  position: absolute;
-  z-index: 2;
-  top: 40%;
-  left: 8%;
-  width: 34%;
-  color: #5e2c21;
-  font: 700 .64rem/1.25 "IBM Plex Mono", monospace;
-  letter-spacing: .08em;
-  text-align: center;
-  text-transform: uppercase;
-  transform: translateZ(7px);
-}
-
-.fragment {
-  position: absolute;
-  top: 48%;
-  left: 50%;
-  width: 64px;
-  height: 64px;
-  padding: 12px;
-  border: 1px solid rgba(224, 185, 104, .34);
-  border-radius: 14px;
-  background: rgba(8, 24, 25, .76);
-  box-shadow: 0 16px 30px rgba(0, 0, 0, .34);
-}
-
-.fragment img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
-.fragment-a { transform: translate(-300px, -150px) rotate(-12deg) translateY(calc(var(--local) * 32px)); }
-.fragment-b { transform: translate(250px, -92px) rotate(10deg) translateY(calc(var(--local) * -20px)); }
-.fragment-c { transform: translate(224px, 124px) rotate(-5deg) translateY(calc(var(--local) * 28px)); }
-
-.blueprint-card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 156px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  padding: 38px 15px 15px;
-  border: 1px solid rgba(125, 180, 173, .35);
-  border-radius: 9px;
-  opacity: calc(.1 + var(--local) * .9);
-  background: rgba(8, 31, 32, .86);
-  transform: translate(-286px, 95px) rotate(8deg);
-}
-
-.blueprint-card span {
-  position: absolute;
-  top: 14px;
-  left: 15px;
-  color: rgba(197, 224, 214, .78);
-  font: 600 .52rem/1 "IBM Plex Mono", monospace;
-  text-transform: uppercase;
-}
-
-.blueprint-card i { aspect-ratio: 1; border: 1px solid rgba(120, 184, 174, .25); }
-.blueprint-card i.filled { background: rgba(112, 186, 167, .52); box-shadow: inset -4px -4px rgba(9, 49, 45, .4); }
-
-.cauldron-rig {
-  opacity: 0;
-  transform: scale(.86) translateY(34px);
-  transition: opacity .35s var(--ease-out), transform .65s var(--ease-out);
-}
-
-.stage-1 .cauldron-rig,
-.stage-2 .cauldron-rig,
-.stage-3 .cauldron-rig {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-.stage-4 .cauldron-rig {
-  opacity: calc(.5 - var(--local) * .5);
-  transform: translate3d(-17%, 26%, 0) scale(.58);
-}
-
-.structure-blocks,
-.magic-cauldron {
-  position: absolute;
-  top: 49%;
-  left: 50%;
-}
-
-.structure-block {
-  position: absolute;
-  width: 52px;
-  height: 52px;
-  margin: -26px;
-  border: 1px solid rgba(255, 231, 183, .14);
-  border-radius: 3px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, .12), transparent 42%),
-    hsl(calc(32 + var(--tone) * 8) 22% calc(22% + var(--tone) * 3%));
-  box-shadow: inset -12px -12px rgba(0, 0, 0, .2), 0 13px 18px rgba(0, 0, 0, .28);
-  will-change: transform;
-}
-
-.magic-cauldron {
-  width: 320px;
-  height: 300px;
-  transform: translate(-50%, -50%);
-  transform-style: preserve-3d;
-}
-
-.cauldron-body {
-  position: absolute;
-  z-index: 4;
-  top: 104px;
-  left: 51px;
-  width: 218px;
-  height: 135px;
-  overflow: hidden;
-  border: 2px solid rgba(226, 211, 181, .14);
-  border-radius: 12px 12px 78px 78px;
-  background: linear-gradient(100deg, #1c2523 0%, #4d5650 23%, #202a28 56%, #101818 100%);
-  box-shadow: inset 0 -24px 34px rgba(0, 0, 0, .54), 0 34px 42px rgba(0, 0, 0, .52);
-  clip-path: polygon(2% 0, 98% 0, 87% 77%, 67% 100%, 33% 100%, 13% 77%);
-}
-
-.cauldron-body i {
-  position: absolute;
-  inset: 14px 18px 22px;
-  border-radius: 0 0 60px 60px;
-  border: 1px solid rgba(198, 155, 82, .18);
-  background: repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 255, 255, .025) 35px);
-}
-
-.cauldron-rim,
-.cauldron-liquid {
-  position: absolute;
-  z-index: 7;
-  top: 75px;
-  left: 37px;
-  width: 246px;
-  height: 76px;
-  border-radius: 50%;
-}
-
-.cauldron-rim {
-  border: 12px solid #222c2a;
-  box-shadow: inset 0 7px #535d55, inset 0 -8px #0b1111, 0 10px 10px rgba(0, 0, 0, .4);
-}
-
-.cauldron-rim i { position: absolute; inset: -7px; border-radius: 50%; border: 1px solid rgba(215, 181, 112, .18); }
-
-.cauldron-liquid {
-  z-index: 6;
-  top: 91px;
-  left: 49px;
-  width: 222px;
-  height: 53px;
-  overflow: hidden;
-  opacity: .16;
-  background: radial-gradient(ellipse at 48% 43%, #b9e0c9 0 6%, #4e9f80 31%, #123d35 76%);
-  box-shadow: 0 0 28px rgba(71, 160, 127, .18);
-  transform: scale(calc(.82 + var(--local) * .18));
-  transition: opacity .3s;
-}
-
-.stage-2 .cauldron-liquid { opacity: .32; }
-.stage-3 .cauldron-liquid { opacity: calc(.62 + var(--local) * .3); box-shadow: 0 0 calc(28px + var(--local) * 40px) rgba(89, 189, 147, .48); }
-
-.liquid-sheen { position: absolute; top: 10px; left: 30px; width: 86px; height: 10px; border-radius: 50%; background: rgba(232, 255, 240, .46); filter: blur(2px); }
-.liquid-ring { position: absolute; border: 1px solid rgba(229, 241, 220, .48); border-radius: 50%; transform: scale(calc(.2 + var(--local) * .9)); opacity: calc(1 - var(--local)); }
-.ring-one { inset: 8px 36px; }
-.ring-two { inset: 15px 64px; transform: scale(calc(.15 + var(--local) * .75)); }
-
-.cauldron-lid {
-  position: absolute;
-  z-index: 8;
-  top: 65px;
-  left: 54px;
-  width: 212px;
-  height: 63px;
-  border-radius: 50%;
-  opacity: .42;
-  background: linear-gradient(180deg, #56605a, #1b2423 74%);
-  border: 2px solid rgba(224, 211, 178, .15);
-  transform-origin: 82% 54%;
-  transform: translateY(-18px) rotate(-4deg);
-  transition: transform .7s var(--ease-out), opacity .3s;
-}
-
-.cauldron-lid i { position: absolute; top: -20px; left: 88px; width: 38px; height: 27px; border-radius: 9px 9px 3px 3px; background: #303a36; box-shadow: inset 6px 5px rgba(255, 255, 255, .06); }
-.stage-2 .cauldron-lid { opacity: .58; transform: translate3d(50px, -67px, 0) rotate(-24deg); }
-.stage-3 .cauldron-lid { opacity: .38; transform: translate3d(72px, -88px, 0) rotate(-39deg); }
-
-.cauldron-handle { position: absolute; z-index: 3; top: 120px; width: 60px; height: 74px; border: 12px solid #1a2322; border-radius: 48%; }
-.cauldron-handle-left { left: 19px; }
-.cauldron-handle-right { right: 19px; }
-.cauldron-feet { position: absolute; z-index: 3; top: 220px; left: 76px; right: 76px; display: flex; justify-content: space-between; }
-.cauldron-feet i { width: 38px; height: 41px; border-radius: 3px 3px 9px 9px; background: #161e1d; transform: skew(-7deg); }
-.cauldron-feet i:last-child { transform: skew(7deg); }
-
-.cauldron-fire {
-  position: absolute;
-  z-index: 2;
-  top: 237px;
-  left: 93px;
-  width: 134px;
-  height: 50px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity .3s;
-}
-
-.stage-3 .cauldron-fire { opacity: 1; }
-.cauldron-fire i { width: 31px; height: calc(26px + var(--local) * 20px); border-radius: 24px 2px 24px 3px; background: linear-gradient(40deg, #c36c22, #f5cd68 70%, #fff0b5); transform: rotate(8deg) scaleX(calc(.8 + var(--local) * .18)); filter: drop-shadow(0 0 8px rgba(235, 148, 48, .6)); }
-.cauldron-fire i:nth-child(2) { height: calc(42px + var(--local) * 7px); transform: rotate(-5deg); }
-
-.ingredient-rig { position: absolute; inset: 0; }
-.ingredient { position: absolute; z-index: 14; top: 49%; left: 50%; width: 84px; margin: -42px; text-align: center; will-change: transform; }
-.ingredient > span { width: 72px; height: 72px; display: grid; place-items: center; margin: auto; border: 1px solid rgba(235, 222, 190, .16); border-radius: 18px; background: rgba(7, 22, 23, .84); box-shadow: 0 18px 34px rgba(0, 0, 0, .36), inset 0 0 24px rgba(92, 157, 133, .08); }
-.ingredient img { width: 46px; height: 46px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 7px 3px rgba(0, 0, 0, .32)); }
-.ingredient figcaption { margin-top: 9px; color: rgba(252, 249, 242, .6); font: 600 .54rem/1 "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
-.ingredient-main > span { border-color: rgba(196, 100, 74, .5); }
-.ingredient-supplementary > span { border-color: rgba(88, 148, 190, .5); }
-
-.cauldron-interface {
-  position: absolute;
-  z-index: 16;
-  top: 49%;
-  right: -7%;
-  width: min(390px, 40vw);
-  overflow: hidden;
-  border: 1px solid rgba(231, 213, 176, .15);
-  border-radius: 18px;
-  opacity: 0;
-  background: rgba(7, 18, 19, .88);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, .58);
-  transform: translate3d(65px, -50%, 0) rotateY(-8deg) scale(.92);
-  transition: opacity .48s var(--ease-out), transform .7s var(--ease-out);
-}
-
-.stage-2 .cauldron-interface { opacity: calc(var(--local) * .9); transform: translate3d(0, -50%, 0) rotateY(-6deg) scale(.94); }
-.stage-3 .cauldron-interface { opacity: calc(.8 - var(--local) * .8); transform: translate3d(calc(var(--local) * 35px), -50%, 0) rotateY(-5deg) scale(.95); }
-.interface-label { min-height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; }
-.interface-label span,
-.interface-label i { color: rgba(252, 249, 242, .64); font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
-.interface-label i { color: #69a88c; font-style: normal; }
-.cauldron-interface > img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-.slot-key { min-height: 48px; display: grid; grid-template-columns: 1fr .9fr 1.35fr; align-items: center; gap: 5px; padding: 0 12px; color: rgba(252, 249, 242, .48); font: 500 .44rem/1.2 "IBM Plex Mono", monospace; text-transform: uppercase; }
-.slot-key span:first-child { color: #dd7665; }
-.slot-key span:nth-child(2) { color: #e2c154; }
-.slot-key span:last-child { color: #72aee2; }
-
-.potion-rig { opacity: 0; transition: opacity .38s var(--ease-out); }
-.stage-3 .potion-rig { opacity: calc(var(--local) * 1.4); }
-.stage-4 .potion-rig { opacity: 1; }
-.stage-5 .potion-rig { opacity: calc(.38 - var(--local) * .38); }
-.potion-halo { position: absolute; top: 48%; left: 50%; width: 340px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(105, 194, 159, .32), rgba(198, 155, 82, .1) 42%, transparent 70%); transform: translate(-50%, -50%) scale(calc(.64 + var(--local) * .28)); filter: blur(8px); }
-.potion-bottle { position: absolute; z-index: 8; top: 48%; left: 50%; width: 128px; height: 128px; transform: translate(-50%, -50%) scale(.62); transition: transform .35s var(--ease-out); transform-origin: 68% 35%; }
-.stage-3 .potion-bottle { transform: translate(-50%, calc(-50% + (1 - var(--local)) * 100px)) scale(calc(.42 + var(--local) * .56)); }
-.stage-4 .potion-bottle { transform: translate(calc(-50% - var(--local) * 78px), calc(-50% - var(--local) * 58px)) rotate(calc(var(--local) * -68deg)) scale(calc(1 + var(--local) * .08)); }
-.potion-pixel { width: 100%; height: 100%; background-image: var(--potion-sprite); background-repeat: no-repeat; background-size: 100% 18300%; background-position: center var(--potion-position); image-rendering: pixelated; filter: drop-shadow(0 18px 12px rgba(0, 0, 0, .42)) drop-shadow(0 0 16px rgba(85, 194, 154, .44)); }
-.drink-stream { position: absolute; z-index: 6; top: 43%; left: 43%; width: 7px; height: calc(var(--local) * 78px); border-radius: 999px; opacity: var(--local); background: linear-gradient(#8ac7aa, rgba(124, 197, 163, 0)); transform: rotate(-26deg); transform-origin: top; }
-
-.brew-confirmation {
-  position: absolute;
-  top: 49%;
-  left: calc(50% + 126px);
-  width: 182px;
-  display: grid;
-  gap: 7px;
-  padding: 16px 18px;
-  border: 1px solid rgba(223, 185, 104, .24);
-  border-radius: 15px;
-  opacity: 0;
-  background: rgba(7, 23, 23, .76);
-  transform: translateY(-50%);
-}
-
-.stage-3 .brew-confirmation { opacity: calc(var(--local) * 1.2); }
-.stage-4 .brew-confirmation { opacity: calc(1 - var(--local) * 1.3); }
-.brew-confirmation span { color: #dfb968; font: 600 .5rem/1 "IBM Plex Mono", monospace; letter-spacing: .12em; }
-.brew-confirmation strong { font: 600 1.15rem/1 "IBM Plex Sans Condensed", sans-serif; }
-.brew-confirmation i { color: rgba(252, 249, 242, .48); font: 500 .52rem/1.4 "IBM Plex Mono", monospace; font-style: normal; }
-
-.block-avatar {
-  position: absolute;
-  z-index: 3;
-  top: 37%;
-  left: 61%;
-  width: 180px;
-  height: 280px;
-  opacity: 0;
-  transform: translateY(24px) scale(.9);
-  transition: opacity .45s, transform .7s var(--ease-out);
-}
-
-.stage-4 .block-avatar { opacity: calc(var(--local) * 1.5); transform: translateY(0) scale(1); }
-.avatar-head { position: absolute; top: 0; left: 51px; width: 78px; height: 78px; border-radius: 6px; background: linear-gradient(135deg, #b59a7d, #715c50); box-shadow: inset -14px -12px rgba(22, 25, 24, .18), 0 14px 20px rgba(0, 0, 0, .28); }
-.avatar-head::before { content: ""; position: absolute; top: 33px; left: 13px; width: 15px; height: 7px; background: #152321; box-shadow: 36px 0 #152321; }
-.avatar-body { position: absolute; top: 81px; left: 31px; width: 118px; height: 149px; border-radius: 5px 5px 15px 15px; background: linear-gradient(110deg, #224c42, #0d2726 70%); box-shadow: inset -22px 0 rgba(0, 0, 0, .18); }
-.avatar-arm { position: absolute; top: 100px; left: -4px; width: 50px; height: 130px; border-radius: 8px; background: #183b35; transform: rotate(-8deg); }
-
-.digestion-rig { opacity: 0; transform: scale(.84); transition: opacity .42s, transform .65s var(--ease-out); }
-.stage-5 .digestion-rig { opacity: 1; transform: scale(1); }
-.stage-6 .digestion-rig { opacity: calc(.35 - var(--local) * .35); transform: scale(.72); }
-.digest-figure { position: absolute; top: 46%; left: 50%; width: 250px; height: 390px; transform: translate(-50%, -50%); }
-.digest-head { position: absolute; top: 0; left: 88px; width: 74px; height: 74px; border-radius: 6px; background: rgba(54, 111, 91, .38); border: 1px solid rgba(157, 215, 182, .32); }
-.digest-body { position: absolute; top: 84px; left: 45px; width: 160px; height: 252px; border-radius: 10px 10px 52px 52px; border: 1px solid rgba(157, 215, 182, .22); background: linear-gradient(90deg, rgba(26, 72, 61, .2), rgba(54, 118, 95, .35), rgba(18, 51, 46, .18)); clip-path: polygon(20% 0, 80% 0, 100% 18%, 83% 100%, 17% 100%, 0 18%); }
-.digest-core { position: absolute; z-index: 3; top: 152px; left: 94px; width: 62px; height: 62px; border: 1px solid #dfb968; border-radius: 50%; background: radial-gradient(circle, rgba(228, 201, 136, .88), rgba(57, 139, 104, .66) 35%, rgba(10, 39, 36, .8) 72%); transform: scale(calc(.64 + var(--local) * .36)); box-shadow: 0 0 calc(18px + var(--local) * 35px) rgba(112, 204, 164, .54); }
-.digest-wave { position: absolute; z-index: 2; top: 132px; left: 73px; width: 104px; height: 104px; border: 1px solid rgba(205, 229, 211, .46); border-radius: 50%; opacity: calc(1 - var(--local)); transform: scale(calc(.45 + var(--local) * .8)); }
-.wave-two { opacity: calc(.7 - var(--local) * .7); transform: scale(calc(.85 + var(--local) * .72)); }
-
-.acting-prompt {
-  position: absolute;
-  top: 34%;
-  right: 2%;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 278px;
-  padding: 12px 18px 12px 12px;
-  border: 1px solid rgba(128, 199, 169, .28);
-  border-radius: 14px;
-  background: rgba(7, 23, 24, .82);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, .34);
-  transform: translateX(calc((1 - var(--local)) * 42px));
-}
-
-.acting-prompt img { width: 56px; height: 56px; object-fit: contain; image-rendering: pixelated; }
-.acting-prompt div { display: grid; gap: 6px; }
-.acting-prompt span { color: #67a88c; font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .12em; }
-.acting-prompt strong { font-size: .72rem; }
-.digest-meter { position: absolute; right: 2%; bottom: 19%; width: 278px; padding: 17px; border: 1px solid rgba(252, 249, 242, .12); border-radius: 14px; background: rgba(6, 19, 20, .75); }
-.digest-meter > div { display: flex; justify-content: space-between; font: 600 .62rem/1 "IBM Plex Mono", monospace; }
-.digest-meter > i,
-.madness-track { display: block; height: 5px; margin-top: 13px; overflow: hidden; border-radius: 999px; background: rgba(252, 249, 242, .1); }
-.digest-meter b { display: block; height: 100%; background: linear-gradient(90deg, #3f8d6f, #b8d6bd); transition: width .08s linear; }
-.digest-meter p { margin: 10px 0 0; color: rgba(252, 249, 242, .72); font: 500 .52rem/1.4 "IBM Plex Mono", monospace; }
-
-.ritual-rig { opacity: 0; transform: translateY(45px) scale(.72); transition: opacity .45s, transform .7s var(--ease-out); }
-.stage-6 .ritual-rig { opacity: 1; transform: translateY(0) scale(1); }
-.stage-7 .ritual-rig { opacity: calc(.38 - var(--local) * .38); transform: translateY(-40px) scale(1.18); }
-.ritual-plane { position: absolute; top: 49%; left: 50%; width: 430px; height: 430px; transform: translate(-50%, -50%) rotateX(62deg) rotateZ(calc(-14deg + var(--local) * 20deg)); transform-style: preserve-3d; }
-.ritual-ring { position: absolute; border-radius: 50%; opacity: calc(.3 + var(--local) * .7); background: conic-gradient(from 0deg, #c69b52 calc(var(--local) * 75%), rgba(198, 155, 82, .1) 0); mask: radial-gradient(transparent 0 68%, #000 69% 72%, transparent 73%); }
-.ritual-ring-outer { inset: 0; }
-.ritual-ring-inner { inset: 74px; background: conic-gradient(from 180deg, #79b296 calc(var(--local) * 92%), rgba(121, 178, 150, .08) 0); mask: radial-gradient(transparent 0 64%, #000 65% 69%, transparent 70%); }
-.ritual-axis { position: absolute; top: 50%; left: 50%; width: 360px; height: 1px; opacity: calc(.2 + var(--local) * .65); background: linear-gradient(90deg, transparent, rgba(221, 185, 105, .82), transparent); transform: translate(-50%, -50%) rotate(0); }
-.axis-two { transform: translate(-50%, -50%) rotate(60deg); }
-.axis-three { transform: translate(-50%, -50%) rotate(120deg); }
-.ritual-anchor { --distance: 197px; position: absolute; top: calc(50% - 14px); left: calc(50% - 14px); width: 28px; height: 28px; border: 1px solid rgba(225, 193, 123, .72); border-radius: 5px; opacity: clamp(0, calc((var(--local) - var(--anchor-delay)) * 3), 1); background: #183c35; box-shadow: 0 0 18px rgba(198, 155, 82, .24); transform: rotate(var(--anchor-angle)) translateX(var(--distance)) rotate(var(--anchor-angle-negative)) scale(clamp(.4, var(--local), 1)); }
-.ritual-book { position: absolute; top: 50%; left: 50%; width: 78px; height: 78px; transform: translate(-50%, -50%) rotateX(-62deg) translateZ(18px); }
-.ritual-book img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, .45)); }
-.ritual-potion { position: absolute; top: 50%; left: 50%; width: 78px; height: 78px; transform: translate(-50%, -50%) rotateX(-62deg) translateZ(102px) scale(calc(.35 + var(--local) * .65)); }
-.advance-beam { position: absolute; top: 8%; bottom: 8%; left: 50%; width: calc(2px + var(--local) * 12px); border-radius: 50%; opacity: clamp(0, calc((var(--local) - .55) * 2.4), 1); background: linear-gradient(transparent, rgba(243, 220, 164, .94) 38%, #effff6 51%, rgba(78, 166, 130, .7) 68%, transparent); transform: translateX(-50%); filter: blur(calc(var(--local) * 2px)) drop-shadow(0 0 22px rgba(207, 179, 107, .8)); }
-.sequence-shift { position: absolute; top: 12%; left: 50%; display: flex; align-items: center; gap: 10px; color: rgba(252, 249, 242, .8); opacity: clamp(0, calc((var(--local) - .58) * 3), 1); transform: translateX(-50%); font-family: "IBM Plex Mono", monospace; }
-.sequence-shift span { color: #dfb968; font-size: .55rem; letter-spacing: .15em; }
-.sequence-shift strong { font-size: 1.4rem; }
-.sequence-shift i { width: 38px; height: 1px; background: rgba(252, 249, 242, .4); }
-
-.power-rig { opacity: 0; transform: scale(.72); transition: opacity .45s, transform .8s var(--ease-out); }
-.stage-7 .power-rig { opacity: 1; transform: scale(calc(.84 + var(--local) * .16)); }
-.power-core { position: absolute; z-index: 5; top: 48%; left: 50%; width: 106px; height: 106px; display: grid; place-items: center; border: 1px solid #d2b268; border-radius: 50%; background: radial-gradient(circle, #376f5c, #102d29 70%); transform: translate(-50%, -50%); box-shadow: 0 0 calc(22px + var(--local) * 42px) rgba(84, 161, 128, .44); }
-.power-core span { font: 600 3rem/1 "IBM Plex Sans Condensed", sans-serif; }
-.power-core i { position: absolute; inset: 15px; border: 1px dashed rgba(223, 185, 104, .48); border-radius: 50%; transform: rotate(calc(var(--local) * 110deg)); }
-.power-orbit { position: absolute; top: 48%; left: 50%; border: 1px solid rgba(122, 184, 157, .22); border-radius: 50%; transform: translate(-50%, -50%) rotate(calc(var(--local) * 30deg)); }
-.orbit-one { width: 390px; height: 230px; }
-.orbit-two { width: 520px; height: 344px; border-color: rgba(198, 155, 82, .18); transform: translate(-50%, -50%) rotate(calc(-18deg - var(--local) * 24deg)); }
-.power-node { position: absolute; z-index: 5; display: flex; align-items: center; gap: 9px; color: rgba(252, 249, 242, .72); font: 600 .6rem/1 "IBM Plex Mono", monospace; text-transform: uppercase; opacity: clamp(0, calc((var(--local) - .12) * 2.2), 1); }
-.power-node i { width: 24px; height: 24px; border: 1px solid rgba(131, 191, 165, .52); border-radius: 50%; background: #143630; box-shadow: 0 0 13px rgba(95, 174, 140, .2); }
-.node-abilities { top: 24%; left: 25%; }
-.node-spirituality { top: 29%; right: 17%; }
-.node-acting { bottom: 24%; left: 23%; }
-.node-madness { right: 18%; bottom: 23%; color: #e4a186; }
-.node-madness i { border-color: rgba(212, 111, 85, .62); background: #492724; }
-.madness-panel { position: absolute; z-index: 7; right: -2%; bottom: 4%; width: 246px; padding: 17px; border: 1px solid rgba(215, 116, 91, .3); border-radius: 14px; background: rgba(24, 16, 17, .82); opacity: clamp(0, calc((var(--local) - .42) * 2.3), 1); transform: translateY(calc((1 - var(--local)) * 22px)); }
-.madness-panel > div { display: flex; justify-content: space-between; color: #e4a186; font: 650 .62rem/1 "IBM Plex Mono", monospace; }
-.madness-track b { display: block; height: 100%; background: linear-gradient(90deg, #a4523e, #e29b75); transition: width .08s linear; }
-.madness-panel p { margin: 10px 0 0; color: rgba(252, 249, 242, .5); font-size: .66rem; }
-.fracture { position: absolute; z-index: 2; width: 2px; height: 180px; opacity: clamp(0, calc((var(--local) - .48) * 1.8), .7); background: linear-gradient(transparent, rgba(224, 127, 100, .72), transparent); transform-origin: top; clip-path: polygon(0 0, 100% 0, 40% 22%, 100% 43%, 0 61%, 70% 78%, 30% 100%, 0 100%, 34% 77%, 0 58%, 65% 42%, 0 20%); }
-.fracture-one { top: 17%; left: 45%; transform: rotate(13deg); }
-.fracture-two { top: 37%; right: 28%; transform: rotate(58deg) scale(.7); }
-.fracture-three { bottom: 10%; left: 38%; transform: rotate(-27deg) scale(.62); }
-
-.stage-copy {
-  position: absolute;
-  z-index: 30;
-  left: clamp(22px, 4vw, 64px);
-  top: 43%;
-  width: min(370px, 29vw);
-  transform: translateY(-50%);
-}
-
-.stage-copy h3 {
-  margin: 15px 0 14px;
-  font: 620 clamp(2.5rem, 4.7vw, 5rem)/.88 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -.045em;
-  text-wrap: balance;
-}
-
-.stage-copy > p {
-  margin: 0;
-  color: rgba(252, 249, 242, .7);
-  font-size: clamp(.82rem, 1vw, .96rem);
-  line-height: 1.62;
-}
-
-.fact-line {
-  display: flex;
-  gap: 10px;
-  margin-top: 22px;
-  padding-top: 17px;
-  border-top: 1px solid rgba(252, 249, 242, .13);
-  color: rgba(252, 249, 242, .48);
-  font: 500 .62rem/1.55 "IBM Plex Mono", monospace;
-}
-
+.progression-sticky { position: sticky; top: 0; height: 100svh; min-height: 620px; overflow: hidden; background: #0b191b; }
+.sr-mechanic-details { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.brewery-backdrop, .scene-grade, .fog-memory { position: absolute; inset: 0; }
+.brewery-backdrop { transform: scale(calc(1.045 + var(--journey) * .11)) translate3d(calc((.5 - var(--journey)) * 1.5%), calc(var(--journey) * -1.4%), 0); transform-origin: 51% 57%; will-change: transform; }
+.brewery-backdrop img { width: 100%; height: 100%; object-fit: cover; object-position: center 57%; filter: saturate(.68) contrast(1.06) brightness(.42); }
+.scene-grade { z-index: 1; background: linear-gradient(90deg, rgba(3, 12, 14, .91), rgba(3, 12, 14, .32) 34%, rgba(3, 12, 14, .24) 68%, rgba(3, 12, 14, .86)), linear-gradient(180deg, rgba(2, 9, 11, .7), transparent 25%, transparent 71%, rgba(2, 9, 11, .92)), radial-gradient(circle at 53% 49%, rgba(67, 139, 112, .16), transparent 37%); }
+.stage-ritual .scene-grade, .stage-advance .scene-grade { background: linear-gradient(90deg, rgba(2, 10, 12, .94), rgba(4, 17, 18, .48) 52%, rgba(3, 12, 15, .9)), radial-gradient(circle at 54% 49%, rgba(198, 155, 82, .27), transparent 36%), linear-gradient(180deg, rgba(2, 8, 10, .78), transparent 34%, rgba(2, 8, 10, .94)); }
+.fog-memory { z-index: 2; height: 34%; opacity: calc(.48 - var(--journey) * .42); background: radial-gradient(ellipse at 15% 0, rgba(184, 193, 191, .47), transparent 46%), radial-gradient(ellipse at 54% 0, rgba(208, 214, 211, .37), transparent 51%), radial-gradient(ellipse at 91% 0, rgba(161, 173, 172, .45), transparent 44%); filter: blur(28px); transform: translateY(calc(var(--journey) * -72%)); }
+
+.chapter-heading { position: absolute; z-index: 20; top: clamp(68px, 8vh, 88px); left: clamp(18px, 3.2vw, 52px); display: grid; gap: 5px; }
+.chapter-heading span, .stage-copy > span { color: #dfb968; font: 650 .62rem/1 "IBM Plex Mono", monospace; letter-spacing: .16em; text-transform: uppercase; }
+.chapter-heading h2 { margin: 0; color: rgba(252, 249, 242, .91); font: 600 clamp(1.05rem, 1.5vw, 1.35rem)/1 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.02em; }
+.chapter-heading p { margin: 2px 0 0; color: rgba(252, 249, 242, .55); font: 500 .58rem/1 "IBM Plex Mono", monospace; }
+
+.stage-layout { position: absolute; z-index: 8; inset: clamp(140px, 16vh, 165px) clamp(18px, 3.2vw, 52px) clamp(96px, 12vh, 124px); display: grid; grid-template-columns: minmax(270px, .72fr) minmax(540px, 1.7fr); align-items: center; gap: clamp(28px, 4vw, 72px); }
+.stage-copy { align-self: center; min-width: 0; opacity: var(--presence); transform: translateY(calc((1 - var(--presence)) * 18px)); }
+.stage-copy h3 { max-width: 440px; margin: 15px 0 15px; font: 630 clamp(2.8rem, 4.8vw, 5.3rem)/.88 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.048em; text-wrap: balance; }
+.stage-copy > p { max-width: 440px; margin: 0; color: rgba(252, 249, 242, .7); font-size: clamp(.82rem, .96vw, .94rem); line-height: 1.62; }
+.fact-line { max-width: 440px; display: flex; gap: 10px; margin-top: 21px; padding-top: 16px; border-top: 1px solid rgba(252, 249, 242, .13); color: rgba(252, 249, 242, .48); font: 500 .59rem/1.55 "IBM Plex Mono", monospace; }
 .fact-line i { flex: 0 0 auto; width: 6px; height: 6px; margin-top: 3px; border-radius: 50%; background: #dfb968; box-shadow: 0 0 10px rgba(223, 185, 104, .48); }
-.stage-nav {
-  position: absolute;
-  z-index: 40;
-  right: clamp(14px, 2.3vw, 36px);
-  top: 50%;
-  display: grid;
-  transform: translateY(-50%);
-}
 
-.stage-nav button {
-  position: relative;
-  min-width: 88px;
-  min-height: 48px;
-  display: grid;
-  grid-template-columns: 12px 20px 1fr;
-  align-items: center;
-  gap: 7px;
-  padding: 4px 6px;
-  border: 0;
-  color: rgba(252, 249, 242, .68);
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-}
+.scene-shell { min-width: 0; height: min(66vh, 660px); display: grid; place-items: center; }
+.scene { position: relative; width: 100%; height: 100%; display: grid; place-items: center; opacity: var(--presence); transform: translateY(calc((1 - var(--presence)) * 18px)) scale(calc(.97 + var(--presence) * .03)); will-change: opacity, transform; }
+.scene-item { min-width: 44px; min-height: 44px; border: 0; color: inherit; cursor: pointer; }
+.scene-item:focus-visible { outline: 2px solid #f0d38c; outline-offset: 4px; }
 
-.stage-nav button:focus-visible { outline: 2px solid #f0d38c; outline-offset: 2px; border-radius: 5px; }
-.stage-nav button > i { width: 6px; height: 6px; border: 1px solid currentColor; border-radius: 50%; transition: background .25s, transform .35s var(--ease-out); }
+.scene-detail { position: absolute; z-index: 50; right: 3%; bottom: 3%; width: min(300px, 70%); padding: 15px 17px; border: 1px solid rgba(223, 185, 104, .35); border-radius: 12px; background: rgba(6, 22, 23, .94); box-shadow: 0 18px 50px rgba(0, 0, 0, .34); backdrop-filter: blur(14px); pointer-events: none; }
+.scene-detail > span { color: #dfb968; font: 650 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+.scene-detail strong { display: block; margin-top: 7px; font-size: .83rem; }
+.scene-detail p { margin: 7px 0 0; color: rgba(252, 249, 242, .66); font-size: .69rem; line-height: 1.5; }
+.detail-reveal-enter-active, .detail-reveal-leave-active { transition: opacity .24s ease, transform .34s var(--ease-out); }
+.detail-reveal-enter-from, .detail-reveal-leave-to { opacity: 0; transform: translateY(8px) scale(.98); }
+
+.formula-pages { position: absolute; inset: 0; }
+.formula-page { position: absolute; top: calc(18% + var(--page) * 27%); left: calc(4% + var(--page) * 3%); width: 154px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid rgba(223, 185, 104, .28); border-radius: 11px; color: rgba(252, 249, 242, .78); background: rgba(7, 26, 25, .84); font: 600 .57rem/1.3 "IBM Plex Mono", monospace; text-align: left; transform: translateX(calc((1 - var(--local)) * -48px)); }
+.formula-page img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
+.formula-page:hover, .formula-page:focus-visible { border-color: #dfb968; background: rgba(15, 48, 40, .95); }
+.written-formula { position: relative; width: 310px; display: grid; justify-items: center; gap: 12px; color: #fcf9f2; background: transparent; transform: rotate(calc((.5 - var(--local)) * 4deg)); }
+.formula-book { position: relative; width: 290px; height: 190px; display: flex; filter: drop-shadow(0 28px 22px rgba(0, 0, 0, .56)); transform: rotateX(50deg) rotateZ(-6deg); transform-style: preserve-3d; }
+.formula-book > i { width: 50%; display: grid; place-items: center; border: 1px solid rgba(112, 67, 42, .28); color: #5e2c21; background: repeating-linear-gradient(180deg, transparent 0 15px, rgba(79, 53, 35, .1) 16px), linear-gradient(145deg, #f6e2b9, #d6b57f); font: 700 .61rem/1.3 "IBM Plex Mono", monospace; font-style: normal; }
+.formula-book__left { border-radius: 14px 4px 4px 14px; }
+.formula-book__left small { display: block; margin-top: 7px; font-size: .52rem; letter-spacing: .1em; }
+.formula-book__right { border-radius: 4px 14px 14px 4px; }
+.formula-book__right img { width: 96px; height: 96px; object-fit: contain; image-rendering: pixelated; }
+.written-formula > strong { font: 650 .67rem/1 "IBM Plex Mono", monospace; }
+
+.ingredient-table { width: min(600px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.ingredient-card { min-height: 145px; display: grid; grid-template-columns: 72px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; align-items: center; column-gap: 14px; padding: 16px; border: 1px solid rgba(131, 190, 164, .2); border-radius: 16px; color: #fcf9f2; background: rgba(7, 27, 27, .82); text-align: left; transition: transform .3s var(--ease-out), border-color .25s, background-color .25s; }
+.ingredient-card:hover, .ingredient-card:focus-visible { border-color: rgba(223, 185, 104, .65); background: rgba(12, 42, 36, .95); transform: translateY(-4px); }
+.ingredient-card > span { grid-row: 1 / 3; width: 72px; height: 72px; display: grid; place-items: center; border: 1px solid rgba(223, 185, 104, .2); border-radius: 13px; background: radial-gradient(circle, rgba(60, 123, 99, .33), rgba(6, 21, 22, .78)); }
+.ingredient-card img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+.ingredient-card strong { align-self: end; font-size: .75rem; }
+.ingredient-card small { align-self: start; margin-top: 6px; color: rgba(252, 249, 242, .48); font: 550 .5rem/1.4 "IBM Plex Mono", monospace; }
+.ingredient-card--characteristic > span i { width: 30px; height: 42px; background: linear-gradient(145deg, #cfd9cf, #5f8d77 38%, #173c34 75%); clip-path: polygon(50% 0, 90% 20%, 100% 65%, 50% 100%, 0 65%, 10% 20%); box-shadow: inset 0 0 0 3px rgba(252, 249, 242, .3); }
+
+.brew-interface { position: relative; width: min(620px, 100%); overflow: hidden; border: 1px solid rgba(112, 174, 148, .26); border-radius: 16px; background: rgba(5, 20, 21, .9); box-shadow: 0 26px 60px rgba(0, 0, 0, .36); }
+.brew-interface__header { min-height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; color: rgba(252, 249, 242, .55); font: 600 .54rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.brew-interface__header i { color: #75af94; font-style: normal; }
+.brew-interface__image { position: relative; }
+.brew-interface__image img { width: 100%; height: auto; display: block; object-fit: contain; image-rendering: auto; }
+.clean-brew-grid { position: absolute; z-index: 1; left: 25%; top: 18%; width: 50.5%; height: 75%; display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(5, 1fr); gap: 3px; padding: 3px; border: 2px solid #a65f4d; background: #d88668; box-shadow: inset 0 0 0 2px rgba(255, 217, 167, .46); }
+.clean-brew-grid > span { min-width: 0; min-height: 0; display: grid; place-items: center; border: 2px solid #f2c29b; border-right-color: #9e594b; border-bottom-color: #8a4b41; background: #c7745c; }
+.clean-brew-grid img { width: 80%; height: 80%; object-fit: contain; image-rendering: pixelated; }
+.slot-zone { position: absolute; min-width: 44px; min-height: 44px; border: 2px solid transparent; border-radius: 8px; background: transparent; cursor: pointer; transition: border-color .25s, background-color .25s; }
+.slot-zone:hover, .slot-zone:focus-visible { border-color: #dfb968; background: rgba(223, 185, 104, .12); }
+.slot-zone--main { z-index: 2; left: 29%; top: 30%; width: 17%; height: 42%; }
+.slot-zone--recipe { z-index: 2; left: 49%; top: 27%; width: 7%; height: 20%; }
+.slot-zone--supp { z-index: 2; right: 28%; top: 30%; width: 16%; height: 42%; }
+.slot-zone--main:hover, .slot-zone--main:focus-visible { border-color: rgba(214, 95, 73, .9); }
+.slot-zone--recipe:hover, .slot-zone--recipe:focus-visible { border-color: rgba(223, 185, 104, .95); }
+.slot-zone--supp:hover, .slot-zone--supp:focus-visible { border-color: rgba(94, 144, 201, .95); }
+.potion-result { position: absolute; right: 1%; bottom: 1%; display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid rgba(131, 190, 164, .35); border-radius: 11px; color: #fcf9f2; background: rgba(5, 27, 25, .95); font: 650 .58rem/1 "IBM Plex Mono", monospace; transform: translateY(calc((1 - var(--local)) * 24px)); }
+
+.potion-pixel { width: 64px; height: 64px; display: block; background-image: var(--potion-sprite); background-repeat: no-repeat; background-size: 64px auto; background-position: 0 42%; image-rendering: pixelated; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, .48)); }
+.player-rig { width: min(360px, 64%); height: 100%; }
+.drink-potion { position: absolute; left: 4%; top: 28%; display: grid; justify-items: center; gap: 7px; padding: 12px; border: 1px solid rgba(131, 190, 164, .25); border-radius: 14px; color: #fcf9f2; background: rgba(7, 27, 26, .82); font: 650 .56rem/1.2 "IBM Plex Mono", monospace; }
+.drink-potion:hover, .drink-potion:focus-visible { border-color: #dfb968; }
+.ability-reveal { position: absolute; right: 1%; top: 33%; display: grid; gap: 7px; padding: 12px 14px; border: 1px solid rgba(131, 190, 164, .28); border-radius: 12px; color: #fcf9f2; background: rgba(7, 27, 26, .86); font: 650 .57rem/1 "IBM Plex Mono", monospace; }
+.ability-reveal span:first-child { color: #dfb968; }
+
+.player-rig--digest { width: min(300px, 54%); }
+.activity-orbit { position: absolute; inset: 0; }
+.activity-node { position: absolute; width: 128px; min-height: 64px; display: flex; align-items: center; gap: 9px; padding: 9px 10px; border: 1px solid rgba(131, 190, 164, .22); border-radius: 12px; color: rgba(252, 249, 242, .84); background: rgba(6, 25, 25, .86); font: 600 .53rem/1.25 "IBM Plex Mono", monospace; text-align: left; transition: transform .3s var(--ease-out), border-color .25s, background-color .25s; }
+.activity-node:hover, .activity-node:focus-visible { z-index: 4; border-color: #dfb968; background: rgba(12, 42, 36, .96); transform: scale(1.04); }
+.activity-node svg, .activity-node img { flex: 0 0 auto; width: 28px; height: 28px; object-fit: contain; image-rendering: pixelated; }
+.activity-node svg { fill: none; stroke: #83bea4; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+.route-1 { left: 2%; top: 13%; }
+.route-2 { right: 2%; top: 13%; }
+.route-3 { left: 0; top: 44%; }
+.route-4 { right: 0; top: 44%; }
+.route-5 { left: 5%; bottom: 9%; }
+.route-6 { right: 5%; bottom: 9%; }
+.digestion-meter { position: absolute; left: 50%; bottom: 1%; width: min(310px, 52%); padding: 12px 14px; border: 1px solid rgba(131, 190, 164, .23); border-radius: 12px; background: rgba(6, 25, 25, .9); transform: translateX(-50%); }
+.digestion-meter > span { display: flex; justify-content: space-between; font: 600 .57rem/1 "IBM Plex Mono", monospace; }
+.digestion-meter > i { height: 6px; display: block; margin-top: 9px; overflow: hidden; border-radius: 6px; background: rgba(252, 249, 242, .12); }
+.digestion-meter > i b { display: block; height: 100%; background: linear-gradient(90deg, #4b9b79, #bddcc8); }
+
+.ritual-scene, .advance-scene { position: relative; width: 100%; height: 100%; display: grid; place-items: center; }
+.magic-circle { width: min(480px, 84%); height: auto; object-fit: contain; filter: drop-shadow(0 0 34px rgba(208, 170, 86, .4)); transform: rotate(calc(-16deg + var(--local) * 28deg)) scale(calc(.72 + var(--local) * .28)); }
+.ritual-book, .ritual-ready, .ritual-risk { position: absolute; display: grid; justify-items: center; gap: 5px; padding: 10px 12px; border: 1px solid rgba(223, 185, 104, .3); border-radius: 11px; color: #fcf9f2; background: rgba(7, 24, 24, .9); font: 600 .54rem/1.2 "IBM Plex Mono", monospace; }
+.ritual-book { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+.ritual-book img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+.ritual-ready { left: 3%; top: 28%; color: #9fd2b9; }
+.ritual-risk { right: 2%; bottom: 24%; color: #e6a18a; border-color: rgba(216, 114, 89, .34); }
+.ritual-ready strong, .ritual-risk strong { font-size: .75rem; }
+
+.magic-circle--advance { position: absolute; width: min(570px, 96%); opacity: calc(.5 + var(--local) * .5); transform: rotate(calc(-18deg + var(--local) * 44deg)) scale(calc(.75 + var(--local) * .28)); }
+.advance-beam { position: absolute; top: -8%; bottom: -8%; left: 50%; width: calc(3px + var(--local) * 18px); opacity: clamp(0, calc((var(--local) - .2) * 2), 1); background: linear-gradient(transparent, rgba(244, 220, 160, .86) 31%, #effff6 52%, rgba(82, 168, 131, .72) 70%, transparent); transform: translateX(-50%); filter: blur(calc(var(--local) * 2px)) drop-shadow(0 0 26px rgba(207, 179, 107, .72)); }
+.player-rig--advance { position: relative; z-index: 2; width: min(330px, 58%); }
+.sequence-shift { position: absolute; z-index: 6; top: 3%; left: 50%; display: flex; align-items: center; gap: 10px; padding: 8px 11px; border: 1px solid rgba(223, 185, 104, .32); border-radius: 10px; color: #fcf9f2; background: rgba(7, 24, 24, .88); transform: translateX(-50%); font-family: "IBM Plex Mono", monospace; }
+.sequence-shift span { color: #dfb968; font-size: .52rem; letter-spacing: .14em; }
+.sequence-shift strong { font-size: 1.35rem; }
+.sequence-shift i { width: 38px; height: 1px; background: rgba(252, 249, 242, .42); }
+.advance-node { position: absolute; z-index: 6; padding: 11px 13px; border: 1px solid rgba(131, 190, 164, .32); border-radius: 999px; color: rgba(252, 249, 242, .88); background: rgba(7, 27, 26, .9); font: 600 .55rem/1 "IBM Plex Mono", monospace; }
+.node-abilities { left: 1%; top: 26%; }
+.node-spirituality { right: 0; top: 34%; }
+.node-madness { right: 5%; bottom: 16%; color: #e4a186; border-color: rgba(212, 111, 85, .55); background: rgba(45, 23, 23, .9); }
+
+.stage-nav { position: absolute; z-index: 45; right: clamp(18px, 3.2vw, 52px); bottom: 20px; left: clamp(18px, 3.2vw, 52px); display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border-top: 1px solid rgba(252, 249, 242, .12); }
+.stage-nav button { min-width: 44px; min-height: 58px; display: grid; grid-template-columns: 10px 22px minmax(0, 1fr); align-items: center; gap: 7px; padding: 5px 8px; border: 0; color: rgba(252, 249, 242, .48); background: transparent; cursor: pointer; text-align: left; }
+.stage-nav button > i { width: 6px; height: 6px; border: 1px solid currentColor; border-radius: 50%; }
 .stage-nav button.active { color: #fcf9f2; }
 .stage-nav button.active > i { border-color: #dfb968; background: #dfb968; transform: scale(1.35); box-shadow: 0 0 10px rgba(223, 185, 104, .46); }
 .stage-nav button.complete { color: #9bcbb5; }
-.stage-nav span { font: 600 .54rem/1 "IBM Plex Mono", monospace; }
-.stage-nav strong { font-size: .64rem; }
-
-.journey-line { position: absolute; z-index: 45; right: 0; bottom: 0; left: 0; height: 3px; background: rgba(252, 249, 242, .07); }
+.stage-nav span { font: 600 .52rem/1 "IBM Plex Mono", monospace; }
+.stage-nav strong { overflow: hidden; font-size: .61rem; text-overflow: ellipsis; white-space: nowrap; }
+.journey-line { position: absolute; z-index: 46; right: 0; bottom: 0; left: 0; height: 3px; background: rgba(252, 249, 242, .07); }
 .journey-line i { display: block; height: 100%; background: linear-gradient(90deg, #35775f, #dfb968); box-shadow: 0 0 12px rgba(198, 155, 82, .3); }
 .static-progression { display: none; }
 
-@media (min-width: 1180px) {
-  .stage-1 .artifact-stage,
-  .stage-2 .artifact-stage,
-  .stage-3 .artifact-stage { left: 60%; }
-}
-
-@media (max-width: 980px) {
-  .artifact-stage { left: 58%; width: min(73vw, 760px); transform: translate(-50%, -50%) scale(.88); }
-  .stage-copy { width: min(330px, 35vw); }
-  .stage-nav button { min-width: 52px; grid-template-columns: 10px 22px; }
+@media (max-width: 1120px) {
+  .stage-layout { grid-template-columns: minmax(230px, .72fr) minmax(470px, 1.6fr); gap: 24px; }
+  .stage-copy h3 { font-size: clamp(2.6rem, 4.5vw, 4.4rem); }
   .stage-nav strong { display: none; }
-  .cauldron-interface { right: -3%; width: 330px; }
+  .stage-nav button { grid-template-columns: 10px 1fr; justify-items: center; text-align: center; }
 }
 
-@media (max-width: 680px) {
-  .progression { min-height: 700svh; }
-  .progression-sticky { min-height: 600px; }
-  .brewery-backdrop img { object-position: 56% center; filter: saturate(.6) contrast(1.08) brightness(.34); }
-  .scene-grade { background: linear-gradient(180deg, rgba(3, 12, 14, .78), rgba(3, 12, 14, .18) 35%, rgba(3, 12, 14, .4) 62%, #061214 84%); }
-  .chapter-heading { top: 68px; left: 16px; right: 16px; }
-  .chapter-heading h2 { font-size: 1rem; }
-  .artifact-stage { top: 40%; left: 50%; width: 760px; height: 600px; transform: translate(-50%, -50%) scale(.52); }
-  .stage-copy { top: auto; right: 16px; bottom: 66px; left: 16px; width: auto; transform: none; }
-  .stage-copy h3 { margin: 10px 0 9px; font-size: clamp(2rem, 11vw, 3.35rem); }
-  .stage-copy > p { font-size: .78rem; line-height: 1.47; }
-  .fact-line { margin-top: 10px; padding-top: 10px; font-size: .55rem; line-height: 1.4; }
-  .copy-shift-enter-from { transform: translateY(18px); }
-  .copy-shift-leave-to { transform: translateY(-12px); }
-  .stage-nav { top: auto; right: 8px; bottom: 12px; left: 8px; grid-template-columns: repeat(8, minmax(0, 1fr)); transform: none; }
-  .stage-nav button { min-width: 44px; min-height: 44px; grid-template-columns: 1fr; justify-items: center; gap: 2px; padding: 2px 0; }
-  .stage-nav button > i { width: 5px; height: 5px; }
-  .stage-nav span { font-size: .5rem; }
-  .journey-line { bottom: 0; }
-  .cauldron-interface { right: 2%; }
-}
-
-@media (max-width: 390px) {
-  .artifact-stage { top: 38%; transform: translate(-50%, -50%) scale(.43); }
-  .stage-copy { bottom: 63px; }
-  .stage-copy h3 { font-size: 2.3rem; }
-  .stage-copy > p { font-size: .72rem; }
+@media (max-width: 820px) {
+  .progression { min-height: 900svh; }
+  .progression-sticky { min-height: 620px; }
+  .chapter-heading { top: 82px; right: 15px; left: 15px; }
+  .stage-layout { inset: 148px 14px 72px; grid-template-columns: 1fr; grid-template-rows: auto minmax(290px, 1fr); gap: 10px; align-items: start; }
+  .stage-copy { align-self: start; }
+  .stage-copy h3 { margin: 8px 0 8px; font-size: clamp(2.2rem, 8.5vw, 3.5rem); }
+  .stage-copy > p { font-size: .75rem; line-height: 1.46; }
   .fact-line { display: none; }
+  .scene-shell { width: 100%; height: 100%; min-height: 250px; }
+  .scene-detail { right: 0; bottom: 0; width: min(280px, 78%); }
+  .stage-nav { right: max(8px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); left: max(8px, env(safe-area-inset-left)); grid-template-columns: repeat(8, minmax(44px, 1fr)); border-top: 0; }
+  .stage-nav button { min-height: 48px; grid-template-columns: 1fr; gap: 2px; padding: 3px; }
+  .stage-nav button > i { width: 5px; height: 5px; }
+  .formula-page { width: 128px; padding: 7px; }
+  .formula-page img { width: 32px; height: 32px; }
+  .written-formula { width: 260px; }
+  .formula-book { width: 240px; height: 150px; }
+  .formula-book__right img { width: 80px; height: 80px; }
+  .ingredient-table { width: min(520px, 100%); gap: 8px; }
+  .ingredient-card { min-height: 104px; grid-template-columns: 55px minmax(0, 1fr); padding: 10px; }
+  .ingredient-card > span { width: 55px; height: 55px; }
+  .ingredient-card img { width: 48px; height: 48px; }
+  .brew-interface { width: min(540px, 100%); }
+  .player-rig { width: min(280px, 60%); }
+  .activity-node { width: 108px; min-height: 52px; padding: 7px; font-size: .46rem; }
+  .activity-node svg, .activity-node img { width: 23px; height: 23px; }
+  .digestion-meter { width: min(250px, 52%); }
 }
 
-@media (max-height: 680px) and (min-width: 681px) {
-  .chapter-heading { top: 66px; }
-  .artifact-stage { transform: translate(-50%, -50%) scale(.79); }
-  .stage-copy h3 { font-size: 2.7rem; }
-  .fact-line { margin-top: 12px; padding-top: 10px; }
+@media (max-width: 480px) {
+  .progression-sticky { min-height: 600px; }
+  .stage-layout { inset: 142px 10px 66px; grid-template-rows: auto minmax(300px, 1fr); }
+  .chapter-heading h2 { font-size: .95rem; }
+  .chapter-heading p { display: none; }
+  .stage-copy h3 { font-size: clamp(2rem, 10vw, 2.85rem); }
+  .formula-page { width: 112px; font-size: .48rem; }
+  .formula-page:nth-child(2) { top: 42%; }
+  .formula-page:nth-child(3) { top: 67%; }
+  .written-formula { transform: translateX(34px) rotate(calc((.5 - var(--local)) * 4deg)); }
+  .ingredient-table { grid-template-columns: 1fr 1fr; }
+  .ingredient-card { min-height: 92px; grid-template-columns: 44px 1fr; column-gap: 7px; padding: 8px; }
+  .ingredient-card > span { width: 44px; height: 44px; }
+  .ingredient-card img { width: 32px; height: 32px; }
+  .ingredient-card strong { font-size: .65rem; }
+  .ingredient-card small { font-size: .625rem; }
+  .brew-interface__header { min-height: 32px; font-size: .45rem; }
+  .potion-result { right: 0; bottom: -10px; }
+  .potion-pixel { width: 48px; height: 48px; background-size: 48px auto; }
+  .drink-potion { left: 0; top: 24%; padding: 7px; }
+  .drink-potion strong { max-width: 86px; font-size: .46rem; }
+  .ability-reveal { right: 0; top: 26%; padding: 8px; font-size: .46rem; }
+  .activity-node { width: 100px; min-height: 48px; font-size: .625rem; }
+  .route-1, .route-3, .route-5 { left: 0; }
+  .route-2, .route-4, .route-6 { right: 0; }
+  .digestion-meter { width: min(210px, 58%); bottom: -4px; }
+  .ritual-book img { width: 48px; height: 48px; }
+  .ritual-ready { left: 0; top: 18%; }
+  .ritual-risk { right: 0; bottom: 14%; }
+  .advance-node { padding: 8px; font-size: .625rem; }
+  .node-abilities { left: 0; top: 19%; }
+  .node-spirituality { top: 31%; }
+  .node-madness { right: 0; bottom: 10%; }
+  .sequence-shift { top: 0; padding: 5px 8px; }
 }
 
-@media (prefers-reduced-motion: reduce), (max-height: 620px) {
-  .progression { min-height: auto; padding: clamp(86px, 12vw, 140px) clamp(18px, 4vw, 64px); background: linear-gradient(145deg, #071416, #102724); }
+@media (prefers-reduced-motion: reduce), (max-height: 560px) {
+  .progression { min-height: auto; padding: clamp(82px, 11vw, 130px) clamp(16px, 4vw, 58px); background: linear-gradient(145deg, #071416, #102724); }
   .progression-sticky { position: relative; height: auto; min-height: 0; overflow: visible; background: transparent; }
-  .brewery-backdrop,
-  .scene-grade,
-  .scene-depth,
-  .artifact-stage,
-  .stage-copy,
-  .stage-nav,
-  .journey-line { display: none; }
-  .chapter-heading { position: relative; top: auto; left: auto; width: min(720px, 100%); margin: 0 auto 50px; }
-  .chapter-heading h2 { margin-top: 8px; font-size: clamp(2.6rem, 8vw, 5rem); }
+  .brewery-backdrop, .scene-grade, .fog-memory, .stage-layout, .stage-nav, .journey-line { display: none; }
+  .chapter-heading { position: relative; top: auto; left: auto; width: min(760px, 100%); margin: 0 auto 44px; }
+  .chapter-heading h2 { margin-top: 8px; font-size: clamp(2.5rem, 8vw, 5rem); }
   .static-progression { width: min(920px, 100%); display: block; margin: 0 auto; padding: 0; list-style: none; }
-  .static-progression li { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: clamp(18px, 4vw, 44px); padding: clamp(28px, 5vw, 52px) 0; border-top: 1px solid rgba(252, 249, 242, .13); }
-  .static-progression li > span { color: #dfb968; font: 600 .72rem/1 "IBM Plex Mono", monospace; }
-  .static-progression small { color: #70a88e; font: 600 .6rem/1 "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
-  .static-progression h3 { margin: 10px 0 12px; font: 600 clamp(2rem, 6vw, 3.8rem)/.95 "IBM Plex Sans Condensed", sans-serif; }
+  .static-progression li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: clamp(16px, 4vw, 40px); padding: clamp(27px, 5vw, 48px) 0; border-top: 1px solid rgba(252, 249, 242, .13); }
+  .static-progression li > span { color: #dfb968; font: 600 .7rem/1 "IBM Plex Mono", monospace; }
+  .static-progression small { color: #70a88e; font: 600 .58rem/1 "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .static-progression h3 { margin: 10px 0 12px; font: 600 clamp(2rem, 6vw, 3.7rem)/.95 "IBM Plex Sans Condensed", sans-serif; }
   .static-progression p { max-width: 660px; margin: 0; color: rgba(252, 249, 242, .68); line-height: 1.65; }
-  .static-progression strong { display: block; margin-top: 16px; color: rgba(252, 249, 242, .72); font: 500 .64rem/1.5 "IBM Plex Mono", monospace; }
-}
-
-@media (max-width: 260px) {
-  .progression { min-height: auto; padding: 70px 10px; }
-  .progression-sticky { position: relative; height: auto; min-height: 0; overflow: visible; }
-  .brewery-backdrop,
-  .scene-grade,
-  .scene-depth,
-  .artifact-stage,
-  .stage-copy,
-  .stage-nav,
-  .journey-line { display: none; }
-  .chapter-heading { position: relative; top: auto; left: auto; margin-bottom: 36px; }
-  .static-progression { display: block; margin: 0; padding: 0; list-style: none; }
-  .static-progression li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 6px; padding: 22px 0; border-top: 1px solid rgba(252, 249, 242, .12); }
-  .static-progression li > span { color: #dfb968; font: 600 .52rem/1 "IBM Plex Mono", monospace; }
-  .static-progression h3 { margin: 7px 0; font: 600 1.6rem/1 "IBM Plex Sans Condensed", sans-serif; }
-  .static-progression p { margin: 0; color: rgba(252, 249, 242, .66); font-size: .7rem; line-height: 1.5; }
-  .static-progression strong { display: block; margin-top: 9px; color: rgba(252, 249, 242, .72); font-size: .55rem; }
+  .static-progression strong { display: block; margin-top: 15px; color: rgba(252, 249, 242, .72); font: 500 .62rem/1.5 "IBM Plex Mono", monospace; }
+  .static-progression ul { display: grid; gap: 10px; margin: 22px 0 0; padding: 0; list-style: none; }
+  .static-progression ul li { display: grid; grid-template-columns: minmax(120px, .4fr) 1fr; gap: 12px; padding: 12px 0 0; border-top: 1px solid rgba(252, 249, 242, .1); }
+  .static-progression ul b { color: #dfb968; font: 600 .68rem/1.4 "IBM Plex Mono", monospace; }
+  .static-progression ul span { color: rgba(252, 249, 242, .7); font-size: .78rem; line-height: 1.5; }
 }
 </style>

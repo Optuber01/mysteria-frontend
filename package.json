@@ -37,6 +37,7 @@
     "marked": "^15.0.12",
     "minimatch": "3",
     "pinia": "^2.3.0",
+    "skinview3d": "^3.4.2",
     "terser": "^5.43.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vue": "^3.4.15",

@@ -4,7 +4,7 @@
     <HeaderItem />
     <main id="main-content" tabindex="-1">
       <HomeHero :status="serverStatus" />
-      <ProgressionStory :pathway-name="selectedPathway" />
+      <ProgressionStory />
       <div
         ref="pathwayTrigger"
         class="deferred-chapter deferred-chapter--pathways"
@@ -44,7 +44,7 @@ import type { NewsArticle } from '@/types/news';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
 
 const latestNews = ref<NewsArticle[]>([]);
-const selectedPathway = ref('Abyss');
+const selectedPathway = ref('Fool');
 const pathwayReady = ref(false);
 const worldReady = ref(false);
 const joinReady = ref(false);

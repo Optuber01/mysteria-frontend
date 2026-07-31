@@ -52,8 +52,10 @@ wiki and game archive.
 - `mysterria-dawn.webp` is promotional artwork created by re-lighting and
   art-directing an existing Mysterria castle capture. It is a homepage backdrop,
   not a gameplay screenshot.
-- `home/progression/` uses a real Mysterria brewery capture and COI-owned item
-  textures: potion, ingredient, recipe, cauldron, ritual-book and acting assets.
+- `home/progression/` uses a real Mysterria brewery capture, COI-owned potion,
+  ingredient, recipe, ritual-book and acting textures, and vanilla block textures
+  for the plugin's exact 18-block Normal Ritual Altar layout. The animated player
+  uses the standard Steve skin rendered as a real articulated Minecraft rig.
 - `home/world/` uses repo-backed dungeon, creature, boss, Emporium, economy and
   town captures. These are shown as distinct locations rather than as repeated
   crops of the hero.
