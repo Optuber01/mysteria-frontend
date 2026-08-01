@@ -24,17 +24,19 @@ import type { PlayerAnimation, SkinViewer } from 'skinview3d';
 import steveSkinUrl from '@/assets/images/home/progression/steve.png';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
-export type MinecraftPlayerMode = 'idle' | 'drink' | 'walk' | 'advance';
+export type MinecraftPlayerMode = 'idle' | 'inspect' | 'gather' | 'brew' | 'drink' | 'cast' | 'walk' | 'advance';
 
 const props = withDefaults(
   defineProps<{
     mode?: MinecraftPlayerMode;
     active?: boolean;
+    progress?: number;
     label?: string;
   }>(),
   {
     mode: 'idle',
     active: true,
+    progress: 0,
     label: '',
   },
 );
@@ -54,7 +56,11 @@ let disposed = false;
 
 const modeLabels: Record<MinecraftPlayerMode, string> = {
   idle: 'Steve standing ready to enter Mysterria',
+  inspect: 'Steve inspecting a recovered potion formula',
+  gather: 'Steve gathering ingredients in Mysterria',
+  brew: 'Steve loading ingredients into the Ritual Altar',
   drink: 'Steve drinking a Sequence potion',
+  cast: 'Steve performing a Seer acting method',
   walk: 'Steve travelling through Mysterria',
   advance: 'Steve advancing to the next Sequence',
 };
@@ -67,6 +73,56 @@ function makeAnimation(mode: MinecraftPlayerMode): PlayerAnimation {
   if (mode === 'walk') {
     const animation = new skinview.WalkingAnimation();
     animation.speed = 1.25;
+    return animation;
+  }
+
+  if (mode === 'inspect') {
+    const animation = new skinview.FunctionAnimation((player, progress) => {
+      const breathe = Math.sin(progress * 1.6) * 0.025;
+      player.skin.head.rotation.x = 0.34 + breathe;
+      player.skin.head.rotation.y = Math.sin(progress * 0.45) * 0.06;
+      player.skin.rightArm.rotation.x = -0.82 + breathe;
+      player.skin.rightArm.rotation.z = 0.24;
+      player.skin.leftArm.rotation.x = -0.82 - breathe;
+      player.skin.leftArm.rotation.z = -0.24;
+      player.rotation.y = -0.24;
+      player.position.y = breathe;
+    });
+    animation.speed = 0.72;
+    return animation;
+  }
+
+  if (mode === 'gather') {
+    const animation = new skinview.FunctionAnimation((player, progress) => {
+      const swing = (Math.sin(progress * 1.8) + 1) / 2;
+      const strike = Math.pow(swing, 2.4);
+      player.skin.head.rotation.x = 0.16 - strike * 0.12;
+      player.skin.rightArm.rotation.x = -0.38 - strike * 1.55;
+      player.skin.rightArm.rotation.z = 0.18 + strike * 0.18;
+      player.skin.leftArm.rotation.x = 0.2 + strike * 0.35;
+      player.skin.leftArm.rotation.z = -0.1;
+      player.skin.body.rotation.y = 0.12 - strike * 0.25;
+      player.skin.rightLeg.rotation.x = -0.08;
+      player.skin.leftLeg.rotation.x = 0.08;
+      player.rotation.y = -0.38;
+      player.position.y = Math.sin(progress * 3.6) * 0.025;
+    });
+    animation.speed = 0.88;
+    return animation;
+  }
+
+  if (mode === 'brew') {
+    const animation = new skinview.FunctionAnimation((player, progress) => {
+      const stir = Math.sin(progress * 2.1);
+      player.skin.head.rotation.x = 0.24;
+      player.skin.rightArm.rotation.x = -1.24 + stir * 0.18;
+      player.skin.rightArm.rotation.z = 0.28 + stir * 0.08;
+      player.skin.leftArm.rotation.x = -0.72 - stir * 0.16;
+      player.skin.leftArm.rotation.z = -0.2;
+      player.skin.body.rotation.x = 0.08;
+      player.rotation.y = -0.46;
+    });
+    animation.speed = 0.82;
     return animation;
   }
 
@@ -105,6 +161,23 @@ function makeAnimation(mode: MinecraftPlayerMode): PlayerAnimation {
     return animation;
   }
 
+  if (mode === 'cast') {
+    const animation = new skinview.FunctionAnimation((player, progress) => {
+      const focus = Math.sin(progress * 1.25) * 0.08;
+      player.skin.head.rotation.x = -0.05;
+      player.skin.head.rotation.y = focus * 0.4;
+      player.skin.rightArm.rotation.x = -1.48 + focus;
+      player.skin.rightArm.rotation.z = 0.34;
+      player.skin.leftArm.rotation.x = -1.34 - focus;
+      player.skin.leftArm.rotation.z = -0.34;
+      player.skin.body.rotation.y = focus * 0.25;
+      player.rotation.y = -0.08;
+      player.position.y = (Math.sin(progress * 1.25) + 1) * 0.05;
+    });
+    animation.speed = 0.7;
+    return animation;
+  }
+
   const animation = new skinview.IdleAnimation();
   animation.speed = 0.72;
   return animation;
@@ -124,15 +197,17 @@ function syncPlayback() {
   if (!viewer || !skinview || viewer.disposed) return;
 
   const shouldAnimate = props.active && inViewport.value && !reducedMotion.value;
+  const scrollDriven = props.mode !== 'idle';
   const animation = makeAnimation(props.mode);
   viewer.animation = animation;
-  if (!shouldAnimate) animation.update(viewer.playerObject, 0);
-  animation.paused = !shouldAnimate;
+  if (scrollDriven) animation.update(viewer.playerObject, Math.max(0, Math.min(1, props.progress)) * 4.2);
+  else if (!shouldAnimate) animation.update(viewer.playerObject, 0);
+  animation.paused = scrollDriven || !shouldAnimate;
   viewer.autoRotate = props.mode === 'idle' && shouldAnimate;
   viewer.autoRotateSpeed = 0.12;
-  viewer.renderPaused = !shouldAnimate;
+  viewer.renderPaused = scrollDriven || !shouldAnimate;
 
-  if (!shouldAnimate) viewer.render();
+  if (scrollDriven || !shouldAnimate) viewer.render();
 }
 
 onMounted(async () => {
@@ -181,7 +256,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => [props.mode, props.active, reducedMotion.value] as const,
+  () => [props.mode, props.active, props.progress, reducedMotion.value] as const,
   () => syncPlayback(),
 );
 

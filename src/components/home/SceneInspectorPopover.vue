@@ -1,4 +1,5 @@
 <template>
+  <Teleport to="body">
   <Transition name="inspector">
     <aside v-if="open" ref="popoverRef" class="inspector" aria-hidden="true">
       <span>Inspecting</span>
@@ -7,6 +8,7 @@
       <i ref="arrowRef" class="inspector__arrow" />
     </aside>
   </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -35,7 +37,7 @@ async function position() {
     ? (anchorRect.top - boundaryRect.top > boundaryRect.height / 2 ? 'top' : 'bottom')
     : (anchorRect.left + anchorRect.width / 2 < boundaryRect.left + boundaryRect.width / 2 ? 'left' : 'right');
   const result = await computePosition(props.anchor, popover, {
-    strategy: 'absolute',
+    strategy: 'fixed',
     placement,
     middleware: [
       offset(12),
@@ -68,7 +70,7 @@ function start() {
   if (!props.open || !props.anchor || !props.boundary) return;
   nextTick(() => {
     if (!props.anchor || !popoverRef.value) return;
-    cleanup = autoUpdate(props.anchor, popoverRef.value, position, { animationFrame: true });
+    cleanup = autoUpdate(props.anchor, popoverRef.value, position);
   });
 }
 
@@ -77,7 +79,7 @@ onUnmounted(() => cleanup?.());
 </script>
 
 <style scoped>
-.inspector { position:absolute; z-index:80; width:min(300px,calc(100vw - 24px)); padding:14px 16px; border:1px solid rgba(223,185,104,.4); border-radius:12px; background:rgba(6,22,23,.96); box-shadow:0 16px 44px rgba(0,0,0,.42); backdrop-filter:blur(14px); pointer-events:none; }
+.inspector { position:fixed; z-index:80; width:min(300px,calc(100vw - 24px)); padding:14px 16px; border:1px solid rgba(223,185,104,.4); border-radius:12px; background:rgba(6,22,23,.96); box-shadow:0 16px 44px rgba(0,0,0,.42); backdrop-filter:blur(14px); pointer-events:none; }
 .inspector>span { color:#dfb968; font:650 .52rem/1 "IBM Plex Mono",monospace; letter-spacing:.13em; text-transform:uppercase; }
 .inspector strong { display:block; margin-top:7px; color:#fcf9f2; font-size:.83rem; }
 .inspector p { margin:7px 0 0; color:rgba(252,249,242,.7); font-size:.69rem; line-height:1.5; }
