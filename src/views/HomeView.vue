@@ -39,7 +39,7 @@ import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
-import ProgressionStory from '@/components/home/ProgressionStory.vue';
+import ProgressionStory from '@/components/home/ProgressionStoryV2.vue';
 import type { NewsArticle } from '@/types/news';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
 
@@ -164,7 +164,7 @@ onUnmounted(() => {
 .skip-link:focus { transform: none; }
 
 .deferred-chapter { min-width: 0; }
-.deferred-chapter--pathways.is-pending { min-height: 560svh; background: #102420; }
+.deferred-chapter--pathways.is-pending { min-height: 420svh; background: #102420; }
 .deferred-chapter--world.is-pending { min-height: 690svh; background: #0d1f22; }
 .deferred-chapter--join.is-pending { min-height: 430svh; background: #071416; }
 

@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
   <Transition name="inspector">
-    <aside v-if="open" ref="popoverRef" class="inspector" aria-hidden="true">
+    <aside v-if="open" :id="id" ref="popoverRef" class="inspector" role="tooltip">
       <span>Inspecting</span>
       <strong>{{ title }}</strong>
       <p>{{ description }}</p>
@@ -16,6 +16,7 @@ import { autoUpdate, computePosition, flip, offset, shift, size, arrow } from '@
 import { nextTick, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
+  id?: string;
   open: boolean;
   anchor: HTMLElement | null;
   boundary: HTMLElement | null;

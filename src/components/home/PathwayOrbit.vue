@@ -59,7 +59,7 @@
           @pointerup="endDrag"
           @pointercancel="endDrag"
           @pointerleave="leaveOrbit"
-          @wheel="handleWheel"
+          @wheel.passive="handleWheel"
         >
           <div class="orbit-geometry" aria-hidden="true">
             <i /><i /><i />
@@ -129,8 +129,8 @@
           </p>
         </div>
 
-        <div class="scroll-cue" :class="{ 'is-complete': interactionReady }" aria-hidden="true">
-          <span>{{ interactionReady ? 'TAKE CONTROL' : 'SCROLL TO ASSEMBLE' }}</span><i />
+        <div class="scroll-cue" :class="{ 'is-complete': interactionReady, 'is-exiting': phase === 'exit' }" aria-hidden="true">
+          <span>{{ phase === 'exit' ? 'SCROLL TO CONTINUE' : (interactionReady ? 'TAKE CONTROL' : 'SCROLL TO ASSEMBLE') }}</span><i />
         </div>
       </div>
     </div>
@@ -197,7 +197,7 @@
       </div>
     </div>
 
-    <details v-if="compactLayout || reducedMotion" class="catalog-fallback" @toggle="handleFallbackToggle">
+    <details class="catalog-fallback" @toggle="handleFallbackToggle">
       <summary>View all {{ activeCatalog.length }} {{ activeKindLabel }}</summary>
       <ul v-if="fallbackOpen">
         <li v-for="(entry, index) in activeCatalog" :key="entry.id">
@@ -288,8 +288,15 @@ const catalogOptions = computed(() => [
   { id: 'pathway' as const, label: 'Pathways', count: standardPathways.length },
   { id: 'boon' as const, label: 'Boons', count: boonPathways.length },
 ]);
-const assemblyProgress = computed(() => Math.min(1, scrollProgress.value / .72));
-const interactionReady = computed(() => reducedMotion.value || compactLayout.value || scrollProgress.value >= .8);
+const assemblyProgress = computed(() => Math.min(1, scrollProgress.value / .64));
+const phase = computed<'entry' | 'assembly' | 'orbit' | 'exit'>(() => {
+  if (reducedMotion.value || compactLayout.value) return 'orbit';
+  if (scrollProgress.value < .08) return 'entry';
+  if (scrollProgress.value < .64) return 'assembly';
+  if (scrollProgress.value < .9) return 'orbit';
+  return 'exit';
+});
+const interactionReady = computed(() => reducedMotion.value || compactLayout.value || phase.value === 'orbit');
 const assemblyCursor = computed(() => {
   return assemblyProgress.value * (activeCatalog.value.length + 1) - 1;
 });
@@ -308,7 +315,8 @@ const themeStyle = computed(() => ({
 type OrbitVisual = { hidden: boolean; behind: boolean; style: CSSProperties };
 
 const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, index) => {
-  if (!interactionReady.value) return assemblyStyle(index);
+  if (phase.value === 'entry' || phase.value === 'assembly') return assemblyStyle(index);
+  if (phase.value === 'exit') return exitStyle(index);
   const delta = signedWrap(index - (rotation.value + pointerOffset.value), activeCatalog.value.length);
   const hidden = Math.abs(delta) > 3.55;
   const angle = -Math.PI / 2 + delta * ((Math.PI * 2) / 7);
@@ -326,6 +334,30 @@ const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, in
     },
   };
 }));
+
+function exitStyle(index: number): OrbitVisual {
+  const delta = signedWrap(index - (rotation.value + pointerOffset.value), activeCatalog.value.length);
+  const angle = -Math.PI / 2 + delta * ((Math.PI * 2) / 7);
+  const depth = (Math.sin(angle) + 1) / 2;
+  const fromX = 50 + Math.cos(angle) * 42;
+  const fromY = 50 + Math.sin(angle) * 34;
+  const exitProgress = easeOut(clamp((scrollProgress.value - .9) / .1, 0, 1));
+  const side = index % 2 === 0 ? -1 : 1;
+  const toX = side < 0 ? -18 : 118;
+  const toY = side < 0 ? 32 : 68;
+  return {
+    hidden: exitProgress > .98,
+    behind: depth < .42,
+    style: {
+      left: `${mix(fromX, toX, exitProgress)}%`,
+      top: `${mix(fromY, toY, exitProgress)}%`,
+      opacity: String(Math.max(0, (.48 + depth * .52) * (1 - exitProgress))),
+      zIndex: String(18 + Math.round(depth * 46)),
+      transform: `translate(-50%, -50%) scale(${.66 + depth * .38 - exitProgress * .18})`,
+      pointerEvents: exitProgress > .62 ? 'none' : 'auto',
+    },
+  };
+}
 
 function assemblyStyle(index: number): OrbitVisual {
   const age = assemblyCursor.value - index;
@@ -490,7 +522,6 @@ function leaveOrbit() {
 
 function handleWheel(event: WheelEvent) {
   if (!interactionReady.value) return;
-  event.preventDefault();
   const now = performance.now();
   if (now - wheelTime < 160) return;
   const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
@@ -523,9 +554,12 @@ function handleMobileScroll() {
 
 function scrollMobileTo(index: number) {
   const normalized = normalizeIndex(index);
-  const card = mobileRailRef.value?.querySelector<HTMLElement>(`[data-mobile-index="${normalized}"]`);
+  const rail = mobileRailRef.value;
+  const card = rail?.querySelector<HTMLElement>(`[data-mobile-index="${normalized}"]`);
   selectedIndex.value = normalized;
-  card?.scrollIntoView({ behavior: reducedMotion.value ? 'auto' : 'smooth', inline: 'center', block: 'nearest' });
+  if (!rail || !card) return;
+  const left = Math.max(0, card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2);
+  rail.scrollTo({ left, behavior: reducedMotion.value ? 'auto' : 'smooth' });
 }
 function previousMobile() { scrollMobileTo(selectedIndex.value - 1); }
 function nextMobile() { scrollMobileTo(selectedIndex.value + 1); }
@@ -618,7 +652,7 @@ onUnmounted(() => {
   --path-surface: #10201f;
   --path-haze: #345f58;
   position: relative;
-  min-height: 560svh;
+  min-height: 420svh;
   color: var(--path-ink);
   background: var(--path-surface);
   transition: color .9s cubic-bezier(.22, 1, .36, 1), background-color .9s cubic-bezier(.22, 1, .36, 1);
@@ -729,7 +763,7 @@ onUnmounted(() => {
 .motif-coin .motif-stage::after { inset: 11%; border-radius: 50%; transform: rotate(28deg); border: 5px double color-mix(in srgb, var(--path-accent) 48%, transparent); }
 
 .mobile-experience { display: none; }
-.catalog-fallback { position: relative; z-index: 5; display: none; }
+.catalog-fallback { position: relative; z-index: 5; display: block; width: min(800px, calc(100% - 40px)); margin: 70px auto 0; }
 
 :global(.dossier-scrim) { position: fixed; z-index: 2000; inset: 0; display: grid; justify-items: end; padding: clamp(12px, 3vw, 38px); background: rgba(3, 11, 13, .7); backdrop-filter: blur(12px); }
 :global(.pathway-dossier) { --path-accent: #c69b52; position: relative; width: min(490px, 100%); height: 100%; overflow: auto; padding: clamp(28px, 5vw, 58px); border: 1px solid rgba(245,240,230,.17); border-radius: 28px; color: #f5f0e6; background: #0b1c1d; box-shadow: 0 35px 100px rgba(0,0,0,.45); outline: 0; }
@@ -777,7 +811,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
   .mobile-card > button { min-height: 48px; margin-top: auto; padding: 0 18px; border: 0; border-radius: 999px; color: #08151a; background: var(--path-accent); cursor: pointer; font-size: .72rem; font-weight: 800; }
   .mobile-pagination { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 16px; }
   .mobile-pagination span { min-width: 72px; }
-  .catalog-fallback { display: block; width: min(800px, calc(100% - 40px)); margin: 70px auto 0; }
+  .catalog-fallback { display: block; }
   .catalog-fallback summary { min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border: 1px solid color-mix(in srgb, var(--path-ink) 20%, transparent); border-radius: 12px; cursor: pointer; font-size: .76rem; font-weight: 750; }
   .catalog-fallback summary::after { content: "+"; font-size: 1.2rem; }
   .catalog-fallback[open] summary::after { content: "−"; }

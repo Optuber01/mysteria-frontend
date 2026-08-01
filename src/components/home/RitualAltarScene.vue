@@ -41,7 +41,7 @@
         :style="item.style"
         type="button"
         :aria-label="`${item.block.label}, block ${item.index + 1} of ${blocks.length}`"
-        :aria-describedby="`progression-detail-altar-${item.block.detailId}`"
+        :aria-describedby="`progression-v2-detail-brew-${item.block.detailId}`"
         :aria-pressed="isBuilt(item.index)"
         @pointerdown.stop
         @pointerenter="emitInspect(item.block.detailId, $event)"
