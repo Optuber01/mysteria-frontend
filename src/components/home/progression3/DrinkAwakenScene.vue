@@ -21,43 +21,43 @@
 
     <!-- Steve drinks the potion, then advances -->
     <div class="drink-scene__player" :style="playerStyle">
-      <MinecraftPlayer :mode="playerMode" :active="active" :progress="p" />
-    </div>
+      <MinecraftPlayer :mode="playerMode" :active="active" :progress="p" @hand="onHand" />
 
-    <!-- draining Sequence 9 potion chip -->
-    <button
-      type="button"
-      class="hotspot potion"
-      :style="potionStyle"
-      aria-label="Sequence 9 Seer potion"
-      @mouseenter="inspect('drink-potion', $event)"
-      @mouseleave="emit('clear-inspect')"
-      @focus="inspect('drink-potion', $event)"
-      @blur="emit('clear-inspect')"
-      @click="inspect('drink-potion', $event)"
-    >
-      <span class="potion__frame">
-        <img
-          class="potion__layer potion__layer--base"
-          :src="potionBase"
-          alt=""
-          width="16"
-          height="16"
-          decoding="async"
-          draggable="false"
-        />
-        <img
-          class="potion__layer potion__layer--liquid"
-          :style="liquidStyle"
-          :src="potionOverlay"
-          alt=""
-          width="16"
-          height="16"
-          decoding="async"
-          draggable="false"
-        />
-      </span>
-    </button>
+      <!-- draining Sequence 9 potion chip, anchored to the model's raised hand -->
+      <button
+        type="button"
+        class="hotspot potion"
+        :style="potionStyle"
+        aria-label="Sequence 9 Seer potion"
+        @mouseenter="inspect('drink-potion', $event)"
+        @mouseleave="emit('clear-inspect')"
+        @focus="inspect('drink-potion', $event)"
+        @blur="emit('clear-inspect')"
+        @click="inspect('drink-potion', $event)"
+      >
+        <span class="potion__frame">
+          <img
+            class="potion__layer potion__layer--base"
+            :src="potionBase"
+            alt=""
+            width="16"
+            height="16"
+            decoding="async"
+            draggable="false"
+          />
+          <img
+            class="potion__layer potion__layer--liquid"
+            :style="liquidStyle"
+            :src="potionOverlay"
+            alt=""
+            width="16"
+            height="16"
+            decoding="async"
+            draggable="false"
+          />
+        </span>
+      </button>
+    </div>
 
     <!-- white-gold flash burst -->
     <div class="drink-scene__flash" :style="flashStyle" aria-hidden="true" />
@@ -122,6 +122,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import type { CSSProperties } from 'vue';
 
 import MinecraftPlayer from '../MinecraftPlayer.vue';
+import type { HandPosition } from '../MinecraftPlayer.vue';
 import SceneParticles from './SceneParticles.vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
@@ -176,20 +177,31 @@ const playerStyle = computed<CSSProperties>(() => ({
   transform: compact.value ? 'translateX(-50%)' : 'none',
 }));
 
-/* ---------------- potion chip (liquid empties as the player drinks) ---------------- */
+/* ---------------- potion chip (tracked to the model's raised hand) ---------------- */
+const hand = ref<HandPosition | null>(null);
 const potionIn = computed(() => (final.value ? 0 : clamp01(p.value / 0.06)));
 const potionOut = computed(() => (final.value ? 0 : 1 - clamp01((p.value - 0.68) / 0.05)));
 const potionOpacity = computed(() => potionIn.value * potionOut.value);
 const emptyT = computed(() => (final.value ? 1 : clamp01((p.value - 0.12) / 0.48)));
 const potionBob = computed(() => (final.value ? 0 : Math.sin(p.value * 26) * 3.5));
 
-const potionStyle = computed<CSSProperties>(() => ({
-  left: compact.value ? '62%' : '36%',
-  top: compact.value ? '10%' : '20%',
-  opacity: potionOpacity.value.toFixed(4),
-  transform: `translate(-50%, -50%) translateY(${potionBob.value.toFixed(2)}px)`,
-  pointerEvents: potionOpacity.value > 0.4 ? 'auto' : 'none',
-}));
+function onHand(pos: HandPosition | null): void {
+  hand.value = pos;
+}
+
+const potionStyle = computed<CSSProperties>(() => {
+  const tracked = hand.value;
+  // tip the bottle up as it empties, as if draining into the mouth
+  const tip = emptyT.value * 46;
+  const centered = `translate(-50%, -50%) translateY(${potionBob.value.toFixed(2)}px) rotate(-${tip.toFixed(1)}deg)`;
+  const pos = tracked ? { left: `${tracked.x.toFixed(1)}px`, top: `${tracked.y.toFixed(1)}px` } : { left: '50%', top: '16%' };
+  return {
+    ...pos,
+    transform: centered,
+    opacity: potionOpacity.value.toFixed(4),
+    pointerEvents: potionOpacity.value > 0.4 ? 'auto' : 'none',
+  };
+});
 
 const liquidStyle = computed<CSSProperties>(() => ({
   clipPath: `inset(${(emptyT.value * 100).toFixed(2)}% 0 0 0)`,
@@ -355,13 +367,14 @@ const ctaStyle = computed<CSSProperties>(() => ({
   pointer-events: none;
 }
 
-/* ---------- potion chip ---------- */
+/* ---------- potion chip (inside the player wrapper, at the model's hand) ---------- */
 .potion {
   position: absolute;
   z-index: 6;
   min-width: 44px;
   min-height: 44px;
   padding: 0;
+  pointer-events: auto;
   will-change: transform, opacity;
 }
 .potion__frame {

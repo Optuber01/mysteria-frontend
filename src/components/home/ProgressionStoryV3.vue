@@ -174,9 +174,17 @@ const details: Record<string, { label: string; detail: string }> = {
     label: 'Gold Mint Leaves',
     detail: 'Supplementary ingredient · harvested from a minable Gold Mint resource node.',
   },
-  'altar-core': {
-    label: 'Ritual Altar',
-    detail: 'Raised from a glass blueprint: a 3×3 stone-brick base with an enchanting core. Altar tier shapes the brewing challenge.',
+  'brew-recipe-slot': {
+    label: 'Formula slot',
+    detail: 'The written formula holds the heart of the cauldron interface — load it first, then the ingredients in written order.',
+  },
+  'brew-main-slots': {
+    label: 'Main ingredient slots',
+    detail: 'Main ingredients load into the left column of the interface, in written order.',
+  },
+  'brew-supp-slots': {
+    label: 'Supplementary slots',
+    detail: 'Supplementary ingredients fill the right column — any order, but never before the mains.',
   },
   'brew-circle': {
     label: 'The working',

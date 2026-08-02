@@ -19,12 +19,15 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { Vector3 } from 'three';
 import type { PlayerAnimation, SkinViewer } from 'skinview3d';
 
 import steveSkinUrl from '@/assets/images/home/progression/steve.png';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
 export type MinecraftPlayerMode = 'idle' | 'inspect' | 'gather' | 'brew' | 'drink' | 'cast' | 'walk' | 'advance';
+
+export type HandPosition = { x: number; y: number };
 
 const props = withDefaults(
   defineProps<{
@@ -41,6 +44,11 @@ const props = withDefaults(
   },
 );
 
+const emit = defineEmits<{
+  /** Screen position (px, relative to this figure) of the right hand while drinking. */
+  (e: 'hand', pos: HandPosition | null): void;
+}>();
+
 const host = ref<HTMLElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
 const ready = ref(false);
@@ -53,6 +61,9 @@ let skinview: typeof import('skinview3d') | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let intersectionObserver: IntersectionObserver | null = null;
 let disposed = false;
+let lastHand: HandPosition | null = null;
+const handVector = new Vector3();
+const HAND_LOCAL = new Vector3(0, -10, 0);
 
 const modeLabels: Record<MinecraftPlayerMode, string> = {
   idle: 'Steve standing ready to enter Mysterria',
@@ -129,13 +140,14 @@ function makeAnimation(mode: MinecraftPlayerMode): PlayerAnimation {
   if (mode === 'drink') {
     const animation = new skinview.FunctionAnimation((player, progress) => {
       const breath = Math.sin(progress * 2.2) * 0.035;
-      const sip = Math.sin(progress * 1.35) * 0.055;
-      player.skin.rightArm.rotation.x = -2.05 + sip;
-      player.skin.rightArm.rotation.z = 0.18;
+      const sip = Math.sin(progress * 1.35) * 0.05;
+      // arm extended toward the camera so the hand overlaps the mouth on screen; head tilted back to drink
+      player.skin.rightArm.rotation.x = -1.65 + sip;
+      player.skin.rightArm.rotation.z = 0.65;
       player.skin.leftArm.rotation.x = -0.22 - breath;
       player.skin.leftArm.rotation.z = -0.1;
-      player.skin.head.rotation.x = -0.16 + breath;
-      player.skin.head.rotation.y = -0.08;
+      player.skin.head.rotation.x = 0.26 + breath;
+      player.skin.head.rotation.y = -0.06;
       player.rotation.y = -0.15;
       player.position.y = breath * 1.6;
     });
@@ -191,6 +203,27 @@ function sizeViewer() {
   const height = Math.max(1, Math.round(bounds.height));
   viewer.setSize(width, height);
   viewer.render();
+  emitHandPosition();
+}
+
+/** Projects the right hand (end of the raised arm) to screen px relative to this figure. */
+function emitHandPosition(): void {
+  if (!viewer || !ready.value || props.mode !== 'drink' || !host.value) return;
+  const arm = viewer.playerObject?.skin?.rightArm;
+  if (!arm) return;
+
+  // the hand is the bottom of the arm mesh in the arm's local space
+  handVector.copy(HAND_LOCAL);
+  arm.localToWorld(handVector);
+  handVector.project(viewer.camera);
+
+  const next: HandPosition = {
+    x: (handVector.x * 0.5 + 0.5) * host.value.clientWidth,
+    y: (0.5 - handVector.y * 0.5) * host.value.clientHeight,
+  };
+  if (lastHand && Math.abs(next.x - lastHand.x) < 0.4 && Math.abs(next.y - lastHand.y) < 0.4) return;
+  lastHand = next;
+  emit('hand', next);
 }
 
 function syncPlayback() {
@@ -208,6 +241,7 @@ function syncPlayback() {
   viewer.renderPaused = scrollDriven || !shouldAnimate;
 
   if (scrollDriven || !shouldAnimate) viewer.render();
+  emitHandPosition();
 }
 
 onMounted(async () => {
