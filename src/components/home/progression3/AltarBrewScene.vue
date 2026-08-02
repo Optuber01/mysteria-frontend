@@ -20,15 +20,17 @@
 
     <!-- REAL CauldronGUI panel (actual server texture) -->
     <div ref="guiRef" class="gui" :style="guiStyle" role="img" aria-label="Cauldron brewing interface">
-      <img
-        class="gui__img"
-        :src="cauldronInterface"
-        alt=""
-        width="636"
-        height="284"
-        decoding="async"
-        draggable="false"
-      />
+      <div class="gui__crop">
+        <img
+          class="gui__img"
+          :src="cauldronInterface"
+          alt=""
+          width="636"
+          height="284"
+          decoding="async"
+          draggable="false"
+        />
+      </div>
 
       <!-- green confirm button glows as the brew completes -->
       <span class="gui__confirm" :style="confirmStyle" aria-hidden="true" />
@@ -223,20 +225,20 @@ const guiStyle = computed<CSSProperties>(() => {
   return {
     left: `${x}%`,
     top: `${y}%`,
-    width: compact.value ? 'min(360px, 88vw)' : 'min(480px, 44vw)',
+    width: compact.value ? 'min(360px, 88vw)' : 'min(470px, 45vw)',
     opacity: inValue.toFixed(4),
     transform: `translate(-50%, -50%) scale(${(0.9 + 0.1 * inValue).toFixed(4)}) translateY(${((1 - inValue) * 26).toFixed(1)}px)`,
     pointerEvents: inValue > 0.5 ? 'auto' : 'none',
   };
 });
 
-/* slot centers, % of the 636x284 texture (verified by pixel scan) */
-const SLOT_R = { x: 50.2, y: 36.6 };
-const SLOT_M1 = { x: 33.2, y: 49.3 };
-const SLOT_M2 = { x: 38.8, y: 62.0 };
-const SLOT_S1 = { x: 61.5, y: 49.3 };
-const SLOT_S2 = { x: 67.1, y: 62.0 };
-const SLOT_C = { x: 50.2, y: 74.6 };
+/* Slot centres after cropping the real 636px server screenshot to its 350px GUI. */
+const SLOT_R = { x: 50.3, y: 36.6 };
+const SLOT_M1 = { x: 19.5, y: 49.3 };
+const SLOT_M2 = { x: 29.6, y: 62.0 };
+const SLOT_S1 = { x: 70.9, y: 49.3 };
+const SLOT_S2 = { x: 81.1, y: 62.0 };
+const SLOT_C = { x: 50.3, y: 74.6 };
 
 function zoneStyle(slot: { x: number; y: number }, w: number, h: number): CSSProperties {
   return {
@@ -263,7 +265,7 @@ const confirmStyle = computed<CSSProperties>(() => {
 });
 
 /* ---------------- ingredient flight: book -> GUI slots ---------------- */
-const FLIGHT_SPAN = 0.13;
+const FLIGHT_SPAN = 0.16;
 const ARC_PX = { desktop: 30, mobile: 18 };
 
 type Point = { x: number; y: number };
@@ -277,10 +279,13 @@ type ItemSpec = {
 };
 
 const ITEMS: ItemSpec[] = [
-  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.02, start: { x: 63, y: 62 }, slot: SLOT_R },
-  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.08, start: { x: 31, y: 34 }, slot: SLOT_M1 },
-  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.14, start: { x: 31, y: 52 }, slot: SLOT_M2 },
-  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.2, start: { x: 56, y: 36 }, slot: SLOT_S1 },
+  // These are the corresponding positions on the open formula. While the two
+  // scenes cross-fade, the item sprites continue from the book into the real
+  // Cauldron GUI instead of appearing at arbitrary points in the stage.
+  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.02, start: { x: 50, y: 63 }, slot: SLOT_R },
+  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.08, start: { x: 42, y: 37 }, slot: SLOT_M1 },
+  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.14, start: { x: 42, y: 52 }, slot: SLOT_M2 },
+  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.2, start: { x: 58, y: 38 }, slot: SLOT_S1 },
 ];
 
 type FlightItem = ItemSpec & {
@@ -292,7 +297,7 @@ type FlightItem = ItemSpec & {
 const items = computed<FlightItem[]>(() => {
   const g = geom.value;
   const arc = compact.value ? ARC_PX.mobile : ARC_PX.desktop;
-  const dim = p.value >= 0.85 && !final.value ? 0.82 : 1;
+    const dim = p.value >= 0.85 && !final.value ? 0.82 : 1;
   const unmeasured = g.w <= 0 || g.guiW <= 0;
   return ITEMS.map((spec) => {
     if (unmeasured) {
@@ -307,7 +312,7 @@ const items = computed<FlightItem[]>(() => {
     const ey = g.guiTop + (spec.slot.y / 100) * g.guiH;
     const x = lerp(sx, ex, e);
     const y = lerp(sy, ey, e) - arc * Math.sin(f * Math.PI);
-    const slotBlend = smoothstep(clamp01((f - 0.82) / 0.18));
+    const slotBlend = smoothstep(clamp01((f - 0.42) / 0.58));
     const scale = (1.15 - 0.15 * f) * (1 - 0.38 * slotBlend);
     const rotate = (1 - f) * 7;
     const trailStrength = 1 - f;
@@ -454,6 +459,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
+  mix-blend-mode: screen;
   -webkit-user-drag: none;
 }
 
@@ -461,13 +467,17 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 .gui {
   position: absolute;
   z-index: 3;
-  aspect-ratio: 636 / 284;
+  aspect-ratio: 350 / 284;
   filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .55));
   will-change: transform, opacity;
 }
+.gui__crop { position: absolute; inset: 0; overflow: hidden; }
 .gui__img {
+  position: absolute;
+  top: 0;
+  left: -40.86%;
   display: block;
-  width: 100%;
+  width: 181.72%;
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
@@ -507,10 +517,10 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   display: block;
   min-width: 44px;
   min-height: 44px;
-  padding: 7px 9px;
-  border: 1px solid rgba(131, 190, 164, .32);
-  border-radius: 11px;
-  background: rgba(6, 24, 24, .9);
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
   text-align: center;
   will-change: transform, opacity;
   transition: border-color .2s ease, box-shadow .25s ease, background-color .2s ease;
@@ -519,11 +529,11 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 2px;
 }
 .item__icon {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   object-fit: contain;
   image-rendering: pixelated;
   -webkit-user-drag: none;
@@ -531,15 +541,18 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 }
 .item__label {
   max-width: 132px;
-  font-size: .72rem;
+  font-size: .62rem;
+  font-weight: 700;
   line-height: 1.25;
-  color: rgba(252, 249, 242, .84);
+  color: rgba(252, 249, 242, .88);
+  text-align: center;
+  text-shadow: 0 2px 4px #061718, 0 0 5px #061718;
   will-change: opacity;
 }
 .item:hover,
 .item:focus-visible {
-  border-color: var(--gold);
-  background: rgba(8, 31, 31, .97);
+  border-color: rgba(240, 211, 140, .72);
+  background: rgba(6, 24, 24, .52);
 }
 .item.is-rested {
   padding: 0;
@@ -567,8 +580,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   filter: drop-shadow(0 0 8px rgba(240, 211, 140, .75));
 }
 .item.is-brewing {
-  border-color: rgba(223, 185, 104, .55);
-  box-shadow: 0 0 14px rgba(131, 190, 164, .22), 0 10px 20px rgba(0, 0, 0, .4);
+  box-shadow: none;
 }
 
 /* ---------- bubbles FX (positioned over the cauldron pot) ---------- */

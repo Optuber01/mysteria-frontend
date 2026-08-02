@@ -23,7 +23,7 @@
     <div class="drink-scene__player" :style="playerStyle">
       <MinecraftPlayer :mode="playerMode" :active="active" :progress="p" @hand="onHand" />
 
-      <!-- draining Sequence 9 potion chip, anchored to the model's raised hand -->
+      <!-- The actual Sequence potion stays locked to Steve's raised hand. -->
       <button
         type="button"
         class="hotspot potion"
@@ -35,26 +35,8 @@
         @blur="emit('clear-inspect')"
         @click="inspect('drink-potion', $event)"
       >
-        <span class="potion__frame">
-          <img
-            class="potion__layer potion__layer--base"
-            :src="potionBase"
-            alt=""
-            width="16"
-            height="16"
-            decoding="async"
-            draggable="false"
-          />
-          <img
-            class="potion__layer potion__layer--liquid"
-            :style="liquidStyle"
-            :src="potionOverlay"
-            alt=""
-            width="16"
-            height="16"
-            decoding="async"
-            draggable="false"
-          />
+        <span class="potion__sprite" :style="liquidStyle">
+          <img :src="sequencePotion" alt="" width="16" height="16" decoding="async" draggable="false" />
         </span>
       </button>
     </div>
@@ -127,8 +109,7 @@ import SceneParticles from './SceneParticles.vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
 import magicCircle from '@/assets/images/home/progression/real/magic-circle.png';
-import potionBase from '@/assets/images/home/progression/source/potion-base.png';
-import potionOverlay from '@/assets/images/home/progression/source/potion-overlay.png';
+import sequencePotion from '@/assets/images/home/progression/real/sequence-potion.png';
 
 const props = defineProps<{ progress: number; active: boolean }>()
 const emit = defineEmits<{ (e: 'inspect', id: string, anchor: HTMLElement): void; (e: 'clear-inspect'): void }>()
@@ -169,7 +150,9 @@ const final = computed(() => reduced.value);
 /* ---------------- player ---------------- */
 const playerMode = computed<'drink' | 'advance'>(() => (final.value || p.value >= 0.68 ? 'advance' : 'drink'));
 const playerStyle = computed<CSSProperties>(() => ({
-  left: compact.value ? '50%' : '11%',
+  // Let the final awakening resolve in the centre of the stage. The drink beat
+  // stays left-biased, so the ability panel never has to cover Steve.
+  left: compact.value ? '50%' : `${(11 + awaken.value * 39).toFixed(2)}%`,
   bottom: compact.value ? 'auto' : '0',
   top: compact.value ? '0' : 'auto',
   width: compact.value ? 'min(150px, 36vw)' : 'min(190px, 22vw)',
@@ -209,14 +192,16 @@ const liquidStyle = computed<CSSProperties>(() => ({
 
 /* ---------------- aura: circle + glow + particles, 0.25 -> 0.72 ---------------- */
 const auraIn = computed(() => (final.value ? 1 : clamp01((p.value - 0.25) / 0.08)));
-const auraOut = computed(() => (final.value ? 1 : 1 - clamp01((p.value - 0.72) / 0.05)));
+// The ritual circle does not disappear when the player awakens: it becomes the
+// quieter, persistent base of the final Seer reveal.
+const auraOut = computed(() => (final.value ? 1 : (p.value >= 0.72 ? 0.76 : 1)));
 const auraOpacity = computed(() => auraIn.value * auraOut.value);
-const inAuraRange = computed(() => p.value >= 0.25 && p.value < 0.72);
+const inAuraRange = computed(() => p.value >= 0.25);
 const auraActive = computed(() => props.active && (final.value || inAuraRange.value));
-const auraIntensity = computed(() => (final.value ? 0.75 : 0.35 + 0.65 * auraOpacity.value));
+const auraIntensity = computed(() => (final.value || p.value >= 0.72 ? 0.7 : 0.35 + 0.65 * auraOpacity.value));
 
 const auraAnchorStyle = computed<CSSProperties>(() => ({
-  left: compact.value ? '50%' : '21%',
+  left: compact.value ? '50%' : `${(21 + awaken.value * 29).toFixed(2)}%`,
   bottom: compact.value ? '38%' : '7%',
 }));
 
@@ -348,6 +333,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
+  mix-blend-mode: screen;
   -webkit-user-drag: none;
 }
 .drink-scene__fx {
@@ -365,6 +351,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   z-index: 5;
   min-width: 0;
   pointer-events: none;
+  transition: left .5s var(--ease);
 }
 
 /* ---------- potion chip (inside the player wrapper, at the model's hand) ---------- */
@@ -377,35 +364,24 @@ const ctaStyle = computed<CSSProperties>(() => ({
   pointer-events: auto;
   will-change: transform, opacity;
 }
-.potion__frame {
+.potion__sprite {
   position: relative;
   display: block;
-  width: 68px;
-  height: 68px;
-  border: 1px solid rgba(223, 185, 104, .38);
-  border-radius: 10px;
-  background: rgba(7, 23, 25, .86);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, .42), inset 0 0 12px rgba(223, 185, 104, .08);
-  transition: border-color .2s ease, box-shadow .25s ease;
+  width: 54px;
+  height: 54px;
+  filter: drop-shadow(0 5px 7px rgba(0, 0, 0, .56));
+  transition: filter .2s ease;
 }
-.potion:hover .potion__frame,
-.potion:focus-visible .potion__frame {
-  border-color: rgba(240, 211, 140, .7);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, .42), 0 0 16px rgba(223, 185, 104, .3);
-}
-.potion__layer {
-  position: absolute;
-  inset: 0;
+.potion__sprite img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  -webkit-user-drag: none;
 }
-.potion__layer--liquid {
-  filter: drop-shadow(0 0 6px rgba(131, 190, 164, .35));
-  will-change: clip-path;
+.potion:hover .potion__sprite,
+.potion:focus-visible .potion__sprite {
+  filter: drop-shadow(0 0 11px rgba(240, 211, 140, .8));
 }
 
 /* ---------- flash burst overlay ---------- */
@@ -428,12 +404,12 @@ const ctaStyle = computed<CSSProperties>(() => ({
 .panel {
   position: absolute;
   z-index: 40;
-  width: min(340px, 31vw);
-  padding: 14px;
+  width: min(332px, 30vw);
+  padding: 15px;
   border: 1px solid rgba(223, 185, 104, .4);
   border-radius: 13px;
-  background: rgba(5, 24, 23, .94);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, .5), 0 0 30px rgba(223, 185, 104, .1);
+  background: linear-gradient(135deg, rgba(10, 34, 31, .98), rgba(4, 18, 20, .96));
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .5), inset 0 1px rgba(240, 211, 140, .1), 0 0 30px rgba(223, 185, 104, .1);
   will-change: transform, opacity;
 }
 .panel__kicker {
@@ -571,9 +547,9 @@ const ctaStyle = computed<CSSProperties>(() => ({
     width: min(230px, 54vw);
     height: min(230px, 54vw);
   }
-  .potion__frame {
-    width: 58px;
-    height: 58px;
+  .potion__sprite {
+    width: 48px;
+    height: 48px;
   }
   .panel {
     width: min(380px, 94vw);
