@@ -5,8 +5,11 @@
     </p>
 
     <div class="book-viewport">
+      <div class="book-scene__fog" aria-hidden="true"><i /><i /><i /></div>
       <div class="book" :class="{ 'is-open': openT > 0.5 }">
         <div class="book__glow" aria-hidden="true" />
+        <div class="book__closed-cover" :style="coverTextureStyle" aria-hidden="true" />
+        <div class="book__back-cover" :style="coverTextureStyle" aria-hidden="true" />
 
         <div class="book__spread">
           <!-- LEFT PAGE · main ingredients -->
@@ -75,12 +78,8 @@
 
         <!-- COVER LEAF · swings open around the spine -->
         <div class="cover-leaf" aria-hidden="true">
-          <div class="cover-leaf__face cover-leaf__front">
-            <img :src="writtenBook" alt="" width="256" height="256" decoding="async">
-          </div>
-          <div class="cover-leaf__face cover-leaf__back">
-            <img :src="writtenBook" alt="" width="256" height="256" decoding="async">
-          </div>
+          <div class="cover-leaf__face cover-leaf__front" :style="coverTextureStyle" />
+          <div class="cover-leaf__face cover-leaf__back" :style="coverTextureStyle" />
         </div>
       </div>
     </div>
@@ -96,7 +95,7 @@ import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-b
 import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
 import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leaves.png';
 import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
-import writtenBook from '@/assets/images/home/progression/source/written-book.png';
+import enchantingTableBookAtlas from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_2k_nearest.png';
 
 const props = defineProps<{ progress: number; active: boolean }>();
 const emit = defineEmits<{
@@ -113,6 +112,9 @@ const mainEntries = [
 const suppEntries = [
   { id: 'gold-mint-leaves', name: 'Gold Mint Leaves', role: 'Supplementary ingredient', icon: goldMintLeaves },
 ];
+const coverTextureStyle = {
+  backgroundImage: `url(${enchantingTableBookAtlas})`,
+};
 
 function clamp01(value: number): number {
   if (Number.isNaN(value) || !Number.isFinite(value)) return 0;
@@ -124,13 +126,14 @@ function smoothstep(t: number): number {
 }
 
 const p = computed(() => clamp01(props.progress));
-// appear 0–0.18 · open 0.18–0.75 · hold 0.75–1
-const appearT = computed(() => (reducedMotion.value ? 1 : clamp01(p.value / 0.18)));
-const openT = computed(() => (reducedMotion.value ? 1 : smoothstep((p.value - 0.18) / 0.57)));
+// Let the closed book travel up through the fog before the cover begins to hinge.
+// This deliberately keeps the first beat slower than the page reveal.
+const appearT = computed(() => (reducedMotion.value ? 1 : smoothstep(p.value / 0.28)));
+const openT = computed(() => (reducedMotion.value ? 1 : smoothstep((p.value - 0.4) / 0.45)));
 const dimT = computed(() => (reducedMotion.value ? 0 : smoothstep((p.value - 0.93) / 0.07)));
 // left page reveals as the cover swings past perpendicular
 const leftPageOpacity = computed(() =>
-  reducedMotion.value ? 1 : smoothstep((openT.value - 0.42) / 0.3).toFixed(4),
+  reducedMotion.value ? 1 : smoothstep((openT.value - 0.14) / 0.32).toFixed(4),
 );
 
 const sceneVars = computed(() => {
@@ -141,18 +144,20 @@ const sceneVars = computed(() => {
     '--appear': appear.toFixed(4),
     '--open': open.toFixed(4),
     '--book-opacity': (appear * (1 - dim * 0.55)).toFixed(4),
-    '--book-scale': (0.74 + appear * 0.16 + open * 0.1 - dim * 0.08).toFixed(4),
-    '--book-lift': `${((1 - appear) * 24 - open * 4).toFixed(2)}px`,
-    '--book-tilt': `${(13 - open * 5).toFixed(2)}deg`,
-    '--book-roll': `${(-2.5 + open * 2.5).toFixed(2)}deg`,
-    '--cover-angle': `${(-178 * open).toFixed(2)}deg`,
+    '--book-scale': (0.64 + appear * 0.16 + open * 0.14 - dim * 0.08).toFixed(4),
+    '--book-lift': `${((1 - appear) * 118 - open * 8).toFixed(2)}px`,
+    '--book-tilt': `${(24 - open * 12).toFixed(2)}deg`,
+    '--book-roll': `${(-5 + open * 5).toFixed(2)}deg`,
+    '--cover-angle': `${(-82 * open).toFixed(2)}deg`,
     '--cover-z': open > 0.5 ? '0' : '4',
     '--cover-zshift': open > 0.5 ? '-2px' : '2px',
-    '--cover-opacity': (1 - smoothstep((open - 0.34) / 0.26)).toFixed(4),
-    '--spread-opacity': smoothstep((open - 0.12) / 0.34).toFixed(4),
+    '--closed-cover-opacity': (1 - smoothstep((open - 0.08) / 0.22)).toFixed(4),
+    '--cover-opacity': (smoothstep((open - 0.08) / 0.22) * (1 - smoothstep((open - 0.42) / 0.22))).toFixed(4),
+    '--spread-opacity': smoothstep((open - 0.04) / 0.34).toFixed(4),
     '--spine-shadow': (open * 0.85).toFixed(4),
     '--glow-opacity': (appear * (0.35 + open * 0.4)).toFixed(4),
     '--pageblock-opacity': (1 - smoothstep(open / 0.35)).toFixed(4),
+    '--fog-opacity': (appear * (0.9 - open * 0.32)).toFixed(4),
   };
 });
 
@@ -202,12 +207,32 @@ function inspect(id: string, event: Event) {
   position: relative;
   width: min(620px, 74%);
   aspect-ratio: 8 / 5;
+  overflow: visible;
 }
 
+.book-scene__fog {
+  position: absolute;
+  right: -16%;
+  bottom: -12%;
+  left: -16%;
+  z-index: 0;
+  height: 58%;
+  overflow: hidden;
+  border-radius: 50% 50% 0 0 / 42% 42% 0 0;
+  background:
+    radial-gradient(ellipse at 13% 100%, rgba(147, 166, 149, 0.24), transparent 49%),
+    radial-gradient(ellipse at 52% 103%, rgba(95, 129, 115, 0.24), transparent 56%),
+    radial-gradient(ellipse at 90% 100%, rgba(129, 148, 133, 0.2), transparent 50%),
+    linear-gradient(0deg, rgba(30, 58, 53, 0.34), transparent 70%);
+  filter: blur(7px);
+  opacity: var(--fog-opacity, 0);
+  pointer-events: none;
+}
 .book {
   position: absolute;
   inset: 0;
-  perspective: 1500px;
+  z-index: 2;
+  perspective: 2400px;
   perspective-origin: 50% 42%;
   opacity: var(--book-opacity, 0);
   transform:
@@ -215,6 +240,7 @@ function inspect(id: string, event: Event) {
     rotateX(var(--book-tilt, 14deg))
     rotateZ(var(--book-roll, -3deg))
     scale(var(--book-scale, 0.72));
+  transform-style: preserve-3d;
 }
 
 .book__glow {
@@ -228,6 +254,47 @@ function inspect(id: string, event: Event) {
   pointer-events: none;
 }
 
+.book__closed-cover {
+  position: absolute;
+  top: -3%;
+  right: -1.5%;
+  bottom: -3%;
+  left: -1.5%;
+  z-index: 4;
+  border: 2px solid rgba(43, 24, 10, 0.72);
+  border-radius: 10px;
+  background-color: #6b411e;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 1066.667% 320%;
+  box-shadow: inset 0 0 0 4px rgba(129, 76, 29, 0.25), inset 0 0 34px rgba(32, 16, 5, 0.46), 0 30px 30px rgba(0, 0, 0, 0.56);
+  image-rendering: pixelated;
+  opacity: var(--closed-cover-opacity, 1);
+  pointer-events: none;
+  transform: translateZ(5px);
+}
+.book__closed-cover::before {
+  position: absolute;
+  inset: 11% 30% 11% 30%;
+  border: 2px solid rgba(241, 196, 70, 0.75);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px rgba(44, 23, 7, 0.44), 0 0 18px rgba(240, 190, 74, 0.14);
+  content: '';
+}
+.book__closed-cover::after {
+  position: absolute;
+  top: 50%;
+  right: 11%;
+  left: 11%;
+  color: rgba(255, 231, 170, 0.91);
+  content: 'SEQUENCE 9  ·  SEER';
+  font: 700 clamp(0.62rem, 1vw, 0.82rem)/1 "IBM Plex Mono", monospace;
+  letter-spacing: 0.11em;
+  text-align: center;
+  text-shadow: 1px 1px 0 rgba(40, 22, 7, 0.7);
+  transform: translateY(-50%);
+}
+
 .book__spread {
   position: absolute;
   inset: 0;
@@ -239,6 +306,24 @@ function inspect(id: string, event: Event) {
   pointer-events: none;
 }
 .book.is-open .book__spread { pointer-events: auto; }
+
+.book__back-cover {
+  position: absolute;
+  top: -2.5%;
+  bottom: -2.5%;
+  left: -1.5%;
+  z-index: 0;
+  width: 51.5%;
+  border-radius: 12px 3px 3px 12px;
+  background-color: #5e3a1d;
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 1066.667% 320%;
+  box-shadow: inset -8px 0 0 rgba(28, 15, 7, 0.24), 0 22px 28px rgba(0, 0, 0, 0.36);
+  image-rendering: pixelated;
+  opacity: var(--spread-opacity, 0);
+  transform: translateZ(-8px);
+}
 
 .page {
   position: relative;
@@ -406,14 +491,14 @@ function inspect(id: string, event: Event) {
 
 .cover-leaf {
   position: absolute;
-  top: -2.5%;
-  bottom: -2.5%;
+  top: 2%;
+  bottom: 2%;
   left: 50%;
   z-index: var(--cover-z, 4);
   width: 51%;
   transform-style: preserve-3d;
-  transform-origin: center center;
-  transform: translateX(-50%) rotateY(var(--cover-angle, 0deg)) translateZ(var(--cover-zshift, 2px));
+  transform-origin: left center;
+  transform: rotateY(var(--cover-angle, 0deg)) translateZ(var(--cover-zshift, 2px));
   opacity: var(--cover-opacity, 1);
   pointer-events: none;
 }
@@ -422,29 +507,21 @@ function inspect(id: string, event: Event) {
   inset: 0;
   display: grid;
   place-items: center;
-  border: 0;
+  background-color: #6b411e;
+  background-repeat: no-repeat;
+  background-size: 1066.667% 320%;
+  box-shadow: inset 0 0 0 2px rgba(40, 22, 10, 0.35), inset 0 0 24px rgba(27, 14, 5, 0.28), 0 8px 18px rgba(0, 0, 0, 0.42);
+  image-rendering: pixelated;
   backface-visibility: hidden;
 }
 .cover-leaf__front {
   border-radius: 3px 12px 12px 3px;
-}
-.cover-leaf__front img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+  background-position: 0 0;
 }
 .cover-leaf__back {
   border-radius: 12px 3px 3px 12px;
+  background-position: 0 50%;
   transform: rotateY(180deg);
-}
-.cover-leaf__back img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  image-rendering: pixelated;
-  transform: scaleX(-1);
 }
 
 .book-scene__motes {
@@ -509,6 +586,11 @@ function inspect(id: string, event: Event) {
   .seal {
     width: 40px;
     height: 40px;
+  }
+  /* A vertical cover leaf would obscure the very small mobile spread; retain
+     the textured closed cover, then reveal the readable two-page state. */
+  .cover-leaf {
+    display: none;
   }
 }
 
