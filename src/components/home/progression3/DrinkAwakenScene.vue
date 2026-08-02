@@ -4,15 +4,7 @@
     <div class="drink-scene__aura" :style="auraAnchorStyle" aria-hidden="true">
       <div class="drink-scene__glow" :style="glowStyle" />
       <div class="drink-scene__circle" :style="circleStyle">
-        <img
-          class="drink-scene__circle-img"
-          :src="magicCircle"
-          alt=""
-          width="256"
-          height="256"
-          decoding="async"
-          draggable="false"
-        />
+        <span class="drink-scene__circle-art" :style="{ maskImage: `url(${magicCircle})` }" />
       </div>
       <div class="drink-scene__fx" :style="auraFxStyle">
         <SceneParticles mode="aura" :active="auraActive" :intensity="auraIntensity" />
@@ -152,11 +144,13 @@ const playerMode = computed<'drink' | 'advance'>(() => (final.value || p.value >
 const playerStyle = computed<CSSProperties>(() => ({
   // Let the final awakening resolve in the centre of the stage. The drink beat
   // stays left-biased, so the ability panel never has to cover Steve.
-  left: compact.value ? '50%' : `${(11 + awaken.value * 39).toFixed(2)}%`,
+  // The stage occupies the right side of the split layout. Keep Steve in the
+  // visual centre of that stage, while leaving a clear lane for the panel.
+  left: compact.value ? '50%' : `${(34 + awaken.value * 2).toFixed(2)}%`,
   bottom: compact.value ? 'auto' : '0',
   top: compact.value ? '0' : 'auto',
-  width: compact.value ? 'min(150px, 36vw)' : 'min(190px, 22vw)',
-  height: compact.value ? '44%' : '78%',
+  width: compact.value ? 'min(150px, 36vw)' : 'min(172px, 18vw)',
+  height: compact.value ? '44%' : '72%',
   transform: compact.value ? 'translateX(-50%)' : 'none',
 }));
 
@@ -201,7 +195,7 @@ const auraActive = computed(() => props.active && (final.value || inAuraRange.va
 const auraIntensity = computed(() => (final.value || p.value >= 0.72 ? 0.7 : 0.35 + 0.65 * auraOpacity.value));
 
 const auraAnchorStyle = computed<CSSProperties>(() => ({
-  left: compact.value ? '50%' : `${(21 + awaken.value * 29).toFixed(2)}%`,
+  left: compact.value ? '50%' : `${(34 + awaken.value * 2).toFixed(2)}%`,
   bottom: compact.value ? '38%' : '7%',
 }));
 
@@ -265,7 +259,7 @@ const teaserReveal = computed(() => (final.value ? 1 : clamp01((awaken.value - 0
 const ctaT = computed(() => (final.value ? 1 : clamp01((p.value - 0.9) / 0.08)));
 const ctaStyle = computed<CSSProperties>(() => ({
   opacity: ctaT.value.toFixed(4),
-  transform: `translateX(-50%) translateY(${((1 - ctaT.value) * 20).toFixed(1)}px)`,
+  transform: `${compact.value ? 'translateX(-50%) ' : ''}translateY(${((1 - ctaT.value) * 20).toFixed(1)}px)`,
   pointerEvents: ctaT.value > 0.5 ? 'auto' : 'none',
 }));
 </script>
@@ -327,14 +321,19 @@ const ctaStyle = computed<CSSProperties>(() => ({
   transform-origin: 50% 50%;
   will-change: transform, opacity, filter;
 }
-.drink-scene__circle-img {
+.drink-scene__circle-art {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  image-rendering: pixelated;
-  mix-blend-mode: screen;
-  -webkit-user-drag: none;
+  background: linear-gradient(135deg, #ffe49b, #d6a818 70%);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  mask-mode: luminance;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  filter: drop-shadow(0 0 12px rgba(223, 185, 104, .7));
 }
 .drink-scene__fx {
   position: absolute;
@@ -367,8 +366,8 @@ const ctaStyle = computed<CSSProperties>(() => ({
 .potion__sprite {
   position: relative;
   display: block;
-  width: 54px;
-  height: 54px;
+  width: 64px;
+  height: 64px;
   filter: drop-shadow(0 5px 7px rgba(0, 0, 0, .56));
   transition: filter .2s ease;
 }
@@ -503,7 +502,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
 .cta {
   position: absolute;
   z-index: 50;
-  left: 50%;
+  right: 6%;
   bottom: 7%;
   display: inline-flex;
   align-items: center;
@@ -548,8 +547,8 @@ const ctaStyle = computed<CSSProperties>(() => ({
     height: min(230px, 54vw);
   }
   .potion__sprite {
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
   }
   .panel {
     width: min(380px, 94vw);
@@ -576,7 +575,10 @@ const ctaStyle = computed<CSSProperties>(() => ({
     font-size: .7rem;
   }
   .cta {
+    right: auto;
+    left: 50%;
     bottom: 16px;
+    transform: translateX(-50%);
     padding: 10px 20px;
     font-size: .74rem;
   }

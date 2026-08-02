@@ -5,7 +5,7 @@
     </p>
 
     <div class="book-viewport">
-      <div class="book" :class="{ 'is-open': openT > 0.98 }">
+      <div class="book" :class="{ 'is-open': openT > 0.5 }">
         <div class="book__glow" aria-hidden="true" />
 
         <div class="book__spread">
@@ -76,10 +76,11 @@
         <!-- COVER LEAF · swings open around the spine -->
         <div class="cover-leaf" aria-hidden="true">
           <div class="cover-leaf__face cover-leaf__front">
-            <img :src="writtenBook" alt="" width="150" height="150" decoding="async">
-            <span class="cover-leaf__latch" />
+            <img :src="writtenBook" alt="" width="256" height="256" decoding="async">
           </div>
-          <div class="cover-leaf__face cover-leaf__back" />
+          <div class="cover-leaf__face cover-leaf__back">
+            <img :src="writtenBook" alt="" width="256" height="256" decoding="async">
+          </div>
         </div>
       </div>
     </div>
@@ -147,6 +148,8 @@ const sceneVars = computed(() => {
     '--cover-angle': `${(-178 * open).toFixed(2)}deg`,
     '--cover-z': open > 0.5 ? '0' : '4',
     '--cover-zshift': open > 0.5 ? '-2px' : '2px',
+    '--cover-opacity': (1 - smoothstep((open - 0.34) / 0.26)).toFixed(4),
+    '--spread-opacity': smoothstep((open - 0.12) / 0.34).toFixed(4),
     '--spine-shadow': (open * 0.85).toFixed(4),
     '--glow-opacity': (appear * (0.35 + open * 0.4)).toFixed(4),
     '--pageblock-opacity': (1 - smoothstep(open / 0.35)).toFixed(4),
@@ -232,7 +235,10 @@ function inspect(id: string, event: Event) {
   display: flex;
   border-radius: 10px;
   filter: drop-shadow(0 34px 30px rgba(0, 0, 0, 0.5));
+  opacity: var(--spread-opacity, 0);
+  pointer-events: none;
 }
+.book.is-open .book__spread { pointer-events: auto; }
 
 .page {
   position: relative;
@@ -406,8 +412,9 @@ function inspect(id: string, event: Event) {
   z-index: var(--cover-z, 4);
   width: 51%;
   transform-style: preserve-3d;
-  transform-origin: left center;
-  transform: rotateY(var(--cover-angle, 0deg)) translateZ(var(--cover-zshift, 2px));
+  transform-origin: center center;
+  transform: translateX(-50%) rotateY(var(--cover-angle, 0deg)) translateZ(var(--cover-zshift, 2px));
+  opacity: var(--cover-opacity, 1);
   pointer-events: none;
 }
 .cover-leaf__face {
@@ -415,40 +422,29 @@ function inspect(id: string, event: Event) {
   inset: 0;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(46, 24, 18, 0.55);
+  border: 0;
   backface-visibility: hidden;
 }
 .cover-leaf__front {
   border-radius: 3px 12px 12px 3px;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.28), transparent 14%),
-    linear-gradient(150deg, #7d4430 0%, #63311f 55%, #4e2415 100%);
-  box-shadow: inset 0 0 0 6px rgba(240, 211, 140, 0.08), inset 0 0 26px rgba(0, 0, 0, 0.45);
 }
 .cover-leaf__front img {
-  width: 56%;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
 }
-.cover-leaf__latch {
-  position: absolute;
-  top: 50%;
-  right: 7%;
-  width: 12px;
-  height: 26px;
-  border-radius: 3px;
-  background: linear-gradient(145deg, #f0d38c, #a3803d);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-  transform: translateY(-50%);
-}
 .cover-leaf__back {
   border-radius: 12px 3px 3px 12px;
-  background:
-    linear-gradient(-90deg, rgba(87, 59, 40, 0.2), transparent 16%),
-    linear-gradient(215deg, #f1e6cc 0%, #e7d7b6 60%, #dcc9a3 100%);
   transform: rotateY(180deg);
+}
+.cover-leaf__back img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: scaleX(-1);
 }
 
 .book-scene__motes {

@@ -15,22 +15,12 @@
       @blur="emit('clear-inspect')"
       @click="inspect('brew-circle', $event)"
     >
-      <img class="altar-scene__circle-img" :src="magicCircle" alt="" width="256" height="256" decoding="async" draggable="false" />
+      <span class="altar-scene__circle-art" :style="circleMaskStyle" aria-hidden="true" />
     </button>
 
-    <!-- REAL CauldronGUI panel (actual server texture) -->
+    <!-- Actual server GUI texture — no composited world screenshot. -->
     <div ref="guiRef" class="gui" :style="guiStyle" role="img" aria-label="Cauldron brewing interface">
-      <div class="gui__crop">
-        <img
-          class="gui__img"
-          :src="cauldronInterface"
-          alt=""
-          width="636"
-          height="284"
-          decoding="async"
-          draggable="false"
-        />
-      </div>
+      <img class="gui__img" :src="generic54" alt="" width="256" height="256" decoding="async" draggable="false" />
 
       <!-- green confirm button glows as the brew completes -->
       <span class="gui__confirm" :style="confirmStyle" aria-hidden="true" />
@@ -124,7 +114,7 @@ import type { CSSProperties } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import SceneParticles from './SceneParticles.vue';
 
-import cauldronInterface from '@/assets/images/home/progression/cauldron-interface.png';
+import generic54 from '@/assets/images/home/progression/source/generic-54.png';
 import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
 import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
 import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
@@ -220,25 +210,25 @@ watch(altarIn, () => requestAnimationFrame(syncGeom));
 /* ---------------- GUI panel ---------------- */
 const guiStyle = computed<CSSProperties>(() => {
   const inValue = altarIn.value;
-  const x = compact.value ? 50 : 63;
-  const y = compact.value ? 48 : 50;
+  const x = 50;
+  const y = compact.value ? 50 : 53;
   return {
     left: `${x}%`,
     top: `${y}%`,
-    width: compact.value ? 'min(360px, 88vw)' : 'min(470px, 45vw)',
+    width: compact.value ? 'min(310px, 82vw)' : 'min(420px, 43vw)',
     opacity: inValue.toFixed(4),
     transform: `translate(-50%, -50%) scale(${(0.9 + 0.1 * inValue).toFixed(4)}) translateY(${((1 - inValue) * 26).toFixed(1)}px)`,
     pointerEvents: inValue > 0.5 ? 'auto' : 'none',
   };
 });
 
-/* Slot centres after cropping the real 636px server screenshot to its 350px GUI. */
-const SLOT_R = { x: 50.3, y: 36.6 };
-const SLOT_M1 = { x: 19.5, y: 49.3 };
-const SLOT_M2 = { x: 29.6, y: 62.0 };
-const SLOT_S1 = { x: 70.9, y: 49.3 };
-const SLOT_S2 = { x: 81.1, y: 62.0 };
-const SLOT_C = { x: 50.3, y: 74.6 };
+/* Slot centres on the original Generic 54 resource texture. */
+const SLOT_R = { x: 50, y: 31 };
+const SLOT_M1 = { x: 35, y: 45 };
+const SLOT_M2 = { x: 35, y: 57 };
+const SLOT_S1 = { x: 65, y: 45 };
+const SLOT_S2 = { x: 65, y: 57 };
+const SLOT_C = { x: 50, y: 72 };
 
 function zoneStyle(slot: { x: number; y: number }, w: number, h: number): CSSProperties {
   return {
@@ -250,8 +240,8 @@ function zoneStyle(slot: { x: number; y: number }, w: number, h: number): CSSPro
   };
 }
 const recipeZoneStyle = computed<CSSProperties>(() => zoneStyle(SLOT_R, 10, 16));
-const mainZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 36, y: 55.7 }, 12, 26));
-const suppZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 64.3, y: 55.7 }, 12, 26));
+const mainZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 35, y: 51 }, 20, 30));
+const suppZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 65, y: 51 }, 20, 30));
 
 const confirmStyle = computed<CSSProperties>(() => {
   const b = brew.value;
@@ -282,10 +272,10 @@ const ITEMS: ItemSpec[] = [
   // These are the corresponding positions on the open formula. While the two
   // scenes cross-fade, the item sprites continue from the book into the real
   // Cauldron GUI instead of appearing at arbitrary points in the stage.
-  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.02, start: { x: 50, y: 63 }, slot: SLOT_R },
-  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.08, start: { x: 42, y: 37 }, slot: SLOT_M1 },
-  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.14, start: { x: 42, y: 52 }, slot: SLOT_M2 },
-  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.2, start: { x: 58, y: 38 }, slot: SLOT_S1 },
+  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.02, start: { x: 48, y: 62 }, slot: SLOT_R },
+  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.08, start: { x: 31, y: 34 }, slot: SLOT_M1 },
+  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.14, start: { x: 31, y: 55 }, slot: SLOT_M2 },
+  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.2, start: { x: 68, y: 36 }, slot: SLOT_S1 },
 ];
 
 type FlightItem = ItemSpec & {
@@ -335,13 +325,17 @@ const items = computed<FlightItem[]>(() => {
 
 /* ---------------- magic circle (brew phase) ---------------- */
 const circleIn = computed(() => (final.value ? 1 : clamp01((p.value - 0.5) / 0.12)));
+const circleMaskStyle = computed<CSSProperties>(() => ({
+  maskImage: `url(${magicCircle})`,
+  WebkitMaskImage: `url(${magicCircle})`,
+}));
 const circleStyle = computed<CSSProperties>(() => {
   const inValue = circleIn.value;
   const bright = brew.value;
   const rotation = final.value ? 100 : p.value * 120;
   return {
-    left: `${compact.value ? 50 : 63}%`,
-    top: `${compact.value ? 48 : 50}%`,
+    left: '50%',
+    top: `${compact.value ? 50 : 53}%`,
     opacity: (inValue * 0.92).toFixed(4),
     transform: `translate(-50%, -50%) rotate(${rotation.toFixed(2)}deg) scale(${(0.84 + 0.16 * inValue).toFixed(4)})`,
     filter: `brightness(${(0.5 + 0.5 * bright).toFixed(3)}) saturate(${(0.8 + 0.3 * bright).toFixed(3)}) drop-shadow(0 0 ${(10 + 20 * bright).toFixed(1)}px rgba(198, 172, 106, ${(0.16 + 0.3 * bright).toFixed(3)}))`,
@@ -353,8 +347,8 @@ const circleStyle = computed<CSSProperties>(() => {
 const fxStyle = computed<CSSProperties>(() => {
   const g = geom.value;
   if (g.guiW <= 0) return { opacity: 0 };
-  const cx = g.guiLeft + 0.23 * g.guiW;
-  const cy = g.guiTop + 0.11 * g.guiH;
+  const cx = g.guiLeft + 0.5 * g.guiW;
+  const cy = g.guiTop + 0.43 * g.guiH;
   const size = compact.value ? 130 : 180;
   return {
     left: `${(cx - size / 2).toFixed(1)}px`,
@@ -372,8 +366,8 @@ const revealWrapStyle = computed<CSSProperties>(() => ({
 const potionStyle = computed<CSSProperties>(() => {
   const r = reveal.value;
   return {
-    left: `${compact.value ? 50 : 63}%`,
-    top: `${compact.value ? 8 : 12}%`,
+    left: '50%',
+    top: `${compact.value ? 10 : 13}%`,
     transform: `translate(-50%, -50%) scale(${easeOutBack(r).toFixed(4)})`,
     filter: `brightness(${(0.35 + 0.65 * r).toFixed(3)})`,
     pointerEvents: r > 0.5 ? 'auto' : 'none',
@@ -446,40 +440,43 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 .altar-scene__circle-hotspot {
   position: absolute;
   z-index: 1;
-  width: min(340px, 44vw);
+  width: min(500px, 58vw);
   aspect-ratio: 1;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: transparent;
 }
-.altar-scene__circle-img {
+.altar-scene__circle-art {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  image-rendering: pixelated;
-  mix-blend-mode: screen;
-  -webkit-user-drag: none;
+  background: linear-gradient(135deg, #ffe49b, #d6a818 70%);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  mask-mode: luminance;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  -webkit-mask-mode: luminance;
+  filter: drop-shadow(0 0 12px rgba(223, 185, 104, .7));
 }
 
 /* ---------- CauldronGUI panel ---------- */
 .gui {
   position: absolute;
   z-index: 3;
-  aspect-ratio: 350 / 284;
+  aspect-ratio: 1;
   filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .55));
   will-change: transform, opacity;
 }
-.gui__crop { position: absolute; inset: 0; overflow: hidden; }
 .gui__img {
-  position: absolute;
-  top: 0;
-  left: -40.86%;
   display: block;
-  width: 181.72%;
+  width: 100%;
+  max-width: none;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
   image-rendering: pixelated;
   -webkit-user-drag: none;
 }
@@ -537,16 +534,10 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   object-fit: contain;
   image-rendering: pixelated;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 0 6px rgba(223, 185, 104, .4));
+  filter: drop-shadow(0 0 5px rgba(223, 185, 104, .34));
 }
 .item__label {
-  max-width: 132px;
-  font-size: .62rem;
-  font-weight: 700;
-  line-height: 1.25;
-  color: rgba(252, 249, 242, .88);
-  text-align: center;
-  text-shadow: 0 2px 4px #061718, 0 0 5px #061718;
+  display: none;
   will-change: opacity;
 }
 .item:hover,
@@ -651,7 +642,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 /* ---------- mobile: panel centers, shorter flights ---------- */
 @media (max-width: 820px) {
   .altar-scene__circle-hotspot {
-    width: min(240px, 46vw);
+    width: min(290px, 70vw);
   }
   .gui__confirm {
     width: 26px;

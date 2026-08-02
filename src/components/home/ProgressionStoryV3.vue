@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import FormulaBookScene from './progression3/FormulaBookScene.vue';
 import AltarBrewScene from './progression3/AltarBrewScene.vue';
@@ -219,6 +219,7 @@ const visible = ref(false);
 const reducedMotion = useReducedMotion();
 const activeHotspotId = ref<string | null>(null);
 const inspectorAnchor = ref<HTMLElement | null>(null);
+const inspectorScene = ref<'book' | 'altar' | 'drink' | null>(null);
 let observer: IntersectionObserver | null = null;
 let frame = 0;
 
@@ -264,17 +265,43 @@ const bookWindowStyle = computed(() => windowStyle(bookOpacity.value));
 const altarWindowStyle = computed(() => windowStyle(altarOpacity.value));
 const drinkWindowStyle = computed(() => windowStyle(drinkOpacity.value));
 
+// The inspector is teleported, so it must never outlive the scene that owns
+// its anchor. Clearing on a chapter/window transition fixes the stray cards
+// that previously remained on-screen after the book or altar had faded away.
+const bookDetailIds = new Set(['formula-fool', 'lavos-squid-blood', 'stellar-aqua-crystal', 'gold-mint-leaves']);
+const altarDetailIds = new Set(['brew-recipe-slot', 'brew-main-slots', 'brew-supp-slots', 'brew-circle', 'sequence-potion']);
+
+watch(activeChapterIndex, () => clearDetail());
+watch([bookOpacity, altarOpacity, drinkOpacity], ([book, altar, drink]) => {
+  const ownerHasFaded =
+    (inspectorScene.value === 'book' && book <= 0.5) ||
+    (inspectorScene.value === 'altar' && altar <= 0.5) ||
+    (inspectorScene.value === 'drink' && drink <= 0.5);
+  if (ownerHasFaded) clearDetail();
+});
+
 function showDetail(id: string, anchor: HTMLElement) {
   if (!details[id]) return;
   activeHotspotId.value = id;
   inspectorAnchor.value = anchor;
+  inspectorScene.value = bookDetailIds.has(id) ? 'book' : altarDetailIds.has(id) ? 'altar' : 'drink';
 }
 function clearDetail() {
   activeHotspotId.value = null;
   inspectorAnchor.value = null;
+  inspectorScene.value = null;
 }
 function onStageClick(event: MouseEvent) {
   if (!(event.target instanceof HTMLElement) || !event.target.closest('button')) clearDetail();
+}
+function clearExpiredInspector(nextProgress: number) {
+  // A pointer can remain at the same screen coordinate while the sticky scene
+  // scrolls underneath it. Do not let a teleported tooltip remain attached to
+  // a now-hidden control in that case.
+  if (
+    (inspectorScene.value === 'book' && nextProgress >= 0.27) ||
+    (inspectorScene.value === 'altar' && nextProgress >= 0.65)
+  ) clearDetail();
 }
 
 function update() {
@@ -284,7 +311,9 @@ function update() {
     const rect = sectionRef.value?.getBoundingClientRect();
     if (!rect) return;
     const range = Math.max(1, rect.height - innerHeight);
-    progress.value = clamp01(-rect.top / range);
+    const nextProgress = clamp01(-rect.top / range);
+    progress.value = nextProgress;
+    clearExpiredInspector(nextProgress);
   });
 }
 function goToChapter(index: number) {
@@ -574,7 +603,9 @@ onUnmounted(() => {
     display: none;
   }
   .progression-v3__layout {
-    inset: 122px 9px 62px;
+    /* The two-line mobile heading finishes around 142px. Start the chapter
+       copy below it so the stage never clips the kicker into the title. */
+    inset: 154px 9px 62px;
   }
 }
 
