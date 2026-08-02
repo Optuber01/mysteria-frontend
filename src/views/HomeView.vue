@@ -39,7 +39,7 @@ import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
-import ProgressionStory from '@/components/home/ProgressionStoryV2.vue';
+import ProgressionStory from '@/components/home/ProgressionStoryV3.vue';
 import type { NewsArticle } from '@/types/news';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
 
