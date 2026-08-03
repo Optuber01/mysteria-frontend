@@ -55,6 +55,7 @@ type FormulaImages = {
   stellarAquaCrystal: HTMLImageElement;
   goldMintLeaves: HTMLImageElement;
   foolRecipe: HTMLImageElement;
+  foolPathwaySymbol: HTMLImageElement;
 };
 
 type TexturePainter = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -91,6 +92,28 @@ function makeRegionTexture(
   texture.magFilter = isIllustratedPage ? THREE.LinearFilter : THREE.NearestFilter;
   texture.minFilter = isIllustratedPage ? THREE.LinearMipmapLinearFilter : THREE.NearestFilter;
   texture.generateMipmaps = isIllustratedPage;
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  ownedTextures.push(texture);
+  return texture;
+}
+
+function makePixelSymbolTexture(image: HTMLImageElement): THREE.Texture {
+  const pixelCanvas = document.createElement('canvas');
+  pixelCanvas.width = 32;
+  pixelCanvas.height = 32;
+  const context = pixelCanvas.getContext('2d');
+  if (!context) throw new Error('A 2D canvas is required to prepare the Fool Pathway emblem.');
+
+  context.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
+  context.imageSmoothingEnabled = false;
+  context.drawImage(image, 1, 1, 30, 30);
+
+  const texture = new THREE.CanvasTexture(pixelCanvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   ownedTextures.push(texture);
@@ -358,6 +381,25 @@ function buildBook(formulaImages: FormulaImages) {
   const seam = new THREE.Mesh(geometry(new THREE.BoxGeometry(0.42, 10.15, 0.76)), seamMaterial);
   seam.position.z = 0.06;
   bookRoot.add(seam);
+
+  // The entrance presents the book edge-on, making the seam's -X face the visible
+  // exterior spine. Keeping the emblem in bookRoot's local space makes it rotate
+  // and recede with the physical spine as the cover opens.
+  const spineEmblemMaterial = basicMaterial({
+    map: makePixelSymbolTexture(formulaImages.foolPathwaySymbol),
+    transparent: true,
+    alphaTest: 0.08,
+    depthTest: true,
+    depthWrite: true,
+    side: THREE.FrontSide,
+  });
+  const spineEmblem = new THREE.Mesh(
+    geometry(new THREE.PlaneGeometry(0.58, 0.58)),
+    spineEmblemMaterial,
+  );
+  spineEmblem.position.set(-0.216, 2.6, 0.06);
+  spineEmblem.rotation.y = -Math.PI / 2;
+  bookRoot.add(spineEmblem);
 }
 
 function updatePose() {
@@ -422,12 +464,13 @@ onMounted(async () => {
   camera.lookAt(0, 0, 0);
 
   const textureLoader = new THREE.TextureLoader();
-  const [texture, lavosImage, stellarImage, mintImage, recipeImage] = await Promise.all([
+  const [texture, lavosImage, stellarImage, mintImage, recipeImage, foolPathwaySymbolImage] = await Promise.all([
     textureLoader.loadAsync(bookAtlasUrl),
     loadImage(lavosSquidBlood),
     loadImage(stellarAquaCrystal),
     loadImage(goldMintLeaves),
     loadImage(foolRecipe),
+    loadImage('/pathways/native/fool.png'),
     document.fonts?.ready ?? Promise.resolve(),
   ]);
   if (disposed) {
@@ -444,6 +487,7 @@ onMounted(async () => {
     stellarAquaCrystal: stellarImage,
     goldMintLeaves: mintImage,
     foolRecipe: recipeImage,
+    foolPathwaySymbol: foolPathwaySymbolImage,
   });
   updatePose();
 
