@@ -57,6 +57,7 @@
           @pointerup="endDrag"
           @pointercancel="endDrag"
           @pointerleave="leaveOrbit"
+          @contextmenu.prevent
         >
           <template v-for="(entry, index) in activeCatalog" :key="entry.id">
           <button
@@ -109,6 +110,16 @@
             <span class="entry-kind">{{ activeEntry.sequenceCount }} sequences</span>
             <small>{{ activeEntry.tagline }}</small>
           </article>
+
+          <button
+            v-if="hasActiveEntry"
+            type="button"
+            class="open-dossier"
+            :class="{ 'is-visible': interactionReady }"
+            @click="selectActiveAndOpen($event)"
+          >
+            Inspect {{ activeEntry.name }} <span aria-hidden="true">↗</span>
+          </button>
 
         </div>
       </div>
@@ -451,7 +462,7 @@ function clearTokenPreview() {
 }
 
 function startDrag(event: PointerEvent) {
-  if (!hasActiveEntry.value || event.button !== 0 || (event.target as HTMLElement).closest('button, a, [role="button"]')) return;
+  if (!hasActiveEntry.value || ![0, 2].includes(event.button) || (event.target as HTMLElement).closest('button, a, [role="button"]')) return;
   dragging.value = true;
   pointerOffset.value = 0;
   lastPointerX = event.clientX;
@@ -464,7 +475,9 @@ function movePointer(event: PointerEvent) {
   if (dragging.value) {
     const now = performance.now();
     const movement = event.clientX - lastPointerX;
-    const delta = -movement / 92;
+    // Move the orbit with the pointer so the symbol field feels pulled,
+    // rather than pushed away from the drag direction.
+    const delta = movement / 92;
     rotation.value += delta;
     targetRotation.value = rotation.value;
     velocity.value = delta / Math.max(8, now - lastPointerTime) * 16;
@@ -684,14 +697,14 @@ onUnmounted(() => {
 .is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }
 .is-low-power .motif-stage::before { box-shadow: none; }
 
-.orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(300px, 25vw); padding: 0; border: 0; color: inherit; background: transparent; transform: translate(-50%, -50%); text-align: center; cursor: pointer; }
+.orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(540px, 44vw); padding: 0; border: 0; color: inherit; background: transparent; transform: translate(-50%, -50%); text-align: center; cursor: pointer; }
 .orbit-story:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 10px; border-radius: 16px; box-shadow: 0 0 0 5px #08151a; }
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
-.orbit-story h3 { margin: 0; font: 620 clamp(2.3rem, 3.8vw, 4.2rem)/1.04 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.012em; text-wrap: balance; }
-.entry-kind { display: block; margin-top: 12px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1.35 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
-.orbit-story > small { display: block; max-width: 270px; margin: 16px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; line-height: 1.65; letter-spacing: .005em; }
+.orbit-story h3 { margin: 0; overflow: hidden; font: 620 clamp(2.25rem, 3.5vw, 4rem)/1 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.018em; text-overflow: ellipsis; white-space: nowrap; }
+.entry-kind { display: block; margin-top: 9px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+.orbit-story > small { display: block; overflow: hidden; max-width: 470px; margin: 12px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; line-height: 1.35; letter-spacing: .005em; text-overflow: ellipsis; white-space: nowrap; }
 
 .assembly-readout { position: absolute; z-index: 80; left: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); width: min(300px, 25vw); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; }
 .assembly-readout > i { height: 1px; overflow: hidden; background: color-mix(in srgb, var(--path-ink) 15%, transparent); }
@@ -703,7 +716,7 @@ onUnmounted(() => {
 .orbit-controls button:hover, .mobile-pagination button:hover { border-color: var(--path-accent); color: #08151a; background: var(--path-accent); }
 .orbit-controls span, .mobile-pagination span { font: 600 .58rem/1 "IBM Plex Mono", monospace; text-align: center; }
 .orbit-controls span b, .mobile-pagination span b { color: var(--path-accent); font-size: .85rem; }
-.open-dossier { position: absolute; z-index: 86; right: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); min-height: 48px; padding: 0 19px; border: 1px solid color-mix(in srgb, var(--path-ink) 22%, transparent); border-radius: 999px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 76%, transparent); cursor: pointer; opacity: 0; transform: translateY(15px); pointer-events: none; transition: opacity .55s, transform .55s cubic-bezier(.22,1,.36,1), background .25s; font-weight: 750; }
+.open-dossier { position: absolute; z-index: 86; right: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); min-height: 48px; padding: 0 19px; border: 1px solid color-mix(in srgb, var(--path-ink) 22%, transparent); border-radius: 999px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 76%, transparent); cursor: pointer; opacity: 0; transform: translateY(15px); pointer-events: none; transition: opacity .55s, transform .55s cubic-bezier(.22,1,.36,1), background .25s; font: 750 .72rem/1 "IBM Plex Sans Condensed", sans-serif; letter-spacing: .01em; white-space: nowrap; }
 .open-dossier:hover { color: #08151a; background: var(--path-accent); }
 .interaction-hint { position: absolute; z-index: 80; right: clamp(24px, 5vw, 78px); bottom: clamp(101px, 13vh, 144px); margin: 0; color: color-mix(in srgb, var(--path-ink) 70%, transparent); font: 550 .5rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; opacity: 0; transform: translateY(12px); transition: opacity .55s, transform .55s; }
 .scroll-cue { position: absolute; z-index: 82; left: 50%; bottom: 22px; display: grid; justify-items: center; gap: 8px; transform: translateX(-50%); color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .48rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; transition: opacity .4s; }
