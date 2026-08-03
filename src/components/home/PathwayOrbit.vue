@@ -254,6 +254,7 @@ let lastPointerTime = 0;
 let mobileScrollTimer = 0;
 let dossierTrigger: HTMLElement | null = null;
 let previousBodyOverflow = '';
+let previousBodyPaddingRight = '';
 let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
@@ -552,6 +553,9 @@ async function openDetails(event?: Event) {
   if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
   dossierTrigger = event?.currentTarget as HTMLElement | null;
   previousBodyOverflow = document.body.style.overflow;
+  previousBodyPaddingRight = document.body.style.paddingRight;
+  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+  if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
   document.body.style.overflow = 'hidden';
   document.querySelector<HTMLElement>('#app')?.setAttribute('inert', '');
   detailsOpen.value = true;
@@ -563,6 +567,7 @@ async function closeDetails(restoreFocus = true) {
   if (!detailsOpen.value) return;
   detailsOpen.value = false;
   document.body.style.overflow = previousBodyOverflow;
+  document.body.style.paddingRight = previousBodyPaddingRight;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
   if (orbitStateBeforeDossier) {
     rotation.value = orbitStateBeforeDossier.rotation;
@@ -644,6 +649,7 @@ onUnmounted(() => {
   window.clearTimeout(mobileScrollTimer);
   window.clearTimeout(catalogWarmTimer);
   document.body.style.overflow = previousBodyOverflow;
+  document.body.style.paddingRight = previousBodyPaddingRight;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
 });
 </script>
@@ -758,8 +764,8 @@ onUnmounted(() => {
 .mobile-experience { display: none; }
 .catalog-fallback { position: relative; z-index: 5; display: block; width: min(800px, calc(100% - 40px)); margin: 70px auto 0; }
 
-:global(.dossier-scrim) { position: fixed; z-index: 2000; inset: 0; display: grid; justify-items: end; padding: clamp(12px, 3vw, 38px); background: rgba(3, 11, 13, .7); backdrop-filter: blur(12px); }
-:global(.pathway-dossier) { --path-accent: #c69b52; position: relative; width: min(490px, 100%); height: 100%; overflow: auto; padding: clamp(28px, 5vw, 58px); border: 1px solid rgba(245,240,230,.17); border-radius: 28px; color: #f5f0e6; background: #0b1c1d; box-shadow: 0 35px 100px rgba(0,0,0,.45); outline: 0; }
+:global(.dossier-scrim) { position: fixed; z-index: 2000; inset: 0; overflow: hidden; isolation: isolate; background: rgba(3, 11, 13, .7); backdrop-filter: blur(12px); }
+:global(.pathway-dossier) { --path-accent: #c69b52; position: fixed; top: clamp(12px, 3vw, 38px); right: clamp(12px, 3vw, 38px); bottom: clamp(12px, 3vw, 38px); width: min(490px, calc(100vw - 24px)); box-sizing: border-box; overflow: auto; overscroll-behavior: contain; padding: clamp(28px, 5vw, 58px); border: 1px solid rgba(245,240,230,.17); border-radius: 28px; color: #f5f0e6; background: #0b1c1d; box-shadow: 0 35px 100px rgba(0,0,0,.45); outline: 0; will-change: transform; }
 :global(.dossier-close) { position: absolute; z-index: 3; top: 18px; right: 18px; width: 48px; height: 48px; border: 1px solid rgba(245,240,230,.2); border-radius: 50%; color: #f5f0e6; background: transparent; cursor: pointer; font-size: 1.5rem; }
 :global(.dossier-symbol) { position: relative; width: 180px; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 40px; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--path-accent) 22%, transparent), transparent 68%); }
 :global(.dossier-symbol img) { width: 78%; height: 78%; object-fit: contain; }
@@ -820,8 +826,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px soli
   .catalog-tabs button { flex: 1; min-width: 0; }
   .mobile-card { min-height: 540px; }
   .catalog-fallback ul { grid-template-columns: 1fr; }
-  :global(.dossier-scrim) { align-items: end; padding: 8px; }
-  :global(.pathway-dossier) { width: 100%; height: min(88svh, 760px); border-radius: 24px; }
+  :global(.pathway-dossier) { top: auto; right: 8px; bottom: 8px; width: calc(100% - 16px); height: min(88svh, 760px); border-radius: 24px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
