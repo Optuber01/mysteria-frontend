@@ -55,6 +55,14 @@
               @clear-inspect="clearDetail"
             />
           </div>
+          <div class="scene-window" :style="buildWindowStyle" :aria-hidden="buildOpacity < 0.5">
+            <RitualAltarScene
+              :progress="buildLocal"
+              @inspect="onAltarInspect"
+              @toggle-inspect="onAltarInspect"
+              @clear="clearDetail"
+            />
+          </div>
           <div
             class="scene-window"
             :style="drinkWindowStyle"
@@ -66,6 +74,9 @@
               @inspect="showDetail"
               @clear-inspect="clearDetail"
             />
+          </div>
+          <div class="scene-window" :style="digestWindowStyle" :aria-hidden="digestOpacity < 0.5">
+            <DigestionScene :progress="digestLocal" :active="digestOpacity > 0.5" @inspect="showDetail" @clear-inspect="clearDetail" />
           </div>
 
           <SceneInspectorPopover
@@ -115,6 +126,8 @@ import { useReducedMotion } from '@/composables/useReducedMotion';
 import FormulaBookScene from './progression3/FormulaBookScene.vue';
 import AltarBrewScene from './progression3/AltarBrewScene.vue';
 import DrinkAwakenScene from './progression3/DrinkAwakenScene.vue';
+import DigestionScene from './progression3/DigestionScene.vue';
+import RitualAltarScene from './RitualAltarScene.vue';
 import SceneInspectorPopover from './SceneInspectorPopover.vue';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 
@@ -122,39 +135,46 @@ type Chapter = { id: string; short: string; kicker: string; title: string; copy:
 
 const chapters: Chapter[] = [
   {
-    id: 'discover', short: 'Discover', start: 0, end: 0.38,
+    id: 'discover', short: 'Discover', start: 0, end: 0.19,
     kicker: '01 · Recover the knowledge',
     title: 'Discover the formula.',
     copy: 'Complete formulas surface in Mysterria’s loot — or recover their pages and assemble the set. This one names a Sequence 9 of the Fool Pathway.',
     hint: 'Hover the book’s entries to study each ingredient.',
   },
   {
-    id: 'infuse', short: 'Infuse', start: 0.38, end: 0.54,
-    kicker: '02 · Feed the altar',
-    title: 'Every item finds its place.',
-    copy: 'The written formula leaves the page — main ingredients to the left, supplementary to the right, the formula at the heart, in written order.',
-    hint: 'Follow each ingredient as it lands.',
+    id: 'gather', short: 'Gather', start: 0.19, end: 0.34,
+    kicker: '02 · Bring the formula to life',
+    title: 'Gather what the page asks for.',
+    copy: 'Hunt the Lavos Squid, find Stellar Aqua in world loot, and harvest Gold Mint. The entries leave the book for the workstation in their written order.',
+    hint: 'Inspect an ingredient where it appears.',
   },
   {
-    id: 'brew', short: 'Brew', start: 0.54, end: 0.68,
-    kicker: '03 · The working',
-    title: 'Watch it become a potion.',
-    copy: 'Under the altar’s circle the mixture turns. A clean brew yields the Sequence 9 potion of the Seer — no challenge failed, nothing wasted.',
-    hint: 'The circle brightens as the brew completes.',
+    id: 'build', short: 'Build', start: 0.34, end: 0.49,
+    kicker: '03 · Build the ritual altar',
+    title: 'Make the working space real.',
+    copy: 'Build the normal altar: a 3×3 stone-brick base, chiseled corners, a central enchanting table, and candle clusters. Rotate the model or place its guide blocks.',
+    hint: 'Drag to rotate · select a guide block to build it.',
   },
   {
-    id: 'drink', short: 'Drink', start: 0.68, end: 0.86,
-    kicker: '04 · Commit to the Pathway',
-    title: 'Drink. Maintain control.',
-    copy: 'Drinking commits you to the Fool Pathway and starts the awakening. The first Sequence 9 potion asks for no ritual — only nerve.',
-    hint: 'Empty it to the last drop.',
+    id: 'brew', short: 'Brew', start: 0.49, end: 0.66,
+    kicker: '04 · Brew the potion',
+    title: 'Load the real brewing interface.',
+    copy: 'Place the formula at the centre, main ingredients on the left, and supplementary ingredients on the right. The completed cauldron yields the Seer potion.',
+    hint: 'Follow the item flight into each slot.',
   },
   {
-    id: 'awaken', short: 'Awaken', start: 0.86, end: 1,
-    kicker: '05 · Awaken',
-    title: 'Become a Seer.',
-    copy: 'Sequence 9 of the Fool Pathway awakens: Divination and Spiritualism join your toolkit. Digest, and Sequence 8 · Clown waits beyond.',
-    hint: 'Inspect your first abilities.',
+    id: 'awaken', short: 'Awaken', start: 0.66, end: 0.84,
+    kicker: '05 · Drink and keep control',
+    title: 'Survive the awakening.',
+    copy: 'Drinking begins the change. Stay in control as the potion takes hold, then awaken your first Seer abilities — Divination and Spiritualism.',
+    hint: 'The control check resolves inside the awakening.',
+  },
+  {
+    id: 'digest', short: 'Digest', start: 0.84, end: 1,
+    kicker: '06 · Live the current Sequence',
+    title: 'Digest through normal play.',
+    copy: 'Discover the current acting method and make it part of the world: bounties, exploration, dungeons, events, Cosmos Incursions, and Acting Bottles where applicable.',
+    hint: 'Prepare the next formula while this one digests.',
   },
 ];
 
@@ -174,6 +194,18 @@ const details: Record<string, { label: string; detail: string }> = {
   'gold-mint-leaves': {
     label: 'Gold Mint Leaves',
     detail: 'Supplementary ingredient · harvested from a minable Gold Mint resource node.',
+  },
+  'altar-materials': {
+    label: 'Normal altar base',
+    detail: 'A 3×3 stone-brick base with chiseled stone-brick corners anchors the normal ritual altar.',
+  },
+  'altar-blueprint': {
+    label: 'Candle clusters',
+    detail: 'Candle clusters complete the normal altar’s ritual perimeter. Use the guide blocks to inspect the build.',
+  },
+  'altar-core': {
+    label: 'Enchanting-table core',
+    detail: 'The central enchanting table is the altar’s functional core.',
   },
   'brew-recipe-slot': {
     label: 'Formula slot',
@@ -211,6 +243,16 @@ const details: Record<string, { label: string; detail: string }> = {
     label: 'Sequence 8 · Clown',
     detail: 'Digest the potion, complete the advancement ritual, and Paper Dagger & Body Control join the toolkit.',
   },
+  'control-challenge': {
+    label: 'Control check',
+    detail: 'Control is part of becoming a Beyonder, not a separate chapter. The first Sequence 9 drink needs nerve; poor control can add Madness.',
+  },
+  'act-sequence': { label: 'Act the current Sequence', detail: 'Discover the acting method for your current Sequence and perform it through normal play.' },
+  'take-bounty': { label: 'Complete bounties', detail: 'Bounties are one of the normal activities that can advance potion digestion.' },
+  'passive-play': { label: 'Explore and gather', detail: 'Exploration and gathering keep the acting loop rooted in the world rather than a menu.' },
+  'dungeons': { label: 'Clear dungeons', detail: 'Dungeon runs are part of the ordinary gameplay loop available while a potion digests.' },
+  'incursions': { label: 'World events & Cosmos Incursions', detail: 'World events and Cosmos Incursions offer another way to live out a Sequence through play.' },
+  'prepare-next': { label: 'Prepare the next Sequence', detail: 'While the current potion digests, collect the next formula, ingredients, and ritual requirements.' },
 };
 
 const sectionRef = ref<HTMLElement | null>(null);
@@ -221,7 +263,7 @@ const visible = ref(false);
 const reducedMotion = useReducedMotion();
 const activeHotspotId = ref<string | null>(null);
 const inspectorAnchor = ref<HTMLElement | null>(null);
-const inspectorScene = ref<'book' | 'altar' | 'drink' | null>(null);
+const inspectorScene = ref<'book' | 'altar' | 'drink' | 'digest' | 'build' | null>(null);
 let observer: IntersectionObserver | null = null;
 let frame = 0;
 
@@ -248,13 +290,17 @@ function fadeWindow(fadeInStart: number, fadeOutStart: number, fadeOutEnd: numbe
   return Math.min(fadeIn, fadeOut);
 }
 
-const bookLocal = computed(() => windowProgress(0, 0.28));
-const altarLocal = computed(() => windowProgress(0.38, 0.68));
-const drinkLocal = computed(() => windowProgress(0.68, 1));
+const bookLocal = computed(() => windowProgress(0, 0.34));
+const buildLocal = computed(() => windowProgress(0.34, 0.52));
+const altarLocal = computed(() => windowProgress(0.48, 0.68));
+const drinkLocal = computed(() => windowProgress(0.66, 0.86));
+const digestLocal = computed(() => windowProgress(0.84, 1));
 
-const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.42, 0.46)));
-const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.39, 0.68, 0.71, 0.43)));
-const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.66, 2, 2, 0.69)));
+const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.31, 0.36)));
+const buildOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.33, 0.49, 0.53, 0.37)));
+const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.48, 0.66, 0.70, 0.52)));
+const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.65, 0.84, 0.87, 0.69)));
+const digestOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.83, 2, 2, 0.87)));
 
 function windowStyle(opacity: number) {
   return {
@@ -264,8 +310,10 @@ function windowStyle(opacity: number) {
   } as const;
 }
 const bookWindowStyle = computed(() => windowStyle(bookOpacity.value));
+const buildWindowStyle = computed(() => windowStyle(buildOpacity.value));
 const altarWindowStyle = computed(() => windowStyle(altarOpacity.value));
 const drinkWindowStyle = computed(() => windowStyle(drinkOpacity.value));
+const digestWindowStyle = computed(() => windowStyle(digestOpacity.value));
 
 // The inspector is teleported, so it must never outlive the scene that owns
 // its anchor. Clearing on a chapter/window transition fixes the stray cards
@@ -274,19 +322,23 @@ const bookDetailIds = new Set(['formula-fool', 'lavos-squid-blood', 'stellar-aqu
 const altarDetailIds = new Set(['brew-recipe-slot', 'brew-main-slots', 'brew-supp-slots', 'brew-circle', 'sequence-potion']);
 
 watch(activeChapterIndex, () => clearDetail());
-watch([bookOpacity, altarOpacity, drinkOpacity], ([book, altar, drink]) => {
+watch([bookOpacity, buildOpacity, altarOpacity, drinkOpacity, digestOpacity], ([book, build, altar, drink, digest]) => {
   const ownerHasFaded =
     (inspectorScene.value === 'book' && book <= 0.5) ||
+    (inspectorScene.value === 'build' && build <= 0.5) ||
     (inspectorScene.value === 'altar' && altar <= 0.5) ||
-    (inspectorScene.value === 'drink' && drink <= 0.5);
+    (inspectorScene.value === 'drink' && drink <= 0.5) ||
+    (inspectorScene.value === 'digest' && digest <= 0.5);
   if (ownerHasFaded) clearDetail();
 });
+
+function onAltarInspect(payload: { id: string; anchor: HTMLElement }) { showDetail(payload.id, payload.anchor); }
 
 function showDetail(id: string, anchor: HTMLElement) {
   if (!details[id]) return;
   activeHotspotId.value = id;
   inspectorAnchor.value = anchor;
-  inspectorScene.value = bookDetailIds.has(id) ? 'book' : altarDetailIds.has(id) ? 'altar' : 'drink';
+  inspectorScene.value = bookDetailIds.has(id) ? 'book' : altarDetailIds.has(id) ? 'altar' : id.startsWith('altar-') ? 'build' : id.startsWith('ability') || id.startsWith('drink') || id === 'control-challenge' ? 'drink' : 'digest';
 }
 function clearDetail() {
   activeHotspotId.value = null;
@@ -302,7 +354,9 @@ function clearExpiredInspector(nextProgress: number) {
   // a now-hidden control in that case.
   if (
     (inspectorScene.value === 'book' && nextProgress >= 0.46) ||
-    (inspectorScene.value === 'altar' && nextProgress >= 0.71)
+    (inspectorScene.value === 'build' && nextProgress >= 0.53) ||
+    (inspectorScene.value === 'altar' && nextProgress >= 0.70) ||
+    (inspectorScene.value === 'drink' && nextProgress >= 0.87)
   ) clearDetail();
 }
 
@@ -559,7 +613,7 @@ onUnmounted(() => {
   bottom: 16px;
   left: clamp(18px, 4vw, 68px);
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-top: 1px solid rgba(252, 249, 242, 0.13);
 }
 .progression-nav button {

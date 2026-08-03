@@ -39,6 +39,14 @@
       <SceneParticles mode="burst" :active="burstActive" :intensity="1" />
     </div>
 
+    <button type="button" class="control-check hotspot" :style="controlStyle" aria-label="Control check during awakening"
+      @mouseenter="inspect('control-challenge', $event)" @mouseleave="emit('clear-inspect')"
+      @focus="inspect('control-challenge', $event)" @blur="emit('clear-inspect')" @click="inspect('control-challenge', $event)">
+      <small>CONTROL CHECK</small>
+      <span aria-hidden="true"><i v-for="index in 5" :key="index" :class="{ active: index <= controlScore }" /></span>
+      <strong>{{ controlScore >= 5 ? 'Stable — awakening' : 'Hold the pattern' }}</strong>
+    </button>
+
     <!-- awakened pathway panel -->
     <section class="panel" :style="panelStyle" role="group" aria-label="Awakened Seer pathway">
       <p class="panel__kicker" :style="itemStyle(kickerReveal)">Pathway Awakened</p>
@@ -224,6 +232,16 @@ const flashStyle = computed<CSSProperties>(() => {
 });
 const burstActive = computed(() => props.active && !final.value && p.value >= 0.6 && p.value < 0.74);
 
+/* The stability prompt lives over the same drink-to-awaken motion; it is never
+   a detached card or a scroll stop. The pattern resolves with the transition. */
+const controlT = computed(() => final.value ? 1 : clamp01((p.value - .28) / .34));
+const controlScore = computed(() => Math.max(1, Math.min(5, 1 + Math.floor(controlT.value * 5))));
+const controlStyle = computed<CSSProperties>(() => ({
+  opacity: (controlT.value * (1 - clamp01((p.value - .73) / .11))).toFixed(3),
+  transform: `translateY(${((1 - controlT.value) * 16).toFixed(1)}px)`,
+  pointerEvents: controlT.value > .2 && p.value < .84 ? 'auto' : 'none',
+}));
+
 /* ---------------- awaken panel, 0.72 -> 1 ---------------- */
 const awaken = computed(() => (final.value ? 1 : clamp01((p.value - 0.72) / 0.16)));
 
@@ -278,6 +296,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   color: #fcf9f2;
   font-family: "IBM Plex Mono", monospace;
 }
+.control-check{position:absolute;z-index:8;top:12%;right:7%;width:190px;display:grid;gap:8px;padding:13px;border:1px solid rgba(205,104,77,.45);border-radius:13px;color:#fcf9f2;background:rgba(32,18,19,.9);text-align:left;cursor:pointer}.control-check small{color:#e8b58a;font:650 .45rem/1 "IBM Plex Mono",monospace;letter-spacing:.12em}.control-check>span{display:flex;gap:5px}.control-check>span i{width:23px;height:23px;border:1px solid rgba(252,249,242,.2);border-radius:4px}.control-check>span i.active{border-color:#dfb968;background:linear-gradient(145deg,#dfb968,#6cb293);box-shadow:0 0 12px rgba(198,155,82,.25)}.control-check strong{font:600 .66rem/1.25 "IBM Plex Mono",monospace}.control-check:hover,.control-check:focus-visible{border-color:#f0d38c;outline:none}
 
 /* shared hotspot base: 44px min touch target, gold focus ring */
 .hotspot {
