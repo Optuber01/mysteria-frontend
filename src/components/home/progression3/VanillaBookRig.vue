@@ -120,6 +120,74 @@ function makePixelSymbolTexture(image: HTMLImageElement): THREE.Texture {
   return texture;
 }
 
+const PIXEL_GLYPHS: Record<string, readonly string[]> = {
+  A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+  B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
+  C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+  K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+  P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+  S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
+};
+
+function drawPixelGlyph(
+  context: CanvasRenderingContext2D,
+  glyph: string,
+  x: number,
+  y: number,
+  pixelSize: number,
+) {
+  const rows = PIXEL_GLYPHS[glyph];
+  if (!rows) return;
+  rows.forEach((row, rowIndex) => {
+    [...row].forEach((cell, columnIndex) => {
+      if (cell === '1') context.fillRect(x + columnIndex * pixelSize, y + rowIndex * pixelSize, pixelSize, pixelSize);
+    });
+  });
+}
+
+function drawPixelLine(
+  context: CanvasRenderingContext2D,
+  label: string,
+  centerX: number,
+  y: number,
+  pixelSize: number,
+) {
+  const glyphWidth = 5 * pixelSize;
+  const gap = pixelSize;
+  const width = label.length * glyphWidth + Math.max(0, label.length - 1) * gap;
+  let x = Math.round(centerX - width / 2);
+  for (const glyph of label) {
+    if (glyph !== ' ') drawPixelGlyph(context, glyph, x, y, pixelSize);
+    x += glyphWidth + gap;
+  }
+}
+
+function makePixelLabelTexture(
+  width: number,
+  height: number,
+  painter: (context: CanvasRenderingContext2D) => void,
+): THREE.Texture {
+  const labelCanvas = document.createElement('canvas');
+  labelCanvas.width = width;
+  labelCanvas.height = height;
+  const context = labelCanvas.getContext('2d');
+  if (!context) throw new Error('A 2D canvas is required to prepare the book label.');
+  context.clearRect(0, 0, width, height);
+  painter(context);
+  const texture = new THREE.CanvasTexture(labelCanvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.magFilter = THREE.NearestFilter;
+  texture.minFilter = THREE.NearestFilter;
+  texture.generateMipmaps = false;
+  ownedTextures.push(texture);
+  return texture;
+}
+
 function drawRule(context: CanvasRenderingContext2D, y: number, width: number, dashed = false) {
   context.save();
   context.strokeStyle = 'rgba(116, 71, 42, 0.52)';
@@ -135,7 +203,7 @@ function drawRule(context: CanvasRenderingContext2D, y: number, width: number, d
 function drawHeading(context: CanvasRenderingContext2D, label: string, width: number) {
   context.save();
   context.fillStyle = '#7f211b';
-  context.font = '700 36px "IBM Plex Sans Condensed", sans-serif';
+  context.font = '800 40px "IBM Plex Sans Condensed", sans-serif';
   context.letterSpacing = '3px';
   context.fillText(label.toUpperCase(), 48, 82);
   context.restore();
@@ -175,26 +243,18 @@ function drawIngredient(
   top: number,
   width: number,
 ) {
-  const iconSize = 96;
+  const iconSize = 116;
   context.save();
-  context.fillStyle = 'rgba(255, 249, 230, 0.2)';
-  context.strokeStyle = 'rgba(118, 72, 42, 0.24)';
-  context.lineWidth = 2;
-  context.beginPath();
-  context.roundRect(38, top, width - 76, 164, 16);
-  context.fill();
-  context.stroke();
-
   context.imageSmoothingEnabled = false;
-  context.drawImage(image, 54, top + 30, iconSize, iconSize);
+  context.drawImage(image, 44, top + 22, iconSize, iconSize);
   context.imageSmoothingEnabled = true;
 
-  context.fillStyle = '#855735';
-  context.font = '700 27px "IBM Plex Mono", monospace';
-  const lastLineY = wrapText(context, name, 176, top + 55, width - 218, 34);
-  context.fillStyle = '#6e594d';
-  context.font = '500 20px "IBM Plex Mono", monospace';
-  context.fillText(role, 176, Math.max(top + 112, lastLineY + 34));
+  context.fillStyle = '#744527';
+  context.font = '800 31px "IBM Plex Mono", monospace';
+  const lastLineY = wrapText(context, name, 184, top + 53, width - 214, 38);
+  context.fillStyle = '#5f4a3d';
+  context.font = '650 23px "IBM Plex Mono", monospace';
+  context.fillText(role, 184, Math.max(top + 116, lastLineY + 38));
   context.restore();
 }
 
@@ -204,7 +264,7 @@ function paintLeftFormula(images: FormulaImages): TexturePainter {
     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
     drawHeading(context, 'Main ingredients', width);
     drawIngredient(context, images.lavosSquidBlood, 'Blood of the Lavos Squid', 'Main ingredient', 145, width);
-    drawIngredient(context, images.stellarAquaCrystal, 'Stellar Aqua Crystal', 'Main ingredient', 345, width);
+    drawIngredient(context, images.stellarAquaCrystal, 'Stellar Aqua Crystal', 'Main ingredient', 350, width);
   };
 }
 
@@ -368,6 +428,30 @@ function buildBook(formulaImages: FormulaImages) {
     back: [6, 0, 6, 10],
   });
 
+  const coverLabelMaterial = basicMaterial({
+    map: makePixelLabelTexture(384, 150, (context) => {
+      context.fillStyle = 'rgba(45, 22, 8, 0.58)';
+      drawPixelLine(context, 'RECIPE BOOK:', 194, 22, 5);
+      context.fillStyle = '#e9c66a';
+      drawPixelLine(context, 'RECIPE BOOK:', 192, 20, 5);
+      context.fillStyle = 'rgba(45, 22, 8, 0.68)';
+      drawPixelLine(context, 'SEER', 194, 87, 7);
+      context.fillStyle = '#f1d27b';
+      drawPixelLine(context, 'SEER', 192, 85, 7);
+    }),
+    transparent: true,
+    alphaTest: 0.08,
+    depthTest: true,
+    depthWrite: true,
+    side: THREE.FrontSide,
+  });
+  const coverLabel = new THREE.Mesh(
+    geometry(new THREE.PlaneGeometry(3.85, 1.5)),
+    coverLabelMaterial,
+  );
+  coverLabel.position.set(3, 0, 0.682);
+  frontCover.add(coverLabel);
+
   const seamMaterial = basicMaterial({
     map: makeRegionTexture(12, 0, 2, 10),
     color: 0xffffff,
@@ -397,9 +481,33 @@ function buildBook(formulaImages: FormulaImages) {
     geometry(new THREE.PlaneGeometry(0.58, 0.58)),
     spineEmblemMaterial,
   );
-  spineEmblem.position.set(-0.216, 2.6, 0.06);
+  spineEmblem.position.set(-0.216, 3.55, 0.06);
   spineEmblem.rotation.y = -Math.PI / 2;
   bookRoot.add(spineEmblem);
+
+  const spineLabelMaterial = basicMaterial({
+    map: makePixelLabelTexture(56, 224, (context) => {
+      const letters = ['S', 'E', 'E', 'R'];
+      letters.forEach((letter, index) => {
+        context.fillStyle = 'rgba(44, 21, 7, 0.62)';
+        drawPixelGlyph(context, letter, 16, 8 + index * 54, 5);
+        context.fillStyle = '#ebcc73';
+        drawPixelGlyph(context, letter, 14, 6 + index * 54, 5);
+      });
+    }),
+    transparent: true,
+    alphaTest: 0.08,
+    depthTest: true,
+    depthWrite: true,
+    side: THREE.FrontSide,
+  });
+  const spineLabel = new THREE.Mesh(
+    geometry(new THREE.PlaneGeometry(0.34, 1.85)),
+    spineLabelMaterial,
+  );
+  spineLabel.position.set(-0.217, 1.65, 0.06);
+  spineLabel.rotation.y = -Math.PI / 2;
+  bookRoot.add(spineLabel);
 }
 
 function updatePose() {
