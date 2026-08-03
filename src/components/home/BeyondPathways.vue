@@ -29,10 +29,10 @@
           <figure class="world-frame">
             <video
               v-if="feature.video && !reducedMotion"
-              :src="activeIndex === index ? feature.video : undefined"
+              :src="visible && activeIndex === index ? feature.video : undefined"
               :poster="feature.image"
               :title="feature.alt"
-              :autoplay="activeIndex === index"
+              :autoplay="visible && activeIndex === index"
               muted
               loop
               playsinline
@@ -334,7 +334,7 @@ const living = ref<LivingWorldSnapshot>({ towns: null, organizations: null, curr
 const reducedMotion = useReducedMotion();
 let observer: IntersectionObserver | null = null;
 let frame = 0;
-let visible = false;
+const visible = ref(false);
 
 const activeStage = computed(() => stages[activeIndex.value] ?? stages[0]);
 
@@ -390,7 +390,7 @@ function valueOrUnavailable(value: string | number | null) {
 }
 
 function update() {
-  if (!visible || !section.value || reducedMotion.value || frame) return;
+  if (!visible.value || !section.value || reducedMotion.value || frame) return;
   frame = requestAnimationFrame(() => {
     frame = 0;
     const rect = section.value?.getBoundingClientRect();
@@ -422,8 +422,8 @@ function toggleMarker(index: number) {
 
 onMounted(async () => {
   observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    if (visible) update();
+    visible.value = entry.isIntersecting;
+    if (visible.value) update();
   }, { rootMargin: '10% 0px' });
   if (section.value) observer.observe(section.value);
   addEventListener('scroll', update, { passive: true });
