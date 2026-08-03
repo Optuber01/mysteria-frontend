@@ -34,6 +34,7 @@ export type HomePathway = {
   startingSequence: string;
   startingSequenceNumber: number;
   strengths: string[];
+  tagline: string;
   playstyle: string;
   summary: string;
   wikiSummary?: string;
@@ -140,6 +141,30 @@ const lotmWikiTopics: Record<string, string> = {
   justiciar: 'Rules · Territory · Punishment · Order',
 };
 const lotmWikiBase = 'https://lordofthemysteries.fandom.com/wiki/';
+const pathwayTaglines: Record<string, string> = {
+  abyss: 'Turn vice, curses, and ruthless pressure into power.',
+  chained: 'Endure corruption and command the monster within.',
+  darkness: 'Hide the truth, shape dreams, and rule the night.',
+  death: 'Walk with spirits, death, and the boundary beyond.',
+  demoness: 'Weaponize calamity, mirrors, curses, and transformation.',
+  door: 'Open distance itself and make the impossible reachable.',
+  emperor: 'Twist rules, bargains, and reality to your advantage.',
+  error: 'Steal chances, deceive fate, and exploit every flaw.',
+  fool: 'Read the unseen, misdirect the certain, and pull the strings.',
+  fortune: 'Tilt probability until luck becomes a weapon.',
+  giant: 'Meet danger head-on with strength, steel, and twilight.',
+  hanged: 'Borrow power from souls, shadows, and forbidden knowledge.',
+  hermit: 'Seek the hidden mysteries written between the stars.',
+  justiciar: 'Set the rules, hold the line, and pass judgement.',
+  moon: 'Command blood, beasts, and the craft of recovery.',
+  mother: 'Grow life, mend allies, and reshape the living world.',
+  paragon: 'Build the answer with invention, craft, and precision.',
+  priest: 'Lead the charge with fire, strategy, and provocation.',
+  sun: 'Burn away corruption and stand as a source of light.',
+  tower: 'Learn faster, see deeper, and turn knowledge into advantage.',
+  tyrant: 'Call the sea, storm, and lightning to your command.',
+  visionary: 'Enter the mind, shape dreams, and imagine reality anew.',
+};
 const titleCase = (id: string) => id
   .replace(/[-_]+/g, ' ')
   .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -163,6 +188,7 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
     startingSequence: `Sequence ${startingNumber} · ${startingName}`,
     startingSequenceNumber: startingNumber,
     strengths,
+    tagline: pathwayTaglines[entry.id] ?? `Discover the ${pathwayNames[entry.id] ?? titleCase(entry.id)} Pathway.`,
     playstyle: strengths.slice(0, 2).join(' · '),
     summary: `${entry.abilityCount} documented abilities across ${entry.sequenceCount} Sequences in Mysterria.`,
     wikiSummary: lotmWikiTopics[entry.id],
