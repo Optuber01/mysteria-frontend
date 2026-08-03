@@ -1,385 +1,84 @@
 <template>
-  <section
-    id="join"
-    ref="section"
-    class="join-story"
-    :class="`join-story--${activeStep.id}`"
-    :style="joinStyle"
-    aria-labelledby="join-title"
-  >
-    <div class="join-sticky">
-      <div class="join-destination" aria-hidden="true">
-        <img :src="townsImage" alt="" width="1280" height="720" loading="lazy" decoding="async">
-        <i />
-      </div>
+  <section id="join" class="join-threshold" aria-labelledby="join-title">
+    <img class="join-threshold__image" :src="portalImage" alt="" width="1228" height="528" decoding="async">
+    <i class="join-threshold__veil" aria-hidden="true" />
+    <i class="join-threshold__grain" aria-hidden="true" />
+    <div class="join-threshold__content">
+      <p class="join-kicker">Enter Mysterria</p>
+      <h2 id="join-title">The portal is open.</h2>
+      <p class="join-intro">Java Edition, no client mods. Connect, choose Mysteries in the lobby, and the first Pathway is yours to earn.</p>
+      <Transition name="orbit-arrival">
+        <aside v-if="selectedPathway" :key="selectedPathway.id" class="orbit-arrival" :style="pathwayStyle" :aria-label="`${selectedPathway.name} Pathway carries forward to the portal`">
+          <svg class="orbit-arrival__line" viewBox="0 0 570 260" aria-hidden="true"><path d="M26 218C108 216 118 126 214 137S316 213 386 147 436 46 540 44" /><circle cx="26" cy="218" r="4" /><circle cx="214" cy="137" r="3" /><circle cx="386" cy="147" r="4" /></svg>
+          <span class="orbit-arrival__seal"><img :src="selectedPathway.image" alt="" width="72" height="72" decoding="async"></span>
+          <p><small>Orbit carried forward</small><strong>{{ selectedPathway.name }}</strong></p>
+        </aside>
+      </Transition>
 
-      <div class="stone-gate" aria-hidden="true">
-        <span class="gate-lintel"><i v-for="index in 9" :key="index" /></span>
-        <span class="gate-pillar gate-pillar--left"><i v-for="index in 7" :key="index" /></span>
-        <span class="gate-pillar gate-pillar--right"><i v-for="index in 7" :key="index" /></span>
-        <span class="gate-door gate-door--left"><i /></span>
-        <span class="gate-door gate-door--right"><i /></span>
-      </div>
-
-      <header class="join-heading">
-        <p>Enter Mysterria</p>
-        <h2 id="join-title">Your first step is simple.</h2>
-      </header>
-
-      <article :key="activeStep.id" class="join-copy">
-        <span>{{ String(activeIndex + 1).padStart(2, '0') }} / 05</span>
-        <p>{{ activeStep.verb }}</p>
-        <h3>{{ activeStep.title }}</h3>
-        <p>{{ activeStep.copy }}</p>
-      </article>
-
-      <div class="connection-panel" aria-label="Connect to Mysterria">
-        <div class="edition-switch" aria-label="Choose Minecraft edition">
-          <button
-            v-for="edition in editions"
-            :key="edition"
-            type="button"
-            :class="{ 'is-active': platform === edition }"
-            :aria-pressed="platform === edition"
-            @click="platform = edition"
-          >
-            <span aria-hidden="true">{{ edition === 'Java' ? 'J' : 'B' }}</span>
-            <strong>{{ edition }}</strong>
-          </button>
-        </div>
-
-        <button class="copy-address" type="button" @click="copyAddress">
-          <span>
-            <small>{{ platform }} server address</small>
-            <strong>{{ MYSTERRIA_ADDRESS }}</strong>
-          </span>
-          <b>{{ copyLabel }}</b>
-        </button>
-
-        <p class="resource-note">
-          <i aria-hidden="true">✓</i>
-          Accept the server resource pack when Minecraft asks.
-        </p>
-
-        <nav class="join-links" aria-label="Joining help">
-          <RouterLink to="/guide">Beginner guide <span aria-hidden="true">↗</span></RouterLink>
-          <a href="https://discord.com/invite/jc7GSxBWgb" target="_blank" rel="noreferrer">Community <span aria-hidden="true">↗</span></a>
-        </nav>
-        <p class="copy-feedback" aria-live="polite">{{ copyFeedback }}</p>
-      </div>
-
-      <nav class="join-steps" aria-label="Steps to join Mysterria">
-        <button
-          v-for="(step, index) in steps"
-          :key="step.id"
-          type="button"
-          :class="{ 'is-active': activeIndex === index, 'is-complete': activeIndex > index }"
-          :aria-current="activeIndex === index ? 'step' : undefined"
-          :aria-label="`Step ${index + 1}: ${step.short}`"
-          @click="goToStep(index)"
-        >
+      <ol class="join-guide" aria-label="Your first steps">
+        <li v-for="(step, index) in steps" :key="step.title">
           <span>{{ String(index + 1).padStart(2, '0') }}</span>
-          <strong>{{ step.short }}</strong>
-        </button>
-      </nav>
+          <div><strong>{{ step.title }}</strong><p>{{ step.copy }}</p></div>
+        </li>
+      </ol>
 
-      <p class="join-payoff">A world to join. A Pathway to begin.</p>
-    </div>
-
-    <div class="join-static">
-      <img :src="townsImage" alt="An illuminated Minecraft city in Mysterria at night." width="1280" height="720" loading="lazy" decoding="async">
-      <div class="join-static__content">
-        <p>Enter Mysterria</p>
-        <h2>Your first step is simple.</h2>
-        <ol>
-          <li v-for="(step, index) in steps" :key="step.id">
-            <span>{{ String(index + 1).padStart(2, '0') }}</span>
-            <div><strong>{{ step.title }}</strong><p>{{ step.copy }}</p></div>
-          </li>
-        </ol>
-        <div class="join-static__editions" role="group" aria-label="Choose Minecraft edition">
-          <button
-            v-for="edition in editions"
-            :key="edition"
-            type="button"
-            :aria-pressed="platform === edition"
-            :class="{ 'is-active': platform === edition }"
-            @click="platform = edition"
-          >{{ edition }}</button>
-        </div>
-        <div class="join-static__actions">
-          <button type="button" @click="copyAddress">{{ copyLabel }} · {{ MYSTERRIA_ADDRESS }}</button>
-          <RouterLink to="/guide">Beginner guide ↗</RouterLink>
-          <a href="https://discord.com/invite/jc7GSxBWgb" target="_blank" rel="noreferrer">Community ↗</a>
-        </div>
-        <p class="copy-feedback" aria-live="polite">{{ copyFeedback }}</p>
-      </div>
+      <button class="copy-address" type="button" @click="copyAddress">
+        <span><small>Server address</small><strong>{{ MYSTERRIA_ADDRESS }}</strong></span>
+        <b>{{ copyLabel }}</b>
+      </button>
+      <p class="copy-feedback" aria-live="polite">{{ copyFeedback }}</p>
+      <RouterLink class="guide-link" to="/guide">Read the beginner guide <span aria-hidden="true">→</span></RouterLink>
+      <p class="join-note">Accept the resource pack when prompted. Bedrock can connect, but some custom interfaces may not render.</p>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onUnmounted, ref, type CSSProperties } from 'vue';
 import { MYSTERRIA_ADDRESS } from '@/services/serverStatus';
-import { useReducedMotion } from '@/composables/useReducedMotion';
-import townsImage from '@/assets/images/home/world/towns.webp';
+import type { HomePathway } from '@/data/pathways';
+import portalImage from '@/assets/images/home/world/lobby-portal.png';
 
+const props = defineProps<{ selectedPathway?: HomePathway | null }>();
 const steps = [
-  { id: 'address', short: 'Address', verb: 'Copy', title: 'Add the server.', copy: 'Copy the address and add Mysterria to your multiplayer server list.' },
-  { id: 'edition', short: 'Edition', verb: 'Choose', title: 'Java or Bedrock.', copy: 'Choose the edition you play. Both connect with the Mysterria server address.' },
-  { id: 'pack', short: 'Resource pack', verb: 'Accept', title: 'Let the world load.', copy: 'Accept the server resource pack when Minecraft prompts you so custom visuals appear correctly.' },
-  { id: 'enter', short: 'Enter', verb: 'Connect', title: 'Walk through.', copy: 'Join the server and follow the in-world onboarding into Mysterria.' },
-  { id: 'begin', short: 'Begin', verb: 'Progress', title: 'Choose what comes next.', copy: 'Start your progression, gather ingredients and work toward your first potion.' },
+  { title: 'Connect', copy: 'Add mc.mysterria.net in a current Java client.' },
+  { title: 'Choose Mysteries', copy: 'Select Mysteries in the lobby to begin your first Pathway.' },
+  { title: 'Begin', copy: 'Take Resolve to learn the potion loop with no permanent cost.' },
 ] as const;
-const editions = ['Java', 'Bedrock'] as const;
-
-const section = ref<HTMLElement | null>(null);
-const progress = ref(0);
-const activeIndex = ref(0);
-const platform = ref<(typeof editions)[number]>('Java');
 const copyState = ref<'idle' | 'copied' | 'failed'>('idle');
-const reducedMotion = useReducedMotion();
-let observer: IntersectionObserver | null = null;
-let frame = 0;
-let visible = false;
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
-
-const activeStep = computed(() => steps[activeIndex.value]);
+const selectedPathway = computed(() => props.selectedPathway ?? null);
+const pathwayStyle = computed<CSSProperties>(() => selectedPathway.value ? {
+  '--orbit-accent': selectedPathway.value.theme.accent,
+  '--orbit-accent-2': selectedPathway.value.theme.accent2,
+  '--orbit-surface': selectedPathway.value.theme.surface,
+} : {});
 const copyLabel = computed(() => copyState.value === 'copied' ? 'Copied' : copyState.value === 'failed' ? 'Try again' : 'Copy address');
-const copyFeedback = computed(() => {
-  if (copyState.value === 'copied') return 'Server address copied to your clipboard.';
-  if (copyState.value === 'failed') return `Copy failed. Select the address manually: ${MYSTERRIA_ADDRESS}`;
-  return '';
-});
-const joinStyle = computed(() => ({
-  '--join-progress': String(progress.value),
-  '--gate-inset': `${Math.max(3, 29 - progress.value * 26)}%`,
-  '--door-left': `${progress.value * -118}%`,
-  '--door-right': `${progress.value * 118}%`,
-  '--scene-scale': String(1.16 - progress.value * 0.14),
-  '--scene-brightness': String(0.56 + progress.value * 0.38),
-  '--scene-saturation': String(0.72 + progress.value * 0.32),
-  '--join-glow-alpha': String(0.08 + progress.value * 0.24),
-  '--heading-opacity': String(Math.max(0, 1 - progress.value * 2)),
-  '--payoff-opacity': String(Math.max(0, Math.min(1, progress.value * 4 - 3))),
-}));
-
-function update() {
-  if (!visible || !section.value || reducedMotion.value || frame) return;
-  frame = requestAnimationFrame(() => {
-    frame = 0;
-    const rect = section.value?.getBoundingClientRect();
-    if (!rect) return;
-    const next = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
-    const scaled = Math.min(steps.length - 0.0001, next * steps.length);
-    progress.value = next;
-    activeIndex.value = Math.floor(scaled);
-  });
-}
-
-function goToStep(index: number) {
-  if (!section.value) return;
-  activeIndex.value = index;
-  const next = (index + 0.16) / steps.length;
-  progress.value = next;
-  if (reducedMotion.value) return;
-  const sectionTop = section.value.getBoundingClientRect().top + window.scrollY;
-  const scrollRange = section.value.offsetHeight - innerHeight;
-  window.scrollTo({ top: sectionTop + scrollRange * next, behavior: 'smooth' });
-}
-
+const copyFeedback = computed(() => copyState.value === 'copied' ? 'Server address copied to your clipboard.' : copyState.value === 'failed' ? `Copy failed. Select the address manually: ${MYSTERRIA_ADDRESS}` : '');
 async function copyAddress() {
-  copyState.value = 'idle';
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
-    } else {
-      const field = document.createElement('textarea');
-      field.value = MYSTERRIA_ADDRESS;
-      field.setAttribute('readonly', '');
-      field.style.position = 'fixed';
-      field.style.opacity = '0';
-      document.body.appendChild(field);
-      field.select();
-      const copied = document.execCommand('copy');
-      field.remove();
-      if (!copied) throw new Error('Clipboard unavailable');
-    }
-    copyState.value = 'copied';
-  } catch {
-    copyState.value = 'failed';
-  }
+  try { await navigator.clipboard.writeText(MYSTERRIA_ADDRESS); copyState.value = 'copied'; } catch { copyState.value = 'failed'; }
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copyState.value = 'idle'), 3200);
 }
-
-onMounted(() => {
-  observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    if (visible) update();
-  }, { rootMargin: '10% 0px' });
-  if (section.value) observer.observe(section.value);
-  addEventListener('scroll', update, { passive: true });
-  addEventListener('resize', update, { passive: true });
-});
-
-onUnmounted(() => {
-  observer?.disconnect();
-  removeEventListener('scroll', update);
-  removeEventListener('resize', update);
-  if (frame) cancelAnimationFrame(frame);
-  if (copyTimer) clearTimeout(copyTimer);
-});
+onUnmounted(() => { if (copyTimer) clearTimeout(copyTimer); });
 </script>
 
 <style scoped>
-.join-story {
-  --join-progress: 0;
-  --gate-inset: 29%;
-  --door-left: 0%;
-  --door-right: 0%;
-  --scene-scale: 1.16;
-  position: relative;
-  min-height: 430svh;
-  color: #fcf9f2;
-  background: #08151a;
-}
-
-.join-sticky {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  min-height: 650px;
-  overflow: hidden;
-  isolation: isolate;
-  background: #08151a;
-}
-
-.join-destination,
-.join-destination::after,
-.join-destination img,
-.join-destination i { position: absolute; inset: 0; }
-
-.join-destination { z-index: -3; overflow: hidden; clip-path: inset(8% var(--gate-inset) 8% var(--gate-inset) round 34px); }
-.join-destination img { width: 100%; height: 100%; object-fit: cover; object-position: center 44%; filter: brightness(var(--scene-brightness)) saturate(var(--scene-saturation)); transform: scale(var(--scene-scale)); will-change: transform; }
-.join-destination::after { content: ""; background: linear-gradient(0deg, rgba(8, 21, 26, .94), transparent 52%), linear-gradient(90deg, rgba(8, 21, 26, .72), transparent 35% 68%, rgba(8, 21, 26, .54)); }
-.join-destination i { background: radial-gradient(circle at 56% 38%, rgba(237, 181, 97, var(--join-glow-alpha)), transparent 44%); }
-
-.stone-gate { position: absolute; z-index: -1; inset: 0; pointer-events: none; filter: drop-shadow(0 28px 36px rgba(0, 0, 0, .48)); }
-.gate-lintel,
-.gate-pillar { position: absolute; display: grid; gap: 4px; }
-.gate-lintel { left: calc(var(--gate-inset) - 4%); right: calc(var(--gate-inset) - 4%); top: 4.5%; grid-template-columns: repeat(9, 1fr); }
-.gate-pillar { top: 5%; bottom: 0; width: 6.6%; grid-template-rows: repeat(7, 1fr); }
-.gate-pillar--left { left: calc(var(--gate-inset) - 4%); }
-.gate-pillar--right { right: calc(var(--gate-inset) - 4%); }
-.gate-lintel i,
-.gate-pillar i { min-width: 0; min-height: 0; border: 1px solid rgba(255, 242, 210, .08); background: linear-gradient(145deg, rgba(33, 51, 47, .76), rgba(11, 30, 31, .82) 68%); box-shadow: inset 8px 8px 14px rgba(255, 255, 255, .025); }
-.gate-lintel i:nth-child(2n), .gate-pillar i:nth-child(2n) { background: linear-gradient(145deg, #2b3f38, #102425 72%); }
-
-.gate-door { position: absolute; z-index: -1; top: 8%; bottom: 8%; width: 29%; overflow: hidden; border: 1px solid rgba(198, 155, 82, .3); background: rgba(10, 27, 29, .84); box-shadow: inset 0 0 50px rgba(0, 0, 0, .62); backdrop-filter: blur(2px); }
-.gate-door::before { content: ""; position: absolute; inset: 5%; border: 1px solid rgba(198, 155, 82, .22); background: repeating-linear-gradient(90deg, transparent 0 32px, rgba(198, 155, 82, .08) 32px 33px), repeating-linear-gradient(0deg, transparent 0 64px, rgba(198, 155, 82, .06) 64px 65px); }
-.gate-door i { position: absolute; top: 50%; width: 12px; aspect-ratio: 1; border: 1px solid #d1aa63; transform: rotate(45deg); box-shadow: 0 0 20px rgba(198, 155, 82, .42); }
-.gate-door--left { left: var(--gate-inset); transform: translateX(var(--door-left)); }
-.gate-door--left i { right: 17px; }
-.gate-door--right { right: var(--gate-inset); transform: translateX(var(--door-right)); }
-.gate-door--right i { left: 17px; }
-
-.join-heading { position: absolute; z-index: 4; left: clamp(22px, 5vw, 80px); top: clamp(72px, 9vh, 104px); width: min(540px, 45vw); opacity: var(--heading-opacity); }
-.join-heading p,
-.join-copy > span,
-.join-copy > p:first-of-type,
-.join-static__content > p { margin: 0; color: #e1b66a; font: 650 .66rem/1 "IBM Plex Mono", monospace; letter-spacing: .15em; text-transform: uppercase; }
-.join-heading h2 { margin: 13px 0 0; font: 650 clamp(3.5rem, 7vw, 8rem)/.8 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.055em; }
-
-.join-copy { position: absolute; z-index: 4; left: clamp(22px, 5vw, 80px); top: 52%; width: min(410px, 33vw); padding: 24px 0; transform: translateY(-50%); text-shadow: 0 3px 26px #08151a; }
-.join-copy > p:first-of-type { margin-top: 13px; }
-.join-copy h3 { margin: 13px 0 15px; font: 650 clamp(3rem, 5.6vw, 6.5rem)/.82 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; text-wrap: balance; }
-.join-copy > p:last-child { max-width: 390px; margin: 0; color: rgba(252, 249, 242, .7); font-size: .86rem; line-height: 1.65; }
-
-.connection-panel { position: absolute; z-index: 5; right: clamp(22px, 5vw, 80px); bottom: clamp(78px, 11vh, 118px); width: min(410px, 34vw); display: grid; gap: 9px; padding: 12px; border: 1px solid rgba(252, 249, 242, .18); border-radius: 22px; background: rgba(8, 21, 26, .82); box-shadow: 0 24px 80px rgba(0, 0, 0, .32); backdrop-filter: blur(18px); }
-.edition-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.edition-switch button { min-height: 48px; display: flex; align-items: center; gap: 9px; padding: 6px 10px; border: 1px solid rgba(252, 249, 242, .13); border-radius: 12px; color: rgba(252, 249, 242, .6); background: transparent; cursor: pointer; }
-.edition-switch button.is-active { border-color: #d9ae62; color: #fcf9f2; background: rgba(198, 155, 82, .09); }
-.edition-switch button > span { width: 29px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 8px; color: #0d2926; background: #f5f0e6; font: 700 .64rem/1 "IBM Plex Mono", monospace; }
-.edition-switch strong { font-size: .72rem; }
-.copy-address { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 13px; border: 0; border-radius: 12px; color: #102924; background: #f5f0e6; cursor: pointer; text-align: left; transition: transform .3s cubic-bezier(.22, 1, .36, 1), background-color .2s; }
-.copy-address:hover { transform: translateY(-2px); background: #fffaf0; }
-.copy-address > span { min-width: 0; display: grid; gap: 6px; }
-.copy-address small { color: rgba(16, 41, 36, .56); font: 600 .54rem/1 "IBM Plex Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
-.copy-address strong { font: 700 .73rem/1 "IBM Plex Mono", monospace; overflow-wrap: anywhere; }
-.copy-address b { flex: none; color: #7c5725; font-size: .7rem; }
-.resource-note { min-height: 44px; display: flex; align-items: center; gap: 9px; margin: 0; padding: 7px 9px; color: rgba(252, 249, 242, .66); font-size: .65rem; line-height: 1.4; }
-.resource-note i { width: 24px; aspect-ratio: 1; display: grid; place-items: center; flex: none; border-radius: 50%; color: #102924; background: #9bcba9; font-size: .65rem; font-style: normal; }
-.join-links { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.join-links a { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px; border: 1px solid rgba(252, 249, 242, .13); border-radius: 11px; color: rgba(252, 249, 242, .75); font-size: .67rem; font-weight: 750; }
-.copy-feedback { min-height: 1em; margin: 0; color: rgba(252, 249, 242, .54); font: 500 .54rem/1.4 "IBM Plex Mono", monospace; }
-
-.join-steps { position: absolute; z-index: 5; left: 50%; bottom: 20px; width: min(790px, calc(100% - 44px)); display: grid; grid-template-columns: repeat(5, 1fr); transform: translateX(-50%); }
-.join-steps button { position: relative; min-width: 44px; min-height: 52px; display: grid; place-items: center; gap: 3px; padding: 7px; border: 0; border-top: 2px solid rgba(252, 249, 242, .3); color: rgba(252, 249, 242, .7); background: rgba(8, 21, 26, .62); cursor: pointer; }
-.join-steps button.is-active { border-color: #dfb46a; color: #fcf9f2; }
-.join-steps button.is-complete { color: #9bcba9; }
-.join-steps span { font: 650 .57rem/1 "IBM Plex Mono", monospace; }
-.join-steps strong { font-size: .62rem; }
-.join-payoff { position: absolute; z-index: 4; left: 50%; top: 19%; margin: 0; color: rgba(252, 249, 242, .68); font: 550 .61rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; opacity: var(--payoff-opacity); transform: translateX(-50%); white-space: nowrap; }
-.join-static { display: none; }
-.join-static__editions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 10px; }
-.join-static__editions button { min-height: 46px; border: 1px solid rgba(252, 249, 242, .28); border-radius: 11px; color: #fcf9f2; background: transparent; font-weight: 750; }
-.join-static__editions button.is-active { border-color: #dfb46a; color: #102924; background: #dfb46a; }
-
-@media (max-width: 760px) {
-  .join-story { min-height: 390svh; }
-  .join-heading { left: 16px; top: 74px; width: calc(100% - 32px); }
-  .join-heading h2 { font-size: clamp(3.3rem, 16vw, 5.5rem); }
-  .join-copy { left: 16px; top: auto; bottom: 318px; width: calc(100% - 32px); transform: none; }
-  .join-copy h3 { font-size: clamp(2.4rem, 11vw, 3.7rem); }
-  .join-copy-enter-from { opacity: 0; transform: translateX(-20px); }
-  .join-copy-leave-to { opacity: 0; transform: translateX(20px); }
-  .connection-panel { left: 16px; right: auto; bottom: 72px; width: calc(100% - 32px); }
-  .join-steps { bottom: 8px; width: 100%; }
-  .join-steps strong { display: none; }
-  .join-payoff { display: none; }
-  .gate-pillar { width: 9%; }
-  .stone-gate { opacity: .82; }
-}
-
-@media (max-width: 340px), (max-height: 560px) {
-  .join-story { min-height: auto; padding: 62px 12px; }
-  .join-sticky { display: none; }
-  .join-static { display: grid; overflow: hidden; border-radius: 24px; background: #102724; }
-  .join-static > img { width: 100%; height: 250px; object-fit: cover; }
-  .join-static__content { padding: 28px 18px; }
-  .join-static__content > h2 { margin: 12px 0 28px; font: 650 3rem/.86 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; }
-  .join-static ol { display: grid; gap: 0; margin: 0 0 26px; padding: 0; list-style: none; }
-  .join-static li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 16px 0; border-top: 1px solid rgba(252, 249, 242, .1); }
-  .join-static li > span { color: #dfb46a; font: 650 .58rem/1.5 "IBM Plex Mono", monospace; }
-  .join-static li strong { font: 650 1.35rem/1 "IBM Plex Sans Condensed", sans-serif; }
-  .join-static li p { margin: 7px 0 0; color: rgba(252, 249, 242, .62); font-size: .73rem; line-height: 1.55; }
-  .join-static__actions { display: grid; gap: 8px; }
-  .join-static__actions button, .join-static__actions a { min-height: 46px; display: flex; align-items: center; justify-content: center; padding: 9px; border: 1px solid rgba(252, 249, 242, .14); border-radius: 11px; color: #fcf9f2; background: transparent; font-size: .68rem; font-weight: 750; }
-  .join-static__actions button { border: 0; color: #102924; background: #f5f0e6; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .join-story { min-height: auto; padding: 90px 24px; background: #08151a; }
-  .join-sticky { display: none; }
-  .join-static { width: min(1120px, 100%); display: grid; grid-template-columns: 1.05fr .95fr; overflow: hidden; margin: 0 auto; border-radius: 32px; background: #102724; }
-  .join-static > img { width: 100%; height: 100%; min-height: 720px; object-fit: cover; }
-  .join-static__content { align-self: center; padding: 48px; }
-  .join-static__content > h2 { margin: 13px 0 30px; font: 650 clamp(3rem, 6vw, 6rem)/.84 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; }
-  .join-static ol { display: grid; margin: 0 0 28px; padding: 0; list-style: none; }
-  .join-static li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 16px 0; border-top: 1px solid rgba(252, 249, 242, .1); }
-  .join-static li > span { color: #dfb46a; font: 650 .58rem/1.5 "IBM Plex Mono", monospace; }
-  .join-static li strong { font: 650 1.35rem/1 "IBM Plex Sans Condensed", sans-serif; }
-  .join-static li p { margin: 7px 0 0; color: rgba(252, 249, 242, .62); font-size: .72rem; line-height: 1.55; }
-  .join-static__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .join-static__actions button, .join-static__actions a { min-height: 46px; display: flex; align-items: center; justify-content: center; padding: 9px; border: 1px solid rgba(252, 249, 242, .14); border-radius: 11px; color: #fcf9f2; background: transparent; font-size: .68rem; font-weight: 750; }
-  .join-static__actions button { grid-column: 1 / -1; border: 0; color: #102924; background: #f5f0e6; }
-}
-
-@media (prefers-reduced-motion: reduce) and (max-width: 760px) {
-  .join-story { padding: 70px 14px; }
-  .join-static { grid-template-columns: 1fr; }
-  .join-static > img { min-height: 280px; max-height: 46svh; }
-  .join-static__content { padding: 32px 20px; }
-}
+.join-threshold { position: relative; min-height: 100svh; display: grid; place-items: center; overflow: hidden; padding: 110px 24px 88px; color: #fcf9f2; background: linear-gradient(180deg,#091718 0%,#0a1b1d 55%,#08151a 100%); isolation: isolate; }
+.join-threshold__image,.join-threshold__veil,.join-threshold__grain { position:absolute; inset:0; width:100%; height:100%; }
+.join-threshold__image { z-index:-3; object-fit:cover; object-position:center; filter:brightness(.67) saturate(.8) hue-rotate(8deg); transform:scale(1.03); }
+.join-threshold__veil { z-index:-2; background:linear-gradient(180deg,rgba(5,17,19,.55),rgba(9,23,24,.82) 55%,#08151a),radial-gradient(ellipse at 50% 42%,rgba(121,204,186,.16),transparent 28%); }
+.join-threshold__grain { z-index:-1; opacity:.1; mix-blend-mode:soft-light; background-image:radial-gradient(rgba(255,255,255,.7) .5px,transparent .5px); background-size:4px 4px; }
+.orbit-arrival { position:absolute; z-index:-1; top:50%; left:74%; width:min(48vw,690px); pointer-events:none; color:var(--orbit-accent); transform:translate(-50%,-45%); filter:drop-shadow(0 0 18px color-mix(in srgb,var(--orbit-accent) 40%,transparent)); }.orbit-arrival__line { display:block; width:100%; overflow:visible; fill:none; stroke:var(--orbit-accent); stroke-width:1.2; stroke-linecap:round; opacity:.76; }.orbit-arrival__line path { stroke-dasharray:3 10; }.orbit-arrival__line circle { fill:var(--orbit-accent); filter:drop-shadow(0 0 7px var(--orbit-accent)); }.orbit-arrival__seal { position:absolute; top:13%; right:3%; width:76px; height:76px; display:grid; place-items:center; overflow:hidden; border:1px solid color-mix(in srgb,var(--orbit-accent) 76%,transparent); border-radius:50%; background:color-mix(in srgb,var(--orbit-surface) 80%,transparent); box-shadow:0 0 0 8px color-mix(in srgb,var(--orbit-accent) 10%,transparent),0 0 30px color-mix(in srgb,var(--orbit-accent) 34%,transparent); }.orbit-arrival__seal::after { content:""; position:absolute; inset:12px; border:1px solid color-mix(in srgb,var(--orbit-accent-2) 72%,transparent); border-radius:50%; }.orbit-arrival__seal img { width:70%; height:70%; object-fit:cover; opacity:.9; mix-blend-mode:screen; }.orbit-arrival p { position:absolute; top:39%; right:7%; display:grid; gap:4px; margin:0; text-align:right; }.orbit-arrival small { color:rgba(252,249,242,.64); font:600 .49rem/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; }.orbit-arrival strong { color:var(--orbit-accent); font:650 clamp(1.3rem,2.1vw,2rem)/1 "IBM Plex Sans Condensed",sans-serif; letter-spacing:-.035em; }
+.join-threshold__content { width:min(620px,100%); }
+.join-kicker,.join-guide span { margin:0; color:#e6bd75; font:650 .65rem/1 "IBM Plex Mono",monospace; letter-spacing:.15em; text-transform:uppercase; }
+.join-threshold h2 { margin:14px 0 16px; font:650 clamp(3.7rem,6.4vw,7rem)/.82 "IBM Plex Sans Condensed",sans-serif; letter-spacing:-.06em; }
+.join-intro { max-width:510px; margin:0; color:rgba(252,249,242,.86); font-size:clamp(.84rem,1.08vw,1rem); line-height:1.65; }
+.join-guide { display:grid; margin:30px 0 40px; padding:0; list-style:none; border-top:1px solid rgba(252,249,242,.17); }
+.join-guide li { display:grid; grid-template-columns:48px 1fr; gap:16px; padding:13px 0; border-bottom:1px solid rgba(252,249,242,.17); }.join-guide span { align-self:start; padding-top:2px; font-size:.875rem; letter-spacing:.1em; }.join-guide strong { font:650 1.2rem/1 "IBM Plex Sans Condensed",sans-serif; }.join-guide p { margin:5px 0 0; color:rgba(252,249,242,.82); font-size:.72rem; line-height:1.5; }
+.copy-address { width:100%; min-height:66px; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:11px 15px; border:1px solid #102924; border-radius:8px; color:#102924; background:#f5f0e6; cursor:pointer; text-align:left; transition:transform .24s cubic-bezier(.22,1,.36,1),background-color .2s,box-shadow .2s; }.copy-address:hover { box-shadow:0 8px 26px rgba(0,0,0,.2); transform:translateY(-2px); background:#fffaf0; }.copy-address span { display:grid; gap:6px; }.copy-address small { color:rgba(16,41,36,.55); font:600 .53rem/1 "IBM Plex Mono",monospace; letter-spacing:.11em; text-transform:uppercase; }.copy-address strong { font:700 .78rem/1 "IBM Plex Mono",monospace; }.copy-address b { padding:10px 13px; border:1px solid rgba(16,41,36,.65); border-radius:6px; color:#102924; font-size:.7rem; white-space:nowrap; }
+.copy-feedback { min-height:1.2em; margin:8px 0 0; color:rgba(252,249,242,.72); font:500 .54rem/1.4 "IBM Plex Mono",monospace; }.guide-link { display:inline-flex; align-items:center; gap:8px; min-height:44px; margin-top:12px; color:#f1cf91; font-size:.76rem; font-weight:750; }.guide-link span { font-size:1.1rem; }.join-note { margin:24px 0 0; color:rgba(252,249,242,.76); font-size:13px; line-height:1.5; }
+.orbit-arrival-enter-active { transition:opacity .8s ease,transform .8s cubic-bezier(.22,1,.36,1); }.orbit-arrival-enter-from { opacity:0; transform:translate(-46%,-35%) scale(.9); }.orbit-arrival-enter-active .orbit-arrival__line path { animation:thread-arrives .9s .1s cubic-bezier(.22,1,.36,1) both; }.orbit-arrival-enter-active .orbit-arrival__seal { animation:seal-arrives .75s .44s cubic-bezier(.22,1,.36,1) both; }.orbit-arrival-enter-active p { animation:copy-arrives .55s .56s cubic-bezier(.22,1,.36,1) both; } @keyframes thread-arrives { from { stroke-dasharray:480; stroke-dashoffset:480; opacity:0; } to { stroke-dasharray:3 10; stroke-dashoffset:0; opacity:.76; } } @keyframes seal-arrives { from { opacity:0; transform:scale(.42) rotate(-30deg); } to { opacity:1; transform:scale(1) rotate(0); } } @keyframes copy-arrives { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+@media (max-width:760px) { .join-threshold { min-height:auto; padding:96px 20px 68px; }.join-threshold__image { object-position:55% 30%; -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 38%,transparent 76%); mask-image:linear-gradient(to bottom,#000 0%,#000 38%,transparent 76%); }.orbit-arrival { position:relative; top:auto; left:auto; width:100%; height:58px; margin:16px 0 0; transform:none; opacity:.82; }.orbit-arrival__line { width:72%; margin-top:18px; }.orbit-arrival__seal { top:0; right:0; width:54px; height:54px; }.orbit-arrival p { top:4px; right:68px; }.orbit-arrival strong { font-size:1.45rem; }.join-threshold h2 { font-size:clamp(3rem,13vw,4.6rem); }.join-intro { font-size:.84rem; }.join-guide { margin-top:26px; }.copy-address strong { overflow-wrap:anywhere; } }
+@media (prefers-reduced-motion:reduce) { .copy-address,.orbit-arrival-enter-active .orbit-arrival__line path,.orbit-arrival-enter-active .orbit-arrival__seal,.orbit-arrival-enter-active p { animation:none; transition:none; } }
 </style>

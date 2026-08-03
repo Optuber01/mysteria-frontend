@@ -59,6 +59,10 @@ wiki and game archive.
 - `home/world/` uses repo-backed dungeon, creature, boss, Emporium, economy and
   town captures. These are shown as distinct locations rather than as repeated
   crops of the hero.
+- `home/world/lobby-portal.png` is an approved Mysterria portal capture from
+  the public Mysterria wiki repository (`src/assets/dungeons/entrance.png`). It
+  is used as the visual threshold for the join sequence; the public copy still
+  accurately directs players through the actual lobby selector.
 - Pathway and Boon sigils remain the existing project assets in
   `src/assets/images/pathways/` and `public/pathways/`.
 

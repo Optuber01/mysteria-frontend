@@ -18,9 +18,9 @@
       <span class="altar-scene__circle-art" :style="circleMaskStyle" aria-hidden="true" />
     </button>
 
-    <!-- Actual in-game Ritual Altar interface, cropped to its central GUI. -->
+    <!-- Actual server GUI texture — no composited world screenshot. -->
     <div ref="guiRef" class="gui" :style="guiStyle" role="img" aria-label="Cauldron brewing interface">
-      <img class="gui__img" :src="cauldronInterface" alt="" width="636" height="284" decoding="async" draggable="false" />
+      <img class="gui__img" :src="generic54" alt="" width="256" height="256" decoding="async" draggable="false" />
 
       <!-- green confirm button glows as the brew completes -->
       <span class="gui__confirm" :style="confirmStyle" aria-hidden="true" />
@@ -114,7 +114,7 @@ import type { CSSProperties } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import SceneParticles from './SceneParticles.vue';
 
-import cauldronInterface from '@/assets/images/home/progression/cauldron-interface.png';
+import generic54 from '@/assets/images/home/progression/source/generic-54.png';
 import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
 import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
 import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
@@ -177,7 +177,7 @@ const p = computed(() => clamp01(props.progress));
 const final = computed(() => reduced.value); // reduced motion => static final composed state
 
 /* ---------------- phase drivers ---------------- */
-const altarIn = computed(() => (final.value ? 1 : clamp01(p.value / 0.1)));
+const altarIn = computed(() => (final.value ? 1 : clamp01(p.value / 0.2)));
 const brew = computed(() => (final.value ? 1 : clamp01((p.value - 0.55) / 0.3)));
 const reveal = computed(() => (final.value ? 1 : clamp01((p.value - 0.78) / 0.14)));
 const brewing = computed(() => p.value >= 0.55);
@@ -210,28 +210,25 @@ watch(altarIn, () => requestAnimationFrame(syncGeom));
 /* ---------------- GUI panel ---------------- */
 const guiStyle = computed<CSSProperties>(() => {
   const inValue = altarIn.value;
-  const x = compact.value ? 50 : 70;
+  const x = 50;
   const y = compact.value ? 50 : 53;
   return {
     left: `${x}%`,
     top: `${y}%`,
-    width: compact.value ? 'min(340px, 84vw)' : 'min(470px, 49vw)',
+    width: compact.value ? 'min(310px, 82vw)' : 'min(420px, 43vw)',
     opacity: inValue.toFixed(4),
     transform: `translate(-50%, -50%) scale(${(0.9 + 0.1 * inValue).toFixed(4)}) translateY(${((1 - inValue) * 26).toFixed(1)}px)`,
     pointerEvents: inValue > 0.5 ? 'auto' : 'none',
   };
 });
 
-/*
- * Pixel-verified slot centres on the actual in-game Ritual Altar capture.
- * The scene crops the 636 px image to x=143..493, so X values are relative
- * to that 350 px GUI region while Y values remain relative to all 284 px.
- */
-const SLOT_R = { x: 50.3, y: 36.6 };
-const SLOT_M1 = { x: 19.5, y: 49.3 };
-const SLOT_M2 = { x: 29.6, y: 62 };
-const SLOT_S1 = { x: 70.9, y: 49.3 };
-const SLOT_C = { x: 50.3, y: 74.6 };
+/* Slot centres on the original Generic 54 resource texture. */
+const SLOT_R = { x: 50, y: 31 };
+const SLOT_M1 = { x: 35, y: 45 };
+const SLOT_M2 = { x: 35, y: 57 };
+const SLOT_S1 = { x: 65, y: 45 };
+const SLOT_S2 = { x: 65, y: 57 };
+const SLOT_C = { x: 50, y: 72 };
 
 function zoneStyle(slot: { x: number; y: number }, w: number, h: number): CSSProperties {
   return {
@@ -242,9 +239,9 @@ function zoneStyle(slot: { x: number; y: number }, w: number, h: number): CSSPro
     pointerEvents: altarIn.value > 0.5 ? 'auto' : 'none',
   };
 }
-const recipeZoneStyle = computed<CSSProperties>(() => zoneStyle(SLOT_R, 11, 9));
-const mainZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 24.55, y: 55.65 }, 28, 28));
-const suppZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 76, y: 55.65 }, 28, 28));
+const recipeZoneStyle = computed<CSSProperties>(() => zoneStyle(SLOT_R, 10, 16));
+const mainZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 35, y: 51 }, 20, 30));
+const suppZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 65, y: 51 }, 20, 30));
 
 const confirmStyle = computed<CSSProperties>(() => {
   const b = brew.value;
@@ -258,8 +255,8 @@ const confirmStyle = computed<CSSProperties>(() => {
 });
 
 /* ---------------- ingredient flight: book -> GUI slots ---------------- */
-const FLIGHT_SPAN = 0.2;
-const ARC_PX = { desktop: 42, mobile: 24 };
+const FLIGHT_SPAN = 0.16;
+const ARC_PX = { desktop: 30, mobile: 18 };
 
 type Point = { x: number; y: number };
 type ItemSpec = {
@@ -267,30 +264,19 @@ type ItemSpec = {
   label: string;
   asset: string;
   stagger: number;
-  bookX: number; // normalised position inside the 680 x 548 book viewport
-  bookY: number;
+  start: Point; // % of the scene (the book area)
   slot: Point; // % of the GUI texture
 };
 
 const ITEMS: ItemSpec[] = [
-  // Positions match the icons painted onto the physical book leaves. The
-  // launch is delayed until the altar panel has reached its resting geometry.
-  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.12, bookX: 0.5547, bookY: 0.7299, slot: SLOT_R },
-  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.18, bookX: 0.2226, bookY: 0.3071, slot: SLOT_M1 },
-  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.24, bookX: 0.2226, bookY: 0.4374, slot: SLOT_M2 },
-  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.3, bookX: 0.5537, bookY: 0.3071, slot: SLOT_S1 },
+  // These are the corresponding positions on the open formula. While the two
+  // scenes cross-fade, the item sprites continue from the book into the real
+  // Cauldron GUI instead of appearing at arbitrary points in the stage.
+  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.02, start: { x: 48, y: 62 }, slot: SLOT_R },
+  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.08, start: { x: 31, y: 34 }, slot: SLOT_M1 },
+  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.14, start: { x: 31, y: 55 }, slot: SLOT_M2 },
+  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.2, start: { x: 68, y: 36 }, slot: SLOT_S1 },
 ];
-
-function bookSource(spec: ItemSpec, geometry: typeof geom.value): Point {
-  const viewportW = Math.min(680, geometry.w);
-  const viewportH = viewportW / 1.24;
-  const viewportLeft = (geometry.w - viewportW) / 2;
-  const viewportTop = (geometry.h - viewportH) / 2 + Math.min(23, geometry.h * 0.035);
-  return {
-    x: viewportLeft + viewportW * spec.bookX,
-    y: viewportTop + viewportH * spec.bookY,
-  };
-}
 
 type FlightItem = ItemSpec & {
   rested: boolean;
@@ -310,9 +296,8 @@ const items = computed<FlightItem[]>(() => {
     const t = clamp01((p.value - spec.stagger) / FLIGHT_SPAN);
     const f = final.value ? 1 : t;
     const e = smoothstep(f);
-    const source = bookSource(spec, g);
-    const sx = source.x;
-    const sy = source.y;
+    const sx = (spec.start.x / 100) * g.w;
+    const sy = (spec.start.y / 100) * g.h;
     const ex = g.guiLeft + (spec.slot.x / 100) * g.guiW;
     const ey = g.guiTop + (spec.slot.y / 100) * g.guiH;
     const x = lerp(sx, ex, e);
@@ -349,7 +334,7 @@ const circleStyle = computed<CSSProperties>(() => {
   const bright = brew.value;
   const rotation = final.value ? 100 : p.value * 120;
   return {
-    left: `${compact.value ? 50 : 70}%`,
+    left: '50%',
     top: `${compact.value ? 50 : 53}%`,
     opacity: (inValue * 0.92).toFixed(4),
     transform: `translate(-50%, -50%) rotate(${rotation.toFixed(2)}deg) scale(${(0.84 + 0.16 * inValue).toFixed(4)})`,
@@ -381,7 +366,7 @@ const revealWrapStyle = computed<CSSProperties>(() => ({
 const potionStyle = computed<CSSProperties>(() => {
   const r = reveal.value;
   return {
-    left: `${compact.value ? 50 : 70}%`,
+    left: '50%',
     top: `${compact.value ? 10 : 13}%`,
     transform: `translate(-50%, -50%) scale(${easeOutBack(r).toFixed(4)})`,
     filter: `brightness(${(0.35 + 0.65 * r).toFixed(3)})`,
@@ -482,20 +467,15 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 .gui {
   position: absolute;
   z-index: 3;
-  aspect-ratio: 350 / 284;
-  overflow: hidden;
+  aspect-ratio: 1;
   filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .55));
   will-change: transform, opacity;
 }
 .gui__img {
-  position: absolute;
-  top: 0;
-  left: 0;
   display: block;
-  width: calc(100% * 636 / 350);
+  width: 100%;
   max-width: none;
   height: 100%;
-  transform: translateX(calc(-100% * 143 / 636));
   object-fit: fill;
   image-rendering: pixelated;
   -webkit-user-drag: none;
