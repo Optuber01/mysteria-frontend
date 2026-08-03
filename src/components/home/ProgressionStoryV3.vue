@@ -38,6 +38,7 @@
           >
             <FormulaBookScene
               :progress="bookLocal"
+              :closing-progress="bookClosingLocal"
               :active="bookOpacity > 0.5"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
@@ -291,6 +292,9 @@ function fadeWindow(fadeInStart: number, fadeOutStart: number, fadeOutEnd: numbe
 }
 
 const bookLocal = computed(() => windowProgress(0, 0.34));
+// Close the physical recipe book as it hands the ingredients to the separate
+// construction scene, preserving the book motion from the Fool-pathway pass.
+const bookClosingLocal = computed(() => windowProgress(0.29, 0.36));
 const buildLocal = computed(() => windowProgress(0.34, 0.52));
 const altarLocal = computed(() => windowProgress(0.48, 0.68));
 const drinkLocal = computed(() => windowProgress(0.66, 0.86));
@@ -380,8 +384,9 @@ function goToChapter(index: number) {
   const chapter = chapters[index];
   const range = sectionRef.value.offsetHeight - innerHeight;
   const top = sectionRef.value.getBoundingClientRect().top + scrollY;
+  const chapterLead = index === 1 ? 0.06 : 0.35;
   clearDetail();
-  scrollTo({ top: top + range * (chapter.start + (chapter.end - chapter.start) * 0.35), behavior: reducedMotion.value ? 'auto' : 'smooth' });
+  scrollTo({ top: top + range * (chapter.start + (chapter.end - chapter.start) * chapterLead), behavior: reducedMotion.value ? 'auto' : 'smooth' });
 }
 
 onMounted(() => {
