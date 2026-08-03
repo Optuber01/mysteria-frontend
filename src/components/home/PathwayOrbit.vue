@@ -61,7 +61,6 @@
         >
           <template v-for="(entry, index) in activeCatalog" :key="entry.id">
           <button
-            v-if="!orbitStyles[index]?.hidden"
             type="button"
             class="orbit-token"
             :class="{
@@ -77,6 +76,7 @@
               '--token-ink': entry.theme.ink,
             }]"
             :tabindex="orbitStyles[index]?.hidden ? -1 : 0"
+            :aria-hidden="orbitStyles[index]?.hidden"
             :aria-label="`${entry.name}. ${entry.startingSequence}. ${entry.playstyle}`"
             :aria-pressed="index === selectedIndex"
             @mouseenter="previewToken(index)"
@@ -86,7 +86,7 @@
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
-              <img :src="entry.thumbnail" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
+              <img :src="orbitStyles[index]?.hidden ? undefined : entry.thumbnail" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
             </span>
             <strong>{{ entry.name }}</strong><small>{{ entry.sequenceCount }} sequences</small>
           </button>
@@ -260,6 +260,7 @@ let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
 let catalogWarmTimer = 0;
 let openingSymbolWarmTimer = 0;
+let pointerReturnFrame = 0;
 const warmedCatalogs = new Set<ProgressionKind>();
 const catalogImageWarmers: HTMLImageElement[] = [];
 let openingSymbolsWarmed = false;
@@ -485,6 +486,7 @@ function clearTokenPreview() {
 
 function startDrag(event: PointerEvent) {
   if (!hasActiveEntry.value || ![0, 2].includes(event.button) || (event.target as HTMLElement).closest('button, a, [role="button"]')) return;
+  if (pointerReturnFrame) { cancelAnimationFrame(pointerReturnFrame); pointerReturnFrame = 0; }
   dragging.value = true;
   pointerOffset.value = 0;
   lastPointerX = event.clientX;
@@ -508,6 +510,7 @@ function movePointer(event: PointerEvent) {
     return;
   }
   if (!orbitStageRef.value || reducedMotion.value) return;
+  if (pointerReturnFrame) { cancelAnimationFrame(pointerReturnFrame); pointerReturnFrame = 0; }
   const rect = orbitStageRef.value.getBoundingClientRect();
   pointerOffset.value = clamp(((event.clientX - rect.left) / rect.width - .5) * .7, -.35, .35);
 }
@@ -526,7 +529,18 @@ function endDrag(event: PointerEvent) {
 
 function leaveOrbit() {
   if (dragging.value) return;
-  pointerOffset.value = 0;
+  settlePointerOffset();
+}
+
+function settlePointerOffset() {
+  const distance = pointerOffset.value;
+  if (Math.abs(distance) < .002) {
+    pointerOffset.value = 0;
+    pointerReturnFrame = 0;
+    return;
+  }
+  pointerOffset.value = distance * .72;
+  pointerReturnFrame = requestAnimationFrame(settlePointerOffset);
 }
 
 function handleMobileScroll() {
@@ -667,6 +681,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', scheduleScrollMeasure);
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
+  if (pointerReturnFrame) cancelAnimationFrame(pointerReturnFrame);
   window.clearTimeout(mobileScrollTimer);
   window.clearTimeout(catalogWarmTimer);
   window.clearTimeout(openingSymbolWarmTimer);
