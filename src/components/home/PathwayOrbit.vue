@@ -323,22 +323,25 @@ const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, in
 
 function assemblyStyle(index: number): OrbitVisual {
   const count = activeCatalog.value.length;
-  const entryProgress = clamp((assemblyProgress.value * count - index) / 1.15, 0, 1);
+  const visibleCount = assemblyProgress.value * count;
+  const entryProgress = clamp(visibleCount - index, 0, 1);
   if (entryProgress <= 0) {
     return { hidden: true, behind: true, style: { left: '-16%', top: '70%', opacity: '0', pointerEvents: 'none' } };
   }
   const t = easeOut(entryProgress);
-  // Every route enters from the left, then advances around the orbit as the
-  // following routes arrive instead of snapping directly to its final slot.
-  const angle = -Math.PI / 2 + (index - (1 - t) * 3.4) * ((Math.PI * 2) / count);
+  // Each new route arrives at the top of the orbit. It pushes every route
+  // already present one slot clockwise, so the first seal visibly scoots
+  // around the ring as the archive fills.
+  const orbitSlot = visibleCount - 1 - index;
+  const angle = -Math.PI / 2 + orbitSlot * ((Math.PI * 2) / count);
   const targetX = 50 + Math.cos(angle) * 42;
   const targetY = 50 + Math.sin(angle) * 34;
   const depth = (Math.sin(angle) + 1) / 2;
   return {
     hidden: false, behind: depth < .42,
     style: {
-      left: `${mix(-14, targetX, t)}%`,
-      top: `${mix(50 + (index % 3 - 1) * 10, targetY, t)}%`,
+      left: `${roundPosition(mix(-14, targetX, t))}%`,
+      top: `${roundPosition(mix(50, targetY, t))}%`,
       opacity: String(t * (.46 + depth * .54)),
       zIndex: String(18 + Math.round(depth * 46)),
       transform: `translate(-50%, -50%) scale(${(.5 + depth * .26) + t * .2})`,
@@ -349,6 +352,7 @@ function assemblyStyle(index: number): OrbitVisual {
 
 function clamp(value: number, min: number, max: number) { return Math.min(max, Math.max(min, value)); }
 function mix(from: number, to: number, amount: number) { return from + (to - from) * amount; }
+function roundPosition(value: number) { return Math.round(value * 10) / 10; }
 function easeOut(value: number) { return 1 - Math.pow(1 - clamp(value, 0, 1), 3); }
 function normalizeIndex(value: number, length = activeCatalog.value.length) { return ((value % length) + length) % length; }
 function signedWrap(value: number, length: number) { return ((value + length / 2) % length + length) % length - length / 2; }
@@ -358,7 +362,11 @@ function measureScroll() {
   if (!sectionRef.value || (!inView.value && !reducedMotion.value)) return;
   const rect = sectionRef.value.getBoundingClientRect();
   const travel = Math.max(1, sectionRef.value.offsetHeight - window.innerHeight);
-  scrollProgress.value = reducedMotion.value ? 1 : clamp(-rect.top / travel, 0, 1);
+  const nextProgress = reducedMotion.value ? 1 : clamp(-rect.top / travel, 0, 1);
+  // Avoid invalidating all 22 token styles for sub-pixel scroll deltas.
+  if (Math.abs(nextProgress - scrollProgress.value) >= .001 || nextProgress === 0 || nextProgress === 1) {
+    scrollProgress.value = nextProgress;
+  }
 }
 
 function scheduleScrollMeasure() {
@@ -591,7 +599,8 @@ onUnmounted(() => {
   min-height: 420svh;
   color: var(--path-ink);
   background: var(--path-surface);
-  transition: color .08s linear, background-color .08s linear;
+  /* Theme changes are immediate: animating a full-screen gradient repaints on
+     every frame and is especially costly while the orbit is assembling. */
 }
 
 .ambient-field { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
@@ -608,7 +617,6 @@ onUnmounted(() => {
     radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 48%, transparent), transparent 35%),
     radial-gradient(circle at 15% 70%, color-mix(in srgb, var(--path-accent-2) 22%, transparent), transparent 30%),
     radial-gradient(circle at 88% 25%, color-mix(in srgb, var(--path-accent) 15%, transparent), transparent 26%);
-  transition: background .08s linear;
 }
 
 .desktop-experience { height: 440svh; }
@@ -624,13 +632,13 @@ onUnmounted(() => {
 .catalog-tabs button b { min-width: 23px; height: 23px; display: grid; place-items: center; border-radius: 99px; color: currentColor; background: color-mix(in srgb, var(--path-ink) 9%, transparent); font: 650 .57rem/1 "IBM Plex Mono", monospace; }
 .catalog-tabs button[aria-selected="true"] { color: #08151a; background: var(--path-accent); }
 
-.orbit-stage { position: absolute; z-index: 10; inset: 0; outline: 0; cursor: default; touch-action: pan-y; user-select: none; }
+.orbit-stage { position: absolute; z-index: 10; inset: 0; outline: 0; cursor: default; touch-action: pan-y; user-select: none; contain: layout paint; }
 .is-interactive .orbit-stage { cursor: grab; }
 .is-interactive .orbit-stage:active { cursor: grabbing; }
 .orbit-stage:focus-visible { outline: 3px solid #fcf9f2; outline-offset: -10px; box-shadow: inset 0 0 0 5px #08151a; }
-.orbit-token { position: absolute; width: 94px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 6px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 77%, transparent); background: transparent; cursor: pointer; will-change: left, top, transform, opacity; transition: left .18s ease-out, top .18s ease-out, transform .16s ease-out, opacity .12s linear, filter .12s linear; }
+.orbit-token { position: absolute; width: 94px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 6px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 77%, transparent); background: transparent; cursor: pointer; contain: layout paint; }
 .orbit-token.is-hidden { visibility: hidden; }
-.orbit-token.is-behind { filter: saturate(.55) brightness(.72); }
+.orbit-token.is-behind { opacity: .68; }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }
 .orbit-token:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 2px; border-radius: 18px; box-shadow: 0 0 0 5px #08151a; }
 .token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-ink) 24%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--path-surface) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
