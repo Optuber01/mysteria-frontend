@@ -61,6 +61,7 @@
         >
           <template v-for="(entry, index) in activeCatalog" :key="entry.id">
           <button
+            v-if="!orbitStyles[index]?.hidden"
             type="button"
             class="orbit-token"
             :class="{
@@ -76,7 +77,6 @@
               '--token-ink': entry.theme.ink,
             }]"
             :tabindex="orbitStyles[index]?.hidden ? -1 : 0"
-            :aria-hidden="orbitStyles[index]?.hidden"
             :aria-label="`${entry.name}. ${entry.startingSequence}. ${entry.playstyle}`"
             :aria-pressed="index === selectedIndex"
             @mouseenter="previewToken(index)"
@@ -86,30 +86,32 @@
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
-              <img :src="orbitStyles[index]?.hidden ? undefined : entry.thumbnail" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
+              <img :src="entry.thumbnail" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
             </span>
             <strong>{{ entry.name }}</strong><small>{{ entry.sequenceCount }} sequences</small>
           </button>
           </template>
 
-          <article
-            v-if="hasActiveEntry"
-            class="orbit-story"
-            role="button"
-            tabindex="0"
-            :aria-label="`Open ${activeEntry.name} archive`"
-            :aria-live="interactionReady ? 'polite' : 'off'"
-            @click="selectActiveAndOpen($event)"
-            @keydown.enter.prevent="selectActiveAndOpen($event)"
-            @keydown.space.prevent="selectActiveAndOpen($event)"
-          >
-            <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
-              <img :src="activeStoryImage" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
-            </div>
-            <h3>{{ activeEntry.name }}</h3>
-            <span class="entry-kind">{{ activeEntry.sequenceCount }} sequences</span>
-            <small>{{ activeEntry.tagline }}</small>
-          </article>
+          <Transition name="orbit-story">
+            <article
+              v-if="hasActiveEntry"
+              class="orbit-story"
+              role="button"
+              tabindex="0"
+              :aria-label="`Open ${activeEntry.name} archive`"
+              :aria-live="interactionReady ? 'polite' : 'off'"
+              @click="selectActiveAndOpen($event)"
+              @keydown.enter.prevent="selectActiveAndOpen($event)"
+              @keydown.space.prevent="selectActiveAndOpen($event)"
+            >
+              <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
+                <img :src="activeStoryImage" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
+              </div>
+              <h3>{{ activeEntry.name }}</h3>
+              <span class="entry-kind">{{ activeEntry.sequenceCount }} sequences</span>
+              <small>{{ activeEntry.tagline }}</small>
+            </article>
+          </Transition>
 
           <button
             v-if="hasActiveEntry"
@@ -260,7 +262,6 @@ let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
 let catalogWarmTimer = 0;
 let openingSymbolWarmTimer = 0;
-let pointerReturnFrame = 0;
 const warmedCatalogs = new Set<ProgressionKind>();
 const catalogImageWarmers: HTMLImageElement[] = [];
 let openingSymbolsWarmed = false;
@@ -486,7 +487,6 @@ function clearTokenPreview() {
 
 function startDrag(event: PointerEvent) {
   if (!hasActiveEntry.value || ![0, 2].includes(event.button) || (event.target as HTMLElement).closest('button, a, [role="button"]')) return;
-  if (pointerReturnFrame) { cancelAnimationFrame(pointerReturnFrame); pointerReturnFrame = 0; }
   dragging.value = true;
   pointerOffset.value = 0;
   lastPointerX = event.clientX;
@@ -510,7 +510,6 @@ function movePointer(event: PointerEvent) {
     return;
   }
   if (!orbitStageRef.value || reducedMotion.value) return;
-  if (pointerReturnFrame) { cancelAnimationFrame(pointerReturnFrame); pointerReturnFrame = 0; }
   const rect = orbitStageRef.value.getBoundingClientRect();
   pointerOffset.value = clamp(((event.clientX - rect.left) / rect.width - .5) * .7, -.35, .35);
 }
@@ -529,18 +528,7 @@ function endDrag(event: PointerEvent) {
 
 function leaveOrbit() {
   if (dragging.value) return;
-  settlePointerOffset();
-}
-
-function settlePointerOffset() {
-  const distance = pointerOffset.value;
-  if (Math.abs(distance) < .002) {
-    pointerOffset.value = 0;
-    pointerReturnFrame = 0;
-    return;
-  }
-  pointerOffset.value = distance * .72;
-  pointerReturnFrame = requestAnimationFrame(settlePointerOffset);
+  pointerOffset.value = 0;
 }
 
 function handleMobileScroll() {
@@ -681,7 +669,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', scheduleScrollMeasure);
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
-  if (pointerReturnFrame) cancelAnimationFrame(pointerReturnFrame);
   window.clearTimeout(mobileScrollTimer);
   window.clearTimeout(catalogWarmTimer);
   window.clearTimeout(openingSymbolWarmTimer);
@@ -758,6 +745,8 @@ onUnmounted(() => {
 
 .orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(540px, 44vw); padding: 0; border: 0; color: inherit; background: transparent; transform: translate(-50%, -50%); text-align: center; cursor: pointer; }
 .orbit-story:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 10px; border-radius: 16px; box-shadow: 0 0 0 5px #08151a; }
+.orbit-story-enter-active { transition: opacity .34s ease-out, transform .52s cubic-bezier(.22, 1, .36, 1); }
+.orbit-story-enter-from { opacity: 0; transform: translate(-50%, -44%) scale(.92); }
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
