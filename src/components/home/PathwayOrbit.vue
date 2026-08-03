@@ -325,7 +325,7 @@ function assemblyStyle(index: number): OrbitVisual {
   const count = activeCatalog.value.length;
   const entryProgress = clamp((assemblyProgress.value * count - index) / 1.15, 0, 1);
   if (entryProgress <= 0) {
-    return { hidden: true, behind: true, style: { left: `${side < 0 ? -16 : 116}%`, top: '70%', opacity: '0', pointerEvents: 'none' } };
+    return { hidden: true, behind: true, style: { left: '-16%', top: '70%', opacity: '0', pointerEvents: 'none' } };
   }
   const t = easeOut(entryProgress);
   // Every route enters from the left, then advances around the orbit as the
