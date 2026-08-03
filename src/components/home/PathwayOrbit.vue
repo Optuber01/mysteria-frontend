@@ -78,6 +78,10 @@
             :tabindex="orbitStyles[index]?.hidden ? -1 : 0"
             :aria-label="`${entry.name}. ${entry.startingSequence}. ${entry.playstyle}`"
             :aria-pressed="index === selectedIndex"
+            @mouseenter="previewToken(index)"
+            @mouseleave="clearTokenPreview"
+            @focus="previewToken(index)"
+            @blur="clearTokenPreview"
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
@@ -221,6 +225,7 @@ const reducedMotion = useReducedMotion();
 const activeKind = ref<ProgressionKind>('pathway');
 const scrollProgress = ref(0);
 const selectedIndex = ref(0);
+const hoveredIndex = ref<number | null>(null);
 const rotation = ref(0);
 const targetRotation = ref(0);
 const pointerOffset = ref(0);
@@ -263,10 +268,10 @@ const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
 const interactionReady = computed(() => reducedMotion.value || compactLayout.value || phase.value === 'orbit');
 const assemblyCursor = computed(() => assemblyProgress.value * activeCatalog.value.length - 1);
 const assemblyIndex = computed(() => clamp(Math.floor(assemblyCursor.value), 0, activeCatalog.value.length - 1));
-const shownIndex = computed(() => interactionReady.value ? selectedIndex.value : assemblyIndex.value);
+const shownIndex = computed(() => hoveredIndex.value ?? (interactionReady.value ? selectedIndex.value : assemblyIndex.value));
 const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
 const selectedEntry = computed(() => activeCatalog.value[selectedIndex.value] ?? activeCatalog.value[0]);
-const activeStoryImage = computed(() => interactionReady.value ? activeEntry.value.image : activeEntry.value.thumbnail);
+const activeStoryImage = computed(() => hoveredIndex.value !== null || !interactionReady.value ? activeEntry.value.thumbnail : activeEntry.value.image);
 const hasActiveEntry = computed(() => reducedMotion.value || compactLayout.value || assemblyProgress.value * activeCatalog.value.length >= 1);
 const neutralTheme = { accent: '#c69b52', accent2: '#4f8275', ink: '#f7f2e7', surface: '#10201f', haze: '#345f58' };
 const themeStyle = computed(() => ({
@@ -385,6 +390,7 @@ function setKind(kind: ProgressionKind) {
   if (kind === 'boon') warmBoonSymbols();
   activeKind.value = kind;
   selectedIndex.value = 0;
+  hoveredIndex.value = null;
   rotation.value = 0;
   targetRotation.value = 0;
   pointerOffset.value = 0;
@@ -409,6 +415,7 @@ function previous() { if (hasActiveEntry.value) snapTo(selectedIndex.value - 1);
 function next() { if (hasActiveEntry.value) snapTo(selectedIndex.value + 1); }
 
 function selectAndOpen(index: number, event: Event) {
+  hoveredIndex.value = null;
   selectedIndex.value = index;
   snapTo(index);
   void openDetails(event);
@@ -433,6 +440,14 @@ function warmBoonSymbols() {
 
 function selectActiveAndOpen(event: Event) {
   selectAndOpen(shownIndex.value, event);
+}
+
+function previewToken(index: number) {
+  hoveredIndex.value = index;
+}
+
+function clearTokenPreview() {
+  hoveredIndex.value = null;
 }
 
 function startDrag(event: PointerEvent) {
@@ -614,7 +629,8 @@ onUnmounted(() => {
   position: relative;
   min-height: 270svh;
   color: var(--path-ink);
-  background: var(--path-surface);
+  background-color: var(--path-surface);
+  transition: background-color .34s ease-out, color .24s ease-out;
   /* Theme changes are immediate: animating a full-screen gradient repaints on
      every frame and is especially costly while the orbit is assembling. */
 }
@@ -633,6 +649,7 @@ onUnmounted(() => {
     radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 48%, transparent), transparent 35%),
     radial-gradient(circle at 15% 70%, color-mix(in srgb, var(--path-accent-2) 22%, transparent), transparent 30%),
     radial-gradient(circle at 88% 25%, color-mix(in srgb, var(--path-accent) 15%, transparent), transparent 26%);
+  transition: background .36s ease-out;
 }
 .is-low-power .ambient-field::before { display: none; }
 .is-low-power .ambient-field__haze { background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 38%, transparent), transparent 42%); }
