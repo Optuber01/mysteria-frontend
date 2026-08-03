@@ -84,7 +84,12 @@
           </button>
           </template>
 
-          <article v-if="hasActiveEntry" class="orbit-story" :aria-live="interactionReady ? 'polite' : 'off'">
+          <div v-if="!hasActiveEntry" class="orbit-idle" aria-hidden="true">
+            <span class="orbit-idle__mark"><i /><i /><i /></span>
+            <p>Scroll to bring the pathways into orbit.</p>
+          </div>
+
+          <article v-if="hasActiveEntry" class="orbit-story" :class="{ 'is-muted': previewIndex !== null }" :aria-live="interactionReady ? 'polite' : 'off'">
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
               <img :src="activeEntry.image" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
             </div>
@@ -100,9 +105,8 @@
             @mouseenter="cancelPreviewClose"
             @mouseleave="schedulePreviewClose"
           >
-            <header><span>PATHWAY ARCHIVE</span><button type="button" aria-label="Close pathway archive" @click="closePreview">×</button></header>
-            <h4>{{ activeEntry.name }}</h4>
-            <p>{{ activeEntry.sequenceCount }} sequences · {{ activeEntry.abilityCount }} abilities</p>
+            <header><span>SEQUENCE ARCHIVE</span><button type="button" aria-label="Close sequence archive" @click="closePreview">×</button></header>
+            <div class="sequence-card__title"><h4>{{ activeEntry.name }}</h4><p>{{ activeEntry.sequenceCount }} sequences</p></div>
             <div v-if="loadingSequenceId === activeEntry.id" class="sequence-card__loading">Loading archive…</div>
             <div v-else class="sequence-list">
               <details v-for="sequence in activeSequences" :key="sequence.sequence">
@@ -672,7 +676,7 @@ onUnmounted(() => {
 .vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 650 .63rem/1 "IBM Plex Mono", monospace; letter-spacing: .18em; }
 .vault-heading h2, .mobile-heading h2 { margin: 0; font: 600 clamp(2.7rem, 5vw, 5.3rem)/.98 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.018em; text-wrap: balance; }
 .vault-heading h2 em, .mobile-heading h2 em { color: var(--path-accent); font-style: normal; }
-.vault-heading > span { display: block; max-width: 350px; margin-top: 18px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font-size: .78rem; line-height: 1.65; }
+.vault-heading > span { display: block; max-width: 350px; margin-top: 22px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font-size: .8rem; line-height: 1.7; letter-spacing: .005em; }
 
 .catalog-tabs { position: absolute; z-index: 100; top: clamp(78px, 9vh, 112px); right: clamp(24px, 5vw, 78px); display: flex; min-height: 48px; padding: 4px; border: 1px solid color-mix(in srgb, var(--path-ink) 18%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--path-surface) 82%, transparent); backdrop-filter: blur(16px); }
 .catalog-tabs button { min-width: 124px; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); background: transparent; cursor: pointer; font: 700 .7rem/1 Manrope, sans-serif; }
@@ -696,32 +700,48 @@ onUnmounted(() => {
 .is-low-power .motif-stage::before { box-shadow: none; }
 
 .orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(300px, 25vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+.orbit-story.is-muted { opacity: .16; transform: translate(-50%, -50%) scale(.96); transition: opacity .14s linear, transform .16s ease-out; }
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
-.orbit-story h3 { margin: 0; font: 620 clamp(2.3rem, 3.8vw, 4.2rem)/.96 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.022em; text-wrap: balance; }
-.entry-kind { display: block; margin-top: 10px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
-.orbit-story > small { display: block; max-width: 270px; margin: 14px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .7rem; line-height: 1.55; }
+.orbit-story h3 { margin: 0; font: 620 clamp(2.3rem, 3.8vw, 4.2rem)/1.04 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.012em; text-wrap: balance; }
+.entry-kind { display: block; margin-top: 12px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1.35 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+.orbit-story > small { display: block; max-width: 270px; margin: 16px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; line-height: 1.65; letter-spacing: .005em; }
 
-.sequence-card { position: absolute; z-index: 120; left: 63%; top: 50%; width: min(360px, 30vw); max-height: min(390px, 44vh); overflow: hidden auto; padding: 14px; border: 1px solid color-mix(in srgb, var(--path-accent) 48%, transparent); border-radius: 12px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 98%, transparent); box-shadow: 0 18px 48px rgba(0,0,0,.24); opacity: 0; pointer-events: none; transform: translate(-50%, -46%) scale(.97); transition: opacity .12s linear, transform .16s ease-out; }
+.orbit-idle { position: absolute; z-index: 42; left: 50%; top: 50%; display: grid; justify-items: center; gap: 15px; width: min(260px, 42vw); transform: translate(-50%, -50%); color: color-mix(in srgb, var(--path-ink) 65%, transparent); text-align: center; }
+.orbit-idle__mark { position: relative; width: 90px; height: 90px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-accent) 40%, transparent); border-radius: 50%; }
+.orbit-idle__mark::before, .orbit-idle__mark::after { content: ""; position: absolute; border: 1px solid color-mix(in srgb, var(--path-accent) 28%, transparent); border-radius: inherit; animation: idle-orbit-pulse 2.5s ease-out infinite; }
+.orbit-idle__mark::before { inset: -12px; }
+.orbit-idle__mark::after { inset: -28px; animation-delay: 1.25s; }
+.orbit-idle__mark i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--path-accent); box-shadow: 0 0 16px color-mix(in srgb, var(--path-accent) 70%, transparent); animation: idle-orbit-dot 1.8s ease-in-out infinite; }
+.orbit-idle__mark i:nth-child(1) { transform: translateY(-31px); }
+.orbit-idle__mark i:nth-child(2) { transform: rotate(120deg) translateY(-31px); animation-delay: .2s; }
+.orbit-idle__mark i:nth-child(3) { transform: rotate(240deg) translateY(-31px); animation-delay: .4s; }
+.orbit-idle p { margin: 0; font: 650 .56rem/1.55 "IBM Plex Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
+
+.sequence-card { position: absolute; z-index: 120; left: 66%; top: 50%; width: clamp(280px, 24vw, 312px); max-height: min(340px, 38vh); overflow: hidden auto; padding: 13px 14px 12px; border: 1px solid color-mix(in srgb, var(--path-accent) 48%, transparent); border-radius: 10px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 99%, transparent); box-shadow: 0 18px 42px rgba(0,0,0,.3); scrollbar-width: thin; opacity: 0; pointer-events: none; transform: translate(-50%, -46%) scale(.97); transition: opacity .12s linear, transform .16s ease-out; }
 .sequence-card.is-visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
 .sequence-card header { display: flex; align-items: center; justify-content: space-between; color: var(--path-accent); font: 700 .53rem/1 "IBM Plex Mono", monospace; letter-spacing: .14em; }
-.sequence-card header button { width: 28px; height: 28px; border: 0; color: inherit; background: transparent; cursor: pointer; font-size: 1.2rem; }
-.sequence-card h4 { margin: 10px 0 3px; font: 620 clamp(1.7rem, 2.2vw, 2.25rem)/.98 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.016em; }
-.sequence-card > p { margin: 0 0 10px; color: color-mix(in srgb, var(--path-ink) 68%, transparent); font: 600 .5rem/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
-.sequence-card__loading { padding: 24px 0; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: .68rem/1.4 "IBM Plex Mono", monospace; }
+.sequence-card header button { width: 24px; height: 24px; padding: 0; border: 0; color: inherit; background: transparent; cursor: pointer; font-size: 1.15rem; line-height: 1; }
+.sequence-card__title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 9px 0 11px; }
+.sequence-card h4 { margin: 0; font: 620 clamp(1.35rem, 1.7vw, 1.75rem)/1.1 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.008em; }
+.sequence-card__title p { flex: 0 0 auto; margin: 0; color: color-mix(in srgb, var(--path-ink) 66%, transparent); font: 650 .48rem/1.35 "IBM Plex Mono", monospace; letter-spacing: .09em; text-transform: uppercase; }
+.sequence-card__loading { padding: 20px 0; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: .64rem/1.5 "IBM Plex Mono", monospace; }
 .sequence-list { display: grid; border-top: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); }
 .sequence-list details { border-bottom: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); }
-.sequence-list summary { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: 7px; padding: 9px 0; cursor: pointer; list-style: none; }
+.sequence-list summary { display: grid; grid-template-columns: 67px 1fr auto; align-items: center; gap: 7px; min-height: 38px; padding: 8px 0; cursor: pointer; list-style: none; }
 .sequence-list summary::-webkit-details-marker { display: none; }
 .sequence-list summary::after { content: '+'; color: var(--path-accent); font: 1rem/1 "IBM Plex Mono", monospace; }
 .sequence-list details[open] summary::after { content: '−'; }
-.sequence-list summary span { color: var(--path-accent); font: 650 .5rem/1 "IBM Plex Mono", monospace; text-transform: uppercase; }
-.sequence-list summary b { font-size: .72rem; }
-.sequence-list ul { display: grid; gap: 8px; margin: 0 0 11px; padding: 0; list-style: none; }
-.sequence-list li { display: grid; gap: 3px; padding-left: 10px; border-left: 1px solid color-mix(in srgb, var(--path-accent) 45%, transparent); }
-.sequence-list li strong { font-size: .68rem; }
-.sequence-list li span { color: color-mix(in srgb, var(--path-ink) 70%, transparent); font-size: .63rem; line-height: 1.42; }
+.sequence-list summary span { color: var(--path-accent); font: 650 .48rem/1.3 "IBM Plex Mono", monospace; text-transform: uppercase; }
+.sequence-list summary b { font-size: .7rem; line-height: 1.3; }
+.sequence-list ul { display: grid; gap: 9px; margin: 0 0 11px; padding: 0; list-style: none; }
+.sequence-list li { display: grid; gap: 4px; padding-left: 9px; border-left: 1px solid color-mix(in srgb, var(--path-accent) 45%, transparent); }
+.sequence-list li strong { font-size: .66rem; line-height: 1.35; }
+.sequence-list li span { color: color-mix(in srgb, var(--path-ink) 70%, transparent); font-size: .61rem; line-height: 1.5; }
+
+@keyframes idle-orbit-pulse { 0%, 100% { opacity: .06; transform: scale(.82); } 45% { opacity: .54; } 70% { opacity: 0; transform: scale(1.08); } }
+@keyframes idle-orbit-dot { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
 
 .assembly-readout { position: absolute; z-index: 80; left: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); width: min(300px, 25vw); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; }
 .assembly-readout > i { height: 1px; overflow: hidden; background: color-mix(in srgb, var(--path-ink) 15%, transparent); }

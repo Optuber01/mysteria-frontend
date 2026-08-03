@@ -165,6 +165,18 @@ const pathwayTaglines: Record<string, string> = {
   tyrant: 'Call the sea, storm, and lightning to your command.',
   visionary: 'Enter the mind, shape dreams, and imagine reality anew.',
 };
+const boonTaglines: Record<string, string> = {
+  aeon: 'Bend time, preserve a moment, and return when fate allows.',
+  chaos: 'Harness unstable power where every choice has a consequence.',
+  chaosmist: 'Shroud the field in uncertainty and make certainty unravel.',
+  condenser: 'Compress raw power into precise, controlled force.',
+  devouring: 'Consume strength, deny resources, and grow from every encounter.',
+  edict: 'Speak a command that turns intention into law.',
+  everlasting: 'Outlast the fight through relentless endurance and renewal.',
+  patriarch: 'Build authority, protect your domain, and lead from the front.',
+  secondlaw: 'Rewrite the rules after the first answer is already chosen.',
+  sublunary: 'Draw on moonlit mysteries, subtle rites, and hidden influence.',
+};
 const titleCase = (id: string) => id
   .replace(/[-_]+/g, ' ')
   .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -188,7 +200,7 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
     startingSequence: `Sequence ${startingNumber} · ${startingName}`,
     startingSequenceNumber: startingNumber,
     strengths,
-    tagline: pathwayTaglines[entry.id] ?? `Discover the ${pathwayNames[entry.id] ?? titleCase(entry.id)} Pathway.`,
+    tagline: pathwayTaglines[entry.id] ?? boonTaglines[entry.id] ?? `Discover the ${pathwayNames[entry.id] ?? titleCase(entry.id)} Pathway.`,
     playstyle: strengths.slice(0, 2).join(' · '),
     summary: `${entry.abilityCount} documented abilities across ${entry.sequenceCount} Sequences in Mysterria.`,
     wikiSummary: lotmWikiTopics[entry.id],
