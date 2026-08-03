@@ -30,6 +30,8 @@
             role="tab"
             :aria-selected="activeKind === option.id"
             :aria-controls="`${option.id}-panel`"
+            @mouseenter="warmCatalog(option.id)"
+            @focus="warmCatalog(option.id)"
             @click="setKind(option.id)"
           >
             <span>{{ option.label }}</span><b>{{ option.count }}</b>
@@ -67,7 +69,12 @@
               'is-behind': orbitStyles[index]?.behind,
               'is-hidden': orbitStyles[index]?.hidden,
             }"
-            :style="orbitStyles[index]?.style"
+            :style="[orbitStyles[index]?.style, {
+              '--token-accent': entry.theme.accent,
+              '--token-haze': entry.theme.haze,
+              '--token-surface': entry.theme.surface,
+              '--token-ink': entry.theme.ink,
+            }]"
             :tabindex="orbitStyles[index]?.hidden ? -1 : 0"
             :aria-label="`${entry.name}. ${entry.startingSequence}. ${entry.playstyle}`"
             :aria-pressed="index === selectedIndex"
@@ -117,9 +124,11 @@
           :key="option.id"
           type="button"
           role="tab"
-          :aria-selected="activeKind === option.id"
-          :aria-controls="`${option.id}-mobile-panel`"
-          @click="setKind(option.id)"
+            :aria-selected="activeKind === option.id"
+            :aria-controls="`${option.id}-mobile-panel`"
+            @mouseenter="warmCatalog(option.id)"
+            @focus="warmCatalog(option.id)"
+            @click="setKind(option.id)"
         >
           <span>{{ option.label }}</span><b>{{ option.count }}</b>
         </button>
@@ -404,6 +413,10 @@ function selectAndOpen(index: number, event: Event) {
   void openDetails(event);
 }
 
+function warmCatalog(kind: ProgressionKind) {
+  if (kind === 'boon') warmBoonSymbols();
+}
+
 function warmBoonSymbols() {
   if (boonSymbolsWarmed) return;
   boonSymbolsWarmed = true;
@@ -564,7 +577,6 @@ onMounted(() => {
     inView.value = entry.isIntersecting;
     if (entry.isIntersecting) {
       scheduleScrollMeasure();
-      warmBoonSymbols();
     }
     else if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
     if (!entry.isIntersecting && detailsOpen.value) void closeDetails(false);
@@ -645,11 +657,11 @@ onUnmounted(() => {
 .orbit-token.is-behind { opacity: .68; }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }
 .orbit-token:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 2px; border-radius: 18px; box-shadow: 0 0 0 5px #08151a; }
-.token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-ink) 24%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--path-surface) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
-.orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--path-accent); background: color-mix(in srgb, var(--path-haze) 40%, var(--path-surface)); transform: scale(1.14); }
+.token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--token-accent, var(--path-ink)) 42%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--token-surface, var(--path-surface)) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
+.orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--token-accent, var(--path-accent)); background: color-mix(in srgb, var(--token-haze, var(--path-haze)) 40%, var(--token-surface, var(--path-surface))); transform: scale(1.14); }
 .token-seal img { width: 57px; height: 57px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,.28)); }
-.orbit-token > strong { max-width: 108px; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: .64rem; white-space: nowrap; }
-.orbit-token > small { color: color-mix(in srgb, var(--path-ink) 68%, transparent); font: 600 .46rem/1 "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
+.orbit-token > strong { max-width: 108px; overflow: hidden; text-overflow: ellipsis; color: color-mix(in srgb, var(--token-ink, var(--path-ink)) 92%, transparent); font-size: .64rem; white-space: nowrap; }
+.orbit-token > small { color: color-mix(in srgb, var(--token-ink, var(--path-ink)) 68%, transparent); font: 600 .46rem/1 "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
 .is-low-power .token-seal { box-shadow: none; }
 .is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }
 .is-low-power .motif-stage::before { box-shadow: none; }
