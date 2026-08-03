@@ -297,7 +297,7 @@ type OrbitVisual = { hidden: boolean; behind: boolean; style: CSSProperties };
 const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, index) => {
   if (phase.value === 'entry' || phase.value === 'assembly') return assemblyStyle(index);
   const delta = signedWrap(index - (rotation.value + pointerOffset.value), activeCatalog.value.length);
-  const angle = -Math.PI / 2 + delta * ((Math.PI * 2) / activeCatalog.value.length);
+  const angle = -Math.PI / 2 - delta * ((Math.PI * 2) / activeCatalog.value.length);
   const x = 50 + Math.cos(angle) * 42;
   const y = 50 + Math.sin(angle) * 34;
   const depth = (Math.sin(angle) + 1) / 2;
@@ -321,10 +321,10 @@ function assemblyStyle(index: number): OrbitVisual {
     return { hidden: true, behind: true, style: { left: '-16%', top: '70%', opacity: '0', pointerEvents: 'none' } };
   }
   const t = easeOut(entryProgress);
-  // Each new route arrives at the top of the orbit. It pushes every route
-  // already present one slot clockwise, so the first seal visibly scoots
-  // around the ring as the archive fills.
-  const orbitSlot = visibleCount - 1 - index - rotation.value;
+  // Each new route arrives beside the top of the orbit and pushes every route
+  // already present around the ring. This converges exactly to the completed
+  // orbit order, avoiding a final-frame remap when the 22nd seal arrives.
+  const orbitSlot = visibleCount - index - rotation.value;
   const angle = -Math.PI / 2 + orbitSlot * ((Math.PI * 2) / count);
   const targetX = 50 + Math.cos(angle) * 42;
   const targetY = 50 + Math.sin(angle) * 34;
