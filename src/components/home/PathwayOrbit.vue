@@ -56,10 +56,6 @@
           @pointercancel="endDrag"
           @pointerleave="leaveOrbit"
         >
-          <div class="orbit-geometry" aria-hidden="true">
-            <i />
-          </div>
-
           <template v-for="(entry, index) in activeCatalog" :key="entry.id">
           <button
             v-if="!orbitStyles[index]?.hidden"
@@ -82,7 +78,7 @@
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
-              <img :src="entry.image" alt="" width="96" height="96" loading="lazy" decoding="async" @error="replaceBrokenImage">
+              <img :src="entry.image" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
               <i>{{ String(index + 1).padStart(2, '0') }}</i>
             </span>
             <strong>{{ entry.name }}</strong>
@@ -91,7 +87,7 @@
 
           <article class="orbit-story" :aria-live="interactionReady ? 'polite' : 'off'">
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
-              <img :src="activeEntry.image" alt="" width="220" height="220" loading="lazy" decoding="async" @error="replaceBrokenImage">
+              <img :src="activeEntry.image" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
             </div>
             <p>{{ activeEntry.startingSequence }}</p>
             <h3>{{ activeEntry.name }}</h3>
@@ -100,6 +96,9 @@
               <li v-for="strength in activeEntry.strengths" :key="strength">{{ strength }}</li>
             </ul>
             <small>{{ activeEntry.summary }}</small>
+            <a v-if="activeEntry.wikiSummary && activeEntry.wikiUrl" class="wiki-strip" :href="activeEntry.wikiUrl" target="_blank" rel="noreferrer" @click.stop>
+              <b>LOTM WIKI</b><span>{{ activeEntry.wikiSummary }}</span><i aria-hidden="true">↗</i>
+            </a>
           </article>
 
           <div class="assembly-readout" aria-hidden="true">
@@ -325,20 +324,21 @@ const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, in
 function assemblyStyle(index: number): OrbitVisual {
   const count = activeCatalog.value.length;
   const entryProgress = clamp((assemblyProgress.value * count - index) / 1.15, 0, 1);
-  const side = index % 2 === 0 ? -1 : 1;
   if (entryProgress <= 0) {
     return { hidden: true, behind: true, style: { left: `${side < 0 ? -16 : 116}%`, top: '70%', opacity: '0', pointerEvents: 'none' } };
   }
   const t = easeOut(entryProgress);
-  const angle = -Math.PI / 2 + index * ((Math.PI * 2) / count);
+  // Every route enters from the left, then advances around the orbit as the
+  // following routes arrive instead of snapping directly to its final slot.
+  const angle = -Math.PI / 2 + (index - (1 - t) * 3.4) * ((Math.PI * 2) / count);
   const targetX = 50 + Math.cos(angle) * 42;
   const targetY = 50 + Math.sin(angle) * 34;
   const depth = (Math.sin(angle) + 1) / 2;
   return {
     hidden: false, behind: depth < .42,
     style: {
-      left: `${mix(side < 0 ? -16 : 116, targetX, t)}%`,
-      top: `${mix(50 + (index % 3 - 1) * 16, targetY, t)}%`,
+      left: `${mix(-14, targetX, t)}%`,
+      top: `${mix(50 + (index % 3 - 1) * 10, targetY, t)}%`,
       opacity: String(t * (.46 + depth * .54)),
       zIndex: String(18 + Math.round(depth * 46)),
       transform: `translate(-50%, -50%) scale(${(.5 + depth * .26) + t * .2})`,
@@ -591,7 +591,7 @@ onUnmounted(() => {
   min-height: 420svh;
   color: var(--path-ink);
   background: var(--path-surface);
-  transition: color .16s ease-out, background-color .16s ease-out;
+  transition: color .08s linear, background-color .08s linear;
 }
 
 .ambient-field { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
@@ -608,7 +608,7 @@ onUnmounted(() => {
     radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 48%, transparent), transparent 35%),
     radial-gradient(circle at 15% 70%, color-mix(in srgb, var(--path-accent-2) 22%, transparent), transparent 30%),
     radial-gradient(circle at 88% 25%, color-mix(in srgb, var(--path-accent) 15%, transparent), transparent 26%);
-  transition: background .16s ease-out;
+  transition: background .08s linear;
 }
 
 .desktop-experience { height: 440svh; }
@@ -628,8 +628,6 @@ onUnmounted(() => {
 .is-interactive .orbit-stage { cursor: grab; }
 .is-interactive .orbit-stage:active { cursor: grabbing; }
 .orbit-stage:focus-visible { outline: 3px solid #fcf9f2; outline-offset: -10px; box-shadow: inset 0 0 0 5px #08151a; }
-.orbit-geometry { position: absolute; z-index: 4; left: 50%; top: 51%; width: min(84vw, 1200px); aspect-ratio: 2 / 1; transform: translate(-50%, -50%); border: 1px solid color-mix(in srgb, var(--path-accent) 31%, transparent); border-radius: 50%; opacity: .68; transition: opacity .6s; }
-
 .orbit-token { position: absolute; width: 94px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 6px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 77%, transparent); background: transparent; cursor: pointer; will-change: left, top, transform, opacity; transition: left .18s ease-out, top .18s ease-out, transform .16s ease-out, opacity .12s linear, filter .12s linear; }
 .orbit-token.is-hidden { visibility: hidden; }
 .orbit-token.is-behind { filter: saturate(.55) brightness(.72); }
@@ -651,6 +649,11 @@ onUnmounted(() => {
 .orbit-story ul { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin: 14px auto 8px; padding: 0; list-style: none; }
 .orbit-story li { padding: 6px 8px; border: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); border-radius: 999px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); background: color-mix(in srgb, var(--path-surface) 72%, transparent); font: 600 .5rem/1 "IBM Plex Mono", monospace; }
 .orbit-story small { color: color-mix(in srgb, var(--path-ink) 72%, transparent); font-size: .62rem; line-height: 1.5; }
+.wiki-strip { width: min(370px, 100%); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; margin: 16px auto 0; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--path-accent) 42%, transparent); border-radius: 10px; color: color-mix(in srgb, var(--path-ink) 88%, transparent); background: color-mix(in srgb, var(--path-surface) 82%, transparent); text-align: left; text-decoration: none; pointer-events: auto; transition: border-color .1s linear, background .1s linear; }
+.wiki-strip:hover { border-color: var(--path-accent); background: color-mix(in srgb, var(--path-haze) 44%, var(--path-surface)); }
+.wiki-strip b { color: var(--path-accent); font: 700 .48rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; white-space: nowrap; }
+.wiki-strip span { overflow: hidden; font: 600 .52rem/1.35 "IBM Plex Mono", monospace; text-overflow: ellipsis; white-space: nowrap; }
+.wiki-strip i { color: var(--path-accent); font-style: normal; }
 
 .assembly-readout { position: absolute; z-index: 80; left: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); width: min(300px, 25vw); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; }
 .assembly-readout > i { height: 1px; overflow: hidden; background: color-mix(in srgb, var(--path-ink) 15%, transparent); }

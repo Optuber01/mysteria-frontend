@@ -36,6 +36,8 @@ export type HomePathway = {
   strengths: string[];
   playstyle: string;
   summary: string;
+  wikiSummary?: string;
+  wikiUrl?: string;
   sequenceCount: number;
   abilityCount: number;
   motif: ProgressionMotif;
@@ -113,6 +115,31 @@ function visual(motif: ProgressionMotif, accent: string, accent2: string, ink: s
 }
 
 const neutral = visual('spiral', '#c69b52', '#4f8275', '#f7f2e7', '#10201f', '#345f58');
+const lotmWikiTopics: Record<string, string> = {
+  fool: 'Divination · Illusion · Shapeshifting · Puppetry',
+  door: 'Door opening · Replication · Teleportation · Space',
+  error: 'Theft · Deceit · Parasitism · Time manipulation',
+  visionary: 'Mind reading · Dreams · Envisioning · Mind world',
+  hanged: 'Soul grazing · Shadows · Flesh and blood magic',
+  sun: 'Light · Purification · Notarization · Holiness',
+  tyrant: 'Ocean · Wind · Lightning · Calamity',
+  tower: 'Knowledge · Analysis · Imitation · Prophecy',
+  darkness: 'Dreams · Requiem · Concealment · Misfortune',
+  death: 'Necromancy · Spirit channeling · Undead · Underworld',
+  giant: 'Giant physique · Weapons · Protection · Twilight',
+  priest: 'Provocation · Pyrokinesis · Conspiracy · War',
+  demoness: 'Black magic · Mirrors · Disease · Catastrophe',
+  paragon: 'Craftsmanship · Technology · Artificial life',
+  hermit: 'Mystery prying · Scrolls · Stardust · Clairvoyance',
+  fortune: 'Luck · Fate · Probability · Reincarnation',
+  moon: 'Potion making · Beast taming · Regeneration',
+  mother: 'Healing · Alchemy · Life · Biological mutation',
+  chained: 'Mutant forms · Curses · Possession · Binding',
+  abyss: 'Demonic spells · Desire · Corruption · Depravity',
+  emperor: 'Bribery · Distortion · Disorder · Resurrection',
+  justiciar: 'Rules · Territory · Punishment · Order',
+};
+const lotmWikiBase = 'https://lordofthemysteries.fandom.com/wiki/';
 const titleCase = (id: string) => id
   .replace(/[-_]+/g, ' ')
   .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -138,6 +165,8 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
     strengths,
     playstyle: strengths.slice(0, 2).join(' · '),
     summary: `${entry.abilityCount} documented abilities across ${entry.sequenceCount} Sequences in Mysterria.`,
+    wikiSummary: lotmWikiTopics[entry.id],
+    wikiUrl: lotmWikiTopics[entry.id] ? `${lotmWikiBase}${encodeURIComponent(`${pathwayNames[entry.id]} Pathway`)}` : undefined,
     sequenceCount: entry.sequenceCount,
     abilityCount: entry.abilityCount,
     ...display,
