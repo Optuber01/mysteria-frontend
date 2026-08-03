@@ -38,6 +38,7 @@
           >
             <FormulaBookScene
               :progress="bookLocal"
+              :closing-progress="bookClosingLocal"
               :active="bookOpacity > 0.5"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
@@ -249,10 +250,15 @@ function fadeWindow(fadeInStart: number, fadeOutStart: number, fadeOutEnd: numbe
 }
 
 const bookLocal = computed(() => windowProgress(0, 0.28));
+// Step two begins with the physical book still on stage. Reverse only the
+// opening portion of its pose while the altar settles underneath it, so the
+// pages close around the departing ingredients instead of the whole book
+// simply cross-fading away.
+const bookClosingLocal = computed(() => windowProgress(0.412, 0.515));
 const altarLocal = computed(() => windowProgress(0.38, 0.68));
 const drinkLocal = computed(() => windowProgress(0.68, 1));
 
-const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.42, 0.46)));
+const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.485, 0.525)));
 const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.39, 0.68, 0.71, 0.43)));
 const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.66, 2, 2, 0.69)));
 
@@ -324,8 +330,9 @@ function goToChapter(index: number) {
   const chapter = chapters[index];
   const range = sectionRef.value.offsetHeight - innerHeight;
   const top = sectionRef.value.getBoundingClientRect().top + scrollY;
+  const chapterLead = index === 1 ? 0.06 : 0.35;
   clearDetail();
-  scrollTo({ top: top + range * (chapter.start + (chapter.end - chapter.start) * 0.35), behavior: reducedMotion.value ? 'auto' : 'smooth' });
+  scrollTo({ top: top + range * (chapter.start + (chapter.end - chapter.start) * chapterLead), behavior: reducedMotion.value ? 'auto' : 'smooth' });
 }
 
 onMounted(() => {

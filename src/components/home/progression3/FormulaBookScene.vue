@@ -6,7 +6,7 @@
 
     <div class="book-viewport">
       <div class="book-scene__glow" aria-hidden="true" />
-      <VanillaBookRig :progress="p" :reduced-motion="reducedMotion" />
+      <VanillaBookRig :progress="rigProgress" :reduced-motion="reducedMotion" />
 
       <div class="formula-hotspots" :aria-hidden="!readable">
         <section class="hotspot-page hotspot-page--left" aria-label="Main ingredients page">
@@ -71,7 +71,13 @@ import { computed } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import VanillaBookRig from './VanillaBookRig.vue';
 
-const props = defineProps<{ progress: number; active: boolean }>();
+const props = withDefaults(defineProps<{
+  progress: number;
+  active: boolean;
+  closingProgress?: number;
+}>(), {
+  closingProgress: 0,
+});
 const emit = defineEmits<{
   (e: 'inspect', id: string, anchor: HTMLElement): void;
   (e: 'clear-inspect'): void;
@@ -97,10 +103,14 @@ function smoothstep(value: number): number {
 }
 
 const p = computed(() => clamp01(props.progress));
+const closeT = computed(() => smoothstep(props.closingProgress));
+// 0.44 is the settled, cover-facing pose: the leaves and cover are closed,
+// but the book remains fully risen out of the threshold fog while it exits.
+const rigProgress = computed(() => reducedMotion.value ? 1 : p.value * (1 - closeT.value * 0.56));
 // The formula itself is part of the physical page textures. Only the invisible
 // semantic hit regions wait until the book settles and aligns with the viewport.
 const readT = computed(() => reducedMotion.value ? 1 : smoothstep((p.value - 0.945) / 0.04));
-const readable = computed(() => props.active && readT.value > 0.92);
+const readable = computed(() => props.active && readT.value > 0.92 && closeT.value < 0.04);
 const sceneVars = computed(() => ({
   '--read': readT.value.toFixed(4),
   '--caption-opacity': (reducedMotion.value ? 1 : smoothstep((p.value - 0.26) / 0.15)).toFixed(4),
@@ -136,6 +146,7 @@ function inspect(id: string, event: Event) {
   text-transform: uppercase;
   white-space: nowrap;
   opacity: var(--caption-opacity, 0);
+  pointer-events: none;
   transform: translateX(-50%);
 }
 
@@ -165,6 +176,7 @@ function inspect(id: string, event: Event) {
   background: radial-gradient(ellipse, rgba(223, 185, 104, 0.24), rgba(72, 133, 110, 0.12) 48%, transparent 72%);
   filter: blur(20px);
   opacity: var(--glow-opacity, 0);
+  pointer-events: none;
 }
 
 .formula-hotspots {
