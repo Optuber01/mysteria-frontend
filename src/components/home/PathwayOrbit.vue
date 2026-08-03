@@ -247,10 +247,10 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch, type CSSProperties } from 'vue';
-import { boonPathways, standardPathways, type ProgressionKind } from '@/data/pathways';
+import { boonPathways, standardPathways, type HomePathway, type ProgressionKind } from '@/data/pathways';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
-const emit = defineEmits<{ selected: [name: string] }>();
+const emit = defineEmits<{ selected: [pathway: HomePathway] }>();
 const sectionRef = ref<HTMLElement | null>(null);
 const orbitStageRef = ref<HTMLElement | null>(null);
 const mobileRailRef = ref<HTMLElement | null>(null);
@@ -449,7 +449,8 @@ function setKind(kind: ProgressionKind) {
   targetRotation.value = 0;
   pointerOffset.value = 0;
   requestAnimationFrame(() => mobileRailRef.value?.scrollTo({ left: 0, behavior: reducedMotion.value ? 'auto' : 'smooth' }));
-  emit('selected', activeCatalog.value[0]?.name ?? '');
+  const entry = activeCatalog.value[0];
+  if (entry) emit('selected', entry);
 }
 
 function snapTo(index: number, announce = true) {
@@ -462,7 +463,7 @@ function snapTo(index: number, announce = true) {
   selectedIndex.value = normalized;
   previewIndex.value = null;
   pointerOffset.value = 0;
-  if (announce) emit('selected', activeCatalog.value[normalized].name);
+  if (announce) emit('selected', activeCatalog.value[normalized]);
   startOrbitAnimation();
 }
 
@@ -510,7 +511,7 @@ function endDrag(event: PointerEvent) {
   const index = normalizeIndex(Math.round(rotation.value));
   targetRotation.value = Math.round(rotation.value);
   selectedIndex.value = index;
-  emit('selected', activeCatalog.value[index].name);
+  emit('selected', activeCatalog.value[index]);
   startOrbitAnimation();
 }
 
@@ -547,7 +548,7 @@ function handleMobileScroll() {
       selectedIndex.value = nearest;
       rotation.value = nearest;
       targetRotation.value = nearest;
-      emit('selected', activeCatalog.value[nearest].name);
+      emit('selected', activeCatalog.value[nearest]);
     }
   }, 90);
 }

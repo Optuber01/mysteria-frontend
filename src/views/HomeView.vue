@@ -27,7 +27,7 @@
         :class="{ 'is-pending': !joinReady }"
         :aria-busy="!joinReady"
       >
-        <JoinJourney v-if="joinReady" />
+        <JoinJourney v-if="joinReady" :selected-pathway="selectedPathway" />
       </div>
     </main>
     <FooterItem />
@@ -41,10 +41,11 @@ import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
 import ProgressionStory from '@/components/home/ProgressionStoryV3.vue';
 import type { NewsArticle } from '@/types/news';
+import type { HomePathway } from '@/data/pathways';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
 
 const latestNews = ref<NewsArticle[]>([]);
-const selectedPathway = ref('Fool');
+const selectedPathway = ref<HomePathway | null>(null);
 const pathwayReady = ref(false);
 const worldReady = ref(false);
 const joinReady = ref(false);
