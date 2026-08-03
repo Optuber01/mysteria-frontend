@@ -263,8 +263,12 @@ function addTexturedLeaf(
   const faceGeometry = geometry(new THREE.PlaneGeometry(width, height));
   const frontMaterial = basicMaterial({
     map: makeRegionTexture(...front, frontPainter),
-    transparent: true,
-    alphaTest: 0.01,
+    transparent: false,
+    opacity: 1,
+    alphaTest: 0,
+    depthTest: true,
+    depthWrite: true,
+    blending: THREE.NoBlending,
     side: THREE.FrontSide,
   });
   const frontFace = new THREE.Mesh(faceGeometry, frontMaterial);
@@ -273,8 +277,12 @@ function addTexturedLeaf(
 
   const backMaterial = basicMaterial({
     map: makeRegionTexture(...back, backPainter),
-    transparent: true,
-    alphaTest: 0.01,
+    transparent: false,
+    opacity: 1,
+    alphaTest: 0,
+    depthTest: true,
+    depthWrite: true,
+    blending: THREE.NoBlending,
     side: THREE.FrontSide,
   });
   const backFace = new THREE.Mesh(faceGeometry, backMaterial);
@@ -307,7 +315,7 @@ function buildBook(formulaImages: FormulaImages) {
     width: 5.25,
     height: 8.65,
     depth: 0,
-    z: 0.12,
+    z: -0.18,
     color: 0xe8ddb4,
     front: [13, 11, 5, 8],
     back: [19, 11, 5, 8],
@@ -332,8 +340,12 @@ function buildBook(formulaImages: FormulaImages) {
   const turningMaterial = basicMaterial({
     map: makeRegionTexture(24, 10, 5, 8),
     color: 0xfff7d7,
-    transparent: true,
-    alphaTest: 0.01,
+    transparent: false,
+    opacity: 1,
+    alphaTest: 0,
+    depthTest: true,
+    depthWrite: true,
+    blending: THREE.NoBlending,
     side: THREE.DoubleSide,
   });
   const turningGeometry = geometry(new THREE.PlaneGeometry(5.15, 8.45, 6, 1));
@@ -365,8 +377,12 @@ function buildBook(formulaImages: FormulaImages) {
   const seamMaterial = basicMaterial({
     map: makeRegionTexture(12, 0, 2, 10),
     color: 0xffffff,
-    transparent: true,
-    alphaTest: 0.01,
+    transparent: false,
+    opacity: 1,
+    alphaTest: 0,
+    depthTest: true,
+    depthWrite: true,
+    blending: THREE.NoBlending,
   });
   const seam = new THREE.Mesh(geometry(new THREE.BoxGeometry(0.42, 10.15, 0.76)), seamMaterial);
   seam.position.z = 0.06;
