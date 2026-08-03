@@ -115,6 +115,7 @@ const PIXEL_GLYPHS: Record<string, readonly string[]> = {
   A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
   B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
   C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
   F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
   H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
   E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
@@ -134,6 +135,7 @@ const PIXEL_GLYPHS: Record<string, readonly string[]> = {
   W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
   X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
   Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  '9': ['01110', '10001', '10001', '01111', '00001', '00001', '01110'],
   ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
 };
 
@@ -245,21 +247,21 @@ function paintCoverArtwork(context: CanvasRenderingContext2D, logo: HTMLImageEle
   context.drawImage(logo, width / 2 - 68, 101, 136, 136);
   context.imageSmoothingEnabled = false;
 
-  drawPixelLineWithShadow(context, 'MYSTERRIA ARCHIVES', width / 2, 286, 3, paleGold);
+  drawPixelLineWithShadow(context, 'FOOL PATHWAY', width / 2, 286, 3, paleGold);
   context.fillStyle = 'rgba(217, 170, 78, 0.74)';
   context.fillRect(86, 345, 126, 4);
   context.fillRect(width - 212, 345, 126, 4);
   context.fillRect(width / 2 - 8, 337, 16, 16);
 
-  drawPixelLineWithShadow(context, 'SEER PATHWAY', width / 2, 392, 5, '#f3d684');
-  drawPixelLineWithShadow(context, 'SEQUENCE IX', width / 2, 474, 4, '#dcb35e');
+  drawPixelLineWithShadow(context, 'SEQUENCE 9', width / 2, 392, 5, '#f3d684');
+  drawPixelLineWithShadow(context, 'SEER', width / 2, 474, 4, '#dcb35e');
 
   context.strokeStyle = 'rgba(217, 170, 78, 0.68)';
   context.lineWidth = 3;
   context.strokeRect(100, 550, width - 200, 96);
   context.fillStyle = 'rgba(217, 170, 78, 0.13)';
   context.fillRect(108, 558, width - 216, 80);
-  drawPixelLineWithShadow(context, 'FORMULARY', width / 2, 579, 4, paleGold);
+  drawPixelLineWithShadow(context, 'BEYONDER RECIPE', width / 2, 582, 3, paleGold);
 
   context.fillStyle = 'rgba(217, 170, 78, 0.66)';
   for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
