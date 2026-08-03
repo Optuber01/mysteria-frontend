@@ -405,7 +405,7 @@ function selectActiveAndOpen(event: Event) {
 }
 
 function startDrag(event: PointerEvent) {
-  if (!hasActiveEntry.value || event.button !== 0 || (event.target as HTMLElement).closest('button, a')) return;
+  if (!hasActiveEntry.value || event.button !== 0 || (event.target as HTMLElement).closest('button, a, [role="button"]')) return;
   dragging.value = true;
   pointerOffset.value = 0;
   lastPointerX = event.clientX;
