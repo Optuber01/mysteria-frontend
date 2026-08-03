@@ -115,7 +115,7 @@
             v-if="hasActiveEntry"
             type="button"
             class="open-dossier"
-            :class="{ 'is-visible': interactionReady }"
+            :class="{ 'is-visible': hasActiveEntry }"
             @click="selectActiveAndOpen($event)"
           >
             Inspect {{ activeEntry.name }} <span aria-hidden="true">↗</span>
@@ -702,7 +702,7 @@ onUnmounted(() => {
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
-.orbit-story h3 { margin: 0; overflow: hidden; font: 620 clamp(2.25rem, 3.5vw, 4rem)/1 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.018em; text-overflow: ellipsis; white-space: nowrap; }
+.orbit-story h3 { margin: 0; max-width: 100%; font: 620 clamp(2.15rem, 3.35vw, 3.8rem)/1.12 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.018em; white-space: nowrap; }
 .entry-kind { display: block; margin-top: 9px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
 .orbit-story > small { display: block; overflow: hidden; max-width: 470px; margin: 12px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; line-height: 1.35; letter-spacing: .005em; text-overflow: ellipsis; white-space: nowrap; }
 
