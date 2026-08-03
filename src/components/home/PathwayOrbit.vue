@@ -747,6 +747,8 @@ onUnmounted(() => {
 .orbit-story:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 10px; border-radius: 16px; box-shadow: 0 0 0 5px #08151a; }
 .orbit-story-enter-active { transition: opacity .34s ease-out, transform .52s cubic-bezier(.22, 1, .36, 1); }
 .orbit-story-enter-from { opacity: 0; transform: translate(-50%, -34%) scale(.92); }
+.orbit-story-leave-active { transition: opacity .24s ease-in, transform .34s cubic-bezier(.4, 0, 1, 1); }
+.orbit-story-leave-to { opacity: 0; transform: translate(-50%, -58%) scale(.96); }
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
