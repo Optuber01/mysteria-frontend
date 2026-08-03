@@ -297,8 +297,10 @@ const drinkLocal = computed(() => windowProgress(0.66, 0.86));
 const digestLocal = computed(() => windowProgress(0.84, 1));
 
 const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.31, 0.36)));
-const buildOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.33, 0.49, 0.53, 0.37)));
-const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.48, 0.66, 0.70, 0.52)));
+// Keep the construction model and the brewing GUI distinct, especially on
+// mobile where their physical overlap made the handoff look like two altars.
+const buildOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.33, 0.48, 0.50, 0.37)));
+const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.50, 0.66, 0.70, 0.52)));
 const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.65, 0.84, 0.87, 0.69)));
 const digestOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.83, 2, 2, 0.87)));
 
