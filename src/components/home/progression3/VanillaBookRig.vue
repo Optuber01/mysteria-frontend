@@ -55,7 +55,7 @@ type FormulaImages = {
   stellarAquaCrystal: HTMLImageElement;
   goldMintLeaves: HTMLImageElement;
   foolRecipe: HTMLImageElement;
-  foolPathwaySymbol: HTMLImageElement;
+  mysterriaLogo: HTMLImageElement;
 };
 
 type TexturePainter = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -98,24 +98,15 @@ function makeRegionTexture(
   return texture;
 }
 
-function makePixelSymbolTexture(image: HTMLImageElement): THREE.Texture {
-  const pixelCanvas = document.createElement('canvas');
-  pixelCanvas.width = 32;
-  pixelCanvas.height = 32;
-  const context = pixelCanvas.getContext('2d');
-  if (!context) throw new Error('A 2D canvas is required to prepare the Fool Pathway emblem.');
-
-  context.clearRect(0, 0, pixelCanvas.width, pixelCanvas.height);
-  context.imageSmoothingEnabled = false;
-  context.drawImage(image, 1, 1, 30, 30);
-
-  const texture = new THREE.CanvasTexture(pixelCanvas);
+function makeImageTexture(image: HTMLImageElement): THREE.Texture {
+  const texture = new THREE.Texture(image);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-  texture.generateMipmaps = false;
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.needsUpdate = true;
   ownedTextures.push(texture);
   return texture;
 }
@@ -124,13 +115,25 @@ const PIXEL_GLYPHS: Record<string, readonly string[]> = {
   A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
   B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
   C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
   E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
   I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
   K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
+  L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+  M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
+  N: ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
   O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
   P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+  Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
   R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
   S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+  T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+  U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+  V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+  W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
+  X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+  Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
   ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
 };
 
@@ -171,6 +174,7 @@ function makePixelLabelTexture(
   width: number,
   height: number,
   painter: (context: CanvasRenderingContext2D) => void,
+  smooth = false,
 ): THREE.Texture {
   const labelCanvas = document.createElement('canvas');
   labelCanvas.width = width;
@@ -181,11 +185,84 @@ function makePixelLabelTexture(
   painter(context);
   const texture = new THREE.CanvasTexture(labelCanvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-  texture.generateMipmaps = false;
+  texture.magFilter = smooth ? THREE.LinearFilter : THREE.NearestFilter;
+  texture.minFilter = smooth ? THREE.LinearMipmapLinearFilter : THREE.NearestFilter;
+  texture.generateMipmaps = smooth;
   ownedTextures.push(texture);
   return texture;
+}
+
+function drawPixelLineWithShadow(
+  context: CanvasRenderingContext2D,
+  label: string,
+  centerX: number,
+  y: number,
+  pixelSize: number,
+  color = '#f2cf75',
+) {
+  context.fillStyle = 'rgba(36, 16, 6, 0.8)';
+  drawPixelLine(context, label, centerX + 3, y + 3, pixelSize);
+  context.fillStyle = color;
+  drawPixelLine(context, label, centerX, y, pixelSize);
+}
+
+function paintCoverArtwork(context: CanvasRenderingContext2D, logo: HTMLImageElement) {
+  const width = context.canvas.width;
+  const height = context.canvas.height;
+  const gold = '#d9aa4e';
+  const paleGold = '#f0d184';
+  const ink = 'rgba(46, 21, 8, 0.78)';
+
+  context.fillStyle = 'rgba(54, 25, 10, 0.34)';
+  context.fillRect(28, 30, width - 56, height - 60);
+  context.strokeStyle = gold;
+  context.lineWidth = 6;
+  context.strokeRect(34, 36, width - 68, height - 72);
+  context.strokeStyle = 'rgba(241, 209, 132, 0.54)';
+  context.lineWidth = 2;
+  context.strokeRect(50, 52, width - 100, height - 104);
+
+  context.fillStyle = gold;
+  const corner = 30;
+  const notch = 12;
+  for (const [x, y, xDirection, yDirection] of [
+    [50, 52, 1, 1],
+    [width - 50, 52, -1, 1],
+    [50, height - 52, 1, -1],
+    [width - 50, height - 52, -1, -1],
+  ] as const) {
+    context.fillRect(x, y, corner * xDirection, 5 * yDirection);
+    context.fillRect(x, y, 5 * xDirection, corner * yDirection);
+    context.fillRect(x + notch * xDirection, y + notch * yDirection, 8 * xDirection, 8 * yDirection);
+  }
+
+  context.fillStyle = ink;
+  context.fillRect(92, 88, width - 184, 168);
+  context.strokeStyle = 'rgba(217, 170, 78, 0.72)';
+  context.lineWidth = 3;
+  context.strokeRect(98, 94, width - 196, 156);
+  context.imageSmoothingEnabled = true;
+  context.drawImage(logo, width / 2 - 68, 101, 136, 136);
+  context.imageSmoothingEnabled = false;
+
+  drawPixelLineWithShadow(context, 'MYSTERRIA ARCHIVES', width / 2, 286, 3, paleGold);
+  context.fillStyle = 'rgba(217, 170, 78, 0.74)';
+  context.fillRect(86, 345, 126, 4);
+  context.fillRect(width - 212, 345, 126, 4);
+  context.fillRect(width / 2 - 8, 337, 16, 16);
+
+  drawPixelLineWithShadow(context, 'SEER PATHWAY', width / 2, 392, 5, '#f3d684');
+  drawPixelLineWithShadow(context, 'SEQUENCE IX', width / 2, 474, 4, '#dcb35e');
+
+  context.strokeStyle = 'rgba(217, 170, 78, 0.68)';
+  context.lineWidth = 3;
+  context.strokeRect(100, 550, width - 200, 96);
+  context.fillStyle = 'rgba(217, 170, 78, 0.13)';
+  context.fillRect(108, 558, width - 216, 80);
+  drawPixelLineWithShadow(context, 'FORMULARY', width / 2, 579, 4, paleGold);
+
+  context.fillStyle = 'rgba(217, 170, 78, 0.66)';
+  for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
 }
 
 function drawRule(context: CanvasRenderingContext2D, y: number, width: number, dashed = false) {
@@ -429,16 +506,12 @@ function buildBook(formulaImages: FormulaImages) {
   });
 
   const coverLabelMaterial = basicMaterial({
-    map: makePixelLabelTexture(384, 150, (context) => {
-      context.fillStyle = 'rgba(45, 22, 8, 0.58)';
-      drawPixelLine(context, 'RECIPE BOOK:', 194, 22, 5);
-      context.fillStyle = '#e9c66a';
-      drawPixelLine(context, 'RECIPE BOOK:', 192, 20, 5);
-      context.fillStyle = 'rgba(45, 22, 8, 0.68)';
-      drawPixelLine(context, 'SEER', 194, 87, 7);
-      context.fillStyle = '#f1d27b';
-      drawPixelLine(context, 'SEER', 192, 85, 7);
-    }),
+    map: makePixelLabelTexture(
+      512,
+      800,
+      (context) => paintCoverArtwork(context, formulaImages.mysterriaLogo),
+      true,
+    ),
     transparent: true,
     alphaTest: 0.08,
     depthTest: true,
@@ -446,10 +519,10 @@ function buildBook(formulaImages: FormulaImages) {
     side: THREE.FrontSide,
   });
   const coverLabel = new THREE.Mesh(
-    geometry(new THREE.PlaneGeometry(3.85, 1.5)),
+    geometry(new THREE.PlaneGeometry(4.72, 7.38)),
     coverLabelMaterial,
   );
-  coverLabel.position.set(3, 0, 0.682);
+  coverLabel.position.set(3, 0, 0.686);
   frontCover.add(coverLabel);
 
   const seamMaterial = basicMaterial({
@@ -467,10 +540,10 @@ function buildBook(formulaImages: FormulaImages) {
   bookRoot.add(seam);
 
   // The entrance presents the book edge-on, making the seam's -X face the visible
-  // exterior spine. Keeping the emblem in bookRoot's local space makes it rotate
-  // and recede with the physical spine as the cover opens.
+  // exterior spine. These archive marks live in bookRoot's local space so they
+  // rotate and recede with the physical spine as the cover opens.
   const spineEmblemMaterial = basicMaterial({
-    map: makePixelSymbolTexture(formulaImages.foolPathwaySymbol),
+    map: makeImageTexture(formulaImages.mysterriaLogo),
     transparent: true,
     alphaTest: 0.08,
     depthTest: true,
@@ -478,22 +551,20 @@ function buildBook(formulaImages: FormulaImages) {
     side: THREE.FrontSide,
   });
   const spineEmblem = new THREE.Mesh(
-    geometry(new THREE.PlaneGeometry(0.58, 0.58)),
+    geometry(new THREE.PlaneGeometry(0.62, 0.62)),
     spineEmblemMaterial,
   );
-  spineEmblem.position.set(-0.216, 3.55, 0.06);
+  spineEmblem.position.set(-0.217, 3.58, 0.06);
   spineEmblem.rotation.y = -Math.PI / 2;
   bookRoot.add(spineEmblem);
 
   const spineLabelMaterial = basicMaterial({
-    map: makePixelLabelTexture(56, 224, (context) => {
-      const letters = ['S', 'E', 'E', 'R'];
-      letters.forEach((letter, index) => {
-        context.fillStyle = 'rgba(44, 21, 7, 0.62)';
-        drawPixelGlyph(context, letter, 16, 8 + index * 54, 5);
-        context.fillStyle = '#ebcc73';
-        drawPixelGlyph(context, letter, 14, 6 + index * 54, 5);
-      });
+    map: makePixelLabelTexture(72, 512, (context) => {
+      context.save();
+      context.translate(36, 256);
+      context.rotate(Math.PI / 2);
+      drawPixelLineWithShadow(context, 'MYSTERRIA', 0, -18, 5, '#f0ce78');
+      context.restore();
     }),
     transparent: true,
     alphaTest: 0.08,
@@ -502,10 +573,10 @@ function buildBook(formulaImages: FormulaImages) {
     side: THREE.FrontSide,
   });
   const spineLabel = new THREE.Mesh(
-    geometry(new THREE.PlaneGeometry(0.34, 1.85)),
+    geometry(new THREE.PlaneGeometry(0.32, 4)),
     spineLabelMaterial,
   );
-  spineLabel.position.set(-0.217, 1.65, 0.06);
+  spineLabel.position.set(-0.218, 0.45, 0.06);
   spineLabel.rotation.y = -Math.PI / 2;
   bookRoot.add(spineLabel);
 }
@@ -572,13 +643,13 @@ onMounted(async () => {
   camera.lookAt(0, 0, 0);
 
   const textureLoader = new THREE.TextureLoader();
-  const [texture, lavosImage, stellarImage, mintImage, recipeImage, foolPathwaySymbolImage] = await Promise.all([
+  const [texture, lavosImage, stellarImage, mintImage, recipeImage, mysterriaLogoImage] = await Promise.all([
     textureLoader.loadAsync(bookAtlasUrl),
     loadImage(lavosSquidBlood),
     loadImage(stellarAquaCrystal),
     loadImage(goldMintLeaves),
     loadImage(foolRecipe),
-    loadImage('/pathways/native/fool.png'),
+    loadImage('/logo-mark.webp'),
     document.fonts?.ready ?? Promise.resolve(),
   ]);
   if (disposed) {
@@ -595,7 +666,7 @@ onMounted(async () => {
     stellarAquaCrystal: stellarImage,
     goldMintLeaves: mintImage,
     foolRecipe: recipeImage,
-    foolPathwaySymbol: foolPathwaySymbolImage,
+    mysterriaLogo: mysterriaLogoImage,
   });
   updatePose();
 
