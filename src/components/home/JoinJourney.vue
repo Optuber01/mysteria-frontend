@@ -37,7 +37,7 @@
 import { computed, onUnmounted, ref, type CSSProperties } from 'vue';
 import { MYSTERRIA_ADDRESS } from '@/services/serverStatus';
 import type { HomePathway } from '@/data/pathways';
-import portalImage from '@/assets/images/home/world/lobby-portal.png';
+import portalImage from '@/assets/images/home/world/lobby-portal.webp';
 
 const props = defineProps<{ selectedPathway?: HomePathway | null }>();
 const steps = [

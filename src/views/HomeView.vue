@@ -39,7 +39,6 @@ import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
-import ProgressionStory from '@/components/home/ProgressionStoryV3.vue';
 import type { NewsArticle } from '@/types/news';
 import type { HomePathway } from '@/data/pathways';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
@@ -57,6 +56,7 @@ let newsObserver: IntersectionObserver | null = null;
 let chapterObserver: IntersectionObserver | null = null;
 
 const PathwayOrbit = defineAsyncComponent(() => import('@/components/home/PathwayOrbit.vue'));
+const ProgressionStory = defineAsyncComponent(() => import('@/components/home/ProgressionStoryV3.vue'));
 const BeyondPathways = defineAsyncComponent(() => import('@/components/home/BeyondPathways.vue'));
 const JoinJourney = defineAsyncComponent(() => import('@/components/home/JoinJourney.vue'));
 
