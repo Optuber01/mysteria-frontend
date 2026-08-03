@@ -17,7 +17,7 @@
             Choose your path,<br><em>in orbit.</em>
           </h2>
           <span>
-            Explore 22 pathways. Hover a symbol to see what each Sequence unlocks.
+            Explore 22 pathways. Select a symbol to open its archive.
           </span>
         </header>
 
@@ -71,11 +71,7 @@
             :tabindex="orbitStyles[index]?.hidden ? -1 : 0"
             :aria-label="`${entry.name}. ${entry.startingSequence}. ${entry.playstyle}`"
             :aria-pressed="index === selectedIndex"
-            @mouseenter="previewPathway(index)"
-            @mouseleave="schedulePreviewClose"
-            @focus="previewPathway(index)"
-            @blur="schedulePreviewClose"
-            @click.stop="selectPreview(index)"
+            @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
               <img :src="entry.image" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
@@ -84,12 +80,7 @@
           </button>
           </template>
 
-          <div v-if="!hasActiveEntry" class="orbit-idle" aria-hidden="true">
-            <span class="orbit-idle__mark"><i /><i /><i /></span>
-            <p>Scroll to bring the pathways into orbit.</p>
-          </div>
-
-          <article v-if="hasActiveEntry" class="orbit-story" :class="{ 'is-muted': previewIndex !== null }" :aria-live="interactionReady ? 'polite' : 'off'">
+          <article v-if="hasActiveEntry" class="orbit-story" :aria-live="interactionReady ? 'polite' : 'off'">
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
               <img :src="activeEntry.image" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
             </div>
@@ -98,25 +89,6 @@
             <small>{{ activeEntry.tagline }}</small>
           </article>
 
-          <aside
-            class="sequence-card"
-            :class="{ 'is-visible': previewIndex !== null && hasActiveEntry }"
-            :aria-hidden="previewIndex === null"
-            @mouseenter="cancelPreviewClose"
-            @mouseleave="schedulePreviewClose"
-          >
-            <header><span>SEQUENCE ARCHIVE</span><button type="button" aria-label="Close sequence archive" @click="closePreview">×</button></header>
-            <div class="sequence-card__title"><h4>{{ activeEntry.name }}</h4><p>{{ activeEntry.sequenceCount }} sequences</p></div>
-            <div v-if="loadingSequenceId === activeEntry.id" class="sequence-card__loading">Loading archive…</div>
-            <div v-else class="sequence-list">
-              <details v-for="sequence in activeSequences" :key="sequence.sequence">
-                <summary><span>Sequence {{ sequence.sequence }}</span><b>{{ sequence.name }}</b></summary>
-                <ul>
-                  <li v-for="ability in sequence.abilities" :key="ability.id"><strong>{{ ability.name }}</strong><span>{{ ability.description }}</span></li>
-                </ul>
-              </details>
-            </div>
-          </aside>
         </div>
       </div>
     </div>
@@ -230,7 +202,6 @@ const reducedMotion = useReducedMotion();
 const activeKind = ref<ProgressionKind>('pathway');
 const scrollProgress = ref(0);
 const selectedIndex = ref(0);
-const previewIndex = ref<number | null>(null);
 const rotation = ref(0);
 const targetRotation = ref(0);
 const pointerOffset = ref(0);
@@ -240,8 +211,6 @@ const inView = ref(false);
 const detailsOpen = ref(false);
 const compactLayout = ref(false);
 const lowPower = ref(false);
-const sequenceArchive = ref<Record<string, SequenceDetail[]>>({});
-const loadingSequenceId = ref<string | null>(null);
 
 let animationFrame = 0;
 let scrollFrame = 0;
@@ -253,7 +222,6 @@ let previousBodyOverflow = '';
 let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
-let previewCloseTimer = 0;
 
 const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
 const activeKindLabel = computed(() => activeKind.value === 'pathway' ? 'Pathways' : 'Boons');
@@ -263,7 +231,7 @@ const catalogOptions = computed(() => [
 ]);
 // Complete close to the end of the sticky scene, leaving only a small
 // hand-off scroll before the next section.
-const assemblyProgress = computed(() => clamp((scrollProgress.value - .04) / .87, 0, 1));
+const assemblyProgress = computed(() => clamp((scrollProgress.value + .09) / .72, 0, 1));
 const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
   if (reducedMotion.value || compactLayout.value) return 'orbit';
   if (scrollProgress.value < .08) return 'entry';
@@ -273,11 +241,10 @@ const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
 const interactionReady = computed(() => reducedMotion.value || compactLayout.value || phase.value === 'orbit');
 const assemblyCursor = computed(() => assemblyProgress.value * activeCatalog.value.length - 1);
 const assemblyIndex = computed(() => clamp(Math.floor(assemblyCursor.value), 0, activeCatalog.value.length - 1));
-const shownIndex = computed(() => previewIndex.value ?? (interactionReady.value ? selectedIndex.value : assemblyIndex.value));
+const shownIndex = computed(() => interactionReady.value ? selectedIndex.value : assemblyIndex.value);
 const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
 const selectedEntry = computed(() => activeCatalog.value[selectedIndex.value] ?? activeCatalog.value[0]);
-const activeSequences = computed(() => sequenceArchive.value[activeEntry.value.id] ?? []);
-const hasActiveEntry = computed(() => reducedMotion.value || compactLayout.value || assemblyProgress.value * activeCatalog.value.length >= 1);
+const hasActiveEntry = computed(() => activeCatalog.value.length > 0);
 const neutralTheme = { accent: '#c69b52', accent2: '#4f8275', ink: '#f7f2e7', surface: '#10201f', haze: '#345f58' };
 const themeStyle = computed(() => ({
   '--path-accent': (hasActiveEntry.value ? activeEntry.value.theme : neutralTheme).accent,
@@ -288,12 +255,6 @@ const themeStyle = computed(() => ({
 }));
 
 type OrbitVisual = { hidden: boolean; behind: boolean; style: CSSProperties };
-type SequenceDetail = {
-  sequence: number;
-  name: string;
-  abilities: Array<{ id: string; name: string; description: string }>;
-};
-
 const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, index) => {
   if (phase.value === 'entry' || phase.value === 'assembly') return assemblyStyle(index);
   const delta = signedWrap(index - (rotation.value + pointerOffset.value), activeCatalog.value.length);
@@ -394,7 +355,6 @@ function setKind(kind: ProgressionKind) {
   if (kind === activeKind.value) return;
   activeKind.value = kind;
   selectedIndex.value = 0;
-  previewIndex.value = null;
   rotation.value = 0;
   targetRotation.value = 0;
   pointerOffset.value = 0;
@@ -410,7 +370,6 @@ function snapTo(index: number, announce = true) {
   const delta = signedWrap(normalized - currentNormalized, activeCatalog.value.length);
   targetRotation.value = Math.round(current) + delta;
   selectedIndex.value = normalized;
-  previewIndex.value = null;
   pointerOffset.value = 0;
   if (announce) emit('selected', activeCatalog.value[normalized].name);
   startOrbitAnimation();
@@ -418,49 +377,6 @@ function snapTo(index: number, announce = true) {
 
 function previous() { if (hasActiveEntry.value) snapTo(selectedIndex.value - 1); }
 function next() { if (hasActiveEntry.value) snapTo(selectedIndex.value + 1); }
-
-async function loadSequenceArchive(id: string) {
-  if (sequenceArchive.value[id] || loadingSequenceId.value === id) return;
-  loadingSequenceId.value = id;
-  try {
-    const source = await import('@/assets/sources/pathway-abilities.json');
-    const pathway = source.default.pathways.find((entry) => entry.id === id);
-    sequenceArchive.value = {
-      ...sequenceArchive.value,
-      [id]: (pathway?.sequences ?? [])
-        .slice()
-        .sort((a, b) => b.sequence - a.sequence)
-        .map((sequence) => ({
-          sequence: sequence.sequence,
-          name: sequence.name.en ?? sequence.name.uk ?? 'Undocumented',
-          abilities: sequence.abilities.map((ability) => ({
-            id: ability.id,
-            name: ability.name.en ?? ability.name.uk ?? 'Undocumented',
-            description: ability.description.en ?? ability.description.uk ?? '',
-          })),
-        })),
-    };
-  } finally {
-    if (loadingSequenceId.value === id) loadingSequenceId.value = null;
-  }
-}
-
-function cancelPreviewClose() { window.clearTimeout(previewCloseTimer); }
-function schedulePreviewClose() {
-  cancelPreviewClose();
-  previewCloseTimer = window.setTimeout(() => { previewIndex.value = null; }, 420);
-}
-function closePreview() { cancelPreviewClose(); previewIndex.value = null; }
-function previewPathway(index: number) {
-  cancelPreviewClose();
-  previewIndex.value = index;
-  void loadSequenceArchive(activeCatalog.value[index].id);
-}
-function selectPreview(index: number) {
-  selectedIndex.value = index;
-  snapTo(index);
-  previewPathway(index);
-}
 
 function selectAndOpen(index: number, event: Event) {
   selectedIndex.value = index;
@@ -491,7 +407,6 @@ function movePointer(event: PointerEvent) {
     return;
   }
   if (!orbitStageRef.value || reducedMotion.value) return;
-  if (previewIndex.value !== null) return;
   const rect = orbitStageRef.value.getBoundingClientRect();
   pointerOffset.value = clamp(((event.clientX - rect.left) / rect.width - .5) * .7, -.35, .35);
 }
@@ -511,7 +426,6 @@ function endDrag(event: PointerEvent) {
 function leaveOrbit() {
   if (dragging.value) return;
   pointerOffset.value = 0;
-  previewIndex.value = null;
 }
 
 function handleMobileScroll() {
@@ -631,7 +545,6 @@ onUnmounted(() => {
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   window.clearTimeout(mobileScrollTimer);
-  window.clearTimeout(previewCloseTimer);
   document.body.style.overflow = previousBodyOverflow;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
 });
@@ -700,48 +613,12 @@ onUnmounted(() => {
 .is-low-power .motif-stage::before { box-shadow: none; }
 
 .orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(300px, 25vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
-.orbit-story.is-muted { opacity: .16; transform: translate(-50%, -50%) scale(.96); transition: opacity .14s linear, transform .16s ease-out; }
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
 .orbit-story h3 { margin: 0; font: 620 clamp(2.3rem, 3.8vw, 4.2rem)/1.04 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.012em; text-wrap: balance; }
 .entry-kind { display: block; margin-top: 12px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1.35 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
 .orbit-story > small { display: block; max-width: 270px; margin: 16px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; line-height: 1.65; letter-spacing: .005em; }
-
-.orbit-idle { position: absolute; z-index: 42; left: 50%; top: 50%; display: grid; justify-items: center; gap: 15px; width: min(260px, 42vw); transform: translate(-50%, -50%); color: color-mix(in srgb, var(--path-ink) 65%, transparent); text-align: center; }
-.orbit-idle__mark { position: relative; width: 90px; height: 90px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-accent) 40%, transparent); border-radius: 50%; }
-.orbit-idle__mark::before, .orbit-idle__mark::after { content: ""; position: absolute; border: 1px solid color-mix(in srgb, var(--path-accent) 28%, transparent); border-radius: inherit; animation: idle-orbit-pulse 2.5s ease-out infinite; }
-.orbit-idle__mark::before { inset: -12px; }
-.orbit-idle__mark::after { inset: -28px; animation-delay: 1.25s; }
-.orbit-idle__mark i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--path-accent); box-shadow: 0 0 16px color-mix(in srgb, var(--path-accent) 70%, transparent); animation: idle-orbit-dot 1.8s ease-in-out infinite; }
-.orbit-idle__mark i:nth-child(1) { transform: translateY(-31px); }
-.orbit-idle__mark i:nth-child(2) { transform: rotate(120deg) translateY(-31px); animation-delay: .2s; }
-.orbit-idle__mark i:nth-child(3) { transform: rotate(240deg) translateY(-31px); animation-delay: .4s; }
-.orbit-idle p { margin: 0; font: 650 .56rem/1.55 "IBM Plex Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
-
-.sequence-card { position: absolute; z-index: 120; left: 66%; top: 50%; width: clamp(280px, 24vw, 312px); max-height: min(340px, 38vh); overflow: hidden auto; padding: 13px 14px 12px; border: 1px solid color-mix(in srgb, var(--path-accent) 48%, transparent); border-radius: 10px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 99%, transparent); box-shadow: 0 18px 42px rgba(0,0,0,.3); scrollbar-width: thin; opacity: 0; pointer-events: none; transform: translate(-50%, -46%) scale(.97); transition: opacity .12s linear, transform .16s ease-out; }
-.sequence-card.is-visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
-.sequence-card header { display: flex; align-items: center; justify-content: space-between; color: var(--path-accent); font: 700 .53rem/1 "IBM Plex Mono", monospace; letter-spacing: .14em; }
-.sequence-card header button { width: 24px; height: 24px; padding: 0; border: 0; color: inherit; background: transparent; cursor: pointer; font-size: 1.15rem; line-height: 1; }
-.sequence-card__title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 9px 0 11px; }
-.sequence-card h4 { margin: 0; font: 620 clamp(1.35rem, 1.7vw, 1.75rem)/1.1 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.008em; }
-.sequence-card__title p { flex: 0 0 auto; margin: 0; color: color-mix(in srgb, var(--path-ink) 66%, transparent); font: 650 .48rem/1.35 "IBM Plex Mono", monospace; letter-spacing: .09em; text-transform: uppercase; }
-.sequence-card__loading { padding: 20px 0; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: .64rem/1.5 "IBM Plex Mono", monospace; }
-.sequence-list { display: grid; border-top: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); }
-.sequence-list details { border-bottom: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); }
-.sequence-list summary { display: grid; grid-template-columns: 67px 1fr auto; align-items: center; gap: 7px; min-height: 38px; padding: 8px 0; cursor: pointer; list-style: none; }
-.sequence-list summary::-webkit-details-marker { display: none; }
-.sequence-list summary::after { content: '+'; color: var(--path-accent); font: 1rem/1 "IBM Plex Mono", monospace; }
-.sequence-list details[open] summary::after { content: '−'; }
-.sequence-list summary span { color: var(--path-accent); font: 650 .48rem/1.3 "IBM Plex Mono", monospace; text-transform: uppercase; }
-.sequence-list summary b { font-size: .7rem; line-height: 1.3; }
-.sequence-list ul { display: grid; gap: 9px; margin: 0 0 11px; padding: 0; list-style: none; }
-.sequence-list li { display: grid; gap: 4px; padding-left: 9px; border-left: 1px solid color-mix(in srgb, var(--path-accent) 45%, transparent); }
-.sequence-list li strong { font-size: .66rem; line-height: 1.35; }
-.sequence-list li span { color: color-mix(in srgb, var(--path-ink) 70%, transparent); font-size: .61rem; line-height: 1.5; }
-
-@keyframes idle-orbit-pulse { 0%, 100% { opacity: .06; transform: scale(.82); } 45% { opacity: .54; } 70% { opacity: 0; transform: scale(1.08); } }
-@keyframes idle-orbit-dot { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
 
 .assembly-readout { position: absolute; z-index: 80; left: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); width: min(300px, 25vw); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; }
 .assembly-readout > i { height: 1px; overflow: hidden; background: color-mix(in srgb, var(--path-ink) 15%, transparent); }
