@@ -12,6 +12,7 @@
         <img :src="breweryScene" alt="" width="1920" height="1017" decoding="async">
       </div>
       <div class="progression-v3__wash" aria-hidden="true" />
+      <div class="progression-v3__threshold-fog" aria-hidden="true"><i /><i /></div>
 
       <header class="progression-v3__heading">
         <p>Playable progression</p>
@@ -348,16 +349,17 @@ onUnmounted(() => {
   position: relative;
   min-height: 500svh;
   color: #fcf9f2;
-  background: #071719;
+  background: #0e2224;
   isolation: isolate;
 }
+
 .progression-v3__sticky {
   position: sticky;
   top: 0;
   height: 100svh;
   min-height: 620px;
   overflow: hidden;
-  background: #0b1a1b;
+  background: #0e2224;
 }
 .progression-v3__backdrop,
 .progression-v3__wash {
@@ -365,6 +367,7 @@ onUnmounted(() => {
   inset: 0;
 }
 .progression-v3__backdrop {
+  opacity: clamp(0, calc(var(--journey) * 22), 1);
   transform: scale(calc(1.03 + var(--journey) * 0.05)) translate3d(0, calc(var(--journey) * -1.2%), 0);
   transform-origin: 50% 56%;
 }
@@ -378,9 +381,66 @@ onUnmounted(() => {
 }
 .progression-v3__wash {
   z-index: 1;
+  opacity: clamp(0, calc(var(--journey) * 18), 1);
   background:
     linear-gradient(90deg, rgba(4, 13, 15, 0.92) 0%, rgba(4, 15, 16, 0.55) 34%, rgba(4, 15, 16, 0.22) 68%, rgba(3, 10, 12, 0.78) 100%),
     linear-gradient(180deg, rgba(2, 8, 10, 0.6), transparent 32%, rgba(2, 8, 10, 0.9));
+}
+
+.progression-v3__threshold-fog {
+  position: absolute;
+  z-index: 6;
+  top: -1px;
+  right: -8%;
+  left: -8%;
+  height: min(58vh, 560px);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 18% 42%, rgba(111, 129, 126, 0.48), transparent 42%),
+    radial-gradient(ellipse at 76% 38%, rgba(119, 134, 130, 0.42), transparent 46%);
+  filter: blur(0.2px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
+  opacity: clamp(0, calc(1.18 - var(--journey) * 9.5), 1);
+  pointer-events: none;
+}
+
+.progression-v3__threshold-fog::before,
+.progression-v3__threshold-fog::after,
+.progression-v3__threshold-fog i {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(128, 145, 141, 0.18);
+  filter: blur(32px);
+  content: '';
+}
+
+.progression-v3__threshold-fog::before {
+  top: 25%;
+  left: 4%;
+  width: 54%;
+  height: 44%;
+}
+
+.progression-v3__threshold-fog::after {
+  top: 18%;
+  right: 0;
+  width: 48%;
+  height: 52%;
+}
+
+.progression-v3__threshold-fog i:first-child {
+  top: 49%;
+  left: 24%;
+  width: 38%;
+  height: 28%;
+}
+
+.progression-v3__threshold-fog i:last-child {
+  top: 55%;
+  right: 19%;
+  width: 31%;
+  height: 24%;
 }
 
 .progression-v3__heading {
