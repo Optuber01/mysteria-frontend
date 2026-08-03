@@ -42,58 +42,9 @@ const currentYear = new Date().getFullYear();
   overflow: hidden;
   padding: 30px clamp(20px, 5vw, 76px) 22px;
   color: #fcf9f2;
-  background:
-    #08151a;
-  border-top: 1px solid rgba(252, 249, 242, .08);
+  background: #08151a;
   isolation: isolate;
 }
-
-
-.footer-address,
-.footer-guide {
-  min-height: 57px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 13px;
-  cursor: pointer;
-  transition: transform .35s cubic-bezier(.22, 1, .36, 1), border-color .25s, background-color .25s;
-}
-
-.footer-address {
-  min-width: min(310px, 100%);
-  justify-content: space-between;
-  gap: 24px;
-  padding: 9px 17px;
-  border: 1px solid rgba(252, 249, 242, .18);
-  color: #fcf9f2;
-  background: rgba(252, 249, 242, .06);
-  text-align: left;
-  backdrop-filter: blur(12px);
-}
-
-.footer-address small {
-  display: block;
-  margin-bottom: 4px;
-  color: rgba(252, 249, 242, .72);
-  font: 600 .56rem/1 "IBM Plex Mono", monospace;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-}
-.footer-address strong { font: 650 .73rem/1 "IBM Plex Mono", monospace; }
-.footer-address b { color: #d7b978; font-size: .7rem; white-space: nowrap; }
-.footer-address:hover { border-color: rgba(252, 249, 242, .36); background: rgba(252, 249, 242, .1); transform: translateY(-2px); }
-
-.footer-guide {
-  gap: 18px;
-  padding: 0 18px;
-  border: 1px solid #f5f0e6;
-  color: #102924;
-  background: #f5f0e6;
-  font-size: .78rem;
-  font-weight: 760;
-}
-.footer-guide svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
-.footer-guide:hover { color: #102924; background: #fcf9f2; transform: translateY(-2px); }
 
 .footer-rail {
   max-width: 1440px;
@@ -169,12 +120,6 @@ const currentYear = new Date().getFullYear();
 
 @media (max-width: 680px) {
   .site-footer { padding-inline: 20px; }
-  .footer-gate { height: 66vw; }
-  .footer-closing { margin-bottom: 84px; }
-  .footer-actions { display: grid; }
-  .footer-address,
-  .footer-guide { width: 100%; }
-  .footer-guide { justify-content: space-between; }
   .footer-rail,
   .footer-legal { align-items: flex-start; flex-direction: column; }
   .footer-nav { gap-inline: 15px; }
@@ -183,14 +128,6 @@ const currentYear = new Date().getFullYear();
 
 @media (max-width: 280px) {
   .site-footer { padding-inline: 10px; }
-  .footer-closing h2 { font-size: 2.8rem; overflow-wrap: anywhere; }
-  .footer-address { min-width: 0; align-items: flex-start; flex-direction: column; gap: 8px; }
-  .footer-address strong { overflow-wrap: anywhere; }
   .footer-nav { display: grid; grid-template-columns: 1fr; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-address,
-  .footer-guide { transition: none; }
 }
 </style>
