@@ -29,8 +29,6 @@ let scene: THREE.Scene | null = null;
 let bookRoot: THREE.Group | null = null;
 let frontCover: THREE.Group | null = null;
 let leftPages: THREE.Group | null = null;
-let firstTurningPage: THREE.Group | null = null;
-let secondTurningPage: THREE.Group | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let sourceTexture: THREE.Texture | null = null;
 let disposed = false;
@@ -321,7 +319,6 @@ function buildBook(formulaImages: FormulaImages) {
     back: [19, 11, 5, 8],
     frontPainter: paintRightFormula(formulaImages),
   });
-  rightStack.position.x = 0.32;
 
   leftPages = new THREE.Group();
   bookRoot.add(leftPages);
@@ -335,32 +332,6 @@ function buildBook(formulaImages: FormulaImages) {
     back: [7, 11, 5, 8],
     backPainter: paintLeftFormula(formulaImages),
   });
-  leftPages.position.x = 0.32;
-
-  const turningMaterial = basicMaterial({
-    map: makeRegionTexture(24, 10, 5, 8),
-    color: 0xfff7d7,
-    transparent: false,
-    opacity: 1,
-    alphaTest: 0,
-    depthTest: true,
-    depthWrite: true,
-    blending: THREE.NoBlending,
-    side: THREE.DoubleSide,
-  });
-  const turningGeometry = geometry(new THREE.PlaneGeometry(5.15, 8.45, 6, 1));
-
-  firstTurningPage = new THREE.Group();
-  const firstPage = new THREE.Mesh(turningGeometry, turningMaterial);
-  firstPage.position.set(2.88, 0, 0.39);
-  firstTurningPage.add(firstPage);
-  bookRoot.add(firstTurningPage);
-
-  secondTurningPage = new THREE.Group();
-  const secondPage = new THREE.Mesh(turningGeometry, turningMaterial);
-  secondPage.position.set(2.88, 0, 0.44);
-  secondTurningPage.add(secondPage);
-  bookRoot.add(secondTurningPage);
 
   frontCover = new THREE.Group();
   bookRoot.add(frontCover);
@@ -390,7 +361,7 @@ function buildBook(formulaImages: FormulaImages) {
 }
 
 function updatePose() {
-  if (!bookRoot || !frontCover || !leftPages || !firstTurningPage || !secondTurningPage) return;
+  if (!bookRoot || !frontCover || !leftPages) return;
 
   const p = props.reducedMotion ? 1 : clamp01(props.progress);
   const descend = phase(p, 0, 0.2);
@@ -410,10 +381,6 @@ function updatePose() {
 
   frontCover.rotation.y = -Math.PI * 0.985 * opening;
   leftPages.rotation.y = -Math.PI * pageOpening;
-
-  const flutter = Math.sin(pageOpening * Math.PI) * 0.08;
-  firstTurningPage.rotation.y = -Math.PI * phase(p, 0.59, 0.9) - flutter;
-  secondTurningPage.rotation.y = -Math.PI * phase(p, 0.66, 0.92) + flutter * 0.65;
 
   render();
 }
