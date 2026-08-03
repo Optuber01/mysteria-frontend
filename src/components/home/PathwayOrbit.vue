@@ -3,7 +3,7 @@
     id="pathways"
     ref="sectionRef"
     class="pathway-vault"
-    :class="[{ 'is-reduced': reducedMotion, 'is-interactive': interactionReady }, `motif-${activeEntry.motif}`]"
+    :class="[{ 'is-reduced': reducedMotion, 'is-interactive': interactionReady, 'is-low-power': lowPower }, `motif-${activeEntry.motif}`]"
     :style="themeStyle"
     aria-labelledby="pathway-title"
   >
@@ -262,6 +262,7 @@ const inView = ref(false);
 const detailsOpen = ref(false);
 const fallbackOpen = ref(false);
 const compactLayout = ref(false);
+const lowPower = ref(false);
 
 let animationFrame = 0;
 let scrollFrame = 0;
@@ -272,6 +273,7 @@ let dossierTrigger: HTMLElement | null = null;
 let previousBodyOverflow = '';
 let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
+let scrollTravel = 1;
 
 const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
 const activeKindLabel = computed(() => activeKind.value === 'pathway' ? 'Pathways' : 'Boons');
@@ -279,7 +281,9 @@ const catalogOptions = computed(() => [
   { id: 'pathway' as const, label: 'Pathways', count: standardPathways.length },
   { id: 'boon' as const, label: 'Boons', count: boonPathways.length },
 ]);
-const assemblyProgress = computed(() => clamp((scrollProgress.value - .04) / .7, 0, 1));
+// Complete close to the end of the sticky scene, leaving only a small
+// hand-off scroll before the next section.
+const assemblyProgress = computed(() => clamp((scrollProgress.value - .04) / .87, 0, 1));
 const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
   if (reducedMotion.value || compactLayout.value) return 'orbit';
   if (scrollProgress.value < .08) return 'entry';
@@ -361,12 +365,16 @@ function measureScroll() {
   scrollFrame = 0;
   if (!sectionRef.value || (!inView.value && !reducedMotion.value)) return;
   const rect = sectionRef.value.getBoundingClientRect();
-  const travel = Math.max(1, sectionRef.value.offsetHeight - window.innerHeight);
-  const nextProgress = reducedMotion.value ? 1 : clamp(-rect.top / travel, 0, 1);
+  const nextProgress = reducedMotion.value ? 1 : clamp(-rect.top / scrollTravel, 0, 1);
   // Avoid invalidating all 22 token styles for sub-pixel scroll deltas.
   if (Math.abs(nextProgress - scrollProgress.value) >= .001 || nextProgress === 0 || nextProgress === 1) {
     scrollProgress.value = nextProgress;
   }
+}
+
+function refreshScrollTravel() {
+  if (!sectionRef.value) return;
+  scrollTravel = Math.max(1, sectionRef.value.offsetHeight - window.innerHeight);
 }
 
 function scheduleScrollMeasure() {
@@ -549,6 +557,7 @@ function replaceBrokenImage(event: Event) {
 
 function syncCompactLayout(event?: MediaQueryListEvent) {
   compactLayout.value = event?.matches ?? compactMedia?.matches ?? false;
+  refreshScrollTravel();
 }
 
 watch(interactionReady, (ready) => {
@@ -560,6 +569,15 @@ watch(interactionReady, (ready) => {
 });
 
 onMounted(() => {
+  const browserHints = navigator as Navigator & {
+    deviceMemory?: number;
+    connection?: { saveData?: boolean };
+  };
+  lowPower.value = Boolean(
+    browserHints.connection?.saveData
+    || (browserHints.deviceMemory !== undefined && browserHints.deviceMemory <= 4)
+    || navigator.hardwareConcurrency <= 4,
+  );
   compactMedia = window.matchMedia('(max-width: 1050px), (max-height: 720px)');
   syncCompactLayout();
   compactMedia.addEventListener('change', syncCompactLayout);
@@ -571,6 +589,7 @@ onMounted(() => {
   }, { rootMargin: '20% 0px' });
   if (sectionRef.value) sectionObserver.observe(sectionRef.value);
   window.addEventListener('scroll', scheduleScrollMeasure, { passive: true });
+  window.addEventListener('resize', refreshScrollTravel, { passive: true });
   window.addEventListener('resize', scheduleScrollMeasure, { passive: true });
   scheduleScrollMeasure();
 });
@@ -579,6 +598,7 @@ onUnmounted(() => {
   compactMedia?.removeEventListener('change', syncCompactLayout);
   sectionObserver?.disconnect();
   window.removeEventListener('scroll', scheduleScrollMeasure);
+  window.removeEventListener('resize', refreshScrollTravel);
   window.removeEventListener('resize', scheduleScrollMeasure);
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
@@ -618,6 +638,8 @@ onUnmounted(() => {
     radial-gradient(circle at 15% 70%, color-mix(in srgb, var(--path-accent-2) 22%, transparent), transparent 30%),
     radial-gradient(circle at 88% 25%, color-mix(in srgb, var(--path-accent) 15%, transparent), transparent 26%);
 }
+.is-low-power .ambient-field::before { display: none; }
+.is-low-power .ambient-field__haze { background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 38%, transparent), transparent 42%); }
 
 .desktop-experience { height: 440svh; }
 .sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
@@ -646,6 +668,9 @@ onUnmounted(() => {
 .token-seal img { width: 57px; height: 57px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,.28)); }
 .token-seal i { position: absolute; right: -5px; bottom: 0; width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #08151a; background: var(--path-accent); font: 750 .52rem/1 "IBM Plex Mono", monospace; font-style: normal; }
 .orbit-token > strong { max-width: 98px; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: .61rem; white-space: nowrap; }
+.is-low-power .token-seal { box-shadow: none; }
+.is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }
+.is-low-power .motif-stage::before { box-shadow: none; }
 
 .orbit-story { position: absolute; z-index: 42; left: 50%; top: 51%; width: min(390px, 31vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
 .motif-stage { position: relative; width: clamp(145px, 15vw, 210px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 15px; }
