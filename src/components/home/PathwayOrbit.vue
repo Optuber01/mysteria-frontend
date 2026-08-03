@@ -86,7 +86,7 @@
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
-              <img :src="entry.thumbnail" alt="" width="96" height="96" :loading="activeKind === 'boon' || index < 4 ? 'eager' : 'lazy'" :fetchpriority="activeKind === 'boon' && index < 3 ? 'high' : index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
+              <img :src="entry.thumbnail" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
             </span>
             <strong>{{ entry.name }}</strong><small>{{ entry.sequenceCount }} sequences</small>
           </button>
@@ -257,9 +257,10 @@ let previousBodyOverflow = '';
 let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
-let boonWarmTimer = 0;
-let boonSymbolsWarmed = false;
-const boonImageWarmers: HTMLImageElement[] = [];
+let catalogWarmTimer = 0;
+const warmedCatalogs = new Set<ProgressionKind>();
+const catalogImageWarmers: HTMLImageElement[] = [];
+let orbitStateBeforeDossier: { rotation: number; targetRotation: number; velocity: number; pointerOffset: number } | null = null;
 
 const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
 const activeKindLabel = computed(() => activeKind.value === 'pathway' ? 'Pathways' : 'Boons');
@@ -398,7 +399,7 @@ function startOrbitAnimation() {
 
 function setKind(kind: ProgressionKind) {
   if (kind === activeKind.value) return;
-  if (kind === 'boon') warmBoonSymbols();
+  warmCatalog(kind);
   activeKind.value = kind;
   selectedIndex.value = 0;
   hoveredIndex.value = null;
@@ -428,23 +429,23 @@ function next() { if (hasActiveEntry.value) snapTo(selectedIndex.value + 1); }
 function selectAndOpen(index: number, event: Event) {
   hoveredIndex.value = null;
   selectedIndex.value = index;
-  snapTo(index);
+  // The assembling layout is driven only by scroll. Rotating it while a
+  // dossier is open used to change the order of the incoming seals on return.
+  if (phase.value === 'orbit') snapTo(index);
   void openDetails(event);
 }
 
 function warmCatalog(kind: ProgressionKind) {
-  if (kind === 'boon') warmBoonSymbols();
-}
-
-function warmBoonSymbols() {
-  if (boonSymbolsWarmed) return;
-  boonSymbolsWarmed = true;
-  boonWarmTimer = window.setTimeout(() => {
-    boonPathways.forEach((entry) => {
+  if (kind === activeKind.value) return;
+  if (warmedCatalogs.has(kind)) return;
+  warmedCatalogs.add(kind);
+  catalogWarmTimer = window.setTimeout(() => {
+    const catalog = kind === 'pathway' ? standardPathways : boonPathways;
+    catalog.forEach((entry) => {
       const image = new Image();
       image.decoding = 'async';
       image.src = entry.thumbnail;
-      boonImageWarmers.push(image);
+      catalogImageWarmers.push(image);
     });
   }, 180);
 }
@@ -542,6 +543,13 @@ function previousMobile() { scrollMobileTo(selectedIndex.value - 1); }
 function nextMobile() { scrollMobileTo(selectedIndex.value + 1); }
 
 async function openDetails(event?: Event) {
+  orbitStateBeforeDossier = {
+    rotation: rotation.value,
+    targetRotation: targetRotation.value,
+    velocity: velocity.value,
+    pointerOffset: pointerOffset.value,
+  };
+  if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
   dossierTrigger = event?.currentTarget as HTMLElement | null;
   previousBodyOverflow = document.body.style.overflow;
   document.body.style.overflow = 'hidden';
@@ -556,6 +564,14 @@ async function closeDetails(restoreFocus = true) {
   detailsOpen.value = false;
   document.body.style.overflow = previousBodyOverflow;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
+  if (orbitStateBeforeDossier) {
+    rotation.value = orbitStateBeforeDossier.rotation;
+    targetRotation.value = orbitStateBeforeDossier.targetRotation;
+    velocity.value = orbitStateBeforeDossier.velocity;
+    pointerOffset.value = orbitStateBeforeDossier.pointerOffset;
+    orbitStateBeforeDossier = null;
+    startOrbitAnimation();
+  }
   await nextTick();
   if (restoreFocus && dossierTrigger?.isConnected) dossierTrigger.focus();
 }
@@ -626,7 +642,7 @@ onUnmounted(() => {
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   window.clearTimeout(mobileScrollTimer);
-  window.clearTimeout(boonWarmTimer);
+  window.clearTimeout(catalogWarmTimer);
   document.body.style.overflow = previousBodyOverflow;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
 });
