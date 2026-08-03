@@ -74,7 +74,7 @@
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
-              <img :src="entry.image" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
+              <img :src="entry.image" alt="" width="96" height="96" :loading="activeKind === 'boon' || index < 4 ? 'eager' : 'lazy'" :fetchpriority="activeKind === 'boon' && index < 3 ? 'high' : index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
             </span>
             <strong>{{ entry.name }}</strong><small>{{ entry.sequenceCount }} sequences</small>
           </button>
@@ -145,7 +145,7 @@
           :aria-label="`${entry.name}, ${index + 1} of ${activeCatalog.length}`"
         >
           <div class="mobile-card__visual" aria-hidden="true">
-            <img :src="entry.image" alt="" width="170" height="170" loading="lazy" decoding="async" @error="replaceBrokenImage">
+            <img :src="entry.image" alt="" width="170" height="170" :loading="activeKind === 'boon' ? 'eager' : 'lazy'" decoding="async" @error="replaceBrokenImage">
             <b>{{ String(index + 1).padStart(2, '0') }}</b>
           </div>
           <p>{{ entry.sequenceCount }} sequences</p>
@@ -232,6 +232,9 @@ let previousBodyOverflow = '';
 let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
+let boonWarmTimer = 0;
+let boonSymbolsWarmed = false;
+const boonImageWarmers: HTMLImageElement[] = [];
 
 const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
 const activeKindLabel = computed(() => activeKind.value === 'pathway' ? 'Pathways' : 'Boons');
@@ -369,6 +372,7 @@ function startOrbitAnimation() {
 
 function setKind(kind: ProgressionKind) {
   if (kind === activeKind.value) return;
+  if (kind === 'boon') warmBoonSymbols();
   activeKind.value = kind;
   selectedIndex.value = 0;
   rotation.value = 0;
@@ -398,6 +402,19 @@ function selectAndOpen(index: number, event: Event) {
   selectedIndex.value = index;
   snapTo(index);
   void openDetails(event);
+}
+
+function warmBoonSymbols() {
+  if (boonSymbolsWarmed) return;
+  boonSymbolsWarmed = true;
+  boonWarmTimer = window.setTimeout(() => {
+    boonPathways.forEach((entry) => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = entry.image;
+      boonImageWarmers.push(image);
+    });
+  }, 180);
 }
 
 function selectActiveAndOpen(event: Event) {
@@ -545,7 +562,10 @@ onMounted(() => {
   compactMedia.addEventListener('change', syncCompactLayout);
   sectionObserver = new IntersectionObserver(([entry]) => {
     inView.value = entry.isIntersecting;
-    if (entry.isIntersecting) scheduleScrollMeasure();
+    if (entry.isIntersecting) {
+      scheduleScrollMeasure();
+      warmBoonSymbols();
+    }
     else if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
     if (!entry.isIntersecting && detailsOpen.value) void closeDetails(false);
   }, { rootMargin: '20% 0px' });
@@ -565,6 +585,7 @@ onUnmounted(() => {
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   window.clearTimeout(mobileScrollTimer);
+  window.clearTimeout(boonWarmTimer);
   document.body.style.overflow = previousBodyOverflow;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
 });
