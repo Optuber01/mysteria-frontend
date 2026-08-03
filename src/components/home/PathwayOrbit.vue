@@ -259,8 +259,10 @@ let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
 let catalogWarmTimer = 0;
+let openingSymbolWarmTimer = 0;
 const warmedCatalogs = new Set<ProgressionKind>();
 const catalogImageWarmers: HTMLImageElement[] = [];
+let openingSymbolsWarmed = false;
 let orbitStateBeforeDossier: { rotation: number; targetRotation: number; velocity: number; pointerOffset: number } | null = null;
 
 const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
@@ -451,6 +453,24 @@ function warmCatalog(kind: ProgressionKind) {
   }, 180);
 }
 
+function warmOpeningSymbols() {
+  if (openingSymbolsWarmed) return;
+  openingSymbolsWarmed = true;
+  const openingEntries = standardPathways.slice(0, lowPower.value ? 3 : 8);
+  openingSymbolWarmTimer = window.setTimeout(() => {
+    openingEntries.forEach((entry) => {
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = entry.thumbnail;
+      catalogImageWarmers.push(image);
+    });
+    const focusedImage = new Image();
+    focusedImage.decoding = 'async';
+    focusedImage.src = standardPathways[0].image;
+    catalogImageWarmers.push(focusedImage);
+  }, 0);
+}
+
 function selectActiveAndOpen(event: Event) {
   selectAndOpen(shownIndex.value, event);
 }
@@ -626,11 +646,12 @@ onMounted(() => {
   sectionObserver = new IntersectionObserver(([entry]) => {
     inView.value = entry.isIntersecting;
     if (entry.isIntersecting) {
+      warmOpeningSymbols();
       scheduleScrollMeasure();
     }
     else if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
     if (!entry.isIntersecting && detailsOpen.value) void closeDetails(false);
-  }, { rootMargin: '20% 0px' });
+  }, { rootMargin: '60% 0px' });
   if (sectionRef.value) sectionObserver.observe(sectionRef.value);
   window.addEventListener('scroll', scheduleScrollMeasure, { passive: true });
   window.addEventListener('resize', refreshScrollTravel, { passive: true });
@@ -648,6 +669,7 @@ onUnmounted(() => {
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   window.clearTimeout(mobileScrollTimer);
   window.clearTimeout(catalogWarmTimer);
+  window.clearTimeout(openingSymbolWarmTimer);
   document.body.style.overflow = previousBodyOverflow;
   document.body.style.paddingRight = previousBodyPaddingRight;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
