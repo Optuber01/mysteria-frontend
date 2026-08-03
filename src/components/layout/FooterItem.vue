@@ -1,39 +1,5 @@
 <template>
   <footer class="site-footer">
-    <div class="footer-gate" aria-hidden="true">
-      <span class="footer-gate__arch" />
-      <span class="footer-gate__horizon" />
-    </div>
-
-    <div class="footer-closing">
-      <p class="footer-eyebrow">One server · Java &amp; Bedrock</p>
-      <h2>Your first potion starts here.</h2>
-      <p class="footer-summary">
-        Join Mysterria, choose a Pathway and earn your next Sequence through play.
-      </p>
-
-      <div class="footer-actions">
-        <button
-          class="footer-address"
-          type="button"
-          :aria-label="copied ? 'Server address copied' : `Copy server address ${MYSTERRIA_ADDRESS}`"
-          @click="copyAddress"
-        >
-          <span>
-            <small>Server address</small>
-            <strong>{{ MYSTERRIA_ADDRESS }}</strong>
-          </span>
-          <b aria-live="polite">{{ copied ? 'Copied' : 'Copy address' }}</b>
-        </button>
-        <RouterLink class="footer-guide" to="/guide">
-          Read the beginner guide
-          <svg aria-hidden="true" viewBox="0 0 20 20">
-            <path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" />
-          </svg>
-        </RouterLink>
-      </div>
-    </div>
-
     <div class="footer-rail">
       <RouterLink class="footer-brand" to="/" aria-label="Mysterria home">
         <IconLogo aria-hidden="true" />
@@ -64,30 +30,9 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue';
 import IconLogo from '@/assets/icons/IconLogo.vue';
-import { MYSTERRIA_ADDRESS } from '@/services/serverStatus';
 
 const currentYear = new Date().getFullYear();
-const copied = ref(false);
-let copiedTimer: ReturnType<typeof setTimeout> | null = null;
-
-async function copyAddress() {
-  try {
-    await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
-    copied.value = true;
-    if (copiedTimer) clearTimeout(copiedTimer);
-    copiedTimer = setTimeout(() => {
-      copied.value = false;
-    }, 1800);
-  } catch {
-    copied.value = false;
-  }
-}
-
-onUnmounted(() => {
-  if (copiedTimer) clearTimeout(copiedTimer);
-});
 </script>
 
 <style scoped>
@@ -95,98 +40,14 @@ onUnmounted(() => {
   position: relative;
   z-index: 2;
   overflow: hidden;
-  padding: clamp(92px, 13vw, 190px) clamp(20px, 5vw, 76px) 22px;
+  padding: 30px clamp(20px, 5vw, 76px) 22px;
   color: #fcf9f2;
   background:
-    radial-gradient(ellipse at 50% 4%, rgba(198, 155, 82, .13), transparent 30%),
-    radial-gradient(ellipse at 50% 18%, rgba(33, 100, 77, .3), transparent 47%),
     #08151a;
   border-top: 1px solid rgba(252, 249, 242, .08);
   isolation: isolate;
 }
 
-.footer-gate {
-  position: absolute;
-  z-index: -1;
-  top: clamp(34px, 5vw, 76px);
-  left: 50%;
-  width: min(900px, 92vw);
-  height: min(430px, 52vw);
-  transform: translateX(-50%);
-  opacity: .92;
-}
-
-.footer-gate__arch {
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(215, 185, 120, .23);
-  border-bottom: 0;
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-  box-shadow:
-    inset 0 1px 0 rgba(252, 249, 242, .04),
-    0 -18px 70px rgba(198, 155, 82, .06);
-}
-
-.footer-gate__arch::before,
-.footer-gate__arch::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  width: 1px;
-  height: 34%;
-  background: linear-gradient(0deg, rgba(215, 185, 120, .36), transparent);
-}
-.footer-gate__arch::before { left: 0; }
-.footer-gate__arch::after { right: 0; }
-
-.footer-gate__horizon {
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: -1px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(215, 185, 120, .55), transparent);
-  box-shadow: 0 0 24px rgba(215, 185, 120, .22);
-}
-
-.footer-closing {
-  max-width: 780px;
-  margin: 0 auto clamp(92px, 11vw, 150px);
-  text-align: center;
-}
-
-.footer-eyebrow {
-  margin: 0 0 19px;
-  color: #d7b978;
-  font: 650 .66rem/1.2 "IBM Plex Mono", monospace;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-.footer-closing h2 {
-  margin: 0;
-  color: #fcf9f2;
-  font: 700 clamp(3.4rem, 7.8vw, 7rem)/.86 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -.055em;
-  text-wrap: balance;
-}
-
-.footer-summary {
-  max-width: 570px;
-  margin: 25px auto 0;
-  color: rgba(252, 249, 242, .62);
-  font-size: clamp(.94rem, 1.5vw, 1.08rem);
-  line-height: 1.6;
-  text-wrap: balance;
-}
-
-.footer-actions {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin-top: 32px;
-}
 
 .footer-address,
 .footer-guide {
