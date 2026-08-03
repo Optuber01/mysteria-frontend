@@ -131,7 +131,7 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
     id: entry.id,
     kind: entry.kind,
     name: pathwayNames[entry.id] ?? titleCase(entry.id),
-    image: entry.kind === 'pathway' ? `/pathways/native/${imageId}.png` : `/pathways/thumbs/${imageId}.webp`,
+    image: entry.kind === 'pathway' ? `/pathways/native/${imageId}.webp` : `/pathways/thumbs/${imageId}.webp`,
     route: `/pathways/${entry.id}`,
     startingSequence: `Sequence ${startingNumber} · ${startingName}`,
     startingSequenceNumber: startingNumber,

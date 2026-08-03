@@ -7,11 +7,7 @@
     :style="themeStyle"
     aria-labelledby="pathway-title"
   >
-    <div class="ambient-field" aria-hidden="true">
-      <i class="ambient-field__haze" />
-      <i class="ambient-field__line ambient-field__line--one" />
-      <i class="ambient-field__line ambient-field__line--two" />
-    </div>
+    <div class="ambient-field" aria-hidden="true"><i class="ambient-field__haze" /></div>
 
     <div v-if="!compactLayout && !reducedMotion" class="desktop-experience">
       <div class="sticky-scene">
@@ -48,7 +44,7 @@
           :aria-labelledby="`${activeKind}-tab`"
           :tabindex="interactionReady ? 0 : -1"
           :aria-label="interactionReady
-            ? `${activeKindLabel} orbit. Drag, move the pointer, use the mouse wheel, or press the arrow keys.`
+            ? `${activeKindLabel} orbit. Drag, move the pointer, or press the arrow keys.`
             : `${activeKindLabel} are assembling as you scroll.`"
           @keydown.left.prevent="previous"
           @keydown.right.prevent="next"
@@ -59,10 +55,9 @@
           @pointerup="endDrag"
           @pointercancel="endDrag"
           @pointerleave="leaveOrbit"
-          @wheel.passive="handleWheel"
         >
           <div class="orbit-geometry" aria-hidden="true">
-            <i /><i /><i />
+            <i />
           </div>
 
           <template v-for="(entry, index) in activeCatalog" :key="entry.id">
@@ -96,7 +91,6 @@
 
           <article class="orbit-story" :aria-live="interactionReady ? 'polite' : 'off'">
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
-              <i /><i /><i />
               <img :src="activeEntry.image" alt="" width="220" height="220" loading="lazy" decoding="async" @error="replaceBrokenImage">
             </div>
             <p>{{ activeEntry.startingSequence }}</p>
@@ -125,12 +119,12 @@
           </button>
 
           <p class="interaction-hint" :class="{ 'is-visible': interactionReady }" aria-hidden="true">
-            DRAG&nbsp;&nbsp;·&nbsp;&nbsp;WHEEL&nbsp;&nbsp;·&nbsp;&nbsp;ARROW KEYS
+            DRAG&nbsp;&nbsp;·&nbsp;&nbsp;ARROW KEYS
           </p>
         </div>
 
-        <div class="scroll-cue" :class="{ 'is-complete': interactionReady, 'is-exiting': phase === 'exit' }" aria-hidden="true">
-          <span>{{ phase === 'exit' ? 'SCROLL TO CONTINUE' : (interactionReady ? 'TAKE CONTROL' : 'SCROLL TO ASSEMBLE') }}</span><i />
+        <div class="scroll-cue" :class="{ 'is-complete': interactionReady }" aria-hidden="true">
+          <span>{{ interactionReady ? 'SCROLL TO CONTINUE' : 'SCROLL TO ASSEMBLE' }}</span><i />
         </div>
       </div>
     </div>
@@ -177,7 +171,6 @@
           :aria-label="`${entry.name}, ${index + 1} of ${activeCatalog.length}`"
         >
           <div class="mobile-card__visual" aria-hidden="true">
-            <i /><i />
             <img :src="entry.image" alt="" width="170" height="170" loading="lazy" decoding="async" @error="replaceBrokenImage">
             <b>{{ String(index + 1).padStart(2, '0') }}</b>
           </div>
@@ -225,7 +218,7 @@
           >
             <button ref="dossierCloseRef" class="dossier-close" type="button" :aria-label="`Close ${selectedEntry.name} details`" @click="closeDetails()">×</button>
             <div class="dossier-symbol" aria-hidden="true">
-              <i /><i /><img :src="selectedEntry.image" alt="" width="150" height="150" @error="replaceBrokenImage">
+              <img :src="selectedEntry.image" alt="" width="150" height="150" @error="replaceBrokenImage">
             </div>
             <p>{{ selectedEntry.kind === 'boon' ? 'BOON DOSSIER' : 'PATHWAY DOSSIER' }}</p>
             <h3 :id="`${selectedEntry.id}-dossier-title`">{{ selectedEntry.name }}</h3>
@@ -276,7 +269,6 @@ let scrollFrame = 0;
 let lastPointerX = 0;
 let lastPointerTime = 0;
 let mobileScrollTimer = 0;
-let wheelTime = 0;
 let dossierTrigger: HTMLElement | null = null;
 let previousBodyOverflow = '';
 let sectionObserver: IntersectionObserver | null = null;
@@ -288,18 +280,15 @@ const catalogOptions = computed(() => [
   { id: 'pathway' as const, label: 'Pathways', count: standardPathways.length },
   { id: 'boon' as const, label: 'Boons', count: boonPathways.length },
 ]);
-const assemblyProgress = computed(() => Math.min(1, scrollProgress.value / .64));
-const phase = computed<'entry' | 'assembly' | 'orbit' | 'exit'>(() => {
+const assemblyProgress = computed(() => clamp((scrollProgress.value - .04) / .7, 0, 1));
+const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
   if (reducedMotion.value || compactLayout.value) return 'orbit';
   if (scrollProgress.value < .08) return 'entry';
-  if (scrollProgress.value < .64) return 'assembly';
-  if (scrollProgress.value < .9) return 'orbit';
-  return 'exit';
+  if (assemblyProgress.value < 1) return 'assembly';
+  return 'orbit';
 });
 const interactionReady = computed(() => reducedMotion.value || compactLayout.value || phase.value === 'orbit');
-const assemblyCursor = computed(() => {
-  return assemblyProgress.value * (activeCatalog.value.length + 1) - 1;
-});
+const assemblyCursor = computed(() => assemblyProgress.value * activeCatalog.value.length - 1);
 const assemblyIndex = computed(() => clamp(Math.floor(assemblyCursor.value), 0, activeCatalog.value.length - 1));
 const shownIndex = computed(() => previewIndex.value ?? (interactionReady.value ? selectedIndex.value : assemblyIndex.value));
 const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
@@ -316,87 +305,44 @@ type OrbitVisual = { hidden: boolean; behind: boolean; style: CSSProperties };
 
 const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, index) => {
   if (phase.value === 'entry' || phase.value === 'assembly') return assemblyStyle(index);
-  if (phase.value === 'exit') return exitStyle(index);
   const delta = signedWrap(index - (rotation.value + pointerOffset.value), activeCatalog.value.length);
-  const hidden = Math.abs(delta) > 3.55;
-  const angle = -Math.PI / 2 + delta * ((Math.PI * 2) / 7);
+  const angle = -Math.PI / 2 + delta * ((Math.PI * 2) / activeCatalog.value.length);
   const x = 50 + Math.cos(angle) * 42;
   const y = 50 + Math.sin(angle) * 34;
   const depth = (Math.sin(angle) + 1) / 2;
   return {
-    hidden,
+    hidden: false,
     behind: depth < .42,
     style: {
-      left: `${x}%`, top: `${y}%`, opacity: hidden ? '0' : String(.48 + depth * .52),
+      left: `${x}%`, top: `${y}%`, opacity: String(.46 + depth * .54),
       zIndex: String(18 + Math.round(depth * 46)),
-      transform: `translate(-50%, -50%) scale(${.66 + depth * .38})`,
-      pointerEvents: hidden ? 'none' : 'auto',
+      transform: `translate(-50%, -50%) scale(${.62 + depth * .34})`,
+      pointerEvents: 'auto',
     },
   };
 }));
 
-function exitStyle(index: number): OrbitVisual {
-  const delta = signedWrap(index - (rotation.value + pointerOffset.value), activeCatalog.value.length);
-  const angle = -Math.PI / 2 + delta * ((Math.PI * 2) / 7);
-  const depth = (Math.sin(angle) + 1) / 2;
-  const fromX = 50 + Math.cos(angle) * 42;
-  const fromY = 50 + Math.sin(angle) * 34;
-  const exitProgress = easeOut(clamp((scrollProgress.value - .9) / .1, 0, 1));
-  const side = index % 2 === 0 ? -1 : 1;
-  const toX = side < 0 ? -18 : 118;
-  const toY = side < 0 ? 32 : 68;
-  return {
-    hidden: exitProgress > .98,
-    behind: depth < .42,
-    style: {
-      left: `${mix(fromX, toX, exitProgress)}%`,
-      top: `${mix(fromY, toY, exitProgress)}%`,
-      opacity: String(Math.max(0, (.48 + depth * .52) * (1 - exitProgress))),
-      zIndex: String(18 + Math.round(depth * 46)),
-      transform: `translate(-50%, -50%) scale(${.66 + depth * .38 - exitProgress * .18})`,
-      pointerEvents: exitProgress > .62 ? 'none' : 'auto',
-    },
-  };
-}
-
 function assemblyStyle(index: number): OrbitVisual {
-  const age = assemblyCursor.value - index;
+  const count = activeCatalog.value.length;
+  const entryProgress = clamp((assemblyProgress.value * count - index) / 1.15, 0, 1);
   const side = index % 2 === 0 ? -1 : 1;
-  if (age < 0) {
+  if (entryProgress <= 0) {
     return { hidden: true, behind: true, style: { left: `${side < 0 ? -16 : 116}%`, top: '70%', opacity: '0', pointerEvents: 'none' } };
   }
-  if (age <= 1) {
-    const t = easeOut(age);
-    const joinX = side < 0 ? 15 : 85;
-    const x = mix(side < 0 ? -16 : 116, joinX, t);
-    return {
-      hidden: false, behind: true,
-      style: { left: `${x}%`, top: `${mix(70, 50, t)}%`, opacity: String(t), zIndex: '18', transform: `translate(-50%, -50%) scale(${.55 + t * .2})` },
-    };
-  }
-  if (age <= 7) {
-    const travel = (age - 1) / 6;
-    const angle = side < 0 ? Math.PI + travel * Math.PI : travel * Math.PI;
-    const yDirection = side < 0 ? 1 : -1;
-    const x = 50 + Math.cos(angle) * 35;
-    const y = 50 + Math.sin(angle) * 20 * yDirection;
-    const depth = (y - 29) / 42;
-    return {
-      hidden: false, behind: depth < .45,
-      style: {
-        left: `${x}%`, top: `${y}%`, opacity: String(.52 + depth * .48),
-        zIndex: String(18 + Math.round(depth * 44)),
-        transform: `translate(-50%, -50%) scale(${.65 + depth * .35})`,
-      },
-    };
-  }
-  const exit = clamp(age - 7, 0, 1);
+  const t = easeOut(entryProgress);
+  const angle = -Math.PI / 2 + index * ((Math.PI * 2) / count);
+  const targetX = 50 + Math.cos(angle) * 42;
+  const targetY = 50 + Math.sin(angle) * 34;
+  const depth = (Math.sin(angle) + 1) / 2;
   return {
-    hidden: exit >= .98, behind: false,
+    hidden: false, behind: depth < .42,
     style: {
-      left: `${mix(side < 0 ? 85 : 15, side < 0 ? 116 : -16, easeOut(exit))}%`,
-      top: `${mix(50, 30, exit)}%`, opacity: String(1 - exit), zIndex: '30',
-      transform: `translate(-50%, -50%) scale(${1 - exit * .3})`, pointerEvents: exit > .7 ? 'none' : 'auto',
+      left: `${mix(side < 0 ? -16 : 116, targetX, t)}%`,
+      top: `${mix(50 + (index % 3 - 1) * 16, targetY, t)}%`,
+      opacity: String(t * (.46 + depth * .54)),
+      zIndex: String(18 + Math.round(depth * 46)),
+      transform: `translate(-50%, -50%) scale(${(.5 + depth * .26) + t * .2})`,
+      pointerEvents: entryProgress > .94 ? 'auto' : 'none',
     },
   };
 }
@@ -518,16 +464,6 @@ function leaveOrbit() {
   if (dragging.value) return;
   pointerOffset.value = 0;
   previewIndex.value = null;
-}
-
-function handleWheel(event: WheelEvent) {
-  if (!interactionReady.value) return;
-  const now = performance.now();
-  if (now - wheelTime < 160) return;
-  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-  if (delta > 0) next();
-  else previous();
-  wheelTime = now;
 }
 
 function handleMobileScroll() {
@@ -655,7 +591,7 @@ onUnmounted(() => {
   min-height: 420svh;
   color: var(--path-ink);
   background: var(--path-surface);
-  transition: color .9s cubic-bezier(.22, 1, .36, 1), background-color .9s cubic-bezier(.22, 1, .36, 1);
+  transition: color .16s ease-out, background-color .16s ease-out;
 }
 
 .ambient-field { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
@@ -672,13 +608,10 @@ onUnmounted(() => {
     radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 48%, transparent), transparent 35%),
     radial-gradient(circle at 15% 70%, color-mix(in srgb, var(--path-accent-2) 22%, transparent), transparent 30%),
     radial-gradient(circle at 88% 25%, color-mix(in srgb, var(--path-accent) 15%, transparent), transparent 26%);
-  transition: background .9s cubic-bezier(.22, 1, .36, 1);
+  transition: background .16s ease-out;
 }
-.ambient-field__line { position: absolute; left: -20%; width: 140%; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--path-accent) 55%, transparent), transparent); transform: rotate(-8deg); opacity: .45; }
-.ambient-field__line--one { top: 20%; }
-.ambient-field__line--two { top: 73%; transform: rotate(7deg); }
 
-.desktop-experience { height: 560svh; }
+.desktop-experience { height: 440svh; }
 .sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
 .vault-heading { position: absolute; z-index: 90; top: clamp(76px, 9vh, 112px); left: clamp(24px, 5vw, 78px); width: min(420px, 35vw); padding: 12px 54px 18px 0; background: linear-gradient(90deg, color-mix(in srgb, var(--path-surface) 98%, transparent) 0 72%, transparent); }
 .vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 650 .63rem/1 "IBM Plex Mono", monospace; letter-spacing: .18em; }
@@ -696,32 +629,22 @@ onUnmounted(() => {
 .is-interactive .orbit-stage:active { cursor: grabbing; }
 .orbit-stage:focus-visible { outline: 3px solid #fcf9f2; outline-offset: -10px; box-shadow: inset 0 0 0 5px #08151a; }
 .orbit-geometry { position: absolute; z-index: 4; left: 50%; top: 51%; width: min(84vw, 1200px); aspect-ratio: 2 / 1; transform: translate(-50%, -50%); border: 1px solid color-mix(in srgb, var(--path-accent) 31%, transparent); border-radius: 50%; opacity: .68; transition: opacity .6s; }
-.orbit-geometry i { position: absolute; inset: 13%; border: 1px dashed color-mix(in srgb, var(--path-ink) 13%, transparent); border-radius: 50%; }
-.orbit-geometry i:nth-child(2) { inset: 28%; }
-.orbit-geometry i:nth-child(3) { left: 50%; top: -4%; width: 1px; height: 108%; border: 0; border-radius: 0; background: linear-gradient(transparent, color-mix(in srgb, var(--path-accent) 40%, transparent), transparent); }
 
-.orbit-token { position: absolute; width: 124px; min-height: 132px; display: grid; place-items: center; align-content: center; gap: 8px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 77%, transparent); background: transparent; cursor: pointer; will-change: left, top, transform, opacity; transition: left .72s cubic-bezier(.22,1,.36,1), top .72s cubic-bezier(.22,1,.36,1), transform .62s cubic-bezier(.22,1,.36,1), opacity .35s, filter .35s; }
+.orbit-token { position: absolute; width: 94px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 6px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 77%, transparent); background: transparent; cursor: pointer; will-change: left, top, transform, opacity; transition: left .18s ease-out, top .18s ease-out, transform .16s ease-out, opacity .12s linear, filter .12s linear; }
 .orbit-token.is-hidden { visibility: hidden; }
 .orbit-token.is-behind { filter: saturate(.55) brightness(.72); }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }
 .orbit-token:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 2px; border-radius: 18px; box-shadow: 0 0 0 5px #08151a; }
-.token-seal { position: relative; width: 88px; height: 88px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-ink) 24%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--path-surface) 88%, transparent); box-shadow: 0 20px 45px rgba(0,0,0,.28); transition: transform .45s cubic-bezier(.22,1,.36,1), border-color .3s, background .3s; }
-.token-seal::before { content: ""; position: absolute; inset: -7px; border: 1px dashed color-mix(in srgb, var(--path-accent) 28%, transparent); border-radius: 50%; opacity: 0; transform: rotate(-20deg) scale(.8); transition: opacity .35s, transform .55s cubic-bezier(.22,1,.36,1); }
-.orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--path-accent); background: color-mix(in srgb, var(--path-haze) 40%, var(--path-surface)); transform: scale(1.11); }
-.orbit-token:hover .token-seal::before, .orbit-token:focus-visible .token-seal::before, .orbit-token.is-active .token-seal::before { opacity: 1; transform: rotate(18deg) scale(1); }
-.token-seal img { width: 76px; height: 76px; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(0,0,0,.28)); }
+.token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-ink) 24%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--path-surface) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
+.orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--path-accent); background: color-mix(in srgb, var(--path-haze) 40%, var(--path-surface)); transform: scale(1.14); }
+.token-seal img { width: 57px; height: 57px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,.28)); }
 .token-seal i { position: absolute; right: -5px; bottom: 0; width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #08151a; background: var(--path-accent); font: 750 .52rem/1 "IBM Plex Mono", monospace; font-style: normal; }
-.orbit-token > strong { max-width: 120px; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: .69rem; white-space: nowrap; }
+.orbit-token > strong { max-width: 98px; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: .61rem; white-space: nowrap; }
 
 .orbit-story { position: absolute; z-index: 42; left: 50%; top: 51%; width: min(390px, 31vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
 .motif-stage { position: relative; width: clamp(145px, 15vw, 210px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 15px; }
-.motif-stage::before, .motif-stage::after, .motif-stage > i { content: ""; position: absolute; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); transition: all .8s cubic-bezier(.22,1,.36,1); }
-.motif-stage::before { inset: 4%; border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
-.motif-stage::after { inset: 13%; border-radius: 28% 72% 40% 60%; transform: rotate(35deg); border-style: dashed; }
-.motif-stage > i:nth-child(1) { inset: 0 49%; border-width: 0 0 0 1px; transform: rotate(35deg); }
-.motif-stage > i:nth-child(2) { inset: 49% 0; border-width: 1px 0 0; transform: rotate(-22deg); }
-.motif-stage > i:nth-child(3) { inset: 22%; border-radius: 50%; transform: rotate(25deg); }
-.motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .7s cubic-bezier(.22,1,.36,1); }
+.motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
+.motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
 .orbit-story > p { margin: 0 0 7px; color: var(--path-accent); font: 650 .56rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
 .orbit-story h3 { margin: 0; font: 620 clamp(2.7rem, 4.7vw, 5.2rem)/.78 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.055em; }
 .entry-kind { display: block; margin-top: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .54rem/1 "IBM Plex Mono", monospace; letter-spacing: .12em; }
@@ -769,8 +692,6 @@ onUnmounted(() => {
 :global(.pathway-dossier) { --path-accent: #c69b52; position: relative; width: min(490px, 100%); height: 100%; overflow: auto; padding: clamp(28px, 5vw, 58px); border: 1px solid rgba(245,240,230,.17); border-radius: 28px; color: #f5f0e6; background: #0b1c1d; box-shadow: 0 35px 100px rgba(0,0,0,.45); outline: 0; }
 :global(.dossier-close) { position: absolute; z-index: 3; top: 18px; right: 18px; width: 48px; height: 48px; border: 1px solid rgba(245,240,230,.2); border-radius: 50%; color: #f5f0e6; background: transparent; cursor: pointer; font-size: 1.5rem; }
 :global(.dossier-symbol) { position: relative; width: 180px; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 40px; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--path-accent) 22%, transparent), transparent 68%); }
-:global(.dossier-symbol i) { position: absolute; inset: -10px; border: 1px dashed color-mix(in srgb, var(--path-accent) 38%, transparent); border-radius: 50%; transform: rotate(23deg); }
-:global(.dossier-symbol i:nth-child(2)) { inset: 17px; transform: rotate(-33deg); }
 :global(.dossier-symbol img) { width: 78%; height: 78%; object-fit: contain; }
 :global(.pathway-dossier > p) { margin: 0 0 12px; color: var(--path-accent); font: 650 .59rem/1 "IBM Plex Mono", monospace; letter-spacing: .17em; }
 :global(.pathway-dossier h3) { margin: 0; font: 620 clamp(3.7rem, 7vw, 6.6rem)/.79 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.055em; }
