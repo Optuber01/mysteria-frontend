@@ -81,7 +81,7 @@
             @click.stop="selectAndOpen(index, $event)"
           >
             <span class="token-seal">
-              <img :src="entry.image" alt="" width="96" height="96" :loading="activeKind === 'boon' || index < 4 ? 'eager' : 'lazy'" :fetchpriority="activeKind === 'boon' && index < 3 ? 'high' : index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
+              <img :src="entry.thumbnail" alt="" width="96" height="96" :loading="activeKind === 'boon' || index < 4 ? 'eager' : 'lazy'" :fetchpriority="activeKind === 'boon' && index < 3 ? 'high' : index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
             </span>
             <strong>{{ entry.name }}</strong><small>{{ entry.sequenceCount }} sequences</small>
           </button>
@@ -99,7 +99,7 @@
             @keydown.space.prevent="selectActiveAndOpen($event)"
           >
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
-              <img :src="activeEntry.image" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
+              <img :src="activeStoryImage" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
             </div>
             <h3>{{ activeEntry.name }}</h3>
             <span class="entry-kind">{{ activeEntry.sequenceCount }} sequences</span>
@@ -266,6 +266,7 @@ const assemblyIndex = computed(() => clamp(Math.floor(assemblyCursor.value), 0, 
 const shownIndex = computed(() => interactionReady.value ? selectedIndex.value : assemblyIndex.value);
 const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
 const selectedEntry = computed(() => activeCatalog.value[selectedIndex.value] ?? activeCatalog.value[0]);
+const activeStoryImage = computed(() => interactionReady.value ? activeEntry.value.image : activeEntry.value.thumbnail);
 const hasActiveEntry = computed(() => reducedMotion.value || compactLayout.value || assemblyProgress.value * activeCatalog.value.length >= 1);
 const neutralTheme = { accent: '#c69b52', accent2: '#4f8275', ink: '#f7f2e7', surface: '#10201f', haze: '#345f58' };
 const themeStyle = computed(() => ({
@@ -424,7 +425,7 @@ function warmBoonSymbols() {
     boonPathways.forEach((entry) => {
       const image = new Image();
       image.decoding = 'async';
-      image.src = entry.image;
+      image.src = entry.thumbnail;
       boonImageWarmers.push(image);
     });
   }, 180);
@@ -652,7 +653,7 @@ onUnmounted(() => {
 .orbit-stage { position: absolute; z-index: 10; inset: 0; outline: 0; cursor: default; touch-action: pan-y; user-select: none; contain: layout paint; }
 .orbit-stage:focus-visible { outline: 3px solid #fcf9f2; outline-offset: -10px; box-shadow: inset 0 0 0 5px #08151a; }
 .orbit-token { position: absolute; width: 108px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 3px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 92%, transparent); background: transparent; cursor: pointer; contain: layout paint; }
-.pathway-vault:not(.is-interactive) .orbit-token { transition: left .14s cubic-bezier(.22, 1, .36, 1), top .14s cubic-bezier(.22, 1, .36, 1), transform .14s cubic-bezier(.22, 1, .36, 1), opacity .1s linear; }
+.pathway-vault:not(.is-interactive) .orbit-token { transition: left .06s linear, top .06s linear, transform .08s cubic-bezier(.22, 1, .36, 1), opacity .06s linear; }
 .orbit-token.is-hidden { visibility: hidden; }
 .orbit-token.is-behind { opacity: .68; }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }

@@ -30,6 +30,7 @@ export type HomePathway = {
   kind: ProgressionKind;
   name: string;
   image: string;
+  thumbnail: string;
   route: string;
   startingSequence: string;
   startingSequenceNumber: number;
@@ -140,6 +141,39 @@ const lotmWikiTopics: Record<string, string> = {
   emperor: 'Bribery · Distortion · Disorder · Resurrection',
   justiciar: 'Rules · Territory · Punishment · Order',
 };
+
+// Generated from the dominant non-transparent color of each shipped symbol.
+// The focused scene uses this palette, while each orbit token carries its own.
+const imageAccents: Record<string, string> = {
+  abyss: '#e04030', chained: '#505090', darkness: '#203060', death: '#f0f0e0',
+  demoness: '#a02070', door: '#207090', emperor: '#5070a0', error: '#607090',
+  fool: '#403060', fortune: '#406060', giant: '#f0b070', hanged: '#c03030',
+  hermit: '#403080', justiciar: '#604030', moon: '#903030', mother: '#307060',
+  paragon: '#a05020', priest: '#a02010', sun: '#805010', tower: '#3040a0',
+  tyrant: '#b0f0f0', visionary: '#506070', aeon: '#405080', chaos: '#502010',
+  chaosmist: '#507080', condenser: '#3050a0', devouring: '#e0c0b0', edict: '#407060',
+  everlasting: '#504070', patriarch: '#f0e0e0', secondlaw: '#506050', sublunary: '#604020',
+};
+
+function mixHex(from: string, to: string, amount: number) {
+  const source = from.slice(1);
+  const target = to.slice(1);
+  const channel = (offset: number) => Math.round(
+    Number.parseInt(source.slice(offset, offset + 2), 16) * (1 - amount)
+    + Number.parseInt(target.slice(offset, offset + 2), 16) * amount,
+  ).toString(16).padStart(2, '0');
+  return `#${channel(0)}${channel(2)}${channel(4)}`;
+}
+
+function themeFromImage(accent: string): HomePathway['theme'] {
+  return {
+    accent,
+    accent2: mixHex(accent, '#e8f0f2', .25),
+    ink: mixHex('#fff8ec', accent, .07),
+    surface: mixHex('#081315', accent, .22),
+    haze: mixHex('#0b171a', accent, .52),
+  };
+}
 const lotmWikiBase = 'https://lordofthemysteries.fandom.com/wiki/';
 const pathwayTaglines: Record<string, string> = {
   abyss: 'Turn vice, curses, and ruthless pressure into power.',
@@ -189,6 +223,7 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
   while (strengths.length < 3) strengths.push('See documented abilities');
   const display = presentation[entry.id] ?? neutral;
   const imageId = entry.id === 'aeon' ? 'eternalaeon' : entry.id;
+  const accent = imageAccents[entry.id];
   const startingName = english(starting?.name);
   const startingNumber = Number.isFinite(starting?.sequence) ? (starting?.sequence ?? 9) : 9;
   return {
@@ -196,6 +231,7 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
     kind: entry.kind,
     name: pathwayNames[entry.id] ?? titleCase(entry.id),
     image: entry.kind === 'pathway' ? `/pathways/native/${imageId}.webp` : `/pathways/thumbs/${imageId}.webp`,
+    thumbnail: `/pathways/thumbs/${imageId}.webp`,
     route: `/pathways/${entry.id}`,
     startingSequence: `Sequence ${startingNumber} · ${startingName}`,
     startingSequenceNumber: startingNumber,
@@ -208,6 +244,7 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
     sequenceCount: entry.sequenceCount,
     abilityCount: entry.abilityCount,
     ...display,
+    theme: accent ? themeFromImage(accent) : display.theme,
   };
 });
 
