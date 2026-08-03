@@ -231,7 +231,10 @@ const catalogOptions = computed(() => [
 ]);
 // Complete close to the end of the sticky scene, leaving only a small
 // hand-off scroll before the next section.
-const assemblyProgress = computed(() => clamp((scrollProgress.value + .09) / .72, 0, 1));
+// Start empty at the section boundary; each scroll increment introduces the
+// next route. The shorter travel leaves only a small hand-off after the orbit
+// is complete.
+const assemblyProgress = computed(() => clamp(scrollProgress.value / .85, 0, 1));
 const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
   if (reducedMotion.value || compactLayout.value) return 'orbit';
   if (scrollProgress.value < .08) return 'entry';
@@ -244,7 +247,7 @@ const assemblyIndex = computed(() => clamp(Math.floor(assemblyCursor.value), 0, 
 const shownIndex = computed(() => interactionReady.value ? selectedIndex.value : assemblyIndex.value);
 const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
 const selectedEntry = computed(() => activeCatalog.value[selectedIndex.value] ?? activeCatalog.value[0]);
-const hasActiveEntry = computed(() => activeCatalog.value.length > 0);
+const hasActiveEntry = computed(() => reducedMotion.value || compactLayout.value || assemblyProgress.value * activeCatalog.value.length >= 1);
 const neutralTheme = { accent: '#c69b52', accent2: '#4f8275', ink: '#f7f2e7', surface: '#10201f', haze: '#345f58' };
 const themeStyle = computed(() => ({
   '--path-accent': (hasActiveEntry.value ? activeEntry.value.theme : neutralTheme).accent,
@@ -583,7 +586,7 @@ onUnmounted(() => {
 .is-low-power .ambient-field::before { display: none; }
 .is-low-power .ambient-field__haze { background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 38%, transparent), transparent 42%); }
 
-.desktop-experience { height: 440svh; }
+.desktop-experience { height: 270svh; }
 .sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
 .vault-heading { position: absolute; z-index: 90; top: clamp(76px, 9vh, 112px); left: clamp(24px, 5vw, 78px); width: min(470px, 34vw); }
 .vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 650 .63rem/1 "IBM Plex Mono", monospace; letter-spacing: .18em; }
