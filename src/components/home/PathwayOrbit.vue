@@ -14,10 +14,10 @@
         <header class="vault-heading">
           <p>PLAYABLE ROUTES TO POWER</p>
           <h2 id="pathway-title">
-            Watch every route<br><em>fall into orbit.</em>
+            Every pathway,<br><em>in orbit.</em>
           </h2>
           <span>
-            Scroll through the archive, then take control. Every Sequence and ability shown here comes from Mysterria’s current data.
+            Scroll to explore. Hover a symbol to see its Sequences and abilities.
           </span>
         </header>
 
@@ -71,17 +71,16 @@
             :tabindex="orbitStyles[index]?.hidden ? -1 : 0"
             :aria-label="`${entry.name}. ${entry.startingSequence}. ${entry.playstyle}`"
             :aria-pressed="index === selectedIndex"
-            @mouseenter="previewIndex = index"
-            @mouseleave="previewIndex = null"
-            @focus="previewIndex = index"
-            @blur="previewIndex = null"
-            @click.stop="selectAndOpen(index, $event)"
+            @mouseenter="previewPathway(index)"
+            @mouseleave="schedulePreviewClose"
+            @focus="previewPathway(index)"
+            @blur="schedulePreviewClose"
+            @click.stop="selectPreview(index)"
           >
             <span class="token-seal">
               <img :src="entry.image" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
-              <i>{{ String(index + 1).padStart(2, '0') }}</i>
             </span>
-            <strong>{{ entry.name }}</strong>
+            <strong>{{ entry.name }}</strong><small>{{ entry.sequenceCount }} sequences</small>
           </button>
           </template>
 
@@ -89,41 +88,30 @@
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
               <img :src="activeEntry.image" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
             </div>
-            <p>{{ activeEntry.startingSequence }}</p>
             <h3>{{ activeEntry.name }}</h3>
-            <span class="entry-kind">{{ activeEntry.kind === 'boon' ? 'BOON' : 'PATHWAY' }} · {{ activeEntry.sequenceCount }} SEQUENCES</span>
-            <ul aria-label="Early documented abilities">
-              <li v-for="strength in activeEntry.strengths" :key="strength">{{ strength }}</li>
-            </ul>
-            <small>{{ activeEntry.summary }}</small>
-            <a v-if="activeEntry.wikiSummary && activeEntry.wikiUrl" class="wiki-strip" :href="activeEntry.wikiUrl" target="_blank" rel="noreferrer" @click.stop>
-              <b>LOTM WIKI</b><span>{{ activeEntry.wikiSummary }}</span><i aria-hidden="true">↗</i>
-            </a>
+            <span class="entry-kind">{{ activeEntry.sequenceCount }} sequences</span>
           </article>
 
-          <div class="assembly-readout" aria-hidden="true">
-            <span>{{ interactionReady ? 'ORBIT UNLOCKED' : 'ASSEMBLING ARCHIVE' }}</span>
-            <i><b :style="{ transform: `scaleX(${Math.max(.025, assemblyProgress)})` }" /></i>
-            <strong>{{ String(Math.min(activeCatalog.length, Math.max(1, assemblyIndex + 1))).padStart(2, '0') }} / {{ String(activeCatalog.length).padStart(2, '0') }}</strong>
-          </div>
-
-          <div class="orbit-controls" :class="{ 'is-visible': interactionReady }">
-            <button type="button" :aria-label="`Previous ${activeKindLabel.slice(0, -1)}`" @click.stop="previous">←</button>
-            <span><b>{{ String(selectedIndex + 1).padStart(2, '0') }}</b> / {{ String(activeCatalog.length).padStart(2, '0') }}</span>
-            <button type="button" :aria-label="`Next ${activeKindLabel.slice(0, -1)}`" @click.stop="next">→</button>
-          </div>
-
-          <button class="open-dossier" :class="{ 'is-visible': interactionReady }" type="button" @click.stop="openDetails($event)">
-            Inspect {{ activeEntry.name }} <span aria-hidden="true">↗</span>
-          </button>
-
-          <p class="interaction-hint" :class="{ 'is-visible': interactionReady }" aria-hidden="true">
-            DRAG&nbsp;&nbsp;·&nbsp;&nbsp;ARROW KEYS
-          </p>
-        </div>
-
-        <div class="scroll-cue" :class="{ 'is-complete': interactionReady }" aria-hidden="true">
-          <span>{{ interactionReady ? 'SCROLL TO CONTINUE' : 'SCROLL TO ASSEMBLE' }}</span><i />
+          <aside
+            class="sequence-card"
+            :class="{ 'is-visible': previewIndex !== null && interactionReady }"
+            :aria-hidden="previewIndex === null"
+            @mouseenter="cancelPreviewClose"
+            @mouseleave="schedulePreviewClose"
+          >
+            <header><span>PATHWAY ARCHIVE</span><button type="button" aria-label="Close pathway archive" @click="closePreview">×</button></header>
+            <h4>{{ activeEntry.name }}</h4>
+            <p>{{ activeEntry.sequenceCount }} sequences · {{ activeEntry.abilityCount }} abilities</p>
+            <div v-if="loadingSequenceId === activeEntry.id" class="sequence-card__loading">Loading archive…</div>
+            <div v-else class="sequence-list">
+              <details v-for="sequence in activeSequences" :key="sequence.sequence">
+                <summary><span>Sequence {{ sequence.sequence }}</span><b>{{ sequence.name }}</b></summary>
+                <ul>
+                  <li v-for="ability in sequence.abilities" :key="ability.id"><strong>{{ ability.name }}</strong><span>{{ ability.description }}</span></li>
+                </ul>
+              </details>
+            </div>
+          </aside>
         </div>
       </div>
     </div>
@@ -173,12 +161,9 @@
             <img :src="entry.image" alt="" width="170" height="170" loading="lazy" decoding="async" @error="replaceBrokenImage">
             <b>{{ String(index + 1).padStart(2, '0') }}</b>
           </div>
-          <p>{{ entry.startingSequence }}</p>
+          <p>{{ entry.sequenceCount }} sequences</p>
           <h3>{{ entry.name }}</h3>
-          <ul aria-label="Early documented abilities">
-            <li v-for="strength in entry.strengths" :key="strength">{{ strength }}</li>
-          </ul>
-          <button type="button" @click="selectAndOpen(index, $event)">Inspect {{ entry.name }} <span aria-hidden="true">↗</span></button>
+          <button type="button" @click="selectAndOpen(index, $event)">Open archive <span aria-hidden="true">↗</span></button>
         </article>
       </div>
 
@@ -188,18 +173,6 @@
         <button type="button" :aria-label="`Next ${activeKindLabel.slice(0, -1)}`" @click="nextMobile">→</button>
       </div>
     </div>
-
-    <details class="catalog-fallback" @toggle="handleFallbackToggle">
-      <summary>View all {{ activeCatalog.length }} {{ activeKindLabel }}</summary>
-      <ul v-if="fallbackOpen">
-        <li v-for="(entry, index) in activeCatalog" :key="entry.id">
-          <button type="button" @click="selectAndOpen(index, $event)">
-            <img :src="entry.image" alt="" width="44" height="44" loading="lazy" decoding="async" @error="replaceBrokenImage">
-            <span><strong>{{ entry.name }}</strong><small>{{ entry.startingSequence }}</small></span>
-          </button>
-        </li>
-      </ul>
-    </details>
 
     <Teleport to="body">
       <Transition name="dossier">
@@ -260,9 +233,10 @@ const velocity = ref(0);
 const dragging = ref(false);
 const inView = ref(false);
 const detailsOpen = ref(false);
-const fallbackOpen = ref(false);
 const compactLayout = ref(false);
 const lowPower = ref(false);
+const sequenceArchive = ref<Record<string, SequenceDetail[]>>({});
+const loadingSequenceId = ref<string | null>(null);
 
 let animationFrame = 0;
 let scrollFrame = 0;
@@ -274,6 +248,7 @@ let previousBodyOverflow = '';
 let sectionObserver: IntersectionObserver | null = null;
 let compactMedia: MediaQueryList | null = null;
 let scrollTravel = 1;
+let previewCloseTimer = 0;
 
 const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
 const activeKindLabel = computed(() => activeKind.value === 'pathway' ? 'Pathways' : 'Boons');
@@ -296,6 +271,7 @@ const assemblyIndex = computed(() => clamp(Math.floor(assemblyCursor.value), 0, 
 const shownIndex = computed(() => previewIndex.value ?? (interactionReady.value ? selectedIndex.value : assemblyIndex.value));
 const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
 const selectedEntry = computed(() => activeCatalog.value[selectedIndex.value] ?? activeCatalog.value[0]);
+const activeSequences = computed(() => sequenceArchive.value[activeEntry.value.id] ?? []);
 const themeStyle = computed(() => ({
   '--path-accent': activeEntry.value.theme.accent,
   '--path-accent-2': activeEntry.value.theme.accent2,
@@ -305,6 +281,11 @@ const themeStyle = computed(() => ({
 }));
 
 type OrbitVisual = { hidden: boolean; behind: boolean; style: CSSProperties };
+type SequenceDetail = {
+  sequence: number;
+  name: string;
+  abilities: Array<{ id: string; name: string; description: string }>;
+};
 
 const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, index) => {
   if (phase.value === 'entry' || phase.value === 'assembly') return assemblyStyle(index);
@@ -430,6 +411,50 @@ function snapTo(index: number, announce = true) {
 
 function previous() { if (interactionReady.value) snapTo(selectedIndex.value - 1); }
 function next() { if (interactionReady.value) snapTo(selectedIndex.value + 1); }
+
+async function loadSequenceArchive(id: string) {
+  if (sequenceArchive.value[id] || loadingSequenceId.value === id) return;
+  loadingSequenceId.value = id;
+  try {
+    const source = await import('@/assets/sources/pathway-abilities.json');
+    const pathway = source.default.pathways.find((entry) => entry.id === id);
+    sequenceArchive.value = {
+      ...sequenceArchive.value,
+      [id]: (pathway?.sequences ?? [])
+        .slice()
+        .sort((a, b) => b.sequence - a.sequence)
+        .map((sequence) => ({
+          sequence: sequence.sequence,
+          name: sequence.name.en ?? sequence.name.uk ?? 'Undocumented',
+          abilities: sequence.abilities.map((ability) => ({
+            id: ability.id,
+            name: ability.name.en ?? ability.name.uk ?? 'Undocumented',
+            description: ability.description.en ?? ability.description.uk ?? '',
+          })),
+        })),
+    };
+  } finally {
+    if (loadingSequenceId.value === id) loadingSequenceId.value = null;
+  }
+}
+
+function cancelPreviewClose() { window.clearTimeout(previewCloseTimer); }
+function schedulePreviewClose() {
+  cancelPreviewClose();
+  previewCloseTimer = window.setTimeout(() => { previewIndex.value = null; }, 120);
+}
+function closePreview() { cancelPreviewClose(); previewIndex.value = null; }
+function previewPathway(index: number) {
+  cancelPreviewClose();
+  previewIndex.value = index;
+  void loadSequenceArchive(activeCatalog.value[index].id);
+}
+function selectPreview(index: number) {
+  selectedIndex.value = index;
+  snapTo(index);
+  previewPathway(index);
+}
+
 function selectAndOpen(index: number, event: Event) {
   selectedIndex.value = index;
   snapTo(index);
@@ -516,10 +541,6 @@ function scrollMobileTo(index: number) {
 function previousMobile() { scrollMobileTo(selectedIndex.value - 1); }
 function nextMobile() { scrollMobileTo(selectedIndex.value + 1); }
 
-function handleFallbackToggle(event: Event) {
-  fallbackOpen.value = (event.currentTarget as HTMLDetailsElement).open;
-}
-
 async function openDetails(event?: Event) {
   dossierTrigger = event?.currentTarget as HTMLElement | null;
   previousBodyOverflow = document.body.style.overflow;
@@ -603,6 +624,7 @@ onUnmounted(() => {
   if (animationFrame) cancelAnimationFrame(animationFrame);
   if (scrollFrame) cancelAnimationFrame(scrollFrame);
   window.clearTimeout(mobileScrollTimer);
+  window.clearTimeout(previewCloseTimer);
   document.body.style.overflow = previousBodyOverflow;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
 });
@@ -625,7 +647,7 @@ onUnmounted(() => {
 
 .ambient-field { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
 .ambient-field::before {
-  content: ""; position: absolute; inset: 0;
+  content: none; position: absolute; inset: 0;
   opacity: .13;
   background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px);
   background-size: 72px 72px;
@@ -643,9 +665,9 @@ onUnmounted(() => {
 
 .desktop-experience { height: 440svh; }
 .sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
-.vault-heading { position: absolute; z-index: 90; top: clamp(76px, 9vh, 112px); left: clamp(24px, 5vw, 78px); width: min(420px, 35vw); padding: 12px 54px 18px 0; background: linear-gradient(90deg, color-mix(in srgb, var(--path-surface) 98%, transparent) 0 72%, transparent); }
+.vault-heading { position: absolute; z-index: 90; top: clamp(76px, 9vh, 112px); left: clamp(24px, 5vw, 78px); width: min(470px, 34vw); }
 .vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 650 .63rem/1 "IBM Plex Mono", monospace; letter-spacing: .18em; }
-.vault-heading h2, .mobile-heading h2 { margin: 0; font: 600 clamp(2.7rem, 5vw, 5.3rem)/.84 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.052em; }
+.vault-heading h2, .mobile-heading h2 { margin: 0; font: 600 clamp(2.7rem, 5vw, 5.3rem)/.88 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.052em; text-wrap: balance; }
 .vault-heading h2 em, .mobile-heading h2 em { color: var(--path-accent); font-style: normal; }
 .vault-heading > span { display: block; max-width: 350px; margin-top: 18px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font-size: .78rem; line-height: 1.65; }
 
@@ -658,7 +680,7 @@ onUnmounted(() => {
 .is-interactive .orbit-stage { cursor: grab; }
 .is-interactive .orbit-stage:active { cursor: grabbing; }
 .orbit-stage:focus-visible { outline: 3px solid #fcf9f2; outline-offset: -10px; box-shadow: inset 0 0 0 5px #08151a; }
-.orbit-token { position: absolute; width: 94px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 6px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 77%, transparent); background: transparent; cursor: pointer; contain: layout paint; }
+.orbit-token { position: absolute; width: 108px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 3px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 92%, transparent); background: transparent; cursor: pointer; contain: layout paint; }
 .orbit-token.is-hidden { visibility: hidden; }
 .orbit-token.is-behind { opacity: .68; }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }
@@ -666,27 +688,38 @@ onUnmounted(() => {
 .token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--path-ink) 24%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--path-surface) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
 .orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--path-accent); background: color-mix(in srgb, var(--path-haze) 40%, var(--path-surface)); transform: scale(1.14); }
 .token-seal img { width: 57px; height: 57px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,.28)); }
-.token-seal i { position: absolute; right: -5px; bottom: 0; width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #08151a; background: var(--path-accent); font: 750 .52rem/1 "IBM Plex Mono", monospace; font-style: normal; }
-.orbit-token > strong { max-width: 98px; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: .61rem; white-space: nowrap; }
+.orbit-token > strong { max-width: 108px; overflow: hidden; text-overflow: ellipsis; color: inherit; font-size: .64rem; white-space: nowrap; }
+.orbit-token > small { color: color-mix(in srgb, var(--path-ink) 68%, transparent); font: 600 .46rem/1 "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
 .is-low-power .token-seal { box-shadow: none; }
 .is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }
 .is-low-power .motif-stage::before { box-shadow: none; }
 
-.orbit-story { position: absolute; z-index: 42; left: 50%; top: 51%; width: min(390px, 31vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
-.motif-stage { position: relative; width: clamp(145px, 15vw, 210px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 15px; }
+.orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(300px, 25vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+.motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
-.orbit-story > p { margin: 0 0 7px; color: var(--path-accent); font: 650 .56rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
-.orbit-story h3 { margin: 0; font: 620 clamp(2.7rem, 4.7vw, 5.2rem)/.78 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.055em; }
-.entry-kind { display: block; margin-top: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .54rem/1 "IBM Plex Mono", monospace; letter-spacing: .12em; }
-.orbit-story ul { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin: 14px auto 8px; padding: 0; list-style: none; }
-.orbit-story li { padding: 6px 8px; border: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); border-radius: 999px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); background: color-mix(in srgb, var(--path-surface) 72%, transparent); font: 600 .5rem/1 "IBM Plex Mono", monospace; }
-.orbit-story small { color: color-mix(in srgb, var(--path-ink) 72%, transparent); font-size: .62rem; line-height: 1.5; }
-.wiki-strip { width: min(370px, 100%); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px; margin: 16px auto 0; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--path-accent) 42%, transparent); border-radius: 10px; color: color-mix(in srgb, var(--path-ink) 88%, transparent); background: color-mix(in srgb, var(--path-surface) 82%, transparent); text-align: left; text-decoration: none; pointer-events: auto; transition: border-color .1s linear, background .1s linear; }
-.wiki-strip:hover { border-color: var(--path-accent); background: color-mix(in srgb, var(--path-haze) 44%, var(--path-surface)); }
-.wiki-strip b { color: var(--path-accent); font: 700 .48rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; white-space: nowrap; }
-.wiki-strip span { overflow: hidden; font: 600 .52rem/1.35 "IBM Plex Mono", monospace; text-overflow: ellipsis; white-space: nowrap; }
-.wiki-strip i { color: var(--path-accent); font-style: normal; }
+.orbit-story h3 { margin: 0; font: 620 clamp(2.3rem, 3.8vw, 4.2rem)/.84 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.055em; }
+.entry-kind { display: block; margin-top: 10px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 650 .56rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+
+.sequence-card { position: absolute; z-index: 120; left: 50%; top: 50%; width: min(430px, 32vw); max-height: min(500px, 56vh); overflow: hidden auto; padding: 18px; border: 1px solid color-mix(in srgb, var(--path-accent) 48%, transparent); border-radius: 16px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 96%, transparent); box-shadow: 0 24px 70px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transform: translate(-50%, -46%) scale(.97); transition: opacity .12s linear, transform .16s ease-out; }
+.sequence-card.is-visible { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+.sequence-card header { display: flex; align-items: center; justify-content: space-between; color: var(--path-accent); font: 700 .53rem/1 "IBM Plex Mono", monospace; letter-spacing: .14em; }
+.sequence-card header button { width: 28px; height: 28px; border: 0; color: inherit; background: transparent; cursor: pointer; font-size: 1.2rem; }
+.sequence-card h4 { margin: 14px 0 3px; font: 620 clamp(2rem, 3vw, 3rem)/.88 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.04em; }
+.sequence-card > p { margin: 0 0 14px; color: color-mix(in srgb, var(--path-ink) 68%, transparent); font: 600 .55rem/1.4 "IBM Plex Mono", monospace; text-transform: uppercase; }
+.sequence-card__loading { padding: 24px 0; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: .68rem/1.4 "IBM Plex Mono", monospace; }
+.sequence-list { display: grid; border-top: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); }
+.sequence-list details { border-bottom: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); }
+.sequence-list summary { display: grid; grid-template-columns: 80px 1fr auto; align-items: center; gap: 8px; padding: 12px 0; cursor: pointer; list-style: none; }
+.sequence-list summary::-webkit-details-marker { display: none; }
+.sequence-list summary::after { content: '+'; color: var(--path-accent); font: 1rem/1 "IBM Plex Mono", monospace; }
+.sequence-list details[open] summary::after { content: '−'; }
+.sequence-list summary span { color: var(--path-accent); font: 650 .5rem/1 "IBM Plex Mono", monospace; text-transform: uppercase; }
+.sequence-list summary b { font-size: .72rem; }
+.sequence-list ul { display: grid; gap: 9px; margin: 0 0 14px; padding: 0; list-style: none; }
+.sequence-list li { display: grid; gap: 3px; padding-left: 10px; border-left: 1px solid color-mix(in srgb, var(--path-accent) 45%, transparent); }
+.sequence-list li strong { font-size: .68rem; }
+.sequence-list li span { color: color-mix(in srgb, var(--path-ink) 70%, transparent); font-size: .63rem; line-height: 1.42; }
 
 .assembly-readout { position: absolute; z-index: 80; left: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); width: min(300px, 25vw); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 600 .52rem/1 "IBM Plex Mono", monospace; letter-spacing: .1em; }
 .assembly-readout > i { height: 1px; overflow: hidden; background: color-mix(in srgb, var(--path-ink) 15%, transparent); }
