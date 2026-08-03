@@ -321,6 +321,7 @@ function buildBook(formulaImages: FormulaImages) {
     back: [19, 11, 5, 8],
     frontPainter: paintRightFormula(formulaImages),
   });
+  rightStack.position.x = 0.32;
 
   leftPages = new THREE.Group();
   bookRoot.add(leftPages);
@@ -334,6 +335,7 @@ function buildBook(formulaImages: FormulaImages) {
     back: [7, 11, 5, 8],
     backPainter: paintLeftFormula(formulaImages),
   });
+  leftPages.position.x = 0.32;
 
   const turningMaterial = basicMaterial({
     map: makeRegionTexture(24, 10, 5, 8),
@@ -346,17 +348,17 @@ function buildBook(formulaImages: FormulaImages) {
     blending: THREE.NoBlending,
     side: THREE.DoubleSide,
   });
-  const turningGeometry = geometry(new THREE.PlaneGeometry(5.25, 8.65, 6, 1));
+  const turningGeometry = geometry(new THREE.PlaneGeometry(5.15, 8.45, 6, 1));
 
   firstTurningPage = new THREE.Group();
   const firstPage = new THREE.Mesh(turningGeometry, turningMaterial);
-  firstPage.position.set(2.625, 0, 0);
+  firstPage.position.set(2.88, 0, 0.39);
   firstTurningPage.add(firstPage);
   bookRoot.add(firstTurningPage);
 
   secondTurningPage = new THREE.Group();
   const secondPage = new THREE.Mesh(turningGeometry, turningMaterial);
-  secondPage.position.set(2.625, 0, 0);
+  secondPage.position.set(2.88, 0, 0.44);
   secondTurningPage.add(secondPage);
   bookRoot.add(secondTurningPage);
 
@@ -381,10 +383,9 @@ function buildBook(formulaImages: FormulaImages) {
     depthTest: true,
     depthWrite: true,
     blending: THREE.NoBlending,
-    side: THREE.DoubleSide,
   });
-  const seam = new THREE.Mesh(geometry(new THREE.PlaneGeometry(0.12, 8.85)), seamMaterial);
-  seam.position.z = -0.16;
+  const seam = new THREE.Mesh(geometry(new THREE.BoxGeometry(0.42, 10.15, 0.76)), seamMaterial);
+  seam.position.z = 0.06;
   bookRoot.add(seam);
 }
 
@@ -411,12 +412,8 @@ function updatePose() {
   leftPages.rotation.y = -Math.PI * pageOpening;
 
   const flutter = Math.sin(pageOpening * Math.PI) * 0.08;
-  const firstTurningAngle = -Math.PI * phase(p, 0.59, 0.9) - flutter;
-  const secondTurningAngle = -Math.PI * phase(p, 0.66, 0.92) + flutter * 0.65;
-  firstTurningPage.rotation.y = firstTurningAngle;
-  secondTurningPage.rotation.y = secondTurningAngle;
-  firstTurningPage.position.z = 0.39 * Math.cos(firstTurningAngle);
-  secondTurningPage.position.z = 0.44 * Math.cos(secondTurningAngle);
+  firstTurningPage.rotation.y = -Math.PI * phase(p, 0.59, 0.9) - flutter;
+  secondTurningPage.rotation.y = -Math.PI * phase(p, 0.66, 0.92) + flutter * 0.65;
 
   render();
 }
