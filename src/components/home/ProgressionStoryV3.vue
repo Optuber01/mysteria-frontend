@@ -4,7 +4,7 @@
     ref="sectionRef"
     class="progression-v3"
     :class="{ 'is-visible': visible }"
-    :style="{ '--journey': progress.toFixed(4) }"
+    :style="{ '--journey': progress.toFixed(4), '--entry': entryProgress.toFixed(4) }"
     aria-labelledby="progression-title"
   >
     <div class="progression-v3__sticky">
@@ -122,35 +122,35 @@ type Chapter = { id: string; short: string; kicker: string; title: string; copy:
 
 const chapters: Chapter[] = [
   {
-    id: 'discover', short: 'Discover', start: 0, end: 0.24,
+    id: 'discover', short: 'Discover', start: 0, end: 0.38,
     kicker: '01 · Recover the knowledge',
     title: 'Discover the formula.',
     copy: 'Complete formulas surface in Mysterria’s loot — or recover their pages and assemble the set. This one names a Sequence 9 of the Fool Pathway.',
     hint: 'Hover the book’s entries to study each ingredient.',
   },
   {
-    id: 'infuse', short: 'Infuse', start: 0.24, end: 0.44,
+    id: 'infuse', short: 'Infuse', start: 0.38, end: 0.54,
     kicker: '02 · Feed the altar',
     title: 'Every item finds its place.',
     copy: 'The written formula leaves the page — main ingredients to the left, supplementary to the right, the formula at the heart, in written order.',
     hint: 'Follow each ingredient as it lands.',
   },
   {
-    id: 'brew', short: 'Brew', start: 0.44, end: 0.62,
+    id: 'brew', short: 'Brew', start: 0.54, end: 0.68,
     kicker: '03 · The working',
     title: 'Watch it become a potion.',
     copy: 'Under the altar’s circle the mixture turns. A clean brew yields the Sequence 9 potion of the Seer — no challenge failed, nothing wasted.',
     hint: 'The circle brightens as the brew completes.',
   },
   {
-    id: 'drink', short: 'Drink', start: 0.62, end: 0.84,
+    id: 'drink', short: 'Drink', start: 0.68, end: 0.86,
     kicker: '04 · Commit to the Pathway',
     title: 'Drink. Maintain control.',
     copy: 'Drinking commits you to the Fool Pathway and starts the awakening. The first Sequence 9 potion asks for no ritual — only nerve.',
     hint: 'Empty it to the last drop.',
   },
   {
-    id: 'awaken', short: 'Awaken', start: 0.84, end: 1,
+    id: 'awaken', short: 'Awaken', start: 0.86, end: 1,
     kicker: '05 · Awaken',
     title: 'Become a Seer.',
     copy: 'Sequence 9 of the Fool Pathway awakens: Divination and Spiritualism join your toolkit. Digest, and Sequence 8 · Clown waits beyond.',
@@ -216,6 +216,7 @@ const details: Record<string, { label: string; detail: string }> = {
 const sectionRef = ref<HTMLElement | null>(null);
 const stageRef = ref<HTMLElement | null>(null);
 const progress = ref(0);
+const entryProgress = ref(0);
 const visible = ref(false);
 const reducedMotion = useReducedMotion();
 const activeHotspotId = ref<string | null>(null);
@@ -247,13 +248,13 @@ function fadeWindow(fadeInStart: number, fadeOutStart: number, fadeOutEnd: numbe
   return Math.min(fadeIn, fadeOut);
 }
 
-const bookLocal = computed(() => windowProgress(0, 0.24));
-const altarLocal = computed(() => windowProgress(0.24, 0.62));
-const drinkLocal = computed(() => windowProgress(0.62, 1));
+const bookLocal = computed(() => windowProgress(0, 0.28));
+const altarLocal = computed(() => windowProgress(0.38, 0.68));
+const drinkLocal = computed(() => windowProgress(0.68, 1));
 
-const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.24, 0.27)));
-const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.215, 0.62, 0.65, 0.245)));
-const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.595, 2, 2, 0.625)));
+const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.42, 0.46)));
+const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.39, 0.68, 0.71, 0.43)));
+const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.66, 2, 2, 0.69)));
 
 function windowStyle(opacity: number) {
   return {
@@ -300,8 +301,8 @@ function clearExpiredInspector(nextProgress: number) {
   // scrolls underneath it. Do not let a teleported tooltip remain attached to
   // a now-hidden control in that case.
   if (
-    (inspectorScene.value === 'book' && nextProgress >= 0.27) ||
-    (inspectorScene.value === 'altar' && nextProgress >= 0.65)
+    (inspectorScene.value === 'book' && nextProgress >= 0.46) ||
+    (inspectorScene.value === 'altar' && nextProgress >= 0.71)
   ) clearDetail();
 }
 
@@ -312,6 +313,7 @@ function update() {
     const rect = sectionRef.value?.getBoundingClientRect();
     if (!rect) return;
     const range = Math.max(1, rect.height - innerHeight);
+    entryProgress.value = clamp01(1 - Math.max(0, rect.top) / innerHeight);
     const nextProgress = clamp01(-rect.top / range);
     progress.value = nextProgress;
     clearExpiredInspector(nextProgress);
@@ -346,11 +348,23 @@ onUnmounted(() => {
 <style scoped>
 .progression-v3 {
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --entry: 0;
   position: relative;
+  /* Start exactly when the preceding 100svh hero sticky finishes its travel.
+     This removes the otherwise empty hero tail without shortening its motion. */
+  margin-top: -100svh;
   min-height: 500svh;
   color: #fcf9f2;
-  background: #0e2224;
+  background: transparent;
   isolation: isolate;
+}
+
+@media (max-width: 720px) and (max-height: 690px) {
+  .progression-v3 { margin-top: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progression-v3 { margin-top: 0; }
 }
 
 .progression-v3__sticky {
@@ -359,7 +373,14 @@ onUnmounted(() => {
   height: 100svh;
   min-height: 620px;
   overflow: hidden;
-  background: #0e2224;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 34, 36, 0) 0%,
+    rgba(14, 34, 36, 0.22) 12%,
+    rgba(14, 34, 36, 0.72) 34%,
+    #0e2224 62%,
+    #0e2224 100%
+  );
 }
 .progression-v3__backdrop,
 .progression-v3__wash {
@@ -450,6 +471,7 @@ onUnmounted(() => {
   left: clamp(18px, 4vw, 68px);
   display: grid;
   gap: 7px;
+  opacity: clamp(0, calc((var(--entry) - 0.34) * 2.5), 1);
 }
 .progression-v3__heading p,
 .chapter-copy__kicker {
@@ -477,6 +499,7 @@ onUnmounted(() => {
   grid-template-columns: minmax(240px, 0.55fr) minmax(560px, 1.45fr);
   align-items: center;
   gap: clamp(26px, 4vw, 72px);
+  opacity: clamp(0, calc((var(--entry) - 0.68) * 3.125), 1);
 }
 .chapter-copy {
   min-width: 0;
@@ -695,6 +718,7 @@ onUnmounted(() => {
     left: auto;
     width: min(760px, 100%);
     margin: 0 auto 40px;
+    opacity: 1;
   }
   .progression-v3__heading h2 {
     margin-top: 8px;

@@ -8,6 +8,10 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import * as THREE from 'three';
 import bookAtlasUrl from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_1.21.8.png';
+import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
+import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
+import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leaves.png';
+import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
 
 const props = withDefaults(defineProps<{
   progress: number;
@@ -29,6 +33,7 @@ let firstTurningPage: THREE.Group | null = null;
 let secondTurningPage: THREE.Group | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let sourceTexture: THREE.Texture | null = null;
+let disposed = false;
 const ownedTextures: THREE.Texture[] = [];
 const ownedMaterials: THREE.Material[] = [];
 const ownedGeometries: THREE.BufferGeometry[] = [];
@@ -47,24 +52,179 @@ function phase(progress: number, start: number, end: number): number {
   return smoothstep((progress - start) / (end - start));
 }
 
-function makeRegionTexture(u: number, v: number, width: number, height: number): THREE.Texture {
+type FormulaImages = {
+  lavosSquidBlood: HTMLImageElement;
+  stellarAquaCrystal: HTMLImageElement;
+  goldMintLeaves: HTMLImageElement;
+  foolRecipe: HTMLImageElement;
+};
+
+type TexturePainter = (context: CanvasRenderingContext2D, width: number, height: number) => void;
+
+function makeRegionTexture(
+  u: number,
+  v: number,
+  width: number,
+  height: number,
+  painter?: TexturePainter,
+): THREE.Texture {
   if (!sourceTexture) throw new Error('Book atlas has not loaded.');
   const crop = document.createElement('canvas');
-  crop.width = width;
-  crop.height = height;
+  const isIllustratedPage = Boolean(painter);
+  crop.width = isIllustratedPage ? 630 : width;
+  crop.height = isIllustratedPage ? 1038 : height;
   const context = crop.getContext('2d');
   if (!context) throw new Error('A 2D canvas is required to slice the book atlas.');
   context.imageSmoothingEnabled = false;
-  context.drawImage(sourceTexture.image as CanvasImageSource, u, v, width, height, 0, 0, width, height);
+  context.drawImage(
+    sourceTexture.image as CanvasImageSource,
+    u,
+    v,
+    width,
+    height,
+    0,
+    0,
+    crop.width,
+    crop.height,
+  );
+  painter?.(context, crop.width, crop.height);
   const texture = new THREE.CanvasTexture(crop);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = THREE.NearestFilter;
-  texture.minFilter = THREE.NearestFilter;
-  texture.generateMipmaps = false;
+  texture.magFilter = isIllustratedPage ? THREE.LinearFilter : THREE.NearestFilter;
+  texture.minFilter = isIllustratedPage ? THREE.LinearMipmapLinearFilter : THREE.NearestFilter;
+  texture.generateMipmaps = isIllustratedPage;
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   ownedTextures.push(texture);
   return texture;
+}
+
+function drawRule(context: CanvasRenderingContext2D, y: number, width: number, dashed = false) {
+  context.save();
+  context.strokeStyle = 'rgba(116, 71, 42, 0.52)';
+  context.lineWidth = 2;
+  context.setLineDash(dashed ? [10, 8] : []);
+  context.beginPath();
+  context.moveTo(44, y);
+  context.lineTo(width - 44, y);
+  context.stroke();
+  context.restore();
+}
+
+function drawHeading(context: CanvasRenderingContext2D, label: string, width: number) {
+  context.save();
+  context.fillStyle = '#7f211b';
+  context.font = '700 36px "IBM Plex Sans Condensed", sans-serif';
+  context.letterSpacing = '3px';
+  context.fillText(label.toUpperCase(), 48, 82);
+  context.restore();
+  drawRule(context, 108, width);
+}
+
+function wrapText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+): number {
+  const words = text.split(' ');
+  let line = '';
+  let lineY = y;
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (line && context.measureText(candidate).width > maxWidth) {
+      context.fillText(line, x, lineY);
+      line = word;
+      lineY += lineHeight;
+    } else {
+      line = candidate;
+    }
+  }
+  if (line) context.fillText(line, x, lineY);
+  return lineY;
+}
+
+function drawIngredient(
+  context: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  name: string,
+  role: string,
+  top: number,
+  width: number,
+) {
+  const iconSize = 96;
+  context.save();
+  context.fillStyle = 'rgba(255, 249, 230, 0.2)';
+  context.strokeStyle = 'rgba(118, 72, 42, 0.24)';
+  context.lineWidth = 2;
+  context.beginPath();
+  context.roundRect(38, top, width - 76, 164, 16);
+  context.fill();
+  context.stroke();
+
+  context.imageSmoothingEnabled = false;
+  context.drawImage(image, 54, top + 30, iconSize, iconSize);
+  context.imageSmoothingEnabled = true;
+
+  context.fillStyle = '#855735';
+  context.font = '700 27px "IBM Plex Mono", monospace';
+  const lastLineY = wrapText(context, name, 176, top + 55, width - 218, 34);
+  context.fillStyle = '#6e594d';
+  context.font = '500 20px "IBM Plex Mono", monospace';
+  context.fillText(role, 176, Math.max(top + 112, lastLineY + 34));
+  context.restore();
+}
+
+function paintLeftFormula(images: FormulaImages): TexturePainter {
+  return (context, width) => {
+    context.fillStyle = 'rgba(255, 248, 224, 0.14)';
+    context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    drawHeading(context, 'Main ingredients', width);
+    drawIngredient(context, images.lavosSquidBlood, 'Blood of the Lavos Squid', 'Main ingredient', 145, width);
+    drawIngredient(context, images.stellarAquaCrystal, 'Stellar Aqua Crystal', 'Main ingredient', 345, width);
+  };
+}
+
+function paintRightFormula(images: FormulaImages): TexturePainter {
+  return (context, width, height) => {
+    context.fillStyle = 'rgba(255, 248, 224, 0.14)';
+    context.fillRect(0, 0, width, height);
+    drawHeading(context, 'Supplementary', width);
+    drawIngredient(context, images.goldMintLeaves, 'Gold Mint Leaves', 'Supplementary ingredient', 145, width);
+
+    drawRule(context, 775, width, true);
+    context.save();
+    context.strokeStyle = 'rgba(127, 33, 27, 0.48)';
+    context.lineWidth = 3;
+    context.beginPath();
+    context.arc(104, 872, 59, 0, Math.PI * 2);
+    context.stroke();
+    context.imageSmoothingEnabled = false;
+    context.drawImage(images.foolRecipe, 62, 830, 84, 84);
+    context.imageSmoothingEnabled = true;
+
+    context.fillStyle = '#18763a';
+    context.font = '700 23px "IBM Plex Mono", monospace';
+    context.letterSpacing = '2px';
+    context.fillText('RITUAL NOTE', 184, 842);
+    context.letterSpacing = '0px';
+    context.fillStyle = '#49352c';
+    context.font = '500 22px "IBM Plex Mono", monospace';
+    wrapText(context, 'Build the altar before brewing.', 184, 883, width - 228, 31);
+    context.restore();
+  };
+}
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.decoding = 'async';
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Unable to load formula artwork: ${url}`));
+    image.src = url;
+  });
 }
 
 function basicMaterial(parameters: THREE.MeshBasicMaterialParameters): THREE.MeshBasicMaterial {
@@ -88,17 +248,21 @@ function addTexturedLeaf(
     color: number;
     front: [number, number, number, number];
     back: [number, number, number, number];
+    frontPainter?: TexturePainter;
+    backPainter?: TexturePainter;
   },
 ) {
-  const { width, height, depth, z, color, front, back } = options;
-  const bodyMaterial = basicMaterial({ color });
-  const body = new THREE.Mesh(geometry(new THREE.BoxGeometry(width, height, depth)), bodyMaterial);
-  body.position.set(width / 2, 0, z);
-  hinge.add(body);
+  const { width, height, depth, z, color, front, back, frontPainter, backPainter } = options;
+  if (depth > 0) {
+    const bodyMaterial = basicMaterial({ color });
+    const body = new THREE.Mesh(geometry(new THREE.BoxGeometry(width, height, depth)), bodyMaterial);
+    body.position.set(width / 2, 0, z);
+    hinge.add(body);
+  }
 
   const faceGeometry = geometry(new THREE.PlaneGeometry(width, height));
   const frontMaterial = basicMaterial({
-    map: makeRegionTexture(...front),
+    map: makeRegionTexture(...front, frontPainter),
     transparent: true,
     alphaTest: 0.01,
     side: THREE.FrontSide,
@@ -108,7 +272,7 @@ function addTexturedLeaf(
   hinge.add(frontFace);
 
   const backMaterial = basicMaterial({
-    map: makeRegionTexture(...back),
+    map: makeRegionTexture(...back, backPainter),
     transparent: true,
     alphaTest: 0.01,
     side: THREE.FrontSide,
@@ -119,7 +283,7 @@ function addTexturedLeaf(
   hinge.add(backFace);
 }
 
-function buildBook() {
+function buildBook(formulaImages: FormulaImages) {
   if (!scene) return;
 
   bookRoot = new THREE.Group();
@@ -142,11 +306,12 @@ function buildBook() {
   addTexturedLeaf(rightStack, {
     width: 5.25,
     height: 8.65,
-    depth: 0.5,
-    z: -0.06,
+    depth: 0,
+    z: 0.12,
     color: 0xe8ddb4,
     front: [13, 11, 5, 8],
     back: [19, 11, 5, 8],
+    frontPainter: paintRightFormula(formulaImages),
   });
   rightStack.position.x = 0.32;
 
@@ -155,11 +320,12 @@ function buildBook() {
   addTexturedLeaf(leftPages, {
     width: 5.25,
     height: 8.65,
-    depth: 0.34,
+    depth: 0,
     z: 0.18,
     color: 0xeee4bd,
     front: [1, 11, 5, 8],
     back: [7, 11, 5, 8],
+    backPainter: paintLeftFormula(formulaImages),
   });
   leftPages.position.x = 0.32;
 
@@ -227,11 +393,11 @@ function updatePose() {
   bookRoot.scale.setScalar(entranceScale);
 
   frontCover.rotation.y = -Math.PI * 0.985 * opening;
-  leftPages.rotation.y = -Math.PI * 0.955 * pageOpening;
+  leftPages.rotation.y = -Math.PI * pageOpening;
 
   const flutter = Math.sin(pageOpening * Math.PI) * 0.08;
-  firstTurningPage.rotation.y = -Math.PI * pageOpening * 0.72 - flutter;
-  secondTurningPage.rotation.y = -Math.PI * pageOpening * 0.86 + flutter * 0.65;
+  firstTurningPage.rotation.y = -Math.PI * phase(p, 0.59, 0.9) - flutter;
+  secondTurningPage.rotation.y = -Math.PI * phase(p, 0.66, 0.92) + flutter * 0.65;
 
   render();
 }
@@ -256,7 +422,7 @@ function render() {
   if (renderer && scene && camera) renderer.render(scene, camera);
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!canvasRef.value || !hostRef.value) return;
   renderer = new THREE.WebGLRenderer({
     canvas: canvasRef.value,
@@ -272,15 +438,31 @@ onMounted(() => {
   camera.position.set(0, 0, 24);
   camera.lookAt(0, 0, 0);
 
-  new THREE.TextureLoader().load(bookAtlasUrl, (texture) => {
-    sourceTexture = texture;
-    sourceTexture.colorSpace = THREE.SRGBColorSpace;
-    sourceTexture.magFilter = THREE.NearestFilter;
-    sourceTexture.minFilter = THREE.NearestFilter;
-    sourceTexture.generateMipmaps = false;
-    buildBook();
-    updatePose();
+  const textureLoader = new THREE.TextureLoader();
+  const [texture, lavosImage, stellarImage, mintImage, recipeImage] = await Promise.all([
+    textureLoader.loadAsync(bookAtlasUrl),
+    loadImage(lavosSquidBlood),
+    loadImage(stellarAquaCrystal),
+    loadImage(goldMintLeaves),
+    loadImage(foolRecipe),
+    document.fonts?.ready ?? Promise.resolve(),
+  ]);
+  if (disposed) {
+    texture.dispose();
+    return;
+  }
+  sourceTexture = texture;
+  sourceTexture.colorSpace = THREE.SRGBColorSpace;
+  sourceTexture.magFilter = THREE.NearestFilter;
+  sourceTexture.minFilter = THREE.NearestFilter;
+  sourceTexture.generateMipmaps = false;
+  buildBook({
+    lavosSquidBlood: lavosImage,
+    stellarAquaCrystal: stellarImage,
+    goldMintLeaves: mintImage,
+    foolRecipe: recipeImage,
   });
+  updatePose();
 
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(hostRef.value);
@@ -290,6 +472,7 @@ onMounted(() => {
 watch(() => [props.progress, props.reducedMotion], updatePose);
 
 onBeforeUnmount(() => {
+  disposed = true;
   resizeObserver?.disconnect();
   ownedGeometries.forEach((item) => item.dispose());
   ownedMaterials.forEach((item) => item.dispose());

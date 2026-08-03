@@ -4,7 +4,6 @@
     <HeaderItem />
     <main id="main-content" tabindex="-1">
       <HomeHero :status="serverStatus" />
-      <div class="hero-progression-fog" aria-hidden="true"><i /><i /></div>
       <ProgressionStory />
       <div
         ref="pathwayTrigger"
@@ -163,35 +162,6 @@ onUnmounted(() => {
 }
 
 .skip-link:focus { transform: none; }
-
-.hero-progression-fog {
-  position: relative;
-  z-index: 2;
-  height: 56svh;
-  margin-top: -38svh;
-  margin-bottom: -18svh;
-  overflow: visible;
-  background:
-    linear-gradient(180deg, transparent 0%, rgba(14, 34, 36, 0.32) 30%, rgba(14, 34, 36, 0.9) 58%, #0e2224 68%, #0e2224 100%),
-    radial-gradient(ellipse at 22% 76%, rgba(104, 121, 119, 0.25), transparent 46%),
-    radial-gradient(ellipse at 79% 79%, rgba(116, 131, 128, 0.22), transparent 44%);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 72%, rgba(0, 0, 0, 0.66) 86%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 72%, rgba(0, 0, 0, 0.66) 86%, transparent 100%);
-  pointer-events: none;
-}
-
-.hero-progression-fog i {
-  position: absolute;
-  bottom: -16%;
-  width: 56%;
-  height: 55%;
-  border-radius: 50%;
-  background: rgba(121, 137, 133, 0.15);
-  filter: blur(36px);
-}
-
-.hero-progression-fog i:first-child { left: -8%; }
-.hero-progression-fog i:last-child { right: -7%; }
 
 .deferred-chapter { min-width: 0; }
 .deferred-chapter--pathways.is-pending { min-height: 420svh; background: #102420; }
