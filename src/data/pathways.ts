@@ -30,12 +30,16 @@ export type HomePathway = {
   kind: ProgressionKind;
   name: string;
   image: string;
+  thumbnail: string;
   route: string;
   startingSequence: string;
   startingSequenceNumber: number;
   strengths: string[];
+  tagline: string;
   playstyle: string;
   summary: string;
+  wikiSummary?: string;
+  wikiUrl?: string;
   sequenceCount: number;
   abilityCount: number;
   motif: ProgressionMotif;
@@ -113,6 +117,100 @@ function visual(motif: ProgressionMotif, accent: string, accent2: string, ink: s
 }
 
 const neutral = visual('spiral', '#c69b52', '#4f8275', '#f7f2e7', '#10201f', '#345f58');
+const lotmWikiTopics: Record<string, string> = {
+  fool: 'Divination · Illusion · Shapeshifting · Puppetry',
+  door: 'Door opening · Replication · Teleportation · Space',
+  error: 'Theft · Deceit · Parasitism · Time manipulation',
+  visionary: 'Mind reading · Dreams · Envisioning · Mind world',
+  hanged: 'Soul grazing · Shadows · Flesh and blood magic',
+  sun: 'Light · Purification · Notarization · Holiness',
+  tyrant: 'Ocean · Wind · Lightning · Calamity',
+  tower: 'Knowledge · Analysis · Imitation · Prophecy',
+  darkness: 'Dreams · Requiem · Concealment · Misfortune',
+  death: 'Necromancy · Spirit channeling · Undead · Underworld',
+  giant: 'Giant physique · Weapons · Protection · Twilight',
+  priest: 'Provocation · Pyrokinesis · Conspiracy · War',
+  demoness: 'Black magic · Mirrors · Disease · Catastrophe',
+  paragon: 'Craftsmanship · Technology · Artificial life',
+  hermit: 'Mystery prying · Scrolls · Stardust · Clairvoyance',
+  fortune: 'Luck · Fate · Probability · Reincarnation',
+  moon: 'Potion making · Beast taming · Regeneration',
+  mother: 'Healing · Alchemy · Life · Biological mutation',
+  chained: 'Mutant forms · Curses · Possession · Binding',
+  abyss: 'Demonic spells · Desire · Corruption · Depravity',
+  emperor: 'Bribery · Distortion · Disorder · Resurrection',
+  justiciar: 'Rules · Territory · Punishment · Order',
+};
+
+// Generated from the dominant non-transparent color of each shipped symbol.
+// The focused scene uses this palette, while each orbit token carries its own.
+const imageAccents: Record<string, string> = {
+  abyss: '#e04030', chained: '#505090', darkness: '#203060', death: '#f0f0e0',
+  demoness: '#a02070', door: '#207090', emperor: '#5070a0', error: '#607090',
+  fool: '#403060', fortune: '#406060', giant: '#f0b070', hanged: '#c03030',
+  hermit: '#403080', justiciar: '#604030', moon: '#903030', mother: '#307060',
+  paragon: '#a05020', priest: '#a02010', sun: '#805010', tower: '#3040a0',
+  tyrant: '#b0f0f0', visionary: '#506070', aeon: '#405080', chaos: '#502010',
+  chaosmist: '#507080', condenser: '#3050a0', devouring: '#e0c0b0', edict: '#407060',
+  everlasting: '#504070', patriarch: '#f0e0e0', secondlaw: '#506050', sublunary: '#604020',
+};
+
+function mixHex(from: string, to: string, amount: number) {
+  const source = from.slice(1);
+  const target = to.slice(1);
+  const channel = (offset: number) => Math.round(
+    Number.parseInt(source.slice(offset, offset + 2), 16) * (1 - amount)
+    + Number.parseInt(target.slice(offset, offset + 2), 16) * amount,
+  ).toString(16).padStart(2, '0');
+  return `#${channel(0)}${channel(2)}${channel(4)}`;
+}
+
+function themeFromImage(accent: string): HomePathway['theme'] {
+  return {
+    accent,
+    accent2: mixHex(accent, '#e8f0f2', .25),
+    ink: mixHex('#fff8ec', accent, .07),
+    surface: mixHex('#081315', accent, .22),
+    haze: mixHex('#0b171a', accent, .52),
+  };
+}
+const lotmWikiBase = 'https://lordofthemysteries.fandom.com/wiki/';
+const pathwayTaglines: Record<string, string> = {
+  abyss: 'Spread curses, tempt desire, and descend into devilish power.',
+  chained: 'Bind curses, survive corruption, and unleash the monster within.',
+  darkness: 'Weave dreams, hide in shadow, and bring a quiet end.',
+  death: 'Command spirits and the dead beyond life’s last boundary.',
+  demoness: 'Cast curses, rule mirrors, and turn disaster into a weapon.',
+  door: 'Cross barriers, record powers, and step through space.',
+  emperor: 'Exploit loopholes, dispense bribery, and impose your disorder.',
+  error: 'Steal abilities, deceive fate, and exploit every loophole.',
+  fool: 'Divine the unseen, deceive perception, and command marionettes.',
+  fortune: 'Read fate, turn chance, and make luck answer your call.',
+  giant: 'Wield holy steel, stand guard, and bring the twilight war.',
+  hanged: 'Graze souls, wield shadows, and borrow forbidden power.',
+  hermit: 'Read the occult, inscribe spells, and draw power from the stars.',
+  justiciar: 'Declare rules, punish transgression, and enforce order.',
+  moon: 'Brew potions, command beasts, and master blood and renewal.',
+  mother: 'Heal, nurture life, and reshape flesh with alchemy.',
+  paragon: 'Forge artifacts, master machines, and turn knowledge into invention.',
+  priest: 'Provoke conflict, wield fire, and engineer the battlefield.',
+  sun: 'Wield holy light, purge corruption, and bind power with oaths.',
+  tower: 'Analyze all things, imitate powers, and uncover hidden truths.',
+  tyrant: 'Rule sea, storm, and lightning with a sailor’s fury.',
+  visionary: 'Read minds, weave dreams, and make thought touch reality.',
+};
+const boonTaglines: Record<string, string> = {
+  aeon: 'Bend time, preserve a moment, and return when fate allows.',
+  chaos: 'Harness unstable power where every choice has a consequence.',
+  chaosmist: 'Shroud the field in uncertainty and make certainty unravel.',
+  condenser: 'Compress raw power into precise, controlled force.',
+  devouring: 'Consume strength, deny resources, and grow from every encounter.',
+  edict: 'Speak a command that turns intention into law.',
+  everlasting: 'Outlast the fight through relentless endurance and renewal.',
+  patriarch: 'Build authority, protect your domain, and lead from the front.',
+  secondlaw: 'Rewrite the rules after the first answer is already chosen.',
+  sublunary: 'Draw on moonlit mysteries, subtle rites, and hidden influence.',
+};
 const titleCase = (id: string) => id
   .replace(/[-_]+/g, ' ')
   .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -125,22 +223,28 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
   while (strengths.length < 3) strengths.push('See documented abilities');
   const display = presentation[entry.id] ?? neutral;
   const imageId = entry.id === 'aeon' ? 'eternalaeon' : entry.id;
+  const accent = imageAccents[entry.id];
   const startingName = english(starting?.name);
   const startingNumber = Number.isFinite(starting?.sequence) ? (starting?.sequence ?? 9) : 9;
   return {
     id: entry.id,
     kind: entry.kind,
     name: pathwayNames[entry.id] ?? titleCase(entry.id),
-    image: entry.kind === 'pathway' ? `/pathways/native/${imageId}.png` : `/pathways/thumbs/${imageId}.webp`,
+    image: `/pathways/avif/native/${imageId}.avif`,
+    thumbnail: `/pathways/avif/thumbs/${imageId}.avif`,
     route: `/pathways/${entry.id}`,
     startingSequence: `Sequence ${startingNumber} · ${startingName}`,
     startingSequenceNumber: startingNumber,
     strengths,
+    tagline: pathwayTaglines[entry.id] ?? boonTaglines[entry.id] ?? `Discover the ${pathwayNames[entry.id] ?? titleCase(entry.id)} Pathway.`,
     playstyle: strengths.slice(0, 2).join(' · '),
     summary: `${entry.abilityCount} documented abilities across ${entry.sequenceCount} Sequences in Mysterria.`,
+    wikiSummary: lotmWikiTopics[entry.id],
+    wikiUrl: lotmWikiTopics[entry.id] ? `${lotmWikiBase}${encodeURIComponent(`${pathwayNames[entry.id]} Pathway`)}` : undefined,
     sequenceCount: entry.sequenceCount,
     abilityCount: entry.abilityCount,
     ...display,
+    theme: accent ? themeFromImage(accent) : display.theme,
   };
 });
 
