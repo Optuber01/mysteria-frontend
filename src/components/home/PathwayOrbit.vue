@@ -80,7 +80,17 @@
           </button>
           </template>
 
-          <article v-if="hasActiveEntry" class="orbit-story" :aria-live="interactionReady ? 'polite' : 'off'">
+          <article
+            v-if="hasActiveEntry"
+            class="orbit-story"
+            role="button"
+            tabindex="0"
+            :aria-label="`Open ${activeEntry.name} archive`"
+            :aria-live="interactionReady ? 'polite' : 'off'"
+            @click="selectActiveAndOpen($event)"
+            @keydown.enter.prevent="selectActiveAndOpen($event)"
+            @keydown.space.prevent="selectActiveAndOpen($event)"
+          >
             <div class="motif-stage" :data-motif="activeEntry.motif" aria-hidden="true">
               <img :src="activeEntry.image" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
             </div>
@@ -390,6 +400,10 @@ function selectAndOpen(index: number, event: Event) {
   void openDetails(event);
 }
 
+function selectActiveAndOpen(event: Event) {
+  selectAndOpen(shownIndex.value, event);
+}
+
 function startDrag(event: PointerEvent) {
   if (!hasActiveEntry.value || event.button !== 0 || (event.target as HTMLElement).closest('button, a')) return;
   dragging.value = true;
@@ -605,6 +619,7 @@ onUnmounted(() => {
 .orbit-stage { position: absolute; z-index: 10; inset: 0; outline: 0; cursor: default; touch-action: pan-y; user-select: none; contain: layout paint; }
 .orbit-stage:focus-visible { outline: 3px solid #fcf9f2; outline-offset: -10px; box-shadow: inset 0 0 0 5px #08151a; }
 .orbit-token { position: absolute; width: 108px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 3px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 92%, transparent); background: transparent; cursor: pointer; contain: layout paint; }
+.pathway-vault:not(.is-interactive) .orbit-token { transition: left .14s cubic-bezier(.22, 1, .36, 1), top .14s cubic-bezier(.22, 1, .36, 1), transform .14s cubic-bezier(.22, 1, .36, 1), opacity .1s linear; }
 .orbit-token.is-hidden { visibility: hidden; }
 .orbit-token.is-behind { opacity: .68; }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }
@@ -618,7 +633,8 @@ onUnmounted(() => {
 .is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }
 .is-low-power .motif-stage::before { box-shadow: none; }
 
-.orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(300px, 25vw); transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+.orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(300px, 25vw); padding: 0; border: 0; color: inherit; background: transparent; transform: translate(-50%, -50%); text-align: center; cursor: pointer; }
+.orbit-story:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 10px; border-radius: 16px; box-shadow: 0 0 0 5px #08151a; }
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(0,0,0,.34)); transition: transform .16s ease-out; }
