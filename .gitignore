@@ -53,3 +53,4 @@ ios/*
 # AI
 .claude
 .cursor
+.vercel

@@ -10,7 +10,7 @@
     <div class="world-sticky">
       <header class="world-heading">
         <p>Beyond the Pathways</p>
-        <h2 id="world-title">Power changes what the world asks of you.</h2>
+        <h2 id="world-title">Every route leaves a different mark on the world.</h2>
       </header>
 
       <div class="world-rail">
@@ -27,7 +27,19 @@
           :aria-hidden="activeIndex !== index"
         >
           <figure class="world-frame">
+            <video
+              v-if="feature.video && !reducedMotion"
+              :src="feature.video"
+              :poster="feature.image"
+              :title="feature.alt"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+            />
             <img
+              v-else
               :src="feature.image"
               :alt="feature.alt"
               :width="feature.width"
@@ -38,11 +50,18 @@
             <div class="world-grade" />
           </figure>
 
+          <div v-if="feature.gallery?.length" class="world-gallery" aria-label="More views from this build">
+            <figure v-for="(shot, shotIndex) in feature.gallery" :key="shot.image" :class="`world-gallery__shot--${shotIndex + 1}`">
+              <img :src="shot.image" :alt="shot.alt" loading="lazy" decoding="async">
+            </figure>
+          </div>
+
           <div class="world-copy">
-            <span>{{ String(index + 1).padStart(2, '0') }} / 06</span>
+            <span>Field note {{ String(index + 1).padStart(2, '0') }} / {{ String(features.length).padStart(2, '0') }}</span>
             <p>{{ feature.kicker }}</p>
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.copy }}</p>
+            <p class="world-proof">{{ feature.proof }}</p>
           </div>
 
           <div class="scene-marker" :class="`scene-marker--${feature.pin}`">
@@ -72,15 +91,15 @@
           :aria-hidden="activeIndex !== features.length"
         >
           <div class="live-landscape" aria-hidden="true">
-            <img :src="townsImage" alt="" width="1280" height="720" loading="lazy" decoding="async">
+            <img :src="townsImage" alt="" width="1920" height="1009" loading="lazy" decoding="async">
             <i />
           </div>
 
           <div class="living-panel">
             <div class="living-intro">
               <span>Live from the server</span>
-              <h3>The world keeps moving.</h3>
-              <p>Live values appear only when a public data source responds.</p>
+              <h3>Nothing here is a backdrop.</h3>
+              <p>Server status and updates are shown only when a first-party source answers.</p>
             </div>
 
             <div class="living-primary">
@@ -148,14 +167,14 @@
       </nav>
 
       <p class="world-direction" aria-hidden="true">
-        <span>Scroll to travel</span><i />
+        <span>Scroll through the field notes</span><i />
       </p>
     </div>
 
     <div class="world-static" aria-label="World systems overview">
       <header>
         <p>Beyond the Pathways</p>
-        <h2>Power changes what the world asks of you.</h2>
+        <h2>Every route leaves a different mark on the world.</h2>
       </header>
       <article v-for="(feature, index) in features" :key="feature.id">
         <img
@@ -203,11 +222,19 @@ import {
   type ServerStatus,
 } from '@/services/serverStatus';
 import creatureChamber from '@/assets/images/home/world/creature-chamber.webp';
-import dungeonGate from '@/assets/images/home/world/dungeon-gate.webp';
-import emporiumImage from '@/assets/images/home/world/emporium.webp';
-import economyImage from '@/assets/images/home/world/player-economy.webp';
-import raidBosses from '@/assets/images/home/world/raid-bosses.webp';
-import townsImage from '@/assets/images/home/world/towns.webp';
+import dungeonGate from '@/assets/images/community-archive/dungeons/twin-tree-rift/twin-tree-rift-wide.webp';
+import dungeonEntranceVideo from '@/assets/images/community-archive/dungeons/twin-tree-rift/twin-tree-rift-entrance.mp4';
+import eyeRift from '@/assets/images/community-archive/dungeons/eye-rift/eye-rift-front.webp';
+import snowRingRift from '@/assets/images/community-archive/dungeons/snow-ring-rift/snow-ring-rift-clear-front.webp';
+import guardianDragon from '@/assets/images/community-archive/events/guardians/guardian-dragon-encounter.webp';
+import guardianRadiantWide from '@/assets/images/community-archive/events/guardians/guardian-radiant-encounter-wide.webp';
+import guardianRadiantClose from '@/assets/images/community-archive/events/guardians/guardian-radiant-encounter-close.webp';
+import cliffsideStreet from '@/assets/images/community-archive/towns/cliffside-harbor/003-codex-clipboard-c99c3cd1-1448-4e64-b41a-ee21d5b77599.png';
+import townsImage from '@/assets/images/community-archive/towns/aurora-cliffside/012-codex-clipboard-24fd3d9e-a18e-4096-9066-a5dcc64e385b.webp';
+import eyeCanopy from '@/assets/images/community-archive/towns/eye-canopy/035-codex-clipboard-bafbf6e4-e073-4ec2-bbf7-5edfcd13277b.webp';
+import cathedralExterior from '@/assets/images/community-archive/churches/great-cathedral/043-codex-clipboard-e3e53182-1d93-4a27-a827-c4dce2287f2b.webp';
+import fogCathedralNave from '@/assets/images/community-archive/churches/fog-cathedral/071-codex-clipboard-f1b4ed29-cefc-4536-8bd6-47dd76309623.webp';
+import sanctuaryCeiling from '@/assets/images/community-archive/churches/black-gold-sanctuary/061-codex-clipboard-7a800fbe-bf7b-422c-8aaf-f969e7478270.webp';
 
 type Palette = { bg: string; accent: string; ink: string };
 type WorldFeature = {
@@ -216,6 +243,7 @@ type WorldFeature = {
   kicker: string;
   title: string;
   copy: string;
+  proof: string;
   marker: string;
   note: string;
   pin: 'high' | 'middle' | 'low';
@@ -223,6 +251,8 @@ type WorldFeature = {
   alt: string;
   width: number;
   height: number;
+  video?: string;
+  gallery?: Array<{ image: string; alt: string }>;
   palette: Palette;
 };
 
@@ -233,46 +263,60 @@ const props = defineProps<{
 
 const features: WorldFeature[] = [
   {
-    id: 'dungeons', short: 'Dungeons', kicker: 'Purpose-built spaces', title: 'Enter somewhere made to test you.',
-    copy: 'Follow custom dungeon entrances into purpose-built rooms and encounters made for Mysterria.',
-    marker: 'Dungeon entrance', note: 'A real in-game entrance from the Mysterria project.', pin: 'middle',
-    image: dungeonGate, alt: 'A tall violet dungeon entrance standing in a snowy Minecraft landscape.', width: 1244, height: 530,
+    id: 'dungeons', short: 'Rifts', kicker: '01 · Prepare the run', title: 'Rifts reward preparation.',
+    copy: 'Use /subspace to find a dungeon, check its power and cooldown, then weaken its Rift with Energy Shards before your party enters.',
+    proof: 'A dungeon is an instanced run with its own classes, rooms and boss—not just another overworld cave.',
+    marker: 'Dungeon Rift', note: 'A Rift gate marks the threshold. Parties weaken it with Energy Shards before committing to the instance beyond.', pin: 'middle',
+    image: dungeonGate, video: dungeonEntranceVideo, alt: 'A black-and-white tree Rift gate surrounding a glowing dungeon portal.', width: 1920, height: 1080,
+    gallery: [
+      { image: eyeRift, alt: 'A vast eye-shaped dungeon gate opening around a glowing Rift.' },
+      { image: snowRingRift, alt: 'A circular stone dungeon gate standing in a snowy biome.' },
+    ],
     palette: { bg: '#dbe4e8', accent: '#725c86', ink: '#14272b' },
   },
   {
-    id: 'creatures', short: 'Creatures', kicker: 'Original encounters', title: 'Vanilla rules are only the starting point.',
-    copy: 'Face custom creatures and encounter mechanics built to make abilities matter in combat.',
-    marker: 'Encounter chamber', note: 'This creature encounter is captured in an in-game dungeon room.', pin: 'high',
+    id: 'creatures', short: 'The wilds', kicker: '02 · Read the encounter', title: 'The wild reacts to your Pathway.',
+    copy: 'Beyonder Creatures give XP, acting points and ingredients. Wild Beyonders are different: pathway-based NPCs that may trade with you or fight you depending on your relationship.',
+    proof: 'Crimson Moon nights raise the danger outside and turn fishing into a high-risk route to Beyonder rewards.',
+    marker: 'Beyonder encounter', note: 'A genuine custom-creature encounter. A dedicated Wild Beyonder capture can replace it later.', pin: 'high',
     image: creatureChamber, alt: 'A custom floating creature surrounded by fragments inside a dark Minecraft chamber.', width: 1075, height: 503,
     palette: { bg: '#0d1d21', accent: '#a691d2', ink: '#f7f0e5' },
   },
   {
-    id: 'locations', short: 'Locations', kicker: 'Places with a purpose', title: 'Every landmark can change how you play.',
-    copy: 'Move through server-built locations such as the Emporium—places designed around what players do there.',
-    marker: 'The Emporium', note: 'A real Mysterria location used for server commerce.', pin: 'low',
-    image: emporiumImage, alt: 'A bright modern Minecraft emporium built from dark wood and large glass windows.', width: 1920, height: 1080,
-    palette: { bg: '#d9edf0', accent: '#a55d35', ink: '#122c2a' },
-  },
-  {
-    id: 'events', short: 'World events', kicker: 'Shared fights', title: 'The world can call everyone at once.',
-    copy: 'Scheduled open-world bosses scale around nearby players, turning an encounter into a shared fight.',
-    marker: 'Open-world boss', note: 'Boss encounters support scheduled spawns, group scaling and shared rewards.', pin: 'middle',
-    image: raidBosses, alt: 'Custom armored Minecraft bosses emerging through mist.', width: 1200, height: 653,
+    id: 'events', short: 'Guardians', kicker: '03 · Answer the signal', title: 'A Guardian changes the plan.',
+    copy: 'Guardians are random open-world boss encounters. Find one, bring the right people, and adapt when the fight turns: physical damage stops working below 20% health.',
+    proof: 'A successful group earns a Guardian-specific Reward Token for ingredients, recipes and other rare rewards.',
+    marker: 'Open-world Guardian', note: 'This image is a Guardian encounter. Cosmos Incursions need their own capture before they earn a separate chapter.', pin: 'middle',
+    image: guardianDragon, alt: 'Players fighting a many-headed Guardian inside a radiant arena.', width: 1920, height: 1042,
+    gallery: [
+      { image: guardianRadiantWide, alt: 'Players spread across a bright arena during a Guardian encounter.' },
+      { image: guardianRadiantClose, alt: 'A party facing a towering radiant Guardian at close range.' },
+    ],
     palette: { bg: '#1a242b', accent: '#81d9df', ink: '#f6f3ec' },
   },
   {
-    id: 'economy', short: 'Economy', kicker: 'Trade what you find', title: 'Loot becomes a decision, not clutter.',
-    copy: 'Appraise and sell resources through in-world interfaces, then move those earnings through the player economy.',
-    marker: 'Item appraisal', note: 'The appraisal interface shows quantity, uniqueness and final sell value.', pin: 'high',
-    image: economyImage, alt: 'Mysterria item appraisal interface calculating the sale value of deepslate diamond ore.', width: 904, height: 309,
-    palette: { bg: '#4a403b', accent: '#8ed56d', ink: '#fff7e9' },
+    id: 'towns', short: 'Settlements', kicker: '04 · Leave a mark', title: 'Build a place that has consequences.',
+    copy: 'Towns protect claims and organise shared infrastructure. Build with others, stay solo, or form a Secret Order—each route gives you a different way to move through the server.',
+    proof: 'As a town grows, it gains territory and can earn architectural perks. A level-five Domain can found a Nation.',
+    marker: 'Player settlement', note: 'These are real community landmarks: a waterfront town, an everyday street, and a vast eye suspended above another settlement.', pin: 'low',
+    image: townsImage, alt: 'A player-built waterfront settlement glowing beneath a green aurora.', width: 1920, height: 1009,
+    gallery: [
+      { image: cliffsideStreet, alt: 'A bright street lined with player-built homes and a glass workshop.' },
+      { image: eyeCanopy, alt: 'A giant purple eye-shaped canopy floating above a forest settlement.' },
+    ],
+    palette: { bg: '#241c1d', accent: '#efb96d', ink: '#fff6e8' },
   },
   {
-    id: 'towns', short: 'Towns', kicker: 'A lasting place', title: 'Build somewhere worth returning to.',
-    copy: 'Create a home, join a town and shape a persistent place with other players.',
-    marker: 'Player settlement', note: 'Mysterria supports housing, towns and player organizations.', pin: 'low',
-    image: townsImage, alt: 'A detailed Minecraft city at night with a domed central tower and illuminated streets.', width: 1280, height: 720,
-    palette: { bg: '#241c1d', accent: '#efb96d', ink: '#fff6e8' },
+    id: 'churches', short: 'Churches', kicker: '05 · Establish a presence', title: 'Faith needs a place to gather.',
+    copy: 'Churches are player-run institutions built around a physical Church Core. Their sites, prayer, members and pathway relation make a visible organisation with real influence.',
+    proof: 'A Church can develop branches, support members and grant benefits such as acting progress, Madness recovery and site-based prayer effects.',
+    marker: 'Consecrated site', note: 'The architecture is player-made; the Church system gives the site membership, prayer and pathway consequences.', pin: 'middle',
+    image: cathedralExterior, alt: 'A monumental player-built cathedral rising into a stormy sky.', width: 1920, height: 1009,
+    gallery: [
+      { image: fogCathedralNave, alt: 'Warm lantern light filling the nave of a player-built church.' },
+      { image: sanctuaryCeiling, alt: 'A black-and-gold sanctuary ceiling above a dark ceremonial hall.' },
+    ],
+    palette: { bg: '#14171c', accent: '#d1aa76', ink: '#f5f0e8' },
   },
 ];
 
@@ -293,16 +337,33 @@ let frame = 0;
 let visible = false;
 
 const activeStage = computed(() => stages[activeIndex.value] ?? stages[0]);
-const worldStyle = computed(() => ({
-  '--world-progress': String(progress.value),
-  '--world-bg': activeStage.value.palette.bg,
-  '--world-accent': activeStage.value.palette.accent,
-  '--world-ink': activeStage.value.palette.ink,
-  '--rail-x': `${progress.value * -600}vw`,
-  '--image-shift': `${progress.value * -5}%`,
-  '--direction-width': `${progress.value * 100}%`,
-  '--world-heading-opacity': String(Math.max(0, 1 - progress.value * 10)),
-}));
+
+function blendHex(from: string, to: string, amount: number) {
+  const a = from.slice(1).match(/.{2}/g)?.map((value) => Number.parseInt(value, 16)) ?? [0, 0, 0];
+  const b = to.slice(1).match(/.{2}/g)?.map((value) => Number.parseInt(value, 16)) ?? [0, 0, 0];
+  return `#${a.map((value, index) => Math.round(value + (b[index] - value) * amount).toString(16).padStart(2, '0')).join('')}`;
+}
+
+const worldStyle = computed(() => {
+  // Seven scenes require six viewport-to-viewport moves. This is deliberately
+  // the same timeline used by the rail and active index below.
+  const scaled = Math.min(stages.length - 1, progress.value * (stages.length - 1));
+  const index = Math.floor(scaled);
+  const mix = scaled - index;
+  const current = stages[index] ?? stages[0];
+  const next = stages[index + 1] ?? current;
+  return {
+    '--world-progress': String(progress.value),
+    '--stage-count': String(stages.length),
+    '--world-bg': blendHex(current.palette.bg, next.palette.bg, mix),
+    '--world-accent': blendHex(current.palette.accent, next.palette.accent, mix),
+    '--world-ink': blendHex(current.palette.ink, next.palette.ink, mix),
+    '--rail-x': `${progress.value * (stages.length - 1) * -100}vw`,
+    '--image-shift': `${progress.value * -4}%`,
+    '--direction-width': `${progress.value * 100}%`,
+    '--world-heading-opacity': String(Math.max(0, 1 - progress.value * 10)),
+  };
+});
 const worldFeedUnavailable = computed(() =>
   living.value.towns === null &&
   living.value.organizations === null &&
@@ -335,9 +396,9 @@ function update() {
     const rect = section.value?.getBoundingClientRect();
     if (!rect) return;
     const next = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
-    const scaled = Math.min(stages.length - 0.0001, next * stages.length);
+    const scaled = Math.min(stages.length - 1, next * (stages.length - 1));
     progress.value = next;
-    activeIndex.value = Math.floor(scaled);
+    activeIndex.value = Math.min(stages.length - 1, Math.floor(scaled + 0.5));
     if (selectedMarker.value !== null && selectedMarker.value !== activeIndex.value) selectedMarker.value = null;
   });
 }
@@ -345,7 +406,9 @@ function update() {
 function goToStage(index: number) {
   if (!section.value) return;
   activeIndex.value = index;
-  const next = (index + 0.18) / stages.length;
+  const next = index === stages.length - 1
+    ? 1
+    : Math.min(1, (index + 0.08) / (stages.length - 1));
   progress.value = next;
   if (reducedMotion.value) return;
   const sectionTop = section.value.getBoundingClientRect().top + window.scrollY;
@@ -385,11 +448,12 @@ onUnmounted(() => {
   --world-progress: 0;
   position: relative;
   z-index: 2;
-  min-height: 690svh;
+  /* Five world systems plus the live epilogue: one steady scroll chapter per move. */
+  min-height: 590svh;
   isolation: isolate;
   color: var(--world-ink);
   background: var(--world-bg);
-  transition: background-color .8s cubic-bezier(.22, 1, .36, 1), color .5s ease;
+  transition: background-color 1.05s cubic-bezier(.22, 1, .36, 1), color .7s ease;
 }
 
 .world-sticky {
@@ -400,7 +464,7 @@ onUnmounted(() => {
   overflow: hidden;
   isolation: isolate;
   background: var(--world-bg);
-  transition: background-color .8s cubic-bezier(.22, 1, .36, 1);
+  transition: background-color 1.05s cubic-bezier(.22, 1, .36, 1);
 }
 
 .world-sticky::before,
@@ -460,7 +524,7 @@ onUnmounted(() => {
   position: absolute;
   z-index: 1;
   inset: 0 auto 0 0;
-  width: 700vw;
+  width: calc(var(--stage-count) * 100vw);
   display: flex;
   transform: translate3d(var(--rail-x), 0, 0);
   will-change: transform;
@@ -471,12 +535,18 @@ onUnmounted(() => {
   --beat-accent: #c69b52;
   --beat-ink: #fcf9f2;
   position: relative;
-  width: 100vw;
+  /* Adjacent scenes overlap by one feather width. The incoming scene reveals the
+     outgoing capture beneath it, which prevents a colour seam at the rail edge. */
+  width: 116vw;
+  margin-right: -16vw;
   height: 100%;
   flex: none;
   overflow: hidden;
   color: var(--beat-ink);
   background: var(--beat-bg);
+  /* Let the interpolated chapter colour show through while one scene gives way to the next. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
 }
 
 .world-beat::before {
@@ -484,10 +554,10 @@ onUnmounted(() => {
   position: absolute;
   z-index: 3;
   inset: 0;
-  opacity: .65;
+  opacity: .72;
   background:
-    linear-gradient(90deg, var(--beat-bg) 0 9%, transparent 30% 72%, var(--beat-bg) 96%),
-    radial-gradient(circle at 72% 46%, transparent 0 18%, color-mix(in srgb, var(--beat-bg) 32%, transparent) 72%);
+    linear-gradient(90deg, var(--beat-bg) 0 12%, color-mix(in srgb, var(--beat-bg) 72%, transparent) 32%, transparent 66%, color-mix(in srgb, var(--beat-bg) 64%, transparent) 90%),
+    radial-gradient(circle at 72% 46%, transparent 0 18%, color-mix(in srgb, var(--beat-bg) 35%, transparent) 72%);
   pointer-events: none;
 }
 
@@ -497,9 +567,10 @@ onUnmounted(() => {
   inset: clamp(94px, 12vh, 132px) 5vw clamp(76px, 10vh, 104px) 18vw;
   margin: 0;
   overflow: hidden;
-  border-radius: clamp(20px, 3vw, 42px);
-  box-shadow: 0 42px 100px rgba(0, 0, 0, .24);
-  clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
+  border-radius: 38px;
+  box-shadow: 0 42px 100px rgba(0, 0, 0, .28);
+  /* A soft viewing window keeps the art present without shearing it into a card. */
+  clip-path: inset(0 round 38px);
 }
 
 .world-frame::after {
@@ -511,27 +582,107 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.world-frame img {
+.world-frame img,
+.world-frame video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.065) translate3d(var(--image-shift), 0, 0);
+  transform: scale(1.055) translate3d(var(--image-shift), 0, 0);
+  transition: transform .8s cubic-bezier(.22, 1, .36, 1);
   transform-origin: center;
 }
 
-.world-beat--dungeons .world-frame img { object-position: 55% center; }
-.world-beat--creatures .world-frame img { object-position: center; }
-.world-beat--locations .world-frame img { object-position: 53% center; }
+.world-beat--dungeons .world-frame {
+  inset: clamp(102px, 13vh, 138px) 5vw clamp(88px, 11vh, 118px) 20vw;
+  border-radius: 48% 48% 34px 34px / 17% 17% 34px 34px;
+  clip-path: inset(0 round 48% 48% 34px 34px / 17% 17% 34px 34px);
+}
+.world-beat--dungeons .world-frame img,
+.world-beat--dungeons .world-frame video { object-position: 52% 52%; filter: saturate(.9) contrast(1.04) brightness(.88); }
+
+.world-beat--creatures .world-frame {
+  inset: clamp(84px, 10vh, 110px) 12vw clamp(62px, 8vh, 86px) 30vw;
+  border-radius: 48% 44% 42% 46% / 17% 19% 15% 17%;
+  clip-path: inset(0 round 48% 44% 42% 46% / 17% 19% 15% 17%);
+}
+.world-beat--creatures .world-frame img { object-position: center; transform: scale(1.14) translate3d(var(--image-shift), 0, 0); }
+
+.world-beat--events .world-frame {
+  inset: clamp(92px, 11vh, 122px) 8vw clamp(78px, 9vh, 104px) 22vw;
+  border-radius: 52% 48% 44% 56% / 22% 18% 24% 20%;
+  clip-path: inset(0 round 52% 48% 44% 56% / 22% 18% 24% 20%);
+}
 .world-beat--events .world-frame img { object-position: 47% center; }
-.world-beat--economy .world-frame img { object-position: 57% center; image-rendering: auto; }
-.world-beat--towns .world-frame img { object-position: 64% center; }
+
+.world-beat--towns .world-frame {
+  inset: clamp(96px, 12vh, 128px) 9vw clamp(82px, 10vh, 108px) 18vw;
+  border-radius: 42px 180px 42px 42px;
+  clip-path: inset(0 round 42px 180px 42px 42px);
+}
+.world-beat--towns .world-frame img { object-position: 54% center; filter: saturate(1.08) contrast(1.05) brightness(.9); }
+
+.world-beat--churches .world-frame {
+  inset: clamp(92px, 11vh, 120px) 10vw clamp(78px, 9vh, 102px) 26vw;
+  border-radius: 48% 48% 30px 30px / 16% 16% 30px 30px;
+  clip-path: inset(0 round 48% 48% 30px 30px / 16% 16% 30px 30px);
+  background: #1b1d22;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--beat-accent) 46%, transparent), 0 42px 100px rgba(0, 0, 0, .36);
+}
+.world-beat--churches .world-frame img { object-position: 54% 45%; filter: saturate(.66) sepia(.1) contrast(1.08) brightness(.8); transform: scale(1.04) translate3d(var(--image-shift), 0, 0); }
+
+.world-gallery {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+}
+
+.world-gallery figure {
+  position: absolute;
+  right: clamp(52px, 5vw, 84px);
+  width: clamp(150px, 17vw, 270px);
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--beat-ink) 30%, transparent);
+  background: var(--beat-bg);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, .34);
+}
+
+.world-gallery__shot--1 {
+  top: clamp(92px, 13vh, 130px);
+  border-radius: 46% 46% 18px 18px / 24% 24% 18px 18px;
+  transform: rotate(1.7deg);
+}
+
+.world-gallery__shot--2 {
+  bottom: clamp(76px, 9vh, 104px);
+  width: clamp(132px, 14vw, 228px) !important;
+  border-radius: 18px 18px 46% 46% / 18px 18px 24% 24%;
+  transform: translateX(-4.5vw) rotate(-2.2deg);
+}
+
+.world-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.world-beat--towns .world-gallery__shot--1 img { object-position: center; filter: saturate(.9) brightness(.88); }
+.world-beat--towns .world-gallery__shot--2 img { object-position: center; filter: saturate(.88) contrast(1.06) brightness(.83); }
+.world-beat--churches .world-gallery__shot--1 img { object-position: center; filter: saturate(.8) contrast(1.05) brightness(.9); }
+.world-beat--churches .world-gallery__shot--2 img { object-position: center 30%; filter: saturate(.82) contrast(1.08) brightness(.8); }
+.world-beat--dungeons .world-gallery__shot--1 img { object-position: center 58%; filter: saturate(.86) contrast(1.08) brightness(.78); }
+.world-beat--dungeons .world-gallery__shot--2 img { object-position: center; filter: saturate(.76) contrast(1.06) brightness(.84); }
+.world-beat--events .world-gallery__shot--1 img { object-position: center; filter: saturate(.82) contrast(1.04) brightness(.86); }
+.world-beat--events .world-gallery__shot--2 img { object-position: center; filter: saturate(.84) contrast(1.06) brightness(.84); }
+.world-beat--towns .scene-marker,
+.world-beat--churches .scene-marker { right: clamp(20vw, 24vw, 390px); }
 
 .world-grade {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, .48), transparent 42%),
-    linear-gradient(0deg, rgba(0, 0, 0, .24), transparent 45%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, .46), transparent 44%), linear-gradient(0deg, rgba(0, 0, 0, .26), transparent 48%);
   pointer-events: none;
 }
 
@@ -539,8 +690,9 @@ onUnmounted(() => {
   position: absolute;
   z-index: 6;
   left: clamp(24px, 7vw, 112px);
-  top: 51%;
-  width: min(410px, 34vw);
+  /* Leave the opening chapter heading room to breathe before each scene takes over. */
+  top: 60%;
+  width: min(420px, 34vw);
   padding: 24px 0;
   transform: translateY(-50%);
   text-shadow: 0 2px 30px color-mix(in srgb, var(--beat-bg) 86%, transparent);
@@ -550,7 +702,7 @@ onUnmounted(() => {
 
 .world-copy h3 {
   margin: 14px 0 16px;
-  font: 650 clamp(3.1rem, 6vw, 6.8rem)/.82 "IBM Plex Sans Condensed", sans-serif;
+  font: 650 clamp(3.05rem, 5.8vw, 6.5rem)/.84 "IBM Plex Sans Condensed", sans-serif;
   letter-spacing: -.055em;
   text-wrap: balance;
 }
@@ -558,10 +710,12 @@ onUnmounted(() => {
 .world-copy > p:last-child {
   max-width: 390px;
   margin: 0;
-  color: color-mix(in srgb, var(--beat-ink) 76%, transparent);
+  color: color-mix(in srgb, var(--beat-ink) 78%, transparent);
   font-size: clamp(.84rem, 1.05vw, 1rem);
   line-height: 1.65;
 }
+
+.world-proof { margin: 18px 0 0 !important; padding-top: 16px; border-top: 1px solid color-mix(in srgb, var(--beat-ink) 18%, transparent); color: var(--beat-accent) !important; font: 500 .67rem/1.55 "IBM Plex Mono", monospace !important; }
 
 .scene-marker {
   position: absolute;
@@ -584,7 +738,7 @@ onUnmounted(() => {
   border: 1px solid color-mix(in srgb, var(--beat-ink) 38%, transparent);
   border-radius: 999px;
   color: inherit;
-  background: color-mix(in srgb, var(--beat-bg) 70%, transparent);
+  background: color-mix(in srgb, var(--beat-bg) 74%, transparent);
   backdrop-filter: blur(12px);
   cursor: pointer;
 }
@@ -612,8 +766,8 @@ onUnmounted(() => {
   padding: 14px 16px;
   border: 1px solid color-mix(in srgb, var(--beat-ink) 18%, transparent);
   border-radius: 14px;
-  color: color-mix(in srgb, var(--beat-ink) 76%, transparent);
-  background: color-mix(in srgb, var(--beat-bg) 84%, transparent);
+  color: color-mix(in srgb, var(--beat-ink) 78%, transparent);
+  background: color-mix(in srgb, var(--beat-bg) 90%, transparent);
   font-size: .73rem;
   line-height: 1.5;
   opacity: 0;
