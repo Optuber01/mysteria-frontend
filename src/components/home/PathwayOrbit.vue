@@ -229,12 +229,9 @@ const catalogOptions = computed(() => [
   { id: 'pathway' as const, label: 'Pathways', count: standardPathways.length },
   { id: 'boon' as const, label: 'Boons', count: boonPathways.length },
 ]);
-// Complete close to the end of the sticky scene, leaving only a small
-// hand-off scroll before the next section.
-// Start empty at the section boundary; each scroll increment introduces the
-// next route. The shorter travel leaves only a small hand-off after the orbit
-// is complete.
-const assemblyProgress = computed(() => clamp(scrollProgress.value / .85, 0, 1));
+// The assembly begins while the section is approaching the viewport, then
+// accelerates through the sticky scene and leaves a short completed orbit.
+const assemblyProgress = computed(() => clamp(Math.pow(scrollProgress.value, 1.3) / .92, 0, 1));
 const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
   if (reducedMotion.value || compactLayout.value) return 'orbit';
   if (scrollProgress.value < .08) return 'entry';
@@ -317,7 +314,13 @@ function measureScroll() {
   scrollFrame = 0;
   if (!sectionRef.value || (!inView.value && !reducedMotion.value)) return;
   const rect = sectionRef.value.getBoundingClientRect();
-  const nextProgress = reducedMotion.value ? 1 : clamp(-rect.top / scrollTravel, 0, 1);
+  // Start the first route while the preceding section is still on screen.
+  // Include this lead-in in the range so the final orbit always completes
+  // before the sticky scene releases.
+  const entryLead = window.innerHeight * .65;
+  const nextProgress = reducedMotion.value
+    ? 1
+    : clamp((entryLead - rect.top) / (scrollTravel + entryLead), 0, 1);
   // Avoid invalidating all 22 token styles for sub-pixel scroll deltas.
   if (Math.abs(nextProgress - scrollProgress.value) >= .001 || nextProgress === 0 || nextProgress === 1) {
     scrollProgress.value = nextProgress;
@@ -561,7 +564,7 @@ onUnmounted(() => {
   --path-surface: #10201f;
   --path-haze: #345f58;
   position: relative;
-  min-height: 420svh;
+  min-height: 270svh;
   color: var(--path-ink);
   background: var(--path-surface);
   /* Theme changes are immediate: animating a full-screen gradient repaints on
