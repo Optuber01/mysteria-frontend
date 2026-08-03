@@ -56,6 +56,7 @@ type FormulaImages = {
   goldMintLeaves: HTMLImageElement;
   foolRecipe: HTMLImageElement;
   mysterriaLogo: HTMLImageElement;
+  foolPathwaySymbol: HTMLImageElement;
 };
 
 type TexturePainter = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -66,6 +67,7 @@ function makeRegionTexture(
   width: number,
   height: number,
   painter?: TexturePainter,
+  useCoverPalette = false,
 ): THREE.Texture {
   if (!sourceTexture) throw new Error('Book atlas has not loaded.');
   const crop = document.createElement('canvas');
@@ -86,6 +88,7 @@ function makeRegionTexture(
     crop.width,
     crop.height,
   );
+  if (useCoverPalette) recolorCoverTexture(context);
   painter?.(context, crop.width, crop.height);
   const texture = new THREE.CanvasTexture(crop);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -96,6 +99,49 @@ function makeRegionTexture(
   texture.wrapT = THREE.ClampToEdgeWrapping;
   ownedTextures.push(texture);
   return texture;
+}
+
+function recolorCoverTexture(context: CanvasRenderingContext2D) {
+  const { width, height } = context.canvas;
+  const image = context.getImageData(0, 0, width, height);
+  const data = image.data;
+  const plumRamp = [
+    [43, 23, 58],
+    [59, 34, 79],
+    [75, 50, 92],
+  ] as const;
+  const goldRamp = [
+    [184, 154, 88],
+    [209, 186, 122],
+  ] as const;
+  const lavenderRamp = [
+    [111, 90, 130],
+    [137, 116, 155],
+  ] as const;
+
+  for (let index = 0; index < data.length; index += 4) {
+    if (data[index + 3] === 0) continue;
+    const red = data[index];
+    const green = data[index + 1];
+    const blue = data[index + 2];
+    const max = Math.max(red, green, blue);
+    const min = Math.min(red, green, blue);
+    const brightness = (red + green + blue) / (3 * 255);
+    const saturation = max === 0 ? 0 : (max - min) / max;
+    const isBrightGold =
+      red >= 205 &&
+      green >= 135 &&
+      blue <= 105 &&
+      brightness >= 0.58 &&
+      saturation >= 0.46;
+    const ramp = isBrightGold ? goldRamp : saturation < 0.16 && brightness > 0.58 ? lavenderRamp : plumRamp;
+    const rampIndex = Math.min(ramp.length - 1, Math.floor(brightness * ramp.length));
+    const [nextRed, nextGreen, nextBlue] = ramp[rampIndex];
+    data[index] = nextRed;
+    data[index + 1] = nextGreen;
+    data[index + 2] = nextBlue;
+  }
+  context.putImageData(image, 0, 0);
 }
 
 function makeImageTexture(image: HTMLImageElement): THREE.Texture {
@@ -202,25 +248,25 @@ function drawPixelLineWithShadow(
   pixelSize: number,
   color = '#f2cf75',
 ) {
-  context.fillStyle = 'rgba(36, 16, 6, 0.8)';
+  context.fillStyle = 'rgba(18, 8, 26, 0.84)';
   drawPixelLine(context, label, centerX + 3, y + 3, pixelSize);
   context.fillStyle = color;
   drawPixelLine(context, label, centerX, y, pixelSize);
 }
 
-function paintCoverArtwork(context: CanvasRenderingContext2D, logo: HTMLImageElement) {
+function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTMLImageElement) {
   const width = context.canvas.width;
   const height = context.canvas.height;
-  const gold = '#d9aa4e';
-  const paleGold = '#f0d184';
-  const ink = 'rgba(46, 21, 8, 0.78)';
+  const gold = '#c1a464';
+  const paleGold = '#eadca4';
+  const ink = 'rgba(26, 13, 36, 0.88)';
 
-  context.fillStyle = 'rgba(54, 25, 10, 0.34)';
+  context.fillStyle = 'rgba(43, 23, 58, 0.76)';
   context.fillRect(28, 30, width - 56, height - 60);
   context.strokeStyle = gold;
   context.lineWidth = 6;
   context.strokeRect(34, 36, width - 68, height - 72);
-  context.strokeStyle = 'rgba(241, 209, 132, 0.54)';
+  context.strokeStyle = 'rgba(169, 151, 181, 0.68)';
   context.lineWidth = 2;
   context.strokeRect(50, 52, width - 100, height - 104);
 
@@ -240,30 +286,30 @@ function paintCoverArtwork(context: CanvasRenderingContext2D, logo: HTMLImageEle
 
   context.fillStyle = ink;
   context.fillRect(92, 88, width - 184, 168);
-  context.strokeStyle = 'rgba(217, 170, 78, 0.72)';
+  context.strokeStyle = 'rgba(193, 164, 100, 0.76)';
   context.lineWidth = 3;
   context.strokeRect(98, 94, width - 196, 156);
   context.imageSmoothingEnabled = true;
-  context.drawImage(logo, width / 2 - 68, 101, 136, 136);
+  context.drawImage(pathwaySymbol, width / 2 - 68, 101, 136, 136);
   context.imageSmoothingEnabled = false;
 
   drawPixelLineWithShadow(context, 'FOOL PATHWAY', width / 2, 286, 3, paleGold);
-  context.fillStyle = 'rgba(217, 170, 78, 0.74)';
+  context.fillStyle = 'rgba(193, 164, 100, 0.78)';
   context.fillRect(86, 345, 126, 4);
   context.fillRect(width - 212, 345, 126, 4);
   context.fillRect(width / 2 - 8, 337, 16, 16);
 
-  drawPixelLineWithShadow(context, 'SEQUENCE 9', width / 2, 392, 5, '#f3d684');
-  drawPixelLineWithShadow(context, 'SEER', width / 2, 474, 4, '#dcb35e');
+  drawPixelLineWithShadow(context, 'SEQUENCE 9', width / 2, 392, 5, '#eadca4');
+  drawPixelLineWithShadow(context, 'SEER', width / 2, 474, 4, '#a997bb');
 
-  context.strokeStyle = 'rgba(217, 170, 78, 0.68)';
+  context.strokeStyle = 'rgba(193, 164, 100, 0.72)';
   context.lineWidth = 3;
   context.strokeRect(100, 550, width - 200, 96);
-  context.fillStyle = 'rgba(217, 170, 78, 0.13)';
+  context.fillStyle = 'rgba(126, 108, 145, 0.2)';
   context.fillRect(108, 558, width - 216, 80);
   drawPixelLineWithShadow(context, 'BEYONDER RECIPE', width / 2, 582, 3, paleGold);
 
-  context.fillStyle = 'rgba(217, 170, 78, 0.66)';
+  context.fillStyle = 'rgba(193, 164, 100, 0.7)';
   for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
 }
 
@@ -410,9 +456,10 @@ function addTexturedLeaf(
     back: [number, number, number, number];
     frontPainter?: TexturePainter;
     backPainter?: TexturePainter;
+    useCoverPalette?: boolean;
   },
 ) {
-  const { width, height, depth, z, color, front, back, frontPainter, backPainter } = options;
+  const { width, height, depth, z, color, front, back, frontPainter, backPainter, useCoverPalette = false } = options;
   if (depth > 0) {
     const bodyMaterial = basicMaterial({ color });
     const body = new THREE.Mesh(geometry(new THREE.BoxGeometry(width, height, depth)), bodyMaterial);
@@ -422,7 +469,7 @@ function addTexturedLeaf(
 
   const faceGeometry = geometry(new THREE.PlaneGeometry(width, height));
   const frontMaterial = basicMaterial({
-    map: makeRegionTexture(...front, frontPainter),
+    map: makeRegionTexture(...front, frontPainter, useCoverPalette),
     transparent: false,
     opacity: 1,
     alphaTest: 0,
@@ -436,7 +483,7 @@ function addTexturedLeaf(
   hinge.add(frontFace);
 
   const backMaterial = basicMaterial({
-    map: makeRegionTexture(...back, backPainter),
+    map: makeRegionTexture(...back, backPainter, useCoverPalette),
     transparent: false,
     opacity: 1,
     alphaTest: 0,
@@ -464,9 +511,10 @@ function buildBook(formulaImages: FormulaImages) {
     height: 10,
     depth: 0.24,
     z: -0.42,
-    color: 0x744317,
+    color: 0x2b173a,
     front: [16, 0, 6, 10],
     back: [22, 0, 6, 10],
+    useCoverPalette: true,
   });
 
   const rightStack = new THREE.Group();
@@ -502,16 +550,17 @@ function buildBook(formulaImages: FormulaImages) {
     height: 10,
     depth: 0.24,
     z: 0.55,
-    color: 0x744317,
+    color: 0x2b173a,
     front: [0, 0, 6, 10],
     back: [6, 0, 6, 10],
+    useCoverPalette: true,
   });
 
   const coverLabelMaterial = basicMaterial({
     map: makePixelLabelTexture(
       512,
       800,
-      (context) => paintCoverArtwork(context, formulaImages.mysterriaLogo),
+      (context) => paintCoverArtwork(context, formulaImages.foolPathwaySymbol),
       true,
     ),
     transparent: true,
@@ -528,7 +577,7 @@ function buildBook(formulaImages: FormulaImages) {
   frontCover.add(coverLabel);
 
   const seamMaterial = basicMaterial({
-    map: makeRegionTexture(12, 0, 2, 10),
+    map: makeRegionTexture(12, 0, 2, 10, undefined, true),
     color: 0xffffff,
     transparent: false,
     opacity: 1,
@@ -645,13 +694,14 @@ onMounted(async () => {
   camera.lookAt(0, 0, 0);
 
   const textureLoader = new THREE.TextureLoader();
-  const [texture, lavosImage, stellarImage, mintImage, recipeImage, mysterriaLogoImage] = await Promise.all([
+  const [texture, lavosImage, stellarImage, mintImage, recipeImage, mysterriaLogoImage, foolPathwaySymbolImage] = await Promise.all([
     textureLoader.loadAsync(bookAtlasUrl),
     loadImage(lavosSquidBlood),
     loadImage(stellarAquaCrystal),
     loadImage(goldMintLeaves),
     loadImage(foolRecipe),
     loadImage('/logo-mark.webp'),
+    loadImage('/pathways/native/fool.png'),
     document.fonts?.ready ?? Promise.resolve(),
   ]);
   if (disposed) {
@@ -669,6 +719,7 @@ onMounted(async () => {
     goldMintLeaves: mintImage,
     foolRecipe: recipeImage,
     mysterriaLogo: mysterriaLogoImage,
+    foolPathwaySymbol: foolPathwaySymbolImage,
   });
   updatePose();
 
