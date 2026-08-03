@@ -3,113 +3,96 @@
     id="join"
     ref="section"
     class="join-story"
-    :class="`join-story--${activeStep.id}`"
     :style="joinStyle"
     aria-labelledby="join-title"
   >
     <div class="join-sticky">
-      <div class="join-destination" aria-hidden="true">
-        <img :src="townsImage" alt="" width="1280" height="720" loading="lazy" decoding="async">
-        <i />
-      </div>
-
-      <div class="stone-gate" aria-hidden="true">
-        <span class="gate-lintel"><i v-for="index in 9" :key="index" /></span>
-        <span class="gate-pillar gate-pillar--left"><i v-for="index in 7" :key="index" /></span>
-        <span class="gate-pillar gate-pillar--right"><i v-for="index in 7" :key="index" /></span>
-        <span class="gate-door gate-door--left"><i /></span>
-        <span class="gate-door gate-door--right"><i /></span>
+      <div class="join-scenes" aria-hidden="true">
+        <img
+          v-for="(scene, index) in scenes"
+          :key="scene.src"
+          :src="scene.src"
+          alt=""
+          width="1280"
+          height="720"
+          decoding="async"
+          :class="{ 'is-active': activeIndex === index }"
+        >
+        <i class="join-scenes__veil" />
+        <i class="join-scenes__grain" />
       </div>
 
       <header class="join-heading">
         <p>Enter Mysterria</p>
-        <h2 id="join-title">Your first step is simple.</h2>
+        <h2 id="join-title">Arrive with purpose.</h2>
+        <span>01 — 03</span>
       </header>
 
-      <article :key="activeStep.id" class="join-copy">
-        <span>{{ String(activeIndex + 1).padStart(2, '0') }} / 05</span>
-        <p>{{ activeStep.verb }}</p>
-        <h3>{{ activeStep.title }}</h3>
-        <p>{{ activeStep.copy }}</p>
-      </article>
+      <div class="join-content">
+        <Transition name="join-copy" mode="out-in">
+          <article :key="activeStep.id" class="join-copy">
+            <span>{{ String(activeIndex + 1).padStart(2, '0') }} / 03</span>
+            <p>{{ activeStep.eyebrow }}</p>
+            <h3>{{ activeStep.title }}</h3>
+            <p>{{ activeStep.copy }}</p>
+            <RouterLink v-if="activeStep.link" :to="activeStep.link.to" class="inline-guide">
+              {{ activeStep.link.label }} <span aria-hidden="true">→</span>
+            </RouterLink>
+          </article>
+        </Transition>
 
-      <div class="connection-panel" aria-label="Connect to Mysterria">
-        <div class="edition-switch" aria-label="Choose Minecraft edition">
-          <button
-            v-for="edition in editions"
-            :key="edition"
-            type="button"
-            :class="{ 'is-active': platform === edition }"
-            :aria-pressed="platform === edition"
-            @click="platform = edition"
-          >
-            <span aria-hidden="true">{{ edition === 'Java' ? 'J' : 'B' }}</span>
-            <strong>{{ edition }}</strong>
+        <aside class="connection-panel" aria-label="Connect to Mysterria">
+          <p class="panel-label">Java Edition · fully supported</p>
+          <button class="copy-address" type="button" @click="copyAddress">
+            <span>
+              <small>Server address</small>
+              <strong>{{ MYSTERRIA_ADDRESS }}</strong>
+            </span>
+            <b>{{ copyLabel }}</b>
           </button>
-        </div>
-
-        <button class="copy-address" type="button" @click="copyAddress">
-          <span>
-            <small>{{ platform }} server address</small>
-            <strong>{{ MYSTERRIA_ADDRESS }}</strong>
-          </span>
-          <b>{{ copyLabel }}</b>
-        </button>
-
-        <p class="resource-note">
-          <i aria-hidden="true">✓</i>
-          Accept the server resource pack when Minecraft asks.
-        </p>
-
-        <nav class="join-links" aria-label="Joining help">
-          <RouterLink to="/guide">Beginner guide <span aria-hidden="true">↗</span></RouterLink>
-          <a href="https://discord.com/invite/jc7GSxBWgb" target="_blank" rel="noreferrer">Community <span aria-hidden="true">↗</span></a>
-        </nav>
-        <p class="copy-feedback" aria-live="polite">{{ copyFeedback }}</p>
+          <p class="resource-note">
+            <i aria-hidden="true">✓</i>
+            Accept the resource pack, then choose <strong>Mysteries</strong> in the lobby.
+          </p>
+          <p class="edition-note">Bedrock can connect, but some custom interfaces and pathway icons may not render correctly.</p>
+          <nav class="join-links" aria-label="Joining help">
+            <RouterLink to="/guide">Read the beginner guide <span aria-hidden="true">→</span></RouterLink>
+            <a href="https://discord.com/invite/jc7GSxBWgb" target="_blank" rel="noreferrer">Ask the community <span aria-hidden="true">↗</span></a>
+          </nav>
+          <p class="copy-feedback" aria-live="polite">{{ copyFeedback }}</p>
+        </aside>
       </div>
 
-      <nav class="join-steps" aria-label="Steps to join Mysterria">
+      <nav class="join-steps" aria-label="Your first moments in Mysterria">
         <button
           v-for="(step, index) in steps"
           :key="step.id"
           type="button"
           :class="{ 'is-active': activeIndex === index, 'is-complete': activeIndex > index }"
           :aria-current="activeIndex === index ? 'step' : undefined"
-          :aria-label="`Step ${index + 1}: ${step.short}`"
           @click="goToStep(index)"
         >
           <span>{{ String(index + 1).padStart(2, '0') }}</span>
           <strong>{{ step.short }}</strong>
         </button>
       </nav>
-
-      <p class="join-payoff">A world to join. A Pathway to begin.</p>
     </div>
 
     <div class="join-static">
       <img :src="townsImage" alt="An illuminated Minecraft city in Mysterria at night." width="1280" height="720" loading="lazy" decoding="async">
       <div class="join-static__content">
         <p>Enter Mysterria</p>
-        <h2>Your first step is simple.</h2>
+        <h2>Arrive with purpose.</h2>
         <ol>
           <li v-for="(step, index) in steps" :key="step.id">
             <span>{{ String(index + 1).padStart(2, '0') }}</span>
             <div><strong>{{ step.title }}</strong><p>{{ step.copy }}</p></div>
           </li>
         </ol>
-        <div class="join-static__editions" role="group" aria-label="Choose Minecraft edition">
-          <button
-            v-for="edition in editions"
-            :key="edition"
-            type="button"
-            :aria-pressed="platform === edition"
-            :class="{ 'is-active': platform === edition }"
-            @click="platform = edition"
-          >{{ edition }}</button>
-        </div>
+        <button type="button" class="static-copy" @click="copyAddress">{{ copyLabel }} · {{ MYSTERRIA_ADDRESS }}</button>
+        <p class="resource-note"><i aria-hidden="true">✓</i> Java Edition is fully supported. Accept the resource pack when prompted.</p>
         <div class="join-static__actions">
-          <button type="button" @click="copyAddress">{{ copyLabel }} · {{ MYSTERRIA_ADDRESS }}</button>
-          <RouterLink to="/guide">Beginner guide ↗</RouterLink>
+          <RouterLink to="/guide">Beginner guide →</RouterLink>
           <a href="https://discord.com/invite/jc7GSxBWgb" target="_blank" rel="noreferrer">Community ↗</a>
         </div>
         <p class="copy-feedback" aria-live="polite">{{ copyFeedback }}</p>
@@ -123,20 +106,36 @@ import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { MYSTERRIA_ADDRESS } from '@/services/serverStatus';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import townsImage from '@/assets/images/home/world/towns.webp';
+import breweryImage from '@/assets/images/home/progression/brewery-scene.webp';
+import dawnImage from '@/assets/images/home/mysterria-dawn.webp';
+
+const scenes = [
+  { src: townsImage },
+  { src: dawnImage },
+  { src: breweryImage },
+] as const;
 
 const steps = [
-  { id: 'address', short: 'Address', verb: 'Copy', title: 'Add the server.', copy: 'Copy the address and add Mysterria to your multiplayer server list.' },
-  { id: 'edition', short: 'Edition', verb: 'Choose', title: 'Java or Bedrock.', copy: 'Choose the edition you play. Both connect with the Mysterria server address.' },
-  { id: 'pack', short: 'Resource pack', verb: 'Accept', title: 'Let the world load.', copy: 'Accept the server resource pack when Minecraft prompts you so custom visuals appear correctly.' },
-  { id: 'enter', short: 'Enter', verb: 'Connect', title: 'Walk through.', copy: 'Join the server and follow the in-world onboarding into Mysterria.' },
-  { id: 'begin', short: 'Begin', verb: 'Progress', title: 'Choose what comes next.', copy: 'Start your progression, gather ingredients and work toward your first potion.' },
+  {
+    id: 'connect', short: 'Connect', eyebrow: 'The threshold', title: 'Find the right door.',
+    copy: 'Join mc.mysterria.net with a current Java client. No client mods are required—just bring your curiosity.',
+    link: undefined,
+  },
+  {
+    id: 'arrive', short: 'Arrive', eyebrow: 'The first signal', title: 'Let Mysterria reveal itself.',
+    copy: 'Accept the server resource pack, enter Mysteries from the lobby, and read the NPC dialogue before you leave.',
+    link: { to: '/guide', label: 'See connection help' },
+  },
+  {
+    id: 'begin', short: 'Begin', eyebrow: 'Your first decision', title: 'A Pathway is earned.',
+    copy: 'Your starter choice only changes your bonus. Take Resolve to learn the recipe, cauldron, ingredients, and potion loop without a permanent cost.',
+    link: { to: '/guide?topic=starter-choice', label: 'Understand the starter choice' },
+  },
 ] as const;
-const editions = ['Java', 'Bedrock'] as const;
 
 const section = ref<HTMLElement | null>(null);
 const progress = ref(0);
 const activeIndex = ref(0);
-const platform = ref<(typeof editions)[number]>('Java');
 const copyState = ref<'idle' | 'copied' | 'failed'>('idle');
 const reducedMotion = useReducedMotion();
 let observer: IntersectionObserver | null = null;
@@ -153,15 +152,9 @@ const copyFeedback = computed(() => {
 });
 const joinStyle = computed(() => ({
   '--join-progress': String(progress.value),
-  '--gate-inset': `${Math.max(3, 29 - progress.value * 26)}%`,
-  '--door-left': `${progress.value * -118}%`,
-  '--door-right': `${progress.value * 118}%`,
-  '--scene-scale': String(1.16 - progress.value * 0.14),
-  '--scene-brightness': String(0.56 + progress.value * 0.38),
-  '--scene-saturation': String(0.72 + progress.value * 0.32),
-  '--join-glow-alpha': String(0.08 + progress.value * 0.24),
-  '--heading-opacity': String(Math.max(0, 1 - progress.value * 2)),
-  '--payoff-opacity': String(Math.max(0, Math.min(1, progress.value * 4 - 3))),
+  '--scene-position': `${50 + progress.value * 4}%`,
+  '--scene-scale': String(1.06 - progress.value * 0.035),
+  '--heading-opacity': String(Math.max(0.28, 1 - progress.value * 0.7)),
 }));
 
 function update() {
@@ -171,34 +164,30 @@ function update() {
     const rect = section.value?.getBoundingClientRect();
     if (!rect) return;
     const next = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
-    const scaled = Math.min(steps.length - 0.0001, next * steps.length);
     progress.value = next;
-    activeIndex.value = Math.floor(scaled);
+    activeIndex.value = Math.min(steps.length - 1, Math.floor(next * steps.length));
   });
 }
 
 function goToStep(index: number) {
   if (!section.value) return;
   activeIndex.value = index;
-  const next = (index + 0.16) / steps.length;
+  const next = (index + 0.18) / steps.length;
   progress.value = next;
   if (reducedMotion.value) return;
   const sectionTop = section.value.getBoundingClientRect().top + window.scrollY;
-  const scrollRange = section.value.offsetHeight - innerHeight;
-  window.scrollTo({ top: sectionTop + scrollRange * next, behavior: 'smooth' });
+  window.scrollTo({ top: sectionTop + (section.value.offsetHeight - innerHeight) * next, behavior: 'smooth' });
 }
 
 async function copyAddress() {
   copyState.value = 'idle';
   try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
-    } else {
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
+    else {
       const field = document.createElement('textarea');
       field.value = MYSTERRIA_ADDRESS;
       field.setAttribute('readonly', '');
-      field.style.position = 'fixed';
-      field.style.opacity = '0';
+      field.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(field);
       field.select();
       const copied = document.execCommand('copy');
@@ -206,180 +195,54 @@ async function copyAddress() {
       if (!copied) throw new Error('Clipboard unavailable');
     }
     copyState.value = 'copied';
-  } catch {
-    copyState.value = 'failed';
-  }
+  } catch { copyState.value = 'failed'; }
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => (copyState.value = 'idle'), 3200);
 }
 
 onMounted(() => {
-  observer = new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    if (visible) update();
-  }, { rootMargin: '10% 0px' });
+  observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) update(); }, { rootMargin: '10% 0px' });
   if (section.value) observer.observe(section.value);
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', update, { passive: true });
 });
-
 onUnmounted(() => {
-  observer?.disconnect();
-  removeEventListener('scroll', update);
-  removeEventListener('resize', update);
-  if (frame) cancelAnimationFrame(frame);
-  if (copyTimer) clearTimeout(copyTimer);
+  observer?.disconnect(); removeEventListener('scroll', update); removeEventListener('resize', update);
+  if (frame) cancelAnimationFrame(frame); if (copyTimer) clearTimeout(copyTimer);
 });
 </script>
 
 <style scoped>
-.join-story {
-  --join-progress: 0;
-  --gate-inset: 29%;
-  --door-left: 0%;
-  --door-right: 0%;
-  --scene-scale: 1.16;
-  position: relative;
-  min-height: 430svh;
-  color: #fcf9f2;
-  background: #08151a;
-}
-
-.join-sticky {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  min-height: 650px;
-  overflow: hidden;
-  isolation: isolate;
-  background: #08151a;
-}
-
-.join-destination,
-.join-destination::after,
-.join-destination img,
-.join-destination i { position: absolute; inset: 0; }
-
-.join-destination { z-index: -3; overflow: hidden; clip-path: inset(8% var(--gate-inset) 8% var(--gate-inset) round 34px); }
-.join-destination img { width: 100%; height: 100%; object-fit: cover; object-position: center 44%; filter: brightness(var(--scene-brightness)) saturate(var(--scene-saturation)); transform: scale(var(--scene-scale)); will-change: transform; }
-.join-destination::after { content: ""; background: linear-gradient(0deg, rgba(8, 21, 26, .94), transparent 52%), linear-gradient(90deg, rgba(8, 21, 26, .72), transparent 35% 68%, rgba(8, 21, 26, .54)); }
-.join-destination i { background: radial-gradient(circle at 56% 38%, rgba(237, 181, 97, var(--join-glow-alpha)), transparent 44%); }
-
-.stone-gate { position: absolute; z-index: -1; inset: 0; pointer-events: none; filter: drop-shadow(0 28px 36px rgba(0, 0, 0, .48)); }
-.gate-lintel,
-.gate-pillar { position: absolute; display: grid; gap: 4px; }
-.gate-lintel { left: calc(var(--gate-inset) - 4%); right: calc(var(--gate-inset) - 4%); top: 4.5%; grid-template-columns: repeat(9, 1fr); }
-.gate-pillar { top: 5%; bottom: 0; width: 6.6%; grid-template-rows: repeat(7, 1fr); }
-.gate-pillar--left { left: calc(var(--gate-inset) - 4%); }
-.gate-pillar--right { right: calc(var(--gate-inset) - 4%); }
-.gate-lintel i,
-.gate-pillar i { min-width: 0; min-height: 0; border: 1px solid rgba(255, 242, 210, .08); background: linear-gradient(145deg, rgba(33, 51, 47, .76), rgba(11, 30, 31, .82) 68%); box-shadow: inset 8px 8px 14px rgba(255, 255, 255, .025); }
-.gate-lintel i:nth-child(2n), .gate-pillar i:nth-child(2n) { background: linear-gradient(145deg, #2b3f38, #102425 72%); }
-
-.gate-door { position: absolute; z-index: -1; top: 8%; bottom: 8%; width: 29%; overflow: hidden; border: 1px solid rgba(198, 155, 82, .3); background: rgba(10, 27, 29, .84); box-shadow: inset 0 0 50px rgba(0, 0, 0, .62); backdrop-filter: blur(2px); }
-.gate-door::before { content: ""; position: absolute; inset: 5%; border: 1px solid rgba(198, 155, 82, .22); background: repeating-linear-gradient(90deg, transparent 0 32px, rgba(198, 155, 82, .08) 32px 33px), repeating-linear-gradient(0deg, transparent 0 64px, rgba(198, 155, 82, .06) 64px 65px); }
-.gate-door i { position: absolute; top: 50%; width: 12px; aspect-ratio: 1; border: 1px solid #d1aa63; transform: rotate(45deg); box-shadow: 0 0 20px rgba(198, 155, 82, .42); }
-.gate-door--left { left: var(--gate-inset); transform: translateX(var(--door-left)); }
-.gate-door--left i { right: 17px; }
-.gate-door--right { right: var(--gate-inset); transform: translateX(var(--door-right)); }
-.gate-door--right i { left: 17px; }
-
-.join-heading { position: absolute; z-index: 4; left: clamp(22px, 5vw, 80px); top: clamp(72px, 9vh, 104px); width: min(540px, 45vw); opacity: var(--heading-opacity); }
-.join-heading p,
-.join-copy > span,
-.join-copy > p:first-of-type,
-.join-static__content > p { margin: 0; color: #e1b66a; font: 650 .66rem/1 "IBM Plex Mono", monospace; letter-spacing: .15em; text-transform: uppercase; }
-.join-heading h2 { margin: 13px 0 0; font: 650 clamp(3.5rem, 7vw, 8rem)/.8 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.055em; }
-
-.join-copy { position: absolute; z-index: 4; left: clamp(22px, 5vw, 80px); top: 52%; width: min(410px, 33vw); padding: 24px 0; transform: translateY(-50%); text-shadow: 0 3px 26px #08151a; }
-.join-copy > p:first-of-type { margin-top: 13px; }
-.join-copy h3 { margin: 13px 0 15px; font: 650 clamp(3rem, 5.6vw, 6.5rem)/.82 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; text-wrap: balance; }
-.join-copy > p:last-child { max-width: 390px; margin: 0; color: rgba(252, 249, 242, .7); font-size: .86rem; line-height: 1.65; }
-
-.connection-panel { position: absolute; z-index: 5; right: clamp(22px, 5vw, 80px); bottom: clamp(78px, 11vh, 118px); width: min(410px, 34vw); display: grid; gap: 9px; padding: 12px; border: 1px solid rgba(252, 249, 242, .18); border-radius: 22px; background: rgba(8, 21, 26, .82); box-shadow: 0 24px 80px rgba(0, 0, 0, .32); backdrop-filter: blur(18px); }
-.edition-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.edition-switch button { min-height: 48px; display: flex; align-items: center; gap: 9px; padding: 6px 10px; border: 1px solid rgba(252, 249, 242, .13); border-radius: 12px; color: rgba(252, 249, 242, .6); background: transparent; cursor: pointer; }
-.edition-switch button.is-active { border-color: #d9ae62; color: #fcf9f2; background: rgba(198, 155, 82, .09); }
-.edition-switch button > span { width: 29px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 8px; color: #0d2926; background: #f5f0e6; font: 700 .64rem/1 "IBM Plex Mono", monospace; }
-.edition-switch strong { font-size: .72rem; }
-.copy-address { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 13px; border: 0; border-radius: 12px; color: #102924; background: #f5f0e6; cursor: pointer; text-align: left; transition: transform .3s cubic-bezier(.22, 1, .36, 1), background-color .2s; }
-.copy-address:hover { transform: translateY(-2px); background: #fffaf0; }
-.copy-address > span { min-width: 0; display: grid; gap: 6px; }
-.copy-address small { color: rgba(16, 41, 36, .56); font: 600 .54rem/1 "IBM Plex Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
-.copy-address strong { font: 700 .73rem/1 "IBM Plex Mono", monospace; overflow-wrap: anywhere; }
-.copy-address b { flex: none; color: #7c5725; font-size: .7rem; }
-.resource-note { min-height: 44px; display: flex; align-items: center; gap: 9px; margin: 0; padding: 7px 9px; color: rgba(252, 249, 242, .66); font-size: .65rem; line-height: 1.4; }
-.resource-note i { width: 24px; aspect-ratio: 1; display: grid; place-items: center; flex: none; border-radius: 50%; color: #102924; background: #9bcba9; font-size: .65rem; font-style: normal; }
-.join-links { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-.join-links a { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px; border: 1px solid rgba(252, 249, 242, .13); border-radius: 11px; color: rgba(252, 249, 242, .75); font-size: .67rem; font-weight: 750; }
-.copy-feedback { min-height: 1em; margin: 0; color: rgba(252, 249, 242, .54); font: 500 .54rem/1.4 "IBM Plex Mono", monospace; }
-
-.join-steps { position: absolute; z-index: 5; left: 50%; bottom: 20px; width: min(790px, calc(100% - 44px)); display: grid; grid-template-columns: repeat(5, 1fr); transform: translateX(-50%); }
-.join-steps button { position: relative; min-width: 44px; min-height: 52px; display: grid; place-items: center; gap: 3px; padding: 7px; border: 0; border-top: 2px solid rgba(252, 249, 242, .3); color: rgba(252, 249, 242, .7); background: rgba(8, 21, 26, .62); cursor: pointer; }
-.join-steps button.is-active { border-color: #dfb46a; color: #fcf9f2; }
-.join-steps button.is-complete { color: #9bcba9; }
-.join-steps span { font: 650 .57rem/1 "IBM Plex Mono", monospace; }
-.join-steps strong { font-size: .62rem; }
-.join-payoff { position: absolute; z-index: 4; left: 50%; top: 19%; margin: 0; color: rgba(252, 249, 242, .68); font: 550 .61rem/1 "IBM Plex Mono", monospace; letter-spacing: .13em; text-transform: uppercase; opacity: var(--payoff-opacity); transform: translateX(-50%); white-space: nowrap; }
+.join-story { --join-progress: 0; --scene-position: 50%; --scene-scale: 1.06; --heading-opacity: 1; position: relative; min-height: 310svh; color: #fcf9f2; background: #091718; }
+.join-sticky { position: sticky; top: 0; height: 100svh; min-height: 620px; overflow: hidden; isolation: isolate; background: #091718; }
+.join-scenes, .join-scenes::after, .join-scenes img, .join-scenes i { position: absolute; inset: 0; }
+.join-scenes { z-index: -2; overflow: hidden; background: #102724; }
+.join-scenes img { width: 100%; height: 100%; object-fit: cover; object-position: var(--scene-position) 48%; opacity: 0; filter: brightness(.58) saturate(.78); transform: scale(var(--scene-scale)); transition: opacity 900ms cubic-bezier(.22, 1, .36, 1), transform 950ms cubic-bezier(.22, 1, .36, 1), filter 800ms ease; }
+.join-scenes img.is-active { opacity: 1; filter: brightness(.72) saturate(.96); }
+.join-scenes::after { content: ''; z-index: 1; background: linear-gradient(90deg, rgba(5, 17, 19, .86) 0%, rgba(6, 20, 22, .48) 43%, rgba(5, 17, 19, .2) 74%), linear-gradient(0deg, rgba(5, 17, 19, .78), transparent 50%); }
+.join-scenes__veil { z-index: 2; background: radial-gradient(ellipse at 62% 45%, rgba(231, 181, 95, .22), transparent 45%), linear-gradient(180deg, rgba(255,255,255,.025), transparent 26%); }
+.join-scenes__grain { z-index: 3; opacity: .16; mix-blend-mode: soft-light; background-image: radial-gradient(rgba(255,255,255,.7) .5px, transparent .5px); background-size: 4px 4px; }
+.join-heading { position: absolute; z-index: 2; top: clamp(88px, 12vh, 126px); left: clamp(22px, 6vw, 96px); width: min(540px, 52vw); opacity: var(--heading-opacity); transition: opacity 400ms ease; }
+.join-heading p, .join-heading > span, .join-copy > span, .join-copy > p:first-of-type, .join-static__content > p, .panel-label { margin: 0; color: #e6bd75; font: 650 .65rem/1 'IBM Plex Mono', monospace; letter-spacing: .15em; text-transform: uppercase; }
+.join-heading h2 { max-width: 540px; margin: 13px 0 17px; font: 650 clamp(3.8rem, 7.4vw, 8.4rem)/.79 'IBM Plex Sans Condensed', sans-serif; letter-spacing: -.06em; text-wrap: balance; }
+.join-heading > span { color: rgba(252,249,242,.46); }
+.join-content { position: absolute; z-index: 2; inset: 0; pointer-events: none; }
+.join-copy { position: absolute; left: clamp(22px, 6vw, 96px); top: 53%; width: min(475px, 38vw); transform: translateY(-50%); text-shadow: 0 4px 34px rgba(4,16,18,.8); pointer-events: auto; }
+.join-copy > p:first-of-type { margin-top: 15px; }
+.join-copy h3 { margin: 12px 0 16px; font: 650 clamp(3rem, 5.8vw, 6.6rem)/.82 'IBM Plex Sans Condensed', sans-serif; letter-spacing: -.055em; text-wrap: balance; }
+.join-copy > p:last-of-type { max-width: 410px; margin: 0; color: rgba(252,249,242,.78); font-size: clamp(.82rem, 1.05vw, .96rem); line-height: 1.7; }
+.inline-guide { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; margin-top: 19px; color: #f1cf91; font-size: .76rem; font-weight: 750; }
+.inline-guide span { font-size: 1.1rem; transition: transform .24s ease; }.inline-guide:hover span { transform: translateX(4px); }
+.join-copy-enter-active, .join-copy-leave-active { transition: opacity 240ms ease, transform 360ms cubic-bezier(.22, 1, .36, 1); }.join-copy-enter-from { opacity: 0; transform: translateY(calc(-50% + 16px)); }.join-copy-leave-to { opacity: 0; transform: translateY(calc(-50% - 12px)); }
+.connection-panel { position: absolute; right: clamp(22px, 6vw, 96px); bottom: clamp(82px, 11vh, 120px); width: min(430px, 35vw); display: grid; gap: 9px; padding: 15px; border: 1px solid rgba(252,249,242,.17); border-radius: 20px; background: linear-gradient(145deg, rgba(15,40,39,.82), rgba(5,18,20,.78)); box-shadow: 0 28px 82px rgba(0,0,0,.34); backdrop-filter: blur(18px); pointer-events: auto; }
+.panel-label { color: rgba(252,249,242,.58); }
+.copy-address { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 11px 13px; border: 0; border-radius: 11px; color: #102924; background: #f5f0e6; cursor: pointer; text-align: left; transition: transform .24s cubic-bezier(.22,1,.36,1), background-color .2s; }.copy-address:hover { transform: translateY(-2px); background: #fffaf0; }.copy-address > span { display: grid; gap: 6px; min-width: 0; }.copy-address small { color: rgba(16,41,36,.55); font: 600 .53rem/1 'IBM Plex Mono', monospace; letter-spacing: .11em; text-transform: uppercase; }.copy-address strong { font: 700 .76rem/1 'IBM Plex Mono', monospace; }.copy-address b { flex: none; color: #795221; font-size: .7rem; }
+.resource-note { min-height: 39px; display: flex; align-items: center; gap: 8px; margin: 0; color: rgba(252,249,242,.73); font-size: .68rem; line-height: 1.45; }.resource-note i { width: 22px; aspect-ratio: 1; display: grid; flex: none; place-items: center; border-radius: 50%; color: #102924; background: #a6d2ac; font-size: .63rem; font-style: normal; }.resource-note strong { color: #fcf9f2; }.edition-note { margin: 0; padding-top: 8px; border-top: 1px solid rgba(252,249,242,.11); color: rgba(252,249,242,.54); font-size: .61rem; line-height: 1.45; }
+.join-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }.join-links a { min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px; border: 1px solid rgba(252,249,242,.14); border-radius: 10px; color: rgba(252,249,242,.8); font-size: .65rem; font-weight: 750; }.copy-feedback { min-height: 1em; margin: 0; color: rgba(252,249,242,.52); font: 500 .53rem/1.4 'IBM Plex Mono', monospace; }
+.join-steps { position: absolute; z-index: 3; left: 50%; bottom: 21px; width: min(610px, calc(100% - 44px)); display: grid; grid-template-columns: repeat(3,1fr); transform: translateX(-50%); }.join-steps button { position: relative; min-width: 44px; min-height: 54px; display: grid; place-items: center; gap: 4px; padding: 8px; border: 0; border-top: 2px solid rgba(252,249,242,.28); color: rgba(252,249,242,.66); background: rgba(5,17,19,.56); cursor: pointer; transition: color .2s ease, border-color .2s ease, background-color .2s ease; }.join-steps button:hover { color: #fcf9f2; }.join-steps button.is-active { border-color: #e5bb72; color: #fcf9f2; background: rgba(13,38,38,.58); }.join-steps button.is-complete { color: #a6d2ac; }.join-steps span { font: 650 .57rem/1 'IBM Plex Mono', monospace; }.join-steps strong { font-size: .64rem; }
 .join-static { display: none; }
-.join-static__editions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 10px; }
-.join-static__editions button { min-height: 46px; border: 1px solid rgba(252, 249, 242, .28); border-radius: 11px; color: #fcf9f2; background: transparent; font-weight: 750; }
-.join-static__editions button.is-active { border-color: #dfb46a; color: #102924; background: #dfb46a; }
-
-@media (max-width: 760px) {
-  .join-story { min-height: 390svh; }
-  .join-heading { left: 16px; top: 74px; width: calc(100% - 32px); }
-  .join-heading h2 { font-size: clamp(3.3rem, 16vw, 5.5rem); }
-  .join-copy { left: 16px; top: auto; bottom: 318px; width: calc(100% - 32px); transform: none; }
-  .join-copy h3 { font-size: clamp(2.4rem, 11vw, 3.7rem); }
-  .join-copy-enter-from { opacity: 0; transform: translateX(-20px); }
-  .join-copy-leave-to { opacity: 0; transform: translateX(20px); }
-  .connection-panel { left: 16px; right: auto; bottom: 72px; width: calc(100% - 32px); }
-  .join-steps { bottom: 8px; width: 100%; }
-  .join-steps strong { display: none; }
-  .join-payoff { display: none; }
-  .gate-pillar { width: 9%; }
-  .stone-gate { opacity: .82; }
-}
-
-@media (max-width: 340px), (max-height: 560px) {
-  .join-story { min-height: auto; padding: 62px 12px; }
-  .join-sticky { display: none; }
-  .join-static { display: grid; overflow: hidden; border-radius: 24px; background: #102724; }
-  .join-static > img { width: 100%; height: 250px; object-fit: cover; }
-  .join-static__content { padding: 28px 18px; }
-  .join-static__content > h2 { margin: 12px 0 28px; font: 650 3rem/.86 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; }
-  .join-static ol { display: grid; gap: 0; margin: 0 0 26px; padding: 0; list-style: none; }
-  .join-static li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 16px 0; border-top: 1px solid rgba(252, 249, 242, .1); }
-  .join-static li > span { color: #dfb46a; font: 650 .58rem/1.5 "IBM Plex Mono", monospace; }
-  .join-static li strong { font: 650 1.35rem/1 "IBM Plex Sans Condensed", sans-serif; }
-  .join-static li p { margin: 7px 0 0; color: rgba(252, 249, 242, .62); font-size: .73rem; line-height: 1.55; }
-  .join-static__actions { display: grid; gap: 8px; }
-  .join-static__actions button, .join-static__actions a { min-height: 46px; display: flex; align-items: center; justify-content: center; padding: 9px; border: 1px solid rgba(252, 249, 242, .14); border-radius: 11px; color: #fcf9f2; background: transparent; font-size: .68rem; font-weight: 750; }
-  .join-static__actions button { border: 0; color: #102924; background: #f5f0e6; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .join-story { min-height: auto; padding: 90px 24px; background: #08151a; }
-  .join-sticky { display: none; }
-  .join-static { width: min(1120px, 100%); display: grid; grid-template-columns: 1.05fr .95fr; overflow: hidden; margin: 0 auto; border-radius: 32px; background: #102724; }
-  .join-static > img { width: 100%; height: 100%; min-height: 720px; object-fit: cover; }
-  .join-static__content { align-self: center; padding: 48px; }
-  .join-static__content > h2 { margin: 13px 0 30px; font: 650 clamp(3rem, 6vw, 6rem)/.84 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; }
-  .join-static ol { display: grid; margin: 0 0 28px; padding: 0; list-style: none; }
-  .join-static li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 16px 0; border-top: 1px solid rgba(252, 249, 242, .1); }
-  .join-static li > span { color: #dfb46a; font: 650 .58rem/1.5 "IBM Plex Mono", monospace; }
-  .join-static li strong { font: 650 1.35rem/1 "IBM Plex Sans Condensed", sans-serif; }
-  .join-static li p { margin: 7px 0 0; color: rgba(252, 249, 242, .62); font-size: .72rem; line-height: 1.55; }
-  .join-static__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .join-static__actions button, .join-static__actions a { min-height: 46px; display: flex; align-items: center; justify-content: center; padding: 9px; border: 1px solid rgba(252, 249, 242, .14); border-radius: 11px; color: #fcf9f2; background: transparent; font-size: .68rem; font-weight: 750; }
-  .join-static__actions button { grid-column: 1 / -1; border: 0; color: #102924; background: #f5f0e6; }
-}
-
-@media (prefers-reduced-motion: reduce) and (max-width: 760px) {
-  .join-story { padding: 70px 14px; }
-  .join-static { grid-template-columns: 1fr; }
-  .join-static > img { min-height: 280px; max-height: 46svh; }
-  .join-static__content { padding: 32px 20px; }
-}
+@media (max-width: 760px) { .join-story { min-height: 285svh; }.join-sticky { min-height: 650px; }.join-heading { top: 82px; left: 17px; width: calc(100% - 34px); }.join-heading h2 { max-width: 380px; font-size: clamp(3.5rem, 16vw, 5.7rem); }.join-copy { z-index: 1; top: 272px; bottom: auto; left: 17px; width: calc(100% - 34px); transform: none; }.join-copy h3 { font-size: clamp(2.55rem, 11vw, 3.8rem); }.join-copy-enter-from { transform: translateY(16px); }.join-copy-leave-to { transform: translateY(-12px); }.connection-panel { right: auto; bottom: 77px; left: 17px; width: calc(100% - 34px); padding: 12px; }.edition-note { display: none; }.join-steps { bottom: 8px; width: 100%; }.join-steps strong { display: none; }.join-scenes::after { background: linear-gradient(0deg, rgba(5,17,19,.88), rgba(5,17,19,.08) 72%), linear-gradient(90deg, rgba(5,17,19,.62), transparent); } }
+@media (max-width: 760px) and (max-height: 720px) { .join-heading { opacity: .58; }.join-copy { top: 215px; }.join-copy h3 { font-size: clamp(2.3rem, 10vw, 3.2rem); }.join-copy > p:last-of-type { font-size: .76rem; line-height: 1.5; } }
+@media (max-width: 340px), (max-height: 560px), (prefers-reduced-motion: reduce) { .join-story { min-height: auto; padding: 70px 14px; }.join-sticky { display: none; }.join-static { width: min(1100px,100%); display: grid; grid-template-columns: 1.05fr .95fr; overflow: hidden; margin: 0 auto; border-radius: 28px; background: #102724; }.join-static > img { width: 100%; height: 100%; min-height: 670px; object-fit: cover; }.join-static__content { align-self: center; padding: 44px; }.join-static__content > h2 { margin: 12px 0 27px; font: 650 clamp(3rem,6vw,6rem)/.84 'IBM Plex Sans Condensed',sans-serif; letter-spacing: -.05em; }.join-static ol { display: grid; margin: 0 0 24px; padding: 0; list-style: none; }.join-static li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 15px 0; border-top: 1px solid rgba(252,249,242,.11); }.join-static li > span { color: #dfb46a; font: 650 .58rem/1.5 'IBM Plex Mono',monospace; }.join-static li strong { font: 650 1.35rem/1 'IBM Plex Sans Condensed',sans-serif; }.join-static li p { margin: 7px 0 0; color: rgba(252,249,242,.65); font-size: .73rem; line-height: 1.55; }.static-copy { width: 100%; min-height: 48px; margin-bottom: 9px; border: 0; border-radius: 11px; color: #102924; background: #f5f0e6; font-size: .68rem; font-weight: 750; }.join-static__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }.join-static__actions a { min-height: 46px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(252,249,242,.14); border-radius: 11px; color: #fcf9f2; font-size: .68rem; font-weight: 750; } }
+@media (max-width: 760px) and (max-height: 560px), (prefers-reduced-motion: reduce) and (max-width: 760px) { .join-static { grid-template-columns: 1fr; }.join-static > img { min-height: 270px; max-height: 46svh; }.join-static__content { padding: 30px 20px; }.join-static__actions { grid-template-columns: 1fr; } }
 </style>
