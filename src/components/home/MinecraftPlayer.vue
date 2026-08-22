@@ -62,6 +62,7 @@ let resizeObserver: ResizeObserver | null = null;
 let intersectionObserver: IntersectionObserver | null = null;
 let disposed = false;
 let lastHand: HandPosition | null = null;
+let viewerCreationStarted = false;
 const handVector = new Vector3();
 const HAND_LOCAL = new Vector3(0, -10, 0);
 
@@ -244,14 +245,15 @@ function syncPlayback() {
   emitHandPosition();
 }
 
-onMounted(async () => {
-  if (!canvas.value || !host.value) return;
+async function createViewer() {
+  if (viewerCreationStarted || disposed || !canvas.value || !host.value) return;
+  viewerCreationStarted = true;
 
   try {
     skinview = await import('skinview3d');
-    if (disposed || !canvas.value) return;
+    if (disposed || !canvas.value || viewer) return;
 
-    viewer = new skinview.SkinViewer({
+    const instance = new skinview.SkinViewer({
       canvas: canvas.value,
       width: 1,
       height: 1,
@@ -261,23 +263,15 @@ onMounted(async () => {
       zoom: 0.84,
       fov: 46,
     });
-    viewer.background = null;
-    viewer.globalLight.intensity = 2.35;
-    viewer.cameraLight.intensity = 0.72;
+    viewer = instance;
+    instance.background = null;
+    instance.globalLight.intensity = 2.35;
+    instance.cameraLight.intensity = 0.72;
 
     resizeObserver = new ResizeObserver(sizeViewer);
     resizeObserver.observe(host.value);
 
-    intersectionObserver = new IntersectionObserver(
-      ([entry]) => {
-        inViewport.value = entry?.isIntersecting ?? false;
-        syncPlayback();
-      },
-      { rootMargin: '120px 0px', threshold: 0.01 },
-    );
-    intersectionObserver.observe(host.value);
-
-    await viewer.loadSkin(steveSkinUrl, { model: 'default' });
+    await instance.loadSkin(steveSkinUrl, { model: 'default' });
     if (disposed || !viewer) return;
 
     ready.value = true;
@@ -287,6 +281,20 @@ onMounted(async () => {
     failed.value = true;
     console.warn('The Minecraft player model could not be initialized.', error);
   }
+}
+
+onMounted(() => {
+  if (!canvas.value || !host.value) return;
+
+  intersectionObserver = new IntersectionObserver(
+    ([entry]) => {
+      inViewport.value = entry?.isIntersecting ?? false;
+      if (entry?.isIntersecting) void createViewer();
+      else syncPlayback();
+    },
+    { rootMargin: '120px 0px', threshold: 0.01 },
+  );
+  intersectionObserver.observe(host.value);
 });
 
 watch(

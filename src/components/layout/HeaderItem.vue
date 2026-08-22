@@ -27,16 +27,16 @@
         <div
           ref="servicesRef"
           class="services"
-          @mouseenter="openServices"
+          @mouseenter="handleServicesEnter"
           @mouseleave="scheduleCloseServices"
         >
           <button
+            ref="servicesTriggerRef"
             class="desktop-nav__link services__trigger"
             type="button"
-            aria-haspopup="true"
             :aria-expanded="isServicesOpen"
             aria-controls="mysterria-services"
-            @click="toggleServices"
+            @click="handleServicesClick"
             @focus="cancelCloseServices"
             @keydown.escape.stop="closeServices"
           >
@@ -100,7 +100,7 @@
           type="button"
           :aria-expanded="isMobileNavOpen"
           aria-controls="mobile-navigation-drawer"
-          aria-label="Open navigation"
+          :aria-label="isMobileNavOpen ? 'Close navigation' : 'Open navigation'"
           @click="openMobileNav"
         >
           <span /><span />
@@ -228,9 +228,12 @@ const isMobileNavOpen = ref(false);
 const mobileNavToggleRef = ref<HTMLButtonElement | null>(null);
 const mobileNavRef = ref<HTMLElement | null>(null);
 const servicesRef = ref<HTMLElement | null>(null);
+const servicesTriggerRef = ref<HTMLButtonElement | null>(null);
 
 let scrollFrame = 0;
 let servicesTimer: ReturnType<typeof setTimeout> | null = null;
+let servicesOpenedByHover = false;
+let servicesPinnedByClick = false;
 
 const isHome = computed(() => route.path === '/');
 let i18nLoaded = false;
@@ -295,19 +298,44 @@ function openServices() {
   isServicesOpen.value = true;
 }
 
+function handleServicesEnter() {
+  cancelCloseServices();
+  if (!isServicesOpen.value) servicesOpenedByHover = true;
+  isServicesOpen.value = true;
+}
+
 function closeServices() {
   cancelCloseServices();
   isServicesOpen.value = false;
+  servicesOpenedByHover = false;
+  servicesPinnedByClick = false;
+}
+
+function blurServicesTrigger() {
+  if (document.activeElement === servicesTriggerRef.value) servicesTriggerRef.value?.blur();
+}
+
+function dismissServices() {
+  closeServices();
+  blurServicesTrigger();
 }
 
 function scheduleCloseServices() {
   cancelCloseServices();
-  servicesTimer = setTimeout(closeServices, 180);
+  servicesTimer = setTimeout(dismissServices, 180);
 }
 
-function toggleServices() {
-  if (isServicesOpen.value) closeServices();
-  else openServices();
+function handleServicesClick() {
+  if (!isServicesOpen.value) {
+    servicesOpenedByHover = false;
+    openServices();
+    return;
+  }
+  if (servicesOpenedByHover && !servicesPinnedByClick) {
+    servicesPinnedByClick = true;
+    return;
+  }
+  closeServices();
 }
 
 function openMobileNav() {
@@ -320,7 +348,7 @@ function closeMobileNav() {
 }
 
 function closePanels() {
-  closeServices();
+  dismissServices();
   closeMobileNav();
 }
 
@@ -362,7 +390,7 @@ function handleMobileNavKeydown(event: KeyboardEvent) {
 function handleOutsidePointer(event: PointerEvent) {
   if (!isServicesOpen.value) return;
   const target = event.target;
-  if (target instanceof Node && !servicesRef.value?.contains(target)) closeServices();
+  if (target instanceof Node && !servicesRef.value?.contains(target)) dismissServices();
 }
 
 watch(isMobileNavOpen, async (isOpen) => {
@@ -415,11 +443,11 @@ onUnmounted(() => {
 
 .site-header.is-home.is-at-top:not(.has-panel) {
   height: 82px;
-  color: #102924;
-  background: rgba(252, 249, 242, .42);
-  border-bottom-color: rgba(16, 41, 36, .11);
+  color: rgba(252, 249, 242, .92);
+  background: rgba(8, 21, 26, .55);
+  border-bottom-color: rgba(198, 155, 82, .28);
   box-shadow: none;
-  backdrop-filter: blur(14px) saturate(1.18);
+  backdrop-filter: blur(14px) saturate(1.12);
 }
 
 .site-header:not(.is-at-top),
@@ -525,11 +553,11 @@ onUnmounted(() => {
   right: -74px;
   width: 332px;
   padding: 10px;
-  border: 1px solid rgba(252, 249, 242, .13);
+  border: 1px solid rgba(198, 155, 82, .34);
   border-radius: 16px;
   color: #fcf9f2;
   background: rgba(8, 21, 26, .96);
-  box-shadow: 0 24px 65px rgba(3, 14, 17, .32);
+  box-shadow: 0 4px 16px rgba(3, 14, 17, .28), 0 24px 65px rgba(3, 14, 17, .45);
   backdrop-filter: blur(24px);
 }
 
@@ -562,7 +590,7 @@ onUnmounted(() => {
 .service-link__icon { width: 26px; height: 26px; color: #d7b978; }
 .service-link span { min-width: 0; }
 .service-link strong { display: block; font-size: .78rem; }
-.service-link small { display: block; margin-top: 2px; color: rgba(252, 249, 242, .5); font-size: .67rem; }
+.service-link small { display: block; margin-top: 2px; color: rgba(252, 249, 242, .62); font-size: .67rem; }
 .service-link__arrow,
 .play-link svg,
 .mobile-nav__link svg,

@@ -64,7 +64,7 @@
             <p class="world-proof">{{ feature.proof }}</p>
           </div>
 
-          <div class="scene-marker" :class="`scene-marker--${feature.pin}`">
+          <div class="scene-marker" :class="[`scene-marker--${feature.pin}`, { 'is-dormant': !isHotspotLive(index) }]">
             <button
               type="button"
               :aria-expanded="selectedMarker === index"
@@ -119,33 +119,32 @@
             </div>
 
             <dl class="living-feed">
-              <div>
+              <div v-if="living.towns !== null">
                 <dt>Active towns</dt>
-                <dd>{{ valueOrUnavailable(living.towns) }}</dd>
+                <dd>{{ living.towns }}</dd>
               </div>
-              <div>
+              <div v-if="living.organizations !== null">
                 <dt>Organizations</dt>
-                <dd>{{ valueOrUnavailable(living.organizations) }}</dd>
+                <dd>{{ living.organizations }}</dd>
               </div>
-              <div>
+              <div v-if="living.currentEvent !== null">
                 <dt>Current world event</dt>
-                <dd>{{ valueOrUnavailable(living.currentEvent) }}</dd>
+                <dd>{{ living.currentEvent }}</dd>
               </div>
-              <div>
+              <div v-if="living.recentDiscovery !== null">
                 <dt>Recent discovery</dt>
-                <dd>{{ valueOrUnavailable(living.recentDiscovery) }}</dd>
+                <dd>{{ living.recentDiscovery }}</dd>
               </div>
-              <div class="living-feed__update">
+              <div v-if="latestUpdate" class="living-feed__update">
                 <dt>Latest update</dt>
-                <dd v-if="latestUpdate">
-                  <RouterLink :to="`/news/${latestUpdate.slug}`" :tabindex="activeIndex === features.length ? 0 : -1">{{ latestUpdate.title }} <span aria-hidden="true">↗</span></RouterLink>
+                <dd>
+                  <RouterLink :to="`/news/${latestUpdate.slug}`" :lang="storedLanguage === 'uk' ? 'uk' : undefined" :tabindex="activeIndex === features.length ? 0 : -1">{{ latestUpdate.title }} <span aria-hidden="true">↗</span></RouterLink>
                 </dd>
-                <dd v-else>Unavailable</dd>
               </div>
             </dl>
 
             <p v-if="worldFeedUnavailable" class="feed-disclosure">
-              No public towns, organization, event or discovery feed is connected.
+              Live town, organization and event feeds are quiet right now — join the Discord for the latest happenings.
             </p>
           </div>
         </article>
@@ -203,7 +202,7 @@
             <div><dt>Recent discovery</dt><dd>{{ valueOrUnavailable(living.recentDiscovery) }}</dd></div>
             <div>
               <dt>Latest update</dt>
-              <dd><RouterLink v-if="latestUpdate" :to="`/news/${latestUpdate.slug}`">{{ latestUpdate.title }} ↗</RouterLink><span v-else>Unavailable</span></dd>
+              <dd><RouterLink v-if="latestUpdate" :to="`/news/${latestUpdate.slug}`" :lang="storedLanguage === 'uk' ? 'uk' : undefined">{{ latestUpdate.title }} ↗</RouterLink><span v-else>Unavailable</span></dd>
             </div>
           </dl>
           <p v-if="worldFeedUnavailable" class="feed-disclosure">No public towns, organization, event or discovery feed is connected.</p>
@@ -261,6 +260,8 @@ const props = defineProps<{
   latestUpdate: { title: string; slug: string } | null;
 }>();
 
+const storedLanguage = localStorage.getItem('mysterria-language');
+
 const features: WorldFeature[] = [
   {
     id: 'dungeons', short: 'Rifts', kicker: '01 · Prepare the run', title: 'Rifts reward preparation.',
@@ -278,7 +279,7 @@ const features: WorldFeature[] = [
     id: 'creatures', short: 'The wilds', kicker: '02 · Read the encounter', title: 'The wild reacts to your Pathway.',
     copy: 'Beyonder Creatures give XP, acting points and ingredients. Wild Beyonders are different: pathway-based NPCs that may trade with you or fight you depending on your relationship.',
     proof: 'Crimson Moon nights raise the danger outside and turn fishing into a high-risk route to Beyonder rewards.',
-    marker: 'Beyonder encounter', note: 'A genuine custom-creature encounter. A dedicated Wild Beyonder capture can replace it later.', pin: 'high',
+    marker: 'Beyonder encounter', note: 'A Beyonder creature met in the wild: every encounter yields XP, acting points and ingredients worth the risk.', pin: 'high',
     image: creatureChamber, alt: 'A custom floating creature surrounded by fragments inside a dark Minecraft chamber.', width: 1075, height: 503,
     palette: { bg: '#0d1d21', accent: '#a691d2', ink: '#f7f0e5' },
   },
@@ -286,7 +287,7 @@ const features: WorldFeature[] = [
     id: 'events', short: 'Guardians', kicker: '03 · Answer the signal', title: 'A Guardian changes the plan.',
     copy: 'Guardians are random open-world boss encounters. Find one, bring the right people, and adapt when the fight turns: physical damage stops working below 20% health.',
     proof: 'A successful group earns a Guardian-specific Reward Token for ingredients, recipes and other rare rewards.',
-    marker: 'Open-world Guardian', note: 'This image is a Guardian encounter. Cosmos Incursions need their own capture before they earn a separate chapter.', pin: 'middle',
+    marker: 'Open-world Guardian', note: 'A Guardian encountered in the open world. Cosmos Incursions are rarer kin that answer their own signal.', pin: 'middle',
     image: guardianDragon, alt: 'Players fighting a many-headed Guardian inside a radiant arena.', width: 1600, height: 868,
     gallery: [
       { image: guardianRadiantWide, alt: 'Players spread across a bright arena during a Guardian encounter.' },
@@ -406,9 +407,7 @@ function update() {
 function goToStage(index: number) {
   if (!section.value) return;
   activeIndex.value = index;
-  const next = index === stages.length - 1
-    ? 1
-    : Math.min(1, (index + 0.08) / (stages.length - 1));
+  const next = index / (stages.length - 1);
   progress.value = next;
   if (reducedMotion.value) return;
   const sectionTop = section.value.getBoundingClientRect().top + window.scrollY;
@@ -418,6 +417,11 @@ function goToStage(index: number) {
 
 function toggleMarker(index: number) {
   selectedMarker.value = selectedMarker.value === index ? null : index;
+}
+
+function isHotspotLive(index: number) {
+  const scaled = Math.min(stages.length - 1, progress.value * (stages.length - 1));
+  return Math.floor(scaled + 0.5) === index;
 }
 
 onMounted(async () => {
@@ -722,11 +726,17 @@ onUnmounted(() => {
   z-index: 6;
   right: clamp(7vw, 11vw, 176px);
   color: var(--beat-ink);
+  transition: opacity .22s ease;
 }
 
 .scene-marker--high { top: 30%; }
 .scene-marker--middle { top: 48%; }
 .scene-marker--low { top: 66%; }
+
+.scene-marker.is-dormant {
+  opacity: 0;
+  pointer-events: none;
+}
 
 .scene-marker button {
   min-width: 44px;

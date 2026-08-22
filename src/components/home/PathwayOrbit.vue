@@ -120,7 +120,7 @@
             :class="{ 'is-visible': hasActiveEntry }"
             @click="selectActiveAndOpen($event)"
           >
-            Inspect {{ activeEntry.name }} <span aria-hidden="true">↗</span>
+            Inspect {{ activeEntry.name }}<span aria-hidden="true"> ↗</span>
           </button>
 
         </div>
@@ -168,7 +168,6 @@
           class="mobile-card"
           :class="`motif-${entry.motif}`"
           :data-mobile-index="index"
-          :aria-label="`${entry.name}, ${index + 1} of ${activeCatalog.length}`"
         >
           <div class="mobile-card__visual" aria-hidden="true">
             <img :src="entry.image" alt="" width="170" height="170" :loading="activeKind === 'boon' ? 'eager' : 'lazy'" decoding="async" @error="replaceBrokenImage">
@@ -176,7 +175,7 @@
           </div>
           <p>{{ entry.sequenceCount }} sequences</p>
           <h3>{{ entry.name }}</h3>
-          <button type="button" @click="selectAndOpen(index, $event)">Open archive <span aria-hidden="true">↗</span></button>
+          <button type="button" @click="selectAndOpen(index, $event)">Open archive<span aria-hidden="true"> ↗</span></button>
         </article>
       </div>
 
@@ -214,7 +213,7 @@
               <div><dt>Archive</dt><dd>{{ selectedEntry.sequenceCount }} Sequences · {{ selectedEntry.abilityCount }} abilities</dd></div>
             </dl>
             <RouterLink :to="selectedEntry.route" @click="closeDetails(false)">
-              Learn more in the full archive <span aria-hidden="true">↗</span>
+              Learn more in the full archive<span aria-hidden="true"> ↗</span>
             </RouterLink>
           </aside>
         </div>
@@ -311,9 +310,9 @@ const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, in
     hidden: false,
     behind: depth < .42,
     style: {
-      left: `${x}%`, top: `${y}%`, opacity: String(.46 + depth * .54),
+      left: `${x}%`, top: `${y}%`, opacity: String(.7 + depth * .3),
       zIndex: String(18 + Math.round(depth * 46)),
-      transform: `translate(-50%, -50%) scale(${.62 + depth * .34})`,
+      transform: `translate(-50%, -50%) scale(${.74 + depth * .22})`,
       pointerEvents: 'auto',
     },
   };
@@ -340,7 +339,7 @@ function assemblyStyle(index: number): OrbitVisual {
     style: {
       left: `${roundPosition(mix(-14, targetX, t))}%`,
       top: `${roundPosition(mix(50, targetY, t))}%`,
-      opacity: String(t * (.46 + depth * .54)),
+      opacity: String(t * (.7 + depth * .3)),
       zIndex: String(18 + Math.round(depth * 46)),
       transform: `translate(-50%, -50%) scale(${(.5 + depth * .26) + t * .2})`,
       pointerEvents: entryProgress > .94 ? 'auto' : 'none',
@@ -732,13 +731,16 @@ onUnmounted(() => {
 .orbit-token { position: absolute; width: 108px; min-height: 108px; display: grid; place-items: center; align-content: center; gap: 3px; padding: 4px; border: 0; color: color-mix(in srgb, var(--path-ink) 92%, transparent); background: transparent; cursor: pointer; contain: layout paint; }
 .pathway-vault:not(.is-interactive) .orbit-token { transition: left .06s linear, top .06s linear, transform .08s cubic-bezier(.22, 1, .36, 1), opacity .06s linear; }
 .orbit-token.is-hidden { visibility: hidden; }
-.orbit-token.is-behind { opacity: .68; }
 .orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-active { z-index: 75 !important; color: var(--path-ink); filter: none; }
 .orbit-token:focus-visible { outline: 3px solid #fcf9f2; outline-offset: 2px; border-radius: 18px; box-shadow: 0 0 0 5px #08151a; }
 .token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--token-accent, var(--path-ink)) 42%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--token-surface, var(--path-surface)) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
 .orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--token-accent, var(--path-accent)); background: color-mix(in srgb, var(--token-haze, var(--path-haze)) 40%, var(--token-surface, var(--path-surface))); transform: scale(1.14); }
-.token-seal img { width: 57px; height: 57px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0,0,0,.28)); }
-.orbit-token > strong { max-width: 108px; overflow: hidden; text-overflow: ellipsis; color: color-mix(in srgb, var(--token-ink, var(--path-ink)) 92%, transparent); font-size: .64rem; white-space: nowrap; }
+.orbit-token.is-selected { z-index: 76 !important; }
+.orbit-token.is-selected .token-seal { box-shadow: 0 12px 26px rgba(0,0,0,.24), 0 0 0 3px rgba(198,155,82,.55); }
+.orbit-token.is-selected .token-seal::before { content: ""; position: absolute; inset: -6px; z-index: -1; border-radius: 50%; background: radial-gradient(circle, transparent 56%, rgba(198,155,82,.32) 82%, transparent); }
+.orbit-token.is-selected > strong { color: #fcf9f2; }
+.token-seal img { width: 57px; height: 57px; object-fit: contain; filter: brightness(1.15) drop-shadow(0 8px 12px rgba(0,0,0,.28)) drop-shadow(0 0 6px rgba(198,155,82,.35)); }
+.orbit-token > strong { max-width: 108px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: rgba(252,249,242,.88); font-size: calc(.64rem + 1px); line-height: 1.3; }
 .orbit-token > small { color: color-mix(in srgb, var(--token-ink, var(--path-ink)) 68%, transparent); font: 600 .46rem/1 "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
 .is-low-power .token-seal { box-shadow: none; }
 .is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }

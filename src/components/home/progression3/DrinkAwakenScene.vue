@@ -87,7 +87,7 @@
     </section>
 
     <!-- begin journey CTA -->
-    <a class="cta" href="/play" :style="ctaStyle">Begin your journey</a>
+    <RouterLink class="cta" to="/game" :style="ctaStyle">Begin your journey</RouterLink>
   </div>
 </template>
 

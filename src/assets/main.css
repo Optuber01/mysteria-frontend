@@ -429,9 +429,9 @@ h6,
 }
 
 *:focus-visible {
-    outline: 3px solid #0b3630;
+    outline: 3px solid var(--myst-gold);
     outline-offset: 2px;
-    box-shadow: 0 0 0 2px #fcf9f2;
+    box-shadow: 0 0 0 2px rgba(8, 21, 26, 0.85);
 }
 
 html {

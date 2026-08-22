@@ -1,19 +1,27 @@
 <template>
-  <button class="server-chip" :title="copied ? 'Server address copied' : 'Copy mc.mysterria.net'" @click="copyIp">
+  <button
+    class="server-chip"
+    :title="copied ? 'Server address copied' : `Copy ${MYSTERRIA_ADDRESS}`"
+    @click="copyIp"
+  >
     <span class="status-dot" :class="{ online: isOnline, offline: !isOnline }" aria-hidden="true"></span>
-    <span class="chip-ip">mc.mysterria.net</span>
+    <span class="chip-ip">{{ MYSTERRIA_ADDRESS }}</span>
     <span v-if="isOnline && playerCount !== null" class="chip-players">
       {{ playerCount }}
     </span>
-    <Transition name="fade">
-      <span v-if="copied" class="copied-badge">✓</span>
-    </Transition>
+    <span class="chip-copy-live" aria-live="polite">
+      <Transition name="fade">
+        <span v-if="copied" class="copied-badge" aria-hidden="true">✓</span>
+      </Transition>
+      <span v-if="copied" class="visually-hidden">Server address copied</span>
+    </span>
   </button>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, onUnmounted } from 'vue';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
+import { MYSTERRIA_ADDRESS } from '@/services/serverStatus';
 
 const { status } = useSharedServerStatus();
 const isOnline = computed(() => status.value.state === 'online');
@@ -23,7 +31,7 @@ let copiedTimeout: ReturnType<typeof setTimeout> | null = null;
 
 async function copyIp() {
   try {
-    await navigator.clipboard.writeText('mc.mysterria.net');
+    await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
     copied.value = true;
     if (copiedTimeout) clearTimeout(copiedTimeout);
     copiedTimeout = setTimeout(() => { copied.value = false; }, 1800);
@@ -59,9 +67,9 @@ onUnmounted(() => {
 }
 
 .server-chip:hover {
-  border-color: color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  color: var(--myst-ink);
-  background: color-mix(in srgb, var(--myst-gold) 5%, var(--myst-bg));
+  border-color: color-mix(in srgb, var(--myst-gold) 60%, transparent);
+  color: var(--myst-ink-strong);
+  background: color-mix(in srgb, var(--myst-gold) 9%, var(--myst-bg));
 }
 
 .status-dot {
@@ -93,8 +101,24 @@ onUnmounted(() => {
 
 .chip-players::before {
   content: '·';
-  margin-right: 3px;
+  margin-right: 6px;
   opacity: 0.5;
+}
+
+.chip-copy-live {
+  position: absolute;
+  inset: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .copied-badge {

@@ -327,12 +327,16 @@ function update() {
 }
 function goToChapter(index: number) {
   if (!sectionRef.value) return;
+  const section = sectionRef.value;
   const chapter = chapters[index];
-  const range = sectionRef.value.offsetHeight - innerHeight;
-  const top = sectionRef.value.getBoundingClientRect().top + scrollY;
+  const range = Math.max(1, section.offsetHeight - innerHeight);
+  const sectionTop = section.getBoundingClientRect().top + scrollY;
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
   const chapterLead = index === 1 ? 0.06 : 0.35;
+  const fraction = clamp01(chapter.start + (chapter.end - chapter.start) * chapterLead);
+  const destination = Math.min(maxScroll, Math.max(0, sectionTop + fraction * range));
   clearDetail();
-  scrollTo({ top: top + range * (chapter.start + (chapter.end - chapter.start) * chapterLead), behavior: reducedMotion.value ? 'auto' : 'smooth' });
+  scrollTo({ top: destination, behavior: reducedMotion.value ? 'auto' : 'smooth' });
 }
 
 onMounted(() => {

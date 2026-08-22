@@ -3,7 +3,7 @@
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <HeaderItem />
     <main id="main-content" tabindex="-1">
-      <HomeHero :status="serverStatus" />
+      <HomeHero :status="serverStatus" :latest-slug="latestUpdate?.slug ?? null" />
       <ProgressionStory />
       <div
         ref="pathwayTrigger"
@@ -139,12 +139,6 @@ onUnmounted(() => {
   -webkit-tap-highlight-color: transparent;
 }
 
-.mysterria-home :deep(:focus-visible) {
-  outline: 3px solid #071f1d;
-  outline-offset: 3px;
-  box-shadow: 0 0 0 2px #fcf9f2;
-}
-
 .skip-link {
   position: fixed;
   z-index: 2000;
@@ -165,9 +159,9 @@ onUnmounted(() => {
 .skip-link:focus { transform: none; }
 
 .deferred-chapter { min-width: 0; }
-.deferred-chapter--pathways.is-pending { min-height: 420svh; background: #102420; }
-.deferred-chapter--world.is-pending { min-height: 690svh; background: #0d1f22; }
-.deferred-chapter--join.is-pending { min-height: 430svh; background: #071416; }
+.deferred-chapter--pathways.is-pending { min-height: 290svh; background: #102420; }
+.deferred-chapter--world.is-pending { min-height: 610svh; background: #0d1f22; }
+.deferred-chapter--join.is-pending { min-height: 120svh; background: #071416; }
 
 @media (prefers-reduced-motion: reduce) {
   .mysterria-home :deep(*) {

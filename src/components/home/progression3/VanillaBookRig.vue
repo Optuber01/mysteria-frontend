@@ -30,6 +30,8 @@ let bookRoot: THREE.Group | null = null;
 let frontCover: THREE.Group | null = null;
 let leftPages: THREE.Group | null = null;
 let resizeObserver: ResizeObserver | null = null;
+let intersectionObserver: IntersectionObserver | null = null;
+let initialized = false;
 let sourceTexture: THREE.Texture | null = null;
 let disposed = false;
 const ownedTextures: THREE.Texture[] = [];
@@ -674,11 +676,13 @@ function resize() {
 }
 
 function render() {
-  if (renderer && scene && camera) renderer.render(scene, camera);
+  if (!renderer || !scene || !camera || !bookRoot?.visible) return;
+  renderer.render(scene, camera);
 }
 
-onMounted(async () => {
-  if (!canvasRef.value || !hostRef.value) return;
+async function initialize() {
+  if (initialized || disposed || !canvasRef.value || !hostRef.value) return;
+  initialized = true;
   renderer = new THREE.WebGLRenderer({
     canvas: canvasRef.value,
     alpha: true,
@@ -726,6 +730,18 @@ onMounted(async () => {
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(hostRef.value);
   resize();
+}
+
+onMounted(() => {
+  if (!canvasRef.value || !hostRef.value) return;
+
+  intersectionObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (entry?.isIntersecting) void initialize();
+    },
+    { rootMargin: '120px', threshold: 0 },
+  );
+  intersectionObserver.observe(hostRef.value);
 });
 
 watch(() => [props.progress, props.reducedMotion], updatePose);
@@ -733,6 +749,8 @@ watch(() => [props.progress, props.reducedMotion], updatePose);
 onBeforeUnmount(() => {
   disposed = true;
   resizeObserver?.disconnect();
+  intersectionObserver?.disconnect();
+  intersectionObserver = null;
   ownedGeometries.forEach((item) => item.dispose());
   ownedMaterials.forEach((item) => item.dispose());
   ownedTextures.forEach((item) => item.dispose());
