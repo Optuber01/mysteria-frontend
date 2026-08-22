@@ -9,27 +9,26 @@
     <div class="hero-sticky">
       <div class="hero-scene" aria-hidden="true">
         <img
-          class="hero-scene__image"
-          src="@/assets/images/home/mysterria-dawn.webp"
+          v-for="(slide, index) in heroSlides"
+          :key="slide.src"
+          class="hero-slide"
+          :class="{ 'is-active': activeSlide === index }"
+          :src="index === 0 || slidesLoaded ? slide.src : undefined"
+          :style="{ objectPosition: slide.position }"
           alt=""
-          width="1672"
-          height="941"
-          fetchpriority="high"
+          :loading="index === 0 ? 'eager' : undefined"
+          :fetchpriority="index === 0 ? 'high' : undefined"
           decoding="async"
         >
-        <div class="hero-scene__daylight" />
-        <div class="hero-scene__focus" />
-        <div class="fog fog--far" />
-        <div class="fog fog--middle" />
-        <div class="fog fog--near" />
-        <div class="fog-threshold" />
+        <div class="hero-scene__vignette" />
+        <div class="hero-scene__scrim" />
       </div>
 
       <div class="hero-content">
-        <p class="hero-eyebrow"><i aria-hidden="true" />A playable Pathway system<i aria-hidden="true" /></p>
-        <h1 id="home-title">Welcome to Mysterria</h1>
+        <p class="hero-eyebrow"><i aria-hidden="true" />A Lord of the Mysteries Minecraft server<i aria-hidden="true" /></p>
+        <h1 id="home-title">Mysterria</h1>
         <p class="hero-summary">
-          A Lord of Mysteries–inspired Minecraft RPG where you brew potions, act your Sequence and advance toward godhood.
+          Brew Sequence potions, hunt Beyonder creatures and claim a Pathway in a Minecraft RPG server shaped by Lord of the Mysteries.
         </p>
 
         <div class="hero-actions" aria-label="Get started">
@@ -37,10 +36,11 @@
             <span>Start playing</span>
             <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
           </RouterLink>
-          <a class="hero-action hero-action--secondary" href="#progression">
-            <span>Explore progression</span>
-            <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M10 3v12m-4.5-4.5L10 15l4.5-4.5" /></svg>
-          </a>
+          <RouterLink v-if="latestSlug" class="hero-action hero-action--secondary" :to="`/news/${latestSlug}`">
+            <span>Changelog</span>
+            <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
+          </RouterLink>
+          <a class="hero-action--quiet" href="https://wiki.mysterria.net" target="_blank" rel="noopener noreferrer">Wiki ↗</a>
         </div>
 
         <div class="connection-bar" aria-label="Mysterria server details">
@@ -55,13 +55,16 @@
             @click="copyAddress"
           >
             <span><small>Address</small><strong>{{ MYSTERRIA_ADDRESS }}</strong></span>
-            <b aria-live="polite">{{ copied ? 'Copied' : 'Copy' }}</b>
+            <b class="connection-address__pill" :class="{ 'is-copied': copied }" aria-live="polite">
+              <svg v-if="!copied" aria-hidden="true" viewBox="0 0 18 18"><rect x="6.5" y="6.5" width="8" height="8" rx="1.5" /><path d="M11.5 3.5h-6a2 2 0 0 0-2 2v6" /></svg>
+              {{ copied ? 'Copied ✓' : 'Copy' }}
+            </b>
           </button>
         </div>
       </div>
 
-      <a class="scroll-cue" href="#progression" aria-label="Scroll into the gray fog to see Mysterria progression">
-        <span>Scroll into the gray fog</span>
+      <a class="scroll-cue" href="#progression" aria-label="Scroll down to see Mysterria progression">
+        <span>Scroll to explore</span>
         <i aria-hidden="true"><b /></i>
       </a>
 
@@ -74,15 +77,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
+import heroDawnCliffside from '@/assets/images/home/hero/hero-dawn-cliffside.webp';
+import heroBlackgoldSanctuary from '@/assets/images/home/hero/hero-blackgold-sanctuary.webp';
+import heroWatchtowerNight from '@/assets/images/home/hero/hero-watchtower-night.webp';
 
-const props = defineProps<{ status: ServerStatus }>();
+const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
+
+const ROTATE_INTERVAL = 7000;
+const heroSlides = [
+  { src: heroDawnCliffside, position: '32% 54%' },
+  { src: heroBlackgoldSanctuary, position: 'center 42%' },
+  { src: heroWatchtowerNight, position: '62% center' },
+];
+
 const heroRef = ref<HTMLElement | null>(null);
 const progress = ref(0);
 const copied = ref(false);
 const isReady = ref(false);
+const activeSlide = ref(0);
+const slidesLoaded = ref(false);
 const reducedMotion = useReducedMotion();
 
 let visible = false;
@@ -90,6 +106,8 @@ let observer: IntersectionObserver | null = null;
 let frame = 0;
 let readyFrame = 0;
 let copiedTimer: ReturnType<typeof setTimeout> | null = null;
+let idleTimer: ReturnType<typeof setTimeout> | null = null;
+let rotateTimer: ReturnType<typeof setInterval> | null = null;
 
 const statusLabel = computed(() => {
   if (props.status.state === 'online') {
@@ -125,6 +143,39 @@ async function copyAddress() {
   }
 }
 
+function startRotation() {
+  if (rotateTimer || !slidesLoaded.value || reducedMotion.value) return;
+  rotateTimer = setInterval(() => {
+    if (document.hidden || reducedMotion.value || !visible) return;
+    activeSlide.value = (activeSlide.value + 1) % heroSlides.length;
+  }, ROTATE_INTERVAL);
+}
+
+function stopRotation() {
+  if (!rotateTimer) return;
+  clearInterval(rotateTimer);
+  rotateTimer = null;
+}
+
+watch([slidesLoaded, reducedMotion], ([loaded, reduced]) => {
+  if (!loaded || reduced) {
+    stopRotation();
+    if (reduced) activeSlide.value = 0;
+    return;
+  }
+  startRotation();
+});
+
+function loadDeferredSlides() {
+  if (slidesLoaded.value) return;
+  slidesLoaded.value = true;
+}
+
+function queueDeferredSlides() {
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(loadDeferredSlides, 300);
+}
+
 onMounted(() => {
   observer = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
@@ -134,15 +185,21 @@ onMounted(() => {
   addEventListener('scroll', queueUpdate, { passive: true });
   addEventListener('resize', queueUpdate, { passive: true });
   readyFrame = requestAnimationFrame(() => { isReady.value = true; });
+  idleTimer = setTimeout(loadDeferredSlides, 3500);
+  if (document.readyState === 'complete') queueDeferredSlides();
+  else addEventListener('load', queueDeferredSlides, { once: true });
 });
 
 onUnmounted(() => {
   observer?.disconnect();
   removeEventListener('scroll', queueUpdate);
   removeEventListener('resize', queueUpdate);
+  removeEventListener('load', queueDeferredSlides);
   if (frame) cancelAnimationFrame(frame);
   if (readyFrame) cancelAnimationFrame(readyFrame);
   if (copiedTimer) clearTimeout(copiedTimer);
+  if (idleTimer) clearTimeout(idleTimer);
+  stopRotation();
 });
 </script>
 
@@ -151,8 +208,8 @@ onUnmounted(() => {
   --hero-progress: 0;
   position: relative;
   min-height: 190svh;
-  color: #102924;
-  background: #aeb7b5;
+  color: #fcf9f2;
+  background: #0b1216;
   isolation: isolate;
 }
 
@@ -166,96 +223,52 @@ onUnmounted(() => {
 }
 
 .hero-scene,
-.hero-scene__image,
-.hero-scene > div { position: absolute; inset: 0; }
+.hero-scene__vignette,
+.hero-scene__scrim { position: absolute; inset: 0; }
 
-.hero-scene { z-index: -2; overflow: hidden; background: #c8ceca; }
+.hero-scene { z-index: -2; overflow: hidden; background: #08121a; }
 
-.hero-scene__image {
+.hero-slide {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: 58% 54%;
-  filter: saturate(.9) contrast(1.02) brightness(1.03);
-  transform-origin: 63% 58%;
-  transform: scale(calc(1.025 + var(--hero-progress) * .21)) translate3d(0, calc(var(--hero-progress) * -1.8%), 0);
-  will-change: transform, filter;
-}
-
-.hero-scene__daylight {
-  background:
-    radial-gradient(circle at 12% 42%, rgba(255, 249, 225, .58), transparent 25%),
-    linear-gradient(180deg, rgba(252, 249, 242, .1), transparent 55%, rgba(8, 21, 26, .3));
-  opacity: calc(1 - var(--hero-progress) * .74);
-}
-
-.hero-scene__focus {
-  background:
-    radial-gradient(ellipse at 50% 47%, transparent 0 18%, rgba(245, 240, 230, .16) 58%, rgba(8, 21, 26, .36) 100%),
-    linear-gradient(180deg, rgba(252, 249, 242, .1), transparent 45%, rgba(8, 21, 26, .44));
-}
-
-.fog {
-  inset: auto -18% -25% !important;
-  height: 66%;
-  opacity: clamp(0, calc((var(--hero-progress) - .08) * 1.55), .94);
-  background:
-    radial-gradient(ellipse at 12% 78%, rgba(211, 217, 214, .98) 0 13%, transparent 39%),
-    radial-gradient(ellipse at 38% 74%, rgba(184, 193, 191, .94) 0 17%, transparent 44%),
-    radial-gradient(ellipse at 70% 78%, rgba(220, 224, 220, .96) 0 18%, transparent 46%),
-    radial-gradient(ellipse at 92% 72%, rgba(172, 184, 183, .94) 0 14%, transparent 41%);
-  filter: blur(28px);
-  transform: translate3d(calc((.5 - var(--hero-progress)) * 4%), calc((1 - var(--hero-progress)) * 48%), 0) scale(calc(.98 + var(--hero-progress) * .22));
+  opacity: 0;
+  transform-origin: 38% 52%;
+  transform: scale(calc(1.03 + var(--hero-progress) * .16)) translate3d(0, calc(var(--hero-progress) * -1.5%), 0);
+  transition: opacity 1.6s cubic-bezier(.45, 0, .25, 1);
   will-change: transform, opacity;
 }
 
-.hero-content::before {
-  position: absolute;
-  z-index: -1;
-  inset: -12% -10%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(252, 249, 242, .62) 0%, rgba(252, 249, 242, .3) 42%, transparent 72%);
-  content: '';
-  filter: blur(22px);
-  pointer-events: none;
+.hero-slide.is-active { opacity: 1; }
+
+.hero-scene__vignette {
+  background: radial-gradient(ellipse 130% 100% at 32% 44%, transparent 0 30%, rgba(6, 12, 18, .34) 62%, rgba(6, 12, 18, .68) 100%);
 }
 
-.fog--middle {
-  inset: auto -24% -18% !important;
-  height: 78%;
-  opacity: clamp(0, calc((var(--hero-progress) - .26) * 1.7), .95);
-  filter: blur(44px);
-  transform: translate3d(calc((var(--hero-progress) - .5) * 5%), calc((1 - var(--hero-progress)) * 64%), 0) scale(calc(.92 + var(--hero-progress) * .3));
-}
-
-.fog--near {
-  inset: auto -30% -38% !important;
-  height: 105%;
-  opacity: clamp(0, calc((var(--hero-progress) - .47) * 2.1), 1);
-  filter: blur(58px);
-  transform: translate3d(0, calc((1 - var(--hero-progress)) * 72%), 0) scale(calc(.86 + var(--hero-progress) * .34));
-}
-
-.fog-threshold {
+.hero-scene__scrim {
   background:
-    radial-gradient(ellipse at 50% 57%, rgba(8, 21, 26, calc(var(--hero-progress) * .08)) 0 12%, transparent 38%),
-    linear-gradient(180deg, transparent 0 48%, rgba(112, 124, 123, calc(var(--hero-progress) * .76)) 76%, #0e2224 100%);
-  opacity: clamp(0, calc((var(--hero-progress) - .4) * 2), 1);
+    linear-gradient(180deg, rgba(11, 18, 22, .42), transparent 26%, transparent 48%, rgba(11, 18, 22, .82) 80%, #0b1216 100%),
+    linear-gradient(96deg, rgba(8, 15, 20, .86) 0%, rgba(8, 15, 20, .6) 32%, transparent 64%);
 }
 
 .hero-content {
   position: absolute;
   z-index: 5;
-  top: 48%;
-  left: 50%;
-  width: min(940px, calc(100% - 40px));
+  top: 50%;
+  right: 0;
+  left: 0;
+  width: min(100%, 1480px);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 3vw, 44px);
+  text-align: left;
   opacity: clamp(0, calc((.76 - var(--hero-progress)) * 5.2), 1);
-  transform: translate3d(-50%, calc(-50% - var(--hero-progress) * 13vh), 0) scale(calc(1 - var(--hero-progress) * .055));
+  transform: translate3d(0, calc(-50% - var(--hero-progress) * 13vh), 0) scale(calc(1 - var(--hero-progress) * .055));
   will-change: transform, opacity;
 }
 
@@ -264,7 +277,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 13px;
   margin: 0 0 clamp(18px, 2.6vh, 28px);
-  color: #21644d;
+  color: var(--myst-gold);
   font: 700 .68rem/1.2 "IBM Plex Mono", monospace;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -276,25 +289,25 @@ onUnmounted(() => {
 .hero-eyebrow i { width: 36px; height: 1px; background: currentColor; opacity: .55; }
 
 .hero h1 {
-  max-width: 920px;
+  max-width: 720px;
   margin: 0;
-  color: #102924;
-  font: 680 clamp(5.1rem, 10.7vw, 10rem)/.8 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -.06em;
+  color: #fcf9f2;
+  font: 680 clamp(4.6rem, 9vw, 8.4rem)/.84 "IBM Plex Sans Condensed", sans-serif;
+  letter-spacing: -.05em;
   text-wrap: balance;
-  text-shadow: 0 2px 0 rgba(252, 249, 242, .3), 0 18px 55px rgba(252, 249, 242, .24);
+  text-shadow: 0 3px 18px rgba(3, 9, 14, .65), 0 22px 60px rgba(3, 9, 14, .45);
   opacity: 1;
   transform: translateY(16px);
   transition: opacity .9s .13s cubic-bezier(.22, 1, .36, 1), transform .9s .13s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-summary {
-  max-width: 690px;
-  margin: clamp(22px, 3vh, 32px) auto 0;
-  color: rgba(16, 41, 36, .82);
-  font-size: clamp(1rem, 1.45vw, 1.22rem);
-  font-weight: 570;
-  line-height: 1.55;
+  max-width: 560px;
+  margin: clamp(22px, 3vh, 32px) 0 0;
+  color: rgba(252, 249, 242, .88);
+  font-size: clamp(1rem, 1.35vw, 1.16rem);
+  font-weight: 550;
+  line-height: 1.58;
   text-wrap: balance;
   opacity: 0;
   transform: translateY(16px);
@@ -304,7 +317,7 @@ onUnmounted(() => {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  align-items: center;
   gap: 10px;
   margin-top: 28px;
   opacity: 0;
@@ -316,56 +329,86 @@ onUnmounted(() => {
   min-height: 50px;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 0 18px;
-  border: 1px solid rgba(16, 41, 36, .2);
-  border-radius: 14px;
-  color: #102924;
-  background: rgba(252, 249, 242, .56);
-  box-shadow: 0 13px 34px rgba(16, 41, 36, .1);
-  backdrop-filter: blur(14px) saturate(1.08);
+  gap: 10px;
+  padding: 0 20px;
+  border-radius: 999px;
   font-size: .82rem;
   font-weight: 760;
-  transition: transform .32s cubic-bezier(.22, 1, .36, 1), background-color .25s, box-shadow .32s;
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1), background-color .25s, border-color .25s, box-shadow .32s;
 }
 
 .hero-action svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; transition: transform .32s cubic-bezier(.22, 1, .36, 1); }
-.hero-action:hover { color: #102924; background: rgba(252, 249, 242, .88); box-shadow: 0 17px 38px rgba(16, 41, 36, .15); transform: translateY(-2px); }
-.hero-action:hover svg { transform: translateX(3px); }
-.hero-action--secondary:hover svg { transform: translateY(3px); }
-.hero-action--primary { color: #fcf9f2; border-color: #21644d; background: #21644d; box-shadow: 0 13px 34px rgba(33, 100, 77, .25); }
-.hero-action--primary:hover { color: #fcf9f2; background: #184f3c; }
+.hero-action--primary { color: #140f04; border: 1px solid var(--myst-gold); background: var(--myst-gold); box-shadow: 0 12px 30px rgba(198, 155, 82, .26); }
+.hero-action--primary:hover { color: #140f04; border-color: var(--myst-gold-soft); background: var(--myst-gold-soft); box-shadow: 0 18px 42px rgba(198, 155, 82, .38); transform: translateY(-2px); }
+.hero-action--primary:hover svg { transform: translateX(3px); }
+.hero-action--primary:active { box-shadow: 0 8px 18px rgba(198, 155, 82, .3); transform: translateY(0); }
+.hero-action--secondary { color: #fcf9f2; border: 1px solid rgba(198, 155, 82, .55); background: rgba(8, 21, 26, .38); backdrop-filter: blur(10px); box-shadow: 0 12px 30px rgba(3, 9, 14, .35); }
+.hero-action--secondary:hover { color: #fcf9f2; border-color: var(--myst-gold); background: rgba(198, 155, 82, .14); box-shadow: 0 18px 40px rgba(3, 9, 14, .45); transform: translateY(-2px); }
+.hero-action--secondary:hover svg { transform: translateX(3px); }
+.hero-action--secondary:active { box-shadow: 0 8px 18px rgba(3, 9, 14, .4); transform: translateY(0); }
+
+.hero-action--quiet {
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  color: rgba(252, 249, 242, .78);
+  font-size: .8rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(198, 155, 82, .45);
+  text-underline-offset: 6px;
+  transition: color .25s, text-decoration-color .25s;
+}
+.hero-action--quiet:hover { color: var(--myst-gold-soft); text-decoration-color: var(--myst-gold-soft); }
 
 .connection-bar {
-  width: min(760px, 100%);
+  width: min(720px, 100%);
   display: grid;
   grid-template-columns: .8fr .8fr 1.35fr;
   margin-top: clamp(25px, 4.5vh, 44px);
   overflow: hidden;
-  border: 1px solid rgba(16, 41, 36, .15);
+  border: 1px solid rgba(198, 155, 82, .4);
   border-radius: 16px;
-  background: rgba(252, 249, 242, .47);
-  box-shadow: 0 20px 48px rgba(16, 41, 36, .1);
+  background: rgba(8, 21, 26, .55);
+  box-shadow: 0 20px 48px rgba(3, 9, 14, .4);
   backdrop-filter: blur(17px) saturate(1.08);
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .8s .5s cubic-bezier(.22, 1, .36, 1), transform .8s .5s cubic-bezier(.22, 1, .36, 1);
 }
 
-.connection-bar > * { min-width: 0; min-height: 64px; padding: 10px 15px; }
-.connection-bar > * + * { border-left: 1px solid rgba(16, 41, 36, .12); }
+.connection-bar > * { min-width: 0; min-height: 64px; padding: 10px 16px; }
+.connection-bar > * + * { border-left: 1px solid rgba(198, 155, 82, .26); }
 .connection-status, .connection-address { display: flex; align-items: center; gap: 10px; text-align: left; }
 .connection-status__dot { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%; background: #7f8985; }
-.connection-status__dot.is-online { background: #238361; box-shadow: 0 0 0 4px rgba(35, 131, 97, .12); }
-.connection-status__dot.is-offline { background: #a9543b; }
-.connection-status__dot.is-loading { background: #c69b52; }
+.connection-status__dot.is-online { background: #4ecb8d; box-shadow: 0 0 0 4px rgba(78, 203, 141, .14); }
+.connection-status__dot.is-offline { background: #d47a5c; }
+.connection-status__dot.is-loading { background: var(--myst-gold); }
 .connection-editions { display: flex; flex-direction: column; justify-content: center; text-align: left; }
-.connection-bar small { display: block; margin-bottom: 5px; color: rgba(16, 41, 36, .52); font: 600 .55rem/1 "IBM Plex Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
-.connection-bar strong { color: #102924; font: 650 .68rem/1.2 "IBM Plex Mono", monospace; }
-.connection-address { justify-content: space-between; border: 0; color: #102924; background: transparent; cursor: pointer; }
-.connection-address:hover { background: rgba(252, 249, 242, .45); }
-.connection-address b { color: #21644d; font-size: .67rem; }
+.connection-bar small { display: block; margin-bottom: 5px; color: rgba(252, 249, 242, .78); font: 600 .55rem/1 "IBM Plex Mono", monospace; letter-spacing: .11em; text-transform: uppercase; }
+.connection-bar strong { color: #fcf9f2; font: 650 .68rem/1.2 "IBM Plex Mono", monospace; }
+.connection-address { justify-content: space-between; gap: 12px; border: 0; color: #fcf9f2; background: transparent; cursor: pointer; }
+.connection-address:hover strong { color: var(--myst-gold-soft); }
+.connection-address__pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid rgba(198, 155, 82, .5);
+  border-radius: 999px;
+  color: var(--myst-gold);
+  font-size: .63rem;
+  font-weight: 650;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color .25s, border-color .25s, color .25s;
+}
+.connection-address__pill svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+.connection-address:hover .connection-address__pill { border-color: var(--myst-gold-soft); color: var(--myst-gold-soft); background: rgba(198, 155, 82, .12); }
+.connection-address__pill.is-copied { border-color: rgba(126, 217, 163, .6); color: #7ed9a3; background: rgba(126, 217, 163, .1); }
 
 .is-ready .hero-eyebrow,
 .is-ready h1,
@@ -388,15 +431,16 @@ onUnmounted(() => {
   text-transform: uppercase;
   opacity: clamp(0, calc((.6 - var(--hero-progress)) * 4), 1);
   transform: translateX(-50%);
-  text-shadow: 0 2px 13px rgba(8, 21, 26, .65);
+  text-shadow: 0 2px 13px rgba(3, 9, 14, .65);
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(8, 21, 26, .62);
+  border: 1px solid rgba(198, 155, 82, .3);
+  background: rgba(8, 21, 26, .55);
   backdrop-filter: blur(8px);
 }
 
 .scroll-cue i { position: relative; width: 22px; height: 37px; overflow: hidden; border: 1px solid rgba(252, 249, 242, .55); border-radius: 999px; }
-.scroll-cue b { position: absolute; top: 7px; left: 50%; width: 3px; height: 8px; border-radius: 3px; background: #fcf9f2; transform: translateX(-50%); animation: scroll-cue 1.9s cubic-bezier(.22, 1, .36, 1) infinite; }
+.scroll-cue b { position: absolute; top: 7px; left: 50%; width: 3px; height: 8px; border-radius: 3px; background: var(--myst-gold-soft); transform: translateX(-50%); animation: scroll-cue 1.9s cubic-bezier(.22, 1, .36, 1) infinite; }
 
 .fog-message {
   position: absolute;
@@ -413,7 +457,7 @@ onUnmounted(() => {
   opacity: clamp(0, calc((var(--hero-progress) - .72) * 5), 1);
   transform: translate(-50%, calc(-50% + (1 - var(--hero-progress)) * 30px));
 }
-.fog-message i { width: 1px; height: 54px; background: linear-gradient(rgba(252, 249, 242, .8), transparent); }
+.fog-message i { width: 1px; height: 54px; background: linear-gradient(rgba(215, 185, 120, .8), transparent); }
 
 @keyframes scroll-cue {
   0% { opacity: 0; transform: translate(-50%, -4px); }
@@ -424,28 +468,27 @@ onUnmounted(() => {
 @media (max-width: 720px) {
   .hero { min-height: 165svh; }
   .hero-sticky { min-height: 100svh; }
-  .hero-scene__image { object-position: 64% 50%; transform-origin: 64% 55%; }
-  .hero-content { top: 49%; width: calc(100% - 30px); }
-  .hero-content::before { inset: -8% -3%; opacity: .9; }
+  .hero-content { top: 49%; padding-inline: 15px; }
   .hero-eyebrow { margin-bottom: 14px; font-size: .56rem; }
   .hero-eyebrow i { width: 22px; }
   .hero h1 { max-width: 620px; font-size: clamp(4.1rem, 19vw, 7rem); line-height: .82; }
   .hero-summary { max-width: 510px; margin-top: 18px; font-size: .92rem; line-height: 1.46; }
   .hero-actions { margin-top: 20px; }
-  .hero-action { flex: 1 1 170px; min-height: 48px; }
+  .hero-action { flex: 1 1 170px; min-height: 48px; justify-content: space-between; }
+  .hero-action--quiet { flex: 0 0 auto; min-height: 44px; }
   .connection-bar { grid-template-columns: 1fr 1fr; margin-top: 20px; }
-  .connection-address { grid-column: 1 / -1; border-top: 1px solid rgba(16, 41, 36, .12); }
+  .connection-address { grid-column: 1 / -1; border-top: 1px solid rgba(198, 155, 82, .26); }
   .connection-bar > .connection-address { border-left: 0; }
   .scroll-cue { bottom: 12px; max-width: calc(100% - 30px); white-space: nowrap; }
 }
 
 @media (max-width: 420px) {
-  .hero-content { width: calc(100% - 22px); }
+  .hero-content { padding-inline: 11px; }
   .hero h1 { font-size: clamp(3.65rem, 18vw, 5.1rem); }
   .hero-summary { font-size: .84rem; }
   .hero-actions { width: 100%; }
   .connection-bar { grid-template-columns: 1fr; }
-  .connection-bar > * + * { border-top: 1px solid rgba(16, 41, 36, .12); border-left: 0; }
+  .connection-bar > * + * { border-top: 1px solid rgba(198, 155, 82, .26); border-left: 0; }
   .connection-address { grid-column: auto; }
   .scroll-cue span { font-size: .54rem; letter-spacing: .1em; }
 }
@@ -453,8 +496,7 @@ onUnmounted(() => {
 @media (max-width: 720px) and (max-height: 690px) {
   .hero { min-height: auto; }
   .hero-sticky { position: relative; height: auto; min-height: max(620px, 100svh); padding: calc(82px + env(safe-area-inset-top)) 10px 62px; }
-  .hero-content { position: relative; inset: auto; top: auto; left: auto; width: 100%; transform: none; opacity: 1; }
-  .hero-content::before { inset: -3% 0; }
+  .hero-content { position: relative; inset: auto; top: auto; left: auto; right: auto; width: 100%; transform: none; opacity: 1; padding-inline: 0; }
   .hero h1 { font-size: clamp(3.35rem, 16vw, 4.5rem); }
   .hero-summary { max-width: 430px; margin-top: 12px; font-size: .8rem; }
   .hero-actions { margin-top: 14px; }
@@ -485,12 +527,9 @@ onUnmounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .hero { min-height: 100svh; }
   .hero-sticky { position: relative; }
-  .hero-scene__image, .hero-content, .fog { transform: none; }
-  .hero-scene__image { filter: saturate(.88) contrast(1.02) brightness(1.02); }
-  .fog { opacity: .24; }
-  .fog--middle { opacity: .14; }
-  .fog--near, .fog-threshold, .fog-message { display: none; }
-  .hero-content { opacity: 1; }
+  .hero-slide { transform: none; transition: none; will-change: auto; }
+  .hero-slide:nth-of-type(n + 2) { display: none; }
+  .hero-content { opacity: 1; transform: none; }
   .hero-eyebrow, .hero h1, .hero-summary, .hero-actions, .connection-bar { opacity: 1; transform: none; transition: none; }
   .scroll-cue b { animation: none; }
 }
