@@ -19,14 +19,11 @@
           :key="feature.id"
           class="world-beat"
           :class="[`world-beat--${feature.id}`, { 'is-active': activeIndex === index }]"
-          :style="{
-            '--beat-bg': feature.palette.bg,
-            '--beat-accent': feature.palette.accent,
-            '--beat-ink': feature.palette.ink,
-          }"
+          :data-side="index % 2 === 0 ? 'right' : 'left'"
+          :style="beatStyle(feature.palette, index)"
           :aria-hidden="activeIndex !== index"
         >
-          <figure class="world-frame">
+          <figure class="world-media">
             <video
               v-if="feature.video && !reducedMotion"
               :src="visible && activeIndex === index ? feature.video : undefined"
@@ -48,9 +45,13 @@
               decoding="async"
             >
             <div class="world-grade" />
+            <div v-if="index < features.length - 1" class="next-chip" aria-hidden="true">
+              <img :src="features[index + 1].image" alt="" loading="lazy" decoding="async">
+              <span>{{ features[index + 1].short }}</span>
+            </div>
           </figure>
 
-          <div v-if="feature.gallery?.length" class="world-gallery" aria-label="More views from this build">
+          <div v-if="feature.gallery?.length" class="world-gallery" aria-hidden="true">
             <figure v-for="(shot, shotIndex) in feature.gallery" :key="shot.image" :class="`world-gallery__shot--${shotIndex + 1}`">
               <img :src="shot.image" :alt="shot.alt" loading="lazy" decoding="async">
             </figure>
@@ -60,7 +61,8 @@
             <span>Field note {{ String(index + 1).padStart(2, '0') }} / {{ String(features.length).padStart(2, '0') }}</span>
             <p>{{ feature.kicker }}</p>
             <h3>{{ feature.title }}</h3>
-            <p>{{ feature.copy }}</p>
+            <p class="world-caption">{{ feature.note }}</p>
+            <p class="world-body">{{ feature.copy }}</p>
             <p class="world-proof">{{ feature.proof }}</p>
           </div>
 
@@ -88,6 +90,7 @@
         <article
           class="world-beat world-beat--live"
           :class="{ 'is-active': activeIndex === features.length }"
+          :style="beatStyle(liveStage.palette, features.length)"
           :aria-hidden="activeIndex !== features.length"
         >
           <div class="live-landscape" aria-hidden="true">
@@ -150,7 +153,11 @@
         </article>
       </div>
 
-      <nav class="world-index" aria-label="Explore the world systems">
+      <nav
+        class="world-index"
+        :class="{ 'is-faded': railOpacity <= 0.02 }"
+        aria-label="Explore the world systems"
+      >
         <button
           v-for="(stage, index) in stages"
           :key="stage.id"
@@ -336,8 +343,14 @@ const reducedMotion = useReducedMotion();
 let observer: IntersectionObserver | null = null;
 let frame = 0;
 const visible = ref(false);
+const preloadedThumbs = new Set<string>();
 
 const activeStage = computed(() => stages[activeIndex.value] ?? stages[0]);
+const railOpacity = computed(() => {
+  const fadeIn = Math.min(1, progress.value / 0.1);
+  const fadeOut = Math.min(1, (1 - progress.value) / 0.08);
+  return Math.max(0, Math.min(fadeIn, fadeOut));
+});
 
 function blendHex(from: string, to: string, amount: number) {
   const a = from.slice(1).match(/.{2}/g)?.map((value) => Number.parseInt(value, 16)) ?? [0, 0, 0];
@@ -345,24 +358,73 @@ function blendHex(from: string, to: string, amount: number) {
   return `#${a.map((value, index) => Math.round(value + (b[index] - value) * amount).toString(16).padStart(2, '0')).join('')}`;
 }
 
+function beatPhase(index: number) {
+  const span = stages.length - 1;
+  const scaled = Math.min(span, progress.value * span);
+  const beatIndex = Math.floor(scaled);
+  if (index === beatIndex) return scaled - beatIndex;
+  if (index === beatIndex + 1) return scaled - beatIndex - 1;
+  return 0;
+}
+
+function beatFade(index: number) {
+  const phase = beatPhase(index);
+  if (phase >= 0) return phase < 0.2 ? 1 - phase / 0.2 : 0;
+  const entry = 1 + phase;
+  return entry > 0.8 ? (entry - 0.8) / 0.2 : 0;
+}
+
+function mediaDim(index: number) {
+  const phase = beatPhase(index);
+  if (phase <= 0) return 0;
+  return Math.min(1, Math.max(0, (phase - 0.15) / 0.35));
+}
+
+function mediaTravel(index: number) {
+  const phase = beatPhase(index);
+  if (phase >= 0) return -Math.min(phase / 0.8, 1);
+  const entry = 1 + phase;
+  return 0.75 * Math.max(0, Math.min(1, (0.8 - entry) / 0.8));
+}
+
+function mediaAlpha(index: number) {
+  const phase = beatPhase(index);
+  if (phase >= 0) return 1 - mediaDim(index) * 0.65;
+  const entry = 1 + phase;
+  return Math.max(0, Math.min(1, (entry - 0.6) / 0.2));
+}
+
+function beatStyle(palette: Palette, index: number) {
+  return {
+    '--beat-bg': palette.bg,
+    '--beat-accent': palette.accent,
+    '--beat-ink': palette.ink,
+    '--beat-phase': beatPhase(index).toFixed(4),
+    '--beat-fade': beatFade(index).toFixed(4),
+    '--media-dim': mediaDim(index).toFixed(4),
+    '--media-travel': mediaTravel(index).toFixed(4),
+    '--media-alpha': mediaAlpha(index).toFixed(4),
+  };
+}
+
 const worldStyle = computed(() => {
-  // Seven scenes require six viewport-to-viewport moves. This is deliberately
-  // the same timeline used by the rail and active index below.
-  const scaled = Math.min(stages.length - 1, progress.value * (stages.length - 1));
-  const index = Math.floor(scaled);
-  const mix = scaled - index;
-  const current = stages[index] ?? stages[0];
-  const next = stages[index + 1] ?? current;
+  const span = stages.length - 1;
+  const scaled = Math.min(span, progress.value * span);
+  const beatIndex = Math.floor(scaled);
+  const mix = scaled - beatIndex;
+  const current = stages[beatIndex] ?? stages[0];
+  const next = stages[beatIndex + 1] ?? current;
   return {
     '--world-progress': String(progress.value),
     '--stage-count': String(stages.length),
     '--world-bg': blendHex(current.palette.bg, next.palette.bg, mix),
     '--world-accent': blendHex(current.palette.accent, next.palette.accent, mix),
     '--world-ink': blendHex(current.palette.ink, next.palette.ink, mix),
-    '--rail-x': `${progress.value * (stages.length - 1) * -100}vw`,
+    '--rail-x': `${progress.value * span * -100}vw`,
     '--image-shift': `${progress.value * -4}%`,
     '--direction-width': `${progress.value * 100}%`,
     '--world-heading-opacity': String(Math.max(0, 1 - progress.value * 10)),
+    '--rail-opacity': railOpacity.value.toFixed(4),
   };
 });
 const worldFeedUnavailable = computed(() =>
@@ -396,11 +458,20 @@ function update() {
     frame = 0;
     const rect = section.value?.getBoundingClientRect();
     if (!rect) return;
+    const span = stages.length - 1;
     const next = Math.min(1, Math.max(0, -rect.top / Math.max(1, rect.height - innerHeight)));
-    const scaled = Math.min(stages.length - 1, next * (stages.length - 1));
+    const scaled = Math.min(span, next * span);
     progress.value = next;
-    activeIndex.value = Math.min(stages.length - 1, Math.floor(scaled + 0.5));
+    activeIndex.value = Math.min(span, Math.floor(scaled + 0.5));
     if (selectedMarker.value !== null && selectedMarker.value !== activeIndex.value) selectedMarker.value = null;
+    const settled = Math.floor(scaled);
+    if (scaled - settled >= 0.6) {
+      const upcoming = stages[settled + 1] as { image?: string } | undefined;
+      if (upcoming?.image && !preloadedThumbs.has(upcoming.image)) {
+        preloadedThumbs.add(upcoming.image);
+        new Image().src = upcoming.image;
+      }
+    }
   });
 }
 
@@ -435,7 +506,7 @@ onMounted(async () => {
   try {
     living.value = await getLivingWorldSnapshot();
   } catch {
-    // Null values are intentionally rendered as unavailable.
+    living.value = { towns: null, organizations: null, currentEvent: null, recentDiscovery: null };
   }
 });
 
@@ -452,7 +523,6 @@ onUnmounted(() => {
   --world-progress: 0;
   position: relative;
   z-index: 2;
-  /* Five world systems plus the live epilogue: one steady scroll chapter per move. */
   min-height: 590svh;
   isolation: isolate;
   color: var(--world-ink);
@@ -466,6 +536,7 @@ onUnmounted(() => {
   height: 100svh;
   min-height: 650px;
   overflow: hidden;
+  overflow: clip;
   isolation: isolate;
   background: var(--world-bg);
   transition: background-color 1.05s cubic-bezier(.22, 1, .36, 1);
@@ -538,46 +609,54 @@ onUnmounted(() => {
   --beat-bg: #0e2224;
   --beat-accent: #c69b52;
   --beat-ink: #fcf9f2;
+  --text-anchor: clamp(24px, 7vw, 112px);
+  --text-width: min(430px, 34vw);
+  --media-gap: clamp(28px, 3.4vw, 64px);
+  --media-margin: clamp(24px, 4vw, 72px);
+  --media-top: clamp(94px, 12vh, 132px);
+  --media-bottom: clamp(76px, 9vh, 112px);
+  --h-reserved: calc(var(--text-anchor) + var(--text-width) + var(--media-gap) + var(--media-margin));
+  --media-max-h: calc((100vw - var(--h-reserved)) * .8);
+  --polaroid-drift: -26px;
+  --grade-heavy: right;
   position: relative;
-  /* Adjacent scenes overlap by one feather width. The incoming scene reveals the
-     outgoing capture beneath it, which prevents a colour seam at the rail edge. */
-  width: 116vw;
-  margin-right: -16vw;
+  width: 100vw;
   height: 100%;
   flex: none;
   overflow: hidden;
   color: var(--beat-ink);
   background: var(--beat-bg);
-  /* Let the interpolated chapter colour show through while one scene gives way to the next. */
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
 }
 
-.world-beat::before {
-  content: "";
-  position: absolute;
-  z-index: 3;
-  inset: 0;
-  opacity: .72;
-  background:
-    linear-gradient(90deg, var(--beat-bg) 0 12%, color-mix(in srgb, var(--beat-bg) 72%, transparent) 32%, transparent 66%, color-mix(in srgb, var(--beat-bg) 64%, transparent) 90%),
-    radial-gradient(circle at 72% 46%, transparent 0 18%, color-mix(in srgb, var(--beat-bg) 35%, transparent) 72%);
-  pointer-events: none;
+.world-beat[data-side='left'] {
+  --grade-heavy: left;
 }
 
-.world-frame {
+.world-media {
   position: absolute;
-  z-index: 1;
-  inset: clamp(94px, 12vh, 132px) 5vw clamp(76px, 10vh, 104px) 18vw;
+  z-index: 2;
+  top: 50%;
+  height: min(calc(100% - var(--media-top) - var(--media-bottom)), 720px, var(--media-max-h));
+  aspect-ratio: 5 / 4;
   margin: 0;
   overflow: hidden;
   border-radius: 38px;
   box-shadow: 0 42px 100px rgba(0, 0, 0, .28);
-  /* A soft viewing window keeps the art present without shearing it into a card. */
   clip-path: inset(0 round 38px);
+  transform: translate3d(calc(var(--media-travel, 0) * 110vw), -50%, 0);
+  filter: saturate(calc(1 - var(--media-dim, 0) * .3)) brightness(calc(1 - var(--media-dim, 0) * .18));
+  opacity: var(--media-alpha, 1);
 }
 
-.world-frame::after {
+.world-beat[data-side='right'] .world-media {
+  left: calc(var(--text-anchor) + var(--text-width) + var(--media-gap));
+}
+
+.world-beat[data-side='left'] .world-media {
+  right: calc(var(--text-anchor) + var(--text-width) + var(--media-gap));
+}
+
+.world-media::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -586,53 +665,91 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.world-frame img,
-.world-frame video {
+.world-media img,
+.world-media video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transform: scale(1.055) translate3d(var(--image-shift), 0, 0);
   transition: transform .8s cubic-bezier(.22, 1, .36, 1);
   transform-origin: center;
+  filter: saturate(.9) contrast(1.03) brightness(.95);
 }
 
-.world-beat--dungeons .world-frame {
-  inset: clamp(102px, 13vh, 138px) 5vw clamp(88px, 11vh, 118px) 20vw;
+.world-beat--dungeons .world-media {
   border-radius: 48% 48% 34px 34px / 17% 17% 34px 34px;
   clip-path: inset(0 round 48% 48% 34px 34px / 17% 17% 34px 34px);
 }
-.world-beat--dungeons .world-frame img,
-.world-beat--dungeons .world-frame video { object-position: 52% 52%; filter: saturate(.9) contrast(1.04) brightness(.88); }
+.world-beat--dungeons .world-media img,
+.world-beat--dungeons .world-media video { object-position: 52% 52%; }
 
-.world-beat--creatures .world-frame {
-  inset: clamp(84px, 10vh, 110px) 12vw clamp(62px, 8vh, 86px) 30vw;
+.world-beat--creatures .world-media {
   border-radius: 48% 44% 42% 46% / 17% 19% 15% 17%;
   clip-path: inset(0 round 48% 44% 42% 46% / 17% 19% 15% 17%);
 }
-.world-beat--creatures .world-frame img { object-position: center; transform: scale(1.14) translate3d(var(--image-shift), 0, 0); }
+.world-beat--creatures .world-media img { object-position: center; transform: scale(1.14) translate3d(var(--image-shift), 0, 0); }
 
-.world-beat--events .world-frame {
-  inset: clamp(92px, 11vh, 122px) 8vw clamp(78px, 9vh, 104px) 22vw;
+.world-beat--events .world-media {
   border-radius: 52% 48% 44% 56% / 22% 18% 24% 20%;
   clip-path: inset(0 round 52% 48% 44% 56% / 22% 18% 24% 20%);
 }
-.world-beat--events .world-frame img { object-position: 47% center; }
+.world-beat--events .world-media img { object-position: 47% center; }
 
-.world-beat--towns .world-frame {
-  inset: clamp(96px, 12vh, 128px) 9vw clamp(82px, 10vh, 108px) 18vw;
+.world-beat--towns .world-media {
   border-radius: 42px 180px 42px 42px;
   clip-path: inset(0 round 42px 180px 42px 42px);
 }
-.world-beat--towns .world-frame img { object-position: 54% center; filter: saturate(1.08) contrast(1.05) brightness(.9); }
+.world-beat--towns .world-media img { object-position: 54% center; }
 
-.world-beat--churches .world-frame {
-  inset: clamp(92px, 11vh, 120px) 10vw clamp(78px, 9vh, 102px) 26vw;
+.world-beat--churches .world-media {
   border-radius: 48% 48% 30px 30px / 16% 16% 30px 30px;
   clip-path: inset(0 round 48% 48% 30px 30px / 16% 16% 30px 30px);
   background: #1b1d22;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--beat-accent) 46%, transparent), 0 42px 100px rgba(0, 0, 0, .36);
 }
-.world-beat--churches .world-frame img { object-position: 54% 45%; filter: saturate(.66) sepia(.1) contrast(1.08) brightness(.8); transform: scale(1.04) translate3d(var(--image-shift), 0, 0); }
+.world-beat--churches .world-media img { object-position: 54% 45%; transform: scale(1.04) translate3d(var(--image-shift), 0, 0); }
+
+.world-grade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to var(--grade-heavy), rgba(5, 10, 12, .62), rgba(5, 10, 12, .14) 58%, transparent),
+    linear-gradient(0deg, rgba(5, 10, 12, .4), transparent 44%);
+  pointer-events: none;
+}
+
+.next-chip {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border: 1px solid rgba(240, 200, 121, .42);
+  border-radius: 999px;
+  background: rgba(6, 11, 13, .68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+.next-chip img {
+  width: 34px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: none;
+}
+
+.next-chip span {
+  color: rgba(252, 249, 242, .85);
+  font: 600 .56rem/1 "IBM Plex Mono", monospace;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
 .world-gallery {
   position: absolute;
@@ -643,76 +760,72 @@ onUnmounted(() => {
 
 .world-gallery figure {
   position: absolute;
-  right: clamp(52px, 5vw, 84px);
-  width: clamp(150px, 17vw, 270px);
-  aspect-ratio: 4 / 3;
   margin: 0;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--beat-ink) 30%, transparent);
-  background: var(--beat-bg);
-  box-shadow: 0 24px 52px rgba(0, 0, 0, .34);
-}
-
-.world-gallery__shot--1 {
-  top: clamp(92px, 13vh, 130px);
-  border-radius: 46% 46% 18px 18px / 24% 24% 18px 18px;
-  transform: rotate(1.7deg);
-}
-
-.world-gallery__shot--2 {
-  bottom: clamp(76px, 9vh, 104px);
-  width: clamp(132px, 14vw, 228px) !important;
-  border-radius: 18px 18px 46% 46% / 18px 18px 24% 24%;
-  transform: translateX(-4.5vw) rotate(-2.2deg);
+  padding: 7px;
+  border: 1px solid rgba(214, 178, 116, .55);
+  background: #f4ead6;
+  box-shadow: 0 22px 48px rgba(3, 8, 10, .5);
 }
 
 .world-gallery img {
+  display: block;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
-.world-beat--towns .world-gallery__shot--1 img { object-position: center; filter: saturate(.9) brightness(.88); }
-.world-beat--towns .world-gallery__shot--2 img { object-position: center; filter: saturate(.88) contrast(1.06) brightness(.83); }
-.world-beat--churches .world-gallery__shot--1 img { object-position: center; filter: saturate(.8) contrast(1.05) brightness(.9); }
-.world-beat--churches .world-gallery__shot--2 img { object-position: center 30%; filter: saturate(.82) contrast(1.08) brightness(.8); }
-.world-beat--dungeons .world-gallery__shot--1 img { object-position: center 58%; filter: saturate(.86) contrast(1.08) brightness(.78); }
-.world-beat--dungeons .world-gallery__shot--2 img { object-position: center; filter: saturate(.76) contrast(1.06) brightness(.84); }
-.world-beat--events .world-gallery__shot--1 img { object-position: center; filter: saturate(.82) contrast(1.04) brightness(.86); }
-.world-beat--events .world-gallery__shot--2 img { object-position: center; filter: saturate(.84) contrast(1.06) brightness(.84); }
-.world-beat--towns .scene-marker,
-.world-beat--churches .scene-marker { right: clamp(20vw, 24vw, 390px); }
-
-.world-grade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(0, 0, 0, .46), transparent 44%), linear-gradient(0deg, rgba(0, 0, 0, .26), transparent 48%);
-  pointer-events: none;
+.world-gallery__shot--1 {
+  top: calc(var(--media-top) + 28px);
+  width: clamp(148px, 15vw, 252px);
+  transform: rotate(1.6deg) translate3d(calc(var(--beat-phase, 0) * var(--polaroid-drift, 0px)), 0, 0);
 }
+
+.world-gallery__shot--2 {
+  bottom: calc(var(--media-bottom) + 26px);
+  width: clamp(126px, 12.5vw, 210px);
+  transform: rotate(-2deg) translate3d(calc(var(--beat-phase, 0) * var(--polaroid-drift, 0px)), 0, 0);
+}
+
+.world-beat[data-side='right'] .world-gallery__shot--1 { right: calc(var(--media-margin) + 22px); }
+.world-beat[data-side='right'] .world-gallery__shot--2 { right: calc(var(--media-margin) + 170px); }
+.world-beat[data-side='left'] .world-gallery__shot--1 { left: calc(var(--media-margin) + 22px); }
+.world-beat[data-side='left'] .world-gallery__shot--2 { left: calc(var(--media-margin) + 170px); }
 
 .world-copy {
   position: absolute;
   z-index: 6;
-  left: clamp(24px, 7vw, 112px);
-  /* Leave the opening chapter heading room to breathe before each scene takes over. */
-  top: 60%;
-  width: min(420px, 34vw);
+  top: var(--media-top);
+  width: var(--text-width);
   padding: 24px 0;
-  transform: translateY(-50%);
+  opacity: var(--beat-fade, 1);
+  pointer-events: none;
   text-shadow: 0 2px 30px color-mix(in srgb, var(--beat-bg) 86%, transparent);
 }
+
+.world-beat[data-side='right'] .world-copy { left: var(--text-anchor); }
+.world-beat[data-side='left'] .world-copy { right: var(--text-anchor); }
 
 .world-copy > p:first-of-type { margin-top: 13px; color: var(--beat-accent); }
 
 .world-copy h3 {
-  margin: 14px 0 16px;
-  font: 650 clamp(3.05rem, 5.8vw, 6.5rem)/.84 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -.055em;
+  max-width: 12ch;
+  margin: 14px 0 0;
+  font: 650 clamp(3rem, 5vw, 5.6rem)/.88 "IBM Plex Sans Condensed", sans-serif;
+  letter-spacing: -.05em;
   text-wrap: balance;
 }
 
-.world-copy > p:last-child {
-  max-width: 390px;
+.world-caption {
+  max-width: 46ch;
+  min-height: 3.2em;
+  margin: 15px 0 0;
+  padding-bottom: 24px;
+  color: color-mix(in srgb, var(--beat-ink) 74%, transparent);
+  font: 500 .67rem/1.6 "IBM Plex Mono", monospace;
+}
+
+.world-body {
+  max-width: min(46ch, 100%);
   margin: 0;
   color: color-mix(in srgb, var(--beat-ink) 78%, transparent);
   font-size: clamp(.84rem, 1.05vw, 1rem);
@@ -723,15 +836,35 @@ onUnmounted(() => {
 
 .scene-marker {
   position: absolute;
-  z-index: 6;
-  right: clamp(7vw, 11vw, 176px);
+  z-index: 8;
   color: var(--beat-ink);
   transition: opacity .22s ease;
 }
 
-.scene-marker--high { top: 30%; }
-.scene-marker--middle { top: 48%; }
-.scene-marker--low { top: 66%; }
+.world-beat[data-side='right'] .scene-marker { right: calc(var(--media-margin) + 24px); }
+.world-beat[data-side='left'] .scene-marker { left: calc(var(--media-margin) + 24px); }
+
+.scene-marker--high { top: clamp(122px, 30%, 320px); }
+.scene-marker--middle { top: clamp(180px, 47%, 480px); }
+.scene-marker--low { top: clamp(238px, 64%, 640px); }
+
+.scene-marker::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--beat-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--beat-accent) 24%, transparent);
+}
+
+.world-beat[data-side='right'] .scene-marker::after { right: calc(100% + 16px); }
+.world-beat[data-side='left'] .scene-marker::after { left: calc(100% + 16px); }
+.scene-marker--high::after { top: calc(50% + 30px); }
+.scene-marker--low::after { top: calc(50% - 30px); }
 
 .scene-marker.is-dormant {
   opacity: 0;
@@ -771,8 +904,10 @@ onUnmounted(() => {
 .scene-marker button span { font-size: .7rem; font-weight: 750; }
 
 .scene-marker > p {
-  width: min(290px, 28vw);
-  margin: 9px 0 0 auto;
+  position: absolute;
+  top: calc(100% + 8px);
+  width: min(290px, 26vw);
+  margin: 0;
   padding: 14px 16px;
   border: 1px solid color-mix(in srgb, var(--beat-ink) 18%, transparent);
   border-radius: 14px;
@@ -786,6 +921,9 @@ onUnmounted(() => {
   transition: opacity .22s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
 }
 
+.world-beat[data-side='right'] .scene-marker > p { right: 0; }
+.world-beat[data-side='left'] .scene-marker > p { left: 0; }
+
 .scene-marker > p.is-open { opacity: 1; transform: none; }
 
 .world-beat--live { background: #0e2224; }
@@ -794,6 +932,8 @@ onUnmounted(() => {
 .live-landscape::after,
 .live-landscape img,
 .live-landscape i { position: absolute; inset: 0; }
+
+.live-landscape { opacity: var(--beat-fade, 1); }
 
 .live-landscape img {
   width: 100%;
@@ -826,6 +966,7 @@ onUnmounted(() => {
   border-top: 1px solid rgba(252, 249, 242, .24);
   border-bottom: 1px solid rgba(252, 249, 242, .24);
   transform: translate(-50%, -50%);
+  opacity: var(--beat-fade, 1);
 }
 
 .living-intro { grid-column: 1 / -1; }
@@ -853,12 +994,22 @@ onUnmounted(() => {
 .world-index {
   position: absolute;
   z-index: 12;
-  right: clamp(16px, 2.2vw, 34px);
+  right: 48px;
   top: 50%;
   display: grid;
   gap: 3px;
+  padding: 14px 10px;
+  border: 1px solid rgba(252, 249, 242, .09);
+  border-radius: 999px;
+  background: rgba(5, 10, 12, .55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   transform: translateY(-50%);
+  opacity: var(--rail-opacity, 1);
+  transition: opacity .25s ease;
 }
+
+.world-index.is-faded { pointer-events: none; }
 
 .world-index button {
   min-width: 44px;
@@ -869,10 +1020,13 @@ onUnmounted(() => {
   gap: 8px;
   padding: 4px 8px;
   border: 0;
-  color: color-mix(in srgb, var(--world-ink) 48%, transparent);
+  color: rgba(252, 249, 242, .65);
   background: transparent;
   cursor: pointer;
 }
+
+.world-index button:hover,
+.world-index button:focus-visible { color: rgba(252, 249, 242, .92); }
 
 .world-index button::after {
   content: "";
@@ -882,9 +1036,9 @@ onUnmounted(() => {
   transition: width .35s cubic-bezier(.22, 1, .36, 1), background-color .25s ease;
 }
 
-.world-index button.is-active { color: var(--world-accent); }
+.world-index button.is-active { color: #ecc987; }
 .world-index button.is-active::after { width: 36px; }
-.world-index button.is-past { color: color-mix(in srgb, var(--world-accent) 62%, transparent); }
+.world-index button.is-past { color: rgba(236, 201, 135, .78); }
 .world-index span { font: 600 .52rem/1 "IBM Plex Mono", monospace; }
 .world-index strong { max-width: 0; overflow: hidden; opacity: 0; font-size: .59rem; white-space: nowrap; transition: max-width .35s ease, opacity .2s ease; }
 .world-index button:hover strong,
@@ -919,13 +1073,25 @@ onUnmounted(() => {
 
 @media (max-width: 880px) {
   .world-heading { width: 62vw; }
-  .world-frame { left: 8vw; right: 8vw; opacity: .88; }
-  .world-copy { left: 8vw; width: min(430px, 62vw); }
-  .scene-marker { right: 12vw; }
+  .world-beat {
+    --text-anchor: clamp(20px, 6vw, 48px);
+    --text-width: min(400px, 50vw);
+    --media-gap: clamp(20px, 3vw, 40px);
+    --media-margin: clamp(18px, 4vw, 44px);
+  }
+  .world-copy h3 { font-size: clamp(2.4rem, 7vw, 4rem); }
+  .world-gallery { display: none; }
+  .scene-marker > p { width: min(260px, 40vw); }
+  .world-index { right: 18px; padding: 10px 6px; }
   .living-panel { width: calc(100% - 14vw); gap: 20px; }
   .living-primary { min-height: 105px; }
   .living-primary strong { font-size: clamp(2.8rem, 9vw, 5rem); }
   .living-feed > div { grid-template-columns: 100px 1fr; }
+}
+
+@media (max-height: 760px) {
+  .world-copy h3 { font-size: clamp(2.5rem, 5vh + 1rem, 4.4rem); }
+  .world-caption { min-height: 0; padding-bottom: 16px; }
 }
 
 @media (max-width: 560px), (max-height: 560px) {
@@ -953,7 +1119,10 @@ onUnmounted(() => {
   .world-static header { grid-column: 1 / -1; }
   .world-static header p { color: #c69b52; }
   .world-static header h2 { max-width: 700px; margin: 14px 0 18px; font: 650 clamp(3rem, 7vw, 6.5rem)/.86 "IBM Plex Sans Condensed", sans-serif; letter-spacing: -.05em; }
-  .world-static article { min-width: 0; }
+  .world-static article { min-width: 0; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(230px, .8fr); gap: 30px 26px; align-items: center; }
+  .world-static article:nth-of-type(even):not(.world-static__live) { grid-template-columns: minmax(230px, .8fr) minmax(0, 1.2fr); }
+  .world-static article:nth-of-type(even):not(.world-static__live) img { grid-column: 2; grid-row: 1; }
+  .world-static article:nth-of-type(even):not(.world-static__live) > div { grid-column: 1; grid-row: 1; }
   .world-static article img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 24px; }
   .world-static article > div { padding: 20px 4px; }
   .world-static article span { color: #c69b52; }
@@ -967,5 +1136,9 @@ onUnmounted(() => {
   .world-static { grid-template-columns: 1fr; padding: 82px 16px; }
   .world-static header,
   .world-static__live { grid-column: auto; }
+  .world-static article,
+  .world-static article:nth-of-type(even):not(.world-static__live) { grid-template-columns: 1fr; }
+  .world-static article:nth-of-type(even):not(.world-static__live) img,
+  .world-static article:nth-of-type(even):not(.world-static__live) > div { grid-column: auto; grid-row: auto; }
 }
 </style>

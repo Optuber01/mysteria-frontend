@@ -482,7 +482,7 @@ onUnmounted(() => {
   left: clamp(18px, 4vw, 68px);
   display: grid;
   gap: 7px;
-  opacity: clamp(0, calc((var(--entry) - 0.34) * 2.5), 1);
+  opacity: clamp(0, calc((var(--entry) - .34) * 2.5 * clamp(0, var(--journey) * 6, 1)), 1);
 }
 .progression-v3__heading p,
 .chapter-copy__kicker {

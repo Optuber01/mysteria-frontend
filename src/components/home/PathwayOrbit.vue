@@ -202,7 +202,7 @@
           >
             <button ref="dossierCloseRef" class="dossier-close" type="button" :aria-label="`Close ${selectedEntry.name} details`" @click="closeDetails()">×</button>
             <div class="dossier-symbol" aria-hidden="true">
-              <img :src="selectedEntry.image" alt="" width="150" height="150" @error="replaceBrokenImage">
+              <img :src="selectedEntry.image" alt="" width="150" height="150" decoding="async" @error="replaceBrokenImage">
             </div>
             <p>{{ selectedEntry.kind === 'boon' ? 'BOON DOSSIER' : 'PATHWAY DOSSIER' }}</p>
             <h3 :id="`${selectedEntry.id}-dossier-title`">{{ selectedEntry.name }}</h3>
@@ -262,6 +262,7 @@ let scrollTravel = 1;
 let catalogWarmTimer = 0;
 let openingSymbolWarmTimer = 0;
 const warmedCatalogs = new Set<ProgressionKind>();
+const warmedNatives = new Set<string>();
 const catalogImageWarmers: HTMLImageElement[] = [];
 let openingSymbolsWarmed = false;
 let orbitStateBeforeDossier: { rotation: number; targetRotation: number; velocity: number; pointerOffset: number } | null = null;
@@ -455,6 +456,16 @@ function warmCatalog(kind: ProgressionKind) {
   }, 180);
 }
 
+function warmNative(index: number) {
+  const entry = activeCatalog.value[normalizeIndex(index)];
+  if (!entry || warmedNatives.has(entry.id)) return;
+  warmedNatives.add(entry.id);
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = entry.image;
+  catalogImageWarmers.push(image);
+}
+
 function warmOpeningSymbols() {
   if (openingSymbolsWarmed) return;
   openingSymbolsWarmed = true;
@@ -479,6 +490,7 @@ function selectActiveAndOpen(event: Event) {
 
 function previewToken(index: number) {
   hoveredIndex.value = index;
+  warmNative(index);
 }
 
 function clearTokenPreview() {
@@ -630,6 +642,11 @@ watch(interactionReady, (ready) => {
   selectedIndex.value = index;
   rotation.value = index;
   targetRotation.value = index;
+});
+
+watch([selectedIndex, activeKind], () => {
+  warmNative(selectedIndex.value);
+  warmNative(selectedIndex.value + 1);
 });
 
 onMounted(() => {

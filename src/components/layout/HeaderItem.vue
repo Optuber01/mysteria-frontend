@@ -234,6 +234,8 @@ let scrollFrame = 0;
 let servicesTimer: ReturnType<typeof setTimeout> | null = null;
 let servicesOpenedByHover = false;
 let servicesPinnedByClick = false;
+let servicesScrollLastY = 0;
+let servicesScrollDistance = 0;
 
 const isHome = computed(() => route.path === '/');
 let i18nLoaded = false;
@@ -280,6 +282,11 @@ function isLinkActive(path: string) {
 function updateHeaderPosition() {
   scrollFrame = 0;
   isAtTop.value = window.scrollY < 24;
+  if (isServicesOpen.value && !isMobileNavOpen.value) {
+    servicesScrollDistance += Math.abs(window.scrollY - servicesScrollLastY);
+    servicesScrollLastY = window.scrollY;
+    if (servicesScrollDistance > 24) dismissServices();
+  }
 }
 
 function queueHeaderPosition() {
@@ -295,12 +302,18 @@ function cancelCloseServices() {
 
 function openServices() {
   cancelCloseServices();
+  servicesScrollLastY = window.scrollY;
+  servicesScrollDistance = 0;
   isServicesOpen.value = true;
 }
 
 function handleServicesEnter() {
   cancelCloseServices();
-  if (!isServicesOpen.value) servicesOpenedByHover = true;
+  if (!isServicesOpen.value) {
+    servicesOpenedByHover = true;
+    servicesScrollLastY = window.scrollY;
+    servicesScrollDistance = 0;
+  }
   isServicesOpen.value = true;
 }
 
@@ -309,6 +322,7 @@ function closeServices() {
   isServicesOpen.value = false;
   servicesOpenedByHover = false;
   servicesPinnedByClick = false;
+  servicesScrollDistance = 0;
 }
 
 function blurServicesTrigger() {
@@ -438,17 +452,20 @@ onUnmounted(() => {
   background: rgba(8, 21, 26, .87);
   border-bottom: 1px solid rgba(252, 249, 242, .1);
   backdrop-filter: blur(18px) saturate(1.1);
-  transition: height .45s cubic-bezier(.22, 1, .36, 1), color .35s, background-color .4s, border-color .35s, box-shadow .4s;
+  transition: color .35s, background-color .4s, border-color .35s, box-shadow .4s;
 }
 
 .site-header.is-home.is-at-top:not(.has-panel) {
-  height: 82px;
   color: rgba(252, 249, 242, .92);
   background: rgba(8, 21, 26, .55);
   border-bottom-color: rgba(198, 155, 82, .28);
   box-shadow: none;
   backdrop-filter: blur(14px) saturate(1.12);
 }
+
+.site-header.is-home.is-at-top:not(.has-panel) .site-brand__mark { transform: scale(1.06); }
+
+.site-header.is-home.is-at-top:not(.has-panel) .header-server-status { display: none; }
 
 .site-header:not(.is-at-top),
 .site-header.has-panel {
@@ -476,7 +493,7 @@ onUnmounted(() => {
 }
 
 .site-brand:hover { color: inherit; }
-.site-brand__mark { width: 44px; height: 44px; }
+.site-brand__mark { width: 44px; height: 44px; transition: transform .4s cubic-bezier(.22, 1, .36, 1); }
 .site-brand__name {
   font: 700 1.35rem/1 "IBM Plex Sans Condensed", sans-serif;
   letter-spacing: -.025em;
@@ -515,14 +532,18 @@ onUnmounted(() => {
   left: 13px;
   right: 13px;
   bottom: 6px;
-  height: 1px;
-  background: currentColor;
+  height: 2px;
+  background: var(--myst-gold);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform .35s cubic-bezier(.22, 1, .36, 1);
 }
 
-.desktop-nav__link:hover,
+.desktop-nav__link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .09);
+}
+
 .desktop-nav__link.is-active {
   color: inherit;
   background: color-mix(in srgb, currentColor 7%, transparent);
@@ -553,12 +574,11 @@ onUnmounted(() => {
   right: -74px;
   width: 332px;
   padding: 10px;
-  border: 1px solid rgba(198, 155, 82, .34);
+  border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 16px;
   color: #fcf9f2;
-  background: rgba(8, 21, 26, .96);
-  box-shadow: 0 4px 16px rgba(3, 14, 17, .28), 0 24px 65px rgba(3, 14, 17, .45);
-  backdrop-filter: blur(24px);
+  background: #121922;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .55);
 }
 
 .services__panel > p {
@@ -575,16 +595,16 @@ onUnmounted(() => {
   grid-template-columns: 34px 1fr 20px;
   align-items: center;
   gap: 10px;
-  padding: 8px 9px;
+  padding: 10px 14px;
   border-radius: 11px;
   color: #fcf9f2;
-  transition: color .2s, background-color .25s, transform .3s cubic-bezier(.22, 1, .36, 1);
+  transition: color .14s, background-color .14s, transform .14s cubic-bezier(.22, 1, .36, 1);
 }
 
 .service-link:hover {
   color: #fcf9f2;
-  background: rgba(252, 249, 242, .07);
-  transform: translateX(2px);
+  background: rgba(255, 255, 255, .07);
+  transform: translateY(-4px);
 }
 
 .service-link__icon { width: 26px; height: 26px; color: #d7b978; }
@@ -639,17 +659,17 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   padding: 0 15px;
-  border: 1px solid #21644d;
+  border: 1px solid rgba(217, 180, 90, .85);
   border-radius: 10px;
-  color: #fcf9f2;
-  background: #21644d;
+  color: #140f04;
+  background: linear-gradient(180deg, #d9b45a, #a8823a);
   font-size: .77rem;
   font-weight: 760;
-  box-shadow: 0 8px 20px rgba(3, 14, 17, .1);
-  transition: transform .3s cubic-bezier(.22, 1, .36, 1), background-color .25s;
+  box-shadow: 0 8px 20px rgba(168, 130, 58, .28);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .32s;
 }
 
-.play-link:hover { color: #fcf9f2; background: #184f3c; transform: translateY(-1px); }
+.play-link:hover { color: #140f04; border-color: #e4c46f; background: linear-gradient(180deg, #e4c46f, #b6913f); box-shadow: 0 12px 26px rgba(168, 130, 58, .4); transform: translateY(-1px); }
 .play-link:hover svg { transform: translateX(2px); }
 
 .mobile-nav-toggle {
@@ -821,8 +841,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 820px) {
-  .site-header,
-  .site-header.is-home.is-at-top:not(.has-panel) { height: 68px; }
+  .site-header { height: 68px; }
   .desktop-nav,
   .header-utilities,
   .header-server-status { display: none; }
@@ -851,7 +870,9 @@ onUnmounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .site-header,
+  .site-brand__mark,
   .services__trigger svg,
+  .service-link,
   .services-panel-enter-active,
   .services-panel-leave-active,
   .mobile-nav-enter-active,
