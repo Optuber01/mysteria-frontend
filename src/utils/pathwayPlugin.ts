@@ -23,6 +23,40 @@ export function getPathwayImageUrl(name: string): string {
   return new URL(`../assets/images/pathways/${name}.webp`, import.meta.url).href;
 }
 
+const warmedImages = new Map<string, Promise<void>>();
+
+export function warmPathwayImage(src?: string): Promise<void> {
+  if (!src) return Promise.resolve();
+  const pending = warmedImages.get(src);
+  if (pending) return pending;
+  const probe = new Image();
+  probe.decoding = 'async';
+  probe.src = src;
+  const ready = (probe.complete && probe.naturalWidth > 0 ? Promise.resolve() : probe.decode()).catch(() => {});
+  warmedImages.set(src, ready);
+  return ready;
+}
+
+export function decodePathwayImage(src?: string): Promise<void> {
+  return warmPathwayImage(src);
+}
+
+export function schedulePathwayWarmup(urls: Array<string | undefined>): void {
+  const pending = [...new Set(urls.filter((url): url is string => !!url && !warmedImages.has(url)))];
+  if (!pending.length) return;
+  let started = false;
+  const begin = () => {
+    if (started) return;
+    started = true;
+    pending.forEach((src, index) => window.setTimeout(() => void warmPathwayImage(src), index * 90));
+  };
+  if (document.readyState === 'complete') begin();
+  else {
+    window.addEventListener('load', begin, {once: true});
+    window.setTimeout(begin, 2000);
+  }
+}
+
 export function pathwayEmojiPlugin(md: MarkdownIt): void {
   const pathwaySet = new Set<string>(PATHWAYS);
 

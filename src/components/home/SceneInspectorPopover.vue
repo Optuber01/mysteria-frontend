@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
-  <Transition name="inspector">
-    <aside v-if="open" :id="id" ref="popoverRef" class="inspector" role="tooltip">
+  <Transition name="inspector" :duration="reducedMotion ? 0 : { enter: 250, leave: 130 }">
+    <aside v-if="open" :id="id" ref="popoverRef" class="inspector" :class="{ 'inspector--instant': reducedMotion }" role="tooltip">
       <span>Inspecting</span>
       <strong>{{ title }}</strong>
       <p>{{ description }}</p>
@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { autoUpdate, computePosition, flip, offset, shift, size, arrow } from '@floating-ui/dom';
 import { nextTick, onUnmounted, ref, watch } from 'vue';
+import { useReducedMotion } from '@/composables/useReducedMotion';
 
 const props = defineProps<{
   id?: string;
@@ -26,7 +27,15 @@ const props = defineProps<{
 
 const popoverRef = ref<HTMLElement | null>(null);
 const arrowRef = ref<HTMLElement | null>(null);
+const reducedMotion = useReducedMotion();
 let cleanup: (() => void) | null = null;
+
+const notchBorders: Record<string, string[]> = {
+  top: ['borderBottomWidth', 'borderRightWidth'],
+  bottom: ['borderTopWidth', 'borderLeftWidth'],
+  right: ['borderLeftWidth', 'borderBottomWidth'],
+  left: ['borderRightWidth', 'borderTopWidth'],
+};
 
 async function position() {
   if (!props.anchor || !popoverRef.value || !props.boundary) return;
@@ -42,26 +51,35 @@ async function position() {
     placement,
     middleware: [
       offset(12),
-      flip({ boundary: props.boundary, padding: 12 }),
+      flip({ boundary: props.boundary, rootBoundary: 'viewport', padding: 12 }),
       boundaryRect.width < 500 ? undefined : size({
         boundary: props.boundary,
+        rootBoundary: 'viewport',
         padding: 12,
         apply({ availableWidth }) {
           popover.style.maxWidth = `${Math.max(0, Math.min(300, availableWidth))}px`;
         },
       }),
-      shift({ boundary: props.boundary, padding: 12 }),
-      arrowRef.value ? arrow({ element: arrowRef.value }) : undefined,
+      shift({ boundary: props.boundary, rootBoundary: 'viewport', padding: 12 }),
+      arrowRef.value ? arrow({ element: arrowRef.value, padding: 12 }) : undefined,
     ].filter(Boolean),
   });
   Object.assign(popover.style, { left: `${result.x}px`, top: `${result.y}px` });
   if (!arrowRef.value || !result.middlewareData.arrow) return;
   const side = result.placement.split('-')[0];
   const staticSide = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }[side];
+  const [firstBorder, secondBorder] = notchBorders[side] ?? notchBorders.right;
   Object.assign(arrowRef.value.style, {
     left: result.middlewareData.arrow.x == null ? '' : `${result.middlewareData.arrow.x}px`,
     top: result.middlewareData.arrow.y == null ? '' : `${result.middlewareData.arrow.y}px`,
-    right: '', bottom: '', [staticSide ?? 'left']: '-5px',
+    right: '', bottom: '',
+    borderTopWidth: '',
+    borderRightWidth: '',
+    borderBottomWidth: '',
+    borderLeftWidth: '',
+    [firstBorder]: '1px',
+    [secondBorder]: '1px',
+    [staticSide ?? 'left']: '-5px',
   });
 }
 
@@ -86,31 +104,54 @@ onUnmounted(() => cleanup?.());
   width: min(286px, calc(100vw - 24px));
   padding: 15px 17px 16px;
   overflow: visible;
-  border: 1px solid rgba(223, 185, 104, .56);
-  border-radius: 5px;
-  color: #fcf9f2;
+  border: 1px solid rgba(140, 105, 45, .35);
+  border-radius: 10px;
+  color: #2c2418;
   background:
-    linear-gradient(90deg, rgba(223, 185, 104, .7), rgba(223, 185, 104, .7)) 0 0 / 28px 1px no-repeat,
-    linear-gradient(135deg, rgba(12, 43, 39, .99), rgba(3, 15, 17, .99));
-  box-shadow: 0 18px 48px rgba(0, 0, 0, .52), inset 0 1px rgba(255, 245, 210, .1);
-  backdrop-filter: blur(12px);
+    radial-gradient(120% 90% at 14% 0%, rgba(255, 252, 240, .85), transparent 58%),
+    radial-gradient(130% 100% at 86% 108%, rgba(176, 138, 76, .18), transparent 60%),
+    repeating-linear-gradient(112deg, rgba(140, 105, 45, .05) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(24deg, rgba(140, 105, 45, .032) 0 1px, transparent 1px 11px),
+    linear-gradient(168deg, #f8f1e0, #f3ead6 46%, #e9dcbe);
+  box-shadow: 0 12px 32px rgba(60, 40, 10, .35), inset 0 1px 0 rgba(255, 252, 240, .55);
   pointer-events: none;
 }
 .inspector > span {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #dfb968;
+  color: #96742a;
   font: 700 .57rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .16em;
   text-transform: uppercase;
 }
-.inspector > span::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; content: ''; }
-.inspector strong { display: block; margin-top: 9px; color: #fffaf0; font: 650 .95rem/1.15 "IBM Plex Sans Condensed", sans-serif; letter-spacing: .01em; }
-.inspector p { margin: 8px 0 0; color: rgba(252, 249, 242, .74); font-size: .73rem; line-height: 1.52; }
-.inspector__arrow { position: absolute; width: 9px; height: 9px; border-left: 1px solid rgba(223, 185, 104, .56); border-bottom: 1px solid rgba(223, 185, 104, .56); background: #092522; transform: rotate(45deg); }
-.inspector-enter-active,.inspector-leave-active { transition: opacity .14s ease, transform .2s cubic-bezier(.22,1,.36,1); }
-.inspector-enter-from,.inspector-leave-to { opacity: 0; transform: translateY(4px) scale(.98); }
-@media (prefers-reduced-motion:reduce){.inspector-enter-active,.inspector-leave-active{transition:none}}
+.inspector > span::before { width: 5px; height: 5px; border-radius: 50%; background: #dfb968; box-shadow: 0 0 8px rgba(223, 185, 104, .55); content: ''; }
+.inspector strong { display: block; margin-top: 9px; color: #2c2418; font: 650 .95rem/1.15 "IBM Plex Sans Condensed", sans-serif; letter-spacing: .01em; }
+.inspector p { margin: 8px 0 0; color: rgba(44, 36, 24, .78); font-size: .73rem; line-height: 1.52; }
+.inspector__arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 0 solid rgba(140, 105, 45, .35);
+  background: #f3ead6;
+  transform: rotate(45deg);
+}
+.inspector-enter-active { transition: opacity .18s cubic-bezier(.22, .61, .36, 1), transform .18s cubic-bezier(.22, .61, .36, 1); }
+.inspector-leave-active { transition: opacity .12s cubic-bezier(.22, .61, .36, 1), transform .12s cubic-bezier(.22, .61, .36, 1); }
+.inspector-enter-from { opacity: 0; transform: translateY(6px) scale(.97); }
+.inspector-leave-to { opacity: 0; transform: translateY(4px); }
+.inspector-enter-active > span,
+.inspector-enter-active strong,
+.inspector-enter-active p { transition: opacity .18s cubic-bezier(.22, .61, .36, 1), transform .18s cubic-bezier(.22, .61, .36, 1); }
+.inspector-enter-active strong { transition-delay: 30ms; }
+.inspector-enter-active p { transition-delay: 60ms; }
+.inspector-enter-from > span,
+.inspector-enter-from strong,
+.inspector-enter-from p { opacity: 0; transform: translateY(5px); }
+.inspector--instant.inspector-enter-active,
+.inspector--instant.inspector-leave-active,
+.inspector--instant.inspector-enter-active > span,
+.inspector--instant.inspector-enter-active strong,
+.inspector--instant.inspector-enter-active p { transition: none; }
 @media (max-width:600px){.inspector{width:min(236px,calc(100vw - 24px));overflow-wrap:anywhere}}
 </style>

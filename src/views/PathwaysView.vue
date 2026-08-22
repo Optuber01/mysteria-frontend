@@ -39,7 +39,7 @@
                   group.label
                 }}</span><b>{{ group.pathways.length }}</b></div>
               <button v-for="pathway in group.pathways" :key="pathway.id" :class="{active:pathway.id===selected.id}"
-                      @click="selectPathway(pathway.id)">
+                      @pointerenter="warmPathwayImage(imageFor(pathway.id))" @click="selectPathway(pathway.id)">
                 <span class="sigil"><img v-if="imageFor(pathway.id)" :src="imageFor(pathway.id)" alt=""><b
                     v-else>{{ pathway.id[0].toUpperCase() }}</b></span>
                 <span><strong>{{ pathwayName(pathway.id) }}</strong><small>{{
@@ -53,9 +53,12 @@
         <article class="pathway-detail">
           <div class="pathway-controls">
             <header class="pathway-header">
-              <div class="large-sigil"><img v-if="imageFor(selected.id)" :src="imageFor(selected.id)" alt=""><b v-else>{{
-                  selected.id[0].toUpperCase()
-                }}</b></div>
+              <div class="large-sigil">
+                <Transition name="sigil-swap">
+                  <img v-if="revealedImage" :key="revealedImage" :src="revealedImage" alt="" decoding="async">
+                  <b v-else>{{ selected.id[0].toUpperCase() }}</b>
+                </Transition>
+              </div>
               <div><span>{{ ui.pathway }}</span>
                 <h2>{{ pathwayName(selected.id) }}</h2>
                 <p>{{ ui.progression }}</p></div>
@@ -103,6 +106,7 @@ import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
+import {decodePathwayImage, schedulePathwayWarmup, warmPathwayImage} from '@/utils/pathwayPlugin';
 import {useI18n} from '@/composables/useI18n';
 import source from '@/assets/sources/pathway-abilities.json';
 
@@ -233,6 +237,18 @@ const localized = (v: Localized) => v[currentLanguage.value] || v.en;
 const titleCase = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase());
 const pathwayName = (id: string) => currentLanguage.value === 'uk' ? (ukNames[id] || names[id] || titleCase(id)) : (names[id] || titleCase(id));
 const imageFor = (id: string) => images[`/src/assets/images/pathways/${aliases[id] || id}.webp`];
+const revealedImage = ref<string>();
+let revealToken = 0;
+watch(() => imageFor(selected.value.id), async target => {
+  const token = ++revealToken;
+  if (!target) {
+    revealedImage.value = undefined;
+    return;
+  }
+  await decodePathwayImage(target);
+  if (token !== revealToken) return;
+  revealedImage.value = target;
+}, {immediate: true});
 const totalSequences = computed(() => pathways.reduce((n, p) => n + p.sequences.length, 0)),
     totalAbilities = computed(() => pathways.reduce((n, p) => n + p.sequences.reduce((m, s) => m + s.abilities.length, 0), 0));
 const haystack = (p: Pathway) => [pathwayName(p.id), ...p.sequences.flatMap(s => [localized(s.name), ...s.abilities.flatMap(a => [localized(a.name), localized(a.description)])])].join(' ').toLowerCase();
@@ -357,8 +373,14 @@ watch(visibleSequences, sequences => {
   nextTick(updateActiveSequence)
 }, {immediate: true});
 watch([selected, currentLanguage, () => route.params.pathway], updatePageMeta, {immediate: true});
-onMounted(() => window.addEventListener('scroll', updateActiveSequence, {passive: true}));
-onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
+onMounted(() => {
+  window.addEventListener('scroll', updateActiveSequence, {passive: true});
+  schedulePathwayWarmup(Object.values(images));
+});
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateActiveSequence);
+  revealToken++;
+});
 </script>
 
 <style scoped>
@@ -571,6 +593,7 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 }
 
 .large-sigil {
+  position: relative;
   width: 105px;
   height: 105px;
   display: grid;
@@ -579,14 +602,45 @@ onUnmounted(() => window.removeEventListener('scroll', updateActiveSequence));
 }
 
 .large-sigil img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  aspect-ratio: 1;
   object-fit: contain;
   filter: drop-shadow(0 0 20px rgba(200, 178, 115, .18))
 }
 
 .large-sigil b {
   font-size: 55px
+}
+
+.sigil-swap-enter-active,
+.sigil-swap-leave-active {
+  transition: opacity .16s ease, transform .16s ease
+}
+
+.sigil-swap-leave-active {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center
+}
+
+.sigil-swap-enter-from {
+  opacity: 0;
+  transform: scale(.94)
+}
+
+.sigil-swap-leave-to {
+  opacity: 0
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sigil-swap-enter-active,
+  .sigil-swap-leave-active {
+    transition-duration: 0s
+  }
 }
 
 .pathway-header h2 {

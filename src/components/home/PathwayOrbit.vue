@@ -753,9 +753,6 @@ onUnmounted(() => {
 .token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--token-accent, var(--path-ink)) 42%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--token-surface, var(--path-surface)) 92%, transparent); box-shadow: 0 12px 26px rgba(0,0,0,.24); transition: transform .14s ease-out, border-color .12s linear, background .12s linear; }
 .orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal, .orbit-token.is-active .token-seal { border-color: var(--token-accent, var(--path-accent)); background: color-mix(in srgb, var(--token-haze, var(--path-haze)) 40%, var(--token-surface, var(--path-surface))); transform: scale(1.14); }
 .orbit-token.is-selected { z-index: 76 !important; }
-.orbit-token.is-selected .token-seal { box-shadow: 0 12px 26px rgba(0,0,0,.24), 0 0 0 3px rgba(198,155,82,.55); }
-.orbit-token.is-selected .token-seal::before { content: ""; position: absolute; inset: -6px; z-index: -1; border-radius: 50%; background: radial-gradient(circle, transparent 56%, rgba(198,155,82,.32) 82%, transparent); }
-.orbit-token.is-selected > strong { color: #fcf9f2; }
 .token-seal img { width: 57px; height: 57px; object-fit: contain; filter: brightness(1.15) drop-shadow(0 8px 12px rgba(0,0,0,.28)) drop-shadow(0 0 6px rgba(198,155,82,.35)); }
 .orbit-token > strong { max-width: 108px; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; color: rgba(252,249,242,.88); font-size: calc(.64rem + 1px); line-height: 1.3; }
 .orbit-token > small { color: color-mix(in srgb, var(--token-ink, var(--path-ink)) 68%, transparent); font: 600 .46rem/1 "IBM Plex Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }

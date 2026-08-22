@@ -172,7 +172,7 @@
         </button>
       </nav>
 
-      <p class="world-direction" aria-hidden="true">
+      <p class="world-direction" :class="{ 'is-faded': progress >= 0.95 }" aria-hidden="true">
         <span>Scroll through the field notes</span><i />
       </p>
     </div>
@@ -367,31 +367,32 @@ function beatPhase(index: number) {
   return 0;
 }
 
+function fadeRamp(value: number, start: number, end: number) {
+  return Math.max(0, Math.min((value - start) / (end - start), 1));
+}
+
 function beatFade(index: number) {
   const phase = beatPhase(index);
-  if (phase >= 0) return phase < 0.2 ? 1 - phase / 0.2 : 0;
-  const entry = 1 + phase;
-  return entry > 0.8 ? (entry - 0.8) / 0.2 : 0;
+  if (phase >= 0) return 1 - fadeRamp(phase, 0.45, 0.85);
+  return fadeRamp(phase + 1, 0.45, 0.85);
 }
 
 function mediaDim(index: number) {
   const phase = beatPhase(index);
   if (phase <= 0) return 0;
-  return Math.min(1, Math.max(0, (phase - 0.15) / 0.35));
+  return fadeRamp(phase, 0.45, 0.8);
 }
 
 function mediaTravel(index: number) {
   const phase = beatPhase(index);
-  if (phase >= 0) return -Math.min(phase / 0.8, 1);
-  const entry = 1 + phase;
-  return 0.75 * Math.max(0, Math.min(1, (0.8 - entry) / 0.8));
+  if (phase >= 0) return -fadeRamp(phase, 0.45, 0.85);
+  return 1 - fadeRamp(phase + 1, 0.45, 0.85);
 }
 
 function mediaAlpha(index: number) {
   const phase = beatPhase(index);
-  if (phase >= 0) return 1 - mediaDim(index) * 0.65;
-  const entry = 1 + phase;
-  return Math.max(0, Math.min(1, (entry - 0.6) / 0.2));
+  if (phase >= 0) return 1 - fadeRamp(phase, 0.45, 0.85);
+  return fadeRamp(phase + 1, 0.45, 0.85);
 }
 
 function beatStyle(palette: Palette, index: number) {
@@ -617,7 +618,7 @@ onUnmounted(() => {
   --media-bottom: clamp(76px, 9vh, 112px);
   --h-reserved: calc(var(--text-anchor) + var(--text-width) + var(--media-gap) + var(--media-margin));
   --media-max-h: calc((100vw - var(--h-reserved)) * .8);
-  --polaroid-drift: -26px;
+  --polaroid-drift: -18px;
   --grade-heavy: right;
   position: relative;
   width: 100vw;
@@ -643,9 +644,7 @@ onUnmounted(() => {
   border-radius: 38px;
   box-shadow: 0 42px 100px rgba(0, 0, 0, .28);
   clip-path: inset(0 round 38px);
-  transform: translate3d(calc(var(--media-travel, 0) * 110vw), -50%, 0);
-  filter: saturate(calc(1 - var(--media-dim, 0) * .3)) brightness(calc(1 - var(--media-dim, 0) * .18));
-  opacity: var(--media-alpha, 1);
+  transform: translate3d(0, -50%, 0);
 }
 
 .world-beat[data-side='right'] .world-media {
@@ -670,10 +669,11 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.055) translate3d(var(--image-shift), 0, 0);
+  transform: translate3d(calc(var(--media-travel, 0) * 16px), 0, 0) scale(1.055) translate3d(var(--image-shift), 0, 0);
   transition: transform .8s cubic-bezier(.22, 1, .36, 1);
   transform-origin: center;
-  filter: saturate(.9) contrast(1.03) brightness(.95);
+  filter: saturate(calc(.9 - var(--media-dim, 0) * .3)) contrast(1.03) brightness(calc(.95 - var(--media-dim, 0) * .18));
+  opacity: var(--media-alpha, 1);
 }
 
 .world-beat--dungeons .world-media {
@@ -687,7 +687,7 @@ onUnmounted(() => {
   border-radius: 48% 44% 42% 46% / 17% 19% 15% 17%;
   clip-path: inset(0 round 48% 44% 42% 46% / 17% 19% 15% 17%);
 }
-.world-beat--creatures .world-media img { object-position: center; transform: scale(1.14) translate3d(var(--image-shift), 0, 0); }
+.world-beat--creatures .world-media img { object-position: center; transform: translate3d(calc(var(--media-travel, 0) * 16px), 0, 0) scale(1.14) translate3d(var(--image-shift), 0, 0); }
 
 .world-beat--events .world-media {
   border-radius: 52% 48% 44% 56% / 22% 18% 24% 20%;
@@ -707,7 +707,7 @@ onUnmounted(() => {
   background: #1b1d22;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--beat-accent) 46%, transparent), 0 42px 100px rgba(0, 0, 0, .36);
 }
-.world-beat--churches .world-media img { object-position: 54% 45%; transform: scale(1.04) translate3d(var(--image-shift), 0, 0); }
+.world-beat--churches .world-media img { object-position: 54% 45%; transform: translate3d(calc(var(--media-travel, 0) * 16px), 0, 0) scale(1.04) translate3d(var(--image-shift), 0, 0); }
 
 .world-grade {
   position: absolute;
@@ -755,6 +755,8 @@ onUnmounted(() => {
   position: absolute;
   z-index: 5;
   inset: 0;
+  overflow: hidden;
+  overflow: clip;
   pointer-events: none;
 }
 
@@ -775,7 +777,7 @@ onUnmounted(() => {
 }
 
 .world-gallery__shot--1 {
-  top: calc(var(--media-top) + 28px);
+  bottom: calc(var(--media-bottom) + clamp(150px, 36vh, 360px));
   width: clamp(148px, 15vw, 252px);
   transform: rotate(1.6deg) translate3d(calc(var(--beat-phase, 0) * var(--polaroid-drift, 0px)), 0, 0);
 }
@@ -930,8 +932,7 @@ onUnmounted(() => {
 
 .live-landscape,
 .live-landscape::after,
-.live-landscape img,
-.live-landscape i { position: absolute; inset: 0; }
+.live-landscape img { position: absolute; inset: 0; }
 
 .live-landscape { opacity: var(--beat-fade, 1); }
 
@@ -950,22 +951,30 @@ onUnmounted(() => {
 }
 
 .live-landscape i {
-  background: radial-gradient(circle at 72% 32%, rgba(211, 168, 97, .18), transparent 38%);
+  position: absolute;
+  top: clamp(120px, 26%, 300px);
+  right: clamp(48px, 12%, 220px);
+  width: min(420px, 34vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(211, 168, 97, .16), transparent 62%);
 }
 
 .living-panel {
   position: absolute;
   z-index: 6;
   left: 50%;
-  top: 52%;
+  top: 90px;
+  bottom: clamp(48px, 8vh, 110px);
   width: min(1120px, calc(100% - 11vw));
   display: grid;
   grid-template-columns: 1.1fr .62fr .62fr;
+  align-content: center;
   gap: 28px 48px;
   padding: 34px 0;
   border-top: 1px solid rgba(252, 249, 242, .24);
   border-bottom: 1px solid rgba(252, 249, 242, .24);
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   opacity: var(--beat-fade, 1);
 }
 
@@ -1058,7 +1067,10 @@ onUnmounted(() => {
   font: 550 .54rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .12em;
   text-transform: uppercase;
+  opacity: 1;
+  transition: opacity .25s ease;
 }
+.world-direction.is-faded { opacity: 0; }
 .world-direction i { width: 76px; height: 1px; overflow: hidden; background: color-mix(in srgb, var(--world-ink) 18%, transparent); }
 .world-direction i::after { content: ""; display: block; width: var(--direction-width); height: 100%; background: var(--world-accent); }
 
