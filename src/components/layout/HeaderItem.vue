@@ -81,13 +81,15 @@
 
       <div class="site-header__actions">
         <ServerStatusChip class="header-server-status" />
-        <div v-if="!isHome" class="header-utilities">
+        <div class="header-utilities">
           <LanguageSelector />
-          <BalanceButton />
-          <NotificationBell />
-          <AuthButton />
+          <template v-if="!isHome">
+            <BalanceButton />
+            <NotificationBell />
+            <AuthButton />
+          </template>
         </div>
-        <RouterLink v-else class="home-login-link" to="/login">Login</RouterLink>
+        <RouterLink v-if="isHome" class="home-login-link" to="/login">Login</RouterLink>
         <RouterLink class="play-link" to="/guide">
           Play
           <svg aria-hidden="true" viewBox="0 0 18 18">
@@ -173,10 +175,12 @@
           </div>
 
           <div class="mobile-nav__footer">
-            <div v-if="!isHome" class="mobile-nav__controls">
+            <div class="mobile-nav__controls">
               <LanguageSelector />
-              <BalanceButton />
-              <NotificationBell />
+              <template v-if="!isHome">
+                <BalanceButton />
+                <NotificationBell />
+              </template>
             </div>
             <AuthButton v-if="!isHome" mobile-mode @mobile-action="closeMobileNav" />
             <RouterLink v-else class="mobile-login-link" to="/login" @click="closeMobileNav">Login</RouterLink>
@@ -462,9 +466,12 @@ onUnmounted(() => {
   backdrop-filter: none;
 }
 
-.site-header.is-home.is-at-top:not(.has-panel) .site-brand__mark { transform: scale(1.06); }
-
-.site-header.is-home.is-at-top:not(.has-panel) .header-server-status { display: none; }
+.site-header.is-home.is-at-top .header-server-status {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  pointer-events: none;
+}
 
 .site-header:not(.is-at-top),
 .site-header.has-panel {
@@ -493,7 +500,7 @@ onUnmounted(() => {
 }
 
 .site-brand:hover { color: inherit; }
-.site-brand__mark { width: 44px; height: 44px; transition: transform .4s cubic-bezier(.22, 1, .36, 1); }
+.site-brand__mark { width: 44px; height: 44px; }
 .site-brand__name {
   font: 700 1.35rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
   letter-spacing: -.025em;
@@ -629,10 +636,20 @@ onUnmounted(() => {
   gap: 9px;
 }
 
+.header-server-status {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  will-change: opacity, transform;
+  transition: opacity .35s cubic-bezier(.22, 1, .36, 1), transform .35s cubic-bezier(.22, 1, .36, 1), visibility 0s linear;
+}
+
 .header-utilities { display: flex; align-items: center; gap: 7px; }
 
-.header-utilities :deep(button),
+.header-utilities :deep(button:not(.lang-ritual-btn)),
 .header-utilities :deep(a) { min-width: 44px; min-height: 44px; }
+.header-utilities :deep(.lang-ritual-selector) { min-height: 36px; }
+.header-utilities :deep(.lang-ritual-btn) { min-width: 32px; min-height: 30px; }
 
 .home-login-link,
 .mobile-login-link {
@@ -817,8 +834,10 @@ onUnmounted(() => {
   background: rgba(251, 247, 239, .78);
 }
 .mobile-nav__controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.mobile-nav__controls :deep(button),
+.mobile-nav__controls :deep(button:not(.lang-ritual-btn)),
 .mobile-nav__controls :deep(a) { min-width: 44px; min-height: 44px; }
+.mobile-nav__controls :deep(.lang-ritual-selector) { min-height: 36px; }
+.mobile-nav__controls :deep(.lang-ritual-btn) { min-width: 32px; min-height: 30px; }
 
 .mobile-nav-enter-active,
 .mobile-nav-leave-active { transition: opacity .35s; }
@@ -830,8 +849,7 @@ onUnmounted(() => {
 .mobile-nav-leave-to .mobile-nav { transform: translateX(100%); }
 
 @media (max-width: 1320px) {
-  .header-utilities :deep(.dollar),
-  .header-utilities :deep(.lang-ritual-btn) { display: none; }
+  .header-utilities :deep(.dollar) { display: none; }
 }
 
 @media (max-width: 1080px) {

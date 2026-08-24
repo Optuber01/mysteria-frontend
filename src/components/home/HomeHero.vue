@@ -69,19 +69,45 @@
               <span>WORLD ONLINE</span>
               <b>FIELD {{ String(activeSlide + 1).padStart(2, '0') }}</b>
             </div>
-            <div class="hero-plate__tile hero-plate__tile--north" aria-hidden="true">
+            <button
+              class="hero-plate__tile hero-plate__tile--north"
+              type="button"
+              :aria-label="`Show ${heroSlides[(activeSlide + 1) % heroSlides.length].label}`"
+              @click="selectSlide((activeSlide + 1) % heroSlides.length)"
+            >
               <img :src="heroSlides[(activeSlide + 1) % heroSlides.length].src" alt="">
-              <span>PATHWAY SCOUT</span>
-            </div>
-            <div class="hero-plate__tile hero-plate__tile--south" aria-hidden="true">
-              <img :src="heroSlides[(activeSlide + 2) % heroSlides.length].src" alt="">
-              <span>MYSTERRIA / 03</span>
-            </div>
+              <span>{{ heroSlides[(activeSlide + 1) % heroSlides.length].tag }}</span>
+            </button>
+            <button
+              class="hero-plate__tile hero-plate__tile--south"
+              type="button"
+              :aria-label="`Show ${heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].label}`"
+              @click="selectSlide((activeSlide + heroSlides.length - 1) % heroSlides.length)"
+            >
+              <img :src="heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].src" alt="">
+              <span>{{ heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].tag }}</span>
+            </button>
           </div>
           <figcaption class="hero-plate__caption">
             <span>{{ heroSlides[activeSlide].label }}</span>
             <b>{{ heroSlides[activeSlide].sequence }}</b>
           </figcaption>
+          <div class="hero-plate__controls" role="tablist" aria-label="Hero world scenes">
+            <button
+              v-for="(slide, index) in heroSlides"
+              :key="slide.src"
+              class="hero-plate__control"
+              :class="{ 'is-active': activeSlide === index }"
+              type="button"
+              role="tab"
+              :aria-selected="activeSlide === index"
+              :aria-label="`Show ${slide.label}`"
+              @click="selectSlide(index)"
+            >
+              <span>0{{ index + 1 }}</span>
+              <i aria-hidden="true" />
+            </button>
+          </div>
         </figure>
       </div>
 
@@ -100,14 +126,18 @@ import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
 import heroDawnCliffside from '@/assets/images/home/hero/hero-dawn-cliffside.webp';
 import heroBlackgoldSanctuary from '@/assets/images/home/hero/hero-blackgold-sanctuary.webp';
 import heroWatchtowerNight from '@/assets/images/home/hero/hero-watchtower-night.webp';
+import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
+import raidBosses from '@/assets/images/home/world/raid-bosses.webp';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: heroDawnCliffside, position: '36% 54%', label: 'Cliffside Sanctuary', sequence: 'SEQ IX' },
-  { src: heroBlackgoldSanctuary, position: '38% 46%', label: 'Blackgold Sanctuary', sequence: 'SEQ IX' },
-  { src: heroWatchtowerNight, position: '34% 52%', label: 'Night Watchtower', sequence: 'SEQ IX' },
+  { src: breweryScene, position: '50% 56%', label: 'The Alchemist’s Bench', sequence: 'CRAFT / 01', tag: 'BREW / POTIONS' },
+  { src: raidBosses, position: '50% 52%', label: 'The Veiled Hunt', sequence: 'PARTY / 02', tag: 'HUNT / RAID' },
+  { src: heroDawnCliffside, position: '36% 54%', label: 'Cliffside Sanctuary', sequence: 'WORLD / 03', tag: 'WORLD / EXPLORE' },
+  { src: heroBlackgoldSanctuary, position: '38% 46%', label: 'Blackgold Sanctuary', sequence: 'WORLD / 04', tag: 'WORLD / DISCOVER' },
+  { src: heroWatchtowerNight, position: '34% 52%', label: 'Night Watchtower', sequence: 'WORLD / 05', tag: 'NIGHT / WATCH' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -162,15 +192,26 @@ async function copyAddress() {
   }
 }
 
-function advanceSlide() {
-  const next = (activeSlide.value + 1) % heroSlides.length;
-  const target = heroRef.value?.querySelectorAll<HTMLImageElement>('.hero-slide')[next] ?? null;
-  const reveal = () => { activeSlide.value = next; };
+function revealSlide(index: number) {
+  const target = heroRef.value?.querySelectorAll<HTMLImageElement>('.hero-slide')[index] ?? null;
   if (!target || (target.complete && target.naturalWidth > 0)) {
-    reveal();
+    activeSlide.value = index;
     return;
   }
-  target.decode().then(reveal).catch(() => {});
+  target.decode().then(() => { activeSlide.value = index; }).catch(() => {});
+}
+
+function selectSlide(index: number) {
+  slidesLoaded.value = true;
+  revealSlide(index);
+  if (rotateTimer) {
+    stopRotation();
+    startRotation();
+  }
+}
+
+function advanceSlide() {
+  revealSlide((activeSlide.value + 1) % heroSlides.length);
 }
 
 function startRotation() {
@@ -573,12 +614,18 @@ onUnmounted(() => {
   position: absolute;
   z-index: 4;
   width: 132px;
+  display: block;
   padding: 6px;
   border: 1px solid rgba(255, 255, 255, .52);
   border-radius: 14px;
   background: rgba(249, 245, 237, .9);
   box-shadow: 0 18px 34px rgba(15, 15, 20, .26);
   backdrop-filter: blur(12px);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, border-color .25s;
 }
 
 .hero-plate__tile img {
@@ -605,6 +652,9 @@ onUnmounted(() => {
   transform: rotate(3deg);
 }
 
+.hero-plate__tile--north:hover,
+.hero-plate__tile--north:focus-visible { transform: rotate(3deg) translateY(-5px); }
+
 .hero-plate__tile--south {
   right: 34px;
   bottom: 28px;
@@ -612,7 +662,61 @@ onUnmounted(() => {
   transform: rotate(-3deg);
 }
 
+.hero-plate__tile--south:hover,
+.hero-plate__tile--south:focus-visible { transform: rotate(-3deg) translateY(-5px); }
+.hero-plate__tile:hover,
+.hero-plate__tile:focus-visible { border-color: rgba(255, 255, 255, .9); box-shadow: 0 22px 38px rgba(15, 15, 20, .34); }
 .hero-plate__tile--south img { height: 88px; }
+
+.hero-plate__controls {
+  position: absolute;
+  z-index: 5;
+  right: 24px;
+  bottom: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 999px;
+  background: rgba(18, 20, 28, .38);
+  backdrop-filter: blur(12px);
+}
+
+.hero-plate__control {
+  position: relative;
+  width: 30px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, .58);
+  background: transparent;
+  font: 700 .5rem/1 var(--font-mono);
+  letter-spacing: .08em;
+  cursor: pointer;
+  transition: color .2s, background-color .2s;
+}
+
+.hero-plate__control i {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  left: 6px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--champagne);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero-plate__control:hover,
+.hero-plate__control:focus-visible,
+.hero-plate__control.is-active { color: #fff; background: rgba(255, 255, 255, .14); }
+.hero-plate__control.is-active i { transform: scaleX(1); }
 
 .hero-plate__caption {
   position: absolute;
