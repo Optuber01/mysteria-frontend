@@ -52,6 +52,7 @@ const { status: serverStatus } = useSharedServerStatus();
 const pathwayTrigger = ref<HTMLElement | null>(null);
 const worldTrigger = ref<HTMLElement | null>(null);
 const joinTrigger = ref<HTMLElement | null>(null);
+let newsObserver: IntersectionObserver | null = null;
 let chapterObserver: IntersectionObserver | null = null;
 
 const PathwayOrbit = defineAsyncComponent(() => import('@/components/home/PathwayOrbit.vue'));
@@ -70,6 +71,8 @@ const latestUpdate = computed(() => {
 });
 
 async function loadLatestNews() {
+  newsObserver?.disconnect();
+  newsObserver = null;
   try {
     const { newsAPI } = await import('@/utils/api/news');
     const storedLanguage = localStorage.getItem('mysterria-language');
@@ -95,9 +98,10 @@ onMounted(() => {
   const descriptionTag = document.head.querySelector<HTMLMetaElement>('meta[name="description"]');
   if (descriptionTag) descriptionTag.content = description;
 
-  // Load the latest published entry immediately so the hero CTA can point to
-  // a real changelog article instead of waiting for the world chapter.
-  void loadLatestNews();
+  newsObserver = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) void loadLatestNews();
+  }, { rootMargin: '1200px 0px' });
+  if (worldTrigger.value) newsObserver.observe(worldTrigger.value);
 
   chapterObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
@@ -115,6 +119,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  newsObserver?.disconnect();
   chapterObserver?.disconnect();
   window.removeEventListener('keydown', revealAllChapters);
 });

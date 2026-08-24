@@ -11,22 +11,22 @@
 
       <div class="hero-content" :class="{ 'is-faded': stackFaded }">
         <div class="hero-copy">
-          <p class="hero-eyebrow">Mysterria · Minecraft RPG</p>
+          <p class="hero-eyebrow">A Lord of the Mysteries Minecraft server</p>
           <h1 id="home-title">
-            Choose a path.
-            <span class="hero-keyword">Make it yours.</span>
+            Brew what
+            <span class="hero-keyword">shouldn't exist.</span>
           </h1>
           <p class="hero-summary">
-            Brew potions, learn a Pathway and explore a living world shaped by the people who play it.
+            Sequence potions, Beyonder hunts and a Pathway of your own — on a Minecraft RPG server shaped by Lord of the Mysteries.
           </p>
 
           <div class="hero-actions" aria-label="Get started">
             <RouterLink class="hero-action hero-action--primary" to="/guide">
-              <span>Enter the world</span>
+              <span>Start playing</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
             <RouterLink class="hero-action hero-action--ghost" :to="latestSlug ? `/news/${latestSlug}` : '/news'">
-              <span>Latest changelog</span>
+              <span>Read the changelog</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
           </div>
@@ -51,15 +51,6 @@
         </div>
 
         <figure class="hero-plate">
-          <div class="hero-plate__float hero-plate__float--top" aria-hidden="true">
-            <img :src="heroWatchtowerNight" alt="" width="420" height="260" decoding="async">
-            <span>Watchtower · after dark</span>
-          </div>
-          <div class="hero-plate__float hero-plate__float--bottom" aria-hidden="true">
-            <i />
-            <span><b>Field note 01</b><small>Cliffside Sanctuary</small></span>
-            <strong>↗</strong>
-          </div>
           <div class="hero-plate__frame">
             <img
               v-for="(slide, index) in heroSlides"
@@ -74,7 +65,7 @@
               decoding="async"
             >
           </div>
-          <figcaption class="hero-plate__caption"><span>01 / Cliffside</span><b>SEQ IX</b></figcaption>
+          <figcaption class="hero-plate__caption">Cliffside Sanctuary · <b>SEQ IX</b></figcaption>
         </figure>
       </div>
 
@@ -230,7 +221,7 @@ onUnmounted(() => {
 .hero {
   --hero-progress: 0;
   position: relative;
-  min-height: 118svh;
+  min-height: 172svh;
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -252,7 +243,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   left: 0;
-  height: clamp(110px, 18svh, 190px);
+  height: clamp(150px, 28svh, 300px);
   background: linear-gradient(180deg, rgba(252, 248, 240, 0) 0%, rgba(252, 248, 240, .72) 58%, var(--journey-mid) 100%);
   pointer-events: none;
 }
@@ -278,13 +269,12 @@ onUnmounted(() => {
 .hero-copy { max-width: 640px; }
 
 .hero-eyebrow {
-  margin: 0 0 18px;
-  color: var(--primary-deep);
-  font-family: var(--font-mono);
-  font-size: .64rem;
+  margin: 0 0 20px;
+  color: var(--ink-muted);
+  font-size: .74rem;
   font-weight: 800;
   line-height: 1.2;
-  letter-spacing: .16em;
+  letter-spacing: .18em;
   text-transform: uppercase;
   opacity: 0;
   transform: translateY(10px);
@@ -292,11 +282,11 @@ onUnmounted(() => {
 }
 
 .hero h1 {
-  max-width: 9ch;
-  margin: 0 0 24px;
+  max-width: 700px;
+  margin: 0 0 22px;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: clamp(52px, 6.7vw, 100px);
+  font-size: clamp(44px, 6vw, 88px);
   font-weight: 800;
   line-height: .98;
   letter-spacing: -.035em;
@@ -309,7 +299,7 @@ onUnmounted(() => {
 
 .hero-keyword {
   position: relative;
-  display: block;
+  display: inline;
   color: var(--primary);
   white-space: normal;
 }
@@ -331,8 +321,8 @@ onUnmounted(() => {
 .is-ready .hero-keyword::after { transform: rotate(-1deg) scaleX(1); }
 
 .hero-summary {
-  max-width: 470px;
-  margin: 0 0 28px;
+  max-width: 520px;
+  margin: 0 0 32px;
   color: var(--ink-muted);
   font-size: clamp(1rem, 1.25vw, 1.13rem);
   line-height: 1.65;
@@ -343,24 +333,22 @@ onUnmounted(() => {
 }
 
 .hero-actions {
-  max-width: 560px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
-  gap: 10px;
-  margin: 0 0 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 30px;
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .8s .38s cubic-bezier(.22, 1, .36, 1), transform .8s .38s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-action {
-  min-width: 0;
-  min-height: 56px;
+  min-height: 52px;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
-  padding: 0 20px;
+  padding: 0 24px;
   border-radius: 999px;
   font-size: .88rem;
   font-weight: 700;
@@ -439,16 +427,15 @@ onUnmounted(() => {
 .hero-link-quiet:hover svg { transform: translateX(3px); }
 
 .connection-pill {
-  width: min(100%, 560px);
+  width: fit-content;
   max-width: 100%;
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  padding: 9px 10px 9px 16px;
+  gap: 14px;
+  padding: 10px 12px 10px 18px;
   border: 1px solid var(--hairline);
-  border-left: 3px solid var(--coral);
-  border-radius: 18px;
+  border-radius: 999px;
   background: var(--surface-glass);
   backdrop-filter: blur(14px) saturate(1.05);
   box-shadow: 0 10px 30px rgba(34, 28, 20, .08);
@@ -528,7 +515,6 @@ onUnmounted(() => {
 .hero-plate {
   position: relative;
   margin: 0;
-  min-width: 0;
   opacity: 0;
   transform: translateY(18px);
   transition: opacity .9s .44s cubic-bezier(.22, 1, .36, 1), transform .9s .44s cubic-bezier(.22, 1, .36, 1);
@@ -536,92 +522,13 @@ onUnmounted(() => {
 
 .hero-plate__frame {
   position: relative;
-  height: clamp(340px, 58svh, 640px);
+  height: clamp(300px, 54svh, 560px);
   overflow: hidden;
   border: 1px solid var(--hairline);
   border-radius: 28px;
   background: var(--journey-mid);
   box-shadow: 0 24px 70px rgba(34, 28, 20, .16), 0 10px 30px rgba(34, 28, 20, .08);
 }
-
-.hero-plate::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 12% -10% -9% 9%;
-  border-radius: 42px;
-  background: radial-gradient(circle at 50% 40%, rgba(116, 88, 232, .18), transparent 68%);
-  filter: blur(24px);
-}
-
-.hero-plate__float {
-  position: absolute;
-  z-index: 4;
-  overflow: hidden;
-  border: 1px solid var(--hairline);
-  color: var(--ink);
-  background: var(--surface);
-  box-shadow: 0 18px 42px rgba(34, 28, 20, .15);
-  pointer-events: none;
-}
-
-.hero-plate__float--top {
-  top: -24px;
-  right: -20px;
-  width: clamp(148px, 15vw, 218px);
-  padding: 7px 7px 9px;
-  transform: rotate(2.8deg);
-}
-
-.hero-plate__float--top img {
-  width: 100%;
-  aspect-ratio: 1.6;
-  object-fit: cover;
-  border-radius: 2px;
-}
-
-.hero-plate__float--top span {
-  display: block;
-  margin: 8px 3px 0;
-  color: var(--ink-muted);
-  font: 700 .55rem/1 var(--font-mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.hero-plate__float--bottom {
-  left: -28px;
-  bottom: 32px;
-  min-width: 214px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 13px 9px 9px;
-  border-radius: 999px;
-  background: var(--surface-glass);
-  backdrop-filter: blur(14px);
-  transform: rotate(-2deg);
-}
-
-.hero-plate__float--bottom > i {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: linear-gradient(145deg, var(--primary), var(--coral));
-  box-shadow: inset 0 0 0 5px rgba(255, 255, 255, .65);
-}
-
-.hero-plate__float--bottom span { display: grid; gap: 4px; }
-.hero-plate__float--bottom b,
-.hero-plate__float--bottom small {
-  display: block;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-}
-.hero-plate__float--bottom b { color: var(--primary-deep); font-size: .52rem; letter-spacing: .12em; }
-.hero-plate__float--bottom small { color: var(--ink-muted); font-size: .58rem; letter-spacing: .05em; }
-.hero-plate__float--bottom strong { margin-left: auto; color: var(--primary); font-size: 1rem; }
 
 .hero-slide {
   position: absolute;
@@ -639,8 +546,8 @@ onUnmounted(() => {
 
 .hero-plate__caption {
   position: absolute;
-  left: 22px;
-  top: 22px;
+  left: -14px;
+  bottom: 26px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -650,7 +557,7 @@ onUnmounted(() => {
   background: var(--surface-glass);
   backdrop-filter: blur(14px) saturate(1.05);
   box-shadow: 0 10px 30px rgba(34, 28, 20, .1);
-  color: var(--ink);
+  color: var(--ink-muted);
   font-size: .64rem;
   font-weight: 700;
   letter-spacing: .13em;
@@ -712,7 +619,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
-  .hero { min-height: 118svh; }
+  .hero { min-height: 150svh; }
   .hero-sticky { min-height: 100svh; }
   .hero-content {
     grid-template-columns: 1fr;
@@ -722,10 +629,10 @@ onUnmounted(() => {
   }
   .hero-copy { max-width: 560px; }
   .hero-eyebrow { margin-bottom: 12px; font-size: .66rem; }
-  .hero h1 { max-width: 10ch; font-size: clamp(44px, 12.5vw, 68px); }
+  .hero h1 { font-size: clamp(42px, 12.5vw, 68px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
-  .hero-actions { gap: 9px; margin-bottom: 14px; }
-  .hero-action { min-height: 50px; padding: 0 16px; font-size: .78rem; }
+  .hero-actions { gap: 9px; margin-bottom: 22px; }
+  .hero-action { flex: 1 1 170px; min-height: 48px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
   .connection-pill { padding: 8px 9px 8px 15px; gap: 11px; }
   .connection-address { font-size: .8rem; }
   .connection-copy { width: 36px; height: 36px; }
@@ -738,7 +645,6 @@ onUnmounted(() => {
   .hero h1 { font-size: clamp(38px, 12vw, 54px); }
   .hero-summary { font-size: .87rem; }
   .hero-actions { width: 100%; }
-  .hero-action { padding-inline: 13px; font-size: .72rem; }
   .connection-pill { width: 100%; }
 }
 
