@@ -92,7 +92,6 @@
               alt=""
               loading="lazy"
             >
-            <span aria-hidden="true">Next field</span>
           </button>
           <figcaption class="hero-plate__caption">
             <span>{{ heroSlides[activeSlide].label }}</span>
@@ -550,7 +549,7 @@ onUnmounted(() => {
 .hero-plate__frame {
   position: absolute;
   z-index: 1;
-  inset: 0 13% 0 0;
+  inset: 0 3% 0 0;
   overflow: hidden;
   clip-path: polygon(12% 0, 100% 0, 94% 100%, 0 100%);
   box-shadow: 0 26px 60px rgba(34, 28, 20, .13);
@@ -642,21 +641,6 @@ onUnmounted(() => {
   width: 25%;
   height: 20%;
   transform: rotate(4deg);
-}
-
-.hero-plate__peek--next span {
-  position: absolute;
-  right: 9px;
-  bottom: 8px;
-  left: 9px;
-  padding: 6px 8px;
-  border: 1px solid rgba(255, 255, 255, .12);
-  border-radius: 8px;
-  color: #fff;
-  background: rgba(26, 20, 46, .68);
-  font: 700 .5rem/1 var(--font-mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
 }
 
 .hero-plate__signal {

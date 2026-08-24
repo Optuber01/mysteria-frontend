@@ -460,9 +460,9 @@ onUnmounted(() => {
 }
 
 .site-header.is-home.is-at-top:not(.has-panel) {
-  background: rgba(252, 248, 240, .86);
-  border-bottom-color: rgba(234, 225, 208, .72);
-  box-shadow: 0 5px 18px rgba(34, 28, 20, .04);
+  background: var(--journey-top, #fcf8f0);
+  border-bottom-color: transparent;
+  box-shadow: none;
   backdrop-filter: blur(14px);
 }
 
