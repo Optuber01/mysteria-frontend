@@ -361,9 +361,9 @@ onUnmounted(() => {
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --entry: 0;
   position: relative;
-  /* Keep the progression chapter below the hero's sticky travel. Negative
-     margins made the two sticky scenes occupy the same viewport. */
-  margin-top: 0;
+  /* Overlap the progression with the final hero travel so the next scene
+     replaces the hero continuously instead of revealing a dead band. */
+  margin-top: -100svh;
   min-height: 300svh;
   color: var(--ink, #221c14);
   background: var(--journey-mid, #f4ecdf);

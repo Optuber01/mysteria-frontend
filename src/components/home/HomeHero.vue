@@ -221,7 +221,7 @@ onUnmounted(() => {
 .hero {
   --hero-progress: 0;
   position: relative;
-  min-height: 100svh;
+  min-height: 190svh;
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -259,8 +259,8 @@ onUnmounted(() => {
   align-items: center;
   gap: clamp(36px, 5vw, 76px);
   padding: calc(96px + env(safe-area-inset-top)) clamp(20px, 4vw, 56px) clamp(128px, 15svh, 170px);
-  opacity: clamp(0, calc((.15 - var(--hero-progress)) / .15), 1);
-  transform: translate3d(0, calc(var(--hero-progress) / .15 * -40px), 0);
+  opacity: clamp(0, calc((.95 - var(--hero-progress)) / .95), 1);
+  transform: translate3d(0, calc(var(--hero-progress) / .95 * -32px), 0);
   will-change: transform, opacity;
 }
 
@@ -608,7 +608,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
-  .hero { min-height: 100svh; }
+  .hero { min-height: 165svh; }
   .hero-sticky { min-height: 100svh; }
   .hero-content {
     grid-template-columns: 1fr;
