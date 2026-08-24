@@ -50,6 +50,18 @@
         </div>
 
         <figure class="hero-plate">
+          <button
+            class="hero-plate__peek hero-plate__peek--previous"
+            type="button"
+            :aria-label="`Show ${heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].label}`"
+            @click="selectSlide((activeSlide + heroSlides.length - 1) % heroSlides.length)"
+          >
+            <img
+              :src="heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].src"
+              alt=""
+              loading="lazy"
+            >
+          </button>
           <div class="hero-plate__frame">
             <img
               v-for="(slide, index) in heroSlides"
@@ -69,6 +81,19 @@
               <b>FIELD {{ String(activeSlide + 1).padStart(2, '0') }}</b>
             </div>
           </div>
+          <button
+            class="hero-plate__peek hero-plate__peek--next"
+            type="button"
+            :aria-label="`Show ${heroSlides[(activeSlide + 1) % heroSlides.length].label}`"
+            @click="selectSlide((activeSlide + 1) % heroSlides.length)"
+          >
+            <img
+              :src="heroSlides[(activeSlide + 1) % heroSlides.length].src"
+              alt=""
+              loading="lazy"
+            >
+            <span aria-hidden="true">Next field</span>
+          </button>
           <figcaption class="hero-plate__caption">
             <span>{{ heroSlides[activeSlide].label }}</span>
             <b>{{ heroSlides[activeSlide].sequence }}</b>
@@ -104,21 +129,21 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
-import heroDawnCliffside from '@/assets/images/home/hero/hero-dawn-cliffside.webp';
-import heroBlackgoldSanctuary from '@/assets/images/home/hero/hero-blackgold-sanctuary.webp';
-import heroWatchtowerNight from '@/assets/images/home/hero/hero-watchtower-night.webp';
-import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
-import emporium from '@/assets/images/home/world/emporium.webp';
+import heroBanner from '@/assets/images/optimized/banner.webp';
+import kleinArchive from '@/assets/images/optimized/Klein.webp';
+import mysterriaDawn from '@/assets/images/home/mysterria-dawn.webp';
+import guardianDragon from '@/assets/images/community-archive/events/guardians/guardian-dragon-encounter.webp';
+import auroraWaterfront from '@/assets/images/community-archive/towns/aurora-cliffside/aurora-waterfront.webp';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: emporium, position: '50% 52%', label: 'The Emporium', sequence: 'TRADE / 01' },
-  { src: breweryScene, position: '50% 56%', label: 'The Alchemist’s Bench', sequence: 'CRAFT / 02' },
-  { src: heroDawnCliffside, position: '36% 54%', label: 'Cliffside Sanctuary', sequence: 'WORLD / 03' },
-  { src: heroBlackgoldSanctuary, position: '38% 46%', label: 'Blackgold Sanctuary', sequence: 'WORLD / 04' },
-  { src: heroWatchtowerNight, position: '34% 52%', label: 'Night Watchtower', sequence: 'WORLD / 05' },
+  { src: heroBanner, position: '62% 52%', label: 'The First Signal', sequence: 'VEIL / 01' },
+  { src: kleinArchive, position: '52% 48%', label: 'The Archive', sequence: 'LORE / 02' },
+  { src: mysterriaDawn, position: '68% 54%', label: 'Dawn Over Mysterria', sequence: 'WORLD / 03' },
+  { src: guardianDragon, position: '50% 48%', label: 'The Guardian Hunt', sequence: 'HUNT / 04' },
+  { src: auroraWaterfront, position: '58% 50%', label: 'Aurora Waterfront', sequence: 'WORLD / 05' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -313,15 +338,12 @@ onUnmounted(() => {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -96px -72px -88px -76px;
-  background: radial-gradient(
-    ellipse at 28% 50%,
-    rgba(252, 248, 240, .98) 0 34%,
-    rgba(252, 248, 240, .86) 50%,
-    rgba(252, 248, 240, .34) 72%,
-    rgba(252, 248, 240, 0) 100%
-  );
-  filter: blur(7px);
+  inset: -86px -12px -74px -72px;
+  border-radius: 32px 46% 46% 32px / 30px 42% 42% 30px;
+  background: rgba(252, 248, 240, .94);
+  box-shadow: 34px 0 42px rgba(252, 248, 240, .46);
+  clip-path: polygon(0 0, 84% 0, 100% 11%, 94% 88%, 83% 100%, 0 100%);
+  filter: blur(5px);
   pointer-events: none;
 }
 
@@ -529,7 +551,7 @@ onUnmounted(() => {
 .hero-plate {
   position: absolute;
   z-index: 1;
-  inset: -8% -5% -10% 0;
+  inset: -8% -7% -10% 21%;
   margin: 0;
   opacity: 0;
   transform: translateY(18px);
@@ -539,9 +561,10 @@ onUnmounted(() => {
 
 .hero-plate__frame {
   position: absolute;
-  inset: 0;
+  z-index: 1;
+  inset: 0 10% 0 0;
   overflow: hidden;
-  clip-path: none;
+  clip-path: polygon(10% 0, 100% 0, 92% 100%, 0 100%);
   background: var(--journey-mid);
 }
 
@@ -554,11 +577,12 @@ onUnmounted(() => {
   object-fit: cover;
   filter: saturate(1.08) contrast(1.04);
   opacity: 0;
-  transition: opacity 1.3s cubic-bezier(.45, 0, .25, 1);
+  transform: scale(1.045) translateX(10px);
+  transition: opacity 1.05s cubic-bezier(.45, 0, .25, 1), transform 1.05s cubic-bezier(.22, 1, .36, 1);
   will-change: opacity;
 }
 
-.hero-slide.is-active { opacity: 1; }
+.hero-slide.is-active { opacity: 1; transform: none; }
 
 .hero-plate__frame::after {
   content: "";
@@ -566,17 +590,81 @@ onUnmounted(() => {
   z-index: 2;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(252, 248, 240, .26) 0%, rgba(252, 248, 240, .08) 28%, transparent 48%),
-    linear-gradient(125deg, rgba(12, 14, 22, .14), transparent 35%, rgba(12, 14, 22, .06) 70%, rgba(12, 14, 22, .36)),
+    linear-gradient(90deg, rgba(252, 248, 240, .2) 0%, rgba(252, 248, 240, .04) 22%, transparent 39%),
+    linear-gradient(125deg, rgba(12, 14, 22, .12), transparent 35%, rgba(12, 14, 22, .04) 70%, rgba(12, 14, 22, .32)),
     linear-gradient(180deg, rgba(12, 14, 22, .12), transparent 28%, transparent 68%, rgba(12, 14, 22, .34));
   pointer-events: none;
+}
+
+.hero-plate__peek {
+  position: absolute;
+  z-index: 3;
+  display: block;
+  overflow: hidden;
+  padding: 0;
+  border: 7px solid var(--journey-top);
+  border-radius: 18px;
+  background: var(--journey-mid);
+  box-shadow: 0 16px 32px rgba(34, 28, 20, .18);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, filter .35s;
+}
+
+.hero-plate__peek img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  filter: saturate(.92) contrast(1.05);
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1), filter .35s;
+}
+
+.hero-plate__peek:hover,
+.hero-plate__peek:focus-visible {
+  box-shadow: 0 22px 42px rgba(34, 28, 20, .24);
+  transform: translateY(-5px) rotate(0deg);
+}
+
+.hero-plate__peek:hover img,
+.hero-plate__peek:focus-visible img { filter: saturate(1.08) contrast(1.08); transform: scale(1.06); }
+.hero-plate__peek:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+
+.hero-plate__peek--previous {
+  left: 2%;
+  bottom: 13%;
+  width: 20%;
+  height: 26%;
+  transform: rotate(-4deg);
+}
+
+.hero-plate__peek--next {
+  top: 13%;
+  right: 0;
+  width: 17%;
+  height: 33%;
+  transform: rotate(4deg);
+}
+
+.hero-plate__peek--next span {
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  left: 9px;
+  padding: 6px 7px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(26, 20, 46, .68);
+  font: 700 .5rem/1 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
 .hero-plate__signal {
   position: absolute;
   z-index: 4;
   top: 24px;
-  left: 24%;
+  left: 13%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -607,7 +695,7 @@ onUnmounted(() => {
 .hero-plate__controls {
   position: absolute;
   z-index: 5;
-  right: 24px;
+  right: 12%;
   bottom: 22px;
   display: inline-flex;
   align-items: center;
@@ -657,7 +745,7 @@ onUnmounted(() => {
 
 .hero-plate__caption {
   position: absolute;
-  left: 18px;
+  left: 10%;
   bottom: 22px;
   display: inline-flex;
   align-items: center;
@@ -724,7 +812,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1080px) {
-  .hero-plate { inset: -5% -12% -10% 0; }
+  .hero-plate { inset: -5% -14% -10% 12%; }
 }
 
 @media (max-width: 720px) {
@@ -769,7 +857,7 @@ onUnmounted(() => {
 @media (max-height: 690px) and (min-width: 721px) {
   .hero-content { padding-top: calc(76px + env(safe-area-inset-top)); }
   .hero h1 { font-size: clamp(40px, 5vw, 68px); }
-  .hero-plate { inset: -4% -5% -8% 0; }
+  .hero-plate { inset: -4% -8% -8% 16%; }
 }
 
 @media (max-width: 270px) {
