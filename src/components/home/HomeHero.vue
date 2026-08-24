@@ -139,7 +139,7 @@ const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>(
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: heroBanner, position: '62% 52%', label: 'The First Signal', sequence: 'VEIL / 01' },
+  { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 01' },
   { src: kleinArchive, position: '52% 48%', label: 'The Archive', sequence: 'LORE / 02' },
   { src: mysterriaDawn, position: '68% 54%', label: 'Dawn Over Mysterria', sequence: 'WORLD / 03' },
   { src: guardianDragon, position: '50% 48%', label: 'The Guardian Hunt', sequence: 'HUNT / 04' },
@@ -332,18 +332,18 @@ onUnmounted(() => {
   z-index: 6;
   width: min(640px, 53%);
   max-width: 640px;
+  margin-left: clamp(0px, 2.2vw, 32px);
 }
 
 .hero-copy::before {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -86px -12px -74px -72px;
-  border-radius: 32px 46% 46% 32px / 30px 42% 42% 30px;
-  background: rgba(252, 248, 240, .94);
-  box-shadow: 34px 0 42px rgba(252, 248, 240, .46);
-  clip-path: polygon(0 0, 84% 0, 100% 11%, 94% 88%, 83% 100%, 0 100%);
-  filter: blur(5px);
+  inset: -102px -10px -94px -72px;
+  background: var(--journey-top);
+  box-shadow: 20px 0 34px rgba(252, 248, 240, .22);
+  clip-path: polygon(0 0, 87% 0, 66% 100%, 0 100%);
+  filter: blur(6px);
   pointer-events: none;
 }
 
@@ -824,7 +824,7 @@ onUnmounted(() => {
     gap: 0;
     padding: calc(84px + env(safe-area-inset-top)) 15px 96px;
   }
-  .hero-copy { width: 100%; max-width: 560px; }
+  .hero-copy { width: 100%; max-width: 560px; margin-left: 0; }
   .hero h1 { font-size: clamp(38px, 11.5vw, 60px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
   .hero-actions { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 8px; }
@@ -838,6 +838,7 @@ onUnmounted(() => {
 
 @media (max-width: 420px) {
   .hero-content { padding-inline: 11px; }
+  .hero-copy { margin-left: 0; }
   .hero h1 { font-size: clamp(36px, 11vw, 52px); }
   .hero-summary { font-size: .87rem; }
   .hero-actions { width: 100%; }
@@ -864,6 +865,7 @@ onUnmounted(() => {
   .hero { min-height: auto; }
   .hero-sticky { position: relative; height: auto; min-height: 100svh; padding: 86px 10px 70px; }
   .hero-content { position: relative; inset: auto; width: 100%; padding: 0; transform: none; opacity: 1; }
+  .hero-copy { margin-left: 0; }
   .hero h1 { font-size: 2.1rem; overflow-wrap: anywhere; }
   .connection-address { overflow-wrap: anywhere; white-space: normal; }
   .scroll-cue { display: none; }
