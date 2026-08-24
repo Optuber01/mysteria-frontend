@@ -638,14 +638,14 @@ function updatePose() {
   if (!bookRoot || !frontCover || !leftPages) return;
 
   const p = props.reducedMotion ? 1 : clamp01(props.progress);
-  const descend = phase(p, 0, 0.2);
-  const faceCover = phase(p, 0.2, 0.43);
+  const descend = phase(p, -0.04, 0.12);
+  const faceCover = phase(p, -0.08, 0.1);
   const opening = phase(p, 0.5, 0.88);
   const pageOpening = phase(p, 0.55, 0.9);
   const settle = phase(p, 0.88, 1);
 
-  bookRoot.visible = props.reducedMotion || p > 0.004;
-  bookRoot.position.y = (1 - descend) * 5.8 - settle * 0.08;
+  bookRoot.visible = true;
+  bookRoot.position.y = (1 - descend) * 3.8 - settle * 0.08;
   bookRoot.position.x = -3 * (1 - opening);
   bookRoot.rotation.y = (Math.PI / 2) * (1 - faceCover);
   bookRoot.rotation.x = -0.06 - opening * 0.035;

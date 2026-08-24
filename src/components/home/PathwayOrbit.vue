@@ -703,7 +703,7 @@ onUnmounted(() => {
   --path-surface: #FFFFFF;
   --path-haze: #EFECFA;
   position: relative;
-  min-height: 270svh;
+  min-height: 210svh;
   color: var(--path-ink);
   background-color: transparent;
 }
@@ -727,7 +727,7 @@ onUnmounted(() => {
 .is-low-power .ambient-field::before { display: none; }
 .is-low-power .ambient-field__haze { background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 38%, transparent), transparent 42%); }
 
-.desktop-experience { height: 270svh; }
+.desktop-experience { height: 210svh; }
 .sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
 .vault-heading { position: absolute; z-index: 90; top: clamp(76px, 9vh, 112px); left: clamp(24px, 5vw, 78px); width: min(470px, 34vw); pointer-events: none; }
 .vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 800 .63rem/1 Manrope, sans-serif; letter-spacing: .18em; }

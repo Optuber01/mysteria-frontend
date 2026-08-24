@@ -500,7 +500,7 @@ onUnmounted(() => {
   --world-progress: 0;
   position: relative;
   z-index: 2;
-  min-height: 590svh;
+  min-height: 380svh;
   isolation: isolate;
   color: var(--ink);
   background: var(--journey-mid);

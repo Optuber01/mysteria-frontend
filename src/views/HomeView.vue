@@ -155,9 +155,9 @@ onUnmounted(() => {
 .skip-link:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .deferred-chapter { min-width: 0; }
-.deferred-chapter--pathways.is-pending { min-height: 290svh; background: var(--journey-mid); }
-.deferred-chapter--world.is-pending { min-height: 610svh; background: var(--journey-mid); }
-.deferred-chapter--join.is-pending { min-height: 120svh; background: var(--journey-end); }
+.deferred-chapter--pathways.is-pending { min-height: 220svh; background: var(--journey-mid); }
+.deferred-chapter--world.is-pending { min-height: 400svh; background: var(--journey-mid); }
+.deferred-chapter--join.is-pending { min-height: 100svh; background: var(--journey-end); }
 
 /* Keep each chapter on the same visual grid while async sections arrive. */
 .deferred-chapter {

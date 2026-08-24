@@ -221,7 +221,7 @@ onUnmounted(() => {
 .hero {
   --hero-progress: 0;
   position: relative;
-  min-height: 106svh;
+  min-height: 100svh;
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -608,7 +608,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
-  .hero { min-height: 106svh; }
+  .hero { min-height: 100svh; }
   .hero-sticky { min-height: 100svh; }
   .hero-content {
     grid-template-columns: 1fr;

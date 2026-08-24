@@ -364,7 +364,7 @@ onUnmounted(() => {
   /* Keep the progression chapter below the hero's sticky travel. Negative
      margins made the two sticky scenes occupy the same viewport. */
   margin-top: 0;
-  min-height: 500svh;
+  min-height: 300svh;
   color: var(--ink, #221c14);
   background: var(--journey-mid, #f4ecdf);
   isolation: isolate;
@@ -666,7 +666,7 @@ onUnmounted(() => {
 }
 @media (max-width: 820px) {
   .progression-v3 {
-    min-height: 560svh;
+    min-height: 360svh;
   }
   .progression-v3__layout {
     inset: 132px 14px 70px;
