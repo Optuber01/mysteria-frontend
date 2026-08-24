@@ -364,7 +364,7 @@ onUnmounted(() => {
   /* Overlap the progression with the final hero travel so the next scene
      replaces the hero continuously instead of revealing a dead band. */
   margin-top: -100svh;
-  min-height: 300svh;
+  min-height: 500svh;
   color: var(--ink, #221c14);
   background: var(--journey-mid, #f4ecdf);
   isolation: isolate;
@@ -415,11 +415,11 @@ onUnmounted(() => {
 
 .progression-v3__threshold-fog {
   position: absolute;
-  z-index: 3;
+  z-index: 6;
   top: -1px;
   right: -8%;
   left: -8%;
-  height: min(34vh, 340px);
+  height: min(58vh, 560px);
   overflow: hidden;
   background:
     radial-gradient(ellipse at 18% 42%, rgba(250, 246, 238, 0.95), transparent 44%),
@@ -427,7 +427,7 @@ onUnmounted(() => {
   filter: blur(0.2px);
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
-  opacity: clamp(0, calc(1.08 - var(--journey) * 24), 1);
+  opacity: clamp(0, calc(1.18 - var(--journey) * 9.5), 1);
   pointer-events: none;
 }
 
@@ -666,7 +666,7 @@ onUnmounted(() => {
 }
 @media (max-width: 820px) {
   .progression-v3 {
-    min-height: 360svh;
+    min-height: 560svh;
   }
   .progression-v3__layout {
     inset: 132px 14px 70px;
