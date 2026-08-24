@@ -139,8 +139,8 @@ const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>(
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: heroWatchtower, position: '55% 52%', label: 'Watchtower at Dusk', sequence: 'VEIL / 01' },
-  { src: heroDawn, position: '56% 48%', label: 'The Cliffside Gate', sequence: 'WORLD / 02' },
+  { src: heroDawn, position: '56% 48%', label: 'The Cliffside Gate', sequence: 'WORLD / 01' },
+  { src: heroWatchtower, position: '72% 52%', label: 'Watchtower at Dusk', sequence: 'VEIL / 02' },
   { src: heroSanctuary, position: '50% 48%', label: 'Black-Gold Sanctuary', sequence: 'RITUAL / 03' },
   { src: twinTreeRift, position: '52% 50%', label: 'The Twin-Tree Rift', sequence: 'FIELD / 04' },
   { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 05' },
@@ -564,7 +564,7 @@ onUnmounted(() => {
   height: 100%;
   max-width: none;
   object-fit: cover;
-  filter: saturate(1.08) contrast(1.04);
+  filter: saturate(1.08) contrast(1.02) brightness(1.08);
   opacity: 0;
   transform: scale(1.045) translateX(10px);
   transition: opacity 1.05s cubic-bezier(.45, 0, .25, 1), transform 1.05s cubic-bezier(.22, 1, .36, 1);
@@ -579,8 +579,8 @@ onUnmounted(() => {
   z-index: 2;
   inset: 0;
   background:
-    linear-gradient(125deg, rgba(12, 14, 22, .08), transparent 35%, rgba(12, 14, 22, .03) 70%, rgba(12, 14, 22, .32)),
-    linear-gradient(180deg, rgba(12, 14, 22, .12), transparent 28%, transparent 68%, rgba(12, 14, 22, .34));
+    linear-gradient(125deg, rgba(12, 14, 22, .06), transparent 35%, rgba(12, 14, 22, .02) 70%, rgba(12, 14, 22, .2)),
+    linear-gradient(180deg, rgba(12, 14, 22, .08), transparent 28%, transparent 68%, rgba(12, 14, 22, .22));
   pointer-events: none;
 }
 
@@ -631,16 +631,16 @@ onUnmounted(() => {
 .hero-plate__peek--previous {
   left: 10%;
   bottom: 12%;
-  width: 24%;
-  height: 27%;
+  width: 28%;
+  height: 22%;
   transform: rotate(-4deg);
 }
 
 .hero-plate__peek--next {
-  top: 12%;
+  top: 18%;
   right: 3%;
-  width: 16%;
-  height: 36%;
+  width: 25%;
+  height: 20%;
   transform: rotate(4deg);
 }
 
