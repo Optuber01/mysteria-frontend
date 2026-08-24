@@ -129,21 +129,21 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
+import heroWatchtower from '@/assets/images/home/hero/hero-watchtower-night.webp';
+import heroDawn from '@/assets/images/home/hero/hero-dawn-cliffside.webp';
+import heroSanctuary from '@/assets/images/home/hero/hero-blackgold-sanctuary.webp';
+import twinTreeRift from '@/assets/images/community-archive/dungeons/twin-tree-rift/twin-tree-rift-wide.webp';
 import heroBanner from '@/assets/images/optimized/banner.webp';
-import kleinArchive from '@/assets/images/optimized/Klein.webp';
-import mysterriaDawn from '@/assets/images/home/mysterria-dawn.webp';
-import guardianDragon from '@/assets/images/community-archive/events/guardians/guardian-dragon-encounter.webp';
-import auroraWaterfront from '@/assets/images/community-archive/towns/aurora-cliffside/aurora-waterfront.webp';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 01' },
-  { src: kleinArchive, position: '52% 48%', label: 'The Archive', sequence: 'LORE / 02' },
-  { src: mysterriaDawn, position: '68% 54%', label: 'Dawn Over Mysterria', sequence: 'WORLD / 03' },
-  { src: guardianDragon, position: '50% 48%', label: 'The Guardian Hunt', sequence: 'HUNT / 04' },
-  { src: auroraWaterfront, position: '58% 50%', label: 'Aurora Waterfront', sequence: 'WORLD / 05' },
+  { src: heroWatchtower, position: '55% 52%', label: 'Watchtower at Dusk', sequence: 'VEIL / 01' },
+  { src: heroDawn, position: '56% 48%', label: 'The Cliffside Gate', sequence: 'WORLD / 02' },
+  { src: heroSanctuary, position: '50% 48%', label: 'Black-Gold Sanctuary', sequence: 'RITUAL / 03' },
+  { src: twinTreeRift, position: '52% 50%', label: 'The Twin-Tree Rift', sequence: 'FIELD / 04' },
+  { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 05' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -333,18 +333,6 @@ onUnmounted(() => {
   width: min(640px, 53%);
   max-width: 640px;
   margin-left: clamp(0px, 2.2vw, 32px);
-}
-
-.hero-copy::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -102px -10px -94px -72px;
-  background: var(--journey-top);
-  box-shadow: 20px 0 34px rgba(252, 248, 240, .22);
-  clip-path: polygon(0 0, 87% 0, 66% 100%, 0 100%);
-  filter: blur(6px);
-  pointer-events: none;
 }
 
 .hero h1 {
@@ -550,8 +538,8 @@ onUnmounted(() => {
 
 .hero-plate {
   position: absolute;
-  z-index: 1;
-  inset: -8% -7% -10% 21%;
+  z-index: 4;
+  inset: -8% -6% -10% 34%;
   margin: 0;
   opacity: 0;
   transform: translateY(18px);
@@ -562,9 +550,10 @@ onUnmounted(() => {
 .hero-plate__frame {
   position: absolute;
   z-index: 1;
-  inset: 0 10% 0 0;
+  inset: 0 13% 0 0;
   overflow: hidden;
-  clip-path: polygon(10% 0, 100% 0, 92% 100%, 0 100%);
+  clip-path: polygon(12% 0, 100% 0, 94% 100%, 0 100%);
+  box-shadow: 0 26px 60px rgba(34, 28, 20, .13);
   background: var(--journey-mid);
 }
 
@@ -590,9 +579,18 @@ onUnmounted(() => {
   z-index: 2;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(252, 248, 240, .2) 0%, rgba(252, 248, 240, .04) 22%, transparent 39%),
-    linear-gradient(125deg, rgba(12, 14, 22, .12), transparent 35%, rgba(12, 14, 22, .04) 70%, rgba(12, 14, 22, .32)),
+    linear-gradient(125deg, rgba(12, 14, 22, .08), transparent 35%, rgba(12, 14, 22, .03) 70%, rgba(12, 14, 22, .32)),
     linear-gradient(180deg, rgba(12, 14, 22, .12), transparent 28%, transparent 68%, rgba(12, 14, 22, .34));
+  pointer-events: none;
+}
+
+.hero-plate__frame::before {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0 auto 0 0;
+  width: 36%;
+  background: linear-gradient(90deg, var(--journey-top) 0%, var(--journey-top) 22%, rgba(252, 248, 240, .94) 48%, rgba(252, 248, 240, .42) 76%, transparent 100%);
   pointer-events: none;
 }
 
@@ -632,17 +630,17 @@ onUnmounted(() => {
 
 .hero-plate__peek--previous {
   left: 2%;
-  bottom: 13%;
-  width: 20%;
-  height: 26%;
+  bottom: 2%;
+  width: 25%;
+  height: 29%;
   transform: rotate(-4deg);
 }
 
 .hero-plate__peek--next {
-  top: 13%;
+  top: 8%;
   right: 0;
-  width: 17%;
-  height: 33%;
+  width: 18%;
+  height: 42%;
   transform: rotate(4deg);
 }
 
@@ -812,7 +810,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1080px) {
-  .hero-plate { inset: -5% -14% -10% 12%; }
+  .hero-plate { inset: -5% -14% -10% 23%; }
 }
 
 @media (max-width: 720px) {
@@ -858,7 +856,7 @@ onUnmounted(() => {
 @media (max-height: 690px) and (min-width: 721px) {
   .hero-content { padding-top: calc(76px + env(safe-area-inset-top)); }
   .hero h1 { font-size: clamp(40px, 5vw, 68px); }
-  .hero-plate { inset: -4% -8% -8% 16%; }
+  .hero-plate { inset: -4% -8% -8% 27%; }
 }
 
 @media (max-width: 270px) {
