@@ -63,30 +63,11 @@
               :fetchpriority="index === 0 ? 'high' : undefined"
               decoding="async"
             >
-            <div class="hero-plate__frame-line" aria-hidden="true" />
             <div class="hero-plate__signal" aria-hidden="true">
               <i />
               <span>WORLD ONLINE</span>
               <b>FIELD {{ String(activeSlide + 1).padStart(2, '0') }}</b>
             </div>
-            <button
-              class="hero-plate__tile hero-plate__tile--north"
-              type="button"
-              :aria-label="`Show ${heroSlides[(activeSlide + 1) % heroSlides.length].label}`"
-              @click="selectSlide((activeSlide + 1) % heroSlides.length)"
-            >
-              <img :src="heroSlides[(activeSlide + 1) % heroSlides.length].src" alt="">
-              <span>{{ heroSlides[(activeSlide + 1) % heroSlides.length].tag }}</span>
-            </button>
-            <button
-              class="hero-plate__tile hero-plate__tile--south"
-              type="button"
-              :aria-label="`Show ${heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].label}`"
-              @click="selectSlide((activeSlide + heroSlides.length - 1) % heroSlides.length)"
-            >
-              <img :src="heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].src" alt="">
-              <span>{{ heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].tag }}</span>
-            </button>
           </div>
           <figcaption class="hero-plate__caption">
             <span>{{ heroSlides[activeSlide].label }}</span>
@@ -127,17 +108,17 @@ import heroDawnCliffside from '@/assets/images/home/hero/hero-dawn-cliffside.web
 import heroBlackgoldSanctuary from '@/assets/images/home/hero/hero-blackgold-sanctuary.webp';
 import heroWatchtowerNight from '@/assets/images/home/hero/hero-watchtower-night.webp';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
-import raidBosses from '@/assets/images/home/world/raid-bosses.webp';
+import emporium from '@/assets/images/home/world/emporium.webp';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: breweryScene, position: '50% 56%', label: 'The Alchemist’s Bench', sequence: 'CRAFT / 01', tag: 'BREW / POTIONS' },
-  { src: raidBosses, position: '50% 52%', label: 'The Veiled Hunt', sequence: 'PARTY / 02', tag: 'HUNT / RAID' },
-  { src: heroDawnCliffside, position: '36% 54%', label: 'Cliffside Sanctuary', sequence: 'WORLD / 03', tag: 'WORLD / EXPLORE' },
-  { src: heroBlackgoldSanctuary, position: '38% 46%', label: 'Blackgold Sanctuary', sequence: 'WORLD / 04', tag: 'WORLD / DISCOVER' },
-  { src: heroWatchtowerNight, position: '34% 52%', label: 'Night Watchtower', sequence: 'WORLD / 05', tag: 'NIGHT / WATCH' },
+  { src: emporium, position: '50% 52%', label: 'The Emporium', sequence: 'TRADE / 01' },
+  { src: breweryScene, position: '50% 56%', label: 'The Alchemist’s Bench', sequence: 'CRAFT / 02' },
+  { src: heroDawnCliffside, position: '36% 54%', label: 'Cliffside Sanctuary', sequence: 'WORLD / 03' },
+  { src: heroBlackgoldSanctuary, position: '38% 46%', label: 'Blackgold Sanctuary', sequence: 'WORLD / 04' },
+  { src: heroWatchtowerNight, position: '34% 52%', label: 'Night Watchtower', sequence: 'WORLD / 05' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -311,10 +292,8 @@ onUnmounted(() => {
   inset: 0;
   width: min(100%, 1480px);
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(0, 1.06fr);
+  display: flex;
   align-items: center;
-  gap: clamp(36px, 5vw, 76px);
   padding: calc(96px + env(safe-area-inset-top)) clamp(20px, 4vw, 56px) clamp(128px, 15svh, 170px);
   opacity: clamp(0, calc((.95 - var(--hero-progress)) / .95), 1);
   transform: translate3d(0, calc(var(--hero-progress) / .95 * -32px), 0);
@@ -323,7 +302,21 @@ onUnmounted(() => {
 
 .hero-content.is-faded { pointer-events: none; }
 
-.hero-copy { max-width: 640px; }
+.hero-copy {
+  position: relative;
+  z-index: 6;
+  width: min(640px, 53%);
+  max-width: 640px;
+}
+
+.hero-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -140px -420px -130px -90px;
+  background: radial-gradient(ellipse at 34% 50%, var(--journey-top) 0 38%, rgba(252, 248, 240, .8) 58%, rgba(252, 248, 240, 0) 94%);
+  pointer-events: none;
+}
 
 .hero h1 {
   max-width: 680px;
@@ -527,21 +520,22 @@ onUnmounted(() => {
 }
 
 .hero-plate {
-  position: relative;
+  position: absolute;
+  z-index: 1;
+  inset: -8% -5% -10% 18%;
   margin: 0;
   opacity: 0;
   transform: translateY(18px);
   transition: opacity .9s .44s cubic-bezier(.22, 1, .36, 1), transform .9s .44s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
 }
 
 .hero-plate__frame {
-  position: relative;
-  height: clamp(300px, 54svh, 560px);
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .36);
-  border-radius: 34px 34px 16px 34px;
+  clip-path: polygon(19% 0, 100% 0, 100% 100%, 2% 100%);
   background: var(--journey-mid);
-  box-shadow: 0 28px 80px rgba(34, 28, 20, .18), 0 12px 32px rgba(34, 28, 20, .1);
 }
 
 .hero-slide {
@@ -564,17 +558,9 @@ onUnmounted(() => {
   z-index: 2;
   inset: 0;
   background:
-    linear-gradient(125deg, rgba(12, 14, 22, .38), transparent 35%, rgba(12, 14, 22, .1) 70%, rgba(12, 14, 22, .48)),
-    linear-gradient(180deg, rgba(12, 14, 22, .2), transparent 28%, transparent 68%, rgba(12, 14, 22, .3));
-  pointer-events: none;
-}
-
-.hero-plate__frame-line {
-  position: absolute;
-  z-index: 3;
-  inset: 16px;
-  border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: 24px 24px 10px 24px;
+    linear-gradient(90deg, rgba(252, 248, 240, .98) 0%, rgba(252, 248, 240, .82) 13%, rgba(252, 248, 240, .3) 30%, transparent 52%),
+    linear-gradient(125deg, rgba(12, 14, 22, .24), transparent 35%, rgba(12, 14, 22, .08) 70%, rgba(12, 14, 22, .4)),
+    linear-gradient(180deg, rgba(12, 14, 22, .12), transparent 28%, transparent 68%, rgba(12, 14, 22, .34));
   pointer-events: none;
 }
 
@@ -582,7 +568,7 @@ onUnmounted(() => {
   position: absolute;
   z-index: 4;
   top: 24px;
-  left: 26px;
+  left: 24%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -610,64 +596,6 @@ onUnmounted(() => {
   font-weight: 700;
 }
 
-.hero-plate__tile {
-  position: absolute;
-  z-index: 4;
-  width: 132px;
-  display: block;
-  padding: 6px;
-  border: 1px solid rgba(255, 255, 255, .52);
-  border-radius: 14px;
-  background: rgba(249, 245, 237, .9);
-  box-shadow: 0 18px 34px rgba(15, 15, 20, .26);
-  backdrop-filter: blur(12px);
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, border-color .25s;
-}
-
-.hero-plate__tile img {
-  display: block;
-  width: 100%;
-  height: 76px;
-  border-radius: 9px;
-  object-fit: cover;
-}
-
-.hero-plate__tile span {
-  display: block;
-  padding: 8px 2px 2px;
-  color: var(--ink-muted);
-  font: 800 .48rem/1 var(--font-mono);
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.hero-plate__tile--north {
-  top: 22px;
-  right: 22px;
-  transform: rotate(3deg);
-}
-
-.hero-plate__tile--north:hover,
-.hero-plate__tile--north:focus-visible { transform: rotate(3deg) translateY(-5px); }
-
-.hero-plate__tile--south {
-  right: 34px;
-  bottom: 28px;
-  width: 154px;
-  transform: rotate(-3deg);
-}
-
-.hero-plate__tile--south:hover,
-.hero-plate__tile--south:focus-visible { transform: rotate(-3deg) translateY(-5px); }
-.hero-plate__tile:hover,
-.hero-plate__tile:focus-visible { border-color: rgba(255, 255, 255, .9); box-shadow: 0 22px 38px rgba(15, 15, 20, .34); }
-.hero-plate__tile--south img { height: 88px; }
-
 .hero-plate__controls {
   position: absolute;
   z-index: 5;
@@ -681,6 +609,7 @@ onUnmounted(() => {
   border-radius: 999px;
   background: rgba(18, 20, 28, .38);
   backdrop-filter: blur(12px);
+  pointer-events: auto;
 }
 
 .hero-plate__control {
@@ -787,23 +716,19 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1080px) {
-  .hero-content { gap: clamp(28px, 4vw, 44px); }
-  .hero-plate__frame { height: clamp(280px, 46svh, 480px); }
-  .hero-plate__tile--north { right: 18px; width: 112px; }
-  .hero-plate__tile--south { right: 24px; width: 132px; }
-  .hero-plate__tile--south img { height: 74px; }
+  .hero-plate { inset: -5% -12% -10% 10%; }
 }
 
 @media (max-width: 720px) {
   .hero { min-height: 165svh; }
   .hero-sticky { min-height: 100svh; }
   .hero-content {
-    grid-template-columns: 1fr;
+    display: block;
     align-content: start;
     gap: 0;
     padding: calc(84px + env(safe-area-inset-top)) 15px 96px;
   }
-  .hero-copy { max-width: 560px; }
+  .hero-copy { width: 100%; max-width: 560px; }
   .hero h1 { font-size: clamp(38px, 11.5vw, 60px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
   .hero-actions { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 8px; }
@@ -836,7 +761,7 @@ onUnmounted(() => {
 @media (max-height: 690px) and (min-width: 721px) {
   .hero-content { padding-top: calc(76px + env(safe-area-inset-top)); }
   .hero h1 { font-size: clamp(40px, 5vw, 68px); }
-  .hero-plate__frame { height: clamp(240px, 52svh, 420px); }
+  .hero-plate { inset: -4% -5% -8% 18%; }
 }
 
 @media (max-width: 270px) {

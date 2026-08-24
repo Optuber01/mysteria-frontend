@@ -460,10 +460,10 @@ onUnmounted(() => {
 }
 
 .site-header.is-home.is-at-top:not(.has-panel) {
-  background: transparent;
-  border-bottom-color: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
+  background: rgba(252, 248, 240, .86);
+  border-bottom-color: rgba(234, 225, 208, .72);
+  box-shadow: 0 5px 18px rgba(34, 28, 20, .04);
+  backdrop-filter: blur(14px);
 }
 
 .site-header.is-home.is-at-top .header-server-status {
@@ -648,8 +648,8 @@ onUnmounted(() => {
 
 .header-utilities :deep(button:not(.lang-ritual-btn)),
 .header-utilities :deep(a) { min-width: 44px; min-height: 44px; }
-.header-utilities :deep(.lang-ritual-selector) { min-height: 36px; }
-.header-utilities :deep(.lang-ritual-btn) { min-width: 32px; min-height: 30px; }
+.header-utilities :deep(.lang-ritual-selector) { align-self: center; height: 36px; min-height: 36px; }
+.header-utilities :deep(.lang-ritual-btn) { min-width: 32px; min-height: 28px; height: 28px; }
 
 .home-login-link,
 .mobile-login-link {
@@ -836,8 +836,8 @@ onUnmounted(() => {
 .mobile-nav__controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .mobile-nav__controls :deep(button:not(.lang-ritual-btn)),
 .mobile-nav__controls :deep(a) { min-width: 44px; min-height: 44px; }
-.mobile-nav__controls :deep(.lang-ritual-selector) { min-height: 36px; }
-.mobile-nav__controls :deep(.lang-ritual-btn) { min-width: 32px; min-height: 30px; }
+.mobile-nav__controls :deep(.lang-ritual-selector) { align-self: center; height: 36px; min-height: 36px; }
+.mobile-nav__controls :deep(.lang-ritual-btn) { min-width: 32px; min-height: 28px; height: 28px; }
 
 .mobile-nav-enter-active,
 .mobile-nav-leave-active { transition: opacity .35s; }

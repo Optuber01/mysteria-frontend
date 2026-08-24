@@ -24,7 +24,9 @@ const {currentLanguage, setLanguage} = useI18n();
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 3px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 2px;
   border: 1px solid var(--hairline, #eae1d0);
   border-radius: 999px;
   background: rgba(255, 255, 255, .58);
@@ -34,7 +36,8 @@ const {currentLanguage, setLanguage} = useI18n();
 
 .lang-ritual-btn {
   min-width: 32px;
-  min-height: 30px;
+  min-height: 28px;
+  height: 28px;
   padding: 0 8px;
   border: 0;
   border-radius: 999px;
