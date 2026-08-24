@@ -12,12 +12,12 @@
     <div v-if="!compactLayout && !reducedMotion" class="desktop-experience">
       <div class="sticky-scene">
         <header class="vault-heading">
-          <p>PLAYABLE ROUTES TO POWER</p>
+          <p>CHOOSE YOUR PATHWAY</p>
           <h2 id="pathway-title">
-            Choose your path,<br><em>in orbit.</em>
+            Shape your ascent.<br><em>Choose your route.</em>
           </h2>
           <span>
-            Explore 22 pathways. Select a symbol to open its archive.
+            Explore 22 Pathways. Open an archive to compare abilities, Sequences, and playstyles.
           </span>
         </header>
 
@@ -129,9 +129,9 @@
 
     <div v-if="compactLayout || reducedMotion" class="mobile-experience">
       <header class="mobile-heading">
-        <p>PLAYABLE ROUTES TO POWER</p>
-        <h2>Choose how<br><em>you advance.</em></h2>
-        <span>Swipe through live Mysterria data. Open any entry for its full Sequence archive.</span>
+        <p>CHOOSE YOUR PATHWAY</p>
+        <h2>Shape your ascent.<br><em>Choose your route.</em></h2>
+        <span>Swipe through 22 Pathways and open any archive to see its abilities and Sequences.</span>
       </header>
 
       <div class="catalog-tabs catalog-tabs--mobile" role="tablist" aria-label="Progression type">

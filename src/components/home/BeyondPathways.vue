@@ -9,8 +9,8 @@
   >
     <div class="world-sticky">
       <header class="world-heading">
-        <p>Beyond the Pathways</p>
-        <h2 id="world-title">Every route leaves a different mark on the world.</h2>
+        <p>The world beyond your Pathway</p>
+        <h2 id="world-title">Your choices change what the world gives back.</h2>
       </header>
 
       <div class="world-rail">
@@ -101,9 +101,9 @@
 
           <div class="living-panel">
             <div class="living-intro">
-              <span>Live from the server</span>
-              <h3>Nothing here is a backdrop.</h3>
-              <p>Server status and updates are shown only when a first-party source answers.</p>
+              <span>Live from Mysterria</span>
+              <h3>A world shaped by players.</h3>
+              <p>See the server as it is now — players, towns, events, and discoveries from first-party data.</p>
             </div>
 
             <div class="living-primary">
@@ -180,8 +180,8 @@
 
     <div class="world-static" aria-label="World systems overview">
       <header>
-        <p>Beyond the Pathways</p>
-        <h2>Every route leaves a different mark on the world.</h2>
+        <p>The world beyond your Pathway</p>
+        <h2>Your choices change what the world gives back.</h2>
       </header>
       <article v-for="(feature, index) in features" :key="feature.id">
         <img
@@ -270,9 +270,9 @@ const storedLanguage = localStorage.getItem('mysterria-language');
 
 const features: WorldFeature[] = [
   {
-    id: 'dungeons', short: 'Rifts', kicker: 'Prepare the run', title: 'Rifts reward preparation.',
+    id: 'dungeons', short: 'Rifts', kicker: 'Prepare the run', title: 'Plan the run. Cross the Rift.',
     copy: 'Use /subspace to find a dungeon, check its power and cooldown, then weaken its Rift with Energy Shards before your party enters.',
-    proof: 'A dungeon is an instanced run with its own classes, rooms and boss—not just another overworld cave.',
+    proof: 'Each dungeon is an instanced run with its own rooms, classes, and boss.',
     marker: 'Dungeon Rift', note: 'A Rift gate marks the threshold. Parties weaken it with Energy Shards before committing to the instance beyond.', pin: 'middle',
     image: dungeonGate, video: dungeonEntranceVideo, alt: 'A black-and-white tree Rift gate surrounding a glowing dungeon portal.', width: 1600, height: 868,
     gallery: [
@@ -281,16 +281,16 @@ const features: WorldFeature[] = [
     ],
   },
   {
-    id: 'creatures', short: 'The wilds', kicker: 'Read the encounter', title: 'The wild reacts to your Pathway.',
-    copy: 'Beyonder Creatures give XP, acting points and ingredients. Wild Beyonders are different: pathway-based NPCs that may trade with you or fight you depending on your relationship.',
-    proof: 'Crimson Moon nights raise the danger outside and turn fishing into a high-risk route to Beyonder rewards.',
+    id: 'creatures', short: 'The wilds', kicker: 'Meet the wild', title: 'Your Pathway changes the encounter.',
+    copy: 'Beyonder Creatures can yield XP, acting points, and ingredients. Wild Beyonders may trade with you — or fight you — depending on the relationship you build.',
+    proof: 'Crimson Moon nights raise the stakes outside and turn every hunt into a decision.',
     marker: 'Beyonder encounter', note: 'A Beyonder creature met in the wild: every encounter yields XP, acting points and ingredients worth the risk.', pin: 'high',
     image: creatureChamber, alt: 'A custom floating creature surrounded by fragments inside a dark Minecraft chamber.', width: 1075, height: 503,
   },
   {
-    id: 'events', short: 'Guardians', kicker: 'Answer the signal', title: 'A Guardian changes the plan.',
-    copy: 'Guardians are random open-world boss encounters. Find one, bring the right people, and adapt when the fight turns: physical damage stops working below 20% health.',
-    proof: 'A successful group earns a Guardian-specific Reward Token for ingredients, recipes and other rare rewards.',
+    id: 'events', short: 'Guardians', kicker: 'Answer the signal', title: 'Bring the right people.',
+    copy: 'Guardians are open-world bosses that force your party to adapt. When physical damage stops working, the plan has to change.',
+    proof: 'Win and earn a Guardian Reward Token for rare ingredients, recipes, and more.',
     marker: 'Open-world Guardian', note: 'A Guardian encountered in the open world. Cosmos Incursions are rarer kin that answer their own signal.', pin: 'middle',
     image: guardianDragon, alt: 'Players fighting a many-headed Guardian inside a radiant arena.', width: 1600, height: 868,
     gallery: [
@@ -299,9 +299,9 @@ const features: WorldFeature[] = [
     ],
   },
   {
-    id: 'towns', short: 'Settlements', kicker: 'Leave a mark', title: 'Build a place that has consequences.',
-    copy: 'Towns protect claims and organise shared infrastructure. Build with others, stay solo, or form a Secret Order—each route gives you a different way to move through the server.',
-    proof: 'As a town grows, it gains territory and can earn architectural perks. A level-five Domain can found a Nation.',
+    id: 'towns', short: 'Settlements', kicker: 'Leave your mark', title: 'Build somewhere worth defending.',
+    copy: 'Claim land, build with others, or form a Secret Order. Your choices shape the towns, territory, and communities around you.',
+    proof: 'Grow a town into a Domain — and eventually a Nation.',
     marker: 'Player settlement', note: 'These are real community landmarks: a waterfront town, an everyday street, and a vast eye suspended above another settlement.', pin: 'low',
     image: townsImage, alt: 'A player-built waterfront settlement glowing beneath a green aurora.', width: 1600, height: 841,
     gallery: [
@@ -310,9 +310,9 @@ const features: WorldFeature[] = [
     ],
   },
   {
-    id: 'churches', short: 'Churches', kicker: 'Establish a presence', title: 'Faith needs a place to gather.',
-    copy: 'Churches are player-run institutions built around a physical Church Core. Their sites, prayer, members and pathway relation make a visible organisation with real influence.',
-    proof: 'A Church can develop branches, support members and grant benefits such as acting progress, Madness recovery and site-based prayer effects.',
+    id: 'churches', short: 'Churches', kicker: 'Gather around a belief', title: 'Make your Pathway visible.',
+    copy: 'Create a player-run Church around a physical Church Core, with members, sites, prayer, and influence that carry into the world.',
+    proof: 'Churches can support members, develop branches, and grant Pathway-based benefits.',
     marker: 'Consecrated site', note: 'The architecture is player-made; the Church system gives the site membership, prayer and pathway consequences.', pin: 'middle',
     image: cathedralExterior, alt: 'A monumental player-built cathedral rising into a stormy sky.', width: 1600, height: 841,
     gallery: [

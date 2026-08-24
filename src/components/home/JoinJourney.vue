@@ -2,11 +2,11 @@
   <section id="join" class="join-threshold" aria-labelledby="join-title">
     <i class="join-threshold__glow" aria-hidden="true" />
     <div class="join-threshold__content">
-      <p class="join-kicker">Enter Mysterria</p>
-      <h2 id="join-title">The portal is open.</h2>
-      <p class="join-intro">Java Edition, no client mods. Connect, choose Mysteries in the lobby, and the first Pathway is yours to earn.</p>
+      <p class="join-kicker">Begin your ascent</p>
+      <h2 id="join-title">Your first Sequence starts here.</h2>
+      <p class="join-intro">Java Edition, no client mods. Join Mysterria, choose Mysteries in the lobby, and begin with a Pathway of your own.</p>
       <Transition name="orbit-arrival">
-        <aside v-if="selectedPathway" :key="selectedPathway.id" class="orbit-arrival" :style="pathwayStyle" :aria-label="`${selectedPathway.name} Pathway carries forward to the portal`">
+        <aside v-if="selectedPathway" :key="selectedPathway.id" class="orbit-arrival" :style="pathwayStyle" :aria-label="`${selectedPathway.name} Pathway selected for your ascent`">
           <svg class="orbit-arrival__line" viewBox="0 0 570 260" aria-hidden="true"><path d="M26 218C108 216 118 126 214 137S316 213 386 147 436 46 540 44" /><circle cx="26" cy="218" r="4" /><circle cx="214" cy="137" r="3" /><circle cx="386" cy="147" r="4" /></svg>
           <span class="orbit-arrival__seal"><img :src="selectedPathway.image" alt="" width="72" height="72" decoding="async"></span>
           <p><small>Orbit carried forward</small><strong>{{ selectedPathway.name }}</strong></p>
@@ -42,8 +42,8 @@ import type { HomePathway } from '@/data/pathways';
 const props = defineProps<{ selectedPathway?: HomePathway | null }>();
 const steps = [
   { title: 'Connect', copy: 'Add mc.mysterria.net in a current Java client.' },
-  { title: 'Choose Mysteries', copy: 'Select Mysteries in the lobby to begin your first Pathway.' },
-  { title: 'Begin', copy: 'Take Resolve to learn the potion loop with no permanent cost.' },
+  { title: 'Choose your Pathway', copy: 'Select Mysteries in the lobby and choose where your ascent begins.' },
+  { title: 'Take your first step', copy: 'Use Resolve to learn the potion loop with no permanent cost.' },
 ] as const;
 const copyState = ref<'idle' | 'copied' | 'failed'>('idle');
 let copyTimer: ReturnType<typeof setTimeout> | null = null;

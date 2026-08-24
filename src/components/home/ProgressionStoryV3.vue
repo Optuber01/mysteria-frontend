@@ -15,9 +15,9 @@
       <div class="progression-v3__threshold-fog" aria-hidden="true"><i /><i /></div>
 
       <header class="progression-v3__heading">
-        <p>Playable progression</p>
-        <h2 id="progression-title">Find it. Brew it. Become it.</h2>
-        <span>Sequence 9 · Seer of the Fool Pathway</span>
+        <p>Your path to godhood starts here</p>
+        <h2 id="progression-title">Start at Sequence 9.</h2>
+        <span>A Seer’s first formula · Fool Pathway</span>
       </header>
 
       <div class="progression-v3__layout">
@@ -124,53 +124,53 @@ type Chapter = { id: string; short: string; kicker: string; title: string; copy:
 const chapters: Chapter[] = [
   {
     id: 'discover', short: 'Discover', start: 0, end: 0.38,
-    kicker: '01 · Recover the knowledge',
-    title: 'Discover the formula.',
-    copy: 'Complete formulas surface in Mysterria’s loot — or recover their pages and assemble the set. This one names a Sequence 9 of the Fool Pathway.',
-    hint: 'Hover the book’s entries to study each ingredient.',
+    kicker: '01 · Recover the formula',
+    title: 'Find the written formula.',
+    copy: 'Recover the pages, gather the ingredients, and learn what a Sequence 9 Seer requires.',
+    hint: 'Inspect each entry to learn the recipe.',
   },
   {
     id: 'infuse', short: 'Infuse', start: 0.38, end: 0.54,
-    kicker: '02 · Feed the altar',
-    title: 'Every item finds its place.',
-    copy: 'The written formula leaves the page — main ingredients to the left, supplementary to the right, the formula at the heart, in written order.',
-    hint: 'Follow each ingredient as it lands.',
+    kicker: '02 · Build the ritual',
+    title: 'Put every ingredient in place.',
+    copy: 'Main ingredients, supplementary ingredients, and the formula itself come together in the order the ritual demands.',
+    hint: 'Follow the formula from page to altar.',
   },
   {
     id: 'brew', short: 'Brew', start: 0.54, end: 0.68,
-    kicker: '03 · The working',
-    title: 'Watch it become a potion.',
-    copy: 'Under the altar’s circle the mixture turns. A clean brew yields the Sequence 9 potion of the Seer — no challenge failed, nothing wasted.',
-    hint: 'The circle brightens as the brew completes.',
+    kicker: '03 · Brew the potion',
+    title: 'Turn the formula into power.',
+    copy: 'Work the altar, keep the mixture stable, and brew the Sequence 9 potion of the Seer.',
+    hint: 'Watch the circle for the final step.',
   },
   {
     id: 'drink', short: 'Drink', start: 0.68, end: 0.86,
-    kicker: '04 · Commit to the Pathway',
-    title: 'Drink. Maintain control.',
-    copy: 'Drinking commits you to the Fool Pathway and starts the awakening. The first Sequence 9 potion asks for no ritual — only nerve.',
-    hint: 'Empty it to the last drop.',
+    kicker: '04 · Choose your Pathway',
+    title: 'Take the first step.',
+    copy: 'Drink the potion to commit to the Fool Pathway. From here, your abilities — and your risks — begin to change.',
+    hint: 'Choose your moment.',
   },
   {
     id: 'awaken', short: 'Awaken', start: 0.86, end: 1,
-    kicker: '05 · Awaken',
+    kicker: '05 · Begin the ascent',
     title: 'Become a Seer.',
-    copy: 'Sequence 9 of the Fool Pathway awakens: Divination and Spiritualism join your toolkit. Digest, and Sequence 8 · Clown waits beyond.',
-    hint: 'Inspect your first abilities.',
+    copy: 'Divination and Spiritualism join your toolkit. Digest the potion, then prepare for Sequence 8.',
+    hint: 'The next Sequence is yours to earn.',
   },
 ];
 
 const details: Record<string, { label: string; detail: string }> = {
   'formula-fool': {
     label: 'Written formula · Sequence 9 — Seer',
-    detail: 'A complete formula of the Fool Pathway. Two pages: main ingredients on the left, supplementary on the right.',
+    detail: 'The first formula on the Fool Pathway. Main ingredients sit on the left; supplementary ingredients sit on the right.',
   },
   'lavos-squid-blood': {
     label: 'Blood of the Lavos Squid',
-    detail: 'Main ingredient · bled from the Lavos Squid, a Beyonder Creature you must hunt.',
+    detail: 'Main ingredient · harvested from the Lavos Squid, a Beyonder Creature you must hunt.',
   },
   'stellar-aqua-crystal': {
     label: 'Stellar Aqua Crystal',
-    detail: 'Main ingredient · a rare crystal condensation found in generated world loot.',
+    detail: 'Main ingredient · a rare crystal condensation recovered from world loot.',
   },
   'gold-mint-leaves': {
     label: 'Gold Mint Leaves',
@@ -178,7 +178,7 @@ const details: Record<string, { label: string; detail: string }> = {
   },
   'brew-recipe-slot': {
     label: 'Formula slot',
-    detail: 'The written formula holds the heart of the cauldron interface — load it first, then the ingredients in written order.',
+    detail: 'The written formula anchors the altar. Load every ingredient in its order.',
   },
   'brew-main-slots': {
     label: 'Main ingredient slots',
@@ -186,19 +186,19 @@ const details: Record<string, { label: string; detail: string }> = {
   },
   'brew-supp-slots': {
     label: 'Supplementary slots',
-    detail: 'Supplementary ingredients fill the right column — any order, but never before the mains.',
+    detail: 'Supplementary ingredients fill the right column after the main ingredients are in place.',
   },
   'brew-circle': {
     label: 'The working',
-    detail: 'The circle binds formula and ingredients together. Load in the written order or the brew is lost.',
+    detail: 'The circle binds formula and ingredients together. Follow the written order or the brew is lost.',
   },
   'sequence-potion': {
     label: 'Sequence 9 · Seer potion',
-    detail: 'A successful brew. Drink it to commit to the Fool Pathway and begin the awakening.',
+    detail: 'A successful brew. Drink it to commit to the Fool Pathway and begin your ascent.',
   },
   'drink-potion': {
     label: 'The last sip',
-    detail: 'The potion empties as the awakening takes hold. Poor control adds Madness — the first drink needs only nerve.',
+    detail: 'The potion empties as the awakening takes hold. The first drink asks for nerve.',
   },
   'ability-divination': {
     label: 'Divination',
@@ -210,7 +210,7 @@ const details: Record<string, { label: string; detail: string }> = {
   },
   'ability-teaser': {
     label: 'Sequence 8 · Clown',
-    detail: 'Digest the potion, complete the advancement ritual, and Paper Dagger & Body Control join the toolkit.',
+    detail: 'Digest the potion, complete the advancement ritual, and prepare for the next Sequence.',
   },
 };
 

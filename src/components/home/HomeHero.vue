@@ -11,13 +11,13 @@
 
       <div class="hero-content" :class="{ 'is-faded': stackFaded }">
         <div class="hero-copy">
-          <p class="hero-eyebrow">A Lord of the Mysteries Minecraft server</p>
+          <p class="hero-eyebrow">A Lord of the Mysteries-inspired Minecraft RPG</p>
           <h1 id="home-title">
-            Brew what
-            <span class="hero-keyword">shouldn't exist.</span>
+            Brew your first potion.
+            <span class="hero-keyword">Choose what you become.</span>
           </h1>
           <p class="hero-summary">
-            Sequence potions, Beyonder hunts and a Pathway of your own — on a Minecraft RPG server shaped by Lord of the Mysteries.
+            Choose a Pathway, uncover forgotten formulas, and explore a world of dungeons, hunts, rituals, and hidden powers.
           </p>
 
           <div class="hero-actions" aria-label="Get started">
@@ -70,7 +70,7 @@
       </div>
 
       <a class="scroll-cue" href="#progression" aria-label="Scroll down to see Mysterria progression">
-        <span>Scroll to explore</span>
+        <span>Scroll to begin</span>
         <i aria-hidden="true"><b /></i>
       </a>
     </div>
