@@ -539,7 +539,7 @@ onUnmounted(() => {
 .hero-plate {
   position: absolute;
   z-index: 4;
-  inset: -8% -6% -10% 34%;
+  inset: -8% 0 0 34%;
   margin: 0;
   opacity: 0;
   transform: translateY(18px);
@@ -629,18 +629,18 @@ onUnmounted(() => {
 .hero-plate__peek:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .hero-plate__peek--previous {
-  left: 2%;
-  bottom: 2%;
-  width: 25%;
-  height: 29%;
+  left: 10%;
+  bottom: 12%;
+  width: 24%;
+  height: 27%;
   transform: rotate(-4deg);
 }
 
 .hero-plate__peek--next {
-  top: 8%;
-  right: 0;
-  width: 18%;
-  height: 42%;
+  top: 12%;
+  right: 3%;
+  width: 16%;
+  height: 36%;
   transform: rotate(4deg);
 }
 
@@ -810,7 +810,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1080px) {
-  .hero-plate { inset: -5% -14% -10% 23%; }
+  .hero-plate { inset: -5% -2% -4% 23%; }
 }
 
 @media (max-width: 720px) {
@@ -856,7 +856,7 @@ onUnmounted(() => {
 @media (max-height: 690px) and (min-width: 721px) {
   .hero-content { padding-top: calc(76px + env(safe-area-inset-top)); }
   .hero h1 { font-size: clamp(40px, 5vw, 68px); }
-  .hero-plate { inset: -4% -8% -8% 27%; }
+  .hero-plate { inset: -4% -2% -4% 27%; }
 }
 
 @media (max-width: 270px) {
