@@ -415,11 +415,11 @@ onUnmounted(() => {
 
 .progression-v3__threshold-fog {
   position: absolute;
-  z-index: 6;
+  z-index: 3;
   top: -1px;
   right: -8%;
   left: -8%;
-  height: min(58vh, 560px);
+  height: min(34vh, 340px);
   overflow: hidden;
   background:
     radial-gradient(ellipse at 18% 42%, rgba(250, 246, 238, 0.95), transparent 44%),
@@ -427,7 +427,7 @@ onUnmounted(() => {
   filter: blur(0.2px);
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
-  opacity: clamp(0, calc(1.18 - var(--journey) * 9.5), 1);
+  opacity: clamp(0, calc(1.08 - var(--journey) * 24), 1);
   pointer-events: none;
 }
 

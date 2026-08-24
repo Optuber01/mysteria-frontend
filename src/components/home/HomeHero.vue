@@ -22,32 +22,32 @@
 
           <div class="hero-actions" aria-label="Get started">
             <RouterLink class="hero-action hero-action--primary" to="/guide">
-              <span>Start playing</span>
+              <span>Enter the world</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
-            <RouterLink class="hero-action hero-action--ghost" :to="latestSlug ? `/news/${latestSlug}` : '/news'">
-              <span>Read the changelog</span>
-              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
-            </RouterLink>
+            <div class="connection-pill" aria-label="Mysterria server details">
+              <span class="connection-status">
+                <i class="connection-status__dot" :class="`is-${status.state}`" aria-hidden="true" />
+                <small aria-live="polite">{{ statusLabel }}</small>
+              </span>
+              <strong class="connection-address">{{ MYSTERRIA_ADDRESS }}</strong>
+              <button
+                class="connection-copy"
+                type="button"
+                :aria-label="copied ? 'Server address copied' : 'Copy server address'"
+                @click="copyAddress"
+              >
+                <svg v-if="!copied" aria-hidden="true" viewBox="0 0 18 18"><rect x="6.5" y="6.5" width="8" height="8" rx="1.5" /><path d="M11.5 3.5h-6a2 2 0 0 0-2 2v6" /></svg>
+                <svg v-else aria-hidden="true" viewBox="0 0 18 18"><path d="M4 9.5l3.5 3.5L14 5.5" /></svg>
+                <b class="visually-hidden" aria-live="polite">{{ copied ? 'Copied' : '' }}</b>
+              </button>
+            </div>
           </div>
 
-          <div class="connection-pill" aria-label="Mysterria server details">
-            <span class="connection-status">
-              <i class="connection-status__dot" :class="`is-${status.state}`" aria-hidden="true" />
-              <small aria-live="polite">{{ statusLabel }}</small>
-            </span>
-            <strong class="connection-address">{{ MYSTERRIA_ADDRESS }}</strong>
-            <button
-              class="connection-copy"
-              type="button"
-              :aria-label="copied ? 'Server address copied' : 'Copy server address'"
-              @click="copyAddress"
-            >
-              <svg v-if="!copied" aria-hidden="true" viewBox="0 0 18 18"><rect x="6.5" y="6.5" width="8" height="8" rx="1.5" /><path d="M11.5 3.5h-6a2 2 0 0 0-2 2v6" /></svg>
-              <svg v-else aria-hidden="true" viewBox="0 0 18 18"><path d="M4 9.5l3.5 3.5L14 5.5" /></svg>
-              <b class="visually-hidden" aria-live="polite">{{ copied ? 'Copied' : '' }}</b>
-            </button>
-          </div>
+          <RouterLink class="hero-link-quiet" :to="latestSlug ? `/news/${latestSlug}` : '/news'">
+            <span>Latest changelog</span>
+            <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l4.5 4.5" /></svg>
+          </RouterLink>
         </div>
 
         <figure class="hero-plate">
@@ -221,7 +221,7 @@ onUnmounted(() => {
 .hero {
   --hero-progress: 0;
   position: relative;
-  min-height: 172svh;
+  min-height: 106svh;
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -333,17 +333,19 @@ onUnmounted(() => {
 }
 
 .hero-actions {
-  display: flex;
-  flex-wrap: wrap;
+  max-width: 620px;
+  display: grid;
+  grid-template-columns: minmax(170px, .72fr) minmax(250px, 1.28fr);
   align-items: center;
   gap: 12px;
-  margin: 0 0 30px;
+  margin: 0 0 10px;
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .8s .38s cubic-bezier(.22, 1, .36, 1), transform .8s .38s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-action {
+  min-width: 0;
   min-height: 52px;
   display: inline-flex;
   align-items: center;
@@ -388,26 +390,13 @@ onUnmounted(() => {
 .hero-action--primary:hover svg { transform: translateX(3px); }
 .hero-action--primary:active { box-shadow: 0 8px 18px rgba(116, 88, 232, .26); transform: translateY(0); }
 
-.hero-action--ghost {
-  color: var(--primary);
-  border: 1px solid rgba(116, 88, 232, .42);
-  background: transparent;
-}
-.hero-action--ghost:hover {
-  color: var(--primary-deep);
-  border-color: var(--primary);
-  background: var(--primary-tint);
-  transform: translateY(-2px);
-}
-.hero-action--ghost:hover svg { transform: scale(1.08); }
-.hero-action--ghost:active { transform: translateY(0); }
-
 .hero-link-quiet {
-  display: none;
+  width: fit-content;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 0 6px;
-  min-height: 52px;
+  min-height: 28px;
+  padding: 0 4px;
   color: var(--ink-muted);
   font-size: .82rem;
   font-weight: 700;
@@ -427,7 +416,7 @@ onUnmounted(() => {
 .hero-link-quiet:hover svg { transform: translateX(3px); }
 
 .connection-pill {
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
   display: inline-flex;
   flex-wrap: wrap;
@@ -435,7 +424,7 @@ onUnmounted(() => {
   gap: 14px;
   padding: 10px 12px 10px 18px;
   border: 1px solid var(--hairline);
-  border-radius: 999px;
+  border-radius: 16px;
   background: var(--surface-glass);
   backdrop-filter: blur(14px) saturate(1.05);
   box-shadow: 0 10px 30px rgba(34, 28, 20, .08);
@@ -619,7 +608,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
-  .hero { min-height: 150svh; }
+  .hero { min-height: 106svh; }
   .hero-sticky { min-height: 100svh; }
   .hero-content {
     grid-template-columns: 1fr;
@@ -631,8 +620,8 @@ onUnmounted(() => {
   .hero-eyebrow { margin-bottom: 12px; font-size: .66rem; }
   .hero h1 { font-size: clamp(42px, 12.5vw, 68px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
-  .hero-actions { gap: 9px; margin-bottom: 22px; }
-  .hero-action { flex: 1 1 170px; min-height: 48px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
+  .hero-actions { grid-template-columns: 1fr; gap: 9px; margin-bottom: 8px; }
+  .hero-action { min-height: 48px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
   .connection-pill { padding: 8px 9px 8px 15px; gap: 11px; }
   .connection-address { font-size: .8rem; }
   .connection-copy { width: 36px; height: 36px; }
@@ -654,7 +643,7 @@ onUnmounted(() => {
   .hero-content { position: relative; inset: auto; width: 100%; padding: 0; transform: none; opacity: 1; }
   .hero h1 { font-size: clamp(34px, 10.5vw, 46px); }
   .hero-summary { margin-bottom: 18px; font-size: .82rem; }
-  .hero-actions { margin-bottom: 16px; }
+  .hero-actions { margin-bottom: 8px; }
   .scroll-cue { display: none; }
 }
 
