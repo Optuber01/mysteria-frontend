@@ -10,9 +10,9 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 type ParticleMode = 'sparkles' | 'bubbles' | 'aura' | 'burst';
 type Color = readonly [number, number, number];
 
-const GOLD: Color = [223, 185, 104];
-const PALE_GOLD: Color = [240, 211, 140];
-const GREEN: Color = [131, 188, 162];
+const VIOLET: Color = [139, 118, 232];
+const CHAMPAGNE: Color = [217, 180, 90];
+const TEAL: Color = [110, 168, 158];
 const TAU = Math.PI * 2;
 const SEED = 0x5eedcafe;
 
@@ -102,7 +102,7 @@ function newParticle(): Particle {
     vy: 0,
     radius: 1,
     baseAlpha: 0.5,
-    color: GOLD,
+    color: VIOLET,
     phase: 0,
     twinkle: 0,
     baseX: 0,
@@ -136,8 +136,8 @@ function createParticle(rng: () => number): Particle {
       p.vx = (rng() - 0.5) * 14;
       p.vy = -(2 + rng() * 9);
       p.radius = 1 + rng() * 1.7;
-      p.baseAlpha = 0.3 + rng() * 0.55;
-      p.color = rng() < 0.6 ? GOLD : PALE_GOLD;
+      p.baseAlpha = 0.22 + rng() * 0.4;
+      p.color = rng() < 0.6 ? VIOLET : CHAMPAGNE;
       p.phase = rng() * TAU;
       p.twinkle = 0.6 + rng() * 1.6;
       return p;
@@ -150,8 +150,8 @@ function createParticle(rng: () => number): Particle {
       p.y = height * (0.55 + rng() * 0.6);
       p.vy = -(14 + rng() * 22);
       p.radius = 2 + rng() * 3.4;
-      p.baseAlpha = 0.4 + rng() * 0.4;
-      p.color = rng() < 0.62 ? GREEN : rng() < 0.5 ? GOLD : PALE_GOLD;
+      p.baseAlpha = 0.3 + rng() * 0.3;
+      p.color = rng() < 0.62 ? TEAL : rng() < 0.5 ? VIOLET : CHAMPAGNE;
       p.phase = rng() * TAU;
       p.wobble = 6 + rng() * 12;
       p.wobbleFreq = 0.8 + rng() * 1.4;
@@ -163,8 +163,8 @@ function createParticle(rng: () => number): Particle {
       p.orbitB = p.orbitA * (0.5 + rng() * 0.2);
       p.angle = rng() * TAU;
       p.dirSpeed = (rng() < 0.5 ? -1 : 1) * (0.22 + rng() * 0.4);
-      p.baseAlpha = 0.35 + rng() * 0.5;
-      p.color = rng() < 0.55 ? GOLD : PALE_GOLD;
+      p.baseAlpha = 0.26 + rng() * 0.34;
+      p.color = rng() < 0.55 ? VIOLET : CHAMPAGNE;
       p.phase = rng() * TAU;
       p.twinkle = 0.5 + rng() * 1.2;
       p.tailLen = 14 + rng() * 20;
@@ -187,8 +187,8 @@ function createBurstParticle(rng: () => number): Particle {
   p.vx = Math.cos(angle) * speed;
   p.vy = Math.sin(angle) * speed;
   p.radius = 1.2 + rng() * 2.2;
-  p.baseAlpha = 0.75 + rng() * 0.25;
-  p.color = rng() < 0.55 ? GOLD : rng() < 0.85 ? PALE_GOLD : GREEN;
+  p.baseAlpha = 0.6 + rng() * 0.3;
+  p.color = rng() < 0.55 ? VIOLET : rng() < 0.85 ? CHAMPAGNE : TEAL;
   p.maxLife = maxLife;
   p.life = maxLife;
   p.drag = 0.93;

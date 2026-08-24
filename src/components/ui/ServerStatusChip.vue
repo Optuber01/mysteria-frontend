@@ -50,16 +50,17 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
-  background: color-mix(in srgb, var(--myst-bg) 70%, transparent);
-  border: 1px solid color-mix(in srgb, var(--myst-gold) 20%, transparent);
-  border-radius: 4px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, .78);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 999px;
   cursor: pointer;
-  color: var(--myst-ink-muted);
+  color: var(--ink, #221c14);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   letter-spacing: 0.5px;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   white-space: nowrap;
   position: relative;
   overflow: hidden;
@@ -67,9 +68,9 @@ onUnmounted(() => {
 }
 
 .server-chip:hover {
-  border-color: color-mix(in srgb, var(--myst-gold) 60%, transparent);
-  color: var(--myst-ink-strong);
-  background: color-mix(in srgb, var(--myst-gold) 9%, var(--myst-bg));
+  border-color: color-mix(in srgb, var(--primary, #7458e8) 40%, transparent);
+  color: var(--ink, #221c14);
+  background: var(--primary-tint, rgba(116, 88, 232, .12));
 }
 
 .status-dot {
@@ -81,12 +82,12 @@ onUnmounted(() => {
 }
 
 .status-dot.online {
-  background: #4ade80;
-  box-shadow: 0 0 5px rgba(74, 222, 128, 0.6);
+  background: var(--live, #34c77b);
+  box-shadow: 0 0 5px rgba(52, 199, 123, 0.55);
 }
 
 .status-dot.offline {
-  background: #52525b;
+  background: var(--ink-muted, #756b5c);
 }
 
 .chip-ip {
@@ -94,7 +95,7 @@ onUnmounted(() => {
 }
 
 .chip-players {
-  color: #4ade80;
+  color: var(--live, #34c77b);
   font-size: 10px;
   opacity: 0.85;
 }
@@ -127,8 +128,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--myst-gold) 15%, var(--myst-bg));
-  color: var(--myst-gold);
+  background: var(--primary-tint, rgba(116, 88, 232, .12));
+  color: var(--primary, #7458e8);
   font-size: 12px;
 }
 

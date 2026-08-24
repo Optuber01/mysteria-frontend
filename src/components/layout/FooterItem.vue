@@ -4,6 +4,7 @@
       <RouterLink class="footer-brand" to="/" aria-label="Mysterria home">
         <IconLogo aria-hidden="true" />
         <span>Mysterria</span>
+        <i class="footer-brand__dot" aria-hidden="true"></i>
       </RouterLink>
 
       <div class="footer-links-stack">
@@ -81,8 +82,8 @@ const statusLabel = computed(() => {
   z-index: 2;
   overflow: hidden;
   padding: 54px clamp(20px, 5vw, 76px) 22px;
-  color: #fcf9f2;
-  background: #08151a;
+  color: var(--ink, #221c14);
+  background: linear-gradient(180deg, rgba(245, 238, 225, 0) 0%, #F5EEE1 160px);
   isolation: isolate;
 }
 
@@ -94,8 +95,8 @@ const statusLabel = computed(() => {
   gap: 28px;
   margin: 0 auto;
   padding: 22px 0;
-  border-top: 1px solid rgba(252, 249, 242, .1);
-  border-bottom: 1px solid rgba(252, 249, 242, .1);
+  border-top: 1px solid var(--hairline, #eae1d0);
+  border-bottom: 1px solid var(--hairline, #eae1d0);
 }
 
 .footer-brand {
@@ -106,10 +107,18 @@ const statusLabel = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #fcf9f2;
+  color: var(--ink, #221c14);
 }
-.footer-brand:hover { color: #fcf9f2; }
-.footer-brand :deep(img) { width: 40px; height: 40px; }
+.footer-brand:hover,
+.footer-brand:focus-visible { color: var(--ink, #221c14); }
+.footer-brand :deep(img) { width: 40px; height: 40px; filter: none; }
+.footer-brand__dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--primary, #7458e8);
+}
 .footer-brand span { font: 700 1.32rem/1 "IBM Plex Sans Condensed", sans-serif; }
 
 .footer-links-stack {
@@ -131,9 +140,11 @@ const statusLabel = computed(() => {
   align-items: center;
   gap: 6px;
   padding: 4px 9px;
-  border: 1px solid rgba(252, 249, 242, .1);
-  border-radius: 4px;
-  color: rgba(252, 249, 242, .58);
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 999px;
+  color: var(--ink-muted, #756b5c);
+  background: var(--surface-glass, rgba(255, 255, 255, .86));
+  backdrop-filter: blur(14px);
   font: 500 .56rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -145,15 +156,15 @@ const statusLabel = computed(() => {
   height: 6px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #52525b;
+  background: var(--ink-muted, #756b5c);
 }
 
 .footer-status.is-online .footer-status__dot {
-  background: #4ade80;
-  box-shadow: 0 0 5px rgba(74, 222, 128, .45);
+  background: var(--live, #34c77b);
+  box-shadow: 0 0 5px rgba(52, 199, 123, .45);
 }
 
-.footer-status.is-online { color: rgba(252, 249, 242, .72); }
+.footer-status.is-online { color: var(--ink, #221c14); }
 
 .footer-meta__icon {
   width: 32px;
@@ -161,17 +172,19 @@ const statusLabel = computed(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(252, 249, 242, .12);
-  border-radius: 8px;
-  color: rgba(252, 249, 242, .66);
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 999px;
+  color: var(--ink-muted, #756b5c);
+  background: var(--surface-glass, rgba(255, 255, 255, .86));
+  backdrop-filter: blur(14px);
   transition: color .25s, border-color .25s, background-color .25s;
 }
 
 .footer-meta__icon:hover,
 .footer-meta__icon:focus-visible {
-  color: var(--myst-gold-soft);
-  border-color: rgba(198, 155, 82, .45);
-  background: rgba(198, 155, 82, .08);
+  color: var(--primary, #7458e8);
+  border-color: color-mix(in srgb, var(--primary, #7458e8) 40%, transparent);
+  background: var(--primary-tint, rgba(116, 88, 232, .12));
 }
 
 .footer-nav {
@@ -189,12 +202,14 @@ const statusLabel = computed(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: rgba(252, 249, 242, .72);
+  color: var(--ink-muted, #756b5c);
   font: 600 .65rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .07em;
   text-transform: uppercase;
   transition: color .25s;
 }
+
+.footer-nav a { color: var(--ink, #221c14); }
 
 .footer-nav a::after,
 .footer-legal a::after {
@@ -204,7 +219,7 @@ const statusLabel = computed(() => {
   right: 8px;
   bottom: 13px;
   height: 1px;
-  background: var(--myst-gold-soft);
+  background: var(--primary, #7458e8);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform .3s cubic-bezier(.22, 1, .36, 1);
@@ -213,7 +228,7 @@ const statusLabel = computed(() => {
 .footer-nav a:hover,
 .footer-nav a:focus-visible,
 .footer-legal a:hover,
-.footer-legal a:focus-visible { color: var(--myst-gold-soft); }
+.footer-legal a:focus-visible { color: var(--ink, #221c14); }
 
 .footer-nav a:hover::after,
 .footer-nav a:focus-visible::after,
@@ -221,6 +236,7 @@ const statusLabel = computed(() => {
 .footer-legal a:focus-visible::after { transform: scaleX(1); }
 
 .footer-legal {
+  position: relative;
   max-width: 1440px;
   display: flex;
   align-items: center;
@@ -228,11 +244,19 @@ const statusLabel = computed(() => {
   gap: 20px;
   margin: 0 auto;
   padding-top: 18px;
-  border-top: 1px solid rgba(198, 155, 82, .18);
+}
+.footer-legal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--sunset, linear-gradient(90deg, #ff7a59, #ffc15e));
 }
 .footer-legal p {
   margin: 0;
-  color: rgba(252, 249, 242, .66);
+  color: var(--ink-muted, #756b5c);
   font: 500 .59rem/1.5 "IBM Plex Mono", monospace;
   letter-spacing: .04em;
   text-transform: uppercase;

@@ -365,7 +365,7 @@ onUnmounted(() => {
      This removes the otherwise empty hero tail without shortening its motion. */
   margin-top: -100svh;
   min-height: 500svh;
-  color: #fcf9f2;
+  color: var(--ink, #221c14);
   background: transparent;
   isolation: isolate;
 }
@@ -384,14 +384,7 @@ onUnmounted(() => {
   height: 100svh;
   min-height: 620px;
   overflow: hidden;
-  background: linear-gradient(
-    180deg,
-    rgba(14, 34, 36, 0) 0%,
-    rgba(14, 34, 36, 0.22) 12%,
-    rgba(14, 34, 36, 0.72) 34%,
-    #0e2224 62%,
-    #0e2224 100%
-  );
+  background: transparent;
 }
 .progression-v3__backdrop,
 .progression-v3__wash {
@@ -399,7 +392,7 @@ onUnmounted(() => {
   inset: 0;
 }
 .progression-v3__backdrop {
-  opacity: clamp(0, calc(var(--journey) * 22), 1);
+  opacity: clamp(0, calc(var(--journey) * 22), 0.18);
   transform: scale(calc(1.03 + var(--journey) * 0.05)) translate3d(0, calc(var(--journey) * -1.2%), 0);
   transform-origin: 50% 56%;
 }
@@ -409,14 +402,15 @@ onUnmounted(() => {
   display: block;
   object-fit: cover;
   object-position: center 56%;
-  filter: saturate(0.8) contrast(1.05) brightness(0.5);
+  filter: saturate(0.72) contrast(0.92) brightness(1.1);
+  mix-blend-mode: multiply;
 }
 .progression-v3__wash {
   z-index: 1;
   opacity: clamp(0, calc(var(--journey) * 18), 1);
   background:
-    linear-gradient(90deg, rgba(4, 13, 15, 0.92) 0%, rgba(4, 15, 16, 0.55) 34%, rgba(4, 15, 16, 0.22) 68%, rgba(3, 10, 12, 0.78) 100%),
-    linear-gradient(180deg, rgba(2, 8, 10, 0.6), transparent 32%, rgba(2, 8, 10, 0.9));
+    linear-gradient(90deg, rgba(250, 246, 238, 0.88) 0%, rgba(250, 246, 238, 0.42) 36%, rgba(250, 246, 238, 0.58) 100%),
+    linear-gradient(180deg, rgba(250, 246, 238, 0.92), rgba(250, 246, 238, 0.38) 34%, rgba(250, 246, 238, 0.94));
 }
 
 .progression-v3__threshold-fog {
@@ -428,8 +422,8 @@ onUnmounted(() => {
   height: min(58vh, 560px);
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 18% 42%, rgba(111, 129, 126, 0.48), transparent 42%),
-    radial-gradient(ellipse at 76% 38%, rgba(119, 134, 130, 0.42), transparent 46%);
+    radial-gradient(ellipse at 18% 42%, rgba(250, 246, 238, 0.95), transparent 44%),
+    radial-gradient(ellipse at 76% 38%, rgba(232, 225, 237, 0.85), transparent 48%);
   filter: blur(0.2px);
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
@@ -442,7 +436,7 @@ onUnmounted(() => {
 .progression-v3__threshold-fog i {
   position: absolute;
   border-radius: 50%;
-  background: rgba(128, 145, 141, 0.18);
+  background: rgba(250, 246, 238, 0.8);
   filter: blur(32px);
   content: '';
 }
@@ -482,24 +476,26 @@ onUnmounted(() => {
   left: clamp(18px, 4vw, 68px);
   display: grid;
   gap: 7px;
-  opacity: clamp(0, calc((var(--entry) - .34) * 2.5 * clamp(0, var(--journey) * 6, 1)), 1);
+  opacity: clamp(0, calc((var(--entry) - 0.2) * 2.8), 1);
 }
 .progression-v3__heading p,
 .chapter-copy__kicker {
   margin: 0;
-  color: #dfb968;
-  font: 700 0.72rem/1 "IBM Plex Mono", monospace;
+  color: #87691d;
+  font: 700 0.72rem/1 "Manrope", sans-serif;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .progression-v3__heading h2 {
   margin: 0;
-  font: 650 clamp(1.25rem, 1.9vw, 1.7rem)/1.05 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -0.02em;
+  color: var(--ink, #221c14);
+  font: 800 clamp(1.35rem, 2vw, 1.8rem)/1.08 "Manrope", sans-serif;
+  letter-spacing: -0.025em;
 }
 .progression-v3__heading span {
-  color: rgba(252, 249, 242, 0.6);
-  font: 500 0.72rem/1.3 "IBM Plex Mono", monospace;
+  color: var(--ink-muted, #756b5c);
+  font: 600 0.72rem/1.3 "Manrope", sans-serif;
+  letter-spacing: 0.08em;
 }
 
 .progression-v3__layout {
@@ -510,7 +506,7 @@ onUnmounted(() => {
   grid-template-columns: minmax(240px, 0.55fr) minmax(560px, 1.45fr);
   align-items: center;
   gap: clamp(26px, 4vw, 72px);
-  opacity: clamp(0, calc((var(--entry) - 0.68) * 3.125), 1);
+  opacity: clamp(0, calc((var(--entry) - 0.52) * 3.2), 1);
 }
 .chapter-copy {
   min-width: 0;
@@ -519,15 +515,15 @@ onUnmounted(() => {
 .chapter-copy h3 {
   max-width: 420px;
   margin: 14px 0 14px;
-  color: #fcf9f2;
-  font: 650 clamp(2rem, 3.6vw, 3.6rem)/0.92 "IBM Plex Sans Condensed", sans-serif;
-  letter-spacing: -0.045em;
+  color: var(--ink, #221c14);
+  font: 800 clamp(2rem, 3.6vw, 3.4rem)/0.98 "Manrope", sans-serif;
+  letter-spacing: -0.03em;
   text-wrap: balance;
 }
 .chapter-copy__body {
   max-width: 400px;
   margin: 0;
-  color: rgba(252, 249, 242, 0.74);
+  color: var(--ink-muted, #756b5c);
   font-size: clamp(0.85rem, 1vw, 0.95rem);
   line-height: 1.6;
 }
@@ -537,17 +533,18 @@ onUnmounted(() => {
   gap: 9px;
   margin: 18px 0 0;
   padding-top: 14px;
-  border-top: 1px solid rgba(252, 249, 242, 0.14);
-  color: rgba(240, 211, 140, 0.75);
-  font: 500 0.72rem/1.5 "IBM Plex Mono", monospace;
+  border-top: 1px solid var(--hairline, #eae1d0);
+  color: var(--ink-muted, #756b5c);
+  font: 600 0.74rem/1.5 "Manrope", sans-serif;
+  letter-spacing: 0.04em;
 }
 .chapter-copy__hint i {
   flex: 0 0 auto;
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #dfb968;
-  box-shadow: 0 0 10px rgba(223, 185, 104, 0.8);
+  background: var(--primary, #7458e8);
+  box-shadow: 0 0 10px rgba(116, 88, 232, 0.35);
 }
 
 .progression-v3__stage {
@@ -571,7 +568,7 @@ onUnmounted(() => {
   left: clamp(18px, 4vw, 68px);
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  border-top: 1px solid rgba(252, 249, 242, 0.13);
+  border-top: 1px solid var(--hairline, #eae1d0);
 }
 .progression-nav button {
   min-width: 44px;
@@ -582,7 +579,7 @@ onUnmounted(() => {
   gap: 8px;
   padding: 5px 8px;
   border: 0;
-  color: rgba(252, 249, 242, 0.5);
+  color: var(--ink-muted, #756b5c);
   background: transparent;
   cursor: pointer;
   text-align: left;
@@ -594,24 +591,31 @@ onUnmounted(() => {
   border-radius: 50%;
 }
 .progression-nav button.active {
-  color: #fcf9f2;
+  color: var(--primary, #7458e8);
 }
 .progression-nav button.active > i {
-  border-color: #dfb968;
-  background: #dfb968;
+  border-color: var(--primary, #7458e8);
+  background: var(--primary, #7458e8);
   transform: scale(1.35);
 }
 .progression-nav button.complete {
-  color: #9bcbb5;
+  color: var(--ink, #221c14);
+}
+.progression-nav button.complete > i {
+  border-color: var(--champagne, #d9b45a);
+  background: var(--champagne, #d9b45a);
+  transform: scale(1.2);
 }
 .progression-nav span {
-  font: 600 0.72rem/1 "IBM Plex Mono", monospace;
+  font: 700 0.68rem/1 "Manrope", sans-serif;
+  letter-spacing: 0.08em;
 }
 .progression-nav strong {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
+  font-weight: 600;
 }
 .progression-nav button:focus-visible {
-  outline: 3px solid #f0d38c;
+  outline: 3px solid var(--primary, #7458e8);
   outline-offset: 2px;
 }
 .progression-line {
@@ -621,12 +625,12 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   height: 3px;
-  background: rgba(252, 249, 242, 0.08);
+  background: rgba(34, 28, 20, 0.08);
 }
 .progression-line i {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, #35775f, #dfb968);
+  background: var(--primary, #7458e8);
 }
 
 .progression-static {
@@ -707,7 +711,7 @@ onUnmounted(() => {
   .progression-v3 {
     min-height: auto;
     padding: clamp(96px, 12vw, 140px) clamp(16px, 4vw, 58px);
-    background: linear-gradient(145deg, #071416, #102724);
+    background: transparent;
   }
   .progression-v3__sticky {
     position: relative;
@@ -747,26 +751,29 @@ onUnmounted(() => {
     grid-template-columns: 52px minmax(0, 1fr);
     gap: clamp(16px, 4vw, 40px);
     padding: clamp(24px, 4.5vw, 42px) 0;
-    border-top: 1px solid rgba(252, 249, 242, 0.13);
+    border-top: 1px solid var(--hairline, #eae1d0);
   }
   .progression-static li > span {
-    color: #dfb968;
-    font: 600 0.72rem/1 "IBM Plex Mono", monospace;
+    color: #87691d;
+    font: 700 0.72rem/1 "Manrope", sans-serif;
+    letter-spacing: 0.12em;
   }
   .progression-static small {
-    color: #70a88e;
-    font: 600 0.72rem/1 "IBM Plex Mono", monospace;
-    letter-spacing: 0.12em;
+    color: var(--primary-deep, #5f46d6);
+    font: 700 0.72rem/1 "Manrope", sans-serif;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
   .progression-static h3 {
     margin: 9px 0 10px;
-    font: 600 clamp(1.8rem, 5vw, 3rem)/0.95 "IBM Plex Sans Condensed", sans-serif;
+    color: var(--ink, #221c14);
+    font: 800 clamp(1.8rem, 5vw, 3rem)/1 "Manrope", sans-serif;
+    letter-spacing: -0.03em;
   }
   .progression-static p {
     max-width: 620px;
     margin: 0;
-    color: rgba(252, 249, 242, 0.7);
+    color: var(--ink-muted, #756b5c);
     font-size: 0.9rem;
     line-height: 1.6;
   }

@@ -140,8 +140,8 @@ function inspect(id: string, event: Event) {
   align-items: center;
   gap: 12px;
   margin: 0;
-  color: #dfb968;
-  font: 650 clamp(0.68rem, 1vw, 0.78rem)/1 "IBM Plex Mono", monospace;
+  color: #87691d;
+  font: 700 clamp(0.68rem, 1vw, 0.78rem)/1 "Manrope", sans-serif;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -154,7 +154,7 @@ function inspect(id: string, event: Event) {
 .book-scene__caption::after {
   width: clamp(24px, 6vw, 70px);
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(223, 185, 104, 0.55));
+  background: linear-gradient(90deg, transparent, rgba(217, 180, 90, 0.55));
   content: '';
 }
 
@@ -173,7 +173,7 @@ function inspect(id: string, event: Event) {
   z-index: -1;
   inset: 10% 4% 0;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(223, 185, 104, 0.24), rgba(72, 133, 110, 0.12) 48%, transparent 72%);
+  background: radial-gradient(ellipse, rgba(217, 180, 90, 0.2), rgba(116, 88, 232, 0.1) 48%, transparent 72%);
   filter: blur(20px);
   opacity: var(--glow-opacity, 0);
   pointer-events: none;
@@ -216,9 +216,9 @@ function inspect(id: string, event: Event) {
 
 .formula-hotspot:hover,
 .formula-hotspot:focus-visible {
-  border-color: rgba(143, 93, 54, 0.5);
+  border-color: rgba(116, 88, 232, 0.45);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(240, 211, 140, 0.28);
+  box-shadow: 0 0 0 3px rgba(116, 88, 232, 0.16);
 }
 
 .sr-only {
@@ -239,8 +239,8 @@ function inspect(id: string, event: Event) {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(240, 211, 140, 0.9), transparent 70%);
-  opacity: calc(var(--mote-opacity, 0) * 0.65);
+  background: radial-gradient(circle, rgba(217, 180, 90, 0.65), transparent 70%);
+  opacity: calc(var(--mote-opacity, 0) * 0.55);
   animation: mote-drift 7s ease-in-out infinite;
 }
 .book-scene__motes i:nth-child(1) { top: 29%; left: 29%; }

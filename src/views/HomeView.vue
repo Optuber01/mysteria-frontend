@@ -129,8 +129,8 @@ onUnmounted(() => {
 .mysterria-home {
   min-width: 0;
   min-height: 100vh;
-  color: #102924;
-  background: #08151a;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--journey-top) 0%, var(--journey-mid) 55%, var(--journey-end) 100%);
   font-family: "Manrope", sans-serif;
 }
 
@@ -149,19 +149,20 @@ onUnmounted(() => {
   align-items: center;
   padding: 0 16px;
   border-radius: 9px;
-  color: #102924;
-  background: #fcf9f2;
+  color: var(--ink);
+  background: var(--surface);
   font-size: .78rem;
   font-weight: 750;
   transform: translateY(-150%);
 }
 
 .skip-link:focus { transform: none; }
+.skip-link:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .deferred-chapter { min-width: 0; }
-.deferred-chapter--pathways.is-pending { min-height: 290svh; background: #102420; }
-.deferred-chapter--world.is-pending { min-height: 610svh; background: #0d1f22; }
-.deferred-chapter--join.is-pending { min-height: 120svh; background: #071416; }
+.deferred-chapter--pathways.is-pending { min-height: 290svh; background: #F2EAD9; }
+.deferred-chapter--world.is-pending { min-height: 610svh; background: #EFE6D3; }
+.deferred-chapter--join.is-pending { min-height: 120svh; background: #FAF5EC; }
 
 @media (prefers-reduced-motion: reduce) {
   .mysterria-home :deep(*) {

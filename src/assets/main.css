@@ -2,6 +2,26 @@
 /* Default: dark */
 
 :root {
+    --journey-top: #FBF7EF;
+    --journey-mid: #F5EEE1;
+    --journey-end: #FAF5EC;
+    --surface: #FFFFFF;
+    --surface-glass: rgba(255, 255, 255, .86);
+    --ink: #221C14;
+    --ink-muted: #756B5C;
+    --hairline: #EAE1D0;
+    --primary: #7458E8;
+    --primary-deep: #5F46D6;
+    --primary-tint: rgba(116, 88, 232, .12);
+    --sunset: linear-gradient(90deg, #FF7A59, #FFC15E);
+    --coral: #FF7A59;
+    --sunset-deep: #E85B33;
+    --champagne: #D9B45A;
+    --live: #34C77B;
+    --danger: #D6453D;
+}
+
+:root {
     --myst-bg: #08151a;
     --myst-bg-2: #0e2224;
     --myst-ink: #f5f0e6;
@@ -429,9 +449,8 @@ h6,
 }
 
 *:focus-visible {
-    outline: 3px solid var(--myst-gold);
-    outline-offset: 2px;
-    box-shadow: 0 0 0 2px rgba(8, 21, 26, 0.85);
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
 }
 
 html {

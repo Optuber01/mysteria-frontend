@@ -265,8 +265,9 @@ async function createViewer() {
     });
     viewer = instance;
     instance.background = null;
-    instance.globalLight.intensity = 2.35;
-    instance.cameraLight.intensity = 0.72;
+    // Brighter ambient + camera fill so the Steve figure reads on the ivory stage.
+    instance.globalLight.intensity = 3.05;
+    instance.cameraLight.intensity = 1.0;
 
     resizeObserver = new ResizeObserver(sizeViewer);
     resizeObserver.observe(host.value);
@@ -332,7 +333,7 @@ onUnmounted(() => {
   width: min(56%, 260px);
   aspect-ratio: 2.6;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(22, 53, 47, 0.34), transparent 72%);
+  background: radial-gradient(ellipse, rgba(60, 48, 30, 0.2), transparent 72%);
   content: '';
   opacity: 0;
   transform: translateX(-50%) scale(0.78);
@@ -347,7 +348,7 @@ onUnmounted(() => {
 }
 
 .minecraft-player--advance::before {
-  background: radial-gradient(ellipse, rgba(198, 155, 82, 0.38), transparent 72%);
+  background: radial-gradient(ellipse, rgba(198, 155, 82, 0.3), transparent 72%);
 }
 
 .minecraft-player__canvas {
@@ -355,7 +356,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   opacity: 0;
-  filter: brightness(1.12) saturate(1.08) drop-shadow(0 24px 22px rgba(2, 9, 10, 0.3));
+  filter: brightness(1.04) saturate(1.05) drop-shadow(0 24px 22px rgba(50, 40, 26, 0.26));
   transition: opacity 0.14s ease;
 }
 

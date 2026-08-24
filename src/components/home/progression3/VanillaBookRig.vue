@@ -773,6 +773,26 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 
+.vanilla-book-rig {
+  position: relative;
+}
+
+/* warm ground bloom under the transparent-canvas book so it sits on ivory */
+.vanilla-book-rig::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: 3%;
+  width: 64%;
+  aspect-ratio: 2.4;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(60, 48, 30, 0.16), transparent 70%);
+  filter: blur(14px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
 .vanilla-book-rig canvas {
   image-rendering: pixelated;
 }

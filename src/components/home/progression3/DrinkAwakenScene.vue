@@ -202,7 +202,7 @@ const auraAnchorStyle = computed<CSSProperties>(() => ({
 const circleStyle = computed<CSSProperties>(() => ({
   opacity: (auraOpacity.value * 0.92).toFixed(4),
   transform: `translate(-50%, 50%) rotate(${(final.value ? 96 : p.value * 140).toFixed(2)}deg) scale(${(0.86 + 0.14 * auraOpacity.value).toFixed(4)})`,
-  filter: `brightness(${(0.5 + 0.5 * auraOpacity.value).toFixed(3)}) saturate(${(0.85 + 0.2 * auraOpacity.value).toFixed(3)}) drop-shadow(0 0 ${(8 + 22 * auraOpacity.value).toFixed(1)}px rgba(223,185,104,${(0.22 * auraOpacity.value).toFixed(3)}))`,
+  filter: `brightness(${(0.5 + 0.5 * auraOpacity.value).toFixed(3)}) saturate(${(0.85 + 0.2 * auraOpacity.value).toFixed(3)}) drop-shadow(0 0 ${(8 + 22 * auraOpacity.value).toFixed(1)}px rgba(198,155,82,${(0.22 * auraOpacity.value).toFixed(3)}))`,
 }));
 
 const glowStyle = computed<CSSProperties>(() => ({
@@ -266,20 +266,19 @@ const ctaStyle = computed<CSSProperties>(() => ({
 
 <style scoped>
 .drink-scene {
-  --gold: #dfb968;
-  --pale-gold: #f0d38c;
-  --green: #83bca2;
-  --bg: #071719;
+  --gold: #c69b52;
+  --pale-gold: #87691d;
+  --green: #6ea89e;
   --ease: cubic-bezier(.22, 1, .36, 1);
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  color: #fcf9f2;
-  font-family: "IBM Plex Mono", monospace;
+  color: var(--ink, #221c14);
+  font-family: "Manrope", sans-serif;
 }
 
-/* shared hotspot base: 44px min touch target, gold focus ring */
+/* shared hotspot base: 44px min touch target, violet focus ring */
 .hotspot {
   border: 0;
   background: transparent;
@@ -288,7 +287,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   font-family: inherit;
 }
 .hotspot:focus-visible {
-  outline: 3px solid #f0d38c;
+  outline: 3px solid var(--primary, #7458e8);
   outline-offset: 3px;
 }
 
@@ -307,7 +306,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   width: min(320px, 44vw);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(223, 185, 104, .34), rgba(131, 190, 164, .16) 46%, transparent 72%);
+  background: radial-gradient(circle, rgba(217, 180, 90, .3), rgba(116, 88, 232, .14) 46%, transparent 72%);
   filter: blur(18px);
   transform-origin: 50% 50%;
   will-change: transform, opacity;
@@ -325,7 +324,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #ffe49b, #d6a818 70%);
+  background: linear-gradient(135deg, #eeda9f, #c69b52 70%);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
@@ -333,7 +332,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  filter: drop-shadow(0 0 12px rgba(223, 185, 104, .7));
+  filter: drop-shadow(0 0 12px rgba(198, 155, 82, .5));
 }
 .drink-scene__fx {
   position: absolute;
@@ -368,7 +367,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   display: block;
   width: 64px;
   height: 64px;
-  filter: drop-shadow(0 5px 7px rgba(0, 0, 0, .56));
+  filter: drop-shadow(0 5px 7px rgba(60, 48, 30, .3));
   transition: filter .2s ease;
 }
 .potion__sprite img {
@@ -380,7 +379,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
 }
 .potion:hover .potion__sprite,
 .potion:focus-visible .potion__sprite {
-  filter: drop-shadow(0 0 11px rgba(240, 211, 140, .8));
+  filter: drop-shadow(0 0 11px rgba(116, 88, 232, .5));
 }
 
 /* ---------- flash burst overlay ---------- */
@@ -389,7 +388,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   inset: 0;
   z-index: 30;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 42%, rgba(255, 248, 226, .95), rgba(240, 211, 140, .5) 34%, rgba(223, 185, 104, .16) 58%, transparent 80%);
+  background: radial-gradient(circle at 50% 42%, rgba(255, 252, 242, .92), rgba(240, 211, 140, .4) 34%, rgba(217, 180, 90, .14) 58%, transparent 80%);
   will-change: opacity;
 }
 .drink-scene__flash-fx {
@@ -404,39 +403,37 @@ const ctaStyle = computed<CSSProperties>(() => ({
   position: absolute;
   z-index: 40;
   width: min(332px, 30vw);
-  padding: 15px;
-  border: 1px solid rgba(223, 185, 104, .4);
-  border-radius: 13px;
-  background: linear-gradient(135deg, rgba(10, 34, 31, .98), rgba(4, 18, 20, .96));
-  box-shadow: 0 24px 48px rgba(0, 0, 0, .5), inset 0 1px rgba(240, 211, 140, .1), 0 0 30px rgba(223, 185, 104, .1);
+  padding: 18px;
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 20px;
+  background: var(--surface, #fff);
+  box-shadow: 0 24px 60px rgba(34, 28, 20, .14);
   will-change: transform, opacity;
 }
 .panel__kicker {
   margin: 0 0 4px;
-  color: var(--gold);
-  font-family: "IBM Plex Mono", monospace;
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .22em;
+  color: #87691d;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .18em;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(223, 185, 104, .35);
 }
 .panel__title {
   margin: 0;
-  color: var(--pale-gold);
-  font-family: "IBM Plex Sans Condensed", sans-serif;
+  color: var(--primary, #7458e8);
+  font-family: "Manrope", sans-serif;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.05;
-  letter-spacing: .04em;
+  letter-spacing: .05em;
   text-transform: uppercase;
-  text-shadow: 0 0 18px rgba(223, 185, 104, .45);
 }
 .panel__sub {
   margin: 4px 0 12px;
-  color: rgba(252, 249, 242, .72);
+  color: var(--ink-muted, #756b5c);
   font-size: .78rem;
-  letter-spacing: .08em;
+  font-weight: 600;
+  letter-spacing: .06em;
 }
 .panel__abilities {
   display: grid;
@@ -450,29 +447,29 @@ const ctaStyle = computed<CSSProperties>(() => ({
   min-width: 44px;
   min-height: 44px;
   padding: 9px 10px;
-  border: 1px solid rgba(131, 190, 164, .32);
-  border-radius: 10px;
-  background: rgba(7, 23, 25, .85);
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 12px;
+  background: var(--surface, #fff);
   text-align: left;
   will-change: transform, opacity;
   transition: border-color .2s ease, background-color .2s ease, box-shadow .25s ease;
 }
 .panel-ability__name {
-  color: var(--pale-gold);
+  color: var(--primary-deep, #5f46d6);
   font-size: .82rem;
-  font-weight: 600;
-  letter-spacing: .04em;
+  font-weight: 700;
+  letter-spacing: .02em;
 }
 .panel-ability__caption {
-  color: rgba(252, 249, 242, .62);
+  color: var(--ink-muted, #756b5c);
   font-size: .72rem;
   line-height: 1.35;
 }
 .panel-ability:hover,
 .panel-ability:focus-visible {
-  border-color: var(--gold);
-  background: rgba(8, 31, 31, .97);
-  box-shadow: 0 0 14px rgba(223, 185, 104, .18);
+  border-color: rgba(116, 88, 232, .45);
+  background: rgba(116, 88, 232, .05);
+  box-shadow: 0 10px 24px rgba(34, 28, 20, .1);
 }
 .panel-teaser {
   display: block;
@@ -481,11 +478,12 @@ const ctaStyle = computed<CSSProperties>(() => ({
   min-height: 44px;
   margin-top: 8px;
   padding: 8px 10px;
-  border: 1px dashed rgba(223, 185, 104, .3);
-  border-radius: 10px;
+  border: 1px dashed rgba(116, 88, 232, .35);
+  border-radius: 12px;
   background: transparent;
-  color: rgba(240, 211, 140, .68);
+  color: var(--ink-muted, #756b5c);
   font-size: .72rem;
+  font-weight: 600;
   line-height: 1.4;
   text-align: left;
   will-change: transform, opacity;
@@ -493,9 +491,9 @@ const ctaStyle = computed<CSSProperties>(() => ({
 }
 .panel-teaser:hover,
 .panel-teaser:focus-visible {
-  border-color: rgba(223, 185, 104, .6);
-  color: var(--pale-gold);
-  background: rgba(223, 185, 104, .06);
+  border-color: rgba(116, 88, 232, .6);
+  color: var(--primary-deep, #5f46d6);
+  background: rgba(116, 88, 232, .05);
 }
 
 /* ---------- CTA pill ---------- */
@@ -509,28 +507,27 @@ const ctaStyle = computed<CSSProperties>(() => ({
   justify-content: center;
   min-height: 44px;
   padding: 11px 26px;
-  border: 1px solid var(--gold);
+  border: 1px solid var(--primary, #7458e8);
   border-radius: 999px;
-  color: var(--pale-gold);
-  font-family: "IBM Plex Mono", monospace;
+  color: #fff;
   font-size: .78rem;
-  font-weight: 600;
-  letter-spacing: .18em;
+  font-weight: 700;
+  letter-spacing: .14em;
   text-transform: uppercase;
   text-decoration: none;
-  background: rgba(223, 185, 104, .08);
-  box-shadow: 0 0 18px rgba(223, 185, 104, .18);
+  background: var(--primary, #7458e8);
+  box-shadow: 0 12px 30px rgba(116, 88, 232, .28);
   white-space: nowrap;
   will-change: transform, opacity;
   transition: background-color .2s ease, box-shadow .25s ease;
 }
 .cta:hover,
 .cta:focus-visible {
-  background: rgba(223, 185, 104, .16);
-  box-shadow: 0 0 26px rgba(223, 185, 104, .34);
+  background: var(--primary-deep, #5f46d6);
+  box-shadow: 0 18px 40px rgba(95, 70, 214, .34);
 }
 .cta:focus-visible {
-  outline: 3px solid #f0d38c;
+  outline: 3px solid var(--primary, #7458e8);
   outline-offset: 3px;
 }
 

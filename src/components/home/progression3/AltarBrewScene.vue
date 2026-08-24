@@ -330,7 +330,7 @@ const items = computed<FlightItem[]>(() => {
       zIndex: String(f >= 1 ? 8 : 9),
       boxShadow:
         trailStrength > 0.02
-          ? `0 0 ${(10 + 18 * trailStrength).toFixed(0)}px ${(3 + 2 * trailStrength).toFixed(1)}px rgba(240, 211, 140, ${(0.5 * trailStrength).toFixed(3)})`
+          ? `0 0 ${(10 + 18 * trailStrength).toFixed(0)}px ${(3 + 2 * trailStrength).toFixed(1)}px rgba(217, 180, 90, ${(0.4 * trailStrength).toFixed(3)})`
           : undefined,
     };
     const labelStyle: CSSProperties = { opacity: (1 - slotBlend).toFixed(4) };
@@ -353,7 +353,7 @@ const circleStyle = computed<CSSProperties>(() => {
     top: `${compact.value ? 50 : 53}%`,
     opacity: (inValue * 0.92).toFixed(4),
     transform: `translate(-50%, -50%) rotate(${rotation.toFixed(2)}deg) scale(${(0.84 + 0.16 * inValue).toFixed(4)})`,
-    filter: `brightness(${(0.5 + 0.5 * bright).toFixed(3)}) saturate(${(0.8 + 0.3 * bright).toFixed(3)}) drop-shadow(0 0 ${(10 + 20 * bright).toFixed(1)}px rgba(198, 172, 106, ${(0.16 + 0.3 * bright).toFixed(3)}))`,
+    filter: `brightness(${(0.5 + 0.5 * bright).toFixed(3)}) saturate(${(0.8 + 0.3 * bright).toFixed(3)}) drop-shadow(0 0 ${(10 + 20 * bright).toFixed(1)}px rgba(198, 155, 82, ${(0.16 + 0.28 * bright).toFixed(3)}))`,
     pointerEvents: inValue > 0.4 ? 'auto' : 'none',
   };
 });
@@ -410,16 +410,16 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 
 <style scoped>
 .altar-scene {
-  --gold: #dfb968;
-  --pale-gold: #f0d38c;
-  --green: #83bca2;
+  --gold: #c69b52;
+  --pale-gold: #87691d;
+  --green: #6ea89e;
   --ease: cubic-bezier(.22, 1, .36, 1);
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  color: #fcf9f2;
-  font-family: "IBM Plex Mono", monospace;
+  color: var(--ink, #221c14);
+  font-family: "Manrope", sans-serif;
 }
 
 /* shared hotspot base: 44px min touch target, gold focus ring */
@@ -433,7 +433,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   font-family: inherit;
 }
 .hotspot:focus-visible {
-  outline: 3px solid var(--pale-gold);
+  outline: 3px solid var(--primary, #7458e8);
   outline-offset: 3px;
 }
 
@@ -443,7 +443,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   inset: 0;
   z-index: 20;
   pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(223, 185, 104, .09) 78%, rgba(5, 13, 14, .55) 100%);
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(217, 180, 90, .1) 78%, rgba(34, 28, 20, .12) 100%);
   animation: vignette-pulse 3s ease-in-out infinite;
 }
 @keyframes vignette-pulse {
@@ -466,7 +466,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #ffe49b, #d6a818 70%);
+  background: linear-gradient(135deg, #eeda9f, #c69b52 70%);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
@@ -475,7 +475,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
   -webkit-mask-mode: luminance;
-  filter: drop-shadow(0 0 12px rgba(223, 185, 104, .7));
+  filter: drop-shadow(0 0 12px rgba(198, 155, 82, .45));
 }
 
 /* ---------- CauldronGUI panel ---------- */
@@ -484,7 +484,13 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   z-index: 3;
   aspect-ratio: 350 / 284;
   overflow: hidden;
-  filter: drop-shadow(0 26px 30px rgba(0, 0, 0, .55));
+  border-radius: 12px;
+  /* Light matte frame: cream spread rings + hairline keep the dark in-game
+     capture reading intentionally on the ivory stage. */
+  box-shadow:
+    0 0 0 12px rgba(255, 253, 244, .95),
+    0 0 0 13px var(--hairline, #eae1d0),
+    0 30px 50px rgba(34, 28, 20, .18);
   will-change: transform, opacity;
 }
 .gui__img {
@@ -523,9 +529,9 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 }
 .gui__zone:hover,
 .gui__zone:focus-visible {
-  border-color: rgba(223, 185, 104, .65);
-  background: rgba(240, 211, 140, .12);
-  box-shadow: 0 0 0 3px rgba(223, 185, 104, .14), inset 0 0 12px rgba(131, 190, 164, .18);
+  border-color: rgba(116, 88, 232, .5);
+  background: rgba(116, 88, 232, .08);
+  box-shadow: 0 0 0 3px rgba(116, 88, 232, .12), inset 0 0 12px rgba(110, 168, 158, .16);
 }
 
 /* ---------- flying / resting ingredient chips ---------- */
@@ -554,7 +560,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   object-fit: contain;
   image-rendering: pixelated;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 0 5px rgba(223, 185, 104, .34));
+  filter: drop-shadow(0 2px 4px rgba(60, 48, 30, .22));
 }
 .item__label {
   display: none;
@@ -562,8 +568,9 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 }
 .item:hover,
 .item:focus-visible {
-  border-color: rgba(240, 211, 140, .72);
-  background: rgba(6, 24, 24, .52);
+  border-color: rgba(116, 88, 232, .45);
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 10px 24px rgba(34, 28, 20, .12);
 }
 .item.is-rested {
   padding: 0;
@@ -577,7 +584,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 .item.is-rested .item__icon {
   width: 26px;
   height: 26px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .45));
+  filter: drop-shadow(0 2px 4px rgba(60, 48, 30, .28));
 }
 .item.is-rested .item__label {
   display: none;
@@ -588,7 +595,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 }
 .item.is-rested:hover .item__icon,
 .item.is-rested:focus-visible .item__icon {
-  filter: drop-shadow(0 0 8px rgba(240, 211, 140, .75));
+  filter: drop-shadow(0 0 8px rgba(116, 88, 232, .5));
 }
 .item.is-brewing {
   box-shadow: none;
@@ -622,7 +629,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   position: absolute;
   inset: -20px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(223, 185, 104, .5), rgba(131, 190, 164, .22) 46%, transparent 72%);
+  background: radial-gradient(circle, rgba(217, 180, 90, .42), rgba(116, 88, 232, .16) 46%, transparent 72%);
   filter: blur(7px);
   pointer-events: none;
   will-change: transform, opacity;
@@ -636,7 +643,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   object-fit: contain;
   image-rendering: pixelated;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 0 12px rgba(223, 185, 104, .8));
+  filter: drop-shadow(0 4px 10px rgba(60, 48, 30, .35));
   animation: potion-float 3.4s ease-in-out infinite;
 }
 @keyframes potion-float {
@@ -651,12 +658,13 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   width: max-content;
   max-width: 180px;
   margin: 0;
-  color: rgba(240, 211, 140, .86);
+  color: var(--ink-muted, #756b5c);
   font-size: .72rem;
+  font-weight: 600;
   line-height: 1.3;
-  letter-spacing: .02em;
+  letter-spacing: .04em;
   text-align: center;
-  text-shadow: 0 0 10px rgba(223, 185, 104, .4);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .65);
 }
 
 /* ---------- mobile: panel centers, shorter flights ---------- */
