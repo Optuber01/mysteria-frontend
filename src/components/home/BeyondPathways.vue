@@ -503,6 +503,7 @@ onUnmounted(() => {
   min-height: 590svh;
   isolation: isolate;
   color: var(--ink);
+  background: var(--journey-mid);
 }
 
 .world-sticky {
@@ -513,6 +514,7 @@ onUnmounted(() => {
   overflow: hidden;
   overflow: clip;
   isolation: isolate;
+  background: var(--journey-mid);
 }
 
 .world-sticky::before,
@@ -527,14 +529,14 @@ onUnmounted(() => {
 
 .world-sticky::before {
   top: 0;
-  height: 28%;
-  background: linear-gradient(180deg, rgba(251, 247, 239, .94), rgba(251, 247, 239, 0));
+  height: 24%;
+  background: linear-gradient(180deg, var(--journey-mid), rgba(244, 236, 223, 0));
 }
 
 .world-sticky::after {
   bottom: 0;
-  height: 26%;
-  background: linear-gradient(0deg, rgba(250, 245, 236, .94), rgba(250, 245, 236, 0));
+  height: 22%;
+  background: linear-gradient(0deg, var(--journey-end), rgba(251, 245, 234, 0));
 }
 
 .world-heading {
@@ -542,7 +544,7 @@ onUnmounted(() => {
   z-index: 10;
   top: clamp(74px, 9vh, 104px);
   left: clamp(22px, 4.8vw, 78px);
-  width: min(610px, 48vw);
+  width: min(500px, 40vw);
   opacity: var(--world-heading-opacity);
   pointer-events: none;
   transition: opacity .25s ease;
@@ -566,8 +568,9 @@ onUnmounted(() => {
 .world-heading h2 {
   max-width: 560px;
   margin: 12px 0 0;
-  font: 800 clamp(2rem, 3.4vw, 2.75rem)/1.04 "Manrope", sans-serif;
+  font: 700 clamp(2.15rem, 3.25vw, 3rem)/.98 var(--font-display);
   letter-spacing: -.025em;
+  text-wrap: balance;
 }
 
 .world-rail {
@@ -582,7 +585,7 @@ onUnmounted(() => {
 
 .world-beat {
   --text-anchor: clamp(24px, 7vw, 112px);
-  --text-width: min(430px, 34vw);
+  --text-width: min(380px, 30vw);
   --media-gap: clamp(28px, 3.4vw, 64px);
   --media-margin: clamp(24px, 4vw, 72px);
   --media-top: clamp(94px, 12vh, 132px);
@@ -747,7 +750,7 @@ onUnmounted(() => {
 .world-copy {
   position: absolute;
   z-index: 6;
-  top: var(--media-top);
+  top: clamp(190px, 25vh, 260px);
   width: var(--text-width);
   padding: 24px 0;
   opacity: var(--beat-fade, 1);
@@ -755,14 +758,14 @@ onUnmounted(() => {
 }
 
 .world-beat[data-side='right'] .world-copy { left: var(--text-anchor); }
-.world-beat[data-side='left'] .world-copy { right: var(--text-anchor); }
+.world-beat[data-side='left'] .world-copy { right: max(var(--text-anchor), 168px); }
 
 .world-copy > p:first-of-type { margin-top: 13px; }
 
 .world-copy h3 {
   max-width: 12ch;
   margin: 14px 0 0;
-  font: 800 clamp(1.9rem, 3vw, 2.9rem)/1.02 "Manrope", sans-serif;
+  font: 700 clamp(2rem, 3vw, 3rem)/.98 var(--font-display);
   letter-spacing: -.025em;
   text-wrap: balance;
 }
@@ -783,6 +786,7 @@ onUnmounted(() => {
   font-size: clamp(.84rem, 1.05vw, 1rem);
   font-weight: 500;
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .world-proof { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--hairline); color: var(--ink-muted); font: 600 .72rem/1.55 "Manrope", sans-serif; }
@@ -1041,10 +1045,11 @@ onUnmounted(() => {
   .world-heading { width: 62vw; }
   .world-beat {
     --text-anchor: clamp(20px, 6vw, 48px);
-    --text-width: min(400px, 50vw);
+    --text-width: min(360px, 46vw);
     --media-gap: clamp(20px, 3vw, 40px);
     --media-margin: clamp(18px, 4vw, 44px);
   }
+  .world-beat[data-side='left'] .world-copy { right: max(var(--text-anchor), 128px); }
   .world-copy h3 { font-size: clamp(1.6rem, 5.5vw, 2.1rem); }
   .world-gallery { display: none; }
   .scene-marker > p { width: min(260px, 40vw); }

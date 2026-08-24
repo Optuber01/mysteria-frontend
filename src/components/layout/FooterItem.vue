@@ -83,7 +83,7 @@ const statusLabel = computed(() => {
   overflow: hidden;
   padding: 54px clamp(20px, 5vw, 76px) 22px;
   color: var(--ink, #221c14);
-  background: linear-gradient(180deg, rgba(245, 238, 225, 0) 0%, #F5EEE1 160px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--journey-mid) 0%, transparent) 0%, var(--journey-mid) 160px);
   isolation: isolate;
 }
 
@@ -119,7 +119,7 @@ const statusLabel = computed(() => {
   border-radius: 50%;
   background: var(--primary, #7458e8);
 }
-.footer-brand span { font: 800 1.32rem/1 "IBM Plex Sans Condensed", sans-serif; }
+.footer-brand span { font: 700 1.32rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif); }
 
 .footer-links-stack {
   display: flex;
@@ -145,7 +145,7 @@ const statusLabel = computed(() => {
   color: var(--ink-muted, #756b5c);
   background: var(--surface-glass, rgba(255, 255, 255, .86));
   backdrop-filter: blur(14px);
-  font: 700 .56rem/1 "IBM Plex Mono", monospace;
+  font: 700 .56rem/1 var(--font-mono, "IBM Plex Mono", monospace);
   letter-spacing: .06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -203,7 +203,7 @@ const statusLabel = computed(() => {
   align-items: center;
   justify-content: center;
   color: var(--ink-muted, #756b5c);
-  font: 700 .65rem/1 "IBM Plex Mono", monospace;
+  font: 700 .65rem/1 var(--font-mono, "IBM Plex Mono", monospace);
   letter-spacing: .07em;
   text-transform: uppercase;
   transition: color .25s;
@@ -257,7 +257,7 @@ const statusLabel = computed(() => {
 .footer-legal p {
   margin: 0;
   color: var(--ink-muted, #756b5c);
-  font: 500 .59rem/1.5 "IBM Plex Mono", monospace;
+  font: 500 .59rem/1.5 var(--font-mono, "IBM Plex Mono", monospace);
   letter-spacing: .04em;
   text-transform: uppercase;
 }

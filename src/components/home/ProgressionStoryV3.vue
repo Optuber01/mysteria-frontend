@@ -361,12 +361,12 @@ onUnmounted(() => {
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --entry: 0;
   position: relative;
-  /* Start exactly when the preceding 100svh hero sticky finishes its travel.
-     This removes the otherwise empty hero tail without shortening its motion. */
-  margin-top: -100svh;
+  /* Keep the progression chapter below the hero's sticky travel. Negative
+     margins made the two sticky scenes occupy the same viewport. */
+  margin-top: 0;
   min-height: 500svh;
   color: var(--ink, #221c14);
-  background: transparent;
+  background: var(--journey-mid, #f4ecdf);
   isolation: isolate;
 }
 
@@ -384,7 +384,7 @@ onUnmounted(() => {
   height: 100svh;
   min-height: 620px;
   overflow: hidden;
-  background: transparent;
+  background: var(--journey-mid, #f4ecdf);
 }
 .progression-v3__backdrop,
 .progression-v3__wash {
@@ -489,7 +489,7 @@ onUnmounted(() => {
 .progression-v3__heading h2 {
   margin: 0;
   color: var(--ink, #221c14);
-  font: 800 clamp(1.35rem, 2vw, 1.8rem)/1.08 "Manrope", sans-serif;
+  font: 700 clamp(1.55rem, 2.2vw, 2.1rem)/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
   letter-spacing: -0.025em;
 }
 .progression-v3__heading span {
@@ -516,7 +516,7 @@ onUnmounted(() => {
   max-width: 420px;
   margin: 14px 0 14px;
   color: var(--ink, #221c14);
-  font: 800 clamp(2rem, 3.6vw, 3.4rem)/0.98 "Manrope", sans-serif;
+  font: 700 clamp(2.1rem, 3.6vw, 3.5rem)/.94 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
   letter-spacing: -0.03em;
   text-wrap: balance;
 }

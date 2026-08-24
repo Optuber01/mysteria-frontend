@@ -731,7 +731,7 @@ onUnmounted(() => {
 .sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
 .vault-heading { position: absolute; z-index: 90; top: clamp(76px, 9vh, 112px); left: clamp(24px, 5vw, 78px); width: min(470px, 34vw); pointer-events: none; }
 .vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 800 .63rem/1 Manrope, sans-serif; letter-spacing: .18em; }
-.vault-heading h2, .mobile-heading h2 { margin: 0; font: 800 clamp(2.7rem, 5vw, 5.3rem)/.98 Manrope, sans-serif; letter-spacing: -.018em; text-wrap: balance; }
+.vault-heading h2, .mobile-heading h2 { margin: 0; font: 700 clamp(2.7rem, 5vw, 5.3rem)/.92 var(--font-display, "IBM Plex Sans Condensed", sans-serif); letter-spacing: -.028em; text-wrap: balance; overflow-wrap: anywhere; }
 .vault-heading h2 em, .mobile-heading h2 em { color: var(--path-accent); font-style: normal; }
 .vault-heading > span { display: block; max-width: 350px; margin-top: 22px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font-size: .8rem; font-weight: 500; line-height: 1.7; letter-spacing: .005em; }
 
@@ -767,9 +767,9 @@ onUnmounted(() => {
 .motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
 .motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
 .motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(34,28,20,.24)); transition: transform .16s ease-out; }
-.orbit-story h3 { margin: 0; max-width: 100%; font: 800 clamp(2.15rem, 3.35vw, 3.8rem)/1.12 Manrope, sans-serif; letter-spacing: -.018em; white-space: nowrap; }
+.orbit-story h3 { margin: 0; max-width: 100%; font: 700 clamp(2.15rem, 3.35vw, 3.8rem)/.98 var(--font-display, "IBM Plex Sans Condensed", sans-serif); letter-spacing: -.028em; overflow-wrap: anywhere; }
 .entry-kind { display: block; margin-top: 9px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font: 800 .56rem/1 Manrope, sans-serif; letter-spacing: .13em; text-transform: uppercase; }
-.orbit-story > small { display: block; overflow: hidden; max-width: 470px; margin: 12px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; font-weight: 500; line-height: 1.35; letter-spacing: .005em; text-overflow: ellipsis; white-space: nowrap; }
+.orbit-story > small { display: block; max-width: 470px; margin: 12px auto 0; color: color-mix(in srgb, var(--path-ink) 74%, transparent); font-size: .72rem; font-weight: 500; line-height: 1.45; letter-spacing: .005em; overflow-wrap: anywhere; }
 
 .assembly-readout { position: absolute; z-index: 80; left: clamp(24px, 5vw, 78px); bottom: clamp(38px, 6vh, 70px); width: min(300px, 25vw); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; color: color-mix(in srgb, var(--path-ink) 72%, transparent); font: 800 .52rem/1 Manrope, sans-serif; letter-spacing: .1em; }
 .assembly-readout > i { height: 1px; overflow: hidden; background: color-mix(in srgb, var(--path-ink) 15%, transparent); }

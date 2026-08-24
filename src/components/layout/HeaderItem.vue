@@ -494,7 +494,7 @@ onUnmounted(() => {
 .site-brand:hover { color: inherit; }
 .site-brand__mark { width: 44px; height: 44px; transition: transform .4s cubic-bezier(.22, 1, .36, 1); }
 .site-brand__name {
-  font: 800 1.35rem/1 "IBM Plex Sans Condensed", sans-serif;
+  font: 700 1.35rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
   letter-spacing: -.025em;
 }
 
@@ -518,7 +518,7 @@ onUnmounted(() => {
   border-radius: 9px;
   color: var(--ink-muted, #756b5c);
   background: transparent;
-  font: 700 .67rem/1 "IBM Plex Mono", monospace;
+  font: 700 .67rem/1 var(--font-mono, "IBM Plex Mono", monospace);
   letter-spacing: .08em;
   text-transform: uppercase;
   cursor: pointer;
@@ -581,7 +581,7 @@ onUnmounted(() => {
 .services__panel > p {
   margin: 4px 8px 8px;
   color: var(--ink-muted, #756b5c);
-  font: 800 .57rem/1 "IBM Plex Mono", monospace;
+  font: 800 .57rem/1 var(--font-mono, "IBM Plex Mono", monospace);
   letter-spacing: .12em;
   text-transform: uppercase;
 }
@@ -641,7 +641,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   color: var(--ink, #221c14);
-  font: 700 .66rem/1 "IBM Plex Mono", monospace;
+  font: 700 .66rem/1 var(--font-mono, "IBM Plex Mono", monospace);
   letter-spacing: .08em;
   text-transform: uppercase;
   transition: color .2s;
@@ -741,7 +741,7 @@ onUnmounted(() => {
 
 .mobile-nav__brand { min-height: 44px; display: flex; align-items: center; gap: 10px; color: var(--ink, #221c14); }
 .mobile-nav__brand :deep(img) { width: 39px; height: 39px; }
-.mobile-nav__brand span { font: 800 1.3rem/1 "IBM Plex Sans Condensed", sans-serif; }
+.mobile-nav__brand span { font: 700 1.3rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif); }
 
 .mobile-nav__close {
   width: 44px;

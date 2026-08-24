@@ -2,23 +2,27 @@
 /* Default: dark */
 
 :root {
-    --journey-top: #FBF7EF;
-    --journey-mid: #F5EEE1;
-    --journey-end: #FAF5EC;
-    --surface: #FFFFFF;
-    --surface-glass: rgba(255, 255, 255, .86);
-    --ink: #221C14;
-    --ink-muted: #756B5C;
-    --hairline: #EAE1D0;
-    --primary: #7458E8;
-    --primary-deep: #5F46D6;
+    /* Homepage design system: warm paper, ink, violet and ember. */
+    --journey-top: #fcf8f0;
+    --journey-mid: #f4ecdf;
+    --journey-end: #fbf5ea;
+    --surface: #fffdf9;
+    --surface-glass: rgba(255, 253, 249, .88);
+    --ink: #201b17;
+    --ink-muted: #75695c;
+    --hairline: #e7dccb;
+    --primary: #7458e8;
+    --primary-deep: #5c42d0;
     --primary-tint: rgba(116, 88, 232, .12);
-    --sunset: linear-gradient(90deg, #FF7A59, #FFC15E);
-    --coral: #FF7A59;
-    --sunset-deep: #E85B33;
-    --champagne: #D9B45A;
-    --live: #34C77B;
-    --danger: #D6453D;
+    --sunset: linear-gradient(90deg, #f36f52, #f5b94d);
+    --coral: #f36f52;
+    --sunset-deep: #d9553b;
+    --champagne: #c8943f;
+    --live: #2fae72;
+    --danger: #c94a43;
+    --font-body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 :root {
@@ -47,7 +51,7 @@
 
 body {
     /* Use system fallbacks first for faster initial render */
-    font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--font-body);
     background-color: var(--myst-bg);
     color: var(--myst-ink);
     margin: 0;
@@ -154,6 +158,13 @@ html {
     -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
     scroll-padding-top: 72px;
+}
+
+/* The app uses a dark canvas for authenticated pages; keep transparent
+   homepage chapters from exposing that canvas while sticky scenes travel. */
+body:has(.mysterria-home),
+body:has(.mysterria-home) #app {
+    background: var(--journey-top);
 }
 
 img,

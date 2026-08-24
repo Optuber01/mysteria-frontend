@@ -131,7 +131,7 @@ onUnmounted(() => {
   min-height: 100vh;
   color: var(--ink);
   background: linear-gradient(180deg, var(--journey-top) 0%, var(--journey-mid) 55%, var(--journey-end) 100%);
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-body);
 }
 
 .mysterria-home :deep(button),
@@ -160,9 +160,30 @@ onUnmounted(() => {
 .skip-link:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .deferred-chapter { min-width: 0; }
-.deferred-chapter--pathways.is-pending { min-height: 290svh; background: #F2EAD9; }
-.deferred-chapter--world.is-pending { min-height: 610svh; background: #EFE6D3; }
-.deferred-chapter--join.is-pending { min-height: 120svh; background: #FAF5EC; }
+.deferred-chapter--pathways.is-pending { min-height: 290svh; background: var(--journey-mid); }
+.deferred-chapter--world.is-pending { min-height: 610svh; background: var(--journey-mid); }
+.deferred-chapter--join.is-pending { min-height: 120svh; background: var(--journey-end); }
+
+/* Keep each chapter on the same visual grid while async sections arrive. */
+.deferred-chapter {
+  position: relative;
+  overflow: clip;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.mysterria-home :deep(.pathway-vault),
+.mysterria-home :deep(.progression-v3),
+.mysterria-home :deep(.world-story),
+.mysterria-home :deep(.join-threshold) {
+  font-family: var(--font-body);
+}
+
+.mysterria-home :deep(h1),
+.mysterria-home :deep(h2),
+.mysterria-home :deep(h3) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .mysterria-home :deep(*) {

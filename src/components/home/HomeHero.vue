@@ -25,12 +25,8 @@
               <span>Start playing</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
-            <a class="hero-action hero-action--ghost" href="#world">
-              <span>Watch the trailer</span>
-              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M8 5.75v8.5L15.25 10z" /></svg>
-            </a>
-            <RouterLink v-if="latestSlug" class="hero-link-quiet" :to="`/news/${latestSlug}`">
-              <span>Changelog</span>
+            <RouterLink class="hero-action hero-action--ghost" :to="latestSlug ? `/news/${latestSlug}` : '/news'">
+              <span>Read the changelog</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
           </div>
@@ -225,7 +221,7 @@ onUnmounted(() => {
 .hero {
   --hero-progress: 0;
   position: relative;
-  min-height: 190svh;
+  min-height: 172svh;
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -238,6 +234,7 @@ onUnmounted(() => {
   min-height: 560px;
   overflow: hidden;
   isolation: isolate;
+  background: var(--journey-top);
 }
 
 .hero-melt {
@@ -246,8 +243,8 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   left: 0;
-  height: clamp(120px, 26svh, 280px);
-  background: linear-gradient(180deg, rgba(251, 247, 239, 0) 0%, rgba(251, 247, 239, .55) 55%, var(--journey-top) 100%);
+  height: clamp(150px, 28svh, 300px);
+  background: linear-gradient(180deg, rgba(252, 248, 240, 0) 0%, rgba(252, 248, 240, .72) 58%, var(--journey-mid) 100%);
   pointer-events: none;
 }
 
@@ -258,10 +255,10 @@ onUnmounted(() => {
   width: min(100%, 1480px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
+  grid-template-columns: minmax(320px, .92fr) minmax(0, 1.08fr);
   align-items: center;
   gap: clamp(36px, 5vw, 76px);
-  padding: calc(92px + env(safe-area-inset-top)) clamp(20px, 4vw, 56px) clamp(110px, 14svh, 160px);
+  padding: calc(96px + env(safe-area-inset-top)) clamp(20px, 4vw, 56px) clamp(128px, 15svh, 170px);
   opacity: clamp(0, calc((.15 - var(--hero-progress)) / .15), 1);
   transform: translate3d(0, calc(var(--hero-progress) / .15 * -40px), 0);
   will-change: transform, opacity;
@@ -288,11 +285,12 @@ onUnmounted(() => {
   max-width: 700px;
   margin: 0 0 22px;
   color: var(--ink);
-  font-family: Manrope, sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(44px, 6vw, 88px);
   font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -.025em;
+  line-height: .98;
+  letter-spacing: -.035em;
+  overflow-wrap: anywhere;
   text-wrap: balance;
   opacity: 1;
   transform: translateY(16px);
@@ -301,8 +299,9 @@ onUnmounted(() => {
 
 .hero-keyword {
   position: relative;
+  display: inline;
   color: var(--primary);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .hero-keyword::after {
@@ -326,7 +325,7 @@ onUnmounted(() => {
   margin: 0 0 32px;
   color: var(--ink-muted);
   font-size: clamp(1rem, 1.25vw, 1.13rem);
-  line-height: 1.6;
+  line-height: 1.65;
   text-wrap: balance;
   opacity: 0;
   transform: translateY(16px);
@@ -404,7 +403,7 @@ onUnmounted(() => {
 .hero-action--ghost:active { transform: translateY(0); }
 
 .hero-link-quiet {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 7px;
   padding: 0 6px;
@@ -476,7 +475,7 @@ onUnmounted(() => {
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
-  font-family: Inter, Manrope, sans-serif;
+  font-family: var(--font-mono);
   font-size: .88rem;
   font-weight: 650;
   letter-spacing: .01em;
@@ -526,7 +525,7 @@ onUnmounted(() => {
   height: clamp(300px, 54svh, 560px);
   overflow: hidden;
   border: 1px solid var(--hairline);
-  border-radius: 22px;
+  border-radius: 28px;
   background: var(--journey-mid);
   box-shadow: 0 24px 70px rgba(34, 28, 20, .16), 0 10px 30px rgba(34, 28, 20, .08);
 }
@@ -620,7 +619,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 720px) {
-  .hero { min-height: 165svh; }
+  .hero { min-height: 150svh; }
   .hero-sticky { min-height: 100svh; }
   .hero-content {
     grid-template-columns: 1fr;
@@ -630,11 +629,10 @@ onUnmounted(() => {
   }
   .hero-copy { max-width: 560px; }
   .hero-eyebrow { margin-bottom: 12px; font-size: .66rem; }
-  .hero h1 { font-size: clamp(40px, 12.5vw, 64px); }
+  .hero h1 { font-size: clamp(42px, 12.5vw, 68px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
   .hero-actions { gap: 9px; margin-bottom: 22px; }
   .hero-action { flex: 1 1 170px; min-height: 48px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
-  .hero-link-quiet { flex: 0 0 auto; min-height: 44px; }
   .connection-pill { padding: 8px 9px 8px 15px; gap: 11px; }
   .connection-address { font-size: .8rem; }
   .connection-copy { width: 36px; height: 36px; }
@@ -644,7 +642,7 @@ onUnmounted(() => {
 
 @media (max-width: 420px) {
   .hero-content { padding-inline: 11px; }
-  .hero h1 { font-size: clamp(36px, 11.5vw, 48px); }
+  .hero h1 { font-size: clamp(38px, 12vw, 54px); }
   .hero-summary { font-size: .87rem; }
   .hero-actions { width: 100%; }
   .connection-pill { width: 100%; }
