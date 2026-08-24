@@ -313,8 +313,14 @@ onUnmounted(() => {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -140px -420px -130px -90px;
-  background: radial-gradient(ellipse at 34% 50%, var(--journey-top) 0 38%, rgba(252, 248, 240, .8) 58%, rgba(252, 248, 240, 0) 94%);
+  inset: -128px -160px -118px -90px;
+  background: radial-gradient(
+    ellipse at 28% 50%,
+    var(--journey-top) 0 34%,
+    rgba(252, 248, 240, .94) 48%,
+    rgba(252, 248, 240, .58) 64%,
+    rgba(252, 248, 240, 0) 86%
+  );
   pointer-events: none;
 }
 
@@ -522,7 +528,7 @@ onUnmounted(() => {
 .hero-plate {
   position: absolute;
   z-index: 1;
-  inset: -8% -5% -10% 18%;
+  inset: -8% -5% -10% 0;
   margin: 0;
   opacity: 0;
   transform: translateY(18px);
@@ -534,7 +540,7 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  clip-path: polygon(19% 0, 100% 0, 100% 100%, 2% 100%);
+  clip-path: none;
   background: var(--journey-mid);
 }
 
@@ -558,7 +564,7 @@ onUnmounted(() => {
   z-index: 2;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(252, 248, 240, .98) 0%, rgba(252, 248, 240, .82) 13%, rgba(252, 248, 240, .3) 30%, transparent 52%),
+    linear-gradient(90deg, rgba(252, 248, 240, .88) 0%, rgba(252, 248, 240, .62) 18%, rgba(252, 248, 240, .2) 36%, transparent 53%),
     linear-gradient(125deg, rgba(12, 14, 22, .24), transparent 35%, rgba(12, 14, 22, .08) 70%, rgba(12, 14, 22, .4)),
     linear-gradient(180deg, rgba(12, 14, 22, .12), transparent 28%, transparent 68%, rgba(12, 14, 22, .34));
   pointer-events: none;
@@ -716,7 +722,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1080px) {
-  .hero-plate { inset: -5% -12% -10% 10%; }
+  .hero-plate { inset: -5% -12% -10% 0; }
 }
 
 @media (max-width: 720px) {
@@ -761,7 +767,7 @@ onUnmounted(() => {
 @media (max-height: 690px) and (min-width: 721px) {
   .hero-content { padding-top: calc(76px + env(safe-area-inset-top)); }
   .hero h1 { font-size: clamp(40px, 5vw, 68px); }
-  .hero-plate { inset: -4% -5% -8% 18%; }
+  .hero-plate { inset: -4% -5% -8% 0; }
 }
 
 @media (max-width: 270px) {

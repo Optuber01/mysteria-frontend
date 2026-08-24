@@ -35,6 +35,9 @@ const {currentLanguage, setLanguage} = useI18n();
 }
 
 .lang-ritual-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 32px;
   min-height: 28px;
   height: 28px;
@@ -43,6 +46,7 @@ const {currentLanguage, setLanguage} = useI18n();
   border-radius: 999px;
   color: var(--ink-muted, #756b5c);
   background: transparent;
+  line-height: 1;
   cursor: pointer;
   transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
