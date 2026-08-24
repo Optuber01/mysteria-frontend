@@ -474,15 +474,16 @@ onUnmounted(() => {
 .site-header__inner {
   width: min(100%, 1480px);
   height: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: clamp(18px, 2.7vw, 44px);
   margin: 0 auto;
-  padding: 0 clamp(16px, 3vw, 44px);
+  padding: 0 clamp(20px, 4vw, 56px);
 }
 
 .site-brand {
-  flex: 0 0 auto;
+  justify-self: start;
   min-width: 44px;
   display: inline-flex;
   align-items: center;
@@ -503,7 +504,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 2px;
-  margin-right: auto;
+  justify-self: center;
 }
 
 .desktop-nav__link {
@@ -622,7 +623,7 @@ onUnmounted(() => {
 }
 
 .site-header__actions {
-  flex: 0 0 auto;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -842,11 +843,12 @@ onUnmounted(() => {
 
 @media (max-width: 820px) {
   .site-header { height: 68px; }
+  .site-header__inner { grid-template-columns: minmax(0, 1fr) auto; }
   .desktop-nav,
   .header-utilities,
   .header-server-status { display: none; }
   .site-brand__name { display: inline; }
-  .site-header__actions { margin-left: auto; }
+  .site-header__actions { justify-self: end; }
   .mobile-nav-toggle { display: grid; }
 }
 

@@ -11,18 +11,14 @@
 
       <div class="hero-content" :class="{ 'is-faded': stackFaded }">
         <div class="hero-copy">
-          <p class="hero-eyebrow">A Lord of the Mysteries-inspired Minecraft RPG</p>
-          <h1 id="home-title">
-            Brew your first potion.
-            <span class="hero-keyword">Choose what you become.</span>
-          </h1>
+          <h1 id="home-title">A Lord of the Mysteries-inspired Minecraft Server</h1>
           <p class="hero-summary">
-            Choose a Pathway, uncover forgotten formulas, and explore a world of dungeons, hunts, rituals, and hidden powers.
+            Choose a Pathway, brew your first potion, and step into a world of dungeons, hunts, rituals, and hidden powers.
           </p>
 
           <div class="hero-actions" aria-label="Get started">
             <RouterLink class="hero-action hero-action--primary" to="/guide">
-              <span>Enter the world</span>
+              <span>Start playing</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
             <div class="connection-pill" aria-label="Mysterria server details">
@@ -268,19 +264,6 @@ onUnmounted(() => {
 
 .hero-copy { max-width: 640px; }
 
-.hero-eyebrow {
-  margin: 0 0 20px;
-  color: var(--ink-muted);
-  font-size: .74rem;
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity .7s .05s cubic-bezier(.22, 1, .36, 1), transform .7s .05s cubic-bezier(.22, 1, .36, 1);
-}
-
 .hero h1 {
   max-width: 700px;
   margin: 0 0 22px;
@@ -297,29 +280,6 @@ onUnmounted(() => {
   transition: opacity .9s .12s cubic-bezier(.22, 1, .36, 1), transform .9s .12s cubic-bezier(.22, 1, .36, 1);
 }
 
-.hero-keyword {
-  position: relative;
-  display: inline;
-  color: var(--primary);
-  white-space: normal;
-}
-
-.hero-keyword::after {
-  content: '';
-  position: absolute;
-  right: 1%;
-  bottom: -.06em;
-  left: 1%;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--sunset);
-  transform: rotate(-1deg) scaleX(0);
-  transform-origin: 0 60%;
-  transition: transform .85s .55s cubic-bezier(.22, 1, .36, 1);
-}
-
-.is-ready .hero-keyword::after { transform: rotate(-1deg) scaleX(1); }
-
 .hero-summary {
   max-width: 520px;
   margin: 0 0 32px;
@@ -334,9 +294,9 @@ onUnmounted(() => {
 
 .hero-actions {
   max-width: 620px;
-  display: grid;
-  grid-template-columns: minmax(170px, .72fr) minmax(250px, 1.28fr);
+  display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin: 0 0 10px;
   opacity: 0;
@@ -396,6 +356,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 7px;
   min-height: 28px;
+  line-height: 1;
   padding: 0 4px;
   color: var(--ink-muted);
   font-size: .82rem;
@@ -403,6 +364,8 @@ onUnmounted(() => {
   transition: color .25s;
 }
 .hero-link-quiet svg {
+  display: block;
+  flex: 0 0 auto;
   width: 15px;
   height: 15px;
   fill: none;
@@ -416,13 +379,13 @@ onUnmounted(() => {
 .hero-link-quiet:hover svg { transform: translateX(3px); }
 
 .connection-pill {
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
-  padding: 10px 12px 10px 18px;
+  gap: 10px;
+  padding: 7px 8px 7px 12px;
   border: 1px solid var(--hairline);
   border-radius: 16px;
   background: var(--surface-glass);
@@ -453,7 +416,7 @@ onUnmounted(() => {
 
 .connection-status small {
   color: var(--ink-muted);
-  font-size: .66rem;
+  font-size: .6rem;
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -465,7 +428,7 @@ onUnmounted(() => {
   overflow: hidden;
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: .88rem;
+  font-size: .78rem;
   font-weight: 650;
   letter-spacing: .01em;
   font-variant-numeric: tabular-nums;
@@ -475,8 +438,8 @@ onUnmounted(() => {
 
 .connection-copy {
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -556,7 +519,6 @@ onUnmounted(() => {
 
 .hero-plate__caption b { color: #a98634; font-weight: 700; }
 
-.is-ready .hero-eyebrow,
 .is-ready h1,
 .is-ready .hero-summary,
 .is-ready .hero-actions,
@@ -617,12 +579,11 @@ onUnmounted(() => {
     padding: calc(84px + env(safe-area-inset-top)) 15px 96px;
   }
   .hero-copy { max-width: 560px; }
-  .hero-eyebrow { margin-bottom: 12px; font-size: .66rem; }
   .hero h1 { font-size: clamp(42px, 12.5vw, 68px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
-  .hero-actions { grid-template-columns: 1fr; gap: 9px; margin-bottom: 8px; }
+  .hero-actions { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 8px; }
   .hero-action { min-height: 48px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
-  .connection-pill { padding: 8px 9px 8px 15px; gap: 11px; }
+  .connection-pill { width: 100%; padding: 8px 9px 8px 15px; gap: 11px; }
   .connection-address { font-size: .8rem; }
   .connection-copy { width: 36px; height: 36px; }
   .hero-plate { display: none; }
@@ -658,7 +619,6 @@ onUnmounted(() => {
   .hero-sticky { position: relative; height: auto; min-height: 100svh; padding: 86px 10px 70px; }
   .hero-content { position: relative; inset: auto; width: 100%; padding: 0; transform: none; opacity: 1; }
   .hero h1 { font-size: 2.1rem; overflow-wrap: anywhere; }
-  .hero-keyword { white-space: normal; }
   .connection-address { overflow-wrap: anywhere; white-space: normal; }
   .scroll-cue { display: none; }
 }
@@ -669,8 +629,7 @@ onUnmounted(() => {
   .hero-slide { transition: none; will-change: auto; }
   .hero-slide:nth-of-type(n + 2) { display: none; }
   .hero-content { opacity: 1; transform: none; }
-  .hero-eyebrow, .hero h1, .hero-summary, .hero-actions, .connection-pill, .hero-plate { opacity: 1; transform: none; transition: none; }
-  .hero-keyword::after { transform: rotate(-1deg) scaleX(1); transition: none; }
+  .hero h1, .hero-summary, .hero-actions, .connection-pill, .hero-plate { opacity: 1; transform: none; transition: none; }
   .scroll-cue i b { animation: none; }
 }
 </style>
