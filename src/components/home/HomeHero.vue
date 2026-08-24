@@ -600,8 +600,8 @@ onUnmounted(() => {
   display: block;
   overflow: hidden;
   padding: 0;
-  border: 7px solid var(--journey-top);
-  border-radius: 18px;
+  border: 4px solid rgba(252, 248, 240, .94);
+  border-radius: 14px;
   background: var(--journey-mid);
   box-shadow: 0 16px 32px rgba(34, 28, 20, .18);
   cursor: pointer;
@@ -649,8 +649,9 @@ onUnmounted(() => {
   right: 9px;
   bottom: 8px;
   left: 9px;
-  padding: 6px 7px;
-  border-radius: 999px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 8px;
   color: #fff;
   background: rgba(26, 20, 46, .68);
   font: 700 .5rem/1 var(--font-mono);
@@ -666,9 +667,9 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 11px;
+  padding: 8px 10px;
   border: 1px solid rgba(255, 255, 255, .22);
-  border-radius: 999px;
+  border-radius: 10px;
   color: rgba(255, 255, 255, .86);
   background: rgba(18, 20, 28, .36);
   backdrop-filter: blur(12px);
@@ -697,24 +698,25 @@ onUnmounted(() => {
   bottom: 22px;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, .24);
-  border-radius: 999px;
-  background: rgba(18, 20, 28, .38);
+  gap: 1px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 12px;
+  background: rgba(18, 20, 28, .48);
   backdrop-filter: blur(12px);
+  box-shadow: 0 10px 24px rgba(18, 20, 28, .16);
   pointer-events: auto;
 }
 
 .hero-plate__control {
   position: relative;
-  width: 30px;
-  height: 25px;
+  width: 32px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 999px;
+  border-radius: 8px;
   color: rgba(255, 255, 255, .58);
   background: transparent;
   font: 700 .5rem/1 var(--font-mono);
@@ -736,10 +738,14 @@ onUnmounted(() => {
   transition: transform .3s cubic-bezier(.22, 1, .36, 1);
 }
 
-.hero-plate__control:hover,
-.hero-plate__control:focus-visible,
-.hero-plate__control.is-active { color: #fff; background: rgba(255, 255, 255, .14); }
-.hero-plate__control.is-active i { transform: scaleX(1); }
+.hero-plate__control:hover { color: #fff; background: rgba(255, 255, 255, .1); }
+.hero-plate__control:focus-visible { color: #fff; background: rgba(255, 255, 255, .14); }
+.hero-plate__control.is-active {
+  color: var(--ink);
+  background: var(--journey-top);
+  box-shadow: 0 1px 3px rgba(18, 20, 28, .2);
+}
+.hero-plate__control.is-active i { background: var(--primary); transform: scaleX(1); }
 
 .hero-plate__caption {
   position: absolute;
@@ -748,12 +754,12 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 15px;
+  padding: 9px 13px;
   border: 1px solid var(--hairline);
-  border-radius: 999px;
-  background: var(--surface-glass);
+  border-radius: 12px;
+  background: rgba(252, 248, 240, .9);
   backdrop-filter: blur(14px) saturate(1.05);
-  box-shadow: 0 10px 30px rgba(34, 28, 20, .1);
+  box-shadow: 0 8px 22px rgba(34, 28, 20, .1);
   color: var(--ink-muted);
   font-size: .64rem;
   font-weight: 700;
