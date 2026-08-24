@@ -59,6 +59,7 @@ onUnmounted(() => {
   color: var(--ink, #221c14);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.5px;
   transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   white-space: nowrap;

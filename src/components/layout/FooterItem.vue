@@ -119,7 +119,7 @@ const statusLabel = computed(() => {
   border-radius: 50%;
   background: var(--primary, #7458e8);
 }
-.footer-brand span { font: 700 1.32rem/1 "IBM Plex Sans Condensed", sans-serif; }
+.footer-brand span { font: 800 1.32rem/1 "IBM Plex Sans Condensed", sans-serif; }
 
 .footer-links-stack {
   display: flex;
@@ -145,7 +145,7 @@ const statusLabel = computed(() => {
   color: var(--ink-muted, #756b5c);
   background: var(--surface-glass, rgba(255, 255, 255, .86));
   backdrop-filter: blur(14px);
-  font: 500 .56rem/1 "IBM Plex Mono", monospace;
+  font: 700 .56rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -203,7 +203,7 @@ const statusLabel = computed(() => {
   align-items: center;
   justify-content: center;
   color: var(--ink-muted, #756b5c);
-  font: 600 .65rem/1 "IBM Plex Mono", monospace;
+  font: 700 .65rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .07em;
   text-transform: uppercase;
   transition: color .25s;

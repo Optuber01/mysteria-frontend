@@ -494,7 +494,7 @@ onUnmounted(() => {
 .site-brand:hover { color: inherit; }
 .site-brand__mark { width: 44px; height: 44px; transition: transform .4s cubic-bezier(.22, 1, .36, 1); }
 .site-brand__name {
-  font: 700 1.35rem/1 "IBM Plex Sans Condensed", sans-serif;
+  font: 800 1.35rem/1 "IBM Plex Sans Condensed", sans-serif;
   letter-spacing: -.025em;
 }
 
@@ -581,7 +581,7 @@ onUnmounted(() => {
 .services__panel > p {
   margin: 4px 8px 8px;
   color: var(--ink-muted, #756b5c);
-  font: 600 .57rem/1 "IBM Plex Mono", monospace;
+  font: 800 .57rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .12em;
   text-transform: uppercase;
 }
@@ -606,8 +606,8 @@ onUnmounted(() => {
 
 .service-link__icon { width: 26px; height: 26px; color: var(--primary, #7458e8); }
 .service-link span { min-width: 0; }
-.service-link strong { display: block; font-size: .78rem; }
-.service-link small { display: block; margin-top: 2px; color: var(--ink-muted, #756b5c); font-size: .67rem; }
+.service-link strong { display: block; font-size: .78rem; font-weight: 700; }
+.service-link small { display: block; margin-top: 2px; color: var(--ink-muted, #756b5c); font-size: .67rem; font-weight: 500; }
 .service-link__arrow,
 .play-link svg,
 .mobile-nav__link svg,
@@ -663,7 +663,7 @@ onUnmounted(() => {
   color: #fff;
   background: var(--primary, #7458e8);
   font-size: .77rem;
-  font-weight: 760;
+  font-weight: 800;
   box-shadow: 0 8px 20px rgba(34, 28, 20, .12);
   transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .32s, background-color .25s;
 }
@@ -741,7 +741,7 @@ onUnmounted(() => {
 
 .mobile-nav__brand { min-height: 44px; display: flex; align-items: center; gap: 10px; color: var(--ink, #221c14); }
 .mobile-nav__brand :deep(img) { width: 39px; height: 39px; }
-.mobile-nav__brand span { font: 700 1.3rem/1 "IBM Plex Sans Condensed", sans-serif; }
+.mobile-nav__brand span { font: 800 1.3rem/1 "IBM Plex Sans Condensed", sans-serif; }
 
 .mobile-nav__close {
   width: 44px;
@@ -761,7 +761,7 @@ onUnmounted(() => {
 .mobile-nav__eyebrow {
   margin: 0 0 11px;
   color: var(--ink-muted, #756b5c);
-  font: 650 .58rem/1 "IBM Plex Mono", monospace;
+  font: 800 .58rem/1 "IBM Plex Mono", monospace;
   letter-spacing: .13em;
   text-transform: uppercase;
 }
@@ -776,7 +776,7 @@ onUnmounted(() => {
   color: var(--ink, #221c14);
 }
 .mobile-nav__link small { color: var(--champagne, #d9b45a); font: 600 .59rem/1 "IBM Plex Mono", monospace; }
-.mobile-nav__link span { font: 690 1.36rem/1 "IBM Plex Sans Condensed", sans-serif; }
+.mobile-nav__link span { font: 700 1.36rem/1 "IBM Plex Sans Condensed", sans-serif; }
 .mobile-nav__link svg { transition: transform .3s cubic-bezier(.22, 1, .36, 1); }
 .mobile-nav__link:hover,
 .mobile-nav__link.is-active { color: var(--primary, #7458e8); }

@@ -11,13 +11,13 @@
 
       <div class="hero-content" :class="{ 'is-faded': stackFaded }">
         <div class="hero-copy">
-          <p class="hero-eyebrow">A Lord of the Mysteries server · Season IX</p>
+          <p class="hero-eyebrow">A Lord of the Mysteries Minecraft server</p>
           <h1 id="home-title">
-            Every evening is an
-            <span class="hero-keyword">experiment.</span>
+            Brew what
+            <span class="hero-keyword">shouldn't exist.</span>
           </h1>
           <p class="hero-summary">
-            Brew Sequence potions, hunt Beyonder creatures and claim a Pathway in a Minecraft RPG server shaped by Lord of the Mysteries.
+            Sequence potions, Beyonder hunts and a Pathway of your own — on a Minecraft RPG server shaped by Lord of the Mysteries.
           </p>
 
           <div class="hero-actions" aria-label="Get started">
@@ -272,18 +272,12 @@ onUnmounted(() => {
 .hero-copy { max-width: 640px; }
 
 .hero-eyebrow {
-  width: fit-content;
-  margin: 0 0 22px;
-  padding: 9px 16px;
-  border: 1px solid rgba(217, 180, 90, .45);
-  border-radius: 999px;
-  color: #a98634;
-  background: var(--surface-glass);
-  backdrop-filter: blur(14px) saturate(1.05);
-  font-size: .68rem;
-  font-weight: 700;
+  margin: 0 0 20px;
+  color: var(--ink-muted);
+  font-size: .74rem;
+  font-weight: 800;
   line-height: 1.2;
-  letter-spacing: .16em;
+  letter-spacing: .18em;
   text-transform: uppercase;
   opacity: 0;
   transform: translateY(10px);
@@ -635,7 +629,7 @@ onUnmounted(() => {
     padding: calc(84px + env(safe-area-inset-top)) 15px 96px;
   }
   .hero-copy { max-width: 560px; }
-  .hero-eyebrow { margin-bottom: 14px; font-size: .58rem; padding: 8px 13px; }
+  .hero-eyebrow { margin-bottom: 12px; font-size: .66rem; }
   .hero h1 { font-size: clamp(40px, 12.5vw, 64px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
   .hero-actions { gap: 9px; margin-bottom: 22px; }

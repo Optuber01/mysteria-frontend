@@ -482,7 +482,7 @@ onUnmounted(() => {
 .chapter-copy__kicker {
   margin: 0;
   color: #87691d;
-  font: 700 0.72rem/1 "Manrope", sans-serif;
+  font: 800 0.72rem/1 "Manrope", sans-serif;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -525,6 +525,7 @@ onUnmounted(() => {
   margin: 0;
   color: var(--ink-muted, #756b5c);
   font-size: clamp(0.85rem, 1vw, 0.95rem);
+  font-weight: 500;
   line-height: 1.6;
 }
 .chapter-copy__hint {
@@ -612,7 +613,7 @@ onUnmounted(() => {
 }
 .progression-nav strong {
   font-size: 0.74rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 .progression-nav button:focus-visible {
   outline: 3px solid var(--primary, #7458e8);
@@ -760,7 +761,7 @@ onUnmounted(() => {
   }
   .progression-static small {
     color: var(--primary-deep, #5f46d6);
-    font: 700 0.72rem/1 "Manrope", sans-serif;
+    font: 800 0.72rem/1 "Manrope", sans-serif;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
@@ -775,6 +776,7 @@ onUnmounted(() => {
     margin: 0;
     color: var(--ink-muted, #756b5c);
     font-size: 0.9rem;
+    font-weight: 500;
     line-height: 1.6;
   }
 }

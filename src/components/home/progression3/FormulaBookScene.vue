@@ -141,7 +141,7 @@ function inspect(id: string, event: Event) {
   gap: 12px;
   margin: 0;
   color: #87691d;
-  font: 700 clamp(0.68rem, 1vw, 0.78rem)/1 "Manrope", sans-serif;
+  font: 800 clamp(0.68rem, 1vw, 0.78rem)/1 "Manrope", sans-serif;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   white-space: nowrap;

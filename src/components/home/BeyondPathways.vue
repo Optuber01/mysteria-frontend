@@ -556,7 +556,7 @@ onUnmounted(() => {
 .world-static article span {
   margin: 0;
   color: var(--primary);
-  font: 700 .68rem/1 "Manrope", sans-serif;
+  font: 800 .68rem/1 "Manrope", sans-serif;
   letter-spacing: .16em;
   text-transform: uppercase;
 }
@@ -691,7 +691,7 @@ onUnmounted(() => {
 
 .next-chip span {
   color: var(--ink-muted);
-  font: 700 .56rem/1 "Manrope", sans-serif;
+  font: 800 .56rem/1 "Manrope", sans-serif;
   letter-spacing: .12em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -781,6 +781,7 @@ onUnmounted(() => {
   margin: 0;
   color: var(--ink-muted);
   font-size: clamp(.84rem, 1.05vw, 1rem);
+  font-weight: 500;
   line-height: 1.65;
 }
 
@@ -869,6 +870,7 @@ onUnmounted(() => {
   background: var(--surface);
   box-shadow: 0 24px 60px rgba(34, 28, 20, .14);
   font-size: .73rem;
+  font-weight: 500;
   line-height: 1.55;
   opacity: 0;
   pointer-events: none;
@@ -929,10 +931,10 @@ onUnmounted(() => {
 
 .living-intro { grid-column: 1 / -1; }
 .living-intro h3 { margin: 12px 0 10px; font: 800 clamp(2rem, 3.6vw, 3.1rem)/1.02 "Manrope", sans-serif; letter-spacing: -.025em; }
-.living-intro > p { max-width: 520px; margin: 0; color: var(--ink-muted); font-size: .83rem; line-height: 1.6; }
+.living-intro > p { max-width: 520px; margin: 0; color: var(--ink-muted); font-size: .83rem; font-weight: 500; line-height: 1.6; }
 
 .living-primary { position: relative; min-height: 130px; padding-top: 20px; }
-.living-primary p { margin: 0 0 12px; color: var(--primary); font: 700 .58rem/1 "Manrope", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.living-primary p { margin: 0 0 12px; color: var(--primary); font: 800 .58rem/1 "Manrope", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .living-primary strong { display: block; color: var(--ink); font: 800 clamp(2.6rem, 5.5vw, 4.25rem)/.9 "Manrope", sans-serif; letter-spacing: -.025em; }
 .living-primary span { display: block; margin-top: 14px; color: var(--ink-muted); font: 500 .66rem/1.35 "Manrope", sans-serif; }
 .status-orb { position: absolute; top: 22px; right: 22px; width: 10px; aspect-ratio: 1; border-radius: 50%; background: var(--ink-muted); }
@@ -943,7 +945,7 @@ onUnmounted(() => {
 .living-feed { display: grid; grid-template-columns: 1fr 1fr; grid-column: 1 / -1; margin: 0; border-top: 1px solid var(--hairline); }
 .living-feed > div { min-width: 0; display: grid; grid-template-columns: minmax(120px, .8fr) 1.2fr; gap: 12px; padding: 14px 18px 14px 0; border-bottom: 1px solid var(--hairline); }
 .living-feed > div:nth-child(odd) { margin-right: 28px; }
-.living-feed dt { color: var(--primary); font: 700 .58rem/1.45 "Manrope", sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+.living-feed dt { color: var(--primary); font: 800 .58rem/1.45 "Manrope", sans-serif; letter-spacing: .1em; text-transform: uppercase; }
 .living-feed dd { min-width: 0; margin: 0; color: var(--ink); font-size: .72rem; font-weight: 700; overflow-wrap: anywhere; }
 .living-feed a { color: var(--primary); text-decoration: underline; text-decoration-color: rgba(116, 88, 232, .35); text-underline-offset: 4px; }
 .living-feed__update { grid-column: 1 / -1; margin-right: 0 !important; }
@@ -1016,7 +1018,7 @@ onUnmounted(() => {
   gap: 10px;
   margin: 0;
   color: var(--ink-muted);
-  font: 600 .58rem/1 "Manrope", sans-serif;
+  font: 800 .58rem/1 "Manrope", sans-serif;
   letter-spacing: .14em;
   text-transform: uppercase;
   opacity: 1;
@@ -1029,9 +1031,9 @@ onUnmounted(() => {
 .world-static { display: none; }
 .world-static__feed { display: grid; gap: 0; margin: 22px 0 0; }
 .world-static__feed > div { display: grid; grid-template-columns: minmax(110px, .7fr) 1fr; gap: 14px; padding: 11px 0; border-top: 1px solid var(--hairline); }
-.world-static__feed dt { color: var(--primary); font: 700 .58rem/1.4 "Manrope", sans-serif; letter-spacing: .1em; text-transform: uppercase; }
-.world-static__feed dd { margin: 0; color: var(--ink); font-size: .72rem; line-height: 1.45; }
-.world-static__feed a { color: var(--primary); font-weight: 600; }
+.world-static__feed dt { color: var(--primary); font: 800 .58rem/1.4 "Manrope", sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+.world-static__feed dd { margin: 0; color: var(--ink); font-size: .72rem; font-weight: 500; line-height: 1.45; }
+.world-static__feed a { color: var(--primary); font-weight: 700; }
 
 @keyframes status-pulse { 50% { opacity: .35; transform: scale(.72); } }
 
@@ -1069,7 +1071,7 @@ onUnmounted(() => {
   .world-static article > div { position: relative; z-index: 1; width: calc(100% - 18px); margin: -36px 0 0 18px; padding: 22px 0 0 20px; border-left: 1px solid var(--hairline); background: linear-gradient(90deg, rgba(255, 255, 255, .96) 0 72%, transparent); }
   .world-static article span { font-size: .6rem; }
   .world-static article h3 { margin: 10px 0; font: 800 clamp(1.6rem, 6.5vw, 2.4rem)/1.02 "Manrope", sans-serif; letter-spacing: -.025em; }
-  .world-static article p { max-width: 460px; margin: 0; color: var(--ink-muted); font-size: .79rem; line-height: 1.6; }
+  .world-static article p { max-width: 460px; margin: 0; color: var(--ink-muted); font-size: .79rem; font-weight: 500; line-height: 1.6; }
   .world-static__live { min-height: 330px; align-content: end; padding: 32px !important; overflow: hidden; border: 1px solid var(--hairline); border-radius: 20px; background: var(--surface); box-shadow: 0 24px 60px rgba(34, 28, 20, .14); }
   .world-static__live > div { width: 100% !important; margin: 0 !important; padding: 0 !important; border: 0 !important; background: none !important; }
   .world-static__live a { display: inline-flex; min-height: 44px; align-items: center; margin-top: 18px; color: var(--primary); font-size: .76rem; font-weight: 700; }
@@ -1088,7 +1090,7 @@ onUnmounted(() => {
   .world-static article img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 22px; box-shadow: 0 0 0 1px var(--hairline), 0 24px 60px rgba(34, 28, 20, .14); }
   .world-static article > div { padding: 20px 4px; }
   .world-static article h3 { margin: 11px 0; font: 800 clamp(1.5rem, 2.6vw, 2.1rem)/1.05 "Manrope", sans-serif; letter-spacing: -.02em; }
-  .world-static article p { margin: 0; color: var(--ink-muted); font-size: .8rem; line-height: 1.6; }
+  .world-static article p { margin: 0; color: var(--ink-muted); font-size: .8rem; font-weight: 500; line-height: 1.6; }
   .world-static__live { grid-column: 1 / -1; min-height: 320px; display: grid; align-items: end; padding: 32px; border: 1px solid var(--hairline); border-radius: 20px; background: var(--surface); box-shadow: 0 24px 60px rgba(34, 28, 20, .14); }
   .world-static__live a { display: inline-flex; min-height: 44px; align-items: center; margin-top: 18px; color: var(--primary); font-weight: 700; }
 }

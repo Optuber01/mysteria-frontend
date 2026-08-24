@@ -414,7 +414,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   margin: 0 0 4px;
   color: #87691d;
   font-size: .7rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: .18em;
   text-transform: uppercase;
 }
@@ -463,6 +463,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
 .panel-ability__caption {
   color: var(--ink-muted, #756b5c);
   font-size: .72rem;
+  font-weight: 500;
   line-height: 1.35;
 }
 .panel-ability:hover,
@@ -483,7 +484,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   background: transparent;
   color: var(--ink-muted, #756b5c);
   font-size: .72rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.4;
   text-align: left;
   will-change: transform, opacity;
@@ -511,7 +512,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
   border-radius: 999px;
   color: #fff;
   font-size: .78rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: .14em;
   text-transform: uppercase;
   text-decoration: none;
