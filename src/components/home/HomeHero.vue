@@ -42,7 +42,10 @@
 
           <RouterLink class="hero-link-quiet" :to="latestSlug ? `/news/${latestSlug}` : '/news'">
             <span>Latest changelog</span>
-            <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l4.5 4.5" /></svg>
+            <svg aria-hidden="true" viewBox="0 0 20 20">
+              <path d="M5.5 2.75h6l3 3v11.5h-9z" />
+              <path d="M11.5 2.75v3h3M8 9h4.5M8 12h4.5" />
+            </svg>
           </RouterLink>
         </div>
 
@@ -60,8 +63,25 @@
               :fetchpriority="index === 0 ? 'high' : undefined"
               decoding="async"
             >
+            <div class="hero-plate__frame-line" aria-hidden="true" />
+            <div class="hero-plate__signal" aria-hidden="true">
+              <i />
+              <span>WORLD ONLINE</span>
+              <b>FIELD {{ String(activeSlide + 1).padStart(2, '0') }}</b>
+            </div>
+            <div class="hero-plate__tile hero-plate__tile--north" aria-hidden="true">
+              <img :src="heroSlides[(activeSlide + 1) % heroSlides.length].src" alt="">
+              <span>PATHWAY SCOUT</span>
+            </div>
+            <div class="hero-plate__tile hero-plate__tile--south" aria-hidden="true">
+              <img :src="heroSlides[(activeSlide + 2) % heroSlides.length].src" alt="">
+              <span>MYSTERRIA / 03</span>
+            </div>
           </div>
-          <figcaption class="hero-plate__caption">Cliffside Sanctuary · <b>SEQ IX</b></figcaption>
+          <figcaption class="hero-plate__caption">
+            <span>{{ heroSlides[activeSlide].label }}</span>
+            <b>{{ heroSlides[activeSlide].sequence }}</b>
+          </figcaption>
         </figure>
       </div>
 
@@ -85,9 +105,9 @@ const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>(
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: heroDawnCliffside, position: '36% 54%' },
-  { src: heroBlackgoldSanctuary, position: '38% 46%' },
-  { src: heroWatchtowerNight, position: '34% 52%' },
+  { src: heroDawnCliffside, position: '36% 54%', label: 'Cliffside Sanctuary', sequence: 'SEQ IX' },
+  { src: heroBlackgoldSanctuary, position: '38% 46%', label: 'Blackgold Sanctuary', sequence: 'SEQ IX' },
+  { src: heroWatchtowerNight, position: '34% 52%', label: 'Night Watchtower', sequence: 'SEQ IX' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -251,7 +271,7 @@ onUnmounted(() => {
   width: min(100%, 1480px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(320px, .92fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(360px, 1fr) minmax(0, 1.06fr);
   align-items: center;
   gap: clamp(36px, 5vw, 76px);
   padding: calc(96px + env(safe-area-inset-top)) clamp(20px, 4vw, 56px) clamp(128px, 15svh, 170px);
@@ -265,11 +285,11 @@ onUnmounted(() => {
 .hero-copy { max-width: 640px; }
 
 .hero h1 {
-  max-width: 700px;
+  max-width: 680px;
   margin: 0 0 22px;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: clamp(44px, 6vw, 88px);
+  font-size: clamp(40px, 5.1vw, 76px);
   font-weight: 800;
   line-height: .98;
   letter-spacing: -.035em;
@@ -366,13 +386,13 @@ onUnmounted(() => {
 .hero-link-quiet svg {
   display: block;
   flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 1.7;
+  stroke-width: 1.45;
   transition: transform .32s cubic-bezier(.22, 1, .36, 1);
 }
 .hero-link-quiet:hover { color: var(--primary); }
@@ -384,10 +404,11 @@ onUnmounted(() => {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  padding: 7px 8px 7px 12px;
+  min-height: 52px;
+  gap: 11px;
+  padding: 6px 8px 6px 14px;
   border: 1px solid var(--hairline);
-  border-radius: 16px;
+  border-radius: 999px;
   background: var(--surface-glass);
   backdrop-filter: blur(14px) saturate(1.05);
   box-shadow: 0 10px 30px rgba(34, 28, 20, .08);
@@ -438,8 +459,8 @@ onUnmounted(() => {
 
 .connection-copy {
   flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -476,10 +497,10 @@ onUnmounted(() => {
   position: relative;
   height: clamp(300px, 54svh, 560px);
   overflow: hidden;
-  border: 1px solid var(--hairline);
-  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, .36);
+  border-radius: 34px 34px 16px 34px;
   background: var(--journey-mid);
-  box-shadow: 0 24px 70px rgba(34, 28, 20, .16), 0 10px 30px rgba(34, 28, 20, .08);
+  box-shadow: 0 28px 80px rgba(34, 28, 20, .18), 0 12px 32px rgba(34, 28, 20, .1);
 }
 
 .hero-slide {
@@ -496,10 +517,107 @@ onUnmounted(() => {
 
 .hero-slide.is-active { opacity: 1; }
 
+.hero-plate__frame::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background:
+    linear-gradient(125deg, rgba(12, 14, 22, .38), transparent 35%, rgba(12, 14, 22, .1) 70%, rgba(12, 14, 22, .48)),
+    linear-gradient(180deg, rgba(12, 14, 22, .2), transparent 28%, transparent 68%, rgba(12, 14, 22, .3));
+  pointer-events: none;
+}
+
+.hero-plate__frame-line {
+  position: absolute;
+  z-index: 3;
+  inset: 16px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 24px 24px 10px 24px;
+  pointer-events: none;
+}
+
+.hero-plate__signal {
+  position: absolute;
+  z-index: 4;
+  top: 24px;
+  left: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, .86);
+  background: rgba(18, 20, 28, .36);
+  backdrop-filter: blur(12px);
+  font: 700 .55rem/1 var(--font-mono);
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+
+.hero-plate__signal i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--live);
+  box-shadow: 0 0 0 4px rgba(52, 199, 123, .16);
+}
+
+.hero-plate__signal b {
+  color: rgba(255, 255, 255, .55);
+  font-weight: 700;
+}
+
+.hero-plate__tile {
+  position: absolute;
+  z-index: 4;
+  width: 132px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, .52);
+  border-radius: 14px;
+  background: rgba(249, 245, 237, .9);
+  box-shadow: 0 18px 34px rgba(15, 15, 20, .26);
+  backdrop-filter: blur(12px);
+}
+
+.hero-plate__tile img {
+  display: block;
+  width: 100%;
+  height: 76px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.hero-plate__tile span {
+  display: block;
+  padding: 8px 2px 2px;
+  color: var(--ink-muted);
+  font: 800 .48rem/1 var(--font-mono);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero-plate__tile--north {
+  top: 22px;
+  right: 22px;
+  transform: rotate(3deg);
+}
+
+.hero-plate__tile--south {
+  right: 34px;
+  bottom: 28px;
+  width: 154px;
+  transform: rotate(-3deg);
+}
+
+.hero-plate__tile--south img { height: 88px; }
+
 .hero-plate__caption {
   position: absolute;
-  left: -14px;
-  bottom: 26px;
+  left: 18px;
+  bottom: 22px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -567,6 +685,9 @@ onUnmounted(() => {
 @media (max-width: 1080px) {
   .hero-content { gap: clamp(28px, 4vw, 44px); }
   .hero-plate__frame { height: clamp(280px, 46svh, 480px); }
+  .hero-plate__tile--north { right: 18px; width: 112px; }
+  .hero-plate__tile--south { right: 24px; width: 132px; }
+  .hero-plate__tile--south img { height: 74px; }
 }
 
 @media (max-width: 720px) {
@@ -579,11 +700,11 @@ onUnmounted(() => {
     padding: calc(84px + env(safe-area-inset-top)) 15px 96px;
   }
   .hero-copy { max-width: 560px; }
-  .hero h1 { font-size: clamp(42px, 12.5vw, 68px); }
+  .hero h1 { font-size: clamp(38px, 11.5vw, 60px); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
   .hero-actions { display: grid; grid-template-columns: 1fr; gap: 9px; margin-bottom: 8px; }
-  .hero-action { min-height: 48px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
-  .connection-pill { width: 100%; padding: 8px 9px 8px 15px; gap: 11px; }
+  .hero-action { min-height: 52px; justify-content: space-between; padding: 0 18px; font-size: .82rem; }
+  .connection-pill { width: 100%; padding: 6px 9px 6px 15px; gap: 10px; }
   .connection-address { font-size: .8rem; }
   .connection-copy { width: 36px; height: 36px; }
   .hero-plate { display: none; }
@@ -592,7 +713,7 @@ onUnmounted(() => {
 
 @media (max-width: 420px) {
   .hero-content { padding-inline: 11px; }
-  .hero h1 { font-size: clamp(38px, 12vw, 54px); }
+  .hero h1 { font-size: clamp(36px, 11vw, 52px); }
   .hero-summary { font-size: .87rem; }
   .hero-actions { width: 100%; }
   .connection-pill { width: 100%; }
