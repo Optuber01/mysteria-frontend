@@ -125,12 +125,18 @@ import corruptedFrontier from '@/assets/images/home/hero/hero-corrupted-frontier
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
+type HeroSceneTheme = {
+  rgb: string;
+  glowRgb: string;
+  accent: string;
+};
+
 const heroSlides = [
-  { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01' },
-  { src: eyeRift, position: '58% 50%', label: 'The Eye Rift', sequence: 'RIFT / 02' },
-  { src: radiantAwakening, position: '52% 48%', label: 'Sanctuary Awakening', sequence: 'RITE / 03' },
-  { src: guardianDragon, position: '62% 48%', label: 'The Guardian’s Trial', sequence: 'FIELD / 04' },
-  { src: corruptedFrontier, position: '56% 48%', label: 'The Corrupted Frontier', sequence: 'EVENT / 05' },
+  { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01', theme: { rgb: '158 126 174', glowRgb: '237 206 190', accent: '#8d6fe4' } satisfies HeroSceneTheme },
+  { src: eyeRift, position: '58% 50%', label: 'The Eye Rift', sequence: 'RIFT / 02', theme: { rgb: '52 68 112', glowRgb: '173 101 224', accent: '#8873e8' } satisfies HeroSceneTheme },
+  { src: radiantAwakening, position: '52% 48%', label: 'Sanctuary Awakening', sequence: 'RITE / 03', theme: { rgb: '190 135 70', glowRgb: '255 222 152', accent: '#ad7d39' } satisfies HeroSceneTheme },
+  { src: guardianDragon, position: '62% 48%', label: 'The Guardian’s Trial', sequence: 'FIELD / 04', theme: { rgb: '56 102 120', glowRgb: '226 164 98', accent: '#a66b43' } satisfies HeroSceneTheme },
+  { src: corruptedFrontier, position: '56% 48%', label: 'The Corrupted Frontier', sequence: 'EVENT / 05', theme: { rgb: '112 65 110', glowRgb: '225 117 91', accent: '#9b6dd3' } satisfies HeroSceneTheme },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -221,6 +227,17 @@ function stopRotation() {
   rotateTimer = null;
 }
 
+function applySceneTheme() {
+  const host = heroRef.value?.closest<HTMLElement>('.mysterria-home');
+  const theme = heroSlides[activeSlide.value].theme;
+  if (!host || !theme) return;
+  host.style.setProperty('--hero-scene-rgb', theme.rgb);
+  host.style.setProperty('--hero-scene-glow-rgb', theme.glowRgb);
+  host.style.setProperty('--hero-scene-accent', theme.accent);
+}
+
+watch(activeSlide, applySceneTheme);
+
 watch([slidesLoaded, reducedMotion], ([loaded, reduced]) => {
   if (!loaded || reduced) {
     stopRotation();
@@ -249,12 +266,17 @@ onMounted(() => {
   addEventListener('scroll', queueUpdate, { passive: true });
   addEventListener('resize', queueUpdate, { passive: true });
   readyFrame = requestAnimationFrame(() => { isReady.value = true; });
+  applySceneTheme();
   idleTimer = setTimeout(loadDeferredSlides, 3500);
   if (document.readyState === 'complete') queueDeferredSlides();
   else addEventListener('load', queueDeferredSlides, { once: true });
 });
 
 onUnmounted(() => {
+  const host = heroRef.value?.closest<HTMLElement>('.mysterria-home');
+  host?.style.removeProperty('--hero-scene-rgb');
+  host?.style.removeProperty('--hero-scene-glow-rgb');
+  host?.style.removeProperty('--hero-scene-accent');
   observer?.disconnect();
   removeEventListener('scroll', queueUpdate);
   removeEventListener('resize', queueUpdate);
@@ -284,7 +306,18 @@ onUnmounted(() => {
   min-height: 560px;
   overflow: hidden;
   isolation: isolate;
-  background: var(--journey-top);
+  background: color-mix(in srgb, var(--journey-top) 95%, rgb(var(--hero-scene-rgb)) 5%);
+  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero-sticky::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: radial-gradient(ellipse at 74% 42%, rgba(var(--hero-scene-glow-rgb), .12), transparent 48%);
+  pointer-events: none;
+  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-melt {
@@ -294,7 +327,8 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   height: clamp(150px, 28svh, 300px);
-  background: linear-gradient(180deg, rgba(252, 248, 240, 0) 0%, rgba(252, 248, 240, .72) 58%, var(--journey-mid) 100%);
+  background: linear-gradient(180deg, rgba(252, 248, 240, 0) 0%, color-mix(in srgb, var(--journey-mid) 84%, rgb(var(--hero-scene-glow-rgb)) 16%) 58%, color-mix(in srgb, var(--journey-mid) 94%, rgb(var(--hero-scene-rgb)) 6%) 100%);
+  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
 }
 
@@ -577,7 +611,8 @@ onUnmounted(() => {
   z-index: 3;
   inset: 0 auto 0 0;
   width: 29%;
-  background: linear-gradient(90deg, var(--journey-top) 0%, var(--journey-top) 12%, rgba(252, 248, 240, .9) 40%, rgba(252, 248, 240, .34) 72%, transparent 100%);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--journey-top) 94%, rgb(var(--hero-scene-rgb)) 6%) 0%, color-mix(in srgb, var(--journey-top) 94%, rgb(var(--hero-scene-rgb)) 6%) 12%, rgba(252, 248, 240, .9) 40%, rgba(252, 248, 240, .34) 72%, transparent 100%);
+  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
 }
 
@@ -709,7 +744,7 @@ onUnmounted(() => {
   background: var(--journey-top);
   box-shadow: 0 1px 3px rgba(18, 20, 28, .2);
 }
-.hero-plate__control.is-active i { background: var(--primary); transform: scaleX(1); }
+.hero-plate__control.is-active i { background: var(--hero-scene-accent, var(--primary)); transform: scaleX(1); transition: background .8s ease, transform .3s cubic-bezier(.22, 1, .36, 1); }
 
 .hero-plate__caption {
   position: absolute;
@@ -732,7 +767,7 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-.hero-plate__caption b { color: #a98634; font-weight: 700; }
+.hero-plate__caption b { color: var(--hero-scene-accent, #a98634); font-weight: 700; transition: color .8s ease; }
 
 .is-ready h1,
 .is-ready .hero-summary,
@@ -841,7 +876,8 @@ onUnmounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .hero { min-height: 100svh; }
-  .hero-sticky { position: relative; }
+  .hero-sticky { position: relative; transition: none; }
+  .hero-sticky::before, .hero-melt, .hero-plate__frame::before { transition: none; }
   .hero-slide { transition: none; will-change: auto; }
   .hero-slide:nth-of-type(n + 2) { display: none; }
   .hero-content { opacity: 1; transform: none; }

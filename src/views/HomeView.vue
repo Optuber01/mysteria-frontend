@@ -125,11 +125,15 @@ onUnmounted(() => {
   --home-content-max: 1480px;
   --home-content-gutter: clamp(20px, 4vw, 56px);
   --home-rail-inset: max(var(--home-content-gutter), calc((100vw - var(--home-content-max)) / 2 + var(--home-content-gutter)));
+  --hero-scene-rgb: 116 88 232;
+  --hero-scene-glow-rgb: 238 207 190;
+  --hero-scene-accent: var(--primary);
   min-width: 0;
   min-height: 100vh;
   color: var(--ink);
-  background: linear-gradient(180deg, var(--journey-top) 0%, var(--journey-mid) 55%, var(--journey-end) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--journey-top) 94%, rgb(var(--hero-scene-rgb)) 6%) 0%, color-mix(in srgb, var(--journey-mid) 97%, rgb(var(--hero-scene-rgb)) 3%) 55%, var(--journey-end) 100%);
   font-family: var(--font-body);
+  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
 }
 
 .mysterria-home :deep(button),

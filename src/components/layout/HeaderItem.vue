@@ -453,14 +453,14 @@ onUnmounted(() => {
   width: 100%;
   height: 72px;
   color: var(--ink, #221c14);
-  background: var(--surface-glass, rgba(255, 255, 255, .86));
+  background: color-mix(in srgb, var(--surface-glass, rgba(255, 255, 255, .86)) 92%, rgb(var(--hero-scene-rgb, 116 88 232)) 8%);
   border-bottom: 1px solid var(--hairline, #eae1d0);
   backdrop-filter: blur(14px);
   transition: color .35s, background-color .4s, border-color .35s, box-shadow .4s;
 }
 
 .site-header.is-home.is-at-top:not(.has-panel) {
-  background: var(--journey-top, #fcf8f0);
+  background: color-mix(in srgb, var(--journey-top, #fcf8f0) 92%, rgb(var(--hero-scene-rgb, 116 88 232)) 8%);
   border-bottom-color: transparent;
   box-shadow: none;
   backdrop-filter: blur(14px);
