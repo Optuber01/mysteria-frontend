@@ -471,6 +471,7 @@ onUnmounted(() => {
   visibility: hidden;
   transform: translateY(-5px);
   pointer-events: none;
+  transition: opacity .35s cubic-bezier(.22, 1, .36, 1), transform .35s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .35s;
 }
 
 .site-header:not(.is-at-top),

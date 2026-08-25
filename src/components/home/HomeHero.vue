@@ -81,18 +81,6 @@
               <b>FIELD {{ String(activeSlide + 1).padStart(2, '0') }}</b>
             </div>
           </div>
-          <button
-            class="hero-plate__peek hero-plate__peek--next"
-            type="button"
-            :aria-label="`Show ${heroSlides[(activeSlide + 1) % heroSlides.length].label}`"
-            @click="selectSlide((activeSlide + 1) % heroSlides.length)"
-          >
-            <img
-              :src="heroSlides[(activeSlide + 1) % heroSlides.length].src"
-              alt=""
-              loading="lazy"
-            >
-          </button>
           <figcaption class="hero-plate__caption">
             <span>{{ heroSlides[activeSlide].label }}</span>
             <b>{{ heroSlides[activeSlide].sequence }}</b>
@@ -128,10 +116,10 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
-import heroWatchtower from '@/assets/images/home/hero/hero-watchtower-night.webp';
 import heroDawn from '@/assets/images/home/hero/hero-dawn-cliffside.webp';
-import heroSanctuary from '@/assets/images/home/hero/hero-blackgold-sanctuary.webp';
 import twinTreeRift from '@/assets/images/community-archive/dungeons/twin-tree-rift/twin-tree-rift-wide.webp';
+import emporium from '@/assets/images/home/world/emporium.webp';
+import auroraWaterfront from '@/assets/images/community-archive/towns/aurora-cliffside/aurora-waterfront.webp';
 import heroBanner from '@/assets/images/optimized/banner.webp';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
@@ -139,10 +127,10 @@ const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>(
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
   { src: heroDawn, position: '56% 48%', label: 'The Cliffside Gate', sequence: 'WORLD / 01' },
-  { src: heroWatchtower, position: '72% 52%', label: 'Watchtower at Dusk', sequence: 'VEIL / 02' },
-  { src: heroSanctuary, position: '50% 48%', label: 'Black-Gold Sanctuary', sequence: 'RITUAL / 03' },
-  { src: twinTreeRift, position: '52% 50%', label: 'The Twin-Tree Rift', sequence: 'FIELD / 04' },
-  { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 05' },
+  { src: twinTreeRift, position: '52% 50%', label: 'The Twin-Tree Rift', sequence: 'FIELD / 02' },
+  { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 03' },
+  { src: emporium, position: '54% 48%', label: 'The Emporium', sequence: 'WORLD / 04' },
+  { src: auroraWaterfront, position: '58% 50%', label: 'Aurora Waterfront', sequence: 'WORLD / 05' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -331,7 +319,7 @@ onUnmounted(() => {
   z-index: 6;
   width: min(640px, 53%);
   max-width: 640px;
-  margin-left: clamp(0px, 2.2vw, 32px);
+  margin-left: 0;
 }
 
 .hero h1 {
@@ -549,7 +537,7 @@ onUnmounted(() => {
 .hero-plate__frame {
   position: absolute;
   z-index: 1;
-  inset: 0 3% 0 0;
+  inset: 0 6% 0 0;
   overflow: hidden;
   clip-path: polygon(12% 0, 100% 0, 94% 100%, 0 100%);
   box-shadow: 0 26px 60px rgba(34, 28, 20, .13);
@@ -633,14 +621,6 @@ onUnmounted(() => {
   width: 28%;
   height: 22%;
   transform: rotate(-4deg);
-}
-
-.hero-plate__peek--next {
-  top: 18%;
-  right: 3%;
-  width: 25%;
-  height: 20%;
-  transform: rotate(4deg);
 }
 
 .hero-plate__signal {
