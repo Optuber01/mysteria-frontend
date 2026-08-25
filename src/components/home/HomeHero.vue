@@ -116,21 +116,21 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
-import heroDawn from '@/assets/images/home/hero/hero-dawn-cliffside.webp';
-import twinTreeRift from '@/assets/images/community-archive/dungeons/twin-tree-rift/twin-tree-rift-wide.webp';
-import emporium from '@/assets/images/home/world/emporium.webp';
-import auroraWaterfront from '@/assets/images/community-archive/towns/aurora-cliffside/aurora-waterfront.webp';
-import heroBanner from '@/assets/images/optimized/banner.webp';
+import auroraCliffside from '@/assets/images/home/hero/hero-aurora-cliffside.webp';
+import cliffsideHarbor from '@/assets/images/home/hero/hero-cliffside-harbor.png';
+import eyeCanopy from '@/assets/images/home/hero/hero-eye-canopy.webp';
+import copperForgeSanctum from '@/assets/images/home/hero/hero-copper-forge-sanctum.webp';
+import copperForgeChamber from '@/assets/images/home/hero/hero-copper-forge-chamber.webp';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
-  { src: heroDawn, position: '56% 48%', label: 'The Cliffside Gate', sequence: 'WORLD / 01' },
-  { src: twinTreeRift, position: '52% 50%', label: 'The Twin-Tree Rift', sequence: 'FIELD / 02' },
-  { src: heroBanner, position: '30% 52%', label: 'The First Signal', sequence: 'VEIL / 03' },
-  { src: emporium, position: '54% 48%', label: 'The Emporium', sequence: 'WORLD / 04' },
-  { src: auroraWaterfront, position: '58% 50%', label: 'Aurora Waterfront', sequence: 'WORLD / 05' },
+  { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01' },
+  { src: cliffsideHarbor, position: '52% 54%', label: 'Cliffside Harbor', sequence: 'WORLD / 02' },
+  { src: eyeCanopy, position: '50% 46%', label: 'The Eye Canopy', sequence: 'RIFT / 03' },
+  { src: copperForgeSanctum, position: '50% 48%', label: 'Copper Forge', sequence: 'FIELD / 04' },
+  { src: copperForgeChamber, position: '52% 48%', label: 'The Ember Sanctum', sequence: 'FIELD / 05' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
