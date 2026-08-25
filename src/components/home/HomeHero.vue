@@ -329,7 +329,7 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   height: clamp(150px, 28svh, 300px);
-  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--journey-mid) 72%, var(--hero-scene-glow) 28%) 58%, color-mix(in srgb, var(--journey-mid) 84%, var(--hero-scene-color) 16%) 100%);
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--journey-mid) 72%, var(--hero-scene-glow) 28%) 30%, color-mix(in srgb, var(--journey-mid) 92%, var(--hero-scene-color) 8%) 50%, var(--journey-mid) 70%, var(--journey-mid) 100%);
   transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
 }
@@ -357,6 +357,8 @@ onUnmounted(() => {
   background:
     radial-gradient(ellipse 66% 90% at 28% 52%, color-mix(in srgb, var(--hero-scene-color) 18%, transparent), transparent 70%),
     linear-gradient(90deg, color-mix(in srgb, var(--hero-scene-color) 12%, transparent) 0%, color-mix(in srgb, var(--hero-scene-glow) 10%, transparent) 34%, transparent 60%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 66%, rgba(0, 0, 0, .48) 78%, transparent 90%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 66%, rgba(0, 0, 0, .48) 78%, transparent 90%);
   pointer-events: none;
   transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
 }
@@ -588,8 +590,10 @@ onUnmounted(() => {
   z-index: 1;
   inset: 0 5.5% 0 0;
   overflow: hidden;
-  clip-path: polygon(8% 0, 100% 0, 96% 100%, 0 100%);
-  box-shadow: 0 26px 60px rgba(34, 28, 20, .13);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .08) 5%, rgba(0, 0, 0, .52) 18%, #000 34%), linear-gradient(180deg, #000 0%, #000 68%, rgba(0, 0, 0, .55) 78%, transparent 92%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .08) 5%, rgba(0, 0, 0, .52) 18%, #000 34%), linear-gradient(180deg, #000 0%, #000 68%, rgba(0, 0, 0, .55) 78%, transparent 92%);
+  mask-composite: intersect;
   background: var(--journey-mid);
 }
 
@@ -625,8 +629,8 @@ onUnmounted(() => {
   position: absolute;
   z-index: 3;
   inset: 0 auto 0 0;
-  width: 38%;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--journey-top) 80%, var(--hero-scene-color) 20%) 0%, color-mix(in srgb, var(--journey-top) 82%, var(--hero-scene-color) 18%) 24%, color-mix(in srgb, var(--hero-scene-color) 16%, transparent) 68%, transparent 100%);
+  width: 42%;
+  background: radial-gradient(ellipse at 0 50%, color-mix(in srgb, var(--hero-scene-color) 24%, transparent), color-mix(in srgb, var(--hero-scene-glow) 10%, transparent) 44%, transparent 76%);
   transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
 }

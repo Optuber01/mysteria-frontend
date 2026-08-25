@@ -370,6 +370,18 @@ onUnmounted(() => {
   isolation: isolate;
 }
 
+.progression-v3::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -140px;
+  right: 0;
+  left: 0;
+  height: 180px;
+  background: linear-gradient(180deg, transparent 0%, rgba(244, 236, 223, .24) 28%, rgba(244, 236, 223, .78) 68%, var(--journey-mid, #f4ecdf) 100%);
+  pointer-events: none;
+}
+
 @media (max-width: 720px) and (max-height: 690px) {
   .progression-v3 { margin-top: 0; }
 }

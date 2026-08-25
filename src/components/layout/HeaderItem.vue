@@ -460,10 +460,10 @@ onUnmounted(() => {
 }
 
 .site-header.is-home.is-at-top:not(.has-panel) {
-  background: color-mix(in srgb, var(--journey-top, #fcf8f0) 84%, var(--hero-scene-color, #9e7eae) 16%);
+  background: transparent;
   border-bottom-color: transparent;
   box-shadow: none;
-  backdrop-filter: blur(14px);
+  backdrop-filter: none;
 }
 
 .site-header.is-home.is-at-top .header-server-status {
