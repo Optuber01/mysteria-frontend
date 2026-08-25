@@ -117,20 +117,20 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
 import auroraCliffside from '@/assets/images/home/hero/hero-aurora-cliffside.webp';
-import cliffsideHarbor from '@/assets/images/home/hero/hero-cliffside-harbor.png';
-import eyeCanopy from '@/assets/images/home/hero/hero-eye-canopy.webp';
-import copperForgeSanctum from '@/assets/images/home/hero/hero-copper-forge-sanctum.webp';
-import copperForgeChamber from '@/assets/images/home/hero/hero-copper-forge-chamber.webp';
+import eyeRift from '@/assets/images/home/hero/hero-eye-rift.webp';
+import radiantAwakening from '@/assets/images/home/hero/hero-radiant-awakening.webp';
+import guardianDragon from '@/assets/images/home/hero/hero-guardian-dragon.webp';
+import corruptedFrontier from '@/assets/images/home/hero/hero-corrupted-frontier.png';
 
 const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
 const heroSlides = [
   { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01' },
-  { src: cliffsideHarbor, position: '52% 54%', label: 'Cliffside Harbor', sequence: 'WORLD / 02' },
-  { src: eyeCanopy, position: '50% 46%', label: 'The Eye Canopy', sequence: 'RIFT / 03' },
-  { src: copperForgeSanctum, position: '50% 48%', label: 'Copper Forge', sequence: 'FIELD / 04' },
-  { src: copperForgeChamber, position: '52% 48%', label: 'The Ember Sanctum', sequence: 'FIELD / 05' },
+  { src: eyeRift, position: '58% 50%', label: 'The Eye Rift', sequence: 'RIFT / 02' },
+  { src: radiantAwakening, position: '52% 48%', label: 'Sanctuary Awakening', sequence: 'RITE / 03' },
+  { src: guardianDragon, position: '62% 48%', label: 'The Guardian’s Trial', sequence: 'FIELD / 04' },
+  { src: corruptedFrontier, position: '56% 48%', label: 'The Corrupted Frontier', sequence: 'EVENT / 05' },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -526,7 +526,7 @@ onUnmounted(() => {
 .hero-plate {
   position: absolute;
   z-index: 4;
-  inset: -8% 0 0 34%;
+  inset: -9% 0 -3% 30%;
   margin: 0;
   opacity: 0;
   transform: translateY(18px);
@@ -537,9 +537,9 @@ onUnmounted(() => {
 .hero-plate__frame {
   position: absolute;
   z-index: 1;
-  inset: 0 6% 0 0;
+  inset: 0 5.5% 0 0;
   overflow: hidden;
-  clip-path: polygon(12% 0, 100% 0, 94% 100%, 0 100%);
+  clip-path: polygon(8% 0, 100% 0, 96% 100%, 0 100%);
   box-shadow: 0 26px 60px rgba(34, 28, 20, .13);
   background: var(--journey-mid);
 }
@@ -576,8 +576,8 @@ onUnmounted(() => {
   position: absolute;
   z-index: 3;
   inset: 0 auto 0 0;
-  width: 36%;
-  background: linear-gradient(90deg, var(--journey-top) 0%, var(--journey-top) 22%, rgba(252, 248, 240, .94) 48%, rgba(252, 248, 240, .42) 76%, transparent 100%);
+  width: 29%;
+  background: linear-gradient(90deg, var(--journey-top) 0%, var(--journey-top) 12%, rgba(252, 248, 240, .9) 40%, rgba(252, 248, 240, .34) 72%, transparent 100%);
   pointer-events: none;
 }
 
@@ -616,10 +616,10 @@ onUnmounted(() => {
 .hero-plate__peek:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 
 .hero-plate__peek--previous {
-  left: 10%;
-  bottom: 12%;
-  width: 28%;
-  height: 22%;
+  left: 4%;
+  bottom: 14%;
+  width: 25%;
+  height: 23%;
   transform: rotate(-4deg);
 }
 
@@ -627,7 +627,7 @@ onUnmounted(() => {
   position: absolute;
   z-index: 4;
   top: 24px;
-  left: 13%;
+  left: 10%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -658,7 +658,7 @@ onUnmounted(() => {
 .hero-plate__controls {
   position: absolute;
   z-index: 5;
-  right: 12%;
+  right: 8%;
   bottom: 22px;
   display: inline-flex;
   align-items: center;
@@ -713,7 +713,7 @@ onUnmounted(() => {
 
 .hero-plate__caption {
   position: absolute;
-  left: 10%;
+  left: 32%;
   bottom: 22px;
   display: inline-flex;
   align-items: center;
@@ -780,7 +780,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1080px) {
-  .hero-plate { inset: -5% -2% -4% 23%; }
+  .hero-plate { inset: -6% -2% -4% 24%; }
 }
 
 @media (max-width: 720px) {
@@ -826,7 +826,7 @@ onUnmounted(() => {
 @media (max-height: 690px) and (min-width: 721px) {
   .hero-content { padding-top: calc(76px + env(safe-area-inset-top)); }
   .hero h1 { font-size: clamp(40px, 5vw, 68px); }
-  .hero-plate { inset: -4% -2% -4% 27%; }
+  .hero-plate { inset: -5% -2% -5% 27%; }
 }
 
 @media (max-width: 270px) {
