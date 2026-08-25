@@ -121,19 +121,37 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+@property --hero-scene-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #9e7eae;
+}
+
+@property --hero-scene-glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #edcebe;
+}
+
+@property --hero-scene-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #8d6fe4;
+}
+
 .mysterria-home {
   --home-content-max: 1480px;
   --home-content-gutter: clamp(20px, 4vw, 56px);
   --home-rail-inset: max(var(--home-content-gutter), calc((100vw - var(--home-content-max)) / 2 + var(--home-content-gutter)));
-  --hero-scene-rgb: 116 88 232;
-  --hero-scene-glow-rgb: 238 207 190;
+  --hero-scene-color: #9e7eae;
+  --hero-scene-glow: #edcebe;
   --hero-scene-accent: var(--primary);
   min-width: 0;
   min-height: 100vh;
   color: var(--ink);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--journey-top) 94%, rgb(var(--hero-scene-rgb)) 6%) 0%, color-mix(in srgb, var(--journey-mid) 97%, rgb(var(--hero-scene-rgb)) 3%) 55%, var(--journey-end) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--journey-top) 84%, var(--hero-scene-color) 16%) 0%, color-mix(in srgb, var(--journey-mid) 92%, var(--hero-scene-color) 8%) 55%, var(--journey-end) 100%);
   font-family: var(--font-body);
-  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
+  transition: --hero-scene-color 1.45s cubic-bezier(.22, 1, .36, 1), --hero-scene-glow 1.45s cubic-bezier(.22, 1, .36, 1), --hero-scene-accent 1.25s cubic-bezier(.22, 1, .36, 1), background 1.45s cubic-bezier(.22, 1, .36, 1);
 }
 
 .mysterria-home :deep(button),
@@ -196,6 +214,7 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mysterria-home { transition: none; }
   .mysterria-home :deep(*) {
     scroll-behavior: auto !important;
     animation-duration: .001ms !important;

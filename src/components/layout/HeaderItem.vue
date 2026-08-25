@@ -453,14 +453,14 @@ onUnmounted(() => {
   width: 100%;
   height: 72px;
   color: var(--ink, #221c14);
-  background: color-mix(in srgb, var(--surface-glass, rgba(255, 255, 255, .86)) 92%, rgb(var(--hero-scene-rgb, 116 88 232)) 8%);
+  background: color-mix(in srgb, var(--surface-glass, rgba(255, 255, 255, .86)) 84%, var(--hero-scene-color, #9e7eae) 16%);
   border-bottom: 1px solid var(--hairline, #eae1d0);
   backdrop-filter: blur(14px);
-  transition: color .35s, background-color .4s, border-color .35s, box-shadow .4s;
+  transition: color .35s, background-color 1.1s cubic-bezier(.22, 1, .36, 1), border-color .35s, box-shadow .4s;
 }
 
 .site-header.is-home.is-at-top:not(.has-panel) {
-  background: color-mix(in srgb, var(--journey-top, #fcf8f0) 92%, rgb(var(--hero-scene-rgb, 116 88 232)) 8%);
+  background: color-mix(in srgb, var(--journey-top, #fcf8f0) 84%, var(--hero-scene-color, #9e7eae) 16%);
   border-bottom-color: transparent;
   box-shadow: none;
   backdrop-filter: blur(14px);
@@ -680,7 +680,7 @@ onUnmounted(() => {
   border: 0;
   border-radius: 999px;
   color: #fff;
-  background: var(--primary, #7458e8);
+  background: color-mix(in srgb, var(--primary, #7458e8) 80%, var(--hero-scene-accent, #8d6fe4) 20%);
   font-size: .77rem;
   font-weight: 800;
   box-shadow: 0 8px 20px rgba(34, 28, 20, .12);

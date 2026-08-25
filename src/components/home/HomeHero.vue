@@ -126,17 +126,17 @@ const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>(
 
 const ROTATE_INTERVAL = 7000;
 type HeroSceneTheme = {
-  rgb: string;
-  glowRgb: string;
+  color: string;
+  glow: string;
   accent: string;
 };
 
 const heroSlides = [
-  { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01', theme: { rgb: '158 126 174', glowRgb: '237 206 190', accent: '#8d6fe4' } satisfies HeroSceneTheme },
-  { src: eyeRift, position: '58% 50%', label: 'The Eye Rift', sequence: 'RIFT / 02', theme: { rgb: '52 68 112', glowRgb: '173 101 224', accent: '#8873e8' } satisfies HeroSceneTheme },
-  { src: radiantAwakening, position: '52% 48%', label: 'Sanctuary Awakening', sequence: 'RITE / 03', theme: { rgb: '190 135 70', glowRgb: '255 222 152', accent: '#ad7d39' } satisfies HeroSceneTheme },
-  { src: guardianDragon, position: '62% 48%', label: 'The Guardian’s Trial', sequence: 'FIELD / 04', theme: { rgb: '56 102 120', glowRgb: '226 164 98', accent: '#a66b43' } satisfies HeroSceneTheme },
-  { src: corruptedFrontier, position: '56% 48%', label: 'The Corrupted Frontier', sequence: 'EVENT / 05', theme: { rgb: '112 65 110', glowRgb: '225 117 91', accent: '#9b6dd3' } satisfies HeroSceneTheme },
+  { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01', theme: { color: '#9e7eae', glow: '#edcebe', accent: '#8d6fe4' } satisfies HeroSceneTheme },
+  { src: eyeRift, position: '58% 50%', label: 'The Eye Rift', sequence: 'RIFT / 02', theme: { color: '#344470', glow: '#ad65e0', accent: '#8873e8' } satisfies HeroSceneTheme },
+  { src: radiantAwakening, position: '52% 48%', label: 'Sanctuary Awakening', sequence: 'RITE / 03', theme: { color: '#be8746', glow: '#ffde98', accent: '#ad7d39' } satisfies HeroSceneTheme },
+  { src: guardianDragon, position: '62% 48%', label: 'The Guardian’s Trial', sequence: 'FIELD / 04', theme: { color: '#386678', glow: '#e2a462', accent: '#a66b43' } satisfies HeroSceneTheme },
+  { src: corruptedFrontier, position: '56% 48%', label: 'The Corrupted Frontier', sequence: 'EVENT / 05', theme: { color: '#70416e', glow: '#e1755b', accent: '#9b6dd3' } satisfies HeroSceneTheme },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -231,8 +231,8 @@ function applySceneTheme() {
   const host = heroRef.value?.closest<HTMLElement>('.mysterria-home');
   const theme = heroSlides[activeSlide.value].theme;
   if (!host || !theme) return;
-  host.style.setProperty('--hero-scene-rgb', theme.rgb);
-  host.style.setProperty('--hero-scene-glow-rgb', theme.glowRgb);
+  host.style.setProperty('--hero-scene-color', theme.color);
+  host.style.setProperty('--hero-scene-glow', theme.glow);
   host.style.setProperty('--hero-scene-accent', theme.accent);
 }
 
@@ -274,8 +274,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   const host = heroRef.value?.closest<HTMLElement>('.mysterria-home');
-  host?.style.removeProperty('--hero-scene-rgb');
-  host?.style.removeProperty('--hero-scene-glow-rgb');
+  host?.style.removeProperty('--hero-scene-color');
+  host?.style.removeProperty('--hero-scene-glow');
   host?.style.removeProperty('--hero-scene-accent');
   observer?.disconnect();
   removeEventListener('scroll', queueUpdate);
@@ -306,8 +306,8 @@ onUnmounted(() => {
   min-height: 560px;
   overflow: hidden;
   isolation: isolate;
-  background: color-mix(in srgb, var(--journey-top) 95%, rgb(var(--hero-scene-rgb)) 5%);
-  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
+  background: color-mix(in srgb, var(--journey-top) 82%, var(--hero-scene-color) 18%);
+  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-sticky::before {
@@ -315,9 +315,11 @@ onUnmounted(() => {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background: radial-gradient(ellipse at 74% 42%, rgba(var(--hero-scene-glow-rgb), .12), transparent 48%);
+  background:
+    radial-gradient(ellipse 58% 74% at 72% 40%, color-mix(in srgb, var(--hero-scene-glow) 28%, transparent), transparent 65%),
+    radial-gradient(ellipse 58% 92% at 22% 48%, color-mix(in srgb, var(--hero-scene-color) 20%, transparent), transparent 72%);
   pointer-events: none;
-  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
+  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-melt {
@@ -327,8 +329,8 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   height: clamp(150px, 28svh, 300px);
-  background: linear-gradient(180deg, rgba(252, 248, 240, 0) 0%, color-mix(in srgb, var(--journey-mid) 84%, rgb(var(--hero-scene-glow-rgb)) 16%) 58%, color-mix(in srgb, var(--journey-mid) 94%, rgb(var(--hero-scene-rgb)) 6%) 100%);
-  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
+  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--journey-mid) 72%, var(--hero-scene-glow) 28%) 58%, color-mix(in srgb, var(--journey-mid) 84%, var(--hero-scene-color) 16%) 100%);
+  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
 }
 
@@ -344,6 +346,19 @@ onUnmounted(() => {
   opacity: clamp(0, calc((.95 - var(--hero-progress)) / .95), 1);
   transform: translate3d(0, calc(var(--hero-progress) / .95 * -32px), 0);
   will-change: transform, opacity;
+  isolation: isolate;
+}
+
+.hero-content::before {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 66% 90% at 28% 52%, color-mix(in srgb, var(--hero-scene-color) 18%, transparent), transparent 70%),
+    linear-gradient(90deg, color-mix(in srgb, var(--hero-scene-color) 12%, transparent) 0%, color-mix(in srgb, var(--hero-scene-glow) 10%, transparent) 34%, transparent 60%);
+  pointer-events: none;
+  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-content.is-faded { pointer-events: none; }
@@ -359,7 +374,7 @@ onUnmounted(() => {
 .hero h1 {
   max-width: 680px;
   margin: 0 0 22px;
-  color: var(--ink);
+  color: color-mix(in srgb, var(--ink) 92%, var(--hero-scene-color) 8%);
   font-family: var(--font-display);
   font-size: clamp(40px, 5.1vw, 76px);
   font-weight: 800;
@@ -369,7 +384,7 @@ onUnmounted(() => {
   text-wrap: balance;
   opacity: 1;
   transform: translateY(16px);
-  transition: opacity .9s .12s cubic-bezier(.22, 1, .36, 1), transform .9s .12s cubic-bezier(.22, 1, .36, 1);
+  transition: opacity .9s .12s cubic-bezier(.22, 1, .36, 1), transform .9s .12s cubic-bezier(.22, 1, .36, 1), color 1.25s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-summary {
@@ -430,8 +445,8 @@ onUnmounted(() => {
 
 .hero-action--primary {
   color: #fff;
-  background: var(--primary);
-  box-shadow: 0 12px 30px rgba(116, 88, 232, .24);
+  background: color-mix(in srgb, var(--primary) 78%, var(--hero-scene-accent) 22%);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--hero-scene-accent) 30%, transparent);
 }
 .hero-action--primary:hover {
   color: #fff;
@@ -479,14 +494,14 @@ onUnmounted(() => {
   min-height: 52px;
   gap: 11px;
   padding: 6px 8px 6px 14px;
-  border: 1px solid var(--hairline);
+  border: 1px solid color-mix(in srgb, var(--hairline) 72%, var(--hero-scene-color) 28%);
   border-radius: 999px;
-  background: var(--surface-glass);
+  background: color-mix(in srgb, var(--surface-glass) 84%, var(--hero-scene-color) 16%);
   backdrop-filter: blur(14px) saturate(1.05);
-  box-shadow: 0 10px 30px rgba(34, 28, 20, .08);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--hero-scene-color) 18%, transparent);
   opacity: 0;
   transform: translateY(14px);
-  transition: opacity .8s .5s cubic-bezier(.22, 1, .36, 1), transform .8s .5s cubic-bezier(.22, 1, .36, 1);
+  transition: opacity .8s .5s cubic-bezier(.22, 1, .36, 1), transform .8s .5s cubic-bezier(.22, 1, .36, 1), background-color 1.25s cubic-bezier(.22, 1, .36, 1), border-color 1.25s cubic-bezier(.22, 1, .36, 1), box-shadow 1.25s cubic-bezier(.22, 1, .36, 1);
 }
 
 .connection-status {
@@ -610,9 +625,9 @@ onUnmounted(() => {
   position: absolute;
   z-index: 3;
   inset: 0 auto 0 0;
-  width: 29%;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--journey-top) 94%, rgb(var(--hero-scene-rgb)) 6%) 0%, color-mix(in srgb, var(--journey-top) 94%, rgb(var(--hero-scene-rgb)) 6%) 12%, rgba(252, 248, 240, .9) 40%, rgba(252, 248, 240, .34) 72%, transparent 100%);
-  transition: background 1.1s cubic-bezier(.22, 1, .36, 1);
+  width: 38%;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--journey-top) 80%, var(--hero-scene-color) 20%) 0%, color-mix(in srgb, var(--journey-top) 82%, var(--hero-scene-color) 18%) 24%, color-mix(in srgb, var(--hero-scene-color) 16%, transparent) 68%, transparent 100%);
+  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
 }
 
@@ -622,13 +637,13 @@ onUnmounted(() => {
   display: block;
   overflow: hidden;
   padding: 0;
-  border: 4px solid rgba(252, 248, 240, .94);
+  border: 4px solid color-mix(in srgb, var(--journey-top) 80%, var(--hero-scene-color) 20%);
   border-radius: 14px;
   background: var(--journey-mid);
   box-shadow: 0 16px 32px rgba(34, 28, 20, .18);
   cursor: pointer;
   pointer-events: auto;
-  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, filter .35s;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, filter .35s, border-color 1.25s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-plate__peek img {
@@ -741,8 +756,9 @@ onUnmounted(() => {
 .hero-plate__control:focus-visible { color: #fff; background: rgba(255, 255, 255, .14); }
 .hero-plate__control.is-active {
   color: var(--ink);
-  background: var(--journey-top);
+  background: color-mix(in srgb, var(--journey-top) 80%, var(--hero-scene-color) 20%);
   box-shadow: 0 1px 3px rgba(18, 20, 28, .2);
+  transition: color .2s, background-color 1.25s cubic-bezier(.22, 1, .36, 1);
 }
 .hero-plate__control.is-active i { background: var(--hero-scene-accent, var(--primary)); transform: scaleX(1); transition: background .8s ease, transform .3s cubic-bezier(.22, 1, .36, 1); }
 
@@ -754,9 +770,9 @@ onUnmounted(() => {
   align-items: center;
   gap: 6px;
   padding: 9px 13px;
-  border: 1px solid var(--hairline);
+  border: 1px solid color-mix(in srgb, var(--hairline) 72%, var(--hero-scene-color) 28%);
   border-radius: 12px;
-  background: rgba(252, 248, 240, .9);
+  background: color-mix(in srgb, rgba(252, 248, 240, .9) 82%, var(--hero-scene-color) 18%);
   backdrop-filter: blur(14px) saturate(1.05);
   box-shadow: 0 8px 22px rgba(34, 28, 20, .1);
   color: var(--ink-muted);
@@ -765,6 +781,7 @@ onUnmounted(() => {
   letter-spacing: .13em;
   text-transform: uppercase;
   white-space: nowrap;
+  transition: background-color 1.25s cubic-bezier(.22, 1, .36, 1), border-color 1.25s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-plate__caption b { color: var(--hero-scene-accent, #a98634); font-weight: 700; transition: color .8s ease; }
@@ -877,7 +894,7 @@ onUnmounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .hero { min-height: 100svh; }
   .hero-sticky { position: relative; transition: none; }
-  .hero-sticky::before, .hero-melt, .hero-plate__frame::before { transition: none; }
+  .hero-sticky::before, .hero-melt, .hero-content::before, .hero-plate__frame::before { transition: none; }
   .hero-slide { transition: none; will-change: auto; }
   .hero-slide:nth-of-type(n + 2) { display: none; }
   .hero-content { opacity: 1; transform: none; }
