@@ -790,7 +790,7 @@ onUnmounted(() => {
     display: block;
     align-content: start;
     gap: 0;
-    padding: calc(84px + env(safe-area-inset-top)) 15px 96px;
+    padding: calc(84px + env(safe-area-inset-top)) var(--home-content-gutter, 20px) 96px;
   }
   .hero-copy { width: 100%; max-width: 560px; margin-left: 0; }
   .hero h1 { font-size: clamp(38px, 11.5vw, 60px); }
@@ -805,7 +805,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 420px) {
-  .hero-content { padding-inline: 11px; }
+  .hero-content { padding-inline: var(--home-content-gutter, 20px); }
   .hero-copy { margin-left: 0; }
   .hero h1 { font-size: clamp(36px, 11vw, 52px); }
   .hero-summary { font-size: .87rem; }

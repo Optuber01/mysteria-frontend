@@ -78,23 +78,26 @@ const statusLabel = computed(() => {
 
 <style scoped>
 .site-footer {
+  --home-content-max: 1480px;
+  --home-content-gutter: clamp(20px, 4vw, 56px);
   position: relative;
   z-index: 2;
   overflow: hidden;
-  padding: 54px clamp(20px, 5vw, 76px) 22px;
+  padding: 54px 0 22px;
   color: var(--ink, #221c14);
   background: linear-gradient(180deg, color-mix(in srgb, var(--journey-mid) 0%, transparent) 0%, var(--journey-mid) 160px);
   isolation: isolate;
 }
 
 .footer-rail {
-  max-width: 1440px;
+  width: min(100%, var(--home-content-max));
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 28px;
   margin: 0 auto;
-  padding: 22px 0;
+  padding: 22px var(--home-content-gutter);
   border-top: 1px solid var(--hairline, #eae1d0);
   border-bottom: 1px solid var(--hairline, #eae1d0);
 }
@@ -237,13 +240,14 @@ const statusLabel = computed(() => {
 
 .footer-legal {
   position: relative;
-  max-width: 1440px;
+  width: min(100%, var(--home-content-max));
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   margin: 0 auto;
-  padding-top: 18px;
+  padding: 18px var(--home-content-gutter) 0;
 }
 .footer-legal::before {
   content: "";
@@ -271,13 +275,20 @@ const statusLabel = computed(() => {
 }
 
 @media (max-width: 680px) {
-  .site-footer { padding-inline: 20px; }
   .footer-rail,
   .footer-links-stack,
   .footer-legal { align-items: flex-start; flex-direction: column; }
   .footer-meta { flex-wrap: wrap; }
   .footer-nav { gap-inline: 15px; }
   .footer-legal { gap: 4px; }
+}
+
+@media (max-width: 420px) {
+  .site-footer { --home-content-gutter: 12px; }
+}
+
+@media (max-width: 260px) {
+  .site-footer { --home-content-gutter: 6px; }
 }
 
 @media (max-width: 280px) {

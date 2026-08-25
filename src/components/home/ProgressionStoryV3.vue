@@ -473,7 +473,7 @@ onUnmounted(() => {
   position: absolute;
   z-index: 8;
   top: clamp(88px, 11vh, 110px);
-  left: clamp(18px, 4vw, 68px);
+  left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   display: grid;
   gap: 7px;
   opacity: clamp(0, calc((var(--entry) - 0.2) * 2.8), 1);
@@ -501,7 +501,7 @@ onUnmounted(() => {
 .progression-v3__layout {
   position: absolute;
   z-index: 4;
-  inset: clamp(150px, 19vh, 190px) clamp(18px, 4vw, 68px) clamp(84px, 11vh, 112px);
+  inset: clamp(150px, 19vh, 190px) var(--home-rail-inset, clamp(20px, 4vw, 56px)) clamp(84px, 11vh, 112px);
   display: grid;
   grid-template-columns: minmax(240px, 0.55fr) minmax(560px, 1.45fr);
   align-items: center;
@@ -564,9 +564,9 @@ onUnmounted(() => {
 .progression-nav {
   position: absolute;
   z-index: 20;
-  right: clamp(18px, 4vw, 68px);
+  right: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   bottom: 16px;
-  left: clamp(18px, 4vw, 68px);
+  left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   border-top: 1px solid var(--hairline, #eae1d0);
@@ -669,7 +669,7 @@ onUnmounted(() => {
     min-height: 560svh;
   }
   .progression-v3__layout {
-    inset: 132px 14px 70px;
+    inset: 132px var(--home-content-gutter, clamp(20px, 4vw, 56px)) 70px;
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(320px, 1fr);
     gap: 6px;
@@ -695,8 +695,8 @@ onUnmounted(() => {
 @media (max-width: 520px) {
   .progression-v3__heading {
     top: 80px;
-    right: 12px;
-    left: 12px;
+    right: var(--home-content-gutter, 20px);
+    left: var(--home-content-gutter, 20px);
   }
   .progression-v3__heading span {
     display: none;
@@ -704,7 +704,7 @@ onUnmounted(() => {
   .progression-v3__layout {
     /* The two-line mobile heading finishes around 142px. Start the chapter
        copy below it so the stage never clips the kicker into the title. */
-    inset: 154px 9px 62px;
+    inset: 154px var(--home-content-gutter, 20px) 62px;
   }
 }
 

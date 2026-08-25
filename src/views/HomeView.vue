@@ -122,6 +122,9 @@ onUnmounted(() => {
 
 <style scoped>
 .mysterria-home {
+  --home-content-max: 1480px;
+  --home-content-gutter: clamp(20px, 4vw, 56px);
+  --home-rail-inset: max(var(--home-content-gutter), calc((100vw - var(--home-content-max)) / 2 + var(--home-content-gutter)));
   min-width: 0;
   min-height: 100vh;
   color: var(--ink);
@@ -178,6 +181,14 @@ onUnmounted(() => {
 .mysterria-home :deep(h3) {
   max-width: 100%;
   overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+  .mysterria-home { --home-content-gutter: 12px; }
+}
+
+@media (max-width: 260px) {
+  .mysterria-home { --home-content-gutter: 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

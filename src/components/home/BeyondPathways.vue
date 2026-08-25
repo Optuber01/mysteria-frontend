@@ -543,7 +543,7 @@ onUnmounted(() => {
   position: absolute;
   z-index: 10;
   top: clamp(74px, 9vh, 104px);
-  left: clamp(22px, 4.8vw, 78px);
+  left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   width: min(500px, 40vw);
   opacity: var(--world-heading-opacity);
   pointer-events: none;
@@ -916,10 +916,10 @@ onUnmounted(() => {
 .living-panel {
   position: absolute;
   z-index: 6;
-  left: 50%;
+  left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   top: 90px;
   bottom: clamp(48px, 8vh, 110px);
-  width: min(1120px, calc(100% - 11vw));
+  width: min(var(--home-content-max, 1480px), calc(100% - var(--home-rail-inset, clamp(20px, 4vw, 56px)) - var(--home-rail-inset, clamp(20px, 4vw, 56px))));
   display: grid;
   grid-template-columns: 1.1fr .62fr .62fr;
   align-content: center;
@@ -929,7 +929,7 @@ onUnmounted(() => {
   border-radius: 20px;
   background: var(--surface);
   box-shadow: 0 32px 80px rgba(34, 28, 20, .14);
-  transform: translateX(-50%);
+  transform: none;
   opacity: var(--beat-fade, 1);
 }
 
@@ -958,7 +958,7 @@ onUnmounted(() => {
 .world-index {
   position: absolute;
   z-index: 12;
-  right: 48px;
+  right: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   top: 50%;
   display: grid;
   gap: 3px;
@@ -1015,7 +1015,7 @@ onUnmounted(() => {
 .world-direction {
   position: absolute;
   z-index: 11;
-  left: clamp(22px, 4.8vw, 78px);
+  left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   bottom: 26px;
   display: flex;
   align-items: center;
@@ -1053,8 +1053,8 @@ onUnmounted(() => {
   .world-copy h3 { font-size: clamp(1.6rem, 5.5vw, 2.1rem); }
   .world-gallery { display: none; }
   .scene-marker > p { width: min(260px, 40vw); }
-  .world-index { right: 18px; padding: 10px 6px; }
-  .living-panel { width: calc(100% - 14vw); gap: 20px; padding: 28px 26px; }
+  .world-index { right: var(--home-rail-inset, clamp(20px, 4vw, 56px)); padding: 10px 6px; }
+  .living-panel { width: calc(100% - var(--home-rail-inset, clamp(20px, 4vw, 56px)) - var(--home-rail-inset, clamp(20px, 4vw, 56px))); gap: 20px; padding: 28px 26px; }
   .living-primary { min-height: 105px; }
   .living-primary strong { font-size: clamp(2.1rem, 7.5vw, 3rem); }
   .living-feed > div { grid-template-columns: 100px 1fr; }
@@ -1068,7 +1068,7 @@ onUnmounted(() => {
 @media (max-width: 560px), (max-height: 560px) {
   .world-story { min-height: auto; }
   .world-sticky { display: none; }
-  .world-static { display: grid; gap: 0; padding: 86px 16px 72px; }
+  .world-static { display: grid; gap: 0; padding: 86px var(--home-content-gutter, 20px) 72px; }
   .world-static header { margin: 0 0 34px; }
   .world-static header h2 { max-width: 520px; margin: 12px 0 0; font: 800 clamp(2rem, 8vw, 2.9rem)/1.02 "Manrope", sans-serif; letter-spacing: -.025em; }
   .world-static article { position: relative; display: grid; min-width: 0; padding: 0 0 54px; }
@@ -1085,7 +1085,7 @@ onUnmounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .world-story { min-height: auto; }
   .world-sticky { display: none; }
-  .world-static { width: min(1120px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 24px; margin: 0 auto; padding: 100px 24px; }
+  .world-static { width: min(var(--home-content-max, 1480px), 100%); box-sizing: border-box; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 24px; margin: 0 auto; padding: 100px var(--home-content-gutter, 20px); }
   .world-static header { grid-column: 1 / -1; }
   .world-static header h2 { max-width: 700px; margin: 14px 0 18px; font: 800 clamp(2rem, 4.5vw, 3.4rem)/1 "Manrope", sans-serif; letter-spacing: -.025em; }
   .world-static article { min-width: 0; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(230px, .8fr); gap: 30px 26px; align-items: center; }
@@ -1101,7 +1101,7 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) and (max-width: 700px) {
-  .world-static { grid-template-columns: 1fr; padding: 82px 16px; }
+  .world-static { grid-template-columns: 1fr; padding: 82px var(--home-content-gutter, 20px); }
   .world-static header,
   .world-static__live { grid-column: auto; }
   .world-static article,
