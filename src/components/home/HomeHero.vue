@@ -50,18 +50,6 @@
         </div>
 
         <figure class="hero-plate">
-          <button
-            class="hero-plate__peek hero-plate__peek--previous"
-            type="button"
-            :aria-label="`Show ${heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].label}`"
-            @click="selectSlide((activeSlide + heroSlides.length - 1) % heroSlides.length)"
-          >
-            <img
-              :src="heroSlides[(activeSlide + heroSlides.length - 1) % heroSlides.length].src"
-              alt=""
-              loading="lazy"
-            >
-          </button>
           <div class="hero-plate__frame">
             <img
               v-for="(slide, index) in heroSlides"
@@ -69,7 +57,13 @@
               class="hero-slide"
               :class="{ 'is-active': activeSlide === index }"
               :src="index === 0 || slidesLoaded ? slide.src : undefined"
-              :style="{ objectPosition: slide.position }"
+              :style="{
+                objectPosition: slide.position,
+                '--slide-scale': slide.scale,
+                '--slide-saturation': slide.saturation,
+                '--slide-brightness': slide.brightness,
+                '--slide-contrast': slide.contrast,
+              }"
               alt=""
               :loading="index === 0 ? 'eager' : undefined"
               :fetchpriority="index === 0 ? 'high' : undefined"
@@ -113,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
 import auroraCliffside from '@/assets/images/home/hero/hero-aurora-cliffside.webp';
@@ -132,11 +126,11 @@ type HeroSceneTheme = {
 };
 
 const heroSlides = [
-  { src: auroraCliffside, position: '52% 48%', label: 'Aurora Cliffside', sequence: 'WORLD / 01', theme: { color: '#9e7eae', glow: '#edcebe', accent: '#8d6fe4' } satisfies HeroSceneTheme },
-  { src: eyeRift, position: '58% 50%', label: 'The Eye Rift', sequence: 'RIFT / 02', theme: { color: '#344470', glow: '#ad65e0', accent: '#8873e8' } satisfies HeroSceneTheme },
-  { src: radiantAwakening, position: '52% 48%', label: 'Sanctuary Awakening', sequence: 'RITE / 03', theme: { color: '#be8746', glow: '#ffde98', accent: '#ad7d39' } satisfies HeroSceneTheme },
-  { src: guardianDragon, position: '62% 48%', label: 'The Guardian’s Trial', sequence: 'FIELD / 04', theme: { color: '#386678', glow: '#e2a462', accent: '#a66b43' } satisfies HeroSceneTheme },
-  { src: corruptedFrontier, position: '56% 48%', label: 'The Corrupted Frontier', sequence: 'EVENT / 05', theme: { color: '#70416e', glow: '#e1755b', accent: '#9b6dd3' } satisfies HeroSceneTheme },
+  { src: auroraCliffside, position: '64% 54%', scale: '1.02', saturation: '1.1', brightness: '1.08', contrast: '1.03', label: 'Aurora Cliffside', sequence: 'WORLD / 01', theme: { color: '#9e7eae', glow: '#edcebe', accent: '#8d6fe4' } satisfies HeroSceneTheme },
+  { src: eyeRift, position: '61% 56%', scale: '1.04', saturation: '1.14', brightness: '1.1', contrast: '1.05', label: 'The Eye Rift', sequence: 'RIFT / 02', theme: { color: '#344470', glow: '#ad65e0', accent: '#8873e8' } satisfies HeroSceneTheme },
+  { src: radiantAwakening, position: '58% 55%', scale: '1.03', saturation: '1.08', brightness: '1.04', contrast: '1.04', label: 'Sanctuary Awakening', sequence: 'RITE / 03', theme: { color: '#be8746', glow: '#ffde98', accent: '#ad7d39' } satisfies HeroSceneTheme },
+  { src: guardianDragon, position: '59% 53%', scale: '1.01', saturation: '1.12', brightness: '1.06', contrast: '1.04', label: 'The Guardian’s Trial', sequence: 'FIELD / 04', theme: { color: '#386678', glow: '#e2a462', accent: '#a66b43' } satisfies HeroSceneTheme },
+  { src: corruptedFrontier, position: '61% 64%', scale: '1.03', saturation: '1.13', brightness: '1.03', contrast: '1.05', label: 'The Corrupted Frontier', sequence: 'EVENT / 05', theme: { color: '#70416e', glow: '#e1755b', accent: '#9b6dd3' } satisfies HeroSceneTheme },
 ];
 
 const heroRef = ref<HTMLElement | null>(null);
@@ -202,7 +196,7 @@ function revealSlide(index: number) {
 
 function selectSlide(index: number) {
   slidesLoaded.value = true;
-  revealSlide(index);
+  void nextTick(() => revealSlide(index));
   if (rotateTimer) {
     stopRotation();
     startRotation();
@@ -590,9 +584,9 @@ onUnmounted(() => {
   z-index: 1;
   inset: 0 5.5% 0 0;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .08) 5%, rgba(0, 0, 0, .52) 18%, #000 34%), linear-gradient(180deg, #000 0%, #000 68%, rgba(0, 0, 0, .55) 78%, transparent 92%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .08) 5%, rgba(0, 0, 0, .52) 18%, #000 34%, #000 91%, rgba(0, 0, 0, .45) 96%, transparent 100%), linear-gradient(180deg, #000 0%, #000 68%, rgba(0, 0, 0, .55) 78%, transparent 92%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .08) 5%, rgba(0, 0, 0, .52) 18%, #000 34%), linear-gradient(180deg, #000 0%, #000 68%, rgba(0, 0, 0, .55) 78%, transparent 92%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .08) 5%, rgba(0, 0, 0, .52) 18%, #000 34%, #000 91%, rgba(0, 0, 0, .45) 96%, transparent 100%), linear-gradient(180deg, #000 0%, #000 68%, rgba(0, 0, 0, .55) 78%, transparent 92%);
   mask-composite: intersect;
   background: var(--journey-mid);
 }
@@ -604,14 +598,14 @@ onUnmounted(() => {
   height: 100%;
   max-width: none;
   object-fit: cover;
-  filter: saturate(1.08) contrast(1.02) brightness(1.08);
+  filter: saturate(var(--slide-saturation, 1.08)) contrast(var(--slide-contrast, 1.02)) brightness(var(--slide-brightness, 1.08));
   opacity: 0;
   transform: scale(1.045) translateX(10px);
   transition: opacity 1.05s cubic-bezier(.45, 0, .25, 1), transform 1.05s cubic-bezier(.22, 1, .36, 1);
   will-change: opacity;
 }
 
-.hero-slide.is-active { opacity: 1; transform: none; }
+.hero-slide.is-active { opacity: 1; transform: scale(var(--slide-scale, 1)); }
 
 .hero-plate__frame::after {
   content: "";
@@ -633,48 +627,6 @@ onUnmounted(() => {
   background: radial-gradient(ellipse at 0 50%, color-mix(in srgb, var(--hero-scene-color) 24%, transparent), color-mix(in srgb, var(--hero-scene-glow) 10%, transparent) 44%, transparent 76%);
   transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
   pointer-events: none;
-}
-
-.hero-plate__peek {
-  position: absolute;
-  z-index: 3;
-  display: block;
-  overflow: hidden;
-  padding: 0;
-  border: 4px solid color-mix(in srgb, var(--journey-top) 80%, var(--hero-scene-color) 20%);
-  border-radius: 14px;
-  background: var(--journey-mid);
-  box-shadow: 0 16px 32px rgba(34, 28, 20, .18);
-  cursor: pointer;
-  pointer-events: auto;
-  transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, filter .35s, border-color 1.25s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-plate__peek img {
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  object-fit: cover;
-  filter: saturate(.92) contrast(1.05);
-  transition: transform .5s cubic-bezier(.22, 1, .36, 1), filter .35s;
-}
-
-.hero-plate__peek:hover,
-.hero-plate__peek:focus-visible {
-  box-shadow: 0 22px 42px rgba(34, 28, 20, .24);
-  transform: translateY(-5px) rotate(0deg);
-}
-
-.hero-plate__peek:hover img,
-.hero-plate__peek:focus-visible img { filter: saturate(1.08) contrast(1.08); transform: scale(1.06); }
-.hero-plate__peek:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-
-.hero-plate__peek--previous {
-  left: 4%;
-  bottom: 14%;
-  width: 25%;
-  height: 23%;
-  transform: rotate(-4deg);
 }
 
 .hero-plate__signal {
