@@ -4,6 +4,7 @@
     <HeaderItem />
     <main id="main-content" tabindex="-1">
       <HomeHero :status="serverStatus" :latest-slug="latestUpdate?.slug ?? null" />
+      <WhatIsMysterria />
       <ProgressionStory />
       <div
         ref="pathwayTrigger"
@@ -21,6 +22,7 @@
       >
         <BeyondPathways v-if="worldReady" :status="serverStatus" :latest-update="latestUpdate" />
       </div>
+      <GettingStarted />
       <div
         ref="joinTrigger"
         class="deferred-chapter deferred-chapter--join"
@@ -39,6 +41,8 @@ import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
+import WhatIsMysterria from '@/components/home/WhatIsMysterria.vue';
+import GettingStarted from '@/components/home/GettingStarted.vue';
 import type { NewsArticle } from '@/types/news';
 import type { HomePathway } from '@/data/pathways';
 import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
@@ -95,8 +99,6 @@ onMounted(() => {
   const descriptionTag = document.head.querySelector<HTMLMetaElement>('meta[name="description"]');
   if (descriptionTag) descriptionTag.content = description;
 
-  // Resolve the CTA against the latest published entry before the hero is
-  // interactive, instead of waiting for the lower world chapter to enter view.
   void loadLatestNews();
 
   chapterObserver = new IntersectionObserver((entries) => {
@@ -184,7 +186,6 @@ onUnmounted(() => {
 .deferred-chapter--world.is-pending { min-height: 400svh; background: var(--journey-mid); }
 .deferred-chapter--join.is-pending { min-height: 100svh; background: var(--journey-end); }
 
-/* Keep each chapter on the same visual grid while async sections arrive. */
 .deferred-chapter {
   position: relative;
   overflow: clip;
