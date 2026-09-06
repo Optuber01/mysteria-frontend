@@ -21,41 +21,51 @@ const {currentLanguage, setLanguage} = useI18n();
 
 <style scoped>
 .lang-ritual-selector {
-  display: flex;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 2px;
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .58);
+  box-shadow: 0 5px 14px rgba(34, 28, 20, .05);
+  backdrop-filter: blur(12px);
 }
 
 .lang-ritual-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--ink-muted, #756b5c);
   background: transparent;
-  border: none;
-  padding: 6px 12px;
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 2px;
+  transition: color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .lang-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: .58rem;
+  font-weight: 800;
   text-transform: uppercase;
-  color: #444;
-  letter-spacing: 1px;
+  letter-spacing: .1em;
 }
 
 .lang-ritual-btn.active {
-  background: rgba(200, 178, 115, 0.1);
+  color: #fff;
+  background: var(--primary, #7458e8);
+  box-shadow: 0 5px 12px rgba(116, 88, 232, .2);
 }
 
-.lang-ritual-btn.active .lang-label {
-  color: var(--myst-gold);
-  font-weight: 700;
-}
-
-.lang-ritual-btn:hover:not(.active) .lang-label {
-  color: #888;
-}
+.lang-ritual-btn:hover:not(.active) { color: var(--ink, #221c14); background: var(--primary-tint, rgba(116, 88, 232, .12)); }
+.lang-ritual-btn:active { transform: scale(.95); }
+.lang-ritual-btn:focus-visible { outline: 2px solid var(--primary, #7458e8); outline-offset: 2px; }
 </style>

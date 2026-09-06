@@ -2,8 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/logo.webp" />
+    <link rel="icon" href="/logo-mark.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#FBF7EF" />
 
     <!-- Primary Meta Tags -->
     <meta
@@ -45,35 +46,24 @@
     />
     <meta property="twitter:image" content="/banner.webp" />
 
-    <link
-      rel="preload"
-      as="style"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-      onload="this.onload=null;this.rel='stylesheet'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-        crossorigin="anonymous"
-        referrerpolicy="no-referrer"
-      />
-    </noscript>
-
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    >
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    </noscript>
     
-    <!-- Ultra-lightweight font - Inter variable font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Preload LCP image - will be updated by Vite -->
-    <link rel="preload" as="image" type="image/webp" href="/src/assets/images/optimized/banner.webp">
+    <!-- Preload the homepage LCP image. Vite fingerprints this source at build time. -->
+    <link rel="preload" as="image" type="image/webp" href="/src/assets/images/home/hero/hero-dawn-cliffside.webp">
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/ibm-plex-sans-condensed-700-latin.woff2" crossorigin>
     
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://api.mysterria.net">
@@ -81,10 +71,17 @@
     
     <!-- Critical CSS for font loading optimization -->
     <style>
-      /* Use Inter font with system fallbacks */
+      @font-face {
+        font-family: "IBM Plex Sans Condensed";
+        font-style: normal;
+        font-weight: 700;
+        font-display: optional;
+        src: url("/fonts/ibm-plex-sans-condensed-700-latin.woff2") format("woff2");
+      }
+      /* Mysterria typography */
       :root {
-        --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        --font-display: "Inter", "Segoe UI", system-ui, sans-serif;
+        --font-primary: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
       }
       
       body { 

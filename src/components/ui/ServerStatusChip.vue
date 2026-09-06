@@ -1,44 +1,37 @@
 <template>
-  <button class="server-chip" :title="copied ? t('guide.copyAddress') : 'mc.mysterria.net'" @click="copyIp">
-    <span class="status-dot" :class="{ online: isOnline, offline: !isOnline }"></span>
-    <span class="chip-ip">mc.mysterria.net</span>
+  <button
+    class="server-chip"
+    :title="copied ? 'Server address copied' : `Copy ${MYSTERRIA_ADDRESS}`"
+    @click="copyIp"
+  >
+    <span class="status-dot" :class="{ online: isOnline, offline: !isOnline }" aria-hidden="true"></span>
+    <span class="chip-ip">{{ MYSTERRIA_ADDRESS }}</span>
     <span v-if="isOnline && playerCount !== null" class="chip-players">
       {{ playerCount }}
     </span>
-    <Transition name="fade">
-      <span v-if="copied" class="copied-badge">✓</span>
-    </Transition>
+    <span class="chip-copy-live" aria-live="polite">
+      <Transition name="fade">
+        <span v-if="copied" class="copied-badge" aria-hidden="true">✓</span>
+      </Transition>
+      <span v-if="copied" class="visually-hidden">Server address copied</span>
+    </span>
   </button>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { useI18n } from '@/composables/useI18n';
+import { computed, ref, onUnmounted } from 'vue';
+import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
+import { MYSTERRIA_ADDRESS } from '@/services/serverStatus';
 
-const { t } = useI18n();
-
-const isOnline = ref(false);
-const playerCount = ref<number | null>(null);
+const { status } = useSharedServerStatus();
+const isOnline = computed(() => status.value.state === 'online');
+const playerCount = computed(() => status.value.playersOnline);
 const copied = ref(false);
-let pollInterval: ReturnType<typeof setInterval> | null = null;
 let copiedTimeout: ReturnType<typeof setTimeout> | null = null;
-
-async function fetchStatus() {
-  try {
-    const res = await fetch('https://mcapi.us/server/status?ip=mc.mysterria.net');
-    if (!res.ok) return;
-    const data = await res.json();
-    isOnline.value = data.online === true;
-    playerCount.value = isOnline.value ? (data.players?.now ?? 0) : null;
-  } catch {
-    isOnline.value = false;
-    playerCount.value = null;
-  }
-}
 
 async function copyIp() {
   try {
-    await navigator.clipboard.writeText('mc.mysterria.net');
+    await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
     copied.value = true;
     if (copiedTimeout) clearTimeout(copiedTimeout);
     copiedTimeout = setTimeout(() => { copied.value = false; }, 1800);
@@ -47,13 +40,7 @@ async function copyIp() {
   }
 }
 
-onMounted(() => {
-  fetchStatus();
-  pollInterval = setInterval(fetchStatus, 60_000);
-});
-
 onUnmounted(() => {
-  if (pollInterval) clearInterval(pollInterval);
   if (copiedTimeout) clearTimeout(copiedTimeout);
 });
 </script>
@@ -63,16 +50,18 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
-  background: color-mix(in srgb, var(--myst-bg) 70%, transparent);
-  border: 1px solid color-mix(in srgb, var(--myst-gold) 20%, transparent);
-  border-radius: 4px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, .78);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 999px;
   cursor: pointer;
-  color: var(--myst-ink-muted);
+  color: var(--ink, #221c14);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
+  font-weight: 700;
   letter-spacing: 0.5px;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   white-space: nowrap;
   position: relative;
   overflow: hidden;
@@ -80,9 +69,9 @@ onUnmounted(() => {
 }
 
 .server-chip:hover {
-  border-color: color-mix(in srgb, var(--myst-gold) 40%, transparent);
-  color: var(--myst-ink);
-  background: color-mix(in srgb, var(--myst-gold) 5%, var(--myst-bg));
+  border-color: color-mix(in srgb, var(--primary, #7458e8) 40%, transparent);
+  color: var(--ink, #221c14);
+  background: var(--primary-tint, rgba(116, 88, 232, .12));
 }
 
 .status-dot {
@@ -94,12 +83,12 @@ onUnmounted(() => {
 }
 
 .status-dot.online {
-  background: #4ade80;
-  box-shadow: 0 0 5px rgba(74, 222, 128, 0.6);
+  background: var(--live, #34c77b);
+  box-shadow: 0 0 5px rgba(52, 199, 123, 0.55);
 }
 
 .status-dot.offline {
-  background: #52525b;
+  background: var(--ink-muted, #756b5c);
 }
 
 .chip-ip {
@@ -107,15 +96,31 @@ onUnmounted(() => {
 }
 
 .chip-players {
-  color: #4ade80;
+  color: var(--live, #34c77b);
   font-size: 10px;
   opacity: 0.85;
 }
 
 .chip-players::before {
   content: '·';
-  margin-right: 3px;
+  margin-right: 6px;
   opacity: 0.5;
+}
+
+.chip-copy-live {
+  position: absolute;
+  inset: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .copied-badge {
@@ -124,8 +129,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--myst-gold) 15%, var(--myst-bg));
-  color: var(--myst-gold);
+  background: var(--primary-tint, rgba(116, 88, 232, .12));
+  color: var(--primary, #7458e8);
   font-size: 12px;
 }
 

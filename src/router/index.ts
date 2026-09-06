@@ -1,5 +1,4 @@
 import {createRouter, createWebHistory} from "vue-router";
-import {useAuthStore} from "@/stores/auth";
 import {nextTick} from "vue";
 import {
     PERM_ADMIN,
@@ -46,6 +45,11 @@ const router = createRouter({
             path: "/",
             name: "home",
             component: () => import("@/views/HomeView.vue"),
+        },
+        {
+            path: "/design-variants",
+            name: "home-design-variants",
+            component: () => import("@/views/HomeVariantsView.vue"),
         },
         {
             path: "/store",
@@ -211,7 +215,17 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+    const needsAuth = Boolean(to.meta.requiresAuth || to.meta.requiresPermission || to.meta.requiresAnyPermission);
+    if (!needsAuth) {
+        next();
+        return;
+    }
+
+    const {useAuthStore} = await import('@/stores/auth');
     const authStore = useAuthStore();
+    if (!authStore.isLoading) {
+        await authStore.init();
+    }
 
     // Wait for auth to finish loading before checking permissions
     if (to.meta.requiresAuth || to.meta.requiresPermission || to.meta.requiresAnyPermission) {

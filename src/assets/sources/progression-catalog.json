@@ -1,0 +1,1157 @@
+{
+  "lastUpdated": "2026-07-14",
+  "entries": [
+    {
+      "id": "abyss",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Criminal",
+          "uk": "Злочинець"
+        }
+      },
+      "strengths": [
+        {
+          "id": "criminal-proficiency",
+          "name": {
+            "en": "Criminal Proficiency",
+            "uk": "Майстерність Злочинця"
+          }
+        },
+        {
+          "id": "physical-enhancement",
+          "name": {
+            "en": "Physical Enhancement",
+            "uk": "Фізичне Посилення"
+          }
+        },
+        {
+          "id": "demonic-poisonous-flames",
+          "name": {
+            "en": "Poisonous Flames",
+            "uk": "Отруйне Полум'я"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 29
+    },
+    {
+      "id": "chained",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Prisoner",
+          "uk": "В'язень"
+        }
+      },
+      "strengths": [
+        {
+          "id": "escapism",
+          "name": {
+            "en": "Escapism",
+            "uk": "Ескапізм"
+          }
+        },
+        {
+          "id": "binding",
+          "name": {
+            "en": "Binding",
+            "uk": "Зв'язування"
+          }
+        },
+        {
+          "id": "enhanced-binding",
+          "name": {
+            "en": "Binding (Enhanced)",
+            "uk": "Посилена Прив'язка"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 48
+    },
+    {
+      "id": "darkness",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Shadow Wanderer",
+          "uk": "Тіньовий Блукач"
+        }
+      },
+      "strengths": [
+        {
+          "id": "spirit-vision",
+          "name": {
+            "en": "Spirit Vision",
+            "uk": "Духовне бачення"
+          }
+        },
+        {
+          "id": "nocturnality",
+          "name": {
+            "en": "Nocturnality",
+            "uk": "Нічність"
+          }
+        },
+        {
+          "id": "spiritualism",
+          "name": {
+            "en": "Spiritualism",
+            "uk": "Духовність"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 29
+    },
+    {
+      "id": "death",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Corpse Collector",
+          "uk": "Corpse Collector"
+        }
+      },
+      "strengths": [
+        {
+          "id": "cold-resistance",
+          "name": {
+            "en": "Cold Resistance",
+            "uk": "Опір холоду"
+          }
+        },
+        {
+          "id": "perception-of-spiritual-bodies",
+          "name": {
+            "en": "Perception of Spiritual Bodies",
+            "uk": "Сприйняття Духовних Тіл"
+          }
+        },
+        {
+          "id": "undead-protection",
+          "name": {
+            "en": "Undead Protection",
+            "uk": "Захист від нежиті"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 41
+    },
+    {
+      "id": "demoness",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Assassin",
+          "uk": "Убивця"
+        }
+      },
+      "strengths": [
+        {
+          "id": "feather-fall",
+          "name": {
+            "en": "Feather Fall",
+            "uk": "Пір'їнкове Падіння"
+          }
+        },
+        {
+          "id": "stealth-blow",
+          "name": {
+            "en": "Stealth Blow",
+            "uk": "Прихований Удар"
+          }
+        },
+        {
+          "id": "agility",
+          "name": {
+            "en": "Agility",
+            "uk": "Спритність"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 30
+    },
+    {
+      "id": "door",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Apprentice",
+          "uk": "Учень"
+        }
+      },
+      "strengths": [
+        {
+          "id": "door-opening",
+          "name": {
+            "en": "Door Opening",
+            "uk": "Відчинення Дверей"
+          }
+        },
+        {
+          "id": "tricky-spells",
+          "name": {
+            "en": "Tricky Spells",
+            "uk": "Підступні Чари"
+          }
+        },
+        {
+          "id": "light-wind",
+          "name": {
+            "en": "Light Wind",
+            "uk": "Легкий Вітер"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 25
+    },
+    {
+      "id": "emperor",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Lawyer",
+          "uk": "Адвокат"
+        }
+      },
+      "strengths": [
+        {
+          "id": "eloquence",
+          "name": {
+            "en": "Eloquence",
+            "uk": "Красномовство"
+          }
+        },
+        {
+          "id": "persuasion",
+          "name": {
+            "en": "Persuasion",
+            "uk": "Переконання"
+          }
+        },
+        {
+          "id": "law-proficiency",
+          "name": {
+            "en": "Law Proficiency",
+            "uk": "Майстерність Закону"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 29
+    },
+    {
+      "id": "error",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Marauder",
+          "uk": "Мародер"
+        }
+      },
+      "strengths": [
+        {
+          "id": "acrobatic-skills",
+          "name": {
+            "en": "Acrobatic Skills",
+            "uk": "Акробатичні Навички"
+          }
+        },
+        {
+          "id": "dexterous-hands",
+          "name": {
+            "en": "Dexterous Hands",
+            "uk": "Ловкість Рук"
+          }
+        },
+        {
+          "id": "agile-proficiency",
+          "name": {
+            "en": "Agile Proficiency",
+            "uk": "Спритна Майстерність"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 32
+    },
+    {
+      "id": "fool",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Seer",
+          "uk": "Провидець"
+        }
+      },
+      "strengths": [
+        {
+          "id": "divination",
+          "name": {
+            "en": "Divination",
+            "uk": "Пророцтво"
+          }
+        },
+        {
+          "id": "spiritualism",
+          "name": {
+            "en": "Spiritualism",
+            "uk": "Духовність"
+          }
+        },
+        {
+          "id": "paper-dagger",
+          "name": {
+            "en": "Paper Dagger",
+            "uk": "Паперовий Кинджал"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 31
+    },
+    {
+      "id": "fortune",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Monster",
+          "uk": "Монстр"
+        }
+      },
+      "strengths": [
+        {
+          "id": "danger-premonition",
+          "name": {
+            "en": "Danger Premonition",
+            "uk": "Передчуття Небезпеки"
+          }
+        },
+        {
+          "id": "foresight",
+          "name": {
+            "en": "Foresight",
+            "uk": "Передбачення"
+          }
+        },
+        {
+          "id": "calculation-mastery",
+          "name": {
+            "en": "Calculation Mastery",
+            "uk": "Майстерність Обчислень"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 32
+    },
+    {
+      "id": "giant",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Warrior",
+          "uk": "Воїн"
+        }
+      },
+      "strengths": [
+        {
+          "id": "simplified-combat",
+          "name": {
+            "en": "Simplified Combat",
+            "uk": "Спрощений Бій"
+          }
+        },
+        {
+          "id": "combat-roll",
+          "name": {
+            "en": "Combat Roll",
+            "uk": "Бойовий Перекат"
+          }
+        },
+        {
+          "id": "giant-physical-enhancement",
+          "name": {
+            "en": "Physical Enhancement",
+            "uk": "Фізичне Посилення"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 32
+    },
+    {
+      "id": "hanged",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Secrets Supplicant",
+          "uk": "Прохач Таємниць"
+        }
+      },
+      "strengths": [
+        {
+          "id": "divination",
+          "name": {
+            "en": "Divination",
+            "uk": "Пророцтво"
+          }
+        },
+        {
+          "id": "spiritual-intuition",
+          "name": {
+            "en": "Spiritual Intuition",
+            "uk": "Духовна Інтуїція"
+          }
+        },
+        {
+          "id": "knowledge",
+          "name": {
+            "en": "Knowledge",
+            "uk": "Знання"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 33
+    },
+    {
+      "id": "hermit",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Mystery Pryer",
+          "uk": "Дослідник Таємниць"
+        }
+      },
+      "strengths": [
+        {
+          "id": "eyes-of-mystery-prying",
+          "name": {
+            "en": "Eyes of Mystery Prying",
+            "uk": "Очі Дослідження Таємниць"
+          }
+        },
+        {
+          "id": "knowledge-pursuit",
+          "name": {
+            "en": "Knowledge Pursuit",
+            "uk": "Погоня за Знаннями"
+          }
+        },
+        {
+          "id": "spirit-vision",
+          "name": {
+            "en": "Spirit Vision",
+            "uk": "Духовне Бачення"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 31
+    },
+    {
+      "id": "justiciar",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Arbiter",
+          "uk": "Арбітр"
+        }
+      },
+      "strengths": [
+        {
+          "id": "coercion",
+          "name": {
+            "en": "Coercion",
+            "uk": "Примус"
+          }
+        },
+        {
+          "id": "authority",
+          "name": {
+            "en": "Authority Reserve",
+            "uk": "Резерв Авторитету"
+          }
+        },
+        {
+          "id": "physical-enhancement",
+          "name": {
+            "en": "Physical Enhancement",
+            "uk": "Фізичне Вдосконалення"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 34
+    },
+    {
+      "id": "moon",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Apothecary",
+          "uk": "Аптекар"
+        }
+      },
+      "strengths": [
+        {
+          "id": "apothecary-brew",
+          "name": {
+            "en": "Apothecary Brew",
+            "uk": "Аптекарське Зілля"
+          }
+        },
+        {
+          "id": "toxin-resistance",
+          "name": {
+            "en": "Toxin Resistance",
+            "uk": "Стійкість до Токсинів"
+          }
+        },
+        {
+          "id": "herbal-healing",
+          "name": {
+            "en": "Herbal Healing",
+            "uk": "Трав'яне Лікування"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 28
+    },
+    {
+      "id": "mother",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Planter",
+          "uk": "Садівник"
+        }
+      },
+      "strengths": [
+        {
+          "id": "enhanced-strength",
+          "name": {
+            "en": "Enhanced Strength",
+            "uk": "Посилена Сила"
+          }
+        },
+        {
+          "id": "green-thumb",
+          "name": {
+            "en": "Green Thumb",
+            "uk": "Зелена Рука"
+          }
+        },
+        {
+          "id": "weather-sense",
+          "name": {
+            "en": "Weather Sense",
+            "uk": "Відчуття Погоди"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 27
+    },
+    {
+      "id": "paragon",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Savant",
+          "uk": "Вчений"
+        }
+      },
+      "strengths": [
+        {
+          "id": "savant-crafting",
+          "name": {
+            "en": "Savant Crafting",
+            "uk": "Ремесло Вченого"
+          }
+        },
+        {
+          "id": "recall",
+          "name": {
+            "en": "Recall",
+            "uk": "Згадка"
+          }
+        },
+        {
+          "id": "tough-nature",
+          "name": {
+            "en": "Tough Nature",
+            "uk": "Витривалість"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 35
+    },
+    {
+      "id": "priest",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Hunter",
+          "uk": "Мисливець"
+        }
+      },
+      "strengths": [
+        {
+          "id": "explosive-trap",
+          "name": {
+            "en": "Explosive Trap",
+            "uk": "Вибухова Пастка"
+          }
+        },
+        {
+          "id": "hunter-body",
+          "name": {
+            "en": "Hunter's Body",
+            "uk": "Тіло Мисливця"
+          }
+        },
+        {
+          "id": "provocation",
+          "name": {
+            "en": "Provocation",
+            "uk": "Провокація"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 28
+    },
+    {
+      "id": "sun",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Bard",
+          "uk": "Бард"
+        }
+      },
+      "strengths": [
+        {
+          "id": "bard-song",
+          "name": {
+            "en": "Song of the Bard",
+            "uk": "Пісня Барда"
+          }
+        },
+        {
+          "id": "light-and-fire",
+          "name": {
+            "en": "Light and Fire",
+            "uk": "Світло і Вогонь"
+          }
+        },
+        {
+          "id": "horror-immunity",
+          "name": {
+            "en": "Immunity to Horror",
+            "uk": "Імунітет до Жаху"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 34
+    },
+    {
+      "id": "tower",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Reader",
+          "uk": "Читець"
+        }
+      },
+      "strengths": [
+        {
+          "id": "enhanced-cognition",
+          "name": {
+            "en": "Enhanced Cognition",
+            "uk": "Посилене Пізнання"
+          }
+        },
+        {
+          "id": "minor-ritual",
+          "name": {
+            "en": "Minor Ritual",
+            "uk": "Малий Ритуал"
+          }
+        },
+        {
+          "id": "reading",
+          "name": {
+            "en": "Reading",
+            "uk": "Читання"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 30
+    },
+    {
+      "id": "tyrant",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Sailor",
+          "uk": "Моряк"
+        }
+      },
+      "strengths": [
+        {
+          "id": "phantom-scales",
+          "name": {
+            "en": "Phantom Scales",
+            "uk": "Примарна Луска"
+          }
+        },
+        {
+          "id": "active-scales",
+          "name": {
+            "en": "Active Scales",
+            "uk": "Активна Луска"
+          }
+        },
+        {
+          "id": "strength-buff",
+          "name": {
+            "en": "Strength Buff",
+            "uk": "Підсилення Сили"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 48
+    },
+    {
+      "id": "visionary",
+      "kind": "pathway",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Spectator",
+          "uk": "Спостерігач"
+        }
+      },
+      "strengths": [
+        {
+          "id": "body-language-analysis",
+          "name": {
+            "en": "Body Language Analysis",
+            "uk": "Аналіз Мови Тіла"
+          }
+        },
+        {
+          "id": "enhanced-vision",
+          "name": {
+            "en": "Enhanced Vision",
+            "uk": "Покращений Зір"
+          }
+        },
+        {
+          "id": "mind-reading",
+          "name": {
+            "en": "Mind Reading",
+            "uk": "Читання Думок"
+          }
+        }
+      ],
+      "sequenceCount": 9,
+      "abilityCount": 31
+    },
+    {
+      "id": "aeon",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Dancer",
+          "uk": "Танцюрист"
+        }
+      },
+      "strengths": [
+        {
+          "id": "wall-spirituality",
+          "name": {
+            "en": "Wall of Spirituality",
+            "uk": "Стіна Духовності"
+          }
+        },
+        {
+          "id": "summoning-dance",
+          "name": {
+            "en": "Summoning Dance",
+            "uk": "Призивний Танець"
+          }
+        },
+        {
+          "id": "enigmatic-dance",
+          "name": {
+            "en": "Enigmatic Dance",
+            "uk": "Загадковий Танець"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 15
+    },
+    {
+      "id": "chaos",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Villain",
+          "uk": "Лиходій"
+        }
+      },
+      "strengths": [
+        {
+          "id": "physical-enhancement",
+          "name": {
+            "en": "Physical Enhancement",
+            "uk": "Фізичне Посилення"
+          }
+        },
+        {
+          "id": "combat-proficiency",
+          "name": {
+            "en": "Combat Proficiency",
+            "uk": "Бойова Майстерність"
+          }
+        },
+        {
+          "id": "intimidation",
+          "name": {
+            "en": "Intimidation",
+            "uk": "Залякування"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 20
+    },
+    {
+      "id": "chaosmist",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Broker",
+          "uk": "Брокер"
+        }
+      },
+      "strengths": [
+        {
+          "id": "brokering",
+          "name": {
+            "en": "Brokering",
+            "uk": "Брокерство"
+          }
+        },
+        {
+          "id": "shadow-contract",
+          "name": {
+            "en": "Shadow Contract",
+            "uk": "Тіньовий Контракт"
+          }
+        },
+        {
+          "id": "pacifying-aura",
+          "name": {
+            "en": "Pacifying Aura",
+            "uk": "Заспокійлива Аура"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 7
+    },
+    {
+      "id": "condenser",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Astronomy Aficionado",
+          "uk": "Аматор Астрономії"
+        }
+      },
+      "strengths": [
+        {
+          "id": "physical-enhancement",
+          "name": {
+            "en": "Physical Enhancement",
+            "uk": "Фізичне Посилення"
+          }
+        },
+        {
+          "id": "astronomy-knowledge",
+          "name": {
+            "en": "Astronomy Knowledge",
+            "uk": "Астрономічні Знання"
+          }
+        },
+        {
+          "id": "language-of-the-stars",
+          "name": {
+            "en": "Language of the Stars",
+            "uk": "Мова Зірок"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 9
+    },
+    {
+      "id": "devouring",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Tramp",
+          "uk": "Бродяга"
+        }
+      },
+      "strengths": [
+        {
+          "id": "hunger",
+          "name": {
+            "en": "Hunger",
+            "uk": "Голод"
+          }
+        },
+        {
+          "id": "adaptation",
+          "name": {
+            "en": "Adaptation",
+            "uk": "Адаптація"
+          }
+        },
+        {
+          "id": "street-fighting",
+          "name": {
+            "en": "Street Fighting",
+            "uk": "Вуличний Бій"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 10
+    },
+    {
+      "id": "edict",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Dreamless",
+          "uk": "Безснівний"
+        }
+      },
+      "strengths": [
+        {
+          "id": "fate-sensation",
+          "name": {
+            "en": "Fate Sensation",
+            "uk": "Відчуття Долі"
+          }
+        },
+        {
+          "id": "dreamless-state",
+          "name": {
+            "en": "Dreamless State",
+            "uk": "Стан без сновидінь"
+          }
+        },
+        {
+          "id": "fate-symphony",
+          "name": {
+            "en": "Fate Symphony",
+            "uk": "Симфонія Долі"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 7
+    },
+    {
+      "id": "everlasting",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Initiator",
+          "uk": "Ініціатор"
+        }
+      },
+      "strengths": [
+        {
+          "id": "initiation",
+          "name": {
+            "en": "Initiation",
+            "uk": "Ініціація"
+          }
+        },
+        {
+          "id": "commentary",
+          "name": {
+            "en": "Commentary",
+            "uk": "Коментар"
+          }
+        },
+        {
+          "id": "oratory",
+          "name": {
+            "en": "Oratory",
+            "uk": "Ораторство"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 5
+    },
+    {
+      "id": "patriarch",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Scrooge",
+          "uk": "Скрудж"
+        }
+      },
+      "strengths": [
+        {
+          "id": "greed",
+          "name": {
+            "en": "Greed",
+            "uk": "Жадібність"
+          }
+        },
+        {
+          "id": "ownership",
+          "name": {
+            "en": "Ownership",
+            "uk": "Володіння"
+          }
+        },
+        {
+          "id": "physical-enhancement-trait",
+          "name": {
+            "en": "Physical Enhancement",
+            "uk": "Фізичне Вдосконалення"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 18
+    },
+    {
+      "id": "secondlaw",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Carrier",
+          "uk": "Носій"
+        }
+      },
+      "strengths": [
+        {
+          "id": "pathogen-carrier",
+          "name": {
+            "en": "Pathogen Carrier",
+            "uk": "Носій Патогену"
+          }
+        },
+        {
+          "id": "ulcerous-wounds",
+          "name": {
+            "en": "Ulcerous Wounds",
+            "uk": "Виразкові Рани"
+          }
+        },
+        {
+          "id": "red-tape-protocol",
+          "name": {
+            "en": "Red Tape Protocol",
+            "uk": "Протокол Тяганини"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 9
+    },
+    {
+      "id": "sublunary",
+      "kind": "boon",
+      "startingSequence": {
+        "sequence": 9,
+        "name": {
+          "en": "Shaman",
+          "uk": "Шаман"
+        }
+      },
+      "strengths": [
+        {
+          "id": "sublunary-eye-usage",
+          "name": {
+            "en": "Sublunary Eye Usage",
+            "uk": "Використання Підмісячного Ока"
+          }
+        },
+        {
+          "id": "territory-creation",
+          "name": {
+            "en": "Territory Creation",
+            "uk": "Створення Території"
+          }
+        },
+        {
+          "id": "spirit-body-connection",
+          "name": {
+            "en": "Spirit Body Connection",
+            "uk": "Зв'язок Духовного Тіла"
+          }
+        }
+      ],
+      "sequenceCount": 5,
+      "abilityCount": 15
+    }
+  ]
+}

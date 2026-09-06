@@ -1,71 +1,77 @@
 <template>
-  <header class="main-header">
-    <div class="header-content">
-      <RouterLink class="header-logo-link" to="/" @click="closeMobileNav">
-        <IconLogo/>
+  <header
+    class="site-header"
+    :class="{
+      'is-home': isHome,
+      'is-at-top': isAtTop,
+      'has-panel': isServicesOpen || isMobileNavOpen,
+    }"
+  >
+    <div class="site-header__inner">
+      <RouterLink class="site-brand" to="/" aria-label="Mysterria home" @click="closePanels">
+        <IconLogo class="site-brand__mark" aria-hidden="true" />
+        <span class="site-brand__name">Mysterria</span>
       </RouterLink>
 
-      <nav ref="navigationRef" class="navigation">
-        <component
-            :is="link.external ? 'a' : 'RouterLink'"
-            v-for="link in navigationLinks"
-            :key="link.path"
-            :class="[
-            'nav-link',
-            { active: !link.external && route.path === link.path },
-          ]"
-            :data-path="link.path"
-            v-bind="getNavLinkProps(link)"
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <RouterLink
+          v-for="link in navigationLinks"
+          :key="link.path"
+          class="desktop-nav__link"
+          :class="{ 'is-active': isLinkActive(link.path) }"
+          :to="link.path"
         >
           {{ link.title }}
-        </component>
+        </RouterLink>
 
-        <!-- Services Dropdown -->
-        <div class="services-dropdown" @mouseenter="clearCloseServicesTimeout"
-             @mouseleave="scheduleCloseServicesDropdown">
+        <div
+          ref="servicesRef"
+          class="services"
+          @mouseenter="handleServicesEnter"
+          @mouseleave="scheduleCloseServices"
+        >
           <button
-              :class="['nav-link', 'services-trigger', { 'active': isServicesOpen }]"
-              @click="toggleServicesDropdown"
-              @mouseenter="openServicesDropdown"
+            ref="servicesTriggerRef"
+            class="desktop-nav__link services__trigger"
+            type="button"
+            :aria-expanded="isServicesOpen"
+            aria-controls="mysterria-services"
+            @click="handleServicesClick"
+            @focus="cancelCloseServices"
+            @keydown.escape.stop="closeServices"
           >
-            {{ t('navServices') }}
-            <span v-if="showServicesDot" aria-hidden="true" class="attention-dot"></span>
-            <svg
-                :class="{ 'rotate': isServicesOpen }"
-                class="dropdown-arrow"
-                fill="none"
-                height="16"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="16"
-            >
-              <polyline points="6,9 12,15 18,9"></polyline>
+            World
+            <svg aria-hidden="true" viewBox="0 0 16 16">
+              <path d="m4.5 6 3.5 3.5L11.5 6" />
             </svg>
           </button>
 
-          <Transition name="dropdown">
-            <div v-if="isServicesOpen" class="services-dropdown-menu" @mouseenter="clearCloseServicesTimeout"
-                 @mouseleave="scheduleCloseServicesDropdown">
+          <Transition name="services-panel">
+            <div
+              v-if="isServicesOpen"
+              id="mysterria-services"
+              class="services__panel"
+              @mouseenter="cancelCloseServices"
+              @mouseleave="scheduleCloseServices"
+              @keydown.escape.stop="closeServices"
+            >
+              <p>Beyond the website</p>
               <a
-                  v-for="service in servicesLinks"
-                  :key="service.url"
-                  :href="service.url"
-                  class="service-link"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  @click="closeServicesDropdown"
+                v-for="service in servicesLinks"
+                :key="service.url"
+                class="service-link"
+                :href="service.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                @click="closeServices"
               >
-                <component :is="service.icon" class="service-icon"/>
-                <div class="service-info">
-                  <span class="service-name">{{ service.name }}</span>
-                  <span class="service-description">{{ service.description }}</span>
-                </div>
-                <svg class="external-link-icon" fill="none" height="14" stroke="currentColor" stroke-width="2"
-                     viewBox="0 0 24 24" width="14">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15,3 21,3 21,9"></polyline>
-                  <line x1="10" x2="21" y1="14" y2="3"></line>
+                <component :is="service.icon" class="service-link__icon" aria-hidden="true" />
+                <span>
+                  <strong>{{ service.name }}</strong>
+                  <small>{{ service.description }}</small>
+                </span>
+                <svg class="service-link__arrow" aria-hidden="true" viewBox="0 0 18 18">
+                  <path d="M5 13 13 5m-6 0h6v6" />
                 </svg>
               </a>
             </div>
@@ -73,20 +79,33 @@
         </div>
       </nav>
 
-      <ServerStatusChip class="server-chip-desktop"/>
-
-      <div class="header-actions">
-        <LanguageSelector class="language-desktop"/>
-        <BalanceButton class="balance-desktop"/>
-        <NotificationBell class="auth-desktop"/>
-        <AuthButton class="auth-desktop"/>
+      <div class="site-header__actions">
+        <ServerStatusChip class="header-server-status" />
+        <div class="header-utilities">
+          <LanguageSelector />
+          <template v-if="!isHome">
+            <BalanceButton />
+            <NotificationBell />
+            <AuthButton />
+          </template>
+        </div>
+        <RouterLink v-if="isHome" class="home-login-link" to="/login">Login</RouterLink>
+        <RouterLink class="play-link" to="/guide">
+          Play
+          <svg aria-hidden="true" viewBox="0 0 18 18">
+            <path d="M4 9h10m-4-4 4 4-4 4" />
+          </svg>
+        </RouterLink>
         <button
-            :aria-expanded="isMobileNavOpen"
-            aria-label="Toggle navigation"
-            class="mobile-nav-toggle"
-            @click="toggleMobileNav"
+          ref="mobileNavToggleRef"
+          class="mobile-nav-toggle"
+          type="button"
+          :aria-expanded="isMobileNavOpen"
+          aria-controls="mobile-navigation-drawer"
+          :aria-label="isMobileNavOpen ? 'Close navigation' : 'Open navigation'"
+          @click="openMobileNav"
         >
-          <IconNavbar/>
+          <span /><span />
         </button>
       </div>
     </div>
@@ -94,66 +113,77 @@
 
   <Teleport to="body">
     <Transition name="mobile-nav">
-      <div v-if="isMobileNavOpen" class="mobile-nav-overlay">
-        <div class="mobile-nav-backdrop" @click="closeMobileNav"></div>
-        <nav class="mobile-nav">
-          <div class="mobile-nav-header">
-            <button
-                aria-label="Close navigation"
-                class="mobile-nav-close"
-                @click="closeMobileNav"
-            >
-              <i class="fa-solid fa-xmark"></i>
+      <div v-if="isMobileNavOpen" class="mobile-nav-layer">
+        <button
+          class="mobile-nav-backdrop"
+          type="button"
+          tabindex="-1"
+          aria-label="Close navigation"
+          @click="closeMobileNav"
+        />
+        <nav
+          id="mobile-navigation-drawer"
+          ref="mobileNavRef"
+          class="mobile-nav"
+          aria-label="Mobile navigation"
+          aria-modal="true"
+          role="dialog"
+          tabindex="-1"
+          @keydown="handleMobileNavKeydown"
+        >
+          <div class="mobile-nav__header">
+            <RouterLink class="mobile-nav__brand" to="/" @click="closeMobileNav">
+              <IconLogo aria-hidden="true" />
+              <span>Mysterria</span>
+            </RouterLink>
+            <button class="mobile-nav__close" type="button" aria-label="Close navigation" @click="closeMobileNav">
+              <span /><span />
             </button>
           </div>
 
-          <div class="mobile-nav-content">
-            <component
-                :is="link.external ? 'a' : 'RouterLink'"
-                v-for="link in navigationLinks"
-                :key="link.path"
-                :class="[
-                'mobile-nav-link',
-                { active: !link.external && route.path === link.path },
-              ]"
-                v-bind="getNavLinkProps(link)"
-                @click="closeMobileNav"
+          <div class="mobile-nav__body">
+            <p class="mobile-nav__eyebrow">Navigate</p>
+            <RouterLink
+              v-for="(link, index) in navigationLinks"
+              :key="link.path"
+              class="mobile-nav__link"
+              :class="{ 'is-active': isLinkActive(link.path) }"
+              :to="link.path"
+              @click="closeMobileNav"
             >
-              {{ link.title }}
-            </component>
+              <small>0{{ index + 1 }}</small>
+              <span>{{ link.title }}</span>
+              <svg aria-hidden="true" viewBox="0 0 18 18"><path d="M4 9h10m-4-4 4 4-4 4" /></svg>
+            </RouterLink>
 
-            <!-- Mobile Services Links -->
-            <div class="mobile-services-section">
-              <div class="mobile-services-header">{{ t('navServices') }}
-                <span v-if="showServicesDot" aria-hidden="true" class="attention-dot mobile"></span>
-              </div>
+            <div class="mobile-nav__world">
+              <p class="mobile-nav__eyebrow">World links</p>
               <a
-                  v-for="service in servicesLinks"
-                  :key="service.url"
-                  :href="service.url"
-                  class="mobile-service-link"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  @click="closeMobileNav"
+                v-for="service in servicesLinks"
+                :key="service.url"
+                :href="service.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                @click="closeMobileNav"
               >
-                <component :is="service.icon" class="mobile-service-icon"/>
-                <div class="mobile-service-info">
-                  <span class="mobile-service-name">{{ service.name }}</span>
-                  <span class="mobile-service-description">{{ service.description }}</span>
-                </div>
+                {{ service.name }}
+                <svg aria-hidden="true" viewBox="0 0 18 18"><path d="M5 13 13 5m-6 0h6v6" /></svg>
               </a>
             </div>
 
-            <div class="mobile-nav-auth">
-              <div class="mobile-language-selector">
-                <LanguageSelector/>
-              </div>
-              <div class="mobile-balance-wrapper">
-                <BalanceButton/>
-              </div>
-              <NotificationBell/>
-              <AuthButton mobile-mode @mobile-action="closeMobileNav"/>
+            <ServerStatusChip class="mobile-server-status" />
+          </div>
+
+          <div class="mobile-nav__footer">
+            <div class="mobile-nav__controls">
+              <LanguageSelector />
+              <template v-if="!isHome">
+                <BalanceButton />
+                <NotificationBell />
+              </template>
             </div>
+            <AuthButton v-if="!isHome" mobile-mode @mobile-action="closeMobileNav" />
+            <RouterLink v-else class="mobile-login-link" to="/login" @click="closeMobileNav">Login</RouterLink>
           </div>
         </nav>
       </div>
@@ -161,647 +191,714 @@
   </Teleport>
 </template>
 
-<script lang="ts" setup>
-import {computed, onUnmounted, ref, watch} from "vue";
-import {useRoute} from "vue-router";
-import AuthButton from "@/components/ui/AuthButton.vue";
-import BalanceButton from "@/components/ui/BalanceButton.vue";
-import NotificationBell from "@/components/notifications/NotificationBell.vue";
-import LanguageSelector from "@/components/ui/LanguageSelector.vue";
-import IconLogo from "@/assets/icons/IconLogo.vue";
-import IconNavbar from "@/assets/icons/IconNavbar.vue";
-import IconArchive from "@/assets/icons/IconArchive.vue";
-import IconMap from "@/assets/icons/IconMap.vue";
-import IconWiki from "@/assets/icons/IconWiki.vue";
-import IconDiscord from "@/assets/icons/IconDiscord.vue";
-import {useI18n} from "@/composables/useI18n";
-import ServerStatusChip from "@/components/ui/ServerStatusChip.vue";
+<script setup lang="ts">
+import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import ServerStatusChip from '@/components/ui/ServerStatusChip.vue';
+import IconLogo from '@/assets/icons/IconLogo.vue';
+import IconMap from '@/assets/icons/IconMap.vue';
+import IconWiki from '@/assets/icons/IconWiki.vue';
+import IconDiscord from '@/assets/icons/IconDiscord.vue';
 
-interface NavLink {
+const AuthButton = defineAsyncComponent(() => import('@/components/ui/AuthButton.vue'));
+const BalanceButton = defineAsyncComponent(() => import('@/components/ui/BalanceButton.vue'));
+const NotificationBell = defineAsyncComponent(() => import('@/components/notifications/NotificationBell.vue'));
+const LanguageSelector = defineAsyncComponent(() => import('@/components/ui/LanguageSelector.vue'));
+
+const headerFallbacks: Record<string, string> = {
+  navGame: 'Guide',
+  navRules: 'Rules',
+  navShop: 'Store',
+  navWiki: 'Wiki',
+  servicesWikiDesc: 'Guides and server knowledge',
+  servicesMap: 'World map',
+  servicesMapDesc: 'Explore the live world',
+  servicesDiscord: 'Community',
+  servicesDiscordDesc: 'Meet players and get help',
+};
+
+type NavigationLink = {
   path: string;
   title: string;
-  external?: boolean;
-  target?: string;
-  rel?: string;
-}
+};
 
 const route = useRoute();
-const {t} = useI18n();
-const isMobileNavOpen = ref(false);
+const translate = ref<(key: string) => string>((key) => headerFallbacks[key] ?? key);
+const t = (key: string) => translate.value(key);
+
+const isAtTop = ref(true);
 const isServicesOpen = ref(false);
-let closeDropdownTimeout: NodeJS.Timeout | null = null;
+const isMobileNavOpen = ref(false);
+const mobileNavToggleRef = ref<HTMLButtonElement | null>(null);
+const mobileNavRef = ref<HTMLElement | null>(null);
+const servicesRef = ref<HTMLElement | null>(null);
+const servicesTriggerRef = ref<HTMLButtonElement | null>(null);
 
-// Show a small attention dot on the Services trigger until user opens it once.
-const showServicesDot = ref(true);
-try {
-  showServicesDot.value = !localStorage.getItem('servicesDotDismissed_v1');
-} catch {
-  // If localStorage is unavailable, default to showing the dot.
-  showServicesDot.value = true;
-}
+let scrollFrame = 0;
+let servicesTimer: ReturnType<typeof setTimeout> | null = null;
+let servicesOpenedByHover = false;
+let servicesPinnedByClick = false;
+let servicesScrollLastY = 0;
+let servicesScrollDistance = 0;
 
-const markServicesSeen = () => {
-  if (showServicesDot.value) {
-    showServicesDot.value = false;
-    try {
-      localStorage.setItem('servicesDotDismissed_v1', '1');
-    } catch {
-      // ignore storage errors
-    }
-  }
-};
+const isHome = computed(() => route.path === '/');
+let i18nLoaded = false;
 
-const navigationLinks = computed<NavLink[]>(() => [
-  {path: "/", title: t("navHome") || "Home"},
-  {path: "/guide", title: t("navGame") || "Guide"},
-  {path: "/rules", title: t("navRules") || "Rules"},
-  {path: "/store", title: t("navShop") || "Shop"},
+watch(isHome, async (home) => {
+  if (home || i18nLoaded) return;
+  const { useI18n } = await import('@/composables/useI18n');
+  translate.value = useI18n().t;
+  i18nLoaded = true;
+}, { immediate: true });
+
+const navigationLinks = computed<NavigationLink[]>(() => [
+  { path: '/guide', title: t('navGame') || 'Guide' },
+  { path: '/pathways', title: 'Pathways' },
+  { path: '/rules', title: t('navRules') || 'Rules' },
+  { path: '/store', title: t('navShop') || 'Store' },
 ]);
-
-const iconComponents = {
-  IconArchive,
-  IconMap,
-  IconWiki,
-  IconDiscord
-};
 
 const servicesLinks = computed(() => [
   {
-    name: t("navWiki") || "Wiki",
-    description: t("servicesWikiDesc") || "Knowledge base & guides",
-    url: "https://wiki.mysterria.net/",
-    icon: iconComponents.IconWiki
+    name: t('navWiki') || 'Wiki',
+    description: t('servicesWikiDesc') || 'Guides and server knowledge',
+    url: 'https://wiki.mysterria.net/',
+    icon: IconWiki,
   },
   {
-    name: t("servicesDiscord") || "Discord",
-    description: t("servicesDiscordDesc") || "Join our community",
-    url: "https://discord.com/invite/jc7GSxBWgb",
-    icon: iconComponents.IconDiscord
+    name: t('servicesMap') || 'World map',
+    description: t('servicesMapDesc') || 'Explore the live world',
+    url: 'https://map.mysterria.net/',
+    icon: IconMap,
   },
   {
-    name: t("servicesMap") || "Live Map",
-    description: t("servicesMapDesc") || "Explore the world",
-    url: "https://map.mysterria.net/",
-    icon: iconComponents.IconMap
-  }
+    name: t('servicesDiscord') || 'Community',
+    description: t('servicesDiscordDesc') || 'Meet players and get help',
+    url: 'https://discord.com/invite/jc7GSxBWgb',
+    icon: IconDiscord,
+  },
 ]);
 
-const getNavLinkProps = (link: NavLink) => {
-  if (link.external) {
-    return {
-      href: link.path,
-      target: link.target,
-      rel: link.rel,
-    };
+function isLinkActive(path: string) {
+  return route.path === path || (path !== '/' && route.path.startsWith(`${path}/`));
+}
+
+function updateHeaderPosition() {
+  scrollFrame = 0;
+  isAtTop.value = window.scrollY < 24;
+  if (isServicesOpen.value && !isMobileNavOpen.value) {
+    servicesScrollDistance += Math.abs(window.scrollY - servicesScrollLastY);
+    servicesScrollLastY = window.scrollY;
+    if (servicesScrollDistance > 24) dismissServices();
   }
-  return {
-    to: link.path,
-  };
-};
+}
 
-const toggleMobileNav = () => {
-  isMobileNavOpen.value = !isMobileNavOpen.value;
-};
+function queueHeaderPosition() {
+  if (scrollFrame) return;
+  scrollFrame = requestAnimationFrame(updateHeaderPosition);
+}
 
-const closeMobileNav = () => {
-  isMobileNavOpen.value = false;
-};
+function cancelCloseServices() {
+  if (!servicesTimer) return;
+  clearTimeout(servicesTimer);
+  servicesTimer = null;
+}
 
-const toggleServicesDropdown = () => {
-  if (!isServicesOpen.value) {
-    markServicesSeen();
-  }
-  isServicesOpen.value = !isServicesOpen.value;
-};
-
-const clearCloseServicesTimeout = () => {
-  if (closeDropdownTimeout) {
-    clearTimeout(closeDropdownTimeout);
-    closeDropdownTimeout = null;
-  }
-};
-
-const scheduleCloseServicesDropdown = () => {
-  clearCloseServicesTimeout();
-  closeDropdownTimeout = setTimeout(() => {
-    isServicesOpen.value = false;
-    closeDropdownTimeout = null;
-  }, 220);
-};
-
-const openServicesDropdown = () => {
-  clearCloseServicesTimeout();
-  markServicesSeen();
+function openServices() {
+  cancelCloseServices();
+  servicesScrollLastY = window.scrollY;
+  servicesScrollDistance = 0;
   isServicesOpen.value = true;
-};
+}
 
-const closeServicesDropdown = () => {
-  clearCloseServicesTimeout();
+function handleServicesEnter() {
+  cancelCloseServices();
+  if (!isServicesOpen.value) {
+    servicesOpenedByHover = true;
+    servicesScrollLastY = window.scrollY;
+    servicesScrollDistance = 0;
+  }
+  isServicesOpen.value = true;
+}
+
+function closeServices() {
+  cancelCloseServices();
   isServicesOpen.value = false;
-};
+  servicesOpenedByHover = false;
+  servicesPinnedByClick = false;
+  servicesScrollDistance = 0;
+}
 
-watch(isMobileNavOpen, (isOpen) => {
+function blurServicesTrigger() {
+  if (document.activeElement === servicesTriggerRef.value) servicesTriggerRef.value?.blur();
+}
+
+function dismissServices() {
+  closeServices();
+  blurServicesTrigger();
+}
+
+function scheduleCloseServices() {
+  cancelCloseServices();
+  servicesTimer = setTimeout(dismissServices, 180);
+}
+
+function handleServicesClick() {
+  if (!isServicesOpen.value) {
+    servicesOpenedByHover = false;
+    openServices();
+    return;
+  }
+  if (servicesOpenedByHover && !servicesPinnedByClick) {
+    servicesPinnedByClick = true;
+    return;
+  }
+  closeServices();
+}
+
+function openMobileNav() {
+  closeServices();
+  isMobileNavOpen.value = true;
+}
+
+function closeMobileNav() {
+  isMobileNavOpen.value = false;
+}
+
+function closePanels() {
+  dismissServices();
+  closeMobileNav();
+}
+
+function getMobileFocusableElements() {
+  if (!mobileNavRef.value) return [];
+  return Array.from(
+    mobileNavRef.value.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  ).filter((element) => element.getClientRects().length > 0);
+}
+
+function handleMobileNavKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeMobileNav();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+
+  const focusable = getMobileFocusableElements();
+  if (!focusable.length) {
+    event.preventDefault();
+    mobileNavRef.value?.focus();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function handleOutsidePointer(event: PointerEvent) {
+  if (!isServicesOpen.value) return;
+  const target = event.target;
+  if (target instanceof Node && !servicesRef.value?.contains(target)) dismissServices();
+}
+
+watch(isMobileNavOpen, async (isOpen) => {
+  const appRoot = document.querySelector<HTMLElement>('#app');
   if (isOpen) {
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
+    appRoot?.setAttribute('inert', '');
+    await nextTick();
+    getMobileFocusableElements()[0]?.focus();
   } else {
-    document.body.style.overflow = "";
+    document.body.style.overflow = '';
+    appRoot?.removeAttribute('inert');
+    await nextTick();
+    mobileNavToggleRef.value?.focus();
   }
 });
 
+watch(() => route.fullPath, closePanels);
+
+onMounted(() => {
+  updateHeaderPosition();
+  window.addEventListener('scroll', queueHeaderPosition, { passive: true });
+  document.addEventListener('pointerdown', handleOutsidePointer);
+});
+
 onUnmounted(() => {
-  document.body.style.overflow = "";
-  clearCloseServicesTimeout();
+  window.removeEventListener('scroll', queueHeaderPosition);
+  document.removeEventListener('pointerdown', handleOutsidePointer);
+  document.body.style.overflow = '';
+  document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
+  if (scrollFrame) cancelAnimationFrame(scrollFrame);
+  cancelCloseServices();
 });
 </script>
 
 <style scoped>
-.main-header {
+.site-header {
   position: fixed;
+  z-index: 1000;
   top: 0;
   left: 0;
-  right: 0;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 16px;
-  gap: 24px;
-  background: color-mix(in srgb, var(--myst-bg) 80%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid color-mix(in srgb, white 15%, transparent);
-  z-index: 1000;
+  height: 72px;
+  color: var(--ink, #221c14);
+  background: color-mix(in srgb, var(--surface-glass, rgba(255, 255, 255, .86)) 84%, var(--hero-scene-color, #9e7eae) 16%);
+  border-bottom: 1px solid var(--hairline, #eae1d0);
+  backdrop-filter: blur(14px);
+  transition: color .35s, background-color 1.1s cubic-bezier(.22, 1, .36, 1), border-color .35s, box-shadow .4s;
 }
 
-.header-content {
-  display: flex;
+.site-header.is-home.is-at-top:not(.has-panel) {
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.site-header.is-home.is-at-top .header-server-status {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-5px);
+  pointer-events: none;
+  transition: opacity .35s cubic-bezier(.22, 1, .36, 1), transform .35s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .35s;
+}
+
+.site-header:not(.is-at-top),
+.site-header.has-panel {
+  box-shadow: 0 10px 30px rgba(34, 28, 20, .08);
+}
+
+.site-header__inner {
+  width: min(100%, 1480px);
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1200px;
+  gap: clamp(18px, 2.7vw, 44px);
   margin: 0 auto;
-  gap: 24px;
+  padding: 0 clamp(20px, 4vw, 56px);
 }
 
-.header-logo-link {
-  flex-shrink: 0;
+.site-brand {
+  justify-self: start;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: inherit;
+}
+
+.site-brand:hover { color: inherit; }
+.site-brand__mark { width: 44px; height: 44px; }
+.site-brand__name {
+  font: 700 1.35rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
+  letter-spacing: -.025em;
+}
+
+.desktop-nav {
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: var(--myst-ink);
-  transition: all 0.3s ease;
+  gap: 2px;
+  justify-self: center;
 }
 
-.header-logo-link:hover {
-  color: var(--myst-gold);
-}
-
-.logo-text {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--myst-gold);
-}
-
-.navigation {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-@media (max-width: 768px) {
-  .navigation {
-    display: none;
-  }
-}
-
-.nav-link {
-  padding: 8px 16px;
-  border-radius: 4px;
-  color: #888;
-  text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  display: flex;
+.desktop-nav__link {
+  position: relative;
+  min-height: 44px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 40px;
+  gap: 5px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--ink-muted, #756b5c);
+  background: transparent;
+  font: 700 .67rem/1 var(--font-mono, "IBM Plex Mono", monospace);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .25s;
 }
 
-.nav-link:hover {
-  color: var(--myst-gold);
+.desktop-nav__link::after {
+  content: "";
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 6px;
+  height: 2px;
+  background: var(--primary, #7458e8);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
 }
 
-.nav-link.active {
-  color: var(--myst-gold);
-  background: rgba(200, 178, 115, 0.05);
-  box-shadow: inset 0 0 10px rgba(200, 178, 115, 0.05);
+.desktop-nav__link:hover {
+  color: var(--ink, #221c14);
 }
 
-.header-actions {
+.desktop-nav__link.is-active {
+  color: var(--ink, #221c14);
+}
+
+.desktop-nav__link:hover::after,
+.desktop-nav__link.is-active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.services { position: relative; }
+.services__trigger svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+  transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+}
+.services__trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.services__panel {
+  position: absolute;
+  top: calc(100% + 13px);
+  right: -74px;
+  width: 332px;
+  padding: 10px;
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 16px;
+  color: var(--ink, #221c14);
+  background: var(--surface, #fff);
+  box-shadow: 0 24px 60px rgba(34, 28, 20, .14);
+}
+
+.services__panel > p {
+  margin: 4px 8px 8px;
+  color: var(--ink-muted, #756b5c);
+  font: 800 .57rem/1 var(--font-mono, "IBM Plex Mono", monospace);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.service-link {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 34px 1fr 20px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 11px;
+  color: var(--ink, #221c14);
+  transition: color .14s, background-color .14s, transform .14s cubic-bezier(.22, 1, .36, 1);
+}
+
+.service-link:hover {
+  color: var(--ink, #221c14);
+  background: var(--primary-tint, rgba(116, 88, 232, .12));
+  transform: translateY(-4px);
+}
+
+.service-link__icon { width: 26px; height: 26px; color: var(--primary, #7458e8); }
+.service-link span { min-width: 0; }
+.service-link strong { display: block; font-size: .78rem; font-weight: 700; }
+.service-link small { display: block; margin-top: 2px; color: var(--ink-muted, #756b5c); font-size: .67rem; font-weight: 500; }
+.service-link__arrow,
+.play-link svg,
+.mobile-nav__link svg,
+.mobile-nav__world svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.site-header__actions {
+  justify-self: end;
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
+  gap: 9px;
 }
+
+.header-server-status {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  will-change: opacity, transform;
+  transition: opacity .35s cubic-bezier(.22, 1, .36, 1), transform .35s cubic-bezier(.22, 1, .36, 1), visibility 0s linear;
+}
+
+.header-utilities { display: flex; align-items: center; gap: 7px; }
+
+.header-utilities :deep(button:not(.lang-ritual-btn)),
+.header-utilities :deep(a) { min-width: 44px; min-height: 44px; }
+.header-utilities :deep(.lang-ritual-selector) { align-self: center; height: 36px; min-height: 36px; }
+.header-utilities :deep(.lang-ritual-btn) { min-width: 32px; min-height: 28px; height: 28px; }
+
+.home-login-link,
+.mobile-login-link {
+  min-width: 72px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink, #221c14);
+  font: 700 .66rem/1 var(--font-mono, "IBM Plex Mono", monospace);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: color .2s;
+}
+
+.home-login-link:hover,
+.mobile-login-link:hover { color: var(--primary, #7458e8); }
+
+.mobile-login-link { width: 100%; min-height: 48px; }
+
+.play-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: color-mix(in srgb, var(--primary, #7458e8) 80%, var(--hero-scene-accent, #8d6fe4) 20%);
+  font-size: .77rem;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(34, 28, 20, .12);
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), box-shadow .32s, background-color .25s;
+}
+
+.play-link:hover { background: var(--primary-deep, #5f46d6); box-shadow: 0 12px 26px rgba(34, 28, 20, .16); transform: translateY(-1px); }
+.play-link:hover svg { transform: translateX(2px); }
 
 .mobile-nav-toggle {
+  width: 44px;
+  height: 44px;
   display: none;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: color-mix(in srgb, var(--myst-bg) 60%, transparent);
-  border: 1px solid color-mix(in srgb, white 15%, transparent);
-  color: var(--myst-ink);
+  place-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 10px;
+  color: inherit;
+  background: transparent;
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px);
 }
 
-:root[data-theme="parchment"] .mobile-nav-toggle {
-  background: var(--myst-bg-2);
-  border-color: color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+.mobile-nav-toggle span {
+  grid-area: 1 / 1;
+  width: 19px;
+  height: 1px;
+  background: currentColor;
+  transform: translateY(-4px);
 }
+.mobile-nav-toggle span + span { transform: translateY(4px); }
 
-.mobile-nav-toggle:hover {
-  background: color-mix(in srgb, white 5%, transparent);
-  border-color: color-mix(in srgb, white 30%, transparent);
-}
+.services-panel-enter-active,
+.services-panel-leave-active { transition: opacity .25s, transform .35s cubic-bezier(.22, 1, .36, 1); }
+.services-panel-enter-from,
+.services-panel-leave-to { opacity: 0; transform: translateY(-7px) scale(.98); }
 
-:root[data-theme="parchment"] .mobile-nav-toggle:hover {
-  background: var(--myst-bg);
-  border-color: var(--myst-ink-muted);
-}
-
-@media (max-width: 768px) {
-  .mobile-nav-toggle {
-    display: flex;
-  }
-
-  .auth-desktop,
-  .balance-desktop,
-  .language-desktop,
-  .server-chip-desktop {
-    display: none;
-  }
-}
-
-.mobile-nav-overlay {
+.mobile-nav-layer {
   position: fixed;
+  z-index: 2000;
   inset: 0;
-  z-index: 1000;
   display: flex;
+  justify-content: flex-end;
 }
 
 .mobile-nav-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: rgba(34, 28, 20, .38);
+  backdrop-filter: blur(6px);
 }
 
 .mobile-nav {
   position: relative;
-  width: 100%;
-  max-width: 320px;
-  height: 100vh;
-  background: var(--myst-bg);
-  border-right: 1px solid color-mix(in srgb, white 10%, transparent);
+  width: min(430px, 92vw);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  transition: transform 0.3s ease;
+  overflow: auto;
+  color: var(--ink, #221c14);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(116, 88, 232, .1), transparent 28%),
+    var(--surface, #fff);
+  box-shadow: -24px 0 70px rgba(34, 28, 20, .18);
 }
 
-.mobile-nav-header {
+.mobile-nav__header {
+  min-height: 78px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid color-mix(in srgb, white 10%, transparent);
+  gap: 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--hairline, #eae1d0);
 }
 
-.mobile-nav-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
+.mobile-nav__brand { min-height: 44px; display: flex; align-items: center; gap: 10px; color: var(--ink, #221c14); }
+.mobile-nav__brand :deep(img) { width: 39px; height: 39px; }
+.mobile-nav__brand span { font: 700 1.3rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif); }
+
+.mobile-nav__close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 10px;
+  color: var(--ink, #221c14);
   background: transparent;
-  border: 1px solid color-mix(in srgb, white 15%, transparent);
-  border-radius: 6px;
-  color: var(--myst-ink);
-  font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+}
+.mobile-nav__close span { grid-area: 1 / 1; width: 19px; height: 1px; background: currentColor; transform: rotate(45deg); }
+.mobile-nav__close span + span { transform: rotate(-45deg); }
+
+.mobile-nav__body { flex: 1; padding: 28px 20px; }
+.mobile-nav__eyebrow {
+  margin: 0 0 11px;
+  color: var(--ink-muted, #756b5c);
+  font: 800 .58rem/1 "IBM Plex Mono", monospace;
+  letter-spacing: .13em;
+  text-transform: uppercase;
 }
 
-.mobile-nav-close:hover {
-  background: color-mix(in srgb, white 5%, transparent);
-  border-color: color-mix(in srgb, white 30%, transparent);
-}
-
-.mobile-nav-content {
-  flex: 1;
-  padding: 32px 0;
-}
-
-.mobile-nav-link {
-  display: flex;
+.mobile-nav__link {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 28px 1fr 22px;
   align-items: center;
-  padding: 18px 28px;
-  color: #e2e8f0;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1.1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-left: 4px solid transparent;
-  letter-spacing: 0.025em;
+  gap: 8px;
+  border-bottom: 1px solid var(--hairline, #eae1d0);
+  color: var(--ink, #221c14);
 }
+.mobile-nav__link small { color: var(--champagne, #d9b45a); font: 600 .59rem/1 "IBM Plex Mono", monospace; }
+.mobile-nav__link span { font: 700 1.36rem/1 "IBM Plex Sans Condensed", sans-serif; }
+.mobile-nav__link svg { transition: transform .3s cubic-bezier(.22, 1, .36, 1); }
+.mobile-nav__link:hover,
+.mobile-nav__link.is-active { color: var(--primary, #7458e8); }
+.mobile-nav__link:hover svg { transform: translateX(3px); }
 
-.mobile-nav-link:hover {
-  color: #ffffff;
-  background: linear-gradient(90deg, rgba(16, 185, 129, 0.1), transparent);
-  border-left-color: #10b981;
-  transform: translateX(6px);
-}
-
-.mobile-nav-link.active {
-  color: #ffffff;
-  background: linear-gradient(
-      90deg,
-      rgba(16, 185, 129, 0.2),
-      rgba(34, 197, 94, 0.1)
-  );
-  border-left-color: #22c55e;
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.1) inset;
-}
-
-.mobile-nav-auth {
-  margin-top: 32px;
-  padding: 0 28px;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
-  background: rgba(15, 23, 42, 0.5);
-}
-
-.mobile-language-selector {
-  margin: 24px 0 16px 0;
-}
-
-.mobile-balance-wrapper {
-  margin-bottom: 16px;
-}
-
-.mobile-balance-wrapper :deep(.dollar) {
-  width: 100%;
+.mobile-nav__world { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 30px; }
+.mobile-nav__world .mobile-nav__eyebrow { grid-column: 1 / -1; }
+.mobile-nav__world a {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  padding: 12px 20px;
-  font-size: 1rem;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid var(--hairline, #eae1d0);
+  border-radius: 9px;
+  color: var(--ink, #221c14);
+  font-size: .72rem;
+  font-weight: 720;
+}
+.mobile-nav__world a:hover {
+  color: var(--primary, #7458e8);
+  border-color: color-mix(in srgb, var(--primary, #7458e8) 40%, transparent);
 }
 
-:root[data-theme="parchment"] .mobile-balance-wrapper :deep(.dollar) {
-  background: var(--myst-bg-2);
-  border-color: color-mix(in srgb, var(--myst-ink-muted) 25%, transparent);
+.mobile-server-status {
+  width: 100%;
+  min-height: 48px;
+  display: flex !important;
+  justify-content: center;
+  margin-top: 18px;
 }
 
-:root[data-theme="parchment"] .mobile-balance-wrapper :deep(.dollar):hover {
-  background: var(--myst-bg);
-  border-color: var(--myst-ink-muted);
+.mobile-nav__footer {
+  padding: 18px 20px max(18px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--hairline, #eae1d0);
+  background: rgba(251, 247, 239, .78);
 }
+.mobile-nav__controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.mobile-nav__controls :deep(button:not(.lang-ritual-btn)),
+.mobile-nav__controls :deep(a) { min-width: 44px; min-height: 44px; }
+.mobile-nav__controls :deep(.lang-ritual-selector) { align-self: center; height: 36px; min-height: 36px; }
+.mobile-nav__controls :deep(.lang-ritual-btn) { min-width: 32px; min-height: 28px; height: 28px; }
 
 .mobile-nav-enter-active,
-.mobile-nav-leave-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  .mobile-nav {
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .mobile-nav-backdrop {
-    transition: opacity 0.4s ease;
-  }
-}
-
+.mobile-nav-leave-active { transition: opacity .35s; }
+.mobile-nav-enter-active .mobile-nav,
+.mobile-nav-leave-active .mobile-nav { transition: transform .48s cubic-bezier(.22, 1, .36, 1); }
 .mobile-nav-enter-from,
-.mobile-nav-leave-to {
-  opacity: 0;
+.mobile-nav-leave-to { opacity: 0; }
+.mobile-nav-enter-from .mobile-nav,
+.mobile-nav-leave-to .mobile-nav { transform: translateX(100%); }
 
-  .mobile-nav {
-    transform: translateX(-100%);
-  }
-
-  .mobile-nav-backdrop {
-    opacity: 0;
-  }
+@media (max-width: 1320px) {
+  .header-utilities :deep(.dollar) { display: none; }
 }
 
-/* Services Dropdown Styles */
-.services-dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
+@media (max-width: 1080px) {
+  .site-header__inner { gap: 16px; }
+  .site-brand__name { display: none; }
+  .header-server-status { display: none; }
+  .desktop-nav__link { padding-inline: 10px; }
 }
 
-.services-trigger {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  background: none;
-  border: none;
+@media (max-width: 820px) {
+  .site-header { height: 68px; }
+  .site-header__inner { grid-template-columns: minmax(0, 1fr) auto; }
+  .desktop-nav,
+  .header-utilities,
+  .header-server-status { display: none; }
+  .site-brand__name { display: inline; }
+  .site-header__actions { justify-self: end; }
+  .mobile-nav-toggle { display: grid; }
 }
 
-.dropdown-arrow {
-  transition: transform 0.2s ease;
+@media (max-width: 420px) {
+  .site-header__inner { padding-inline: 12px; }
+  .site-brand__name { display: none; }
+  .play-link { padding-inline: 13px; }
+  .mobile-nav__world { grid-template-columns: 1fr; }
+  .mobile-nav__world .mobile-nav__eyebrow { grid-column: auto; }
 }
 
-.dropdown-arrow.rotate {
-  transform: rotate(180deg);
+@media (max-width: 260px) {
+  .site-header__inner { padding-inline: 6px; gap: 5px; }
+  .site-brand__mark { width: 36px; height: 36px; }
+  .play-link { padding-inline: 9px; font-size: .67rem; }
+  .mobile-nav { width: 100%; }
+  .mobile-nav__header,
+  .mobile-nav__body,
+  .mobile-nav__footer { padding-inline: 10px; }
 }
 
-.services-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 12px;
-  min-width: 320px;
-  background: #080a14;
-  border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 4px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-  z-index: 100;
-  overflow: hidden;
-  padding: 8px;
-}
-
-.service-link {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border-radius: 2px;
-  border: 1px solid transparent;
-}
-
-.service-link:hover {
-  background: rgba(200, 178, 115, 0.05);
-  border-color: rgba(200, 178, 115, 0.1);
-}
-
-.service-icon {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  color: var(--myst-gold);
-  opacity: 0.8;
-}
-
-.service-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.service-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.service-description {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.external-link-icon {
-  flex-shrink: 0;
-  color: #444;
-  width: 12px;
-  transition: all 0.3s;
-}
-
-.service-link:hover .external-link-icon {
-  color: var(--myst-gold);
-  transform: translate(2px, -2px);
-}
-
-/* Dropdown animations */
-.dropdown-enter-active,
-.dropdown-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dropdown-enter-from,
-.dropdown-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-8px);
-}
-
-/* Mobile responsive adjustments for dropdown */
-@media (max-width: 768px) {
-  .services-dropdown {
-    display: none;
-  }
-}
-
-/* Mobile Services Section */
-.mobile-services-section {
-  margin-top: 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.1);
-  padding-top: 20px;
-}
-
-.mobile-services-header {
-  padding: 0 28px 12px;
-  color: #a1a1aa;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.mobile-service-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 28px;
-  color: #e2e8f0;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-left: 4px solid transparent;
-}
-
-.mobile-service-link:hover {
-  color: #ffffff;
-  background: linear-gradient(90deg, rgba(200, 178, 115, 0.1), transparent);
-  border-left-color: var(--myst-gold);
-  transform: translateX(6px);
-}
-
-.mobile-service-icon {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  color: var(--myst-gold);
-}
-
-.mobile-service-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.mobile-service-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.mobile-service-description {
-  font-size: 11px;
-  color: #a1a1aa;
-}
-
-/* Attention dot styles for Services */
-.services-trigger {
-  position: relative;
-}
-
-.attention-dot {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: var(--myst-gold);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--myst-bg) 85%, transparent);
-}
-
-/* Mobile variant inside header label */
-.mobile-services-header {
-  position: relative;
-}
-
-.attention-dot.mobile {
-  position: absolute;
-  top: 8px;
-  right: 28px;
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-brand__mark,
+  .services__trigger svg,
+  .service-link,
+  .services-panel-enter-active,
+  .services-panel-leave-active,
+  .mobile-nav-enter-active,
+  .mobile-nav-leave-active,
+  .mobile-nav-enter-active .mobile-nav,
+  .mobile-nav-leave-active .mobile-nav { transition: none; }
 }
 </style>

@@ -1,0 +1,5 @@
+# Local diagnostics and generated reports are not deployable site assets.
+audit-findings.md
+dogfood-output/
+*.log
+.tmp-*

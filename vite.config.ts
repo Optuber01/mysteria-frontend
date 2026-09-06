@@ -94,14 +94,26 @@ function copyRobotsPlugin(): Plugin {
     name: 'copy-robots',
     buildEnd() {
       try {
-        if (!fs.existsSync('dist')) {
-          fs.mkdirSync('dist', { recursive: true })
+        if (!fs.existsSync('dist/client')) {
+          fs.mkdirSync('dist/client', { recursive: true })
         }
         const robotsTxt = fs.readFileSync('public/robots.txt', 'utf-8')
-        fs.writeFileSync('dist/robots.txt', robotsTxt)
+        fs.writeFileSync('dist/client/robots.txt', robotsTxt)
       } catch (error) {
         console.error('Error copying robots.txt:', error)
       }
+    },
+  }
+}
+
+function copySitesWorkerPlugin(): Plugin {
+  return {
+    name: 'copy-sites-worker',
+    closeBundle() {
+      const source = fileURLToPath(new URL('./worker/sites-index.js', import.meta.url))
+      const destination = fileURLToPath(new URL('./dist/server/index.js', import.meta.url))
+      fs.mkdirSync(fileURLToPath(new URL('./dist/server', import.meta.url)), { recursive: true })
+      fs.copyFileSync(source, destination)
     },
   }
 }
@@ -116,6 +128,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
     vueDevTools(),
     vercel(),
     copyRobotsPlugin(), // Must run before sitemap plugin
+    copySitesWorkerPlugin(),
     generateSitemap({
       hostname: 'https://mysterria.net',
       robots: [
@@ -143,7 +156,7 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
         '@data': fileURLToPath(new URL('./src/data', import.meta.url)),
         '@services': fileURLToPath(new URL('./src/services', import.meta.url)),
         '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-        vue: 'vue/dist/vue.esm-bundler.js',
+        vue: 'vue/dist/vue.runtime.esm-bundler.js',
       },
       extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue', '.md', '.mdx'],
     },
@@ -189,7 +202,8 @@ function createViteConfig({ mode }: ConfigEnv): UserConfig {
       allowedHosts: ['api.mysterria.net'],
     },
     build: {
-      sourcemap: true,
+      outDir: 'dist/client',
+      sourcemap: false,
       cssCodeSplit: true,
       rollupOptions: {
         input: {
