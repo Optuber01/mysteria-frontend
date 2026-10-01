@@ -4,42 +4,40 @@
     {
       "id": "abyss",
       "kind": "pathway",
+      "image": "abyss",
+      "name": {
+        "en": "Abyss",
+        "uk": "Безодня",
+        "zh-TW": "罪犯",
+        "zh-CN": "罪犯"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Criminal",
           "uk": "Злочинець",
-          "zh-CN": "罪犯",
-          "zh-TW": "罪犯"
+          "zh-TW": "罪犯",
+          "zh-CN": "罪犯"
         }
       },
       "strengths": [
         {
-          "id": "criminal-proficiency",
-          "name": {
-            "en": "Criminal Proficiency",
-            "uk": "Майстерність Злочинця",
-            "zh-CN": "罪犯精通",
-            "zh-TW": "罪犯精通"
-          }
+          "en": "Criminal Proficiency",
+          "uk": "Майстерність Злочинця",
+          "zh-TW": "罪犯精通",
+          "zh-CN": "罪犯精通"
         },
         {
-          "id": "physical-enhancement",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Посилення",
-            "zh-CN": "体质强化",
-            "zh-TW": "體質強化"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Посилення",
+          "zh-TW": "體質強化",
+          "zh-CN": "体质强化"
         },
         {
-          "id": "demonic-poisonous-flames",
-          "name": {
-            "en": "Poisonous Flames",
-            "uk": "Отруйне Полум'я",
-            "zh-CN": "剧毒之焰",
-            "zh-TW": "劇毒之焰"
-          }
+          "en": "Poisonous Flames",
+          "uk": "Отруйне Полум'я",
+          "zh-TW": "劇毒之焰",
+          "zh-CN": "剧毒之焰"
         }
       ],
       "sequenceCount": 9,
@@ -48,42 +46,40 @@
     {
       "id": "chained",
       "kind": "pathway",
+      "image": "chained",
+      "name": {
+        "en": "Chained",
+        "uk": "Прикутий",
+        "zh-TW": "囚犯",
+        "zh-CN": "囚犯"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Prisoner",
           "uk": "В'язень",
-          "zh-CN": "囚犯",
-          "zh-TW": "囚犯"
+          "zh-TW": "囚犯",
+          "zh-CN": "囚犯"
         }
       },
       "strengths": [
         {
-          "id": "escapism",
-          "name": {
-            "en": "Escapism",
-            "uk": "Ескапізм",
-            "zh-CN": "脱逃",
-            "zh-TW": "脫逃"
-          }
+          "en": "Escapism",
+          "uk": "Ескапізм",
+          "zh-TW": "脫逃",
+          "zh-CN": "脱逃"
         },
         {
-          "id": "binding",
-          "name": {
-            "en": "Binding",
-            "uk": "Зв'язування",
-            "zh-CN": "束缚",
-            "zh-TW": "束縛"
-          }
+          "en": "Binding",
+          "uk": "Зв'язування",
+          "zh-TW": "束縛",
+          "zh-CN": "束缚"
         },
         {
-          "id": "enhanced-binding",
-          "name": {
-            "en": "Binding (Enhanced)",
-            "uk": "Посилена Прив'язка",
-            "zh-CN": "束缚（进阶）",
-            "zh-TW": "束縛（進階）"
-          }
+          "en": "Binding (Enhanced)",
+          "uk": "Посилена Прив'язка",
+          "zh-TW": "束縛（進階）",
+          "zh-CN": "束缚（进阶）"
         }
       ],
       "sequenceCount": 9,
@@ -92,42 +88,40 @@
     {
       "id": "darkness",
       "kind": "pathway",
+      "image": "darkness",
+      "name": {
+        "en": "Darkness",
+        "uk": "Темрява",
+        "zh-TW": "不眠者",
+        "zh-CN": "不眠者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Shadow Wanderer",
           "uk": "Тіньовий Блукач",
-          "zh-CN": "不眠者",
-          "zh-TW": "不眠者"
+          "zh-TW": "不眠者",
+          "zh-CN": "不眠者"
         }
       },
       "strengths": [
         {
-          "id": "spirit-vision",
-          "name": {
-            "en": "Spirit Vision",
-            "uk": "Духовне бачення",
-            "zh-CN": "灵视",
-            "zh-TW": "靈視"
-          }
+          "en": "Spirit Vision",
+          "uk": "Духовне бачення",
+          "zh-TW": "靈視",
+          "zh-CN": "灵视"
         },
         {
-          "id": "nocturnality",
-          "name": {
-            "en": "Nocturnality",
-            "uk": "Нічність",
-            "zh-CN": "夜行性",
-            "zh-TW": "夜行性"
-          }
+          "en": "Nocturnality",
+          "uk": "Нічність",
+          "zh-TW": "夜行性",
+          "zh-CN": "夜行性"
         },
         {
-          "id": "spiritualism",
-          "name": {
-            "en": "Spiritualism",
-            "uk": "Духовність",
-            "zh-CN": "通灵",
-            "zh-TW": "通靈"
-          }
+          "en": "Spiritualism",
+          "uk": "Духовність",
+          "zh-TW": "通靈",
+          "zh-CN": "通灵"
         }
       ],
       "sequenceCount": 9,
@@ -136,42 +130,39 @@
     {
       "id": "death",
       "kind": "pathway",
+      "image": "death",
+      "name": {
+        "en": "Death",
+        "uk": "Смерть",
+        "zh-TW": "收屍人",
+        "zh-CN": "收尸人"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Corpse Collector",
-          "uk": "Corpse Collector",
-          "zh-CN": "收尸人",
-          "zh-TW": "收屍人"
+          "zh-TW": "收屍人",
+          "zh-CN": "收尸人"
         }
       },
       "strengths": [
         {
-          "id": "cold-resistance",
-          "name": {
-            "en": "Cold Resistance",
-            "uk": "Опір холоду",
-            "zh-CN": "寒冷抗性",
-            "zh-TW": "寒冷抗性"
-          }
+          "en": "Cold Resistance",
+          "uk": "Опір холоду",
+          "zh-TW": "寒冷抗性",
+          "zh-CN": "寒冷抗性"
         },
         {
-          "id": "perception-of-spiritual-bodies",
-          "name": {
-            "en": "Perception of Spiritual Bodies",
-            "uk": "Сприйняття Духовних Тіл",
-            "zh-CN": "灵体感知",
-            "zh-TW": "靈體感知"
-          }
+          "en": "Perception of Spiritual Bodies",
+          "uk": "Сприйняття Духовних Тіл",
+          "zh-TW": "靈體感知",
+          "zh-CN": "灵体感知"
         },
         {
-          "id": "undead-protection",
-          "name": {
-            "en": "Undead Protection",
-            "uk": "Захист від нежиті",
-            "zh-CN": "亡灵庇护",
-            "zh-TW": "亡靈庇護"
-          }
+          "en": "Undead Protection",
+          "uk": "Захист від нежиті",
+          "zh-TW": "亡靈庇護",
+          "zh-CN": "亡灵庇护"
         }
       ],
       "sequenceCount": 9,
@@ -180,42 +171,40 @@
     {
       "id": "demoness",
       "kind": "pathway",
+      "image": "demoness",
+      "name": {
+        "en": "Demoness",
+        "uk": "Демонеса",
+        "zh-TW": "刺客",
+        "zh-CN": "刺客"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Assassin",
           "uk": "Убивця",
-          "zh-CN": "刺客",
-          "zh-TW": "刺客"
+          "zh-TW": "刺客",
+          "zh-CN": "刺客"
         }
       },
       "strengths": [
         {
-          "id": "feather-fall",
-          "name": {
-            "en": "Feather Fall",
-            "uk": "Пір'їнкове Падіння",
-            "zh-CN": "羽落",
-            "zh-TW": "羽落"
-          }
+          "en": "Feather Fall",
+          "uk": "Пір'їнкове Падіння",
+          "zh-TW": "羽落",
+          "zh-CN": "羽落"
         },
         {
-          "id": "stealth-blow",
-          "name": {
-            "en": "Stealth Blow",
-            "uk": "Прихований Удар",
-            "zh-CN": "潜袭",
-            "zh-TW": "潛襲"
-          }
+          "en": "Stealth Blow",
+          "uk": "Прихований Удар",
+          "zh-TW": "潛襲",
+          "zh-CN": "潜袭"
         },
         {
-          "id": "agility",
-          "name": {
-            "en": "Agility",
-            "uk": "Спритність",
-            "zh-CN": "敏捷",
-            "zh-TW": "敏捷"
-          }
+          "en": "Agility",
+          "uk": "Спритність",
+          "zh-TW": "敏捷",
+          "zh-CN": "敏捷"
         }
       ],
       "sequenceCount": 9,
@@ -224,42 +213,40 @@
     {
       "id": "door",
       "kind": "pathway",
+      "image": "door",
+      "name": {
+        "en": "Door",
+        "uk": "Брама",
+        "zh-TW": "學徒",
+        "zh-CN": "学徒"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Apprentice",
           "uk": "Учень",
-          "zh-CN": "学徒",
-          "zh-TW": "學徒"
+          "zh-TW": "學徒",
+          "zh-CN": "学徒"
         }
       },
       "strengths": [
         {
-          "id": "door-opening",
-          "name": {
-            "en": "Door Opening",
-            "uk": "Відчинення Дверей",
-            "zh-CN": "开门",
-            "zh-TW": "開門"
-          }
+          "en": "Door Opening",
+          "uk": "Відчинення Дверей",
+          "zh-TW": "開門",
+          "zh-CN": "开门"
         },
         {
-          "id": "tricky-spells",
-          "name": {
-            "en": "Tricky Spells",
-            "uk": "Підступні Чари",
-            "zh-CN": "戏法",
-            "zh-TW": "戲法"
-          }
+          "en": "Tricky Spells",
+          "uk": "Підступні Чари",
+          "zh-TW": "戲法",
+          "zh-CN": "戏法"
         },
         {
-          "id": "light-wind",
-          "name": {
-            "en": "Light Wind",
-            "uk": "Легкий Вітер",
-            "zh-CN": "轻风",
-            "zh-TW": "輕風"
-          }
+          "en": "Light Wind",
+          "uk": "Легкий Вітер",
+          "zh-TW": "輕風",
+          "zh-CN": "轻风"
         }
       ],
       "sequenceCount": 9,
@@ -268,42 +255,40 @@
     {
       "id": "emperor",
       "kind": "pathway",
+      "image": "emperor",
+      "name": {
+        "en": "Black Emperor",
+        "uk": "Чорний Імператор",
+        "zh-TW": "律師",
+        "zh-CN": "律师"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Lawyer",
           "uk": "Адвокат",
-          "zh-CN": "律师",
-          "zh-TW": "律師"
+          "zh-TW": "律師",
+          "zh-CN": "律师"
         }
       },
       "strengths": [
         {
-          "id": "eloquence",
-          "name": {
-            "en": "Eloquence",
-            "uk": "Красномовство",
-            "zh-CN": "口才",
-            "zh-TW": "口才"
-          }
+          "en": "Eloquence",
+          "uk": "Красномовство",
+          "zh-TW": "口才",
+          "zh-CN": "口才"
         },
         {
-          "id": "persuasion",
-          "name": {
-            "en": "Persuasion",
-            "uk": "Переконання",
-            "zh-CN": "说服",
-            "zh-TW": "說服"
-          }
+          "en": "Persuasion",
+          "uk": "Переконання",
+          "zh-TW": "說服",
+          "zh-CN": "说服"
         },
         {
-          "id": "law-proficiency",
-          "name": {
-            "en": "Law Proficiency",
-            "uk": "Майстерність Закону",
-            "zh-CN": "律法精通",
-            "zh-TW": "律法精通"
-          }
+          "en": "Law Proficiency",
+          "uk": "Майстерність Закону",
+          "zh-TW": "律法精通",
+          "zh-CN": "律法精通"
         }
       ],
       "sequenceCount": 9,
@@ -312,42 +297,40 @@
     {
       "id": "error",
       "kind": "pathway",
+      "image": "error",
+      "name": {
+        "en": "Error",
+        "uk": "Помилка",
+        "zh-TW": "偷盜者",
+        "zh-CN": "偷盗者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Marauder",
           "uk": "Мародер",
-          "zh-CN": "偷盗者",
-          "zh-TW": "偷盜者"
+          "zh-TW": "偷盜者",
+          "zh-CN": "偷盗者"
         }
       },
       "strengths": [
         {
-          "id": "acrobatic-skills",
-          "name": {
-            "en": "Acrobatic Skills",
-            "uk": "Акробатичні Навички",
-            "zh-CN": "杂技身手",
-            "zh-TW": "雜技身手"
-          }
+          "en": "Acrobatic Skills",
+          "uk": "Акробатичні Навички",
+          "zh-TW": "雜技身手",
+          "zh-CN": "杂技身手"
         },
         {
-          "id": "dexterous-hands",
-          "name": {
-            "en": "Dexterous Hands",
-            "uk": "Ловкість Рук",
-            "zh-CN": "灵巧之手",
-            "zh-TW": "靈巧之手"
-          }
+          "en": "Dexterous Hands",
+          "uk": "Ловкість Рук",
+          "zh-TW": "靈巧之手",
+          "zh-CN": "灵巧之手"
         },
         {
-          "id": "agile-proficiency",
-          "name": {
-            "en": "Agile Proficiency",
-            "uk": "Спритна Майстерність",
-            "zh-CN": "敏捷精通",
-            "zh-TW": "敏捷精通"
-          }
+          "en": "Agile Proficiency",
+          "uk": "Спритна Майстерність",
+          "zh-TW": "敏捷精通",
+          "zh-CN": "敏捷精通"
         }
       ],
       "sequenceCount": 9,
@@ -356,42 +339,40 @@
     {
       "id": "fool",
       "kind": "pathway",
+      "image": "fool",
+      "name": {
+        "en": "Fool",
+        "uk": "Блазень",
+        "zh-TW": "占卜家",
+        "zh-CN": "占卜家"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Seer",
           "uk": "Провидець",
-          "zh-CN": "占卜家",
-          "zh-TW": "占卜家"
+          "zh-TW": "占卜家",
+          "zh-CN": "占卜家"
         }
       },
       "strengths": [
         {
-          "id": "divination",
-          "name": {
-            "en": "Divination",
-            "uk": "Пророцтво",
-            "zh-CN": "占卜",
-            "zh-TW": "占卜"
-          }
+          "en": "Divination",
+          "uk": "Пророцтво",
+          "zh-TW": "占卜",
+          "zh-CN": "占卜"
         },
         {
-          "id": "spiritualism",
-          "name": {
-            "en": "Spiritualism",
-            "uk": "Духовність",
-            "zh-CN": "通灵",
-            "zh-TW": "通靈"
-          }
+          "en": "Spiritualism",
+          "uk": "Духовність",
+          "zh-TW": "通靈",
+          "zh-CN": "通灵"
         },
         {
-          "id": "paper-dagger",
-          "name": {
-            "en": "Paper Dagger",
-            "uk": "Паперовий Кинджал",
-            "zh-CN": "纸匕首",
-            "zh-TW": "紙匕首"
-          }
+          "en": "Paper Dagger",
+          "uk": "Паперовий Кинджал",
+          "zh-TW": "紙匕首",
+          "zh-CN": "纸匕首"
         }
       ],
       "sequenceCount": 9,
@@ -400,42 +381,40 @@
     {
       "id": "fortune",
       "kind": "pathway",
+      "image": "fortune",
+      "name": {
+        "en": "Wheel of Fortune",
+        "uk": "Фортуна",
+        "zh-TW": "怪物",
+        "zh-CN": "怪物"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Monster",
           "uk": "Монстр",
-          "zh-CN": "怪物",
-          "zh-TW": "怪物"
+          "zh-TW": "怪物",
+          "zh-CN": "怪物"
         }
       },
       "strengths": [
         {
-          "id": "danger-premonition",
-          "name": {
-            "en": "Danger Premonition",
-            "uk": "Передчуття Небезпеки",
-            "zh-CN": "危险预感",
-            "zh-TW": "危險預感"
-          }
+          "en": "Danger Premonition",
+          "uk": "Передчуття Небезпеки",
+          "zh-TW": "危險預感",
+          "zh-CN": "危险预感"
         },
         {
-          "id": "foresight",
-          "name": {
-            "en": "Foresight",
-            "uk": "Передбачення",
-            "zh-CN": "预见",
-            "zh-TW": "預見"
-          }
+          "en": "Foresight",
+          "uk": "Передбачення",
+          "zh-TW": "預見",
+          "zh-CN": "预见"
         },
         {
-          "id": "calculation-mastery",
-          "name": {
-            "en": "Calculation Mastery",
-            "uk": "Майстерність Обчислень",
-            "zh-CN": "演算精通",
-            "zh-TW": "演算精通"
-          }
+          "en": "Calculation Mastery",
+          "uk": "Майстерність Обчислень",
+          "zh-TW": "演算精通",
+          "zh-CN": "演算精通"
         }
       ],
       "sequenceCount": 9,
@@ -444,42 +423,40 @@
     {
       "id": "giant",
       "kind": "pathway",
+      "image": "giant",
+      "name": {
+        "en": "Twilight Giant",
+        "uk": "Сутінковий Велетень",
+        "zh-TW": "戰士",
+        "zh-CN": "战士"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Warrior",
           "uk": "Воїн",
-          "zh-CN": "战士",
-          "zh-TW": "戰士"
+          "zh-TW": "戰士",
+          "zh-CN": "战士"
         }
       },
       "strengths": [
         {
-          "id": "simplified-combat",
-          "name": {
-            "en": "Simplified Combat",
-            "uk": "Спрощений Бій",
-            "zh-CN": "精简战斗",
-            "zh-TW": "精簡戰鬥"
-          }
+          "en": "Simplified Combat",
+          "uk": "Спрощений Бій",
+          "zh-TW": "精簡戰鬥",
+          "zh-CN": "精简战斗"
         },
         {
-          "id": "combat-roll",
-          "name": {
-            "en": "Combat Roll",
-            "uk": "Бойовий Перекат",
-            "zh-CN": "战斗翻滚",
-            "zh-TW": "戰鬥翻滾"
-          }
+          "en": "Combat Roll",
+          "uk": "Бойовий Перекат",
+          "zh-TW": "戰鬥翻滾",
+          "zh-CN": "战斗翻滚"
         },
         {
-          "id": "giant-physical-enhancement",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Посилення",
-            "zh-CN": "体质强化",
-            "zh-TW": "體質強化"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Посилення",
+          "zh-TW": "體質強化",
+          "zh-CN": "体质强化"
         }
       ],
       "sequenceCount": 9,
@@ -488,42 +465,40 @@
     {
       "id": "hanged",
       "kind": "pathway",
+      "image": "hanged",
+      "name": {
+        "en": "Hanged Man",
+        "uk": "Повішений",
+        "zh-TW": "秘祈人",
+        "zh-CN": "秘祈人"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Secrets Supplicant",
           "uk": "Прохач Таємниць",
-          "zh-CN": "秘祈人",
-          "zh-TW": "秘祈人"
+          "zh-TW": "秘祈人",
+          "zh-CN": "秘祈人"
         }
       },
       "strengths": [
         {
-          "id": "divination",
-          "name": {
-            "en": "Divination",
-            "uk": "Пророцтво",
-            "zh-CN": "占卜",
-            "zh-TW": "占卜"
-          }
+          "en": "Divination",
+          "uk": "Пророцтво",
+          "zh-TW": "占卜",
+          "zh-CN": "占卜"
         },
         {
-          "id": "spiritual-intuition",
-          "name": {
-            "en": "Spiritual Intuition",
-            "uk": "Духовна Інтуїція",
-            "zh-CN": "灵性直觉",
-            "zh-TW": "靈性直覺"
-          }
+          "en": "Spiritual Intuition",
+          "uk": "Духовна Інтуїція",
+          "zh-TW": "靈性直覺",
+          "zh-CN": "灵性直觉"
         },
         {
-          "id": "knowledge",
-          "name": {
-            "en": "Knowledge",
-            "uk": "Знання",
-            "zh-CN": "知识",
-            "zh-TW": "知識"
-          }
+          "en": "Knowledge",
+          "uk": "Знання",
+          "zh-TW": "知識",
+          "zh-CN": "知识"
         }
       ],
       "sequenceCount": 9,
@@ -532,42 +507,40 @@
     {
       "id": "hermit",
       "kind": "pathway",
+      "image": "hermit",
+      "name": {
+        "en": "Hermit",
+        "uk": "Відлюдник",
+        "zh-TW": "窺秘人",
+        "zh-CN": "窥秘人"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Mystery Pryer",
           "uk": "Дослідник Таємниць",
-          "zh-CN": "窥秘人",
-          "zh-TW": "窺秘人"
+          "zh-TW": "窺秘人",
+          "zh-CN": "窥秘人"
         }
       },
       "strengths": [
         {
-          "id": "eyes-of-mystery-prying",
-          "name": {
-            "en": "Eyes of Mystery Prying",
-            "uk": "Очі Дослідження Таємниць",
-            "zh-CN": "窥秘之眼",
-            "zh-TW": "窺秘之眼"
-          }
+          "en": "Eyes of Mystery Prying",
+          "uk": "Очі Дослідження Таємниць",
+          "zh-TW": "窺秘之眼",
+          "zh-CN": "窥秘之眼"
         },
         {
-          "id": "knowledge-pursuit",
-          "name": {
-            "en": "Knowledge Pursuit",
-            "uk": "Погоня за Знаннями",
-            "zh-CN": "求知",
-            "zh-TW": "求知"
-          }
+          "en": "Knowledge Pursuit",
+          "uk": "Погоня за Знаннями",
+          "zh-TW": "求知",
+          "zh-CN": "求知"
         },
         {
-          "id": "spirit-vision",
-          "name": {
-            "en": "Spirit Vision",
-            "uk": "Духовне Бачення",
-            "zh-CN": "灵视",
-            "zh-TW": "靈視"
-          }
+          "en": "Spirit Vision",
+          "uk": "Духовне Бачення",
+          "zh-TW": "靈視",
+          "zh-CN": "灵视"
         }
       ],
       "sequenceCount": 9,
@@ -576,42 +549,40 @@
     {
       "id": "justiciar",
       "kind": "pathway",
+      "image": "justiciar",
+      "name": {
+        "en": "Justiciar",
+        "uk": "Суддя",
+        "zh-TW": "仲裁人",
+        "zh-CN": "仲裁人"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Arbiter",
           "uk": "Арбітр",
-          "zh-CN": "仲裁人",
-          "zh-TW": "仲裁人"
+          "zh-TW": "仲裁人",
+          "zh-CN": "仲裁人"
         }
       },
       "strengths": [
         {
-          "id": "coercion",
-          "name": {
-            "en": "Coercion",
-            "uk": "Примус",
-            "zh-CN": "强制",
-            "zh-TW": "強制"
-          }
+          "en": "Coercion",
+          "uk": "Примус",
+          "zh-TW": "強制",
+          "zh-CN": "强制"
         },
         {
-          "id": "authority",
-          "name": {
-            "en": "Authority Reserve",
-            "uk": "Резерв Авторитету",
-            "zh-CN": "权柄储备",
-            "zh-TW": "權柄儲備"
-          }
+          "en": "Authority Reserve",
+          "uk": "Резерв Авторитету",
+          "zh-TW": "權柄儲備",
+          "zh-CN": "权柄储备"
         },
         {
-          "id": "physical-enhancement",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Вдосконалення",
-            "zh-CN": "体质强化",
-            "zh-TW": "體質強化"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Вдосконалення",
+          "zh-TW": "體質強化",
+          "zh-CN": "体质强化"
         }
       ],
       "sequenceCount": 9,
@@ -620,42 +591,40 @@
     {
       "id": "moon",
       "kind": "pathway",
+      "image": "moon",
+      "name": {
+        "en": "Moon",
+        "uk": "Місяць",
+        "zh-TW": "藥師",
+        "zh-CN": "药师"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Apothecary",
           "uk": "Аптекар",
-          "zh-CN": "药师",
-          "zh-TW": "藥師"
+          "zh-TW": "藥師",
+          "zh-CN": "药师"
         }
       },
       "strengths": [
         {
-          "id": "apothecary-brew",
-          "name": {
-            "en": "Apothecary Brew",
-            "uk": "Аптекарське Зілля",
-            "zh-CN": "药师调配",
-            "zh-TW": "藥師調配"
-          }
+          "en": "Apothecary Brew",
+          "uk": "Аптекарське Зілля",
+          "zh-TW": "藥師調配",
+          "zh-CN": "药师调配"
         },
         {
-          "id": "toxin-resistance",
-          "name": {
-            "en": "Toxin Resistance",
-            "uk": "Стійкість до Токсинів",
-            "zh-CN": "毒素抗性",
-            "zh-TW": "毒素抗性"
-          }
+          "en": "Toxin Resistance",
+          "uk": "Стійкість до Токсинів",
+          "zh-TW": "毒素抗性",
+          "zh-CN": "毒素抗性"
         },
         {
-          "id": "herbal-healing",
-          "name": {
-            "en": "Herbal Healing",
-            "uk": "Трав'яне Лікування",
-            "zh-CN": "草药疗愈",
-            "zh-TW": "草藥療愈"
-          }
+          "en": "Herbal Healing",
+          "uk": "Трав'яне Лікування",
+          "zh-TW": "草藥療愈",
+          "zh-CN": "草药疗愈"
         }
       ],
       "sequenceCount": 9,
@@ -664,42 +633,40 @@
     {
       "id": "mother",
       "kind": "pathway",
+      "image": "mother",
+      "name": {
+        "en": "Mother",
+        "uk": "Мати",
+        "zh-TW": "耕種者",
+        "zh-CN": "耕种者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Planter",
           "uk": "Садівник",
-          "zh-CN": "耕种者",
-          "zh-TW": "耕種者"
+          "zh-TW": "耕種者",
+          "zh-CN": "耕种者"
         }
       },
       "strengths": [
         {
-          "id": "enhanced-strength",
-          "name": {
-            "en": "Enhanced Strength",
-            "uk": "Посилена Сила",
-            "zh-CN": "力量强化",
-            "zh-TW": "力量強化"
-          }
+          "en": "Enhanced Strength",
+          "uk": "Посилена Сила",
+          "zh-TW": "力量強化",
+          "zh-CN": "力量强化"
         },
         {
-          "id": "green-thumb",
-          "name": {
-            "en": "Green Thumb",
-            "uk": "Зелена Рука",
-            "zh-CN": "绿手指",
-            "zh-TW": "綠手指"
-          }
+          "en": "Green Thumb",
+          "uk": "Зелена Рука",
+          "zh-TW": "綠手指",
+          "zh-CN": "绿手指"
         },
         {
-          "id": "weather-sense",
-          "name": {
-            "en": "Weather Sense",
-            "uk": "Відчуття Погоди",
-            "zh-CN": "天气感知",
-            "zh-TW": "天氣感知"
-          }
+          "en": "Weather Sense",
+          "uk": "Відчуття Погоди",
+          "zh-TW": "天氣感知",
+          "zh-CN": "天气感知"
         }
       ],
       "sequenceCount": 9,
@@ -708,42 +675,40 @@
     {
       "id": "paragon",
       "kind": "pathway",
+      "image": "paragon",
+      "name": {
+        "en": "Paragon",
+        "uk": "Парагон",
+        "zh-TW": "通識者",
+        "zh-CN": "通识者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Savant",
           "uk": "Вчений",
-          "zh-CN": "通识者",
-          "zh-TW": "通識者"
+          "zh-TW": "通識者",
+          "zh-CN": "通识者"
         }
       },
       "strengths": [
         {
-          "id": "savant-crafting",
-          "name": {
-            "en": "Savant Crafting",
-            "uk": "Ремесло Вченого",
-            "zh-CN": "通识制作",
-            "zh-TW": "通識製作"
-          }
+          "en": "Savant Crafting",
+          "uk": "Ремесло Вченого",
+          "zh-TW": "通識製作",
+          "zh-CN": "通识制作"
         },
         {
-          "id": "recall",
-          "name": {
-            "en": "Recall",
-            "uk": "Згадка",
-            "zh-CN": "回想",
-            "zh-TW": "回想"
-          }
+          "en": "Recall",
+          "uk": "Згадка",
+          "zh-TW": "回想",
+          "zh-CN": "回想"
         },
         {
-          "id": "tough-nature",
-          "name": {
-            "en": "Tough Nature",
-            "uk": "Витривалість",
-            "zh-CN": "坚韧体质",
-            "zh-TW": "堅韌體質"
-          }
+          "en": "Tough Nature",
+          "uk": "Витривалість",
+          "zh-TW": "堅韌體質",
+          "zh-CN": "坚韧体质"
         }
       ],
       "sequenceCount": 9,
@@ -752,42 +717,40 @@
     {
       "id": "priest",
       "kind": "pathway",
+      "image": "priest",
+      "name": {
+        "en": "Red Priest",
+        "uk": "Жрець",
+        "zh-TW": "獵人",
+        "zh-CN": "猎人"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Hunter",
           "uk": "Мисливець",
-          "zh-CN": "猎人",
-          "zh-TW": "獵人"
+          "zh-TW": "獵人",
+          "zh-CN": "猎人"
         }
       },
       "strengths": [
         {
-          "id": "explosive-trap",
-          "name": {
-            "en": "Explosive Trap",
-            "uk": "Вибухова Пастка",
-            "zh-CN": "爆裂陷阱",
-            "zh-TW": "爆裂陷阱"
-          }
+          "en": "Explosive Trap",
+          "uk": "Вибухова Пастка",
+          "zh-TW": "爆裂陷阱",
+          "zh-CN": "爆裂陷阱"
         },
         {
-          "id": "hunter-body",
-          "name": {
-            "en": "Hunter's Body",
-            "uk": "Тіло Мисливця",
-            "zh-CN": "猎人之躯",
-            "zh-TW": "獵人之軀"
-          }
+          "en": "Hunter's Body",
+          "uk": "Тіло Мисливця",
+          "zh-TW": "獵人之軀",
+          "zh-CN": "猎人之躯"
         },
         {
-          "id": "provocation",
-          "name": {
-            "en": "Provocation",
-            "uk": "Провокація",
-            "zh-CN": "挑衅",
-            "zh-TW": "挑釁"
-          }
+          "en": "Provocation",
+          "uk": "Провокація",
+          "zh-TW": "挑釁",
+          "zh-CN": "挑衅"
         }
       ],
       "sequenceCount": 9,
@@ -796,42 +759,40 @@
     {
       "id": "sun",
       "kind": "pathway",
+      "image": "sun",
+      "name": {
+        "en": "Sun",
+        "uk": "Сонце",
+        "zh-TW": "歌頌者",
+        "zh-CN": "歌颂者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Bard",
           "uk": "Бард",
-          "zh-CN": "歌颂者",
-          "zh-TW": "歌頌者"
+          "zh-TW": "歌頌者",
+          "zh-CN": "歌颂者"
         }
       },
       "strengths": [
         {
-          "id": "bard-song",
-          "name": {
-            "en": "Song of the Bard",
-            "uk": "Пісня Барда",
-            "zh-CN": "歌颂者之歌",
-            "zh-TW": "歌頌者之歌"
-          }
+          "en": "Song of the Bard",
+          "uk": "Пісня Барда",
+          "zh-TW": "歌頌者之歌",
+          "zh-CN": "歌颂者之歌"
         },
         {
-          "id": "light-and-fire",
-          "name": {
-            "en": "Light and Fire",
-            "uk": "Світло і Вогонь",
-            "zh-CN": "光与火",
-            "zh-TW": "光與火"
-          }
+          "en": "Light and Fire",
+          "uk": "Світло і Вогонь",
+          "zh-TW": "光與火",
+          "zh-CN": "光与火"
         },
         {
-          "id": "horror-immunity",
-          "name": {
-            "en": "Horror Resistance",
-            "uk": "Опір Жахам",
-            "zh-CN": "恐惧抗性",
-            "zh-TW": "恐懼抗性"
-          }
+          "en": "Horror Resistance",
+          "uk": "Опір Жахам",
+          "zh-TW": "恐懼抗性",
+          "zh-CN": "恐惧抗性"
         }
       ],
       "sequenceCount": 9,
@@ -840,42 +801,40 @@
     {
       "id": "tower",
       "kind": "pathway",
+      "image": "tower",
+      "name": {
+        "en": "White Tower",
+        "uk": "Біла Вежа",
+        "zh-TW": "閱讀者",
+        "zh-CN": "阅读者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Reader",
           "uk": "Читець",
-          "zh-CN": "阅读者",
-          "zh-TW": "閱讀者"
+          "zh-TW": "閱讀者",
+          "zh-CN": "阅读者"
         }
       },
       "strengths": [
         {
-          "id": "enhanced-cognition",
-          "name": {
-            "en": "Enhanced Cognition",
-            "uk": "Посилене Пізнання",
-            "zh-CN": "认知强化",
-            "zh-TW": "認知強化"
-          }
+          "en": "Enhanced Cognition",
+          "uk": "Посилене Пізнання",
+          "zh-TW": "認知強化",
+          "zh-CN": "认知强化"
         },
         {
-          "id": "minor-ritual",
-          "name": {
-            "en": "Minor Ritual",
-            "uk": "Малий Ритуал",
-            "zh-CN": "小型仪式",
-            "zh-TW": "小型儀式"
-          }
+          "en": "Minor Ritual",
+          "uk": "Малий Ритуал",
+          "zh-TW": "小型儀式",
+          "zh-CN": "小型仪式"
         },
         {
-          "id": "reading",
-          "name": {
-            "en": "Reading",
-            "uk": "Читання",
-            "zh-CN": "阅读",
-            "zh-TW": "閱讀"
-          }
+          "en": "Reading",
+          "uk": "Читання",
+          "zh-TW": "閱讀",
+          "zh-CN": "阅读"
         }
       ],
       "sequenceCount": 9,
@@ -884,42 +843,40 @@
     {
       "id": "tyrant",
       "kind": "pathway",
+      "image": "tyrant",
+      "name": {
+        "en": "Tyrant",
+        "uk": "Тиран",
+        "zh-TW": "水手",
+        "zh-CN": "水手"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Sailor",
           "uk": "Моряк",
-          "zh-CN": "水手",
-          "zh-TW": "水手"
+          "zh-TW": "水手",
+          "zh-CN": "水手"
         }
       },
       "strengths": [
         {
-          "id": "active-scales",
-          "name": {
-            "en": "Illusory Scales",
-            "uk": "Ілюзорна Луска",
-            "zh-CN": "活鳞",
-            "zh-TW": "活鱗"
-          }
+          "en": "Illusory Scales",
+          "uk": "Ілюзорна Луска",
+          "zh-TW": "活鱗",
+          "zh-CN": "活鳞"
         },
         {
-          "id": "balance",
-          "name": {
-            "en": "Balance",
-            "uk": "Рівновага",
-            "zh-CN": "平衡",
-            "zh-TW": "平衡"
-          }
+          "en": "Balance",
+          "uk": "Рівновага",
+          "zh-TW": "平衡",
+          "zh-CN": "平衡"
         },
         {
-          "id": "strength-buff",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Вдосконалення",
-            "zh-CN": "力量增益",
-            "zh-TW": "力量增益"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Вдосконалення",
+          "zh-TW": "力量增益",
+          "zh-CN": "力量增益"
         }
       ],
       "sequenceCount": 9,
@@ -928,42 +885,40 @@
     {
       "id": "visionary",
       "kind": "pathway",
+      "image": "visionary",
+      "name": {
+        "en": "Visionary",
+        "uk": "Провидець",
+        "zh-TW": "觀眾",
+        "zh-CN": "观众"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Spectator",
           "uk": "Спостерігач",
-          "zh-CN": "观众",
-          "zh-TW": "觀眾"
+          "zh-TW": "觀眾",
+          "zh-CN": "观众"
         }
       },
       "strengths": [
         {
-          "id": "body-language-analysis",
-          "name": {
-            "en": "Body Language Analysis",
-            "uk": "Аналіз Мови Тіла",
-            "zh-CN": "肢体语言解析",
-            "zh-TW": "肢體語言解析"
-          }
+          "en": "Body Language Analysis",
+          "uk": "Аналіз Мови Тіла",
+          "zh-TW": "肢體語言解析",
+          "zh-CN": "肢体语言解析"
         },
         {
-          "id": "enhanced-vision",
-          "name": {
-            "en": "Enhanced Vision",
-            "uk": "Покращений Зір",
-            "zh-CN": "视觉强化",
-            "zh-TW": "視覺強化"
-          }
+          "en": "Enhanced Vision",
+          "uk": "Покращений Зір",
+          "zh-TW": "視覺強化",
+          "zh-CN": "视觉强化"
         },
         {
-          "id": "mind-reading",
-          "name": {
-            "en": "Mind Reading",
-            "uk": "Читання Думок",
-            "zh-CN": "读心",
-            "zh-TW": "讀心"
-          }
+          "en": "Mind Reading",
+          "uk": "Читання Думок",
+          "zh-TW": "讀心",
+          "zh-CN": "读心"
         }
       ],
       "sequenceCount": 9,
@@ -972,42 +927,40 @@
     {
       "id": "aeon",
       "kind": "boon",
+      "image": "eternalaeon",
+      "name": {
+        "en": "Eternal Aeon",
+        "uk": "Вічний Еон",
+        "zh-TW": "宿命之環",
+        "zh-CN": "宿命之环"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Dancer",
           "uk": "Танцюрист",
-          "zh-CN": "舞蹈家",
-          "zh-TW": "舞蹈家"
+          "zh-TW": "舞蹈家",
+          "zh-CN": "舞蹈家"
         }
       },
       "strengths": [
         {
-          "id": "wall-spirituality",
-          "name": {
-            "en": "Wall of Spirituality",
-            "uk": "Стіна Духовності",
-            "zh-CN": "灵性之壁",
-            "zh-TW": "靈性之壁"
-          }
+          "en": "Wall of Spirituality",
+          "uk": "Стіна Духовності",
+          "zh-TW": "靈性之壁",
+          "zh-CN": "灵性之壁"
         },
         {
-          "id": "summoning-dance",
-          "name": {
-            "en": "Summoning Dance",
-            "uk": "Призивний Танець",
-            "zh-CN": "召唤之舞",
-            "zh-TW": "召喚之舞"
-          }
+          "en": "Summoning Dance",
+          "uk": "Призивний Танець",
+          "zh-TW": "召喚之舞",
+          "zh-CN": "召唤之舞"
         },
         {
-          "id": "enigmatic-dance",
-          "name": {
-            "en": "Enigmatic Dance",
-            "uk": "Загадковий Танець",
-            "zh-CN": "谜之舞",
-            "zh-TW": "謎之舞"
-          }
+          "en": "Enigmatic Dance",
+          "uk": "Загадковий Танець",
+          "zh-TW": "謎之舞",
+          "zh-CN": "谜之舞"
         }
       ],
       "sequenceCount": 5,
@@ -1016,42 +969,39 @@
     {
       "id": "chaos",
       "kind": "boon",
+      "image": "chaos",
+      "name": {
+        "en": "Chaos",
+        "zh-TW": "墮落母神",
+        "zh-CN": "堕落母神"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Villain",
           "uk": "Лиходій",
-          "zh-CN": "恶棍",
-          "zh-TW": "惡棍"
+          "zh-TW": "惡棍",
+          "zh-CN": "恶棍"
         }
       },
       "strengths": [
         {
-          "id": "physical-enhancement",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Посилення",
-            "zh-CN": "体质强化",
-            "zh-TW": "體質強化"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Посилення",
+          "zh-TW": "體質強化",
+          "zh-CN": "体质强化"
         },
         {
-          "id": "combat-proficiency",
-          "name": {
-            "en": "Combat Proficiency",
-            "uk": "Бойова Майстерність",
-            "zh-CN": "战斗精通",
-            "zh-TW": "戰鬥精通"
-          }
+          "en": "Combat Proficiency",
+          "uk": "Бойова Майстерність",
+          "zh-TW": "戰鬥精通",
+          "zh-CN": "战斗精通"
         },
         {
-          "id": "intimidation",
-          "name": {
-            "en": "Intimidation",
-            "uk": "Залякування",
-            "zh-CN": "威慑",
-            "zh-TW": "威懾"
-          }
+          "en": "Intimidation",
+          "uk": "Залякування",
+          "zh-TW": "威懾",
+          "zh-CN": "威慑"
         }
       ],
       "sequenceCount": 5,
@@ -1060,42 +1010,39 @@
     {
       "id": "chaosmist",
       "kind": "boon",
+      "image": "chaosmist",
+      "name": {
+        "en": "Chaos Mist",
+        "zh-TW": "混沌之子",
+        "zh-CN": "混沌之子"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Broker",
           "uk": "Брокер",
-          "zh-CN": "掮客",
-          "zh-TW": "掮客"
+          "zh-TW": "掮客",
+          "zh-CN": "掮客"
         }
       },
       "strengths": [
         {
-          "id": "brokering",
-          "name": {
-            "en": "Brokering",
-            "uk": "Брокерство",
-            "zh-CN": "中介",
-            "zh-TW": "中介"
-          }
+          "en": "Brokering",
+          "uk": "Брокерство",
+          "zh-TW": "中介",
+          "zh-CN": "中介"
         },
         {
-          "id": "candidate-attunement",
-          "name": {
-            "en": "Candidate Attunement",
-            "uk": "Налаштування на кандидата",
-            "zh-CN": "候选者契合",
-            "zh-TW": "候選者契合"
-          }
+          "en": "Candidate Attunement",
+          "uk": "Налаштування на кандидата",
+          "zh-TW": "候選者契合",
+          "zh-CN": "候选者契合"
         },
         {
-          "id": "shadow-contract",
-          "name": {
-            "en": "Shadow Contract",
-            "uk": "Тіньовий Контракт",
-            "zh-CN": "暗影契约",
-            "zh-TW": "暗影契約"
-          }
+          "en": "Shadow Contract",
+          "uk": "Тіньовий Контракт",
+          "zh-TW": "暗影契約",
+          "zh-CN": "暗影契约"
         }
       ],
       "sequenceCount": 5,
@@ -1104,42 +1051,39 @@
     {
       "id": "condenser",
       "kind": "boon",
+      "image": "condenser",
+      "name": {
+        "en": "Condenser",
+        "zh-TW": "超星主宰",
+        "zh-CN": "超星主宰"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Astronomy Aficionado",
           "uk": "Аматор Астрономії",
-          "zh-CN": "天文爱好者",
-          "zh-TW": "天文愛好者"
+          "zh-TW": "天文愛好者",
+          "zh-CN": "天文爱好者"
         }
       },
       "strengths": [
         {
-          "id": "physical-enhancement",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Посилення",
-            "zh-CN": "体质强化",
-            "zh-TW": "體質強化"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Посилення",
+          "zh-TW": "體質強化",
+          "zh-CN": "体质强化"
         },
         {
-          "id": "astronomy-knowledge",
-          "name": {
-            "en": "Astronomy Knowledge",
-            "uk": "Астрономічні Знання",
-            "zh-CN": "天文知识",
-            "zh-TW": "天文知識"
-          }
+          "en": "Astronomy Knowledge",
+          "uk": "Астрономічні Знання",
+          "zh-TW": "天文知識",
+          "zh-CN": "天文知识"
         },
         {
-          "id": "language-of-the-stars",
-          "name": {
-            "en": "Language of the Stars",
-            "uk": "Мова Зірок",
-            "zh-CN": "星辰之语",
-            "zh-TW": "星辰之語"
-          }
+          "en": "Language of the Stars",
+          "uk": "Мова Зірок",
+          "zh-TW": "星辰之語",
+          "zh-CN": "星辰之语"
         }
       ],
       "sequenceCount": 5,
@@ -1148,42 +1092,39 @@
     {
       "id": "devouring",
       "kind": "boon",
+      "image": "devouring",
+      "name": {
+        "en": "Devouring",
+        "zh-TW": "原初飢餓",
+        "zh-CN": "原初饥饿"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Tramp",
           "uk": "Бродяга",
-          "zh-CN": "流浪汉",
-          "zh-TW": "流浪漢"
+          "zh-TW": "流浪漢",
+          "zh-CN": "流浪汉"
         }
       },
       "strengths": [
         {
-          "id": "hunger",
-          "name": {
-            "en": "Hunger",
-            "uk": "Голод",
-            "zh-CN": "饥饿",
-            "zh-TW": "飢餓"
-          }
+          "en": "Hunger",
+          "uk": "Голод",
+          "zh-TW": "飢餓",
+          "zh-CN": "饥饿"
         },
         {
-          "id": "adaptation",
-          "name": {
-            "en": "Adaptation",
-            "uk": "Адаптація",
-            "zh-CN": "适应",
-            "zh-TW": "適應"
-          }
+          "en": "Adaptation",
+          "uk": "Адаптація",
+          "zh-TW": "適應",
+          "zh-CN": "适应"
         },
         {
-          "id": "street-fighting",
-          "name": {
-            "en": "Street Fighting",
-            "uk": "Вуличний Бій",
-            "zh-CN": "街头搏斗",
-            "zh-TW": "街頭搏鬥"
-          }
+          "en": "Street Fighting",
+          "uk": "Вуличний Бій",
+          "zh-TW": "街頭搏鬥",
+          "zh-CN": "街头搏斗"
         }
       ],
       "sequenceCount": 5,
@@ -1192,42 +1133,39 @@
     {
       "id": "edict",
       "kind": "boon",
+      "image": "edict",
+      "name": {
+        "en": "Edict",
+        "zh-TW": "命運女神",
+        "zh-CN": "命运女神"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Dreamless",
           "uk": "Безснівний",
-          "zh-CN": "失梦人",
-          "zh-TW": "失夢人"
+          "zh-TW": "失夢人",
+          "zh-CN": "失梦人"
         }
       },
       "strengths": [
         {
-          "id": "fate-sensation",
-          "name": {
-            "en": "Fate Sensation",
-            "uk": "Відчуття Долі",
-            "zh-CN": "命运感知",
-            "zh-TW": "命運感知"
-          }
+          "en": "Fate Sensation",
+          "uk": "Відчуття Долі",
+          "zh-TW": "命運感知",
+          "zh-CN": "命运感知"
         },
         {
-          "id": "dreamless-state",
-          "name": {
-            "en": "Dreamless State",
-            "uk": "Стан без сновидінь",
-            "zh-CN": "无梦之态",
-            "zh-TW": "無夢之態"
-          }
+          "en": "Dreamless State",
+          "uk": "Стан без сновидінь",
+          "zh-TW": "無夢之態",
+          "zh-CN": "无梦之态"
         },
         {
-          "id": "fate-symphony",
-          "name": {
-            "en": "Fate Symphony",
-            "uk": "Симфонія Долі",
-            "zh-CN": "命运交响",
-            "zh-TW": "命運交響"
-          }
+          "en": "Fate Symphony",
+          "uk": "Симфонія Долі",
+          "zh-TW": "命運交響",
+          "zh-CN": "命运交响"
         }
       ],
       "sequenceCount": 5,
@@ -1236,42 +1174,39 @@
     {
       "id": "everlasting",
       "kind": "boon",
+      "image": "everlasting",
+      "name": {
+        "en": "Everlasting",
+        "zh-TW": "不熄的囈語",
+        "zh-CN": "不熄的呓语"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Initiator",
           "uk": "Ініціатор",
-          "zh-CN": "入门者",
-          "zh-TW": "入門者"
+          "zh-TW": "入門者",
+          "zh-CN": "入门者"
         }
       },
       "strengths": [
         {
-          "id": "initiation",
-          "name": {
-            "en": "Initiation",
-            "uk": "Ініціація",
-            "zh-CN": "入门",
-            "zh-TW": "入門"
-          }
+          "en": "Initiation",
+          "uk": "Ініціація",
+          "zh-TW": "入門",
+          "zh-CN": "入门"
         },
         {
-          "id": "commentary",
-          "name": {
-            "en": "Commentary",
-            "uk": "Коментар",
-            "zh-CN": "评述",
-            "zh-TW": "評述"
-          }
+          "en": "Commentary",
+          "uk": "Коментар",
+          "zh-TW": "評述",
+          "zh-CN": "评述"
         },
         {
-          "id": "oratory",
-          "name": {
-            "en": "Oratory",
-            "uk": "Ораторство",
-            "zh-CN": "演说",
-            "zh-TW": "演說"
-          }
+          "en": "Oratory",
+          "uk": "Ораторство",
+          "zh-TW": "演說",
+          "zh-CN": "演说"
         }
       ],
       "sequenceCount": 5,
@@ -1280,42 +1215,40 @@
     {
       "id": "patriarch",
       "kind": "boon",
+      "image": "patriarch",
+      "name": {
+        "en": "Patriarch",
+        "uk": "Патріарх",
+        "zh-TW": "慾望母樹",
+        "zh-CN": "欲望母树"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Scrooge",
           "uk": "Скрудж",
-          "zh-CN": "吝啬鬼",
-          "zh-TW": "吝嗇鬼"
+          "zh-TW": "吝嗇鬼",
+          "zh-CN": "吝啬鬼"
         }
       },
       "strengths": [
         {
-          "id": "greed",
-          "name": {
-            "en": "Greed",
-            "uk": "Жадібність",
-            "zh-CN": "贪婪",
-            "zh-TW": "貪婪"
-          }
+          "en": "Greed",
+          "uk": "Жадібність",
+          "zh-TW": "貪婪",
+          "zh-CN": "贪婪"
         },
         {
-          "id": "ownership",
-          "name": {
-            "en": "Ownership",
-            "uk": "Володіння",
-            "zh-CN": "所有权",
-            "zh-TW": "所有權"
-          }
+          "en": "Ownership",
+          "uk": "Володіння",
+          "zh-TW": "所有權",
+          "zh-CN": "所有权"
         },
         {
-          "id": "physical-enhancement-trait",
-          "name": {
-            "en": "Physical Enhancement",
-            "uk": "Фізичне Вдосконалення",
-            "zh-CN": "体质强化",
-            "zh-TW": "體質強化"
-          }
+          "en": "Physical Enhancement",
+          "uk": "Фізичне Вдосконалення",
+          "zh-TW": "體質強化",
+          "zh-CN": "体质强化"
         }
       ],
       "sequenceCount": 5,
@@ -1324,42 +1257,39 @@
     {
       "id": "secondlaw",
       "kind": "boon",
+      "image": "secondlaw",
+      "name": {
+        "en": "Second Law",
+        "zh-TW": "衰敗君王",
+        "zh-CN": "衰败君王"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Carrier",
           "uk": "Носій",
-          "zh-CN": "带菌者",
-          "zh-TW": "帶菌者"
+          "zh-TW": "帶菌者",
+          "zh-CN": "带菌者"
         }
       },
       "strengths": [
         {
-          "id": "pathogen-carrier",
-          "name": {
-            "en": "Pathogen Carrier",
-            "uk": "Носій Патогену",
-            "zh-CN": "病原携带者",
-            "zh-TW": "病原攜帶者"
-          }
+          "en": "Pathogen Carrier",
+          "uk": "Носій Патогену",
+          "zh-TW": "病原攜帶者",
+          "zh-CN": "病原携带者"
         },
         {
-          "id": "ulcerous-wounds",
-          "name": {
-            "en": "Ulcerous Wounds",
-            "uk": "Виразкові Рани",
-            "zh-CN": "溃烂之伤",
-            "zh-TW": "潰爛之傷"
-          }
+          "en": "Ulcerous Wounds",
+          "uk": "Виразкові Рани",
+          "zh-TW": "潰爛之傷",
+          "zh-CN": "溃烂之伤"
         },
         {
-          "id": "red-tape-protocol",
-          "name": {
-            "en": "Red Tape Protocol",
-            "uk": "Протокол Тяганини",
-            "zh-CN": "官僚协议",
-            "zh-TW": "官僚協議"
-          }
+          "en": "Red Tape Protocol",
+          "uk": "Протокол Тяганини",
+          "zh-TW": "官僚協議",
+          "zh-CN": "官僚协议"
         }
       ],
       "sequenceCount": 5,
@@ -1368,42 +1298,40 @@
     {
       "id": "sublunary",
       "kind": "boon",
+      "image": "sublunary",
+      "name": {
+        "en": "Sublunary",
+        "uk": "Підмісячний",
+        "zh-TW": "高維俯視者",
+        "zh-CN": "高维俯视者"
+      },
       "startingSequence": {
         "sequence": 9,
         "name": {
           "en": "Shaman",
           "uk": "Шаман",
-          "zh-CN": "萨满",
-          "zh-TW": "薩滿"
+          "zh-TW": "薩滿",
+          "zh-CN": "萨满"
         }
       },
       "strengths": [
         {
-          "id": "sublunary-eye-usage",
-          "name": {
-            "en": "Sublunary Eye Usage",
-            "uk": "Використання Підмісячного Ока",
-            "zh-CN": "月下之眼运用",
-            "zh-TW": "月下之眼運用"
-          }
+          "en": "Sublunary Eye Usage",
+          "uk": "Використання Підмісячного Ока",
+          "zh-TW": "月下之眼運用",
+          "zh-CN": "月下之眼运用"
         },
         {
-          "id": "territory-creation",
-          "name": {
-            "en": "Territory Creation",
-            "uk": "Створення Території",
-            "zh-CN": "领地创建",
-            "zh-TW": "領地建立"
-          }
+          "en": "Territory Creation",
+          "uk": "Створення Території",
+          "zh-TW": "領地建立",
+          "zh-CN": "领地创建"
         },
         {
-          "id": "spirit-body-connection",
-          "name": {
-            "en": "Spirit Body Connection",
-            "uk": "Зв'язок Духовного Тіла",
-            "zh-CN": "灵体连结",
-            "zh-TW": "靈體連結"
-          }
+          "en": "Spirit Body Connection",
+          "uk": "Зв'язок Духовного Тіла",
+          "zh-TW": "靈體連結",
+          "zh-CN": "灵体连结"
         }
       ],
       "sequenceCount": 5,
