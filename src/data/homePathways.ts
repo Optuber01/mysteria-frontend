@@ -116,8 +116,8 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
   id: entry.id,
   kind: entry.kind,
   name: entry.name,
-  image: `/pathways/avif/native/${entry.image}.avif`,
-  thumbnail: `/pathways/avif/thumbs/${entry.image}.avif`,
+  image: `/pathway-art/avif/native/${entry.image}.avif`,
+  thumbnail: `/pathway-art/avif/thumbs/${entry.image}.avif`,
   route: `/pathways/${entry.id}`,
   startingSequence: entry.startingSequence
     ? { number: entry.startingSequence.sequence, name: entry.startingSequence.name }

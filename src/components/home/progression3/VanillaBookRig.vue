@@ -771,7 +771,7 @@ function loadAssets(): Promise<LoadedAssets> {
     loadImage(goldMintLeaves),
     loadImage(foolRecipe),
     loadImage('/logo-mark.webp'),
-    loadImage('/pathways/native/fool.webp'),
+    loadImage('/pathway-art/native/fool.webp'),
     document.fonts?.ready ?? Promise.resolve(),
   ]).then(([module, atlas, lavos, stellar, mint, recipe, logo, symbol]) => ({
     module,

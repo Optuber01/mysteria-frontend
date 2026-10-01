@@ -71,7 +71,9 @@ wiki and game archive.
 - `home/world/` and `community-archive/` hold the dungeon, creature, Guardian,
   settlement and church captures used by the world chapter.
 - Pathway and Boon sigils remain the existing project assets in
-  `src/assets/images/pathways/` and `public/pathways/`.
+  `src/assets/images/pathways/` and `public/pathway-art/` (outside
+  `/pathways/`, which upstream redirects to the localized route before Vercel
+  serves static files).
 
 Do not publish raw ModelEngine/MEG textures from the resource pack until their
 third-party license is confirmed. Server screenshots that contain those models
