@@ -224,7 +224,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch, type CSSProperties } from 'vue';
-import { boonPathways, standardPathways, type HomePathway, type ProgressionKind } from '@/data/pathways';
+import { boonPathways, standardPathways, type HomePathway, type ProgressionKind } from '@/data/homePathways';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
 const emit = defineEmits<{ selected: [pathway: HomePathway] }>();

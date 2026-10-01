@@ -24,7 +24,7 @@
     calc((100vw - var(--home-content-max)) / 2 + var(--home-content-gutter))
   );
   --home-section-block: clamp(88px, 10vw, 148px);
-  --home-header-height: 82px;
+  --home-header-height: var(--site-header-stack, 68px);
   --hero-scene-color: #9e7eae;
   --hero-scene-glow: #edcebe;
   --hero-scene-accent: var(--primary);
@@ -108,7 +108,6 @@
 @media (max-width: 1050px) {
   .mysterria-home {
     --home-content-gutter: clamp(18px, 4.5vw, 42px);
-    --home-header-height: 76px;
   }
 }
 
@@ -116,7 +115,6 @@
   .mysterria-home {
     --home-content-gutter: clamp(16px, 5vw, 28px);
     --home-section-block: clamp(72px, 16vw, 104px);
-    --home-header-height: 72px;
   }
 }
 

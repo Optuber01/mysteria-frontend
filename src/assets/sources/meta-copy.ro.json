@@ -1,0 +1,55 @@
+{
+  "pathwayTitle": "Calea {name} - Secvențe și abilități | Mysterria",
+  "pathwayIndexTitle": "Căi și secvențe - Arhiva Beyonder | Mysterria",
+  "pathwayDescription": "Explorează Calea {name}, de la Secvența {first} {firstSeq} până la Secvența {final} {finalSeq}. Descoperă cele {abilities} abilități disponibile pe Mysterria.",
+  "pathwayIndexDescription": "Explorează toate cele {count} Căi ale Beyonderilor, numele Secvențelor lor și fiecare abilitate disponibilă pe Mysterria.",
+  "pathwaySigilAlt": "Simbolul Căii {name}",
+  "pathwayIndexAlt": "Căile Beyonderilor din Mysterria",
+  "redirecting": "Redirecționare către",
+  "pages": {
+    "rules": {
+      "title": "Regulile serverului - Mysterria",
+      "description": "Citește regulile și îndrumările pentru a juca pe Mysterria, serverul Minecraft inspirat de Lord of the Mysteries. Află standardele comunității și politicile de joc."
+    },
+    "store": {
+      "title": "Magazin - Mysterria",
+      "description": "Susține Mysterria și deblochează beneficii exclusive! Răsfoiește magazinul pentru ranguri, obiecte și funcții speciale ale serverului Minecraft Lord of the Mysteries."
+    },
+    "ascension": {
+      "title": "Registrul Ascensiunii - Mysterria",
+      "description": "Disponibilitatea în timp real a locurilor pentru Secvențele înalte din Mysterria: fiecare cale are cel mult 18 Sfinți, 9 Îngeri, 3 Arhangheli și o singură Zeitate. Vezi ce tronuri sunt ocupate înainte să urci."
+    },
+    "guide": {
+      "title": "Ghid de început - Mysterria",
+      "description": "Ești nou pe Mysterria? Află cum să începi pe serverul nostru inspirat de Lord of the Mysteries. Descoperă Căi, Secvențe și aventuri mistice."
+    },
+    "profile": {
+      "title": "Profilul tău - Mysterria",
+      "description": "Vezi și gestionează-ți profilul Mysterria. Urmărește-ți progresul prin Secvențe și Căi pe serverul Minecraft Lord of the Mysteries."
+    },
+    "news": {
+      "title": "Buletine - Mysterria",
+      "description": "Note de actualizare, anunțuri de sezon și buletine din Mysterria, serverul Minecraft Lord of the Mysteries."
+    },
+    "staff": {
+      "title": "Ordinul - Mysterria",
+      "description": "Administratorii, moderatorii și constructorii care țin lumea în mișcare. Contactează-i pe Discord pentru tichete și contestații, niciodată prin mesaje private."
+    },
+    "terms": {
+      "title": "Termeni de utilizare - Mysterria",
+      "description": "Termenii de utilizare pentru Mysterria, serverul Minecraft inspirat de Lord of the Mysteries."
+    },
+    "privacy": {
+      "title": "Confidențialitate - Mysterria",
+      "description": "Cum gestionează Mysterria datele contului tău, legătura cu Discord și cookie-urile."
+    },
+    "sla": {
+      "title": "SLA - Mysterria",
+      "description": "Angajamente de disponibilitate și așteptări privind serviciul pentru serverul Minecraft Mysterria."
+    },
+    "default": {
+      "title": "Mysterria - Server Minecraft Lord of the Mysteries",
+      "description": "Bea elixirul. Interpretează rolul. Urcă pe 22 de Căi ale Beyonderilor, de la Secvența 9 spre divinitate, pe un server Minecraft Lord of the Mysteries."
+    }
+  }
+}

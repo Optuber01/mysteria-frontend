@@ -1,0 +1,1137 @@
+{
+  "ui": {
+    "eyebrow": "HANDBUCH F?R NEUE SPIELER",
+    "title": "Deine ersten Schritte durch den Nebel",
+    "lede": "Beginne in wenigen Minuten zu spielen, verstehe die wichtigen Entscheidungen und finde direkte Antworten, wenn Mysterria anders funktioniert als gew?hnliches Minecraft.",
+    "serverAddress": "SERVERADRESSE",
+    "copyAddress": "Adresse kopieren",
+    "copied": "Kopiert",
+    "startJourney": "Starte deine erste Stunde",
+    "findAnswer": "Antwort finden",
+    "quickFactsLabel": "BEVOR DU DICH VERBINDEST",
+    "expectationsEyebrow": "MYSTERRIA IST ANDERS",
+    "expectationsTitle": "Wisse das, bevor du dich niederl?sst",
+    "expectationsLede": "Der Server trifft einige bewusste Entscheidungen, die Spieler klassischer Survival-Server ?berraschen.",
+    "tasksEyebrow": "SCHNELLE HILFE",
+    "tasksTitle": "Was m?chtest du tun?",
+    "tasksLede": "W?hle ein Ziel oder suche mit deinen eigenen Worten. Du siehst nur die Informationen, die du f?r diese Aufgabe brauchst.",
+    "searchPlaceholder": "Versuche ?erster Zaubertrank?, ?nach Hause teleportieren? oder ?fehlende Benutzeroberfl?che? ?",
+    "clearSearch": "L?schen",
+    "searchResults": "Passende Antworten",
+    "noResults": "Keine direkte Antwort gefunden",
+    "noResultsHint": "Versuche es mit einem k?rzeren Begriff, durchsuche die Themen unten oder frage auf Discord.",
+    "firstHourEyebrow": "ERSTE STUNDE",
+    "firstHourTitle": "Vom Beitritt bis zu deinem ersten echten Ziel",
+    "firstHourLede": "Dies ist der k?rzeste zuverl?ssige Weg von der Serverliste zu dem, was du als N?chstes tun solltest.",
+    "openStep": "Details ansehen",
+    "starterEyebrow": "EINE WICHTIGE ENTSCHEIDUNG",
+    "starterTitle": "W?hle Hilfe, nicht dein Schicksal",
+    "starterLede": "Der im Neulingsmen? gew?hlte Pfad bestimmt nur deinen Startbonus. Sp?ter kannst du einen Zaubertrank f?r Sequenz 9 eines ganz anderen Pfads trinken.",
+    "benefit": "Du erh?ltst",
+    "cost": "Dauerhafte Kosten",
+    "bestFor": "Am besten f?r",
+    "recommended": "VOLLE KRAFT",
+    "important": "Wichtig",
+    "starterWarning": "Die Bonuswahl kann normalerweise nicht geändert werden. Das Team kann einen echten Irrtum über ein Discord-Ticket zurücksetzen, doch die Bestätigung sollte als endgültig gelten.",
+    "directionEyebrow": "DEIN ERSTES ZIEL",
+    "directionTitle": "W?hle eine Richtung, statt umherzuirren",
+    "directionLede": "Beide Ans?tze sind g?ltig; keiner schlie?t den anderen sp?ter aus.",
+    "browseEyebrow": "HANDBUCH",
+    "browseTitle": "Durchsuche jedes wichtige System",
+    "browseLede": "Erweiterte Informationen bleiben dir aus dem Weg, bis du sie brauchst.",
+    "topics": "Themen",
+    "popularEyebrow": "H?UFIG GEFRAGT",
+    "popularTitle": "Beliebte Spielerfragen",
+    "openTopic": "Leitfaden ?ffnen",
+    "backToGuide": "Zur?ck zur Startseite des Leitfadens",
+    "quickAnswer": "KURZE ANTWORT",
+    "onThisPage": "AUF DIESER SEITE",
+    "relatedTopics": "Weiterlesen",
+    "commonMistake": "H?UFIGER FEHLER",
+    "usefulTip": "N?TZLICHER TIPP",
+    "screenshotsLabel": "DAS WIRST DU SEHEN",
+    "screenshotIp": "Serveradresse hinzuf?gen",
+    "screenshotPortal": "W?hle Mysteries in der Auswahl",
+    "screenshotJoin": "Der Server in deiner Liste",
+    "profileCta": "Profil ?ffnen",
+    "pathwaysCta": "Pfade erkunden",
+    "fullRulesCta": "Vollst?ndige Regeln lesen",
+    "supportCta": "Auf Discord fragen",
+    "mobileBrowse": "Themen durchsuchen"
+  },
+  "facts": [
+    {
+      "label": "CLIENT",
+      "value": "Java empfohlen",
+      "note": "Bedrock funktioniert ?ber Geyser mit eingeschr?nkter eigener Benutzeroberfl?che"
+    },
+    {
+      "label": "VERSION",
+      "value": "26.1.2+",
+      "note": "Nutze einen aktuellen Client, falls das Ressourcenpaket nicht l?dt"
+    },
+    {
+      "label": "ERFORDERLICH",
+      "value": "Ressourcenpaket akzeptieren",
+      "note": "Keine Client-Mods erforderlich"
+    }
+  ],
+  "expectations": [
+    {
+      "icon": "fa-solid fa-route",
+      "title": "Es gibt keine Teleportbefehle",
+      "summary": "Kein /home, /spawn, /tpa, /rtp oder /back.",
+      "detail": "Entfernung ist ein strategischer Preis, und Mobilit?t geh?rt zu den Belohnungen von Pfaden wie T?r. W?hle deinen Wohnort sorgf?ltig."
+    },
+    {
+      "icon": "fa-solid fa-hourglass-half",
+      "title": "Der Fortschritt ist bewusst langfristig",
+      "summary": "Fr?he Sequenzen dauern etwa eine Woche, hohe Stufen Monate.",
+      "detail": "Mysterria ist auf eine saisonlange Reise ausgelegt, nicht darauf, an einem Wochenende die maximale St?rke zu erreichen."
+    },
+    {
+      "icon": "fa-solid fa-rotate",
+      "title": "Die Welt ist saisonal",
+      "summary": "Etwa alle sechs Monate findet ein vollst?ndiger Reset statt.",
+      "detail": "Der Reset umfasst auch den Beyonder-Fortschritt. Er h?lt die Welt gesund und macht einen Beitritt mitten in der Saison weiterhin lohnend."
+    },
+    {
+      "icon": "fa-solid fa-shield-halved",
+      "title": "Erkundung ist normalerweise sicher",
+      "summary": "PvP in der Wildnis ist deaktiviert und Griefing verboten.",
+      "detail": "PvP gibt es nur in angek?ndigten Zonen, bei Cosmos Incursions oder in Stadt-Claims, deren Besitzer es absichtlich aktiviert."
+    },
+    {
+      "icon": "fa-solid fa-box-open",
+      "title": "Vanilla-Truhen sind magische Beute",
+      "summary": "Nat?rlich generierte Truhen f?llen sich mit der Zeit wieder auf.",
+      "detail": "D?rfer, Minensch?chte, Tempel, Schiffswracks, Bastionen und andere Strukturen sind erneuerbare Quellen f?r Beyonder-Beute."
+    }
+  ],
+  "tasks": [
+    {
+      "icon": "fa-solid fa-plug",
+      "title": "Dem Server beitreten",
+      "description": "Versionen, Ressourcenpaket, Konten und Verifizierung.",
+      "topicId": "connect"
+    },
+    {
+      "icon": "fa-solid fa-scale-balanced",
+      "title": "Meinen Startbonus w?hlen",
+      "description": "Verstehe Abk?rzung, Entschlossenheit und was die Pfadwahl bedeutet.",
+      "topicId": "starter-choice"
+    },
+    {
+      "icon": "fa-solid fa-flask",
+      "title": "Sequenz 9 werden",
+      "description": "Formel, Kessel, Zutaten, Brauen und Trinken.",
+      "topicId": "first-potion"
+    },
+    {
+      "icon": "fa-solid fa-box-open",
+      "title": "Formeln oder Zutaten finden",
+      "description": "Beutetruhen, Fokussierung, Kreaturen, Knoten und Handel.",
+      "topicId": "loot"
+    },
+    {
+      "icon": "fa-solid fa-arrow-trend-up",
+      "title": "Meine Sequenz steigern",
+      "description": "Schauspielen, Rituale, Spiritualit?t, Wahnsinn und Fortschritt.",
+      "topicId": "progression"
+    },
+    {
+      "icon": "fa-solid fa-dungeon",
+      "title": "Einen Dungeon finden",
+      "description": "Nutze /subspace, schw?che Risse, bilde eine Gruppe und verstehe Abklingzeiten.",
+      "topicId": "activities"
+    },
+    {
+      "icon": "fa-solid fa-house-flag",
+      "title": "Einer Stadt beitreten oder eine bauen",
+      "description": "Gesch?tztes Land, Gruppenspiel, Nationen und allein spielen.",
+      "topicId": "towns"
+    },
+    {
+      "icon": "fa-solid fa-wand-magic-sparkles",
+      "title": "Fehlende eigene Benutzeroberfl?che beheben",
+      "description": "Ressourcenpaket, Client-Version und Bedrock-Einschr?nkungen.",
+      "topicId": "troubleshooting"
+    }
+  ],
+  "firstHour": [
+    {
+      "title": "Verbinde dich und akzeptiere das Ressourcenpaket",
+      "description": "F?ge mc.mysterria.net hinzu, w?hle Mysteries ?ber die Lobby-Auswahl und akzeptiere das Serverpaket.",
+      "topicId": "connect"
+    },
+    {
+      "title": "Registriere dich nur, wenn Minecraft danach fragt",
+      "description": "Offline-Konten nutzen /register und /login. Offizielle Premium-Konten werden automatisch authentifiziert.",
+      "topicId": "connect"
+    },
+    {
+      "title": "Verifiziere dein Minecraft-Konto",
+      "description": "Erstelle in deinem Profil einen Code und gib ihn im Verifizierungsfenster im Spiel ein.",
+      "topicId": "connect"
+    },
+    {
+      "title": "W?hle deinen Startbonus sorgf?ltig",
+      "description": "Der Pfad gibt nur die Richtung f?r deinen Bonus vor. Abk?rzung und Entschlossenheit haben sehr unterschiedliche langfristige Kosten.",
+      "topicId": "starter-choice"
+    },
+    {
+      "title": "W?hle Stadtleben oder Selbstversorgung",
+      "description": "Frage nach einer Stadt, die rekrutiert, oder beginne allein mit Truhenruns und Erkundung.",
+      "topicId": "towns"
+    },
+    {
+      "title": "Arbeite auf deinen ersten Zaubertrank hin",
+      "description": "F?r deine erste Sequenz brauchst du eine Formel, einen Kessel, Zutaten, einen erfolgreichen Brauvorgang und sonst nichts.",
+      "topicId": "first-potion"
+    }
+  ],
+  "starterChoices": [
+    {
+      "name": "Pfad der Abkürzung",
+      "eyebrow": "JETZT MIT FÄHIGKEITEN SPIELEN",
+      "benefit": "Sofort Sequenz 9 im gewählten Pfad.",
+      "cost": "−10 % maximale Spiritualität für immer, auf jeder Sequenz.",
+      "bestFor": "Spieler, die einen sofortigen Start höher bewerten als langfristige Maximalstärke."
+    },
+    {
+      "name": "Pfad der Entschlossenheit",
+      "eyebrow": "LERNE DEN VOLLSTÄNDIGEN ABLAUF",
+      "benefit": "Die nächste Beutetruhe enthält garantiert eine Formel.",
+      "cost": "Keine.",
+      "bestFor": "Spieler, die das Brauen lernen und ihr volles Potenzial behalten möchten.",
+      "recommended": true
+    }
+  ],
+  "directions": [
+    {
+      "icon": "fa-solid fa-people-roof",
+      "title": "Einer bestehenden Stadt beitreten",
+      "eyebrow": "WENIGER REIBUNG",
+      "description": "Frage im Chat oder auf Discord nach einer Stadt, die neue Mitglieder aufnimmt.",
+      "points": [
+        "Teile Kessel, Formeln, Zutaten und geschütztes Land.",
+        "Finde Gruppen für Guardians, Dungeons, Wilde Beyonder und Incursions.",
+        "Nutze ein bestehendes Basisnetzwerk in einer Welt ohne Teleportbefehle."
+      ],
+      "topicId": "towns"
+    },
+    {
+      "icon": "fa-solid fa-compass",
+      "title": "Allein spielen",
+      "eyebrow": "SELBSTBESTIMMT",
+      "description": "Vollständig möglich, aber langsamer und stärker von Erkundung abhängig.",
+      "points": [
+        "Öffne jede generierte Truhe; ihre Beyonder-Beute regeneriert sich.",
+        "Jage Beyonder-Kreaturen und merke dir erneuerbare Ressourcen-Knoten.",
+        "Handle überschüssige Materialien und schließe dich Gruppen an, wenn bestimmter Inhalt es erfordert."
+      ],
+      "topicId": "loot"
+    }
+  ],
+  "categories": {
+    "start": "Hier beginnen",
+    "progression": "Beyonder-Fortschritt",
+    "world": "Welt und Aktivitäten",
+    "community": "Wirtschaft und Gesellschaft",
+    "help": "Hilfe und Referenz"
+  },
+  "popularQuestions": [
+    {
+      "question": "Wie teleportiere ich mich nach Hause?",
+      "topicId": "server-basics"
+    },
+    {
+      "question": "Warum sieht das Spiel wie Vanilla aus?",
+      "topicId": "troubleshooting"
+    },
+    {
+      "question": "Hat mich die Wahl eines Pfads festgelegt?",
+      "topicId": "starter-choice"
+    },
+    {
+      "question": "Wie werde ich Sequenz 9?",
+      "topicId": "first-potion"
+    },
+    {
+      "question": "Wo sind die besonderen Beutetruhen?",
+      "topicId": "loot"
+    },
+    {
+      "question": "Warum steigt mein Interpretationsfortschritt nicht?",
+      "topicId": "progression"
+    },
+    {
+      "question": "Kann mich jemand beim Erkunden töten?",
+      "topicId": "server-basics"
+    },
+    {
+      "question": "Wie finde ich einen Dungeon?",
+      "topicId": "activities"
+    }
+  ],
+  "topics": [
+    {
+      "id": "connect",
+      "category": "start",
+      "icon": "fa-solid fa-plug",
+      "title": "Verbinden, registrieren und verifizieren",
+      "shortTitle": "Verbinden und verifizieren",
+      "summary": "Alles, was du brauchst, um Mysteries mit dem richtigen Client zu erreichen und deinen Startbonus freizuschalten.",
+      "answer": "Verbinde dich mit mc.mysterria.net über einen aktuellen Java-Client, akzeptiere das Ressourcenpaket, wähle Mysteries in der Lobby und verifiziere dich über dein Website-Profil.",
+      "tags": [
+        "ip",
+        "adresse",
+        "beitreten",
+        "java",
+        "bedrock",
+        "geyser",
+        "registrieren",
+        "anmelden",
+        "verifizieren",
+        "discord",
+        "ressourcenpaket",
+        "version",
+        "premium",
+        "offline"
+      ],
+      "sections": [
+        {
+          "title": "Serverdetails",
+          "bullets": [
+            "Adresse: mc.mysterria.net.",
+            "Unterstützte Versionen: 26.1.2 und neuer.",
+            "Java Edition bietet die vollständig unterstützte Erfahrung; Client-Mods sind nicht erforderlich.",
+            "Bedrock kann sich über Geyser verbinden, doch Pfadsymbole und manche eigenen Oberflächen werden möglicherweise falsch dargestellt."
+          ]
+        },
+        {
+          "title": "Verbinden",
+          "steps": [
+            "Öffne Mehrspieler, füge mc.mysterria.net hinzu und tritt dem Server bei.",
+            "Akzeptiere das Server-Ressourcenpaket, wenn Minecraft danach fragt.",
+            "Wähle im Lobby-Serverselektor Mysteries.",
+            "Lies vor dem Verlassen den Dialog des Lobby-NPCs; er enthält nützliche Orientierung."
+          ],
+          "warning": "Wenn alles wie gewöhnliches Vanilla-Minecraft aussieht, wurde das Ressourcenpaket abgelehnt oder dein Java-Client ist zu alt. Aktiviere Server-Ressourcenpakete und aktualisiere den Client."
+        },
+        {
+          "title": "Kontoregistrierung",
+          "paragraphs": [
+            "Offizielle Premium-Minecraft-Konten überspringen die Registrierung und werden automatisch angemeldet.",
+            "Offline-Konten registrieren sich einmal mit /register <password> <password> und nutzen bei späteren Beitritten /login <password>."
+          ]
+        },
+        {
+          "title": "Discord-Verifizierung",
+          "steps": [
+            "Melde dich auf der Mysterria-Website an und öffne dein Profil.",
+            "Erstelle einen Minecraft-Verifizierungscode.",
+            "Gib den Code im Verifizierungsfenster ein, das im Spiel erscheint.",
+            "Nach der Bestätigung werden das Neulingspfad- und Startbonusmenü verfügbar."
+          ]
+        }
+      ],
+      "related": [
+        "starter-choice",
+        "troubleshooting",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "server-basics",
+      "category": "start",
+      "icon": "fa-solid fa-map",
+      "title": "So funktioniert die Welt von Mysterria",
+      "shortTitle": "Grundlagen der Welt",
+      "summary": "Reisen, Sicherheit, Tod, saisonale Resets und die Regeln, die sich von klassischen Survival-Servern unterscheiden.",
+      "answer": "Mysterria ist eine begrenzte saisonale Welt, in der Entfernungen zählen, Erkundung in der Wildnis sicher ist und natürlich generierte Truhen erneuerbare magische Beute liefern.",
+      "tags": [
+        "heim",
+        "spawn",
+        "tpa",
+        "rtp",
+        "zurück",
+        "teleport",
+        "karte",
+        "pvp",
+        "griefing",
+        "tod",
+        "inventar behalten",
+        "reset",
+        "saison",
+        "weltgrenze",
+        "sicher"
+      ],
+      "sections": [
+        {
+          "title": "Karte und Reisen",
+          "paragraphs": [
+            "Die Oberwelt ist auf 15.000 × 15.000 Blöcke begrenzt. Nether und besondere Dimensionen existieren, doch die meisten Beyonder-Inhalte befinden sich in der Oberwelt."
+          ],
+          "warning": "Es gibt kein /home, /sethome, /spawn, /tpa, /rtp oder /back. Das bewahrt den Wert von Reiseplanung und Mobilitätspfaden wie Tür."
+        },
+        {
+          "title": "Sicherheit und PvP",
+          "bullets": [
+            "PvP in der Wildnis ist standardmäßig deaktiviert.",
+            "PvP ist auf ausgewiesene PvP-Bereiche und Cosmos-Incursion-Zonen beschränkt.",
+            "Stadtbesitzer können PvP in ihren Claims gezielt für bestimmte Rollen aktivieren.",
+            "Griefing ist verboten, und Stadt-Claims schützen Land."
+          ]
+        },
+        {
+          "title": "Tod",
+          "paragraphs": [
+            "Ansonsten gelten beim Tod Vanilla-Regeln: Gegenstände fallen zu Boden und es gibt kein Keep-Inventory. Beyonders erhalten außerdem eine geringe Menge vorübergehenden Wahnsinns."
+          ],
+          "tip": "Nur Spieler, die eine Einzigartigkeit tragen, erleiden die zusätzliche Einbüßung bei der Akkommodation. Gewöhnliche Spieler verlieren durch normalen Tod keinen Sequenzfortschritt."
+        },
+        {
+          "title": "Saisonale Resets",
+          "paragraphs": [
+            "Etwa alle sechs Monate werden Welt und Beyonder-Fortschritt zurückgesetzt. Das hält die Karte gesund und ermöglicht Neueinsteigern mitten in der Saison mitzuhalten, ohne dauerhaft im Rückstand zu sein."
+          ]
+        }
+      ],
+      "related": [
+        "towns",
+        "activities",
+        "progression"
+      ]
+    },
+    {
+      "id": "starter-choice",
+      "category": "start",
+      "icon": "fa-solid fa-scale-balanced",
+      "title": "Der Neulingspfad und Startbonus",
+      "shortTitle": "Startwahl",
+      "summary": "Was die anfängliche Pfadauswahl tatsächlich verändert und welcher dauerhafte Unterschied zwischen Abkürzung und Entschlossenheit besteht.",
+      "answer": "Der von dir gewählte Pfad macht dich weder zum Beyonder noch legt er deinen späteren Pfad fest. Er bestimmt nur einen von zwei Startboni.",
+      "tags": [
+        "neuling",
+        "bonus",
+        "abkürzung",
+        "entschlossenheit",
+        "pfad",
+        "festgelegt",
+        "neu wählen",
+        "magie",
+        "sequenz 9",
+        "spiritualität",
+        "formelgarantie"
+      ],
+      "sections": [
+        {
+          "title": "Dein Pfad ist nicht festgelegt",
+          "paragraphs": [
+            "Du gehörst einem Pfad erst an, wenn du seinen Zaubertrank für Sequenz 9 trinkst. Wenn das Neulingsmenü Narr anzeigt, du später aber einen Tür-Zaubertrank trinkst, gehörst du zu Tür.",
+            "/magic ist ein optionales Empfehlungsmenü. Ein dort angezeigter Pfad beweist nicht, dass du bereits ein Beyonder bist."
+          ]
+        },
+        {
+          "title": "Pfad der Abkürzung",
+          "paragraphs": [
+            "Du wirst ohne Brauen sofort Sequenz 9, verlierst aber auf jeder Sequenz und jeder Stufe des Schauspielens dauerhaft 10 % deiner maximalen Spiritualität."
+          ],
+          "warning": "Die Strafe auf Spiritualität ist dauerhaft. Sie wird weder durch Aufstieg noch durch abgeschlossenes Schauspielen wiederhergestellt."
+        },
+        {
+          "title": "Pfad der Entschlossenheit",
+          "paragraphs": [
+            "Dein Zähler für die Formel-Fokussierung wird einen Schritt vor seine Garantie gesetzt, sodass die nächste natürliche Beutetruhe eine Formel enthält. Es gibt keine dauerhaften Kosten."
+          ],
+          "tip": "Entschlossenheit vermittelt den normalen Ablauf Formel → Kessel → Zutaten → Brauen und bewahrt deine volle langfristige Stärke."
+        },
+        {
+          "title": "Bestätigung und Fehler",
+          "paragraphs": [
+            "Nach der Bestätigung kannst du nicht erneut wählen. Bei einem echten Fehler neuer Spieler öffne ein Discord-Ticket; das Team bietet gelegentlich einen Reset an."
+          ]
+        }
+      ],
+      "related": [
+        "first-potion",
+        "progression",
+        "connect"
+      ]
+    },
+    {
+      "id": "first-potion",
+      "category": "progression",
+      "icon": "fa-solid fa-flask",
+      "title": "Braue und trink deinen ersten Zaubertrank",
+      "shortTitle": "Erster Zaubertrank",
+      "summary": "Der vollständige Ablauf für Formel und Brauen von Sequenz 9 – ohne Community-Mythen.",
+      "answer": "Um Sequenz 9 zu erreichen: Besorge eine Formel, baue einen Kessel, sammle die Zutaten, braue erfolgreich und trinke. Dein erster Zaubertrank benötigt weder Schauspielen noch Ritual oder Wahnsinnskosten.",
+      "tags": [
+        "sequenz 9",
+        "zaubertrank",
+        "brauen",
+        "brauvorgang",
+        "kessel",
+        "formel",
+        "zutat",
+        "char",
+        "ritual",
+        "altar",
+        "ablaufen",
+        "plätze"
+      ],
+      "sections": [
+        {
+          "title": "Was du brauchst",
+          "bullets": [
+            "Eine vollständige Formel für Sequenz 9 oder alle unterschiedlichen Formelseiten.",
+            "Einen Magischen Kessel, gebaut mit der Blaupause einer Altarschriftrolle.",
+            "Pfad- und sequenzspezifische Haupt- und Nebenzutaten.",
+            "Beyonder-Chars können alle Hauptzutaten einer Formel auf einmal ersetzen."
+          ],
+          "warning": "Opferaltäre sind für Gnaden bestimmt, nicht zum Brauen von Zaubertränken. Ihre Blaupausen ähneln Kessel-Blaupausen."
+        },
+        {
+          "title": "Reihenfolge beim Brauen",
+          "steps": [
+            "Lege Hauptzutaten oder Beyonder-Chars in die linken Plätze.",
+            "Lege Nebenzutaten in die rechten Plätze.",
+            "Lege die Formel in den mittleren Platz.",
+            "Halte alle Gegenstände in genau derselben Reihenfolge wie auf der Formel.",
+            "Trink bei Erfolg den Zaubertrank, um Sequenz 9 zu werden."
+          ],
+          "tip": "Fehlgeschlagenes Brauen verbraucht keine Zutaten. Kessel höherer Stufe erhöhen die Erfolgschance, statt Verluste zu verringern."
+        },
+        {
+          "title": "Zutaten",
+          "bullets": [
+            "Findbare Zutaten erscheinen nur in generierten Beutetruhen.",
+            "Fallengelassene Zutaten stammen nur von Beyonder-Kreaturen.",
+            "Abbaubare Zutaten wachsen als eigene Knoten in der Welt; ernte sie mit einem Rechtsklick."
+          ]
+        },
+        {
+          "title": "Ablauf des Zaubertranks",
+          "paragraphs": [
+            "Ein Zaubertrank hält ab dem Zeitpunkt seiner Entstehung zwei Tage Echtzeit. Braue erst, wenn du bereit bist zu trinken. Ein abgelaufener Zaubertrank wird, wenn möglich, zu einem passenden Versiegelten Artefakt, liefert jedoch nicht mehr den vorgesehenen Aufstieg."
+          ]
+        }
+      ],
+      "related": [
+        "loot",
+        "starter-choice",
+        "progression"
+      ]
+    },
+    {
+      "id": "loot",
+      "category": "progression",
+      "icon": "fa-solid fa-box-open",
+      "title": "Beute, Formeln und Zutaten finden",
+      "shortTitle": "Beute und Fokussierung",
+      "summary": "Wo magische Materialien tatsächlich herkommen und wie die Fokussierungs-Garantie Pech reduziert.",
+      "answer": "Jede natürlich generierte Vanilla-Truhe ist ein erneuerbarer Behälter für Beyonder-Beute. Öffne sie wiederholt und fokussiere die Belohnungskategorie, die du gerade brauchst.",
+      "tags": [
+        "beute",
+        "truhe",
+        "behälter",
+        "formel",
+        "seite",
+        "zutat",
+        "altarschriftrolle",
+        "fokus",
+        "fokussierung",
+        "pity",
+        "garantie",
+        "wilder beyonder",
+        "kreatur",
+        "knoten",
+        "energiescherbe"
+      ],
+      "sections": [
+        {
+          "title": "Beutebehälter",
+          "paragraphs": [
+            "Truhen in Dörfern, Minenschächten, Dungeons, Tempeln, Schiffswracks, vergrabenen Schätzen, Bastionen und zerstörten Portalen zählen alle. Es gibt keine besondere leuchtende Beyonder-Truhe."
+          ],
+          "tip": "Die Inhalte regenerieren mit der Zeit. Bereits erkundete Strukturen bleiben wertvoll und sollten erneut besucht werden."
+        },
+        {
+          "title": "Belohnungsfokussierung",
+          "paragraphs": [
+            "Wähle eine von vier Kategorien: Zaubertränke, Formeln, Seiten oder Altarschriftrollen. Jede berechtigte Truhe ohne diese Belohnung erhöht einen sichtbaren Zähler; die Truhe am Schwellenwert enthält sie garantiert."
+          ],
+          "warning": "Zutaten können nicht fokussiert werden. Du musst sie in Truhen finden, Kreaturen abnehmen, an Ressourcen-Knoten ernten, ertauschen oder über andere Systeme umwandeln."
+        },
+        {
+          "title": "Gezielter Erwerb",
+          "bullets": [
+            "Handle mit einem friedlichen Wilden Beyonder für bestimmte Pfadgüter.",
+            "Nutze /subspace und spiele Dungeons für wiederholbare Materialien.",
+            "Jage Beyonder-Kreaturen für fallengelassene Zutaten und Schauspielfortschritt.",
+            "Handle überschüssige Zutaten mit einem arbeitslosen Dorfbewohner gegen Energiescherben.",
+            "Prüfe das wechselnde Angebot des Brilliant Emporium."
+          ]
+        }
+      ],
+      "related": [
+        "first-potion",
+        "activities",
+        "economy"
+      ]
+    },
+    {
+      "id": "progression",
+      "category": "progression",
+      "icon": "fa-solid fa-arrow-trend-up",
+      "title": "Schauspielen, Rituale, Spiritualität und Wahnsinn",
+      "shortTitle": "Aufstieg",
+      "summary": "Wie Fortschritt nach Sequenz 9 funktioniert und wo du deinen aktuellen Status prüfst.",
+      "answer": "Nach dem Beyonder-Werden verbindet der Aufstieg Schauspielen aus mehreren Quellen, den nächsten Zaubertrank und zunehmend wichtige Rituale. Deinen vollständigen Status findest du in der Pfadoberfläche im Inventar.",
+      "tags": [
+        "schauspielen",
+        "verdauung",
+        "ritual",
+        "spiritualität",
+        "mana",
+        "wahnsinn",
+        "mutation",
+        "gesundheit",
+        "werte",
+        "status",
+        "sequenz",
+        "aufstieg",
+        "kopfgeld",
+        "flasche"
+      ],
+      "sections": [
+        {
+          "title": "Prüfe deinen Charakter",
+          "steps": [
+            "Öffne dein Inventar.",
+            "Klicke auf das Pfadsymbol oben links.",
+            "Bewege den Mauszeiger in der Oberfläche über den Kopf deines Charakters."
+          ],
+          "tip": "Dort werden Sequenz, Schauspielen und Verdauung, Spiritualität und Wahnsinn angezeigt. Es gibt keinen Statusbefehl."
+        },
+        {
+          "title": "Schauspielen und Verdauung",
+          "paragraphs": [
+            "Nur Zauber zu wirken steigert das Schauspielen nicht zwangsläufig. Jede Fähigkeit hat eine eigene Schauspielmethode; erfolgreiches Schauspielen erzeugt eine Benachrichtigung in der Aktionsleiste."
+          ],
+          "bullets": [
+            "Passives Spiel und fähigkeitsspezifische Schauspielmethoden.",
+            "Schauspiel-Flaschen und wechselnde Kopfgelder.",
+            "Dungeon-Abschluss für PvE-Schauspielen.",
+            "Cosmos Incursions für PvP-Schauspielen."
+          ],
+          "warning": "Keine einzelne Quelle für Schauspielen kann allein 100 % erreichen. Kombiniere mehrere Quellen."
+        },
+        {
+          "title": "Rituale",
+          "bullets": [
+            "Sequenz 9 erfordert nie ein Ritual.",
+            "Für Zielsequenzen 8–6 sind Rituale optional, doch das Überspringen fügt dauerhaften saisonalen Wahnsinn hinzu.",
+            "Ab Zielsequenz 5 ist das Ritual verpflichtend."
+          ]
+        },
+        {
+          "title": "Spiritualität und Wahnsinn",
+          "paragraphs": [
+            "Spiritualität versorgt Fähigkeiten und regeneriert sich mit der Zeit. Maximale Spiritualität wächst mit Sequenz und Schauspielfortschritt.",
+            "Wahnsinn besteht aus vorübergehenden, dauerhaften und rohen Anteilen. Tod und unsicherer Aufstieg erhöhen ihn; Ruhe und manche Mechaniken verringern nur wiederherstellbare Anteile."
+          ],
+          "warning": "Hoher Wahnsinn hat echte Auswirkungen aufs Spiel und kann zu Mutation führen. Nimm Aufstiegswarnungen ernst."
+        }
+      ],
+      "related": [
+        "first-potion",
+        "activities",
+        "advanced"
+      ]
+    },
+    {
+      "id": "activities",
+      "category": "world",
+      "icon": "fa-solid fa-dungeon",
+      "title": "Kreaturen, Wilde Beyonder, Dungeons und Incursions",
+      "shortTitle": "Aktivitäten und Dungeons",
+      "summary": "Die wichtigsten wiederholbaren Aktivitäten für Beute, Schauspielfortschritt und Gruppenziele.",
+      "answer": "Nutze /subspace, um Dungeons zu finden, jage beim Erkunden Beyonder-Kreaturen, handle mit passenden Wilden Beyonders und betrete Cosmos Incursions erst, nachdem du die Zonenfarbe geprüft hast.",
+      "tags": [
+        "dungeon",
+        "subspace",
+        "riss",
+        "gruppe",
+        "abklingzeit",
+        "hilfskarte",
+        "kreatur",
+        "blutmond",
+        "wilder beyonder",
+        "guardian",
+        "incursion",
+        "pvp",
+        "schwarze zone"
+      ],
+      "sections": [
+        {
+          "title": "Dungeons und Risse",
+          "steps": [
+            "Führe /subspace aus, um jeden Dungeon, seinen Riss-Ort, deine relative Stärke und Abklingzeiten zu sehen.",
+            "Gehe zum Riss und spende Energiefragmente, falls er noch geschwächt werden muss.",
+            "Bilde mit /party eine Gruppe und betrete ihn, sobald er verfügbar ist."
+          ],
+          "bullets": [
+            "Echte Beute ist pro Dungeon alle drei Tage einmal verfügbar.",
+            "Pro Tag sind zwei Durchläufe mit Hilfskarte ohne normale Beute verfügbar.",
+            "Eine unterbesetzte Gruppe ist erlaubt, wenn die verbleibende Gruppe nicht übermächtig ist; die Belohnung wird nicht verringert."
+          ]
+        },
+        {
+          "title": "Kreaturen und der Blutmond",
+          "paragraphs": [
+            "Beyonder-Kreaturen liefern XP, Schauspielpunkte und Pfadzutaten. Während des ungefähr wöchentlichen Blutmonds wird Angeln zu einer wertvollen, aber gefährlicheren alternativen Beutequelle."
+          ]
+        },
+        {
+          "title": "Wilde Beyonder und Guardians",
+          "paragraphs": [
+            "Die Haltung eines Wilden Beyonders hängt von den Beziehungen zwischen Pfaden ab. Friedliche bieten den gezieltesten Handel mit Zutaten und Formeln im Spiel; feindliche sind ernsthafte Kämpfe. Guardians schützen wichtige Ziele und sind für Gruppen ausgelegt."
+          ]
+        },
+        {
+          "title": "Cosmos-Incursions",
+          "paragraphs": [
+            "Incursions sind angekündigte PvP-Ziele. In grünen und gelben Zonen riskierst du hauptsächlich mitgeführte Gegenstände, und Schaden zwischen Sequenzen wird ausgeglichen. Schwarze Zonen bergen das ernste Risiko eines Sequenzrückschritts."
+          ],
+          "warning": "Lies vor dem Betreten die Zonenfarbe und Regeln. Eine Incursion zu betreten ist eine bewusste PvP-Entscheidung."
+        }
+      ],
+      "related": [
+        "loot",
+        "progression",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "towns",
+      "category": "community",
+      "icon": "fa-solid fa-house-flag",
+      "title": "Städte, Nationen, Kriege und allein spielen",
+      "shortTitle": "Städte und Nationen",
+      "summary": "Wie geschützte Siedlungen das frühe Spiel verändern und wie ein selbstversorgender Weg aussieht.",
+      "answer": "Einer Stadt beizutreten ist der schnellste soziale Einstieg, während Solo-Spiel vollständig möglich bleibt. Städte bieten geschützte Claims, gemeinsame Infrastruktur, Gruppenzugang und später passive Vorteile.",
+      "tags": [
+        "stadt",
+        "lands",
+        "claim",
+        "nation",
+        "krieg",
+        "solo",
+        "beitreten",
+        "siedeln",
+        "basis",
+        "griefing",
+        "rolle",
+        "vorteil"
+      ],
+      "sections": [
+        {
+          "title": "Einer Stadt beitreten",
+          "paragraphs": [
+            "Frage im Spielchat oder auf Discord nach einer Stadt, die Neulinge aufnimmt. Etablierte Spieler können Formeln, Zutaten, Kessel, Wissen und Gruppen für schwierige Inhalte teilen."
+          ],
+          "tip": "In einer Welt ohne Teleportbefehle sind ein günstiger Siedlungsort und erfahrene Nachbarn erhebliche Vorteile."
+        },
+        {
+          "title": "Allein spielen",
+          "steps": [
+            "Wähle einen sinnvollen Ort für deine Basis und notiere wichtige Koordinaten.",
+            "Öffne jede generierte Truhe und setze den Belohnungsfokus auf deinen aktuellen Engpass.",
+            "Jage Kreaturen, merke dir Ressourcen-Knoten und nutze Handel mit Wilden Beyonders.",
+            "Schließe dich vorübergehenden Dungeon- oder Incursion-Gruppen an, ohne deine Unabhängigkeit aufzugeben."
+          ]
+        },
+        {
+          "title": "Claims, Stufen und Nationen",
+          "paragraphs": [
+            "Städte nutzen Rollen und Claims im Lands-Stil. Höhere Stadtstufen schalten Einwohnerkapazität, Anforderungen an die Schatzkammer, passive Vorteile und architektonische Vorzüge frei. Städte auf Domänenstufe können Nationen bilden."
+          ]
+        },
+        {
+          "title": "Kriege",
+          "paragraphs": [
+            "Kriege sind strukturierte freiwillige Konflikte, die durch eigene Befehle und Serverregeln verwaltet werden. Normale Erkundung der Wildnis bleibt außerhalb ausgewiesener Kampfbereiche geschützt."
+          ]
+        }
+      ],
+      "related": [
+        "server-basics",
+        "economy",
+        "social"
+      ]
+    },
+    {
+      "id": "economy",
+      "category": "community",
+      "icon": "fa-solid fa-coins",
+      "title": "Währungen, Energiescherben und das Emporium",
+      "shortTitle": "Wirtschaft",
+      "summary": "Was die verschiedenen Währungen kaufen und wie gewöhnliches Spielen überschüssige Materialien in nützlichen Fortschritt verwandelt.",
+      "answer": "Nutze /wallet für Coppets, Licks und Verl d’or; wandle unerwünschte magische Materialien in Energiescherben um; verdiene separate Emporium-Punkte durch Community-Aktivitäten.",
+      "tags": [
+        "geld",
+        "währung",
+        "wallet",
+        "coppet",
+        "lick",
+        "verl",
+        "energiescherbe",
+        "emporium",
+        "täglich",
+        "abstimmung",
+        "einkommen",
+        "silk touch",
+        "verkaufen"
+      ],
+      "sections": [
+        {
+          "title": "Geld und Wallet",
+          "paragraphs": [
+            "Die Hauptwährungen sind Coppets, Licks und Verl d’or und werden über /wallet verwaltet. Gegenstandsbewertung ist die wichtigste Einnahmequelle, doch nur nicht erneuerbare Erze, die mit Silk Touch abgebaut wurden, qualifizieren sich."
+          ]
+        },
+        {
+          "title": "Energiescherben",
+          "paragraphs": [
+            "Handle überschüssige Pfadzutaten und Formeln mit einem arbeitslosen Dorfbewohner. Energiescherben finanzieren Handel mit Wilden Beyonders, das Schwächen von Rissen, Aufwertungen Geheimer Orden und saisonale Aktivitäten."
+          ]
+        },
+        {
+          "title": "Das Brilliant Emporium",
+          "paragraphs": [
+            "Das Emporium bietet im Wechsel nützliche Waren, einschließlich magischer Formeln. Emporium-Punkte sind von normalem Geld getrennt und stammen aus Abstimmungen, Anmeldeserien und akzeptierten Bugmeldungen."
+          ],
+          "commands": [
+            {
+              "command": "/emporium or /emp",
+              "purpose": "Brilliant Emporium öffnen"
+            },
+            {
+              "command": "/daily",
+              "purpose": "Menü für tägliche Belohnungen öffnen"
+            },
+            {
+              "command": "/vote",
+              "purpose": "Serverabstimmung öffnen"
+            },
+            {
+              "command": "/wallet",
+              "purpose": "Geld verwalten, Gegenstände bewerten und Zahlungen tätigen"
+            }
+          ]
+        }
+      ],
+      "related": [
+        "loot",
+        "towns",
+        "advanced"
+      ]
+    },
+    {
+      "id": "social",
+      "category": "community",
+      "icon": "fa-solid fa-people-group",
+      "title": "Kuriere, Geheime Orden und soziales Spiel",
+      "shortTitle": "Soziale Systeme",
+      "summary": "Die Systeme für Kommunikation, Lieferungen, private Gruppen und gemeinsame Infrastruktur.",
+      "answer": "Nutze normale private Nachrichten für Gespräche, Kuriere für physische Lieferungen und Geheime Orden für dauerhafte private Gruppen mit eigenen Aufwertungen und Räumen.",
+      "tags": [
+        "kurier",
+        "horn",
+        "senden",
+        "nachricht",
+        "msg",
+        "geheimer orden",
+        "orden",
+        "oc",
+        "einladen",
+        "sos",
+        "gruppe"
+      ],
+      "sections": [
+        {
+          "title": "Kuriere",
+          "paragraphs": [
+            "Kurierhörner beschwören verschiedene Kurierarten zum Versenden physischer Gegenstände. Lieferungen haben eigene Regeln für Kapazität, Entfernung und Sicherheit; prüfe den gewählten Kurier, bevor du wertvolle Fracht übergibst."
+          ]
+        },
+        {
+          "title": "Geheime Orden",
+          "paragraphs": [
+            "Orden sind dauerhafte private Organisationen mit Mitgliedern, Offizieren, Chat, Aufwertungen und Notfallwerkzeugen. Schließlich können sie Mobilitätsoptionen wie Sofortbeschwörung und ein Geheimversteck bieten."
+          ],
+          "commands": [
+            {
+              "command": "/o invite, /o kick",
+              "purpose": "Ordensmitgliedschaft verwalten"
+            },
+            {
+              "command": "/o vice set/remove",
+              "purpose": "Vizeleiter verwalten"
+            },
+            {
+              "command": "/o sos",
+              "purpose": "Notfallsystem des Ordens nutzen"
+            },
+            {
+              "command": "/oc",
+              "purpose": "Privaten Ordenschat öffnen"
+            }
+          ]
+        },
+        {
+          "title": "Private Nachrichten",
+          "commands": [
+            {
+              "command": "/msg, /pm, /w",
+              "purpose": "Private Nachricht senden"
+            },
+            {
+              "command": "/reply",
+              "purpose": "Auf die letzte private Nachricht antworten"
+            }
+          ]
+        }
+      ],
+      "related": [
+        "towns",
+        "economy",
+        "advanced"
+      ]
+    },
+    {
+      "id": "advanced",
+      "category": "world",
+      "icon": "fa-solid fa-star-of-life",
+      "title": "Langfristige und fortgeschrittene Systeme",
+      "shortTitle": "Fortgeschrittene Systeme",
+      "summary": "Eine knappe Übersicht über Systeme, die später in einer Saison relevant werden.",
+      "answer": "Gnaden, Versiegelte Artefakte, Kirchen, Ehrennamen, Einzigartigkeiten, Schusswaffen und andere Spezialsysteme sind langfristige Ebenen – keine Anforderungen für deine ersten Tage.",
+      "tags": [
+        "gnade",
+        "versiegeltes artefakt",
+        "kirche",
+        "ehrenname",
+        "einzigartigkeit",
+        "sequenz 0",
+        "schusswaffe",
+        "getränk",
+        "battlepass",
+        "abonnement",
+        "shop",
+        "ersteller"
+      ],
+      "sections": [
+        {
+          "title": "Gnaden und Opferaltäre",
+          "paragraphs": [
+            "Gnaden sind ein separater Fortschrittspfad, der über Opferaltäre vorangebracht wird. Sie ersetzen deinen Pfad nicht, und ihre Altäre können keine Zaubertränke brauen."
+          ]
+        },
+        {
+          "title": "Versiegelte Artefakte",
+          "paragraphs": [
+            "Artefakte bieten mächtige Effekte mit Nachteilen. Sie können aus Herstellung, Beute oder abgelaufenen Zaubertränken stammen und sollen als Abwägung, nicht als bedingungslose Aufwertung bewertet werden."
+          ]
+        },
+        {
+          "title": "Kirchen und Ehrennamen",
+          "paragraphs": [
+            "Kirchen sind Institutionen des späten Spiels rund um Glauben, Anker, Gebet, Land und unterschiedliche Vorteile. Ehrennamen erlauben rituelle Kommunikation und werden kürzer, wenn ihr Besitzer in der Sequenz aufsteigt."
+          ]
+        },
+        {
+          "title": "Einzigartigkeit und Sequenz 0",
+          "paragraphs": [
+            "Die Einzigartigkeit eines Pfads ist Teil des Wegs zu Sequenz 0 und erfordert Akkommodation. Sie zu tragen fügt dem Fortschritt der Akkommodation eine Todesstrafe hinzu."
+          ]
+        },
+        {
+          "title": "Optionale Unterstützung",
+          "paragraphs": [
+            "Der Shop, der Premium-Battlepass und Abonnements unterstützen den Server und bieten Komfort. Auch ein kostenloser Spieler kann jede Machtstufe erreichen."
+          ]
+        }
+      ],
+      "related": [
+        "progression",
+        "economy",
+        "social"
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "category": "help",
+      "icon": "fa-solid fa-screwdriver-wrench",
+      "title": "Fehlerbehebung für Verbindung und Oberfläche",
+      "shortTitle": "Fehlerbehebung",
+      "summary": "Schnelle Antworten für fehlende eigene Benutzeroberflächen, Verifizierungsprobleme, inkompatible Clients und Bedrock-Einschränkungen.",
+      "answer": "Fehlende magische Oberflächen bedeuten fast immer, dass das Ressourcenpaket abgelehnt wurde oder der Java-Client aktualisiert werden muss. Bedrock hat unvermeidbare Einschränkungen bei eigenen Oberflächen.",
+      "tags": [
+        "problem",
+        "defekt",
+        "fehlend",
+        "vanilla",
+        "ui",
+        "oberfläche",
+        "ressourcenpaket",
+        "verifizieren",
+        "code",
+        "abgelaufen",
+        "bedrock",
+        "mobil",
+        "geyser",
+        "veralteter client",
+        "verbinden"
+      ],
+      "sections": [
+        {
+          "title": "Der Server sieht wie Vanilla aus",
+          "steps": [
+            "Bearbeite den Servereintrag und setze Server-Ressourcenpakete auf Aktiviert.",
+            "Verbinde dich erneut und akzeptiere das Paket.",
+            "Falls es weiterhin still fehlschlägt, aktualisiere den Java-Client und verbinde dich erneut."
+          ],
+          "warning": "Bedrock-Spieler sehen möglicherweise weiterhin fehlende Pfadsymbole oder falsch dargestellte eigene Oberflächen. Dies ist eine bekannte Geyser-Einschränkung."
+        },
+        {
+          "title": "Verifizierung wurde nicht abgeschlossen",
+          "steps": [
+            "Kehre zum Profil zurück und erstelle einen neuen Code.",
+            "Gib ihn im Verifizierungsfenster im Spiel ein.",
+            "Wenn die Discord-Anmeldung auf der Website selbst fehlgeschlagen ist, versuche es erneut, nachdem du die Website-Cookies gelöscht hast.",
+            "Öffne ein Discord-Ticket, falls das Konto weiterhin nicht verknüpft ist."
+          ]
+        },
+        {
+          "title": "Ich kann mich nicht verbinden",
+          "bullets": [
+            "Bestätige, dass die Adresse genau mc.mysterria.net lautet.",
+            "Nutze Minecraft 26.1.2 oder neuer.",
+            "Offline-Konten müssen nach ihrer ersten Registrierung /login verwenden."
+          ]
+        }
+      ],
+      "related": [
+        "connect",
+        "commands",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "commands",
+      "category": "help",
+      "icon": "fa-solid fa-terminal",
+      "title": "Wichtige Befehlsreferenz",
+      "shortTitle": "Befehle",
+      "summary": "Eine gezielte Liste von Befehlen, die Spieler häufig benötigen, sowie absichtlich nicht verfügbare Befehle.",
+      "answer": "Die meisten Charakterinformationen erreichst du über Inventaroberflächen. Befehle öffnen hauptsächlich Menüs, verwalten Communities oder dienen der Kommunikation.",
+      "tags": [
+        "befehl",
+        "magie",
+        "täglich",
+        "abstimmung",
+        "wallet",
+        "subspace",
+        "party",
+        "bounty",
+        "lands",
+        "claim",
+        "krieg",
+        "kirche",
+        "home",
+        "spawn",
+        "tpa"
+      ],
+      "sections": [
+        {
+          "title": "Start und Fortschritt",
+          "commands": [
+            {
+              "command": "/register <pass> <pass>",
+              "purpose": "Offline-Konto einmal registrieren"
+            },
+            {
+              "command": "/login <pass>",
+              "purpose": "Bei einem Offline-Konto anmelden"
+            },
+            {
+              "command": "/magic",
+              "purpose": "Optionalen Begleiter für die nächsten Schritte öffnen"
+            },
+            {
+              "command": "/subspace",
+              "purpose": "Dungeons, Orte, Stärke und Abklingzeiten durchsuchen"
+            },
+            {
+              "command": "/party",
+              "purpose": "Dungeon-Gruppe erstellen oder verwalten"
+            },
+            {
+              "command": "/bounty",
+              "purpose": "Menü für Schauspiel-Kopfgelder öffnen"
+            }
+          ]
+        },
+        {
+          "title": "Wirtschaft und Community",
+          "commands": [
+            {
+              "command": "/wallet",
+              "purpose": "Währung, Bewertung und Zahlungen verwalten"
+            },
+            {
+              "command": "/daily",
+              "purpose": "Tägliche Belohnungen öffnen"
+            },
+            {
+              "command": "/emporium or /emp",
+              "purpose": "Brilliant Emporium öffnen"
+            },
+            {
+              "command": "/vote",
+              "purpose": "Abstimmungsoptionen öffnen"
+            },
+            {
+              "command": "/lands …",
+              "purpose": "Städte, Rollen und Claims verwalten"
+            },
+            {
+              "command": "/claim and /unclaim",
+              "purpose": "Aktuellen Chunk beanspruchen oder freigeben"
+            },
+            {
+              "command": "/wars",
+              "purpose": "Kriegsverwaltung öffnen"
+            }
+          ]
+        },
+        {
+          "title": "Befehle, die nicht existieren",
+          "paragraphs": [
+            "Es gibt bewusst kein /home, /sethome, /spawn, /tpa, /rtp oder /back. Reisen und Mobilität sind Teil des Fortschritts."
+          ],
+          "warning": "Sequenz, Schauspielen, Spiritualität und Wahnsinn prüfst du nicht per Befehl. Öffne dein Inventar, klicke oben links auf das Pfadsymbol und bewege den Mauszeiger über den Kopf deines Charakters."
+        }
+      ],
+      "related": [
+        "server-basics",
+        "activities",
+        "economy"
+      ]
+    }
+  ]
+}

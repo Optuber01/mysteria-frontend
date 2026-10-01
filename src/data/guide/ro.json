@@ -1,0 +1,1137 @@
+{
+  "ui": {
+    "eyebrow": "GHIDUL JUCĂTORULUI NOU",
+    "title": "Primii pași prin Ceața Cenușie",
+    "lede": "Începe să joci în câteva minute, înțelege alegerile importante și găsește un răspuns direct atunci când Mysterria face ceva diferit de Minecraft-ul obișnuit.",
+    "serverAddress": "ADRESA SERVERULUI",
+    "copyAddress": "Copiază adresa",
+    "copied": "Copiat",
+    "startJourney": "Începe prima oră",
+    "findAnswer": "Găsește un răspuns",
+    "quickFactsLabel": "ÎNAINTE SĂ TE CONECTEZI",
+    "expectationsEyebrow": "MYSTERRIA ESTE DIFERITĂ",
+    "expectationsTitle": "Află acestea înainte să te stabilești",
+    "expectationsLede": "Serverul face câteva alegeri deliberate care îi surprind pe jucătorii veniți de pe servere survival convenționale.",
+    "tasksEyebrow": "AJUTOR RAPID",
+    "tasksTitle": "Ce încerci să faci?",
+    "tasksLede": "Alege un obiectiv sau caută în propriile cuvinte. Vei vedea doar informațiile necesare pentru acea sarcină.",
+    "searchPlaceholder": "Încearcă „primul elixir”, „teleportare acasă” sau „interfață lipsă”…",
+    "clearSearch": "Șterge",
+    "searchResults": "Răspunsuri potrivite",
+    "noResults": "Nu s-a găsit un răspuns direct",
+    "noResultsHint": "Încearcă o formulare mai scurtă, răsfoiește subiectele de mai jos sau întreabă pe Discord.",
+    "firstHourEyebrow": "PRIMA ORĂ",
+    "firstHourTitle": "De la conectare la primul obiectiv real",
+    "firstHourLede": "Aceasta este cea mai scurtă rută sigură de la lista serverelor până la a ști ce trebuie să faci în continuare.",
+    "openStep": "Vezi detaliile",
+    "starterEyebrow": "O DECIZIE IMPORTANTĂ",
+    "starterTitle": "Alege ajutorul, nu soarta",
+    "starterLede": "Calea selectată în meniul de începător doar direcționează bonusul tău de început. Mai târziu poți bea un elixir de Secvența 9 dintr-o cale complet diferită.",
+    "benefit": "Primești",
+    "cost": "Cost permanent",
+    "bestFor": "Potrivit pentru",
+    "recommended": "PUTERE MAXIMĂ",
+    "important": "Importantă",
+    "starterWarning": "Alegerea bonusului nu poate fi schimbată în mod normal. Echipa poate reseta o greșeală reală printr-un tichet Discord, dar confirmarea trebuie considerată finală.",
+    "directionEyebrow": "PRIMUL TĂU OBIECTIV",
+    "directionTitle": "Alege o direcție în loc să rătăcești",
+    "directionLede": "Ambele abordări sunt valide și niciuna nu te împiedică să o alegi mai târziu pe cealaltă.",
+    "browseEyebrow": "GHID",
+    "browseTitle": "Răsfoiește fiecare sistem important",
+    "browseLede": "Informațiile avansate stau deoparte până când ai nevoie de ele.",
+    "topics": "subiecte",
+    "popularEyebrow": "ÎNTREBĂRI FRECVENTE",
+    "popularTitle": "Întrebări populare ale jucătorilor",
+    "openTopic": "Deschide ghidul",
+    "backToGuide": "Înapoi la pagina principală a ghidului",
+    "quickAnswer": "RĂSPUNS RAPID",
+    "onThisPage": "PE ACEASTĂ PAGINĂ",
+    "relatedTopics": "Continuă lectura",
+    "commonMistake": "GREȘEALĂ FRECVENTĂ",
+    "usefulTip": "SFAT UTIL",
+    "screenshotsLabel": "CE VEI VEDEA",
+    "screenshotIp": "Adaugă adresa serverului",
+    "screenshotPortal": "Alege Mysteries din selector",
+    "screenshotJoin": "Serverul din lista ta",
+    "profileCta": "Deschide profilul",
+    "pathwaysCta": "Explorează Căile",
+    "fullRulesCta": "Citește regulile complete",
+    "supportCta": "Întreabă pe Discord",
+    "mobileBrowse": "Răsfoiește subiectele"
+  },
+  "facts": [
+    {
+      "label": "CLIENT",
+      "value": "Java recomandat",
+      "note": "Bedrock funcționează prin Geyser, cu interfață personalizată limitată"
+    },
+    {
+      "label": "VERSIUNE",
+      "value": "26.1.2+",
+      "note": "Folosește un client actual dacă pachetul de resurse nu funcționează"
+    },
+    {
+      "label": "OBLIGATORIU",
+      "value": "Acceptă pachetul de resurse",
+      "note": "Nu sunt necesare moduri de client"
+    }
+  ],
+  "expectations": [
+    {
+      "icon": "fa-solid fa-route",
+      "title": "Nu există comenzi de teleportare",
+      "summary": "Fără /home, /spawn, /tpa, /rtp sau /back.",
+      "detail": "Distanța este un cost strategic, iar mobilitatea este una dintre recompensele oferite de Căi precum Ușa. Alege cu grijă unde te stabilești."
+    },
+    {
+      "icon": "fa-solid fa-hourglass-half",
+      "title": "Progresia este deliberat îndelungată",
+      "summary": "Secvențele timpurii durează aproximativ o săptămână; nivelurile înalte durează luni.",
+      "detail": "Mysterria este concepută în jurul unei călătorii de un sezon, nu al atingerii puterii maxime într-un weekend."
+    },
+    {
+      "icon": "fa-solid fa-rotate",
+      "title": "Lumea este sezonieră",
+      "summary": "O resetare completă are loc aproximativ la fiecare șase luni.",
+      "detail": "Resetarea include progresul Beyonderilor. Menține lumea sănătoasă și înseamnă că merită să te alături chiar și la mijlocul unui sezon."
+    },
+    {
+      "icon": "fa-solid fa-shield-halved",
+      "title": "Explorarea este de obicei sigură",
+      "summary": "PvP-ul în sălbăticie este dezactivat, iar griefingul este interzis.",
+      "detail": "PvP există doar în zone anunțate, Incursiuni ale Cosmosului sau revendicări de oraș unde un proprietar îl activează intenționat."
+    },
+    {
+      "icon": "fa-solid fa-box-open",
+      "title": "Cuferele vanilla conțin pradă magică",
+      "summary": "Cuferele generate natural se reumplu în timp.",
+      "detail": "Satele, minele abandonate, templele, epavele, bastioanele și alte structuri sunt surse regenerabile de pradă Beyonder."
+    }
+  ],
+  "tasks": [
+    {
+      "icon": "fa-solid fa-plug",
+      "title": "Alătură-te serverului",
+      "description": "Versiuni, pachet de resurse, conturi și verificare.",
+      "topicId": "connect"
+    },
+    {
+      "icon": "fa-solid fa-scale-balanced",
+      "title": "Alege-mi bonusul de început",
+      "description": "Înțelege Scurtătura, Hotărârea și ce înseamnă alegerea căii.",
+      "topicId": "starter-choice"
+    },
+    {
+      "icon": "fa-solid fa-flask",
+      "title": "Devino Secvența 9",
+      "description": "Formulă, cazan, ingrediente, preparare și băut.",
+      "topicId": "first-potion"
+    },
+    {
+      "icon": "fa-solid fa-box-open",
+      "title": "Găsește formule sau ingrediente",
+      "description": "Cufere de pradă, focalizare, creaturi, noduri și schimburi.",
+      "topicId": "loot"
+    },
+    {
+      "icon": "fa-solid fa-arrow-trend-up",
+      "title": "Avansează-mi Secvența",
+      "description": "Interpretare, ritualuri, Spiritualitate, Nebunie și progres.",
+      "topicId": "progression"
+    },
+    {
+      "icon": "fa-solid fa-dungeon",
+      "title": "Găsește un dungeon",
+      "description": "Folosește /subspace, slăbește Rifturi, formează un grup și înțelege timpii de reîncărcare.",
+      "topicId": "activities"
+    },
+    {
+      "icon": "fa-solid fa-house-flag",
+      "title": "Alătură-te unui oraș sau construiește unul",
+      "description": "Teren protejat, joc de grup, națiuni și joc solo.",
+      "topicId": "towns"
+    },
+    {
+      "icon": "fa-solid fa-wand-magic-sparkles",
+      "title": "Repară interfața personalizată lipsă",
+      "description": "Pachet de resurse, versiune client și limitări Bedrock.",
+      "topicId": "troubleshooting"
+    }
+  ],
+  "firstHour": [
+    {
+      "title": "Conectează-te și acceptă pachetul de resurse",
+      "description": "Adaugă mc.mysterria.net, intră în Mysteries prin selectorul din lobby și acceptă pachetul serverului.",
+      "topicId": "connect"
+    },
+    {
+      "title": "Înregistrează-te doar dacă Minecraft îți cere",
+      "description": "Conturile offline folosesc /register și /login. Conturile premium oficiale sunt autentificate automat.",
+      "topicId": "connect"
+    },
+    {
+      "title": "Verifică-ți contul Minecraft",
+      "description": "Generează un cod în profil, apoi introdu-l în fereastra de verificare afișată în joc.",
+      "topicId": "connect"
+    },
+    {
+      "title": "Alege-ți cu grijă bonusul de început",
+      "description": "Calea este doar o direcție pentru bonus. Scurtătura și Hotărârea au costuri foarte diferite pe termen lung.",
+      "topicId": "starter-choice"
+    },
+    {
+      "title": "Alege viața într-un oraș sau autosuficiența",
+      "description": "Caută un oraș care recrutează sau începe singur un circuit de cufere și explorare.",
+      "topicId": "towns"
+    },
+    {
+      "title": "Lucrează pentru primul tău elixir",
+      "description": "Prima ta Secvență necesită o formulă, un cazan, ingrediente, o preparare reușită și nimic altceva.",
+      "topicId": "first-potion"
+    }
+  ],
+  "starterChoices": [
+    {
+      "name": "Calea Scurtăturii",
+      "eyebrow": "JOACĂ ACUM CU ABILITĂȚI",
+      "benefit": "Secvența 9 instantaneu în calea selectată.",
+      "cost": "−10 % Spiritualitate maximă pentru totdeauna, la fiecare Secvență.",
+      "bestFor": "Jucători care prețuiesc un început imediat mai mult decât puterea maximă pe termen lung."
+    },
+    {
+      "name": "Calea Hotărârii",
+      "eyebrow": "ÎNVAȚĂ ÎNTREGUL CIRCUIT",
+      "benefit": "Următorul cufăr de pradă conține garantat o formulă.",
+      "cost": "Niciunul.",
+      "bestFor": "Jucători care vor să învețe prepararea și să-și păstreze întregul potențial.",
+      "recommended": true
+    }
+  ],
+  "directions": [
+    {
+      "icon": "fa-solid fa-people-roof",
+      "title": "Alătură-te unui oraș stabilit",
+      "eyebrow": "MAI PUȚINĂ FRICȚIUNE",
+      "description": "Întreabă în chat sau pe Discord de un oraș care acceptă membri noi.",
+      "points": [
+        "Împarte cazane, formule, ingrediente și teren protejat.",
+        "Găsește grupuri pentru Gardieni, dungeonuri, Beyonderi Sălbatici și Incursions.",
+        "Folosește o rețea de baze stabilită într-o lume fără comenzi de teleportare."
+      ],
+      "topicId": "towns"
+    },
+    {
+      "icon": "fa-solid fa-compass",
+      "title": "Joacă solo",
+      "eyebrow": "AUTONOM",
+      "description": "Pe deplin viabil, dar mai lent și mai dependent de explorare.",
+      "points": [
+        "Deschide fiecare cufăr generat; prada lor Beyonder se regenerează.",
+        "Vânează Creaturi Beyonder și notează nodurile de resurse regenerabile.",
+        "Schimbă materiale excedentare și alătură-te grupurilor când conținutul specific o cere."
+      ],
+      "topicId": "loot"
+    }
+  ],
+  "categories": {
+    "start": "Începe aici",
+    "progression": "Progres Beyonder",
+    "world": "Lume și activități",
+    "community": "Economie și societate",
+    "help": "Ajutor și referință"
+  },
+  "popularQuestions": [
+    {
+      "question": "Cum mă teleportez acasă?",
+      "topicId": "server-basics"
+    },
+    {
+      "question": "De ce arată jocul ca Vanilla?",
+      "topicId": "troubleshooting"
+    },
+    {
+      "question": "M-a blocat alegerea unei Căi?",
+      "topicId": "starter-choice"
+    },
+    {
+      "question": "Cum devin Secvența 9?",
+      "topicId": "first-potion"
+    },
+    {
+      "question": "Unde sunt cuferele speciale de pradă?",
+      "topicId": "loot"
+    },
+    {
+      "question": "De ce nu avansează progresul meu de interpretare?",
+      "topicId": "progression"
+    },
+    {
+      "question": "Mă poate omorî cineva în timp ce explorez?",
+      "topicId": "server-basics"
+    },
+    {
+      "question": "Cum găsesc un dungeon?",
+      "topicId": "activities"
+    }
+  ],
+  "topics": [
+    {
+      "id": "connect",
+      "category": "start",
+      "icon": "fa-solid fa-plug",
+      "title": "Conectează-te, înregistrează-te și verifică-te",
+      "shortTitle": "Conectare și verificare",
+      "summary": "Tot ce îți trebuie pentru a ajunge la Mysteries cu clientul corect și a debloca bonusul de început.",
+      "answer": "Conectează-te la mc.mysterria.net cu un client Java actualizat, acceptă pachetul de resurse, selectează Mysteries în lobby și verifică-te prin profilul de pe site.",
+      "tags": [
+        "ip",
+        "address",
+        "join",
+        "java",
+        "bedrock",
+        "geyser",
+        "register",
+        "login",
+        "verify",
+        "discord",
+        "resource pack",
+        "version",
+        "premium",
+        "offline"
+      ],
+      "sections": [
+        {
+          "title": "Detalii despre server",
+          "bullets": [
+            "Adresă: mc.mysterria.net.",
+            "Versiuni acceptate: 26.1.2 și mai noi.",
+            "Java Edition oferă experiența complet acceptată; nu sunt necesare moduri de client.",
+            "Bedrock se poate conecta prin Geyser, dar pictogramele Căilor și unele interfețe personalizate se pot afișa incorect."
+          ]
+        },
+        {
+          "title": "Conectare",
+          "steps": [
+            "Deschide Multiplayer, adaugă mc.mysterria.net și intră pe server.",
+            "Acceptă pachetul de resurse al serverului când Minecraft îl solicită.",
+            "În selectorul de servere din lobby, alege Mysteries.",
+            "Citește dialogul NPC-ului din lobby înainte de plecare; conține informații utile de orientare."
+          ],
+          "warning": "Dacă totul arată ca Minecraft vanilla simplu, ai refuzat pachetul de resurse sau clientul Java este prea vechi. Activează pachetele de resurse ale serverului și actualizează clientul."
+        },
+        {
+          "title": "Înregistrarea contului",
+          "paragraphs": [
+            "Conturile oficiale premium de Minecraft sar peste înregistrare și se autentifică automat.",
+            "Conturile offline se înregistrează o dată cu /register <password> <password>, apoi folosesc /login <password> la conectările viitoare."
+          ]
+        },
+        {
+          "title": "Verificare Discord",
+          "steps": [
+            "Autentifică-te pe site-ul Mysterria și deschide-ți profilul.",
+            "Generează un cod de verificare Minecraft.",
+            "Introdu codul în fereastra de verificare care apare în joc.",
+            "După confirmare, devin disponibile Calea pentru începători și meniul bonusului de început."
+          ]
+        }
+      ],
+      "related": [
+        "starter-choice",
+        "troubleshooting",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "server-basics",
+      "category": "start",
+      "icon": "fa-solid fa-map",
+      "title": "Cum funcționează lumea Mysterria",
+      "shortTitle": "Bazele lumii",
+      "summary": "Călătorii, siguranță, moarte, resetări sezoniere și regulile care diferă de serverele convenționale de supraviețuire.",
+      "answer": "Mysterria este o lume sezonieră delimitată, unde distanța contează, explorarea zonelor sălbatice este sigură, iar cuferele generate natural oferă pradă magică regenerabilă.",
+      "tags": [
+        "home",
+        "spawn",
+        "tpa",
+        "rtp",
+        "back",
+        "teleport",
+        "map",
+        "pvp",
+        "grief",
+        "death",
+        "keep inventory",
+        "reset",
+        "season",
+        "world border",
+        "safe"
+      ],
+      "sections": [
+        {
+          "title": "Hartă și călătorii",
+          "paragraphs": [
+            "Lumea de Suprafață este limitată la 15.000 × 15.000 de blocuri. Netherul și dimensiunile speciale există, dar majoritatea conținutului Beyonder se află în Lumea de Suprafață."
+          ],
+          "warning": "Nu există /home, /sethome, /spawn, /tpa, /rtp sau /back. Astfel se păstrează valoarea planificării călătoriilor și a Căilor de mobilitate precum Ușa."
+        },
+        {
+          "title": "Siguranță și PvP",
+          "bullets": [
+            "PvP-ul în sălbăticie este dezactivat implicit.",
+            "PvP-ul este limitat la zonele PvP desemnate și la zonele de Incursiune a Cosmosului.",
+            "Proprietarii orașelor pot activa intenționat PvP-ul pentru roluri specifice în revendicările lor.",
+            "Griefingul este interzis, iar revendicările orașelor oferă protecție terenului."
+          ]
+        },
+        {
+          "title": "Moartea",
+          "paragraphs": [
+            "În rest, moartea urmează regulile vanilla: obiectele cad și nu există keep-inventory. Beyonderii primesc și o cantitate mică de Nebunie temporară."
+          ],
+          "tip": "Doar un jucător care poartă o Unicitate suferă penalizarea suplimentară de acomodare. Jucătorii obișnuiți nu pierd progresul Secvenței prin moarte normală."
+        },
+        {
+          "title": "Resetări sezoniere",
+          "paragraphs": [
+            "Aproximativ la fiecare șase luni, lumea și progresul Beyonder se resetează. Acest lucru menține harta sănătoasă și le permite noilor veniți de la mijlocul sezonului să concureze fără a rămâne permanent în urmă."
+          ]
+        }
+      ],
+      "related": [
+        "towns",
+        "activities",
+        "progression"
+      ]
+    },
+    {
+      "id": "starter-choice",
+      "category": "start",
+      "icon": "fa-solid fa-scale-balanced",
+      "title": "Calea începătorului și bonusul de început",
+      "shortTitle": "Alegerea de început",
+      "summary": "Ce schimbă de fapt alegerea inițială a Căii și compromisului permanent dintre Scurtătură și Hotărâre.",
+      "answer": "Calea pe care o alegi nu te transformă în Beyonder și nu îți blochează Calea viitoare. Ea doar direcționează unul dintre cele două bonusuri de început.",
+      "tags": [
+        "newbie",
+        "bonus",
+        "shortcut",
+        "resolve",
+        "pathway",
+        "locked",
+        "repick",
+        "magic",
+        "sequence 9",
+        "spirituality",
+        "recipe guarantee"
+      ],
+      "sections": [
+        {
+          "title": "Calea ta nu este blocată",
+          "paragraphs": [
+            "Devii parte a unei Căi doar când bei elixirul ei de Secvența 9. Dacă meniul de începător spune Nebunul, dar mai târziu bei un elixir al Ușii, devii Ușa.",
+            "/magic este un meniu opțional de sugestii. Faptul că vezi o Cale acolo nu dovedește că ești deja Beyonder."
+          ]
+        },
+        {
+          "title": "Calea Scurtăturii",
+          "paragraphs": [
+            "Devii imediat Secvența 9 fără preparare, dar pierzi permanent 10 % din Spiritualitatea maximă la fiecare Secvență și nivel de Interpretare."
+          ],
+          "warning": "Penalizarea de Spiritualitate este permanentă. Nu se recuperează prin avansare sau prin finalizarea Interpretării."
+        },
+        {
+          "title": "Calea Hotărârii",
+          "paragraphs": [
+            "Contorul tău de concentrare a formulelor este mutat cu un pas sub garanție, astfel încât următorul cufăr de pradă natural conține o formulă. Nu există cost permanent."
+          ],
+          "tip": "Hotărârea te învață ciclul normal formulă → cazan → ingrediente → preparare și păstrează puterea completă pe termen lung."
+        },
+        {
+          "title": "Confirmare și greșeli",
+          "paragraphs": [
+            "Jucătorii nu pot alege din nou după confirmare. Pentru o greșeală autentică de jucător nou, deschide un ticket Discord; echipa poate oferi uneori o resetare."
+          ]
+        }
+      ],
+      "related": [
+        "first-potion",
+        "progression",
+        "connect"
+      ]
+    },
+    {
+      "id": "first-potion",
+      "category": "progression",
+      "icon": "fa-solid fa-flask",
+      "title": "Prepară și bea primul tău elixir",
+      "shortTitle": "Primul elixir",
+      "summary": "Formula completă de Secvența 9 și ciclul de preparare, fără mituri ale comunității.",
+      "answer": "Pentru a ajunge la Secvența 9: obține o formulă, construiește un cazan, adună ingredientele, prepară cu succes și bea. Primul tău elixir nu necesită Interpretare, ritual sau cost de Nebunie.",
+      "tags": [
+        "sequence 9",
+        "potion",
+        "brew",
+        "brewing",
+        "cauldron",
+        "recipe",
+        "ingredient",
+        "char",
+        "ritual",
+        "altar",
+        "expire",
+        "slots"
+      ],
+      "sections": [
+        {
+          "title": "De ce ai nevoie",
+          "bullets": [
+            "O formulă completă de Secvența 9 sau toate paginile diferite ale formulei.",
+            "Un Cazan Magic construit dintr-un plan de Pergament de Altar.",
+            "Ingrediente principale și secundare specifice Căii și Secvenței.",
+            "Cărbunii Beyonder pot înlocui simultan toate ingredientele principale dintr-o formulă."
+          ],
+          "warning": "Altarele Sacrificiale sunt pentru Haruri, nu pentru prepararea elixirurilor. Planurile lor seamănă cu cele ale cazanelor."
+        },
+        {
+          "title": "Ordinea preparării",
+          "steps": [
+            "Pune ingredientele principale sau Cărbunii Beyonder în sloturile din stânga.",
+            "Pune ingredientele secundare în sloturile din dreapta.",
+            "Pune formula în slotul central.",
+            "Păstrează fiecare obiect în aceeași ordine indicată de formulă.",
+            "Dacă reușește, bea elixirul pentru a deveni Secvența 9."
+          ],
+          "tip": "O preparare eșuată nu consumă ingrediente. Cazanele de nivel mai înalt cresc șansa de reușită în loc să reducă pierderile."
+        },
+        {
+          "title": "Ingrediente",
+          "bullets": [
+            "Ingredientele care pot fi găsite apar doar în cuferele de pradă generate.",
+            "Ingredientele obținute ca pradă provin doar de la Creaturi Beyonder.",
+            "Ingredientele minabile cresc ca noduri distincte în lume; fă clic dreapta pentru a le recolta."
+          ]
+        },
+        {
+          "title": "Expirarea elixirului",
+          "paragraphs": [
+            "Un elixir durează două zile în timp real din momentul în care există. Prepară-l când ești gata să-l bei. Un elixir expirat se transformă, unde este posibil, într-un Artefact Sigilat corespunzător, dar nu mai oferă avansarea dorită."
+          ]
+        }
+      ],
+      "related": [
+        "loot",
+        "starter-choice",
+        "progression"
+      ]
+    },
+    {
+      "id": "loot",
+      "category": "progression",
+      "icon": "fa-solid fa-box-open",
+      "title": "Găsește pradă, formule și ingrediente",
+      "shortTitle": "Pradă și concentrare",
+      "summary": "De unde provin cu adevărat materialele magice și cum garanția concentrării reduce ghinionul.",
+      "answer": "Fiecare cufăr vanilla generat natural este un container regenerabil de pradă Beyonder. Deschide-le repetat și concentrează categoria de recompensă de care ai nevoie acum.",
+      "tags": [
+        "loot",
+        "chest",
+        "container",
+        "recipe",
+        "page",
+        "ingredient",
+        "altar scroll",
+        "focus",
+        "focusing",
+        "pity",
+        "guarantee",
+        "wild beyonder",
+        "creature",
+        "node",
+        "energy shard"
+      ],
+      "sections": [
+        {
+          "title": "Containere de pradă",
+          "paragraphs": [
+            "Sunt valabile cuferele din sate, mine abandonate, temnițe, temple, epave, comori îngropate, bastioane și portaluri ruinate. Nu există un cufăr Beyonder special strălucitor."
+          ],
+          "tip": "Conținutul se regenerează în timp. Structurile explorate anterior rămân valoroase și merită revizitate."
+        },
+        {
+          "title": "Concentrarea recompenselor",
+          "paragraphs": [
+            "Alege una dintre patru categorii: Elixiruri, Formule, Pagini sau Pergamente de Altar. Fiecare cufăr eligibil fără recompensa respectivă avansează un contor vizibil; cufărul de la prag o va conține garantat."
+          ],
+          "warning": "Ingredientele nu pot fi concentrate. Ele trebuie găsite în cufere, luate de la creaturi, recoltate din noduri de resurse, obținute prin schimb sau convertite prin alte sisteme."
+        },
+        {
+          "title": "Obținere țintită",
+          "bullets": [
+            "Fă schimb cu un Beyonder Sălbatic pașnic pentru bunuri specifice unei Căi.",
+            "Folosește /subspace și parcurge temnițe pentru materiale repetabile.",
+            "Vânează Creaturi Beyonder pentru ingrediente obținute ca pradă și puncte de Interpretare.",
+            "Schimbă ingredientele în exces cu un sătean fără profesie pentru Fragmente de Energie.",
+            "Verifică inventarul rotativ al Emporiului Strălucitor."
+          ]
+        }
+      ],
+      "related": [
+        "first-potion",
+        "activities",
+        "economy"
+      ]
+    },
+    {
+      "id": "progression",
+      "category": "progression",
+      "icon": "fa-solid fa-arrow-trend-up",
+      "title": "Interpretare, ritualuri, Spiritualitate și Nebunie",
+      "shortTitle": "Avansare",
+      "summary": "Cum funcționează progresul după Secvența 9 și unde îți poți verifica starea actuală.",
+      "answer": "După ce devii Beyonder, avansarea combină Interpretarea din mai multe surse, următorul elixir și ritualuri din ce în ce mai importante. Starea ta completă este în interfața Căii din inventar.",
+      "tags": [
+        "acting",
+        "digestion",
+        "ritual",
+        "spirituality",
+        "mana",
+        "madness",
+        "mutation",
+        "health",
+        "stats",
+        "status",
+        "sequence",
+        "advance",
+        "bounty",
+        "bottle"
+      ],
+      "sections": [
+        {
+          "title": "Verifică-ți personajul",
+          "steps": [
+            "Deschide inventarul.",
+            "Apasă pictograma Căii din colțul stânga-sus.",
+            "Treci cu cursorul peste capul personajului tău din interfață."
+          ],
+          "tip": "Aici sunt afișate Secvența, Interpretarea și digestia, Spiritualitatea și Nebunia. Nu există comandă de stare."
+        },
+        {
+          "title": "Interpretare și digestie",
+          "paragraphs": [
+            "Simpla lansare a vrăjilor nu avansează neapărat Interpretarea. Fiecare abilitate are o metodă de interpretare specifică, iar o interpretare reușită afișează o notificare în bara de acțiune."
+          ],
+          "bullets": [
+            "Joc pasiv și metode de interpretare specifice abilităților.",
+            "Sticle de Interpretare și recompense rotative.",
+            "Finalizarea temnițelor pentru Interpretare PvE.",
+            "Incursiuni ale Cosmosului pentru Interpretare PvP."
+          ],
+          "warning": "Nicio sursă de Interpretare nu poate ajunge singură la 100 %. Combină mai multe surse."
+        },
+        {
+          "title": "Ritualuri",
+          "bullets": [
+            "Secvența 9 nu necesită niciodată un ritual.",
+            "Pentru Secvențele-țintă 8–6, ritualurile sunt opționale, dar omiterea lor adaugă Nebunie sezonieră permanentă.",
+            "La Secvența-țintă 5 și mai sus, ritualul este obligatoriu."
+          ]
+        },
+        {
+          "title": "Spiritualitate și Nebunie",
+          "paragraphs": [
+            "Spiritualitatea alimentează abilitățile și se regenerează în timp. Spiritualitatea maximă crește odată cu Secvența și progresul de Interpretare.",
+            "Nebunia are componente temporare, permanente și brute. Moartea și avansarea nesigură o adaugă; odihna și unele mecanici reduc doar părțile recuperabile."
+          ],
+          "warning": "Nebunia ridicată are efecte reale asupra jocului și poate duce la Mutație. Ia în serios avertismentele de avansare."
+        }
+      ],
+      "related": [
+        "first-potion",
+        "activities",
+        "advanced"
+      ]
+    },
+    {
+      "id": "activities",
+      "category": "world",
+      "icon": "fa-solid fa-dungeon",
+      "title": "Creaturi, Beyonderi Sălbatici, temnițe și Incursiuni",
+      "shortTitle": "Activități și temnițe",
+      "summary": "Principalele activități repetabile care oferă pradă, progres de Interpretare și obiective de grup.",
+      "answer": "Folosește /subspace pentru a localiza temnițe, vânează Creaturi Beyonder în explorare, fă schimb cu Beyonderi Sălbatici compatibili și intră în Incursiuni ale Cosmosului doar după ce verifici culoarea zonei.",
+      "tags": [
+        "dungeon",
+        "subspace",
+        "rift",
+        "party",
+        "cooldown",
+        "help card",
+        "creature",
+        "crimson moon",
+        "wild beyonder",
+        "guardian",
+        "incursion",
+        "pvp",
+        "black zone"
+      ],
+      "sections": [
+        {
+          "title": "Temnițe și Fisuri",
+          "steps": [
+            "Folosește /subspace pentru a vedea fiecare temniță, locația Fisurii, puterea ta relativă și reîncărcările.",
+            "Mergi la Fisură și contribuie cu Fragmente de Energie dacă încă trebuie slăbită.",
+            "Formează un grup cu /party și intră când devine disponibilă."
+          ],
+          "bullets": [
+            "Prada reală este disponibilă o dată pentru fiecare temniță la trei zile.",
+            "Două parcurgeri cu Carte de Ajutor sunt disponibile zilnic fără pradă normală.",
+            "Participarea cu puțini jucători este permisă dacă grupul rămas nu este prea puternic, fără reducerea recompenselor."
+          ]
+        },
+        {
+          "title": "Creaturi și Luna Purpurie",
+          "paragraphs": [
+            "Creaturile Beyonder oferă XP, puncte de Interpretare și ingrediente de Cale. În timpul Lunii Purpurii, aproximativ săptămânale, pescuitul devine o sursă alternativă valoroasă, dar mai periculoasă, de pradă."
+          ]
+        },
+        {
+          "title": "Beyonderi Sălbatici și Gardieni",
+          "paragraphs": [
+            "Atitudinea unui Beyonder Sălbatic depinde de relațiile dintre Căi. Cei pașnici oferă cele mai țintite schimburi de ingrediente și formule din joc; cei ostili sunt lupte serioase. Gardienii protejează obiective importante și sunt concepuți pentru grupuri."
+          ]
+        },
+        {
+          "title": "Incursiuni ale Cosmosului",
+          "paragraphs": [
+            "Incursiunile sunt obiective PvP anunțate. Zonele Verzi și Galbene pun în pericol în principal obiectele purtate și echilibrează daunele între Secvențe. Zonele Negre implică riscul serios de regresie a Secvenței."
+          ],
+          "warning": "Citește culoarea și regulile zonei înainte de a intra. Intrarea într-o Incursiune este o alegere PvP deliberată."
+        }
+      ],
+      "related": [
+        "loot",
+        "progression",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "towns",
+      "category": "community",
+      "icon": "fa-solid fa-house-flag",
+      "title": "Orașe, națiuni, războaie și joc solo",
+      "shortTitle": "Orașe și națiuni",
+      "summary": "Cum schimbă așezările protejate începutul jocului și cum arată un parcurs autosuficient.",
+      "answer": "Alăturarea la un oraș este cel mai rapid început social, iar jocul solo rămâne pe deplin viabil. Orașele oferă revendicări protejate, infrastructură comună, acces la grupuri și avantaje pasive mai târziu.",
+      "tags": [
+        "town",
+        "lands",
+        "claim",
+        "nation",
+        "war",
+        "solo",
+        "join",
+        "settle",
+        "base",
+        "grief",
+        "role",
+        "perk"
+      ],
+      "sections": [
+        {
+          "title": "Alăturarea la un oraș",
+          "paragraphs": [
+            "Întreabă în chatul jocului sau pe Discord de un oraș care acceptă nou-veniți. Jucătorii stabiliți pot împărți formule, ingrediente, cazane, cunoștințe și grupuri pentru conținut dificil."
+          ],
+          "tip": "Într-o lume fără comenzi de teleportare, un loc bun pentru așezare și vecini experimentați sunt avantaje importante."
+        },
+        {
+          "title": "Joc solo",
+          "steps": [
+            "Alege un loc potrivit pentru bază și notează coordonatele importante.",
+            "Deschide fiecare cufăr generat și setează focalizarea recompensei pe blocajul tău actual.",
+            "Vânează creaturi, reține nodurile de resurse și folosește schimburile cu Beyonderi Sălbatici.",
+            "Alătură-te unor grupuri temporare de dungeon sau Incursion fără să-ți pierzi independența."
+          ]
+        },
+        {
+          "title": "Revendicări, niveluri și națiuni",
+          "paragraphs": [
+            "Orașele folosesc roluri și revendicări în stil Lands. Nivelurile mai mari ale orașului deblochează capacitatea populației, cerințe pentru trezorerie, avantaje pasive și beneficii arhitecturale. Orașele de nivel Domeniu pot forma Națiuni."
+          ]
+        },
+        {
+          "title": "Războaie",
+          "paragraphs": [
+            "Războaiele sunt conflicte structurate, opționale, gestionate prin propriile comenzi și reguli ale serverului. Explorarea obișnuită a sălbăticiei rămâne protejată în afara contextelor de luptă desemnate."
+          ]
+        }
+      ],
+      "related": [
+        "server-basics",
+        "economy",
+        "social"
+      ]
+    },
+    {
+      "id": "economy",
+      "category": "community",
+      "icon": "fa-solid fa-coins",
+      "title": "Monede, Fragmente de Energie și Emporium",
+      "shortTitle": "Economie",
+      "summary": "Ce cumpără diferitele monede și cum transformă jocul obișnuit materialele excedentare în progres util.",
+      "answer": "Folosește /wallet pentru Coppets, Licks și Verl d’or; transformă materialele magice nedorite în Fragmente de Energie; câștigă puncte Emporium separate prin activități ale comunității.",
+      "tags": [
+        "money",
+        "currency",
+        "wallet",
+        "coppet",
+        "lick",
+        "verl",
+        "energy shard",
+        "emporium",
+        "daily",
+        "vote",
+        "income",
+        "silk touch",
+        "sell"
+      ],
+      "sections": [
+        {
+          "title": "Bani și Wallet",
+          "paragraphs": [
+            "Monedele principale sunt Coppets, Licks și Verl d’or, gestionate prin /wallet. Evaluarea obiectelor este principala sursă de venit, dar se califică doar minereurile neregenerabile extrase cu Silk Touch."
+          ]
+        },
+        {
+          "title": "Fragmente de Energie",
+          "paragraphs": [
+            "Schimbă ingredientele și formulele de cale excedentare cu un sătean fără profesie. Fragmentele de Energie finanțează schimburile cu Beyonderi Sălbatici, slăbirea Rifturilor, îmbunătățirile Ordinului Secret și activitățile sezoniere."
+          ]
+        },
+        {
+          "title": "Brilliant Emporium",
+          "paragraphs": [
+            "Emporiumul rotește bunuri utile, inclusiv formule magice. Punctele Emporium sunt separate de banii obișnuiți și provin din voturi, serii de autentificări și rapoarte de erori acceptate."
+          ],
+          "commands": [
+            {
+              "command": "/emporium or /emp",
+              "purpose": "Deschide Brilliant Emporium"
+            },
+            {
+              "command": "/daily",
+              "purpose": "Deschide meniul de recompense zilnice"
+            },
+            {
+              "command": "/vote",
+              "purpose": "Deschide votarea serverului"
+            },
+            {
+              "command": "/wallet",
+              "purpose": "Păstrează bani, evaluează obiecte și efectuează plăți"
+            }
+          ]
+        }
+      ],
+      "related": [
+        "loot",
+        "towns",
+        "advanced"
+      ]
+    },
+    {
+      "id": "social",
+      "category": "community",
+      "icon": "fa-solid fa-people-group",
+      "title": "Curieri, Ordine Secrete și joc social",
+      "shortTitle": "Sisteme sociale",
+      "summary": "Sistemele pentru comunicare, livrări, grupuri private și infrastructură comună.",
+      "answer": "Folosește mesajele private obișnuite pentru conversații, Curierii pentru livrări fizice și Ordinele Secrete pentru grupuri private persistente, cu propriile îmbunătățiri și spații.",
+      "tags": [
+        "courier",
+        "horn",
+        "send",
+        "message",
+        "msg",
+        "secret order",
+        "order",
+        "oc",
+        "invite",
+        "sos",
+        "group"
+      ],
+      "sections": [
+        {
+          "title": "Curieri",
+          "paragraphs": [
+            "Coarnele de curier invocă diferite tipuri de curieri pentru a trimite obiecte fizice. Livrările au propriile reguli de capacitate, distanță și siguranță, așa că verifică curierul ales înainte de a încredința marfă valoroasă."
+          ]
+        },
+        {
+          "title": "Ordine Secrete",
+          "paragraphs": [
+            "Ordinele sunt organizații private persistente, cu membri, ofițeri, chat, îmbunătățiri și instrumente de urgență. În cele din urmă pot oferi opțiuni de mobilitate precum Invocarea Instantanee și un Bârlog Secret."
+          ],
+          "commands": [
+            {
+              "command": "/o invite, /o kick",
+              "purpose": "Gestionează membrii Ordinului"
+            },
+            {
+              "command": "/o vice set/remove",
+              "purpose": "Gestionează vice-liderii"
+            },
+            {
+              "command": "/o sos",
+              "purpose": "Folosește sistemul de urgență al Ordinului"
+            },
+            {
+              "command": "/oc",
+              "purpose": "Deschide chatul privat al Ordinului"
+            }
+          ]
+        },
+        {
+          "title": "Mesaje private",
+          "commands": [
+            {
+              "command": "/msg, /pm, /w",
+              "purpose": "Trimite un mesaj privat"
+            },
+            {
+              "command": "/reply",
+              "purpose": "Răspunde la cel mai recent mesaj privat"
+            }
+          ]
+        }
+      ],
+      "related": [
+        "towns",
+        "economy",
+        "advanced"
+      ]
+    },
+    {
+      "id": "advanced",
+      "category": "world",
+      "icon": "fa-solid fa-star-of-life",
+      "title": "Sisteme pe termen lung și avansate",
+      "shortTitle": "Sisteme avansate",
+      "summary": "O hartă concisă a sistemelor care devin relevante mai târziu într-un sezon.",
+      "answer": "Harurile, Artefactele Sigilate, Bisericile, Numele Onorifice, Unicitățile, armele de foc și alte sisteme specializate sunt straturi pe termen lung, nu cerințe pentru primele tale zile.",
+      "tags": [
+        "boon",
+        "sealed artifact",
+        "church",
+        "honorific name",
+        "uniqueness",
+        "sequence 0",
+        "firearm",
+        "beverage",
+        "battlepass",
+        "subscription",
+        "store",
+        "creator"
+      ],
+      "sections": [
+        {
+          "title": "Haruri și Altare Sacrificiale",
+          "paragraphs": [
+            "Harurile sunt o pistă separată de progres, avansată prin Altare Sacrificiale. Nu îți înlocuiesc calea, iar altarele lor nu pot prepara elixire."
+          ]
+        },
+        {
+          "title": "Artefacte Sigilate",
+          "paragraphs": [
+            "Artefactele oferă efecte puternice însoțite de dezavantaje. Pot proveni din meșteșugărit, pradă sau elixire expirate și trebuie evaluate ca compromisuri, nu ca îmbunătățiri necondiționate."
+          ]
+        },
+        {
+          "title": "Biserici și Nume Onorifice",
+          "paragraphs": [
+            "Bisericile sunt instituții de final de joc construite în jurul credinței, ancorelor, rugăciunii, pământului și avantajelor variabile. Numele Onorifice permit comunicarea rituală și devin mai scurte pe măsură ce proprietarul lor avansează în Secvență."
+          ]
+        },
+        {
+          "title": "Unicitate și Secvența 0",
+          "paragraphs": [
+            "Unicitatea unei căi face parte din drumul spre Secvența 0 și necesită acomodare. Purtarea uneia adaugă o penalizare la moarte progresului de acomodare."
+          ]
+        },
+        {
+          "title": "Sprijin opțional",
+          "paragraphs": [
+            "Magazinul, Battlepass-ul premium și abonamentele susțin serverul și oferă comoditate. Un jucător gratuit poate totuși atinge fiecare nivel de putere."
+          ]
+        }
+      ],
+      "related": [
+        "progression",
+        "economy",
+        "social"
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "category": "help",
+      "icon": "fa-solid fa-screwdriver-wrench",
+      "title": "Depanarea conexiunii și interfeței",
+      "shortTitle": "Depanare",
+      "summary": "Răspunsuri rapide pentru interfața personalizată lipsă, probleme de verificare, clienți incompatibili și limitările Bedrock.",
+      "answer": "Interfețele magice lipsă înseamnă aproape întotdeauna că pachetul de resurse a fost refuzat sau că clientul Java trebuie actualizat. Bedrock are limitări inevitabile ale interfeței personalizate.",
+      "tags": [
+        "problem",
+        "broken",
+        "missing",
+        "vanilla",
+        "ui",
+        "interface",
+        "resource pack",
+        "verify",
+        "code",
+        "expired",
+        "bedrock",
+        "mobile",
+        "geyser",
+        "outdated client",
+        "connect"
+      ],
+      "sections": [
+        {
+          "title": "Serverul arată ca Vanilla",
+          "steps": [
+            "Editează intrarea serverului și setează Pachete de resurse ale serverului la Activat.",
+            "Reconectează-te și acceptă pachetul.",
+            "Dacă tot eșuează fără mesaj, actualizează clientul Java și reconectează-te."
+          ],
+          "warning": "Jucătorii Bedrock pot vedea în continuare pictograme de cale lipsă sau interfețe personalizate afișate greșit. Aceasta este o limitare cunoscută a Geyser."
+        },
+        {
+          "title": "Verificarea nu s-a finalizat",
+          "steps": [
+            "Revino la profil și generează un cod nou.",
+            "Introdu-l în fereastra de verificare din joc.",
+            "Dacă autentificarea Discord pe site a eșuat, încearcă din nou după ce ștergi cookie-urile site-ului.",
+            "Deschide un ticket pe Discord dacă contul rămâne neconectat."
+          ]
+        },
+        {
+          "title": "Nu mă pot conecta",
+          "bullets": [
+            "Confirmă că adresa este exact mc.mysterria.net.",
+            "Folosește Minecraft 26.1.2 sau mai nou.",
+            "Conturile offline trebuie să folosească /login după prima lor înregistrare."
+          ]
+        }
+      ],
+      "related": [
+        "connect",
+        "commands",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "commands",
+      "category": "help",
+      "icon": "fa-solid fa-terminal",
+      "title": "Referință pentru comenzile esențiale",
+      "shortTitle": "Comenzi",
+      "summary": "O listă concentrată de comenzi de care jucătorii au nevoie des, plus comenzi indisponibile în mod intenționat.",
+      "answer": "Majoritatea informațiilor despre personaj sunt accesate prin interfețele inventarului. Comenzile deschid în principal meniuri, gestionează comunități sau permit comunicarea.",
+      "tags": [
+        "command",
+        "magic",
+        "daily",
+        "vote",
+        "wallet",
+        "subspace",
+        "party",
+        "bounty",
+        "lands",
+        "claim",
+        "war",
+        "church",
+        "home",
+        "spawn",
+        "tpa"
+      ],
+      "sections": [
+        {
+          "title": "Început și progres",
+          "commands": [
+            {
+              "command": "/register <pass> <pass>",
+              "purpose": "Înregistrează o dată un cont offline"
+            },
+            {
+              "command": "/login <pass>",
+              "purpose": "Autentifică-te într-un cont offline"
+            },
+            {
+              "command": "/magic",
+              "purpose": "Deschide ghidul opțional pentru următorul pas"
+            },
+            {
+              "command": "/subspace",
+              "purpose": "Răsfoiește dungeonuri, locații, putere și timpi de reîncărcare"
+            },
+            {
+              "command": "/party",
+              "purpose": "Creează sau gestionează un grup de dungeon"
+            },
+            {
+              "command": "/bounty",
+              "purpose": "Deschide meniul de recompense pentru interpretare"
+            }
+          ]
+        },
+        {
+          "title": "Economie și comunitate",
+          "commands": [
+            {
+              "command": "/wallet",
+              "purpose": "Gestionează moneda, evaluarea și plățile"
+            },
+            {
+              "command": "/daily",
+              "purpose": "Deschide recompensele zilnice"
+            },
+            {
+              "command": "/emporium or /emp",
+              "purpose": "Deschide Brilliant Emporium"
+            },
+            {
+              "command": "/vote",
+              "purpose": "Deschide opțiunile de votare"
+            },
+            {
+              "command": "/lands …",
+              "purpose": "Gestionează orașe, roluri și revendicări"
+            },
+            {
+              "command": "/claim and /unclaim",
+              "purpose": "Revendică sau eliberează chunkul curent"
+            },
+            {
+              "command": "/wars",
+              "purpose": "Deschide gestionarea războaielor"
+            }
+          ]
+        },
+        {
+          "title": "Comenzi care nu există",
+          "paragraphs": [
+            "Nu există intenționat /home, /sethome, /spawn, /tpa, /rtp sau /back. Călătoria și mobilitatea fac parte din progres."
+          ],
+          "warning": "Verificarea Secvenței, Interpretării, Spiritualității și Nebuniei nu este o comandă. Deschide inventarul, apasă pictograma căii din stânga sus și treci cursorul peste capul personajului tău."
+        }
+      ],
+      "related": [
+        "server-basics",
+        "activities",
+        "economy"
+      ]
+    }
+  ]
+}

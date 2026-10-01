@@ -1,10 +1,10 @@
 <template>
   <svg
       aria-hidden="true"
+      focusable="false"
       class="icon-navbar"
       fill="none"
       height="18"
-      role="presentation"
       viewBox="0 0 22 18"
       width="22"
       xmlns="http://www.w3.org/2000/svg"

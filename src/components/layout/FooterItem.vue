@@ -1,298 +1,221 @@
 <template>
-  <footer class="site-footer">
-    <div class="footer-rail">
-      <RouterLink class="footer-brand" to="/" aria-label="Mysterria home">
-        <IconLogo aria-hidden="true" />
-        <span>Mysterria</span>
-        <i class="footer-brand__dot" aria-hidden="true"></i>
-      </RouterLink>
-
-      <div class="footer-links-stack">
-        <div class="footer-meta">
-          <span class="footer-status" :class="`is-${status.state}`" role="status">
-            <span class="footer-status__dot" aria-hidden="true"></span>
-            {{ statusLabel }}
-          </span>
-          <a
-            class="footer-meta__icon"
-            href="https://discord.com/invite/jc7GSxBWgb"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Mysterria Discord"
-          >
-            <IconDiscord aria-hidden="true" />
-          </a>
-          <a
-            class="footer-meta__icon"
-            href="https://wiki.mysterria.net/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Mysterria Wiki"
-          >
-            <IconWiki aria-hidden="true" />
-          </a>
+  <footer :class="['site-footer', variant]">
+    <div class="footer-shell">
+      <div v-if="variant === 'full'" class="footer-columns">
+        <div class="footer-identity">
+          <RouterLink :to="$lp('/')" class="footer-brand">
+            <img :src="logo" alt="" width="34" height="34">
+            <span>Mysterria</span>
+          </RouterLink>
+          <p class="footer-disclaimer">{{ t('footer.disclaimer') }}</p>
         </div>
 
-        <nav class="footer-nav" aria-label="Footer navigation">
-          <RouterLink to="/pathways">Pathways</RouterLink>
-          <RouterLink to="/guide">Guide</RouterLink>
-          <RouterLink to="/rules">Rules</RouterLink>
-          <RouterLink to="/store">Store</RouterLink>
-          <RouterLink to="/staff">Staff</RouterLink>
-          <a href="https://wiki.mysterria.net/" target="_blank" rel="noopener noreferrer">Wiki</a>
-          <a href="https://map.mysterria.net/" target="_blank" rel="noopener noreferrer">Map</a>
-          <a href="https://discord.com/invite/jc7GSxBWgb" target="_blank" rel="noopener noreferrer">Community</a>
+        <div class="footer-column">
+          <p class="footer-heading">{{ t('footer.playHeading') }}</p>
+          <RouterLink :to="$lp('/guide')">{{ t('footer.linkGuide') }}</RouterLink>
+          <RouterLink :to="$lp('/pathways')">{{ t('footer.linkArchive') }}</RouterLink>
+          <RouterLink :to="$lp('/rules')">{{ t('footer.linkRules') }}</RouterLink>
+          <RouterLink :to="$lp('/staff')">{{ t('footer.linkStaff') }}</RouterLink>
+          <RouterLink :to="$lp('/#companion')">{{ t('footer.linkCompanion') }}</RouterLink>
+        </div>
+
+        <div class="footer-column">
+          <p class="footer-heading">{{ t('footer.accountHeading') }}</p>
+          <RouterLink :to="$lp('/profile')">{{ t('footer.linkDossier') }}</RouterLink>
+          <RouterLink :to="$lp('/store')">{{ t('footer.linkShop') }}</RouterLink>
+          <RouterLink :to="$lp('/news')">{{ t('footer.linkNews') }}</RouterLink>
+        </div>
+
+        <div class="footer-column">
+          <p class="footer-heading">{{ t('footer.communityHeading') }}</p>
+          <a href="https://discord.com/invite/jc7GSxBWgb" rel="noopener noreferrer" target="_blank">
+            <IconDiscord class="footer-icon"/>
+            {{ t('servicesDiscord') }}
+          </a>
+          <a href="https://wiki.mysterria.net/" rel="noopener noreferrer" target="_blank">
+            <IconWiki class="footer-icon"/>
+            {{ t('navWiki') }}
+          </a>
+          <a href="https://map.mysterria.net/" rel="noopener noreferrer" target="_blank">
+            <IconMap class="footer-icon"/>
+            {{ t('servicesMap') }}
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-baseline">
+        <span class="footer-copy">© {{ year }} Mysterria † {{ SERVER_IP }}</span>
+        <nav class="footer-legal" :aria-label="t('footer.legalLabel')">
+          <template v-if="variant === 'slim'">
+            <RouterLink :to="$lp('/')">{{ t('navHome') }}</RouterLink>
+            <RouterLink :to="$lp('/guide')">{{ t('navGame') }}</RouterLink>
+            <RouterLink :to="$lp('/store')">{{ t('navShop') }}</RouterLink>
+            <RouterLink :to="$lp('/rules')">{{ t('navRules') }}</RouterLink>
+          </template>
+          <template v-else>
+            <RouterLink :to="$lp('/terms')">{{ t('termsViewTitle') }}</RouterLink>
+            <RouterLink :to="$lp('/privacy')">{{ t('privacyViewTitle') }}</RouterLink>
+            <RouterLink :to="$lp('/sla')">{{ t('slaViewTitle') }}</RouterLink>
+          </template>
         </nav>
       </div>
-    </div>
-
-    <div class="footer-legal">
-      <p>© {{ currentYear }} Mysterria · Unofficial fan project · All rights reserved</p>
-      <nav aria-label="Legal">
-        <RouterLink to="/terms">Terms</RouterLink>
-        <RouterLink to="/privacy">Privacy</RouterLink>
-        <RouterLink to="/sla">SLA</RouterLink>
-      </nav>
     </div>
   </footer>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue';
-import IconLogo from '@/assets/icons/IconLogo.vue';
-import IconDiscord from '@/assets/icons/IconDiscord.vue';
-import IconWiki from '@/assets/icons/IconWiki.vue';
-import { useSharedServerStatus } from '@/composables/useSharedServerStatus';
+<script lang="ts" setup>
+import {useI18n} from "@/composables/useI18n";
+import {SERVER_IP} from "@/composables/useServer";
+import IconDiscord from "@/assets/icons/IconDiscord.vue";
+import IconWiki from "@/assets/icons/IconWiki.vue";
+import IconMap from "@/assets/icons/IconMap.vue";
+import logo from "@/assets/icons/sources/IconLogo.webp";
 
-const currentYear = new Date().getFullYear();
+withDefaults(defineProps<{ variant?: "full" | "slim" }>(), {variant: "slim"});
 
-const { status } = useSharedServerStatus();
-const statusLabel = computed(() => {
-  if (status.value.state === 'online') {
-    return status.value.playersOnline !== null ? `Online · ${status.value.playersOnline} players` : 'Online';
-  }
-  if (status.value.state === 'loading') return 'Checking status';
-  return 'Offline';
-});
+const {t} = useI18n();
+const year = new Date().getFullYear();
 </script>
 
 <style scoped>
 .site-footer {
-  --home-content-max: 1480px;
-  --home-content-gutter: clamp(20px, 4vw, 56px);
-  position: relative;
-  z-index: 2;
-  overflow: hidden;
-  padding: 54px 0 22px;
-  color: var(--ink, #221c14);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--journey-mid) 0%, transparent) 0%, var(--journey-mid) 160px);
-  isolation: isolate;
+  background: var(--myst-bg);
+  border-top: 1px solid var(--myst-line-16);
 }
 
-.footer-rail {
-  width: min(100%, var(--home-content-max));
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 28px;
+.site-footer.full {
+  padding: 64px 24px 36px;
+}
+
+.site-footer.slim {
+  padding: 36px 24px;
+}
+
+.footer-shell {
+  max-width: var(--myst-shell);
   margin: 0 auto;
-  padding: 22px var(--home-content-gutter);
-  border-top: 1px solid var(--hairline, #eae1d0);
-  border-bottom: 1px solid var(--hairline, #eae1d0);
+}
+
+.footer-columns {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--myst-line-10);
 }
 
 .footer-brand {
-  flex: 0 0 auto;
-  min-width: 44px;
-  padding-inline: 2px;
-  min-height: 44px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--ink, #221c14);
+  gap: 12px;
+  margin-bottom: 18px;
+  color: inherit;
 }
-.footer-brand:hover,
-.footer-brand:focus-visible { color: var(--ink, #221c14); }
-.footer-brand :deep(img) { width: 40px; height: 40px; filter: none; }
-.footer-brand__dot {
-  width: 7px;
-  height: 7px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--primary, #7458e8);
-}
-.footer-brand span { font: 700 1.32rem/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif); }
 
-.footer-links-stack {
+.footer-brand:hover {
+  color: inherit;
+}
+
+.footer-brand span {
+  font-family: var(--myst-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--myst-offwhite);
+}
+
+.footer-disclaimer {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--myst-ink-muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.footer-column {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  min-width: 0;
+  gap: 11px;
 }
 
-.footer-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 9px;
-  border: 1px solid var(--hairline, #eae1d0);
-  border-radius: 999px;
-  color: var(--ink-muted, #756b5c);
-  background: var(--surface-glass, rgba(255, 255, 255, .86));
-  backdrop-filter: blur(14px);
-  font: 700 .56rem/1 var(--font-mono, "IBM Plex Mono", monospace);
-  letter-spacing: .06em;
+.footer-heading {
+  margin: 0 0 5px;
+  font-family: var(--myst-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  white-space: nowrap;
+  color: var(--myst-gold);
 }
 
-.footer-status__dot {
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--ink-muted, #756b5c);
-}
-
-.footer-status.is-online .footer-status__dot {
-  background: var(--live, #34c77b);
-  box-shadow: 0 0 5px rgba(52, 199, 123, .45);
-}
-
-.footer-status.is-online { color: var(--ink, #221c14); }
-
-.footer-meta__icon {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--hairline, #eae1d0);
-  border-radius: 999px;
-  color: var(--ink-muted, #756b5c);
-  background: var(--surface-glass, rgba(255, 255, 255, .86));
-  backdrop-filter: blur(14px);
-  transition: color .25s, border-color .25s, background-color .25s;
-}
-
-.footer-meta__icon:hover,
-.footer-meta__icon:focus-visible {
-  color: var(--primary, #7458e8);
-  border-color: color-mix(in srgb, var(--primary, #7458e8) 40%, transparent);
-  background: var(--primary-tint, rgba(116, 88, 232, .12));
-}
-
-.footer-nav {
+.footer-column a {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 2px 19px;
-}
-.footer-nav a,
-.footer-legal a {
-  position: relative;
-  min-width: 44px;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink-muted, #756b5c);
-  font: 700 .65rem/1 var(--font-mono, "IBM Plex Mono", monospace);
-  letter-spacing: .07em;
-  text-transform: uppercase;
-  transition: color .25s;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--myst-ink-muted);
+  transition: color 0.25s ease;
 }
 
-.footer-nav a { color: var(--ink, #221c14); }
-
-.footer-nav a::after,
-.footer-legal a::after {
-  content: "";
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 13px;
-  height: 1px;
-  background: var(--primary, #7458e8);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+.footer-column a:hover {
+  color: var(--myst-gold);
 }
 
-.footer-nav a:hover,
-.footer-nav a:focus-visible,
-.footer-legal a:hover,
-.footer-legal a:focus-visible { color: var(--ink, #221c14); }
+.footer-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
 
-.footer-nav a:hover::after,
-.footer-nav a:focus-visible::after,
-.footer-legal a:hover::after,
-.footer-legal a:focus-visible::after { transform: scaleX(1); }
-
-.footer-legal {
-  position: relative;
-  width: min(100%, var(--home-content-max));
-  box-sizing: border-box;
+.footer-baseline {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  margin: 0 auto;
-  padding: 18px var(--home-content-gutter) 0;
+  gap: 24px;
+  flex-wrap: wrap;
 }
-.footer-legal::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--sunset, linear-gradient(90deg, #ff7a59, #ffc15e));
+
+.site-footer.full .footer-baseline {
+  padding-top: 28px;
 }
-.footer-legal p {
-  margin: 0;
-  color: var(--ink-muted, #756b5c);
-  font: 500 .59rem/1.5 var(--font-mono, "IBM Plex Mono", monospace);
-  letter-spacing: .04em;
+
+.footer-copy,
+.footer-legal a {
+  font-family: var(--myst-font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: rgba(145, 145, 155, 0.55);
 }
-.footer-legal nav { display: flex; gap: 18px; }
-.footer-legal a { min-height: 44px; font-size: .57rem; }
+
+.footer-legal {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+
+.footer-legal a:hover {
+  color: var(--myst-gold);
+}
 
 @media (max-width: 900px) {
-  .footer-rail { align-items: flex-start; }
-  .footer-links-stack { align-items: flex-start; }
-  .footer-nav { justify-content: flex-start; }
+  .footer-columns {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+
+  .footer-identity {
+    grid-column: 1 / -1;
+  }
 }
 
-@media (max-width: 680px) {
-  .footer-rail,
-  .footer-links-stack,
-  .footer-legal { align-items: flex-start; flex-direction: column; }
-  .footer-meta { flex-wrap: wrap; }
-  .footer-nav { gap-inline: 15px; }
-  .footer-legal { gap: 4px; }
-}
+@media (max-width: 560px) {
+  .footer-columns {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
 
-@media (max-width: 420px) {
-  .site-footer { --home-content-gutter: 12px; }
-}
-
-@media (max-width: 260px) {
-  .site-footer { --home-content-gutter: 6px; }
-}
-
-@media (max-width: 280px) {
-  .site-footer { padding-inline: 10px; }
-  .footer-nav { display: grid; grid-template-columns: 1fr; }
+  .footer-baseline {
+    justify-content: center;
+    text-align: center;
+  }
 }
 </style>

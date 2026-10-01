@@ -1,38 +1,39 @@
+// Self-hosted Font Awesome subset (solid face, only the glyphs this app uses).
+// Regenerate with `npm run build:icons` after adding or removing an icon.
+import "./assets/fontawesome-subset.css";
 import "./assets/main.css";
 
 import {createApp} from "vue";
 import {createPinia} from "pinia";
 import VueCookies from "vue-cookies";
+import VueDOMPurifyHTML from 'vue-dompurify-html';
 
 import App from "./App.vue";
 import router from "./router";
+import {useAuthStore} from "@/stores/auth";
+import {localePath} from "@/composables/useLocalePath";
+import {useI18n} from "@/composables/useI18n";
 
 const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-let sanitizerInstalled = false;
-let fontAwesomeInstalled = false;
-router.beforeEach(async (to) => {
-    if (to.path !== '/' && !fontAwesomeInstalled) {
-        const stylesheet = document.createElement('link');
-        stylesheet.rel = 'stylesheet';
-        stylesheet.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css';
-        stylesheet.crossOrigin = 'anonymous';
-        stylesheet.referrerPolicy = 'no-referrer';
-        document.head.append(stylesheet);
-        fontAwesomeInstalled = true;
-    }
-    if (!sanitizerInstalled && /^(news-article|news-article-localized|service-detail|edit-news)$/.test(String(to.name))) {
-        const {default: VueDOMPurifyHTML} = await import('vue-dompurify-html');
-        app.use(VueDOMPurifyHTML);
-        sanitizerInstalled = true;
-    }
-});
 app.use(router);
 app.use(VueCookies);
+app.use(VueDOMPurifyHTML);
+
+/*
+ * `$lp` prefixes an internal path with the active locale, so templates can write
+ * :to="$lp('/guide')" without importing anything. Registered globally because
+ * essentially every template with a link needs it.
+ */
+const {currentLanguage} = useI18n();
+app.config.globalProperties.$lp = (path: string) => localePath(path, currentLanguage.value);
 
 window.$cookies = VueCookies.VueCookies;
+
+const authStore = useAuthStore(pinia);
+authStore.init();
 
 app.mount("#app");
 

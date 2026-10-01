@@ -1,0 +1,55 @@
+{
+  "pathwayTitle": "{name}-Pfad – Sequenzen & Fähigkeiten | Mysterria",
+  "pathwayIndexTitle": "Pfade & Sequenzen – Beyonder-Archiv | Mysterria",
+  "pathwayDescription": "Erkunde den {name}-Pfad von Sequenz {first} {firstSeq} bis Sequenz {final} {finalSeq}. Entdecke {abilities} Fähigkeiten, die auf Mysterria verfügbar sind.",
+  "pathwayIndexDescription": "Erkunde alle {count} Beyonder-Pfade, ihre Sequenznamen und jede auf Mysterria verfügbare Fähigkeit.",
+  "pathwaySigilAlt": "Symbol des {name}-Pfads",
+  "pathwayIndexAlt": "Mysterria-Beyonder-Pfade",
+  "redirecting": "Weiterleitung zu",
+  "pages": {
+    "rules": {
+      "title": "Serverregeln – Mysterria",
+      "description": "Lies die Regeln und Richtlinien für Mysterria, den von Lord of the Mysteries inspirierten Minecraft-Server. Erfahre mehr über unsere Community-Standards und Spielrichtlinien."
+    },
+    "store": {
+      "title": "Shop – Mysterria",
+      "description": "Unterstütze Mysterria und schalte exklusive Vorteile frei! Stöbere in unserem Shop nach Rängen, Gegenständen und besonderen Funktionen für den Lord-of-the-Mysteries-Minecraft-Server."
+    },
+    "ascension": {
+      "title": "Aufstiegsregister – Mysterria",
+      "description": "Live-Verfügbarkeit der Sitze in den hohen Sequenzen auf Mysterria: Jeder Pfad hat höchstens 18 Heilige, 9 Engel, 3 Erzengel und eine einzige Gottheit. Sieh nach, welche Throne besetzt sind, bevor du aufsteigst."
+    },
+    "guide": {
+      "title": "Einsteigerleitfaden – Mysterria",
+      "description": "Neu bei Mysterria? Erfahre, wie du auf unserem von Lord of the Mysteries inspirierten Server loslegst. Entdecke Pfade, Sequenzen und mystische Abenteuer."
+    },
+    "profile": {
+      "title": "Dein Profil – Mysterria",
+      "description": "Sieh dir dein Mysterria-Profil an und verwalte es. Verfolge deinen Fortschritt durch Sequenzen und Pfade auf unserem Lord-of-the-Mysteries-Minecraft-Server."
+    },
+    "news": {
+      "title": "Depeschen – Mysterria",
+      "description": "Patchnotizen, Saisonankündigungen und Depeschen von Mysterria, dem Lord-of-the-Mysteries-Minecraft-Server."
+    },
+    "staff": {
+      "title": "Der Orden – Mysterria",
+      "description": "Die Admins, Moderatoren und Baumeister, die die Welt am Laufen halten. Erreiche sie auf Discord für Tickets und Einsprüche, niemals per DM."
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen – Mysterria",
+      "description": "Die Nutzungsbedingungen für Mysterria, den von Lord of the Mysteries inspirierten Minecraft-Server."
+    },
+    "privacy": {
+      "title": "Datenschutz – Mysterria",
+      "description": "Wie Mysterria deine Kontodaten, Discord-Verknüpfung und Cookies verarbeitet."
+    },
+    "sla": {
+      "title": "SLA – Mysterria",
+      "description": "Verfügbarkeitszusagen und Serviceerwartungen für den Mysterria-Minecraft-Server."
+    },
+    "default": {
+      "title": "Mysterria – Lord-of-the-Mysteries-Minecraft-Server",
+      "description": "Trink den Zaubertrank. Spiele die Rolle. Erklimme auf einem Lord-of-the-Mysteries-Minecraft-Server 22 Beyonder-Pfade von Sequenz 9 bis zur Göttlichkeit."
+    }
+  }
+}

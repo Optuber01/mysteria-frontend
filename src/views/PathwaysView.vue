@@ -12,24 +12,25 @@
             ui.abilities
           }}</span></div>
         <div class="archive-freshness"><span
-            class="freshness-dot"/>{{ currentLanguage === 'uk' ? 'Оновлено' : 'Last updated' }} {{
+            class="freshness-dot"/>{{ ui.lastUpdated }} {{
             formattedLastUpdated
           }} <i>·</i> {{
-            currentLanguage === 'uk' ? 'Дані можуть дещо відрізнятися від поточної версії гри' : 'Details may differ slightly from the current game version'
+            ui.dataDisclaimer
           }}
         </div>
+        <RouterLink :to="$lp('/ascension')" class="registry-cta">{{ ui.registryCta }} →</RouterLink>
       </header>
       <section class="archive-layout">
         <aside class="pathway-browser">
           <label class="search-label"
-                 for="pathway-search">{{ currentLanguage === 'uk' ? 'Пошук в архіві' : 'Search the archive' }}</label>
+                 for="pathway-search">{{ ui.searchLabel }}</label>
           <label class="search-box">
             <svg viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"/>
               <path d="m20 20-4-4"/>
             </svg>
             <input id="pathway-search" v-model="query" :placeholder="ui.search" type="search">
-            <button v-if="query" :aria-label="currentLanguage === 'uk' ? 'Очистити пошук' : 'Clear search'"
+            <button v-if="query" :aria-label="ui.clearSearch"
                     @click="query=''">×
             </button>
             <kbd v-else>⌕</kbd></label>
@@ -39,7 +40,7 @@
                   group.label
                 }}</span><b>{{ group.pathways.length }}</b></div>
               <button v-for="pathway in group.pathways" :key="pathway.id" :class="{active:pathway.id===selected.id}"
-                      @pointerenter="warmPathwayImage(imageFor(pathway.id))" @click="selectPathway(pathway.id)">
+                      @click="selectPathway(pathway.id)">
                 <span class="sigil"><img v-if="imageFor(pathway.id)" :src="imageFor(pathway.id)" alt=""><b
                     v-else>{{ pathway.id[0].toUpperCase() }}</b></span>
                 <span><strong>{{ pathwayName(pathway.id) }}</strong><small>{{
@@ -53,12 +54,9 @@
         <article class="pathway-detail">
           <div class="pathway-controls">
             <header class="pathway-header">
-              <div class="large-sigil">
-                <Transition name="sigil-swap">
-                  <img v-if="revealedImage" :key="revealedImage" :src="revealedImage" alt="" decoding="async">
-                  <b v-else>{{ selected.id[0].toUpperCase() }}</b>
-                </Transition>
-              </div>
+              <div class="large-sigil"><img v-if="imageFor(selected.id)" :src="imageFor(selected.id)" alt=""><b v-else>{{
+                  selected.id[0].toUpperCase()
+                }}</b></div>
               <div><span>{{ ui.pathway }}</span>
                 <h2>{{ pathwayName(selected.id) }}</h2>
                 <p>{{ ui.progression }}</p></div>
@@ -106,149 +104,41 @@ import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
-import {decodePathwayImage, schedulePathwayWarmup, warmPathwayImage} from '@/utils/pathwayPlugin';
 import {useI18n} from '@/composables/useI18n';
-import source from '@/assets/sources/pathway-abilities.json';
+import type {Translations} from '@/locales';
+import {breadcrumbLd, itemListLd, useSeo} from '@/composables/useSeo';
+import {
+  type Ability,
+  boonPathwayIds,
+  corePathways,
+  type Localized,
+  type Pathway,
+  pathwayImage,
+  pathwayImageName,
+  pathwayName as localizedPathwayName,
+  pathways,
+  pathwaysLastUpdated,
+  pick,
+  type Sequence,
+  sequenceRank as localizedSequenceRank,
+} from '@/data/pathways';
 
-type Localized = { en: string; uk: string };
-type Ability = { id: string; name: Localized; description: Localized };
-type Sequence = { sequence: number; name: Localized; abilities: Ability[] };
-type Pathway = { id: string; sequences: Sequence[] };
-const pathways = source.pathways as Pathway[];
-const formattedLastUpdated = computed(() => new Intl.DateTimeFormat(currentLanguage.value === 'uk' ? 'uk-UA' : 'en-US', {
+const formattedLastUpdated = computed(() => new Intl.DateTimeFormat(intlLocale.value, {
   year: 'numeric',
   month: 'long',
   day: 'numeric',
   timeZone: 'UTC'
-}).format(new Date(`${source.lastUpdated}T00:00:00Z`)));
-const images = import.meta.glob('/src/assets/images/pathways/*.webp', {
-  eager: true,
-  query: '?url',
-  import: 'default'
-}) as Record<string, string>;
-const aliases: Record<string, string> = {aeon: 'eternalaeon'};
-const names: Record<string, string> = {
-  abyss: 'Abyss',
-  chained: 'Chained',
-  darkness: 'Darkness',
-  death: 'Death',
-  demoness: 'Demoness',
-  door: 'Door',
-  emperor: 'Black Emperor',
-  error: 'Error',
-  fool: 'Fool',
-  fortune: 'Wheel of Fortune',
-  giant: 'Twilight Giant',
-  hanged: 'Hanged Man',
-  hermit: 'Hermit',
-  justiciar: 'Justiciar',
-  moon: 'Moon',
-  mother: 'Mother',
-  paragon: 'Paragon',
-  priest: 'Red Priest',
-  sun: 'Sun',
-  tower: 'White Tower',
-  tyrant: 'Tyrant',
-  visionary: 'Visionary',
-  aeon: 'Eternal Aeon',
-  chaos: 'Chaos',
-  chaosmist: 'Chaos Mist',
-  condenser: 'Condenser',
-  devouring: 'Devouring',
-  edict: 'Edict',
-  everlasting: 'Everlasting',
-  patriarch: 'Patriarch',
-  secondlaw: 'Second Law',
-  sublunary: 'Sublunary'
-};
-const ukNames: Record<string, string> = {
-  abyss: 'Безодня',
-  chained: 'Прикутий',
-  darkness: 'Темрява',
-  death: 'Смерть',
-  demoness: 'Демонеса',
-  door: 'Двері',
-  emperor: 'Чорний Імператор',
-  error: 'Помилка',
-  fool: 'Дурень',
-  fortune: 'Колесо Фортуни',
-  giant: 'Сутінковий Велетень',
-  hanged: 'Повішений',
-  hermit: 'Відлюдник',
-  justiciar: 'Юстиціар',
-  moon: 'Місяць',
-  mother: 'Мати',
-  paragon: 'Парагон',
-  priest: 'Червоний Жрець',
-  sun: 'Сонце',
-  tower: 'Біла Вежа',
-  tyrant: 'Тиран',
-  visionary: 'Візіонер',
-  aeon: 'Вічний Еон',
-  patriarch: 'Патріарх',
-  sublunary: 'Підмісячний'
-};
-const copy = {
-  en: {
-    archive: 'BEYONDER ARCHIVE',
-    title: 'Pathways & Sequences',
-    subtitle: 'Study every route to the divine. Discover each Sequence and the abilities it unlocks before choosing your fate.',
-    pathways: 'Pathways',
-    sequences: 'Sequences',
-    abilities: 'Abilities',
-    search: 'Search pathways or abilities…',
-    allPathways: 'All pathways',
-    pathway: 'Pathway',
-    progression: 'Sequence progression · 9 → 0',
-    seq: 'SEQ',
-    sequence: 'Sequence',
-    designation: 'Designation',
-    noResults: 'Nothing found in the archive.',
-    noAbilities: 'No matching abilities',
-    trySearch: 'Try another search or clear the field.'
-  },
-  uk: {
-    archive: 'АРХІВ ПОТОЙБІЧНОГО',
-    title: 'Шляхи та Послідовності',
-    subtitle: 'Дослідіть кожен шлях до божественного. Дізнайтеся про Послідовності та здібності, перш ніж обрати свою долю.',
-    pathways: 'Шляхів',
-    sequences: 'Послідовностей',
-    abilities: 'Здібностей',
-    search: 'Пошук Шляхів або здібностей…',
-    allPathways: 'Усі Шляхи',
-    pathway: 'Шлях',
-    progression: 'Розвиток Послідовності · 9 → 0',
-    seq: 'ПОСЛ',
-    sequence: 'Послідовність',
-    designation: 'Назва',
-    noResults: 'В архіві нічого не знайдено.',
-    noAbilities: 'Здібностей не знайдено',
-    trySearch: 'Спробуйте інший запит або очистьте поле.'
-  }
-};
-const {currentLanguage} = useI18n(), route = useRoute(), router = useRouter(), query = ref(''),
+}).format(new Date(`${pathwaysLastUpdated}T00:00:00Z`)));
+const {currentLanguage, intlLocale, tree} = useI18n(), route = useRoute(), router = useRouter(), query = ref(''),
     activeSequence = ref<number>();
-const ui = computed(() => copy[currentLanguage.value]);
+const ui = computed(() => tree<Translations["pathwaysPage"]>("pathwaysPage"));
 const routeId = computed(() => typeof route.params.pathway === 'string' && pathways.some(p => p.id === route.params.pathway) ? route.params.pathway : pathways[0].id),
     selectedId = ref(routeId.value);
 watch(routeId, id => selectedId.value = id);
 const selected = computed(() => pathways.find(p => p.id === selectedId.value) ?? pathways[0]);
-const localized = (v: Localized) => v[currentLanguage.value] || v.en;
-const titleCase = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase());
-const pathwayName = (id: string) => currentLanguage.value === 'uk' ? (ukNames[id] || names[id] || titleCase(id)) : (names[id] || titleCase(id));
-const imageFor = (id: string) => images[`/src/assets/images/pathways/${aliases[id] || id}.webp`];
-const revealedImage = ref<string>();
-let revealToken = 0;
-watch(() => imageFor(selected.value.id), async target => {
-  const token = ++revealToken;
-  if (!target) {
-    revealedImage.value = undefined;
-    return;
-  }
-  await decodePathwayImage(target);
-  if (token !== revealToken) return;
-  revealedImage.value = target;
-}, {immediate: true});
+const localized = (v: Localized) => pick(v, currentLanguage.value);
+const pathwayName = (id: string) => localizedPathwayName(id, currentLanguage.value);
+const imageFor = (id: string) => pathwayImage(id);
 const totalSequences = computed(() => pathways.reduce((n, p) => n + p.sequences.length, 0)),
     totalAbilities = computed(() => pathways.reduce((n, p) => n + p.sequences.reduce((m, s) => m + s.abilities.length, 0), 0));
 const haystack = (p: Pathway) => [pathwayName(p.id), ...p.sequences.flatMap(s => [localized(s.name), ...s.abilities.flatMap(a => [localized(a.name), localized(a.description)])])].join(' ').toLowerCase();
@@ -256,62 +146,52 @@ const filteredPathways = computed(() => {
   const q = query.value.trim().toLowerCase();
   return q ? pathways.filter(p => haystack(p).includes(q)) : pathways
 });
-const boonIds = new Set(['aeon', 'chaos', 'chaosmist', 'condenser', 'devouring', 'edict', 'everlasting', 'patriarch', 'secondlaw', 'sublunary']);
 const pathwayGroups = computed(() => [
   {
     id: 'normal',
-    label: currentLanguage.value === 'uk' ? 'Звичайні Шляхи' : 'Standard Pathways',
-    pathways: filteredPathways.value.filter(p => !boonIds.has(p.id))
+    label: ui.value.groupStandard,
+    pathways: filteredPathways.value.filter(p => !boonPathwayIds.has(p.id))
   },
   {
     id: 'boons',
-    label: currentLanguage.value === 'uk' ? 'Благословення' : 'Boons',
-    pathways: filteredPathways.value.filter(p => boonIds.has(p.id))
+    label: ui.value.groupBoons,
+    pathways: filteredPathways.value.filter(p => boonPathwayIds.has(p.id))
   }
 ]);
 
-function setMeta(selector: string, attribute: 'name' | 'property', key: string, content: string) {
-  let tag = document.head.querySelector<HTMLMetaElement>(selector);
-  if (!tag) {
-    tag = document.createElement('meta');
-    tag.setAttribute(attribute, key);
-    document.head.appendChild(tag)
-  }
-  tag.content = content
-}
-
-function updatePageMeta() {
+useSeo(() => {
   const hasPathway = typeof route.params.pathway === 'string';
-  const name = pathwayName(selected.value.id),
-      abilityCount = selected.value.sequences.reduce((n, s) => n + s.abilities.length, 0);
-  const title = hasPathway ? `${name} Pathway – Sequences & Abilities | Mysterria` : 'Pathways & Sequences – Beyonder Archive | Mysterria';
-  const description = hasPathway ? `Explore the ${name} Pathway, its ${selected.value.sequences.length} Sequences and ${abilityCount} abilities available on Mysterria.` : `Explore all ${pathways.length} Beyonder Pathways, their Sequence names, and every ability available on Mysterria.`;
-  const canonical = `https://mysterria.net/pathways${hasPathway ? `/${selected.value.id}` : ''}`,
-      imageName = aliases[selected.value.id] || selected.value.id;
-  const image = hasPathway && imageFor(selected.value.id) ? `https://mysterria.net/pathways/${imageName}.webp` : 'https://mysterria.net/banner.webp';
-  document.title = title;
-  setMeta('meta[name="description"]', 'name', 'description', description);
-  for (const [key, value] of Object.entries({
-    'og:url': canonical,
-    'og:title': title,
-    'og:description': description,
-    'og:image': image,
-    'og:image:alt': hasPathway ? `${name} Pathway symbol` : 'Mysterria Beyonder Pathways'
-  })) setMeta(`meta[property="${key}"]`, 'property', key, value);
-  for (const [key, value] of Object.entries({
-    'twitter:url': canonical,
-    'twitter:title': title,
-    'twitter:description': description,
-    'twitter:image': image
-  })) setMeta(`meta[property="${key}"],meta[name="${key}"]`, 'name', key, value);
-  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'canonical';
-    document.head.appendChild(link)
+  const name = pathwayName(selected.value.id);
+  const abilityCount = selected.value.sequences.reduce((n, s) => n + s.abilities.length, 0);
+  const trail = [{name: 'Home', path: '/'}, {name: 'Pathways', path: '/pathways'}];
+
+  if (!hasPathway) {
+    return {
+      title: 'Pathways & Sequences - Beyonder Archive',
+      description: `Every one of the ${corePathways.length} Beyonder Pathways from Lord of the Mysteries, playable on Mysterria: Sequence names 9 to 0 and all ${totalAbilities.value} abilities.`,
+      path: '/pathways',
+      imageAlt: 'Mysterria Beyonder Pathways',
+      jsonLd: [
+        breadcrumbLd(trail),
+        itemListLd(
+            'Beyonder Pathways',
+            corePathways.map(p => ({name: pathwayName(p.id), path: `/pathways/${p.id}`})),
+        ),
+      ],
+    };
   }
-  link.href = canonical;
-}
+
+  return {
+    title: `${name} Pathway - Sequences & Abilities`,
+    description: `The ${name} Pathway on Mysterria: ${selected.value.sequences.length} Sequences from 9 to 0 and ${abilityCount} Beyonder abilities, with the ritual and acting each rung demands.`,
+    path: `/pathways/${selected.value.id}`,
+    image: imageFor(selected.value.id)
+        ? `/pathways/${pathwayImageName(selected.value.id)}.webp`
+        : undefined,
+    imageAlt: `${name} Pathway symbol`,
+    jsonLd: [breadcrumbLd([...trail, {name, path: `/pathways/${selected.value.id}`}])],
+  };
+});
 
 const selectedNameMatches = computed(() => {
   const q = query.value.trim().toLowerCase();
@@ -332,34 +212,50 @@ const visibleSequences = computed(() => {
 watch(filteredPathways, (matches) => {
   if (query.value.trim() && matches.length && !matches.some(p => p.id === selectedId.value)) {
     selectedId.value = matches[0].id;
-    router.replace({name: 'pathways', params: {pathway: matches[0].id}})
+    router.replace({name: 'pathways', params: {...route.params, pathway: matches[0].id}})
   }
 }, {flush: 'post'});
-const ranks = {
-  en: {4: 'Demigod', 3: 'Saint', 2: 'Angel', 1: 'Archangel', 0: 'Deity'},
-  uk: {4: 'Напівбог', 3: 'Святий', 2: 'Янгол', 1: 'Архангел', 0: 'Божество'}
-} as const;
-
 function sequenceRank(n: number) {
-  return n <= 4 ? ranks[currentLanguage.value][n as keyof typeof ranks.en] : ''
+  return localizedSequenceRank(n, currentLanguage.value)
 }
 
 function sequenceClass(n: number) {
   return n <= 4 ? `ranked rank-${n}` : ''
 }
 
-function updateActiveSequence() {
-  const cards = [...document.querySelectorAll<HTMLElement>('.sequence-card')];
+/*
+ * Scroll-spy for the sequence rail. The rects are read once per card and only
+ * once per animation frame - the previous version re-measured both sides of the
+ * comparison inside a reduce, so a single scroll event forced ~20 layouts and
+ * scroll events fire far faster than frames.
+ */
+let spyRaf: number | null = null;
+
+function measureActiveSequence() {
+  spyRaf = null;
+  const cards = document.querySelectorAll<HTMLElement>('.sequence-card');
   if (!cards.length) return;
   const threshold = 240;
-  const current = cards.reduce((best, card) => Math.abs(card.getBoundingClientRect().top - threshold) < Math.abs(best.getBoundingClientRect().top - threshold) ? card : best);
-  activeSequence.value = Number(current.id.replace('sequence-', ''))
+  let bestId = '';
+  let bestDistance = Infinity;
+  for (const card of cards) {
+    const distance = Math.abs(card.getBoundingClientRect().top - threshold);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestId = card.id;
+    }
+  }
+  if (bestId) activeSequence.value = Number(bestId.replace('sequence-', ''))
+}
+
+function updateActiveSequence() {
+  if (spyRaf === null) spyRaf = requestAnimationFrame(measureActiveSequence)
 }
 
 function selectPathway(id: string) {
   selectedId.value = id;
   activeSequence.value = pathways.find(p => p.id === id)?.sequences[0]?.sequence;
-  router.replace({name: 'pathways', params: {pathway: id}});
+  router.replace({name: 'pathways', params: {...route.params, pathway: id}});
   if (innerWidth < 900) requestAnimationFrame(() => document.querySelector('.pathway-detail')?.scrollIntoView({behavior: 'smooth'}))
 }
 
@@ -372,14 +268,11 @@ watch(visibleSequences, sequences => {
   activeSequence.value = sequences[0]?.sequence;
   nextTick(updateActiveSequence)
 }, {immediate: true});
-watch([selected, currentLanguage, () => route.params.pathway], updatePageMeta, {immediate: true});
-onMounted(() => {
-  window.addEventListener('scroll', updateActiveSequence, {passive: true});
-  schedulePathwayWarmup(Object.values(images));
-});
+// Metadata is handled by useSeo above, which tracks these sources itself.
+onMounted(() => window.addEventListener('scroll', updateActiveSequence, {passive: true}));
 onUnmounted(() => {
   window.removeEventListener('scroll', updateActiveSequence);
-  revealToken++;
+  if (spyRaf !== null) cancelAnimationFrame(spyRaf)
 });
 </script>
 
@@ -391,7 +284,7 @@ onUnmounted(() => {
 }
 
 .archive-hero {
-  padding: 150px 24px 72px;
+  padding: 84px 24px 72px;
   text-align: center;
   background: radial-gradient(circle at 50% 0, rgba(200, 178, 115, .13), transparent 48%), linear-gradient(#0c0e1a, #070910);
   border-bottom: 1px solid rgba(200, 178, 115, .12)
@@ -593,7 +486,6 @@ onUnmounted(() => {
 }
 
 .large-sigil {
-  position: relative;
   width: 105px;
   height: 105px;
   display: grid;
@@ -602,45 +494,14 @@ onUnmounted(() => {
 }
 
 .large-sigil img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
-  aspect-ratio: 1;
   object-fit: contain;
   filter: drop-shadow(0 0 20px rgba(200, 178, 115, .18))
 }
 
 .large-sigil b {
   font-size: 55px
-}
-
-.sigil-swap-enter-active,
-.sigil-swap-leave-active {
-  transition: opacity .16s ease, transform .16s ease
-}
-
-.sigil-swap-leave-active {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center
-}
-
-.sigil-swap-enter-from {
-  opacity: 0;
-  transform: scale(.94)
-}
-
-.sigil-swap-leave-to {
-  opacity: 0
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sigil-swap-enter-active,
-  .sigil-swap-leave-active {
-    transition-duration: 0s
-  }
 }
 
 .pathway-header h2 {
@@ -821,7 +682,7 @@ onUnmounted(() => {
 
 @media (max-width: 560px) {
   .archive-hero {
-    padding-top: 120px
+    padding-top: 56px
   }
 
   .archive-stats {
@@ -940,7 +801,7 @@ onUnmounted(() => {
 
 @media (max-width: 900px) {
   .archive-hero {
-    padding-top: 82px
+    padding-top: 40px
   }
 
   .archive-layout {
@@ -1206,6 +1067,25 @@ onUnmounted(() => {
   border-radius: 50%;
   background: var(--myst-gold);
   box-shadow: 0 0 7px rgba(200, 178, 115, .65)
+}
+
+.registry-cta {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid rgba(200, 178, 115, .34);
+  background: rgba(200, 178, 115, .06);
+  color: #d7c88f;
+  font: 10px 'JetBrains Mono', monospace;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  transition: .25s
+}
+
+.registry-cta:hover {
+  border-color: var(--myst-gold);
+  color: var(--myst-gold);
+  background: rgba(200, 178, 115, .12)
 }
 
 @media (max-width: 560px) {

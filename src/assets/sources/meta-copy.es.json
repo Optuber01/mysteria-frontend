@@ -1,0 +1,55 @@
+{
+  "pathwayTitle": "Sendero de {name}: secuencias y habilidades | Mysterria",
+  "pathwayIndexTitle": "Senderos y secuencias: Archivo de Trascendentes | Mysterria",
+  "pathwayDescription": "Explora el Sendero de {name}, desde la Secuencia {first} {firstSeq} hasta la Secuencia {final} {finalSeq}. Descubre las {abilities} habilidades disponibles en Mysterria.",
+  "pathwayIndexDescription": "Explora los {count} Senderos Trascendentes, sus nombres de Secuencia y todas las habilidades disponibles en Mysterria.",
+  "pathwaySigilAlt": "Símbolo del Sendero de {name}",
+  "pathwayIndexAlt": "Senderos Trascendentes de Mysterria",
+  "redirecting": "Redirigiendo a",
+  "pages": {
+    "rules": {
+      "title": "Reglas del servidor | Mysterria",
+      "description": "Lee las reglas y pautas para jugar en Mysterria, el servidor de Minecraft inspirado en Lord of the Mysteries. Conoce las normas de la comunidad y las políticas de juego."
+    },
+    "store": {
+      "title": "Tienda | Mysterria",
+      "description": "¡Apoya a Mysterria y desbloquea ventajas exclusivas! Explora nuestra tienda de rangos, objetos y funciones especiales para el servidor de Minecraft de Lord of the Mysteries."
+    },
+    "ascension": {
+      "title": "Registro de Ascensos | Mysterria",
+      "description": "Disponibilidad en vivo de los puestos de las Secuencias altas de Mysterria: cada sendero admite como máximo 18 Santos, 9 Ángeles, 3 Arcángeles y una sola Deidad. Mira qué tronos están ocupados antes de ascender."
+    },
+    "guide": {
+      "title": "Guía para empezar | Mysterria",
+      "description": "¿Eres nuevo en Mysterria? Aprende a empezar en nuestro servidor inspirado en Lord of the Mysteries. Descubre Senderos, Secuencias y aventuras místicas."
+    },
+    "profile": {
+      "title": "Tu perfil | Mysterria",
+      "description": "Consulta y administra tu perfil de Mysterria. Sigue tu progreso por las Secuencias y Senderos en nuestro servidor de Minecraft de Lord of the Mysteries."
+    },
+    "news": {
+      "title": "Comunicados | Mysterria",
+      "description": "Notas de actualización, anuncios de temporada y comunicados de Mysterria, el servidor de Minecraft de Lord of the Mysteries."
+    },
+    "staff": {
+      "title": "La Orden | Mysterria",
+      "description": "Administradores, moderadores y constructores que mantienen el mundo en marcha. Contáctalos por Discord para tickets y apelaciones, nunca por MD."
+    },
+    "terms": {
+      "title": "Términos de servicio | Mysterria",
+      "description": "Los términos de servicio de Mysterria, el servidor de Minecraft inspirado en Lord of the Mysteries."
+    },
+    "privacy": {
+      "title": "Privacidad | Mysterria",
+      "description": "Cómo gestiona Mysterria los datos de tu cuenta, la vinculación con Discord y las cookies."
+    },
+    "sla": {
+      "title": "SLA | Mysterria",
+      "description": "Compromisos de disponibilidad y expectativas de servicio para el servidor de Minecraft Mysterria."
+    },
+    "default": {
+      "title": "Mysterria: servidor de Minecraft de Lord of the Mysteries",
+      "description": "Bebe la pócima. Interpreta el papel. Asciende por 22 Senderos Trascendentes desde la Secuencia 9 hacia la divinidad en un servidor de Minecraft de Lord of the Mysteries."
+    }
+  }
+}
