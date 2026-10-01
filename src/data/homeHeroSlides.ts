@@ -18,8 +18,10 @@ export type HomeHeroSlide = Readonly<{
   saturation: number;
   brightness: number;
   contrast: number;
-  label: string;
-  sequence: string;
+  /** i18n key for the scene name shown in the caption and the tab label. */
+  labelKey: string;
+  /** i18n key for the short scene tag beside the caption ("World / 01"). */
+  sequenceKey: string;
   theme: HomeHeroSceneTheme;
 }>;
 
@@ -32,8 +34,8 @@ export const HOME_HERO_SLIDES = [
     saturation: 1.1,
     brightness: 1.08,
     contrast: 1.03,
-    label: 'Aurora Cliffside',
-    sequence: 'WORLD / 01',
+    labelKey: 'home.hero.slides.auroraCliffside.label',
+    sequenceKey: 'home.hero.slides.auroraCliffside.sequence',
     theme: { color: '#9e7eae', glow: '#edcebe', accent: '#8d6fe4' },
   },
   {
@@ -44,8 +46,8 @@ export const HOME_HERO_SLIDES = [
     saturation: 1.14,
     brightness: 1.1,
     contrast: 1.05,
-    label: 'The Eye Rift',
-    sequence: 'RIFT / 02',
+    labelKey: 'home.hero.slides.eyeRift.label',
+    sequenceKey: 'home.hero.slides.eyeRift.sequence',
     theme: { color: '#344470', glow: '#ad65e0', accent: '#8873e8' },
   },
   {
@@ -56,8 +58,8 @@ export const HOME_HERO_SLIDES = [
     saturation: 1.08,
     brightness: 1.04,
     contrast: 1.04,
-    label: 'Sanctuary Awakening',
-    sequence: 'RITE / 03',
+    labelKey: 'home.hero.slides.sanctuaryAwakening.label',
+    sequenceKey: 'home.hero.slides.sanctuaryAwakening.sequence',
     theme: { color: '#be8746', glow: '#ffde98', accent: '#ad7d39' },
   },
   {
@@ -68,8 +70,8 @@ export const HOME_HERO_SLIDES = [
     saturation: 1.12,
     brightness: 1.06,
     contrast: 1.04,
-    label: 'The Guardian’s Trial',
-    sequence: 'FIELD / 04',
+    labelKey: 'home.hero.slides.guardianTrial.label',
+    sequenceKey: 'home.hero.slides.guardianTrial.sequence',
     theme: { color: '#386678', glow: '#e2a462', accent: '#a66b43' },
   },
   {
@@ -80,8 +82,8 @@ export const HOME_HERO_SLIDES = [
     saturation: 1.13,
     brightness: 1.03,
     contrast: 1.05,
-    label: 'The Corrupted Frontier',
-    sequence: 'EVENT / 05',
+    labelKey: 'home.hero.slides.corruptedFrontier.label',
+    sequenceKey: 'home.hero.slides.corruptedFrontier.sequence',
     theme: { color: '#70416e', glow: '#e1755b', accent: '#9b6dd3' },
   },
 ] as const satisfies readonly HomeHeroSlide[];

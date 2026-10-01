@@ -11,27 +11,33 @@
 
       <div class="hero-content">
         <div class="hero-copy">
-          <h1 id="home-title">A Lord of the Mysteries-inspired Minecraft Server</h1>
-          <p class="hero-summary">
-            Choose a Pathway, brew your first potion, and step into a world of dungeons, hunts, rituals, and hidden powers.
-          </p>
+          <h1 id="home-title">{{ t('home.hero.title') }}</h1>
+          <p class="hero-summary">{{ t('home.hero.summary') }}</p>
 
-          <div class="hero-actions" aria-label="Get started">
-            <RouterLink class="hero-action hero-action--primary" to="/guide">
-              <span>Start playing</span>
+          <div class="hero-actions">
+            <RouterLink class="hero-action hero-action--primary" :to="$lp('/guide/connect')">
+              <span>{{ t('home.hero.primaryCta') }}</span>
               <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
             </RouterLink>
 
-            <div class="connection-pill" aria-label="Mysterria server details">
-              <span class="connection-status">
-                <i class="connection-status__dot" :class="`is-${status.state}`" aria-hidden="true" />
-                <small aria-live="polite">{{ statusLabel }}</small>
+            <div class="connection-pill" :class="`is-${copyState}`">
+              <span class="connection-text">
+                <!-- All three labels share one grid cell so the pill keeps the
+                     width of the longest one and never nudges its neighbours. -->
+                <small class="connection-label">
+                  <span
+                    v-for="state in COPY_STATES"
+                    :key="state"
+                    :class="{ 'is-shown': copyState === state }"
+                    :aria-hidden="copyState !== state"
+                  >{{ t(COPY_LABEL_KEYS[state]) }}</span>
+                </small>
+                <strong ref="addressRef" class="connection-address">{{ SERVER_IP }}</strong>
               </span>
-              <strong class="connection-address">{{ MYSTERRIA_ADDRESS }}</strong>
               <button
                 class="connection-copy"
                 type="button"
-                :aria-label="copyState === 'copied' ? 'Server address copied' : 'Copy server address'"
+                :aria-label="copyState === 'copied' ? t('home.hero.copiedAria') : t('home.hero.copyAria')"
                 @click="copyAddress"
               >
                 <svg v-if="copyState !== 'copied'" aria-hidden="true" viewBox="0 0 18 18">
@@ -40,12 +46,12 @@
                 </svg>
                 <svg v-else aria-hidden="true" viewBox="0 0 18 18"><path d="M4 9.5l3.5 3.5L14 5.5" /></svg>
               </button>
-              <span class="visually-hidden" aria-live="polite">{{ copyFeedback }}</span>
+              <span class="visually-hidden" aria-live="polite">{{ copyAnnouncement }}</span>
             </div>
           </div>
 
-          <RouterLink class="hero-link-quiet" :to="latestSlug ? `/news/${latestSlug}` : '/news'">
-            <span>Latest changelog</span>
+          <RouterLink class="hero-link-quiet" :to="$lp(latestSlug ? `/news/${latestSlug}` : '/news')">
+            <span>{{ t('home.hero.latestChangelog') }}</span>
             <svg aria-hidden="true" viewBox="0 0 20 20">
               <path d="M5.5 2.75h6l3 3v11.5h-9z" />
               <path d="M11.5 2.75v3h3M8 9h4.5M8 12h4.5" />
@@ -68,20 +74,22 @@
               decoding="async"
             >
 
-            <div class="hero-plate__signal" aria-hidden="true">
-              <i />
-              <span>WORLD ONLINE</span>
-              <b>FIELD {{ String(activeSlide + 1).padStart(2, '0') }}</b>
+            <div class="hero-plate__signal" :class="{ 'is-live': status.state === 'online' }" aria-hidden="true">
+              <template v-if="status.state === 'online'">
+                <i />
+                <span>{{ t('home.hero.worldOnline') }}</span>
+              </template>
+              <b>{{ t('home.hero.field').replace('{number}', slideNumber(activeSlide)) }}</b>
             </div>
           </div>
 
           <div class="hero-plate__footer">
             <figcaption class="hero-plate__caption">
-              <span>{{ HOME_HERO_SLIDES[activeSlide].label }}</span>
-              <b>{{ HOME_HERO_SLIDES[activeSlide].sequence }}</b>
+              <span>{{ t(HOME_HERO_SLIDES[activeSlide].labelKey) }}</span>
+              <b>{{ t(HOME_HERO_SLIDES[activeSlide].sequenceKey) }}</b>
             </figcaption>
 
-            <div class="hero-plate__controls" role="tablist" aria-label="Hero world scenes">
+            <div class="hero-plate__controls" role="tablist" :aria-label="t('home.hero.scenesAria')">
               <button
                 v-for="(slide, index) in HOME_HERO_SLIDES"
                 :key="slide.src"
@@ -91,14 +99,14 @@
                 role="tab"
                 :tabindex="activeSlide === index ? 0 : -1"
                 :aria-selected="activeSlide === index"
-                :aria-label="`Show ${slide.label}`"
+                :aria-label="t('home.hero.showScene').replace('{scene}', t(slide.labelKey))"
                 @click="selectSlide(index)"
                 @keydown.left.prevent="selectSlide(index - 1, true)"
                 @keydown.right.prevent="selectSlide(index + 1, true)"
                 @keydown.home.prevent="selectSlide(0, true)"
                 @keydown.end.prevent="selectSlide(HOME_HERO_SLIDES.length - 1, true)"
               >
-                <span>{{ String(index + 1).padStart(2, '0') }}</span>
+                <span>{{ slideNumber(index) }}</span>
                 <i aria-hidden="true" />
               </button>
             </div>
@@ -106,8 +114,8 @@
         </figure>
       </div>
 
-      <a class="scroll-cue" href="#progression" aria-label="Scroll down to see Mysterria progression">
-        <span>Scroll to begin</span>
+      <a class="scroll-cue" href="#what-is" :aria-label="t('home.hero.scrollCueAria')">
+        <span>{{ t('home.hero.scrollCue') }}</span>
         <i aria-hidden="true"><b /></i>
       </a>
     </div>
@@ -125,20 +133,40 @@ import {
   type CSSProperties,
 } from 'vue';
 import { useElementScrollProgress } from '@/composables/useElementScrollProgress';
+import { useI18n } from '@/composables/useI18n';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { HOME_HERO_SLIDES, type HomeHeroSlide } from '@/data/homeHeroSlides';
-import { MYSTERRIA_ADDRESS, type ServerStatus } from '@/services/serverStatus';
+import { SERVER_IP } from '@/composables/useServer';
+import type { ServerStatus } from '@/composables/useSharedServerStatus';
 
-const props = defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
+/*
+ * `status` only drives the plate's decorative "World online" tag. The live
+ * player count lives in the header chip, so the hero does not repeat it.
+ */
+defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
 const ROTATE_INTERVAL = 7000;
+/* Same confirmation window as the header chip (useCopyIp), so both copy
+   affordances on the page behave alike. Failure stays up longer: it asks the
+   reader to do something. */
+const COPIED_MS = 1800;
+const FAILED_MS = 4000;
 type HeroCssProperties = CSSProperties & Record<`--${string}`, string>;
+type CopyState = 'idle' | 'copied' | 'failed';
+const COPY_STATES: readonly CopyState[] = ['idle', 'copied', 'failed'];
+const COPY_LABEL_KEYS: Record<CopyState, string> = {
+  idle: 'home.hero.addressLabel',
+  copied: 'home.hero.copied',
+  failed: 'home.hero.copyFailed',
+};
 
+const { t } = useI18n();
 const heroRef = ref<HTMLElement | null>(null);
+const addressRef = ref<HTMLElement | null>(null);
 const activeSlide = ref(0);
 const slidesLoaded = ref(false);
 const isReady = ref(false);
-const copyState = ref<'idle' | 'copied' | 'failed'>('idle');
+const copyState = ref<CopyState>('idle');
 const reducedMotion = useReducedMotion();
 const { progress, inView } = useElementScrollProgress(heroRef, {
   rootMargin: '20% 0px',
@@ -154,24 +182,18 @@ const heroStyle = computed<HeroCssProperties>(() => ({
   '--hero-progress': reducedMotion.value ? '0' : progress.value.toFixed(4),
 }));
 
-const statusLabel = computed(() => {
-  if (props.status.state === 'online') {
-    return props.status.playersOnline === null
-      ? 'Online'
-      : `${props.status.playersOnline} online`;
-  }
-  if (props.status.state === 'offline') return 'Offline';
-  if (props.status.state === 'loading') return 'Checking…';
-  return 'Unavailable';
-});
 
-const copyFeedback = computed(() => {
-  if (copyState.value === 'copied') return 'Server address copied.';
-  if (copyState.value === 'failed') return `Copy failed. Select ${MYSTERRIA_ADDRESS} manually.`;
+const copyAnnouncement = computed(() => {
+  if (copyState.value === 'copied') return t('home.hero.copiedAnnouncement');
+  if (copyState.value === 'failed') return t('home.hero.copyFailedAnnouncement');
   return '';
 });
 
 const stackFaded = computed(() => progress.value >= .18);
+
+function slideNumber(index: number) {
+  return String(index + 1).padStart(2, '0');
+}
 
 function slideStyle(slide: HomeHeroSlide): HeroCssProperties {
   return {
@@ -188,18 +210,30 @@ function normalizeSlide(index: number) {
   return ((index % HOME_HERO_SLIDES.length) + HOME_HERO_SLIDES.length) % HOME_HERO_SLIDES.length;
 }
 
+/** Leaves the address selected so a blocked clipboard is one keystroke from done. */
+function selectAddress() {
+  const node = addressRef.value;
+  const selection = window.getSelection();
+  if (!node || !selection) return;
+  const range = document.createRange();
+  range.selectNodeContents(node);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 async function copyAddress() {
   try {
-    await navigator.clipboard.writeText(MYSTERRIA_ADDRESS);
+    await navigator.clipboard.writeText(SERVER_IP);
     copyState.value = 'copied';
   } catch {
     copyState.value = 'failed';
+    selectAddress();
   }
 
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => {
     copyState.value = 'idle';
-  }, 2600);
+  }, copyState.value === 'copied' ? COPIED_MS : FAILED_MS);
 }
 
 async function revealSlide(index: number) {
@@ -318,7 +352,7 @@ onUnmounted(() => {
 .hero {
   --hero-progress: 0;
   position: relative;
-  min-height: clamp(940px, 168svh, 1540px);
+  min-height: clamp(860px, 140svh, 1260px);
   color: var(--ink);
   background: transparent;
   isolation: isolate;
@@ -362,7 +396,9 @@ onUnmounted(() => {
     calc(var(--home-header-height, 82px) + env(safe-area-inset-top) + 28px)
     var(--home-content-gutter, clamp(20px, 4vw, 56px))
     clamp(112px, 14svh, 156px);
-  opacity: clamp(0, calc((.94 - var(--hero-progress)) / .94), 1);
+  /* Fades only part-way while pinned, so it is still readable as it scrolls off
+     and the next chapter follows directly instead of after an empty screen. */
+  opacity: clamp(0, calc(1 - var(--hero-progress) * .6), 1);
   transform: translate3d(0, calc(var(--hero-progress) * -30px), 0);
   will-change: transform, opacity;
 }
@@ -378,13 +414,28 @@ onUnmounted(() => {
   max-width: 650px;
 }
 
+/*
+ * Text protection. The scene tint behind the copy shifts with every slide, so
+ * the copy sits on its own near-paper plate: solid across the whole text block,
+ * feathered only beyond it (two intersected masks give a soft-edged rectangle
+ * without a blur layer). Contrast no longer depends on which scene is showing.
+ */
 .hero-copy::before {
+  --scrim-x: 112px;
+  --scrim-y: 72px;
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -54px -80px -54px -46px;
-  background: radial-gradient(ellipse at 28% 50%, color-mix(in srgb, var(--journey-top) 78%, var(--hero-scene-glow) 22%), transparent 72%);
-  opacity: .82;
+  inset: calc(var(--scrim-y) * -1) calc(var(--scrim-x) * -1);
+  background: color-mix(in srgb, color-mix(in srgb, var(--journey-top) 94%, var(--hero-scene-glow) 6%) 84%, transparent);
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 var(--scrim-x), #000 calc(100% - var(--scrim-x)), transparent),
+    linear-gradient(180deg, transparent, #000 var(--scrim-y), #000 calc(100% - var(--scrim-y)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 var(--scrim-x), #000 calc(100% - var(--scrim-x)), transparent),
+    linear-gradient(180deg, transparent, #000 var(--scrim-y), #000 calc(100% - var(--scrim-y)), transparent);
+  mask-composite: intersect;
   pointer-events: none;
 }
 
@@ -409,7 +460,7 @@ onUnmounted(() => {
 .hero-summary {
   max-width: 520px;
   margin: 0 0 30px;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
   font-size: clamp(1rem, 1.25vw, 1.13rem);
   line-height: 1.65;
   text-wrap: balance;
@@ -466,25 +517,32 @@ onUnmounted(() => {
   box-shadow: 0 12px 30px color-mix(in srgb, var(--hero-scene-accent) 30%, transparent);
 }
 
+/* Hover only ever adds: darker fill, larger glow in the same hue, lift. */
 .hero-action--primary:hover {
   color: #fff;
   background: var(--primary-deep);
-  box-shadow: 0 22px 48px rgba(116, 88, 232, .32);
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--primary-deep) 38%, transparent);
   transform: translateY(-2px);
 }
 
 .hero-action--primary:hover svg { transform: translateX(3px); }
-.hero-action--primary:active { transform: translateY(0); }
+
+.hero-action--primary:active {
+  background: color-mix(in srgb, var(--primary-deep) 84%, var(--ink) 16%);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--primary-deep) 30%, transparent);
+  transform: translateY(0) scale(.98);
+  transition-duration: .08s;
+}
 
 .connection-pill {
   min-width: 0;
   max-width: 100%;
   min-height: 52px;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 11px;
-  padding: 6px 8px 6px 14px;
+  gap: 14px;
+  padding: 6px 7px 6px 20px;
   border: 1px solid color-mix(in srgb, var(--hairline) 72%, var(--hero-scene-color) 28%);
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface-glass) 86%, var(--hero-scene-color) 14%);
@@ -495,65 +553,92 @@ onUnmounted(() => {
   transition:
     opacity .8s .48s cubic-bezier(.22, 1, .36, 1),
     transform .8s .48s cubic-bezier(.22, 1, .36, 1),
-    background-color 1.25s cubic-bezier(.22, 1, .36, 1),
-    border-color 1.25s cubic-bezier(.22, 1, .36, 1);
+    background-color .3s,
+    border-color .3s,
+    box-shadow .3s;
 }
 
-.connection-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.connection-pill.is-copied {
+  border-color: color-mix(in srgb, var(--live) 70%, var(--ink) 30%);
+  background: color-mix(in srgb, var(--surface) 88%, var(--live) 12%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 22%, transparent);
 }
 
-.connection-status__dot {
-  flex: 0 0 auto;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--ink-muted);
+.connection-pill.is-failed {
+  border-color: color-mix(in srgb, var(--danger) 72%, var(--ink) 28%);
+  background: color-mix(in srgb, var(--surface) 92%, var(--danger) 8%);
 }
 
-.connection-status__dot.is-online { background: var(--live); box-shadow: 0 0 0 4px rgba(52, 199, 123, .16); }
-.connection-status__dot.is-loading { background: var(--champagne); }
-.connection-status__dot.is-offline { background: rgba(34, 28, 20, .35); }
+.connection-text {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
 
-.connection-status small {
-  color: color-mix(in srgb, var(--ink) 68%, transparent);
-  font-size: .62rem;
+.connection-label {
+  display: grid;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
+  font-size: .68rem;
   font-weight: 800;
-  letter-spacing: .09em;
+  letter-spacing: .08em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+  transition: color .2s;
 }
+
+.connection-label > span {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  visibility: hidden;
+}
+
+.connection-label > .is-shown { visibility: visible; }
+
+.is-copied .connection-label { color: color-mix(in srgb, var(--live) 45%, var(--ink) 55%); }
+.is-failed .connection-label { color: color-mix(in srgb, var(--danger) 72%, var(--ink) 28%); }
 
 .connection-address {
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
   font-family: var(--font-mono);
-  font-size: .78rem;
+  font-size: .86rem;
   font-weight: 650;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+  user-select: all;
 }
 
 .connection-copy {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--hairline);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
   border-radius: 50%;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
   background: transparent;
   cursor: pointer;
-  transition: background-color .25s, border-color .25s, color .25s, transform .25s;
+  transition: background-color .2s, border-color .2s, color .2s, transform .2s;
 }
 
-.connection-copy svg { width: 16px; height: 16px; stroke-width: 1.5; }
-.connection-copy:hover { border-color: rgba(116, 88, 232, .45); color: var(--primary-deep); background: var(--primary-tint); }
-.connection-copy:active { transform: scale(.94); }
+.connection-copy svg { width: 16px; height: 16px; stroke-width: 1.6; }
+.connection-copy:hover { border-color: var(--primary); color: var(--primary-deep); background: var(--primary-tint); }
+.connection-copy:active { transform: scale(.92); background: color-mix(in srgb, var(--primary) 20%, transparent); }
+
+.is-copied .connection-copy {
+  border-color: transparent;
+  color: #fff;
+  background: color-mix(in srgb, var(--live) 70%, var(--ink) 30%);
+}
+
+.is-copied .connection-copy svg { stroke-width: 2.2; }
 
 .hero-link-quiet {
   width: fit-content;
@@ -562,7 +647,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 7px;
   padding: 0 4px;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--ink) 76%, transparent);
   font-size: .82rem;
   font-weight: 700;
   transition: color .25s;
@@ -575,7 +660,8 @@ onUnmounted(() => {
   transition: transform .28s cubic-bezier(.22, 1, .36, 1);
 }
 
-.hero-link-quiet:hover { color: var(--primary); }
+.hero-link-quiet:hover { color: var(--primary-deep); }
+.hero-link-quiet:active { color: var(--ink); }
 .hero-link-quiet:hover svg { transform: translateX(3px); }
 
 .hero-plate {
@@ -663,11 +749,12 @@ onUnmounted(() => {
   padding: 8px 10px;
   border: 1px solid rgba(255, 255, 255, .22);
   border-radius: 10px;
-  color: rgba(255, 255, 255, .9);
-  background: rgba(18, 20, 28, .38);
+  color: #fff;
+  background: rgba(18, 20, 28, .62);
   backdrop-filter: blur(12px);
-  font: 700 .55rem/1 var(--font-mono);
+  font: 700 .66rem/1 var(--font-mono);
   letter-spacing: .1em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -680,7 +767,7 @@ onUnmounted(() => {
 }
 
 .hero-plate__signal b {
-  color: rgba(255, 255, 255, .58);
+  color: rgba(255, 255, 255, .8);
   font-weight: 700;
 }
 
@@ -698,10 +785,10 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--ink-muted);
-  font-size: .64rem;
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+  font-size: .72rem;
   font-weight: 800;
-  letter-spacing: .11em;
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
@@ -713,7 +800,7 @@ onUnmounted(() => {
 
 .hero-plate__caption b {
   flex: 0 0 auto;
-  color: var(--hero-scene-accent);
+  color: color-mix(in srgb, var(--hero-scene-accent) 45%, var(--ink) 55%);
   font-weight: 800;
 }
 
@@ -731,16 +818,16 @@ onUnmounted(() => {
 
 .hero-plate__control {
   position: relative;
-  width: 34px;
-  height: 30px;
+  width: 38px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 0;
   border-radius: 8px;
-  color: var(--ink-muted);
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
   background: transparent;
-  font: 800 .52rem/1 var(--font-mono);
+  font: 800 .7rem/1 var(--font-mono);
   letter-spacing: .06em;
   cursor: pointer;
   transition: color .2s, background-color .2s;
@@ -769,6 +856,7 @@ onUnmounted(() => {
   background: color-mix(in srgb, var(--journey-top) 78%, var(--hero-scene-color) 22%);
 }
 
+.hero-plate__control:active { background: color-mix(in srgb, var(--hero-scene-color) 22%, transparent); }
 .hero-plate__control.is-active i { transform: scaleX(1); }
 
 .is-ready h1,
@@ -788,17 +876,17 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: var(--ink-muted);
-  font-size: .66rem;
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+  font-size: .72rem;
   font-weight: 800;
-  letter-spacing: .15em;
+  letter-spacing: .14em;
   text-transform: uppercase;
   opacity: clamp(0, calc((.6 - var(--hero-progress)) * 4), 1);
   transform: translateX(-50%);
   transition: color .25s;
 }
 
-.scroll-cue:hover { color: var(--primary); }
+.scroll-cue:hover { color: var(--primary-deep); }
 
 .scroll-cue > i {
   position: relative;
@@ -873,7 +961,7 @@ onUnmounted(() => {
   }
 
   .hero-copy { max-width: 680px; }
-  .hero-copy::before { inset: -44px -24px; }
+  .hero-copy::before { --scrim-x: 32px; --scrim-y: 40px; }
   .hero h1 { max-width: 640px; font-size: clamp(2.65rem, 8.5vw, 4.5rem); }
   .hero-summary { max-width: 620px; }
 
@@ -899,11 +987,12 @@ onUnmounted(() => {
   .hero h1 { font-size: clamp(2.3rem, 11vw, 3.65rem); }
   .hero-summary { margin-bottom: 24px; font-size: .94rem; }
   .hero-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .hero-action { width: 100%; justify-content: space-between; padding-inline: 18px; }
+  .hero-action { width: 100%; justify-content: space-between; padding-inline: 20px; }
   .connection-pill { width: 100%; }
   .hero-plate__frame { aspect-ratio: 4 / 3; border-radius: 22px; }
   .hero-plate__signal { top: 14px; left: 10%; }
   .hero-plate__signal b { display: none; }
+  .hero-plate__signal:not(.is-live) { display: none; }
   .hero-plate__footer { align-items: flex-start; padding-inline: 8%; }
   .hero-plate__caption { display: grid; gap: 4px; }
 }
@@ -911,9 +1000,8 @@ onUnmounted(() => {
 @media (max-width: 430px) {
   .hero h1 { font-size: clamp(2.2rem, 11.5vw, 3.15rem); }
   .hero-summary { font-size: .88rem; }
-  .connection-pill { grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; padding-left: 12px; }
-  .connection-status small { font-size: .58rem; }
-  .connection-address { font-size: .72rem; }
+  .connection-pill { gap: 10px; padding-left: 16px; }
+  .connection-address { font-size: .8rem; }
   .hero-plate__footer { display: grid; grid-template-columns: 1fr; gap: 10px; }
   .hero-plate__controls { justify-self: end; }
 }
@@ -921,8 +1009,8 @@ onUnmounted(() => {
 @media (max-width: 290px) {
   .hero-content { padding-inline: 8px; }
   .hero h1 { font-size: 2rem; }
-  .connection-pill { grid-template-columns: 1fr auto; border-radius: 20px; }
-  .connection-status { grid-column: 1 / -1; }
+  .connection-pill { border-radius: 20px; }
+  .connection-label,
   .connection-address { white-space: normal; overflow-wrap: anywhere; }
 }
 

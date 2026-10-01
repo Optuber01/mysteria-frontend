@@ -2,41 +2,36 @@
   <section class="getting-started" aria-labelledby="getting-started-title">
     <div class="getting-started__inner">
       <div class="getting-started__heading">
-        <p>START YOUR JOURNEY</p>
-        <h2 id="getting-started-title">From first login to your first Sequence.</h2>
+        <p>{{ t('home.gettingStarted.eyebrow') }}</p>
+        <h2 id="getting-started-title">{{ t('home.gettingStarted.title') }}</h2>
       </div>
 
       <ol class="getting-started__steps">
-        <li>
-          <span>01</span>
+        <li v-for="(step, index) in STEPS" :key="step">
+          <span aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
           <div>
-            <h3>Join the server</h3>
-            <p>Connect to Mysterria and enter the persistent world.</p>
-          </div>
-        </li>
-        <li>
-          <span>02</span>
-          <div>
-            <h3>Find your direction</h3>
-            <p>Explore, learn the systems and decide which Pathway you want to pursue.</p>
-          </div>
-        </li>
-        <li>
-          <span>03</span>
-          <div>
-            <h3>Begin advancing</h3>
-            <p>Work toward formulas, ingredients, potions and the rituals required to move through the Sequences.</p>
+            <h3>{{ t(`home.gettingStarted.steps.${step}.title`) }}</h3>
+            <p>{{ t(`home.gettingStarted.steps.${step}.body`) }}</p>
           </div>
         </li>
       </ol>
 
       <div class="getting-started__actions">
-        <RouterLink to="/guide">Read the guide <span aria-hidden="true">→</span></RouterLink>
-        <RouterLink to="/pathways">Browse Pathways <span aria-hidden="true">→</span></RouterLink>
+        <RouterLink :to="$lp('/guide')">{{ t('home.gettingStarted.guideCta') }} <span aria-hidden="true">→</span></RouterLink>
+        <RouterLink :to="$lp('/pathways')">{{ t('home.gettingStarted.pathwaysCta') }} <span aria-hidden="true">→</span></RouterLink>
       </div>
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+import { useI18n } from '@/composables/useI18n';
+
+/* Keys under home.gettingStarted.steps, in display order. */
+const STEPS = ['join', 'direction', 'advance'] as const;
+
+const { t } = useI18n();
+</script>
 
 <style scoped>
 .getting-started {
@@ -58,11 +53,12 @@
 }
 .getting-started__heading p {
   margin: 7px 0 0;
-  color: color-mix(in srgb, var(--ink) 52%, transparent);
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
   font-family: var(--font-mono, monospace);
-  font-size: .67rem;
+  font-size: .72rem;
   font-weight: 800;
   letter-spacing: .15em;
+  text-transform: uppercase;
 }
 .getting-started h2 {
   max-width: 900px;
@@ -94,9 +90,9 @@
   border-left: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
 }
 .getting-started__steps span {
-  color: color-mix(in srgb, var(--ink) 42%, transparent);
+  color: color-mix(in srgb, var(--ink) 70%, transparent);
   font-family: var(--font-mono, monospace);
-  font-size: .66rem;
+  font-size: .72rem;
   font-weight: 750;
 }
 .getting-started__steps h3 {
@@ -108,7 +104,7 @@
 .getting-started__steps p {
   max-width: 330px;
   margin: 0;
-  color: color-mix(in srgb, var(--ink) 66%, transparent);
+  color: color-mix(in srgb, var(--ink) 76%, transparent);
   font-size: .93rem;
   line-height: 1.65;
 }
@@ -120,13 +116,14 @@
 }
 .getting-started__actions a {
   color: var(--ink);
-  font-size: .78rem;
+  font-size: .84rem;
   font-weight: 800;
   text-decoration: none;
   border-bottom: 1px solid color-mix(in srgb, var(--ink) 36%, transparent);
   padding-bottom: 3px;
 }
-.getting-started__actions a:hover { border-color: var(--ink); }
+.getting-started__actions a:hover { color: var(--primary-deep); border-color: currentColor; }
+.getting-started__actions a:active { color: var(--ink); }
 .getting-started__actions a:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
 
 @media (max-width: 800px) {
