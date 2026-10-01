@@ -3,7 +3,6 @@
     id="progression"
     ref="sectionRef"
     class="progression-v3"
-    :class="{ 'is-visible': visible }"
     :style="{ '--journey': progress.toFixed(4), '--entry': entryProgress.toFixed(4) }"
     aria-labelledby="progression-title"
   >
@@ -15,22 +14,22 @@
       <div class="progression-v3__threshold-fog" aria-hidden="true"><i /><i /></div>
 
       <header class="progression-v3__heading">
-        <p>Your path to godhood starts here</p>
-        <h2 id="progression-title">Start at Sequence 9.</h2>
-        <span>A Seer’s first formula · Fool Pathway</span>
+        <p>{{ tp('eyebrow') }}</p>
+        <h2 id="progression-title">{{ tp('title') }}</h2>
+        <span>{{ tp('tagline') }}</span>
       </header>
 
       <div class="progression-v3__layout">
         <Transition name="chapter-copy" mode="out-in">
           <article :key="activeChapter.id" class="chapter-copy">
-            <p class="chapter-copy__kicker">{{ activeChapter.kicker }}</p>
-            <h3>{{ activeChapter.title }}</h3>
-            <p class="chapter-copy__body">{{ activeChapter.copy }}</p>
-            <p class="chapter-copy__hint"><i aria-hidden="true" />{{ activeChapter.hint }}</p>
+            <p class="chapter-copy__kicker">{{ chapterText(activeChapter.id, 'kicker') }}</p>
+            <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
+            <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
+            <p class="chapter-copy__hint"><i aria-hidden="true" />{{ chapterText(activeChapter.id, 'hint') }}</p>
           </article>
         </Transition>
 
-        <div ref="stageRef" class="progression-v3__stage" @keydown.esc.stop="clearDetail" @click="onStageClick">
+        <div ref="stageRef" class="progression-v3__stage" @click="onStageClick">
           <div
             class="scene-window"
             :style="bookWindowStyle"
@@ -40,6 +39,7 @@
               :progress="bookLocal"
               :closing-progress="bookClosingLocal"
               :active="bookOpacity > 0.5"
+              :warm="near"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
             />
@@ -64,6 +64,7 @@
             <DrinkAwakenScene
               :progress="drinkLocal"
               :active="drinkOpacity > 0.5"
+              :warm="progress >= TIMELINE.playerWarm"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
             />
@@ -80,7 +81,7 @@
         </div>
       </div>
 
-      <nav class="progression-nav" aria-label="Progression chapters">
+      <nav class="progression-nav" :aria-label="tp('navLabel')">
         <button
           v-for="(chapter, index) in chapters"
           :key="chapter.id"
@@ -89,21 +90,24 @@
           :aria-current="activeChapterIndex === index ? 'step' : undefined"
           @click="goToChapter(index)"
         >
-          <i aria-hidden="true" />
+          <i aria-hidden="true">
+            <svg v-if="activeChapterIndex > index" viewBox="0 0 12 12" focusable="false"><path d="M2.5 6.4 5 8.8l4.6-5.3" /></svg>
+          </i>
           <span>{{ String(index + 1).padStart(2, '0') }}</span>
-          <strong>{{ chapter.short }}</strong>
+          <strong>{{ chapterText(chapter.id, 'short') }}</strong>
+          <em v-if="activeChapterIndex > index" class="sr-only">{{ tp('navCompleted') }}</em>
         </button>
       </nav>
-      <div class="progression-line" aria-hidden="true"><i :style="{ width: `${progress * 100}%` }" /></div>
+      <div class="progression-line" aria-hidden="true"><i :style="{ transform: `scaleX(${progress.toFixed(4)})` }" /></div>
     </div>
 
     <ol class="progression-static">
       <li v-for="(chapter, index) in chapters" :key="chapter.id">
         <span>{{ String(index + 1).padStart(2, '0') }}</span>
         <div>
-          <small>{{ chapter.kicker }}</small>
-          <h3>{{ chapter.title }}</h3>
-          <p>{{ chapter.copy }}</p>
+          <small>{{ chapterText(chapter.id, 'kicker') }}</small>
+          <h3>{{ chapterText(chapter.id, 'title') }}</h3>
+          <p>{{ chapterText(chapter.id, 'copy') }}</p>
         </div>
       </li>
     </ol>
@@ -117,113 +121,105 @@ import FormulaBookScene from './progression3/FormulaBookScene.vue';
 import AltarBrewScene from './progression3/AltarBrewScene.vue';
 import DrinkAwakenScene from './progression3/DrinkAwakenScene.vue';
 import SceneInspectorPopover from './SceneInspectorPopover.vue';
+import { preloadPathwayNames, useProgressionCopy } from './progression3/useProgressionCopy';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 
-type Chapter = { id: string; short: string; kicker: string; title: string; copy: string; hint: string; start: number; end: number };
+/*
+ * One timeline (fractions of the pinned scroll) drives the scenes, the chapter
+ * rail and chapter navigation, so the rail can never name a chapter the stage
+ * is not showing.
+ */
+const BOOK = { start: 0, end: 0.28, closeStart: 0.412, closeEnd: 0.515, fadeOutStart: 0.485, fadeOutEnd: 0.525 };
+const ALTAR = { start: 0.38, end: 0.68, fadeInStart: 0.39, fadeInEnd: 0.43, fadeOutStart: 0.68, fadeOutEnd: 0.71 };
+const DRINK = { start: 0.68, end: 1, fadeInStart: 0.66, fadeInEnd: 0.69 };
+const altarAt = (local: number) => ALTAR.start + (ALTAR.end - ALTAR.start) * local;
+const drinkAt = (local: number) => DRINK.start + (DRINK.end - DRINK.start) * local;
+const TIMELINE = {
+  // Chapter starts follow the first visible beat of each step: the book
+  // closing as the ingredients take flight, the cauldron starting to brew,
+  // the altar/drink cross-fade midpoint, and the awakening flash.
+  infuse: BOOK.closeStart,
+  brew: altarAt(0.55),
+  drink: (ALTAR.fadeOutStart + ALTAR.fadeOutEnd) / 2,
+  awaken: drinkAt(0.6),
+  // Book hotspots stop being readable once the pages start closing.
+  bookReadableUntil: BOOK.closeStart,
+  altarReadableUntil: ALTAR.fadeOutEnd,
+  // skinview3d/WebGL for the player is created only once the story is close.
+  playerWarm: 0.5,
+};
 
+type ChapterId = 'discover' | 'infuse' | 'brew' | 'drink' | 'awaken';
+type Chapter = { id: ChapterId; start: number; end: number; landing: number };
+
+// `landing` is where chapter navigation scrolls to: a settled frame of that step.
 const chapters: Chapter[] = [
-  {
-    id: 'discover', short: 'Discover', start: 0, end: 0.38,
-    kicker: '01 · Recover the formula',
-    title: 'Find the written formula.',
-    copy: 'Recover the pages, gather the ingredients, and learn what a Sequence 9 Seer requires.',
-    hint: 'Inspect each entry to learn the recipe.',
-  },
-  {
-    id: 'infuse', short: 'Infuse', start: 0.38, end: 0.54,
-    kicker: '02 · Build the ritual',
-    title: 'Put every ingredient in place.',
-    copy: 'Main ingredients, supplementary ingredients, and the formula itself come together in the order the ritual demands.',
-    hint: 'Follow the formula from page to altar.',
-  },
-  {
-    id: 'brew', short: 'Brew', start: 0.54, end: 0.68,
-    kicker: '03 · Brew the potion',
-    title: 'Turn the formula into power.',
-    copy: 'Work the altar, keep the mixture stable, and brew the Sequence 9 potion of the Seer.',
-    hint: 'Watch the circle for the final step.',
-  },
-  {
-    id: 'drink', short: 'Drink', start: 0.68, end: 0.86,
-    kicker: '04 · Choose your Pathway',
-    title: 'Take the first step.',
-    copy: 'Drink the potion to commit to the Fool Pathway. From here, your abilities — and your risks — begin to change.',
-    hint: 'Choose your moment.',
-  },
-  {
-    id: 'awaken', short: 'Awaken', start: 0.86, end: 1,
-    kicker: '05 · Begin the ascent',
-    title: 'Become a Seer.',
-    copy: 'Divination and Spiritualism join your toolkit. Digest the potion, then prepare for Sequence 8.',
-    hint: 'The next Sequence is yours to earn.',
-  },
+  { id: 'discover', start: 0, end: TIMELINE.infuse, landing: BOOK.end + 0.02 },
+  { id: 'infuse', start: TIMELINE.infuse, end: TIMELINE.brew, landing: altarAt(0.5) + 0.005 },
+  { id: 'brew', start: TIMELINE.brew, end: TIMELINE.drink, landing: altarAt(0.93) },
+  { id: 'drink', start: TIMELINE.drink, end: TIMELINE.awaken, landing: drinkAt(0.38) },
+  { id: 'awaken', start: TIMELINE.awaken, end: 1, landing: 1 },
 ];
 
-const details: Record<string, { label: string; detail: string }> = {
-  'formula-fool': {
-    label: 'Written formula · Sequence 9 — Seer',
-    detail: 'The first formula on the Fool Pathway. Main ingredients sit on the left; supplementary ingredients sit on the right.',
-  },
-  'lavos-squid-blood': {
-    label: 'Blood of the Lavos Squid',
-    detail: 'Main ingredient · harvested from the Lavos Squid, a Beyonder Creature you must hunt.',
-  },
-  'stellar-aqua-crystal': {
-    label: 'Stellar Aqua Crystal',
-    detail: 'Main ingredient · a rare crystal condensation recovered from world loot.',
-  },
-  'gold-mint-leaves': {
-    label: 'Gold Mint Leaves',
-    detail: 'Supplementary ingredient · harvested from a minable Gold Mint resource node.',
-  },
-  'brew-recipe-slot': {
-    label: 'Formula slot',
-    detail: 'The written formula anchors the altar. Load every ingredient in its order.',
-  },
-  'brew-main-slots': {
-    label: 'Main ingredient slots',
-    detail: 'Main ingredients load into the left column of the interface, in written order.',
-  },
-  'brew-supp-slots': {
-    label: 'Supplementary slots',
-    detail: 'Supplementary ingredients fill the right column after the main ingredients are in place.',
-  },
-  'brew-circle': {
-    label: 'The working',
-    detail: 'The circle binds formula and ingredients together. Follow the written order or the brew is lost.',
-  },
-  'sequence-potion': {
-    label: 'Sequence 9 · Seer potion',
-    detail: 'A successful brew. Drink it to commit to the Fool Pathway and begin your ascent.',
-  },
-  'drink-potion': {
-    label: 'The last sip',
-    detail: 'The potion empties as the awakening takes hold. The first drink asks for nerve.',
-  },
-  'ability-divination': {
-    label: 'Divination',
-    detail: 'Dowsing and dream divination: locate mobs, players and answers through the spirit world.',
-  },
-  'ability-spiritualism': {
-    label: 'Spiritualism',
-    detail: 'Perceive spiritual bodies and auras that ordinary eyes cannot see.',
-  },
-  'ability-teaser': {
-    label: 'Sequence 8 · Clown',
-    detail: 'Digest the potion, complete the advancement ritual, and prepare for the next Sequence.',
-  },
+const { tp, names } = useProgressionCopy();
+
+function chapterText(id: ChapterId, field: 'short' | 'kicker' | 'title' | 'copy' | 'hint'): string {
+  return tp(`chapters.${id}.${field}`);
+}
+
+type DetailScene = 'book' | 'altar' | 'drink';
+type Detail = { label: string; detail: string };
+
+const detailScenes: Record<string, DetailScene> = {
+  'formula-fool': 'book',
+  'lavos-squid-blood': 'book',
+  'stellar-aqua-crystal': 'book',
+  'gold-mint-leaves': 'book',
+  'brew-recipe-slot': 'altar',
+  'brew-main-slots': 'altar',
+  'brew-supp-slots': 'altar',
+  'brew-circle': 'altar',
+  'sequence-potion': 'altar',
+  'drink-potion': 'drink',
+  'ability-teaser': 'drink',
 };
+
+function resolveDetail(id: string): Detail | null {
+  const pair = (key: string): Detail => ({ label: tp(`details.${key}.label`), detail: tp(`details.${key}.detail`) });
+  const ingredient = (key: string): Detail => ({ label: tp(`ingredients.${key}`), detail: tp(`details.${key}`) });
+  switch (id) {
+    case 'formula-fool': return pair('formula');
+    case 'lavos-squid-blood': return ingredient('lavosSquidBlood');
+    case 'stellar-aqua-crystal': return ingredient('stellarAquaCrystal');
+    case 'gold-mint-leaves': return ingredient('goldMintLeaves');
+    case 'brew-recipe-slot': return pair('recipeSlot');
+    case 'brew-main-slots': return pair('mainSlots');
+    case 'brew-supp-slots': return pair('supplementarySlots');
+    case 'brew-circle': return pair('circle');
+    case 'sequence-potion': return pair('sequencePotion');
+    case 'drink-potion': return pair('drinkPotion');
+    case 'ability-teaser': return pair('nextSequence');
+  }
+  if (id.startsWith('ability-')) {
+    const ability = names.value.abilities.find((entry) => `ability-${entry.id}` === id);
+    if (ability) return { label: tp('details.abilityLabel', { ability: ability.name }), detail: ability.description };
+  }
+  return null;
+}
 
 const sectionRef = ref<HTMLElement | null>(null);
 const stageRef = ref<HTMLElement | null>(null);
 const progress = ref(0);
 const entryProgress = ref(0);
 const visible = ref(false);
+// True once the chapter is within about a viewport: starts lazy downloads.
+const near = ref(false);
 const reducedMotion = useReducedMotion();
 const activeHotspotId = ref<string | null>(null);
 const inspectorAnchor = ref<HTMLElement | null>(null);
-const inspectorScene = ref<'book' | 'altar' | 'drink' | null>(null);
+const inspectorScene = ref<DetailScene | null>(null);
 let observer: IntersectionObserver | null = null;
+let nearObserver: IntersectionObserver | null = null;
 let frame = 0;
 
 const activeChapterIndex = computed(() => {
@@ -232,35 +228,37 @@ const activeChapterIndex = computed(() => {
   return index === -1 ? chapters.length - 1 : index;
 });
 const activeChapter = computed(() => chapters[activeChapterIndex.value]);
-const activeDetail = computed(() => (activeHotspotId.value ? details[activeHotspotId.value] ?? null : null));
+const activeDetail = computed(() => (activeHotspotId.value ? resolveDetail(activeHotspotId.value) : null));
 
 function clamp01(value: number): number {
-  if (Number.isNaN(value) || !Number.isFinite(value)) return 0;
+  if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
 }
 function windowProgress(start: number, end: number) {
   return clamp01((progress.value - start) / (end - start));
 }
-function fadeWindow(fadeInStart: number, fadeOutStart: number, fadeOutEnd: number, fadeInEnd?: number) {
-  const g = progress.value;
-  const inEnd = fadeInEnd ?? fadeInStart + 0.03;
-  const fadeIn = clamp01((g - fadeInStart) / (inEnd - fadeInStart));
-  const fadeOut = 1 - clamp01((g - fadeOutStart) / (fadeOutEnd - fadeOutStart));
-  return Math.min(fadeIn, fadeOut);
+function fadeIn(start: number, end: number) {
+  return clamp01((progress.value - start) / (end - start));
+}
+function fadeOut(start: number, end: number) {
+  return 1 - clamp01((progress.value - start) / (end - start));
 }
 
-const bookLocal = computed(() => windowProgress(0, 0.28));
+const bookLocal = computed(() => windowProgress(BOOK.start, BOOK.end));
 // Step two begins with the physical book still on stage. Reverse only the
 // opening portion of its pose while the altar settles underneath it, so the
 // pages close around the departing ingredients instead of the whole book
 // simply cross-fading away.
-const bookClosingLocal = computed(() => windowProgress(0.412, 0.515));
-const altarLocal = computed(() => windowProgress(0.38, 0.68));
-const drinkLocal = computed(() => windowProgress(0.68, 1));
+const bookClosingLocal = computed(() => windowProgress(BOOK.closeStart, BOOK.closeEnd));
+const altarLocal = computed(() => windowProgress(ALTAR.start, ALTAR.end));
+const drinkLocal = computed(() => windowProgress(DRINK.start, DRINK.end));
 
-const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(-1, 0.485, 0.525)));
-const altarOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.39, 0.68, 0.71, 0.43)));
-const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeWindow(0.66, 2, 2, 0.69)));
+const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeOut(BOOK.fadeOutStart, BOOK.fadeOutEnd)));
+const altarOpacity = computed(() => (reducedMotion.value ? 1 : Math.min(
+  fadeIn(ALTAR.fadeInStart, ALTAR.fadeInEnd),
+  fadeOut(ALTAR.fadeOutStart, ALTAR.fadeOutEnd),
+)));
+const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeIn(DRINK.fadeInStart, DRINK.fadeInEnd)));
 
 function windowStyle(opacity: number) {
   return {
@@ -276,9 +274,6 @@ const drinkWindowStyle = computed(() => windowStyle(drinkOpacity.value));
 // The inspector is teleported, so it must never outlive the scene that owns
 // its anchor. Clearing on a chapter/window transition fixes the stray cards
 // that previously remained on-screen after the book or altar had faded away.
-const bookDetailIds = new Set(['formula-fool', 'lavos-squid-blood', 'stellar-aqua-crystal', 'gold-mint-leaves']);
-const altarDetailIds = new Set(['brew-recipe-slot', 'brew-main-slots', 'brew-supp-slots', 'brew-circle', 'sequence-potion']);
-
 watch(activeChapterIndex, () => clearDetail());
 watch([bookOpacity, altarOpacity, drinkOpacity], ([book, altar, drink]) => {
   const ownerHasFaded =
@@ -289,10 +284,10 @@ watch([bookOpacity, altarOpacity, drinkOpacity], ([book, altar, drink]) => {
 });
 
 function showDetail(id: string, anchor: HTMLElement) {
-  if (!details[id]) return;
+  if (!resolveDetail(id)) return;
   activeHotspotId.value = id;
   inspectorAnchor.value = anchor;
-  inspectorScene.value = bookDetailIds.has(id) ? 'book' : altarDetailIds.has(id) ? 'altar' : 'drink';
+  inspectorScene.value = detailScenes[id] ?? 'drink';
 }
 function clearDetail() {
   activeHotspotId.value = null;
@@ -302,13 +297,18 @@ function clearDetail() {
 function onStageClick(event: MouseEvent) {
   if (!(event.target instanceof HTMLElement) || !event.target.closest('button')) clearDetail();
 }
+// Escape dismisses the inspector wherever focus is (WCAG 1.4.13), not only
+// when focus happens to sit inside the stage.
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && activeHotspotId.value) clearDetail();
+}
 function clearExpiredInspector(nextProgress: number) {
   // A pointer can remain at the same screen coordinate while the sticky scene
   // scrolls underneath it. Do not let a teleported tooltip remain attached to
   // a now-hidden control in that case.
   if (
-    (inspectorScene.value === 'book' && nextProgress >= 0.46) ||
-    (inspectorScene.value === 'altar' && nextProgress >= 0.71)
+    (inspectorScene.value === 'book' && nextProgress >= TIMELINE.bookReadableUntil) ||
+    (inspectorScene.value === 'altar' && nextProgress >= TIMELINE.altarReadableUntil)
   ) clearDetail();
 }
 
@@ -326,17 +326,19 @@ function update() {
   });
 }
 function goToChapter(index: number) {
-  if (!sectionRef.value) return;
   const section = sectionRef.value;
   const chapter = chapters[index];
-  const range = Math.max(1, section.offsetHeight - innerHeight);
-  const sectionTop = section.getBoundingClientRect().top + scrollY;
-  const maxScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
-  const chapterLead = index === 1 ? 0.06 : 0.35;
-  const fraction = clamp01(chapter.start + (chapter.end - chapter.start) * chapterLead);
-  const destination = Math.min(maxScroll, Math.max(0, sectionTop + fraction * range));
+  if (!section || !chapter) return;
   clearDetail();
-  scrollTo({ top: destination, behavior: reducedMotion.value ? 'auto' : 'smooth' });
+  const rect = section.getBoundingClientRect();
+  const range = rect.height - innerHeight;
+  const sectionTop = rect.top + scrollY;
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+  // Without a pinned range (static layout) there is nothing to scrub: just
+  // bring the section itself into view.
+  const target = range > 1 ? sectionTop + clamp01(chapter.landing) * range : sectionTop;
+  const destination = Math.round(Math.min(maxScroll, Math.max(sectionTop, target)));
+  scrollTo({ top: destination, behavior: reducedMotion.value ? 'instant' : 'smooth' });
 }
 
 onMounted(() => {
@@ -344,50 +346,39 @@ onMounted(() => {
     visible.value = entry.isIntersecting;
     if (visible.value) update();
   }, { rootMargin: '120px 0px' });
-  if (sectionRef.value) observer.observe(sectionRef.value);
+  nearObserver = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    near.value = true;
+    void preloadPathwayNames();
+    nearObserver?.disconnect();
+    nearObserver = null;
+  }, { rootMargin: '100% 0px' });
+  if (sectionRef.value) {
+    observer.observe(sectionRef.value);
+    nearObserver.observe(sectionRef.value);
+  }
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', update, { passive: true });
+  addEventListener('keydown', onKeydown);
 });
 onUnmounted(() => {
   observer?.disconnect();
+  nearObserver?.disconnect();
   removeEventListener('scroll', update);
   removeEventListener('resize', update);
+  removeEventListener('keydown', onKeydown);
   if (frame) cancelAnimationFrame(frame);
 });
 </script>
 
 <style scoped>
 .progression-v3 {
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --entry: 0;
   position: relative;
-  /* Overlap the progression with the final hero travel so the next scene
-     replaces the hero continuously instead of revealing a dead band. */
-  margin-top: -100svh;
   min-height: 500svh;
   color: var(--ink, #221c14);
   background: var(--journey-mid, #f4ecdf);
   isolation: isolate;
-}
-
-.progression-v3::before {
-  content: '';
-  position: absolute;
-  z-index: 2;
-  top: -140px;
-  right: 0;
-  left: 0;
-  height: 180px;
-  background: linear-gradient(180deg, transparent 0%, rgba(244, 236, 223, .24) 28%, rgba(244, 236, 223, .78) 68%, var(--journey-mid, #f4ecdf) 100%);
-  pointer-events: none;
-}
-
-@media (max-width: 720px) and (max-height: 690px) {
-  .progression-v3 { margin-top: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .progression-v3 { margin-top: 0; }
 }
 
 .progression-v3__sticky {
@@ -488,13 +479,18 @@ onUnmounted(() => {
   left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   display: grid;
   gap: 7px;
-  opacity: clamp(0, calc((var(--entry) - 0.2) * 2.8), 1);
+  /* A title card for the entrance only: it yields to each chapter's own
+     kicker once the book has landed, instead of pinning a stale tagline over
+     the later chapters. */
+  opacity: clamp(0, min(calc((var(--entry) - 0.2) * 2.8), calc(1 - (var(--journey) - 0.1) * 16)), 1);
+  transform: translate3d(0, calc(clamp(0, (var(--journey) - 0.1) * 16, 1) * -10px), 0);
+  pointer-events: none;
 }
 .progression-v3__heading p,
 .chapter-copy__kicker {
   margin: 0;
   color: #87691d;
-  font: 800 0.72rem/1 "Manrope", sans-serif;
+  font: 800 0.72rem/1 var(--font-body, "Manrope", sans-serif);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -506,7 +502,7 @@ onUnmounted(() => {
 }
 .progression-v3__heading span {
   color: var(--ink-muted, #756b5c);
-  font: 600 0.72rem/1.3 "Manrope", sans-serif;
+  font: 600 0.72rem/1.3 var(--font-body, "Manrope", sans-serif);
   letter-spacing: 0.08em;
 }
 
@@ -548,7 +544,7 @@ onUnmounted(() => {
   padding-top: 14px;
   border-top: 1px solid var(--hairline, #eae1d0);
   color: var(--ink-muted, #756b5c);
-  font: 600 0.74rem/1.5 "Manrope", sans-serif;
+  font: 600 0.74rem/1.5 var(--font-body, "Manrope", sans-serif);
   letter-spacing: 0.04em;
 }
 .chapter-copy__hint i {
@@ -584,10 +580,11 @@ onUnmounted(() => {
   border-top: 1px solid var(--hairline, #eae1d0);
 }
 .progression-nav button {
+  position: relative;
   min-width: 44px;
   min-height: 56px;
   display: grid;
-  grid-template-columns: 9px 22px minmax(0, 1fr);
+  grid-template-columns: 14px 22px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
@@ -597,30 +594,59 @@ onUnmounted(() => {
   cursor: pointer;
   text-align: left;
 }
+/* States differ by shape, not only hue (WCAG 1.4.1): upcoming = hollow ring,
+   active = filled dot + bar on the rail + bold label, complete = check mark. */
 .progression-nav button > i {
-  width: 6px;
-  height: 6px;
-  border: 1px solid currentColor;
+  width: 8px;
+  height: 8px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid currentColor;
   border-radius: 50%;
 }
 .progression-nav button.active {
   color: var(--primary, #7458e8);
 }
+.progression-nav button.active::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: 8px;
+  left: 8px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--primary, #7458e8);
+}
 .progression-nav button.active > i {
+  width: 10px;
+  height: 10px;
   border-color: var(--primary, #7458e8);
   background: var(--primary, #7458e8);
-  transform: scale(1.35);
+  box-shadow: 0 0 0 3px var(--primary-tint, rgba(116, 88, 232, 0.12));
+}
+.progression-nav button.active strong {
+  font-weight: 800;
 }
 .progression-nav button.complete {
   color: var(--ink, #221c14);
 }
 .progression-nav button.complete > i {
-  border-color: var(--champagne, #d9b45a);
-  background: var(--champagne, #d9b45a);
-  transform: scale(1.2);
+  width: 14px;
+  height: 14px;
+  border-color: var(--ink, #221c14);
+  background: var(--ink, #221c14);
+}
+.progression-nav button > i svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .progression-nav span {
-  font: 700 0.68rem/1 "Manrope", sans-serif;
+  font: 700 0.68rem/1 var(--font-body, "Manrope", sans-serif);
   letter-spacing: 0.08em;
 }
 .progression-nav strong {
@@ -642,8 +668,21 @@ onUnmounted(() => {
 }
 .progression-line i {
   display: block;
+  width: 100%;
   height: 100%;
   background: var(--primary, #7458e8);
+  transform-origin: left center;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .progression-static {
@@ -672,7 +711,7 @@ onUnmounted(() => {
     display: none;
   }
   .progression-nav button {
-    grid-template-columns: 9px 1fr;
+    grid-template-columns: 14px 1fr;
     justify-items: center;
   }
 }
@@ -747,6 +786,7 @@ onUnmounted(() => {
     width: min(760px, 100%);
     margin: 0 auto 40px;
     opacity: 1;
+    transform: none;
   }
   .progression-v3__heading h2 {
     margin-top: 8px;
@@ -768,19 +808,19 @@ onUnmounted(() => {
   }
   .progression-static li > span {
     color: #87691d;
-    font: 700 0.72rem/1 "Manrope", sans-serif;
+    font: 700 0.72rem/1 var(--font-body, "Manrope", sans-serif);
     letter-spacing: 0.12em;
   }
   .progression-static small {
     color: var(--primary-deep, #5f46d6);
-    font: 800 0.72rem/1 "Manrope", sans-serif;
+    font: 800 0.72rem/1 var(--font-body, "Manrope", sans-serif);
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
   .progression-static h3 {
     margin: 9px 0 10px;
     color: var(--ink, #221c14);
-    font: 800 clamp(1.8rem, 5vw, 3rem)/1 "Manrope", sans-serif;
+    font: 800 clamp(1.8rem, 5vw, 3rem)/1 var(--font-body, "Manrope", sans-serif);
     letter-spacing: -0.03em;
   }
   .progression-static p {

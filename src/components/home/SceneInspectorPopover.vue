@@ -1,8 +1,15 @@
 <template>
   <Teleport to="body">
   <Transition name="inspector" :duration="reducedMotion ? 0 : { enter: 250, leave: 130 }">
-    <aside v-if="open" :id="id" ref="popoverRef" class="inspector" :class="{ 'inspector--instant': reducedMotion }" role="tooltip">
-      <span>Inspecting</span>
+    <aside
+      v-if="open && anchor"
+      :id="id"
+      ref="popoverRef"
+      class="inspector"
+      :class="{ 'inspector--instant': reducedMotion, 'is-positioned': positioned }"
+      role="tooltip"
+    >
+      <span>{{ t('home.progression.inspector.kicker') }}</span>
       <strong>{{ title }}</strong>
       <p>{{ description }}</p>
       <i ref="arrowRef" class="inspector__arrow" />
@@ -15,6 +22,7 @@
 import { autoUpdate, computePosition, flip, offset, shift, size, arrow } from '@floating-ui/dom';
 import { nextTick, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
+import { useI18n } from '@/composables/useI18n';
 
 const props = defineProps<{
   id?: string;
@@ -28,6 +36,10 @@ const props = defineProps<{
 const popoverRef = ref<HTMLElement | null>(null);
 const arrowRef = ref<HTMLElement | null>(null);
 const reducedMotion = useReducedMotion();
+const { t } = useI18n();
+// Stays hidden until floating-ui has placed it, so it never flashes at the
+// viewport origin.
+const positioned = ref(false);
 let cleanup: (() => void) | null = null;
 
 const notchBorders: Record<string, string[]> = {
@@ -65,6 +77,7 @@ async function position() {
     ].filter(Boolean),
   });
   Object.assign(popover.style, { left: `${result.x}px`, top: `${result.y}px` });
+  positioned.value = true;
   if (!arrowRef.value || !result.middlewareData.arrow) return;
   const side = result.placement.split('-')[0];
   const staticSide = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }[side];
@@ -93,6 +106,11 @@ function start() {
   });
 }
 
+// A freshly opened card waits for its first placement; a closing card keeps
+// its position so the leave transition plays where it was.
+watch(() => props.open && Boolean(props.anchor), (isOpen) => {
+  if (isOpen) positioned.value = false;
+}, { immediate: true });
 watch(() => [props.open, props.anchor, props.boundary], start, { immediate: true });
 onUnmounted(() => cleanup?.());
 </script>
@@ -101,6 +119,9 @@ onUnmounted(() => cleanup?.());
 .inspector {
   position: fixed;
   z-index: 80;
+  top: 0;
+  left: 0;
+  visibility: hidden;
   width: min(286px, calc(100vw - 24px));
   padding: 15px 17px 16px;
   overflow: visible;
@@ -116,6 +137,7 @@ onUnmounted(() => cleanup?.());
   box-shadow: 0 12px 32px rgba(60, 40, 10, .35), inset 0 1px 0 rgba(255, 252, 240, .55);
   pointer-events: none;
 }
+.inspector.is-positioned { visibility: visible; }
 .inspector > span {
   display: flex;
   align-items: center;

@@ -6,18 +6,37 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import * as THREE from 'three';
+// Types only: three.js itself is imported on demand (see loadAssets) so it
+// stays out of the homepage entry chunk until the chapter approaches.
+import type * as THREE from 'three';
 import bookAtlasUrl from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_1.21.8.png';
 import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
 import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
 import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leaves.png';
 import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
 
+export type BookLabels = {
+  mainHeading: string;
+  supplementaryHeading: string;
+  main: Array<{ name: string; role: string }>;
+  supplementary: Array<{ name: string; role: string }>;
+  noteHeading: string;
+  note: string;
+  coverPathway: string;
+  coverSequence: string;
+  coverName: string;
+  coverRecipe: string;
+};
+
 const props = withDefaults(defineProps<{
   progress: number;
+  labels: BookLabels;
   reducedMotion?: boolean;
+  /** Start downloading three.js and the artwork before the book is needed. */
+  warm?: boolean;
 }>(), {
   reducedMotion: false,
+  warm: false,
 });
 
 const hostRef = ref<HTMLElement | null>(null);
@@ -34,6 +53,10 @@ let intersectionObserver: IntersectionObserver | null = null;
 let initialized = false;
 let sourceTexture: THREE.Texture | null = null;
 let disposed = false;
+let inView = false;
+let three!: typeof import('three');
+let formulaImages: FormulaImages | null = null;
+let builtLabels = '';
 const ownedTextures: THREE.Texture[] = [];
 const ownedMaterials: THREE.Material[] = [];
 const ownedGeometries: THREE.BufferGeometry[] = [];
@@ -92,13 +115,13 @@ function makeRegionTexture(
   );
   if (useCoverPalette) recolorCoverTexture(context);
   painter?.(context, crop.width, crop.height);
-  const texture = new THREE.CanvasTexture(crop);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = isIllustratedPage ? THREE.LinearFilter : THREE.NearestFilter;
-  texture.minFilter = isIllustratedPage ? THREE.LinearMipmapLinearFilter : THREE.NearestFilter;
+  const texture = new three.CanvasTexture(crop);
+  texture.colorSpace = three.SRGBColorSpace;
+  texture.magFilter = isIllustratedPage ? three.LinearFilter : three.NearestFilter;
+  texture.minFilter = isIllustratedPage ? three.LinearMipmapLinearFilter : three.NearestFilter;
   texture.generateMipmaps = isIllustratedPage;
-  texture.wrapS = THREE.ClampToEdgeWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.wrapS = three.ClampToEdgeWrapping;
+  texture.wrapT = three.ClampToEdgeWrapping;
   ownedTextures.push(texture);
   return texture;
 }
@@ -147,13 +170,13 @@ function recolorCoverTexture(context: CanvasRenderingContext2D) {
 }
 
 function makeImageTexture(image: HTMLImageElement): THREE.Texture {
-  const texture = new THREE.Texture(image);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = THREE.LinearFilter;
-  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  const texture = new three.Texture(image);
+  texture.colorSpace = three.SRGBColorSpace;
+  texture.magFilter = three.LinearFilter;
+  texture.minFilter = three.LinearMipmapLinearFilter;
   texture.generateMipmaps = true;
-  texture.wrapS = THREE.ClampToEdgeWrapping;
-  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.wrapS = three.ClampToEdgeWrapping;
+  texture.wrapT = three.ClampToEdgeWrapping;
   texture.needsUpdate = true;
   ownedTextures.push(texture);
   return texture;
@@ -233,10 +256,10 @@ function makePixelLabelTexture(
   if (!context) throw new Error('A 2D canvas is required to prepare the book label.');
   context.clearRect(0, 0, width, height);
   painter(context);
-  const texture = new THREE.CanvasTexture(labelCanvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = smooth ? THREE.LinearFilter : THREE.NearestFilter;
-  texture.minFilter = smooth ? THREE.LinearMipmapLinearFilter : THREE.NearestFilter;
+  const texture = new three.CanvasTexture(labelCanvas);
+  texture.colorSpace = three.SRGBColorSpace;
+  texture.magFilter = smooth ? three.LinearFilter : three.NearestFilter;
+  texture.minFilter = smooth ? three.LinearMipmapLinearFilter : three.NearestFilter;
   texture.generateMipmaps = smooth;
   ownedTextures.push(texture);
   return texture;
@@ -256,7 +279,38 @@ function drawPixelLineWithShadow(
   drawPixelLine(context, label, centerX, y, pixelSize);
 }
 
-function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTMLImageElement) {
+function fitsPixelFont(label: string, pixelSize: number, maxWidth: number): boolean {
+  const width = label.length * 6 * pixelSize - pixelSize;
+  return width <= maxWidth && [...label].every((glyph) => glyph === ' ' || glyph in PIXEL_GLYPHS);
+}
+
+/** Pixel lettering where the glyph set covers the label; a bold UI face otherwise (Cyrillic, CJK...). */
+function drawCoverLine(
+  context: CanvasRenderingContext2D,
+  label: string,
+  centerX: number,
+  y: number,
+  pixelSize: number,
+  color: string,
+) {
+  const text = label.toLocaleUpperCase();
+  const maxWidth = context.canvas.width - 120;
+  if (fitsPixelFont(text, pixelSize, maxWidth)) {
+    drawPixelLineWithShadow(context, text, centerX, y, pixelSize, color);
+    return;
+  }
+  context.save();
+  context.font = `800 ${pixelSize * 7}px "Manrope", sans-serif`;
+  context.textAlign = 'center';
+  context.textBaseline = 'top';
+  context.fillStyle = 'rgba(18, 8, 26, 0.84)';
+  context.fillText(text, centerX + 3, y + 3, maxWidth);
+  context.fillStyle = color;
+  context.fillText(text, centerX, y, maxWidth);
+  context.restore();
+}
+
+function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTMLImageElement, labels: BookLabels) {
   const width = context.canvas.width;
   const height = context.canvas.height;
   const gold = '#c1a464';
@@ -295,21 +349,21 @@ function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTM
   context.drawImage(pathwaySymbol, width / 2 - 68, 101, 136, 136);
   context.imageSmoothingEnabled = false;
 
-  drawPixelLineWithShadow(context, 'FOOL PATHWAY', width / 2, 286, 3, paleGold);
+  drawCoverLine(context, labels.coverPathway, width / 2, 286, 3, paleGold);
   context.fillStyle = 'rgba(193, 164, 100, 0.78)';
   context.fillRect(86, 345, 126, 4);
   context.fillRect(width - 212, 345, 126, 4);
   context.fillRect(width / 2 - 8, 337, 16, 16);
 
-  drawPixelLineWithShadow(context, 'SEQUENCE 9', width / 2, 392, 5, '#eadca4');
-  drawPixelLineWithShadow(context, 'SEER', width / 2, 474, 4, '#a997bb');
+  drawCoverLine(context, labels.coverSequence, width / 2, 392, 5, '#eadca4');
+  drawCoverLine(context, labels.coverName, width / 2, 474, 4, '#a997bb');
 
   context.strokeStyle = 'rgba(193, 164, 100, 0.72)';
   context.lineWidth = 3;
   context.strokeRect(100, 550, width - 200, 96);
   context.fillStyle = 'rgba(126, 108, 145, 0.2)';
   context.fillRect(108, 558, width - 216, 80);
-  drawPixelLineWithShadow(context, 'BEYONDER RECIPE', width / 2, 582, 3, paleGold);
+  drawCoverLine(context, labels.coverRecipe, width / 2, 582, 3, paleGold);
 
   context.fillStyle = 'rgba(193, 164, 100, 0.7)';
   for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
@@ -385,22 +439,24 @@ function drawIngredient(
   context.restore();
 }
 
-function paintLeftFormula(images: FormulaImages): TexturePainter {
+function paintLeftFormula(images: FormulaImages, labels: BookLabels): TexturePainter {
   return (context, width) => {
     context.fillStyle = 'rgba(255, 248, 224, 0.14)';
     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-    drawHeading(context, 'Main ingredients', width);
-    drawIngredient(context, images.lavosSquidBlood, 'Blood of the Lavos Squid', 'Main ingredient', 145, width);
-    drawIngredient(context, images.stellarAquaCrystal, 'Stellar Aqua Crystal', 'Main ingredient', 350, width);
+    drawHeading(context, labels.mainHeading, width);
+    const [first, second] = labels.main;
+    if (first) drawIngredient(context, images.lavosSquidBlood, first.name, first.role, 145, width);
+    if (second) drawIngredient(context, images.stellarAquaCrystal, second.name, second.role, 350, width);
   };
 }
 
-function paintRightFormula(images: FormulaImages): TexturePainter {
+function paintRightFormula(images: FormulaImages, labels: BookLabels): TexturePainter {
   return (context, width, height) => {
     context.fillStyle = 'rgba(255, 248, 224, 0.14)';
     context.fillRect(0, 0, width, height);
-    drawHeading(context, 'Supplementary', width);
-    drawIngredient(context, images.goldMintLeaves, 'Gold Mint Leaves', 'Supplementary ingredient', 145, width);
+    drawHeading(context, labels.supplementaryHeading, width);
+    const [supplementary] = labels.supplementary;
+    if (supplementary) drawIngredient(context, images.goldMintLeaves, supplementary.name, supplementary.role, 145, width);
 
     drawRule(context, 775, width, true);
     context.save();
@@ -416,11 +472,11 @@ function paintRightFormula(images: FormulaImages): TexturePainter {
     context.fillStyle = '#18763a';
     context.font = '700 23px "IBM Plex Mono", monospace';
     context.letterSpacing = '2px';
-    context.fillText('RITUAL NOTE', 184, 842);
+    context.fillText(labels.noteHeading.toLocaleUpperCase(), 184, 842, width - 228);
     context.letterSpacing = '0px';
     context.fillStyle = '#49352c';
     context.font = '500 22px "IBM Plex Mono", monospace';
-    wrapText(context, 'Build the altar before brewing.', 184, 883, width - 228, 31);
+    wrapText(context, labels.note, 184, 883, width - 228, 31);
     context.restore();
   };
 }
@@ -436,7 +492,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 function basicMaterial(parameters: THREE.MeshBasicMaterialParameters): THREE.MeshBasicMaterial {
-  const material = new THREE.MeshBasicMaterial(parameters);
+  const material = new three.MeshBasicMaterial(parameters);
   ownedMaterials.push(material);
   return material;
 }
@@ -464,12 +520,12 @@ function addTexturedLeaf(
   const { width, height, depth, z, color, front, back, frontPainter, backPainter, useCoverPalette = false } = options;
   if (depth > 0) {
     const bodyMaterial = basicMaterial({ color });
-    const body = new THREE.Mesh(geometry(new THREE.BoxGeometry(width, height, depth)), bodyMaterial);
+    const body = new three.Mesh(geometry(new three.BoxGeometry(width, height, depth)), bodyMaterial);
     body.position.set(width / 2, 0, z);
     hinge.add(body);
   }
 
-  const faceGeometry = geometry(new THREE.PlaneGeometry(width, height));
+  const faceGeometry = geometry(new three.PlaneGeometry(width, height));
   const frontMaterial = basicMaterial({
     map: makeRegionTexture(...front, frontPainter, useCoverPalette),
     transparent: false,
@@ -477,10 +533,10 @@ function addTexturedLeaf(
     alphaTest: 0,
     depthTest: true,
     depthWrite: true,
-    blending: THREE.NoBlending,
-    side: THREE.FrontSide,
+    blending: three.NoBlending,
+    side: three.FrontSide,
   });
-  const frontFace = new THREE.Mesh(faceGeometry, frontMaterial);
+  const frontFace = new three.Mesh(faceGeometry, frontMaterial);
   frontFace.position.set(width / 2, 0, z + depth / 2 + 0.006);
   hinge.add(frontFace);
 
@@ -491,22 +547,23 @@ function addTexturedLeaf(
     alphaTest: 0,
     depthTest: true,
     depthWrite: true,
-    blending: THREE.NoBlending,
-    side: THREE.FrontSide,
+    blending: three.NoBlending,
+    side: three.FrontSide,
   });
-  const backFace = new THREE.Mesh(faceGeometry, backMaterial);
+  const backFace = new three.Mesh(faceGeometry, backMaterial);
   backFace.position.set(width / 2, 0, z - depth / 2 - 0.006);
   backFace.rotation.y = Math.PI;
   hinge.add(backFace);
 }
 
-function buildBook(formulaImages: FormulaImages) {
+function buildBook(formulaImages: FormulaImages, labels: BookLabels) {
   if (!scene) return;
+  builtLabels = JSON.stringify(labels);
 
-  bookRoot = new THREE.Group();
+  bookRoot = new three.Group();
   scene.add(bookRoot);
 
-  const backCover = new THREE.Group();
+  const backCover = new three.Group();
   bookRoot.add(backCover);
   addTexturedLeaf(backCover, {
     width: 6,
@@ -519,7 +576,7 @@ function buildBook(formulaImages: FormulaImages) {
     useCoverPalette: true,
   });
 
-  const rightStack = new THREE.Group();
+  const rightStack = new three.Group();
   bookRoot.add(rightStack);
   addTexturedLeaf(rightStack, {
     width: 5.25,
@@ -529,10 +586,10 @@ function buildBook(formulaImages: FormulaImages) {
     color: 0xe8ddb4,
     front: [13, 11, 5, 8],
     back: [19, 11, 5, 8],
-    frontPainter: paintRightFormula(formulaImages),
+    frontPainter: paintRightFormula(formulaImages, labels),
   });
 
-  leftPages = new THREE.Group();
+  leftPages = new three.Group();
   bookRoot.add(leftPages);
   addTexturedLeaf(leftPages, {
     width: 5.25,
@@ -542,10 +599,10 @@ function buildBook(formulaImages: FormulaImages) {
     color: 0xeee4bd,
     front: [1, 11, 5, 8],
     back: [7, 11, 5, 8],
-    backPainter: paintLeftFormula(formulaImages),
+    backPainter: paintLeftFormula(formulaImages, labels),
   });
 
-  frontCover = new THREE.Group();
+  frontCover = new three.Group();
   bookRoot.add(frontCover);
   addTexturedLeaf(frontCover, {
     width: 6,
@@ -562,17 +619,17 @@ function buildBook(formulaImages: FormulaImages) {
     map: makePixelLabelTexture(
       512,
       800,
-      (context) => paintCoverArtwork(context, formulaImages.foolPathwaySymbol),
+      (context) => paintCoverArtwork(context, formulaImages.foolPathwaySymbol, labels),
       true,
     ),
     transparent: true,
     alphaTest: 0.08,
     depthTest: true,
     depthWrite: true,
-    side: THREE.FrontSide,
+    side: three.FrontSide,
   });
-  const coverLabel = new THREE.Mesh(
-    geometry(new THREE.PlaneGeometry(4.72, 7.38)),
+  const coverLabel = new three.Mesh(
+    geometry(new three.PlaneGeometry(4.72, 7.38)),
     coverLabelMaterial,
   );
   coverLabel.position.set(3, 0, 0.686);
@@ -586,9 +643,9 @@ function buildBook(formulaImages: FormulaImages) {
     alphaTest: 0,
     depthTest: true,
     depthWrite: true,
-    blending: THREE.NoBlending,
+    blending: three.NoBlending,
   });
-  const seam = new THREE.Mesh(geometry(new THREE.BoxGeometry(0.42, 10.15, 0.76)), seamMaterial);
+  const seam = new three.Mesh(geometry(new three.BoxGeometry(0.42, 10.15, 0.76)), seamMaterial);
   seam.position.z = 0.06;
   bookRoot.add(seam);
 
@@ -601,10 +658,10 @@ function buildBook(formulaImages: FormulaImages) {
     alphaTest: 0.08,
     depthTest: true,
     depthWrite: true,
-    side: THREE.FrontSide,
+    side: three.FrontSide,
   });
-  const spineEmblem = new THREE.Mesh(
-    geometry(new THREE.PlaneGeometry(0.62, 0.62)),
+  const spineEmblem = new three.Mesh(
+    geometry(new three.PlaneGeometry(0.62, 0.62)),
     spineEmblemMaterial,
   );
   spineEmblem.position.set(-0.217, 3.58, 0.06);
@@ -623,10 +680,10 @@ function buildBook(formulaImages: FormulaImages) {
     alphaTest: 0.08,
     depthTest: true,
     depthWrite: true,
-    side: THREE.FrontSide,
+    side: three.FrontSide,
   });
-  const spineLabel = new THREE.Mesh(
-    geometry(new THREE.PlaneGeometry(0.32, 4)),
+  const spineLabel = new three.Mesh(
+    geometry(new three.PlaneGeometry(0.32, 4)),
     spineLabelMaterial,
   );
   spineLabel.position.set(-0.218, 0.45, 0.06);
@@ -680,26 +737,35 @@ function render() {
   renderer.render(scene, camera);
 }
 
-async function initialize() {
-  if (initialized || disposed || !canvasRef.value || !hostRef.value) return;
-  initialized = true;
-  renderer = new THREE.WebGLRenderer({
-    canvas: canvasRef.value,
-    alpha: true,
-    antialias: false,
-    powerPreference: 'high-performance',
-  });
-  renderer.setClearColor(0x000000, 0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
+function disposeBookResources() {
+  ownedGeometries.forEach((item) => item.dispose());
+  ownedMaterials.forEach((item) => item.dispose());
+  ownedTextures.forEach((item) => item.dispose());
+  ownedGeometries.length = 0;
+  ownedMaterials.length = 0;
+  ownedTextures.length = 0;
+}
 
-  scene = new THREE.Scene();
-  camera = new THREE.OrthographicCamera(-8, 8, 6.4, -6.4, 0.1, 100);
-  camera.position.set(0, 0, 24);
-  camera.lookAt(0, 0, 0);
+/** Repaints the page and cover textures, e.g. after a locale switch. */
+function rebuildBook() {
+  if (!scene || !formulaImages || !bookRoot) return;
+  if (JSON.stringify(props.labels) === builtLabels) return;
+  scene.remove(bookRoot);
+  disposeBookResources();
+  bookRoot = null;
+  frontCover = null;
+  leftPages = null;
+  buildBook(formulaImages, props.labels);
+  updatePose();
+}
 
-  const textureLoader = new THREE.TextureLoader();
-  const [texture, lavosImage, stellarImage, mintImage, recipeImage, mysterriaLogoImage, foolPathwaySymbolImage] = await Promise.all([
-    textureLoader.loadAsync(bookAtlasUrl),
+type LoadedAssets = { module: typeof import('three'); atlas: HTMLImageElement; images: FormulaImages };
+let assets: Promise<LoadedAssets> | null = null;
+
+function loadAssets(): Promise<LoadedAssets> {
+  assets ??= Promise.all([
+    import('three'),
+    loadImage(bookAtlasUrl),
     loadImage(lavosSquidBlood),
     loadImage(stellarAquaCrystal),
     loadImage(goldMintLeaves),
@@ -707,24 +773,66 @@ async function initialize() {
     loadImage('/logo-mark.webp'),
     loadImage('/pathways/native/fool.webp'),
     document.fonts?.ready ?? Promise.resolve(),
-  ]);
-  if (disposed) {
-    texture.dispose();
+  ]).then(([module, atlas, lavos, stellar, mint, recipe, logo, symbol]) => ({
+    module,
+    atlas,
+    images: {
+      lavosSquidBlood: lavos,
+      stellarAquaCrystal: stellar,
+      goldMintLeaves: mint,
+      foolRecipe: recipe,
+      mysterriaLogo: logo,
+      foolPathwaySymbol: symbol,
+    },
+  }));
+  assets.catch(() => {
+    assets = null;
+  });
+  return assets;
+}
+
+// The WebGL context is only created once the book actually has to draw: the
+// chapter has started scrolling (or reduced motion shows the final pose).
+function shouldInitialize() {
+  return inView && (props.progress > 0 || props.reducedMotion);
+}
+
+async function initialize() {
+  if (initialized || disposed || !canvasRef.value || !hostRef.value) return;
+  initialized = true;
+  let loaded: LoadedAssets;
+  try {
+    loaded = await loadAssets();
+  } catch (error) {
+    initialized = false;
+    console.warn('The formula book could not be loaded.', error);
     return;
   }
-  sourceTexture = texture;
-  sourceTexture.colorSpace = THREE.SRGBColorSpace;
-  sourceTexture.magFilter = THREE.NearestFilter;
-  sourceTexture.minFilter = THREE.NearestFilter;
-  sourceTexture.generateMipmaps = false;
-  buildBook({
-    lavosSquidBlood: lavosImage,
-    stellarAquaCrystal: stellarImage,
-    goldMintLeaves: mintImage,
-    foolRecipe: recipeImage,
-    mysterriaLogo: mysterriaLogoImage,
-    foolPathwaySymbol: foolPathwaySymbolImage,
+  if (disposed || !canvasRef.value || !hostRef.value) return;
+  three = loaded.module;
+  formulaImages = loaded.images;
+
+  renderer = new three.WebGLRenderer({
+    canvas: canvasRef.value,
+    alpha: true,
+    antialias: false,
+    powerPreference: 'high-performance',
   });
+  renderer.setClearColor(0x000000, 0);
+  renderer.outputColorSpace = three.SRGBColorSpace;
+
+  scene = new three.Scene();
+  camera = new three.OrthographicCamera(-8, 8, 6.4, -6.4, 0.1, 100);
+  camera.position.set(0, 0, 24);
+  camera.lookAt(0, 0, 0);
+
+  sourceTexture = new three.Texture(loaded.atlas);
+  sourceTexture.colorSpace = three.SRGBColorSpace;
+  sourceTexture.magFilter = three.NearestFilter;
+  sourceTexture.minFilter = three.NearestFilter;
+  sourceTexture.generateMipmaps = false;
+  sourceTexture.needsUpdate = true;
+  buildBook(formulaImages, props.labels);
   updatePose();
 
   resizeObserver = new ResizeObserver(resize);
@@ -737,23 +845,30 @@ onMounted(() => {
 
   intersectionObserver = new IntersectionObserver(
     ([entry]) => {
-      if (entry?.isIntersecting) void initialize();
+      inView = entry?.isIntersecting ?? false;
+      if (shouldInitialize()) void initialize();
     },
     { rootMargin: '120px', threshold: 0 },
   );
   intersectionObserver.observe(hostRef.value);
+  if (props.warm) void loadAssets().catch(() => undefined);
 });
 
-watch(() => [props.progress, props.reducedMotion], updatePose);
+watch(() => props.warm, (warm) => {
+  if (warm) void loadAssets().catch(() => undefined);
+});
+watch(() => [props.progress, props.reducedMotion], () => {
+  if (!initialized && shouldInitialize()) void initialize();
+  updatePose();
+});
+watch(() => props.labels, rebuildBook);
 
 onBeforeUnmount(() => {
   disposed = true;
   resizeObserver?.disconnect();
   intersectionObserver?.disconnect();
   intersectionObserver = null;
-  ownedGeometries.forEach((item) => item.dispose());
-  ownedMaterials.forEach((item) => item.dispose());
-  ownedTextures.forEach((item) => item.dispose());
+  disposeBookResources();
   sourceTexture?.dispose();
   renderer?.dispose();
   renderer?.forceContextLoss();

@@ -1,5 +1,5 @@
 <template>
-  <div class="drink-scene" role="group" aria-label="Drink and awaken scene">
+  <div class="drink-scene" role="group" :aria-label="tp('drink.sceneLabel')">
     <!-- gold aura: magic circle + radial glow + aura particles, anchored under the player -->
     <div class="drink-scene__aura" :style="auraAnchorStyle" aria-hidden="true">
       <div class="drink-scene__glow" :style="glowStyle" />
@@ -11,16 +11,22 @@
       </div>
     </div>
 
-    <!-- Steve drinks the potion, then advances -->
+    <!-- The player drinks the potion, then advances -->
     <div class="drink-scene__player" :style="playerStyle">
-      <MinecraftPlayer :mode="playerMode" :active="active" :progress="p" @hand="onHand" />
+      <MinecraftPlayer
+        :mode="playerMode"
+        :armed="warm"
+        :progress="p"
+        :label="tp(`player.${playerMode}`)"
+        @hand="onHand"
+      />
 
-      <!-- The actual Sequence potion stays locked to Steve's raised hand. -->
+      <!-- The actual Sequence potion stays locked to the player's raised hand. -->
       <button
         type="button"
         class="hotspot potion"
         :style="potionStyle"
-        aria-label="Sequence 9 Seer potion"
+        :aria-label="tp('drink.potionLabel')"
         @mouseenter="inspect('drink-potion', $event)"
         @mouseleave="emit('clear-inspect')"
         @focus="inspect('drink-potion', $event)"
@@ -40,36 +46,25 @@
     </div>
 
     <!-- awakened pathway panel -->
-    <section class="panel" :style="panelStyle" role="group" aria-label="Awakened Seer pathway">
-      <p class="panel__kicker" :style="itemStyle(kickerReveal)">Pathway Awakened</p>
-      <h3 class="panel__title" :style="itemStyle(titleReveal)">SEER</h3>
-      <p class="panel__sub" :style="itemStyle(subReveal)">Sequence 9 · Fool Pathway</p>
-      <div class="panel__abilities">
+    <section class="panel" :style="panelStyle" role="group" :aria-label="tp('drink.panelLabel')">
+      <p class="panel__kicker" :style="itemStyle(kickerReveal)">{{ tp('drink.panelKicker') }}</p>
+      <h3 class="panel__title" :style="itemStyle(titleReveal)">{{ names.sequence }}</h3>
+      <p class="panel__sub" :style="itemStyle(subReveal)">{{ tp('drink.panelSub') }}</p>
+      <div v-if="names.abilities.length" class="panel__abilities">
         <button
+          v-for="(ability, index) in names.abilities"
+          :key="ability.id"
           type="button"
           class="hotspot panel-ability"
-          :style="itemStyle(chip1Reveal)"
-          @mouseenter="inspect('ability-divination', $event)"
+          :style="itemStyle(index === 0 ? chip1Reveal : chip2Reveal)"
+          @mouseenter="inspect(`ability-${ability.id}`, $event)"
           @mouseleave="emit('clear-inspect')"
-          @focus="inspect('ability-divination', $event)"
+          @focus="inspect(`ability-${ability.id}`, $event)"
           @blur="emit('clear-inspect')"
-          @click="inspect('ability-divination', $event)"
+          @click="inspect(`ability-${ability.id}`, $event)"
         >
-          <span class="panel-ability__name">Divination</span>
-          <span class="panel-ability__caption">Dowsing &amp; dream divination</span>
-        </button>
-        <button
-          type="button"
-          class="hotspot panel-ability"
-          :style="itemStyle(chip2Reveal)"
-          @mouseenter="inspect('ability-spiritualism', $event)"
-          @mouseleave="emit('clear-inspect')"
-          @focus="inspect('ability-spiritualism', $event)"
-          @blur="emit('clear-inspect')"
-          @click="inspect('ability-spiritualism', $event)"
-        >
-          <span class="panel-ability__name">Spiritualism</span>
-          <span class="panel-ability__caption">Perceive spiritual bodies</span>
+          <span class="panel-ability__name">{{ ability.name }}</span>
+          <span class="panel-ability__caption">{{ ability.description }}</span>
         </button>
       </div>
       <button
@@ -82,12 +77,12 @@
         @blur="emit('clear-inspect')"
         @click="inspect('ability-teaser', $event)"
       >
-        Sequence 8 · Clown — Paper Dagger &amp; Body Control await
+        {{ teaserText }}
       </button>
     </section>
 
     <!-- begin journey CTA -->
-    <RouterLink class="cta" to="/game" :style="ctaStyle">Begin your journey</RouterLink>
+    <RouterLink class="cta" :to="$lp('/game')" :style="ctaStyle">{{ tp('drink.cta') }}</RouterLink>
   </div>
 </template>
 
@@ -98,15 +93,27 @@ import type { CSSProperties } from 'vue';
 import MinecraftPlayer from '../MinecraftPlayer.vue';
 import type { HandPosition } from '../MinecraftPlayer.vue';
 import SceneParticles from './SceneParticles.vue';
+import { useProgressionCopy } from './useProgressionCopy';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 
 import magicCircle from '@/assets/images/home/progression/real/magic-circle.png';
 import sequencePotion from '@/assets/images/home/progression/real/sequence-potion.png';
 
-const props = defineProps<{ progress: number; active: boolean }>()
-const emit = defineEmits<{ (e: 'inspect', id: string, anchor: HTMLElement): void; (e: 'clear-inspect'): void }>()
+const props = withDefaults(defineProps<{
+  progress: number;
+  active: boolean;
+  /** The story is close to this scene: allow the 3D player to load. */
+  warm?: boolean;
+}>(), { warm: false });
+const emit = defineEmits<{ (e: 'inspect', id: string, anchor: HTMLElement): void; (e: 'clear-inspect'): void }>();
 
 const reduced = useReducedMotion();
+const { tp, names, list } = useProgressionCopy();
+const teaserText = computed(() => {
+  const abilities = names.value.nextAbilities.map((ability) => ability.name);
+  if (!abilities.length) return tp('details.nextSequence.label');
+  return tp('drink.teaser', { abilities: list(abilities) });
+});
 const compact = ref(false);
 let mediaQuery: MediaQueryList | null = null;
 
@@ -142,10 +149,8 @@ const final = computed(() => reduced.value);
 /* ---------------- player ---------------- */
 const playerMode = computed<'drink' | 'advance'>(() => (final.value || p.value >= 0.68 ? 'advance' : 'drink'));
 const playerStyle = computed<CSSProperties>(() => ({
-  // Let the final awakening resolve in the centre of the stage. The drink beat
-  // stays left-biased, so the ability panel never has to cover Steve.
-  // The stage occupies the right side of the split layout. Keep Steve in the
-  // visual centre of that stage, while leaving a clear lane for the panel.
+  // The drink beat stays left-biased so the ability panel never covers the
+  // player, then the awakening drifts slightly toward the stage centre.
   left: compact.value ? '50%' : `${(34 + awaken.value * 2).toFixed(2)}%`,
   bottom: compact.value ? 'auto' : '0',
   top: compact.value ? '0' : 'auto',
@@ -266,16 +271,13 @@ const ctaStyle = computed<CSSProperties>(() => ({
 
 <style scoped>
 .drink-scene {
-  --gold: #c69b52;
-  --pale-gold: #87691d;
-  --green: #6ea89e;
   --ease: cubic-bezier(.22, 1, .36, 1);
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   color: var(--ink, #221c14);
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-body, "Manrope", sans-serif);
 }
 
 /* shared hotspot base: 44px min touch target, violet focus ring */
@@ -421,7 +423,7 @@ const ctaStyle = computed<CSSProperties>(() => ({
 .panel__title {
   margin: 0;
   color: var(--primary, #7458e8);
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-body, "Manrope", sans-serif);
   font-size: 2rem;
   font-weight: 800;
   line-height: 1.05;

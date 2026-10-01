@@ -1,5 +1,5 @@
 <template>
-  <div ref="sceneRef" class="altar-scene" role="group" aria-label="Cauldron brewing GUI scene">
+  <div ref="sceneRef" class="altar-scene" role="group" :aria-label="tp('altar.sceneLabel')">
     <!-- soft gold vignette pulse during the reveal -->
     <div class="altar-scene__vignette" :style="vignetteStyle" aria-hidden="true" />
 
@@ -8,7 +8,7 @@
       type="button"
       class="hotspot altar-scene__circle-hotspot"
       :style="circleStyle"
-      aria-label="Brewing magic circle"
+      :aria-label="tp('altar.circleLabel')"
       @mouseenter="inspect('brew-circle', $event)"
       @mouseleave="emit('clear-inspect')"
       @focus="inspect('brew-circle', $event)"
@@ -18,8 +18,8 @@
       <span class="altar-scene__circle-art" :style="circleMaskStyle" aria-hidden="true" />
     </button>
 
-    <!-- Actual in-game Ritual Altar interface, cropped to its central GUI. -->
-    <div ref="guiRef" class="gui" :style="guiStyle" role="img" aria-label="Cauldron brewing interface">
+    <!-- Actual in-game cauldron interface, cropped to its central GUI. -->
+    <div ref="guiRef" class="gui" :style="guiStyle" role="group" :aria-label="tp('altar.interfaceLabel')">
       <img class="gui__img" :src="cauldronInterface" alt="" width="636" height="284" decoding="async" draggable="false" />
 
       <!-- green confirm button glows as the brew completes -->
@@ -30,7 +30,7 @@
         type="button"
         class="hotspot gui__zone gui__zone--recipe"
         :style="recipeZoneStyle"
-        aria-label="Formula slot"
+        :aria-label="tp('details.recipeSlot.label')"
         @mouseenter="inspect('brew-recipe-slot', $event)"
         @mouseleave="emit('clear-inspect')"
         @focus="inspect('brew-recipe-slot', $event)"
@@ -41,7 +41,7 @@
         type="button"
         class="hotspot gui__zone gui__zone--main"
         :style="mainZoneStyle"
-        aria-label="Main ingredient slots"
+        :aria-label="tp('details.mainSlots.label')"
         @mouseenter="inspect('brew-main-slots', $event)"
         @mouseleave="emit('clear-inspect')"
         @focus="inspect('brew-main-slots', $event)"
@@ -52,7 +52,7 @@
         type="button"
         class="hotspot gui__zone gui__zone--supp"
         :style="suppZoneStyle"
-        aria-label="Supplementary ingredient slots"
+        :aria-label="tp('details.supplementarySlots.label')"
         @mouseenter="inspect('brew-supp-slots', $event)"
         @mouseleave="emit('clear-inspect')"
         @focus="inspect('brew-supp-slots', $event)"
@@ -77,8 +77,7 @@
       @click="inspect(item.id, $event)"
     >
       <span class="item__chip">
-        <img class="item__icon" :src="item.asset" :alt="item.label" width="16" height="16" decoding="async" draggable="false" />
-        <span class="item__label" :style="item.labelStyle">{{ item.label }}</span>
+        <img class="item__icon" :src="item.asset" alt="" width="16" height="16" decoding="async" draggable="false" />
       </span>
     </button>
 
@@ -93,7 +92,7 @@
         type="button"
         class="hotspot altar-scene__potion"
         :style="potionStyle"
-        aria-label="Sequence 9 Seer potion"
+        :aria-label="tp('altar.potionLabel')"
         @mouseenter="inspect('sequence-potion', $event)"
         @mouseleave="emit('clear-inspect')"
         @focus="inspect('sequence-potion', $event)"
@@ -101,8 +100,8 @@
         @click="inspect('sequence-potion', $event)"
       >
         <span class="altar-scene__halo" :style="potionHaloStyle" aria-hidden="true" />
-        <img class="altar-scene__potion-img" :src="sequencePotion" alt="Sequence 9 · Seer potion" width="16" height="16" decoding="async" draggable="false" />
-        <span class="altar-scene__caption" :style="captionStyle">Sequence 9 · Seer</span>
+        <img class="altar-scene__potion-img" :src="sequencePotion" alt="" width="16" height="16" decoding="async" draggable="false" />
+        <span class="altar-scene__caption" :style="captionStyle" aria-hidden="true">{{ tp('altar.potionCaption') }}</span>
       </button>
     </div>
   </div>
@@ -113,6 +112,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import SceneParticles from './SceneParticles.vue';
+import { useProgressionCopy } from './useProgressionCopy';
 
 import cauldronInterface from '@/assets/images/home/progression/cauldron-interface.png';
 import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
@@ -129,6 +129,7 @@ const emit = defineEmits<{
 }>();
 
 const reduced = useReducedMotion();
+const { tp } = useProgressionCopy();
 const compact = ref(false);
 let mediaQuery: MediaQueryList | null = null;
 
@@ -264,7 +265,7 @@ const ARC_PX = { desktop: 42, mobile: 24 };
 type Point = { x: number; y: number };
 type ItemSpec = {
   id: string;
-  label: string;
+  labelKey: string;
   asset: string;
   stagger: number;
   bookX: number; // normalised position inside the 680 x 548 book viewport
@@ -275,10 +276,12 @@ type ItemSpec = {
 const ITEMS: ItemSpec[] = [
   // Positions match the icons painted onto the physical book leaves. The
   // launch is delayed until the altar panel has reached its resting geometry.
-  { id: 'formula-fool', label: 'Fool formula', asset: foolRecipe, stagger: 0.12, bookX: 0.5547, bookY: 0.7299, slot: SLOT_R },
-  { id: 'lavos-squid-blood', label: 'Lavos Squid Blood', asset: lavosSquidBlood, stagger: 0.18, bookX: 0.2226, bookY: 0.3071, slot: SLOT_M1 },
-  { id: 'stellar-aqua-crystal', label: 'Stellar Aqua Crystal', asset: stellarAquaCrystal, stagger: 0.24, bookX: 0.2226, bookY: 0.4374, slot: SLOT_M2 },
-  { id: 'gold-mint-leaves', label: 'Gold Mint Leaves', asset: goldMintLeaves, stagger: 0.3, bookX: 0.5537, bookY: 0.3071, slot: SLOT_S1 },
+  // Loading order follows the in-game guide: main ingredients (left slots),
+  // supplementary ingredients (right slots), then the recipe in the centre.
+  { id: 'lavos-squid-blood', labelKey: 'ingredients.lavosSquidBlood', asset: lavosSquidBlood, stagger: 0.12, bookX: 0.2226, bookY: 0.3071, slot: SLOT_M1 },
+  { id: 'stellar-aqua-crystal', labelKey: 'ingredients.stellarAquaCrystal', asset: stellarAquaCrystal, stagger: 0.18, bookX: 0.2226, bookY: 0.4374, slot: SLOT_M2 },
+  { id: 'gold-mint-leaves', labelKey: 'ingredients.goldMintLeaves', asset: goldMintLeaves, stagger: 0.24, bookX: 0.5537, bookY: 0.3071, slot: SLOT_S1 },
+  { id: 'formula-fool', labelKey: 'ingredients.formula', asset: foolRecipe, stagger: 0.3, bookX: 0.5547, bookY: 0.7299, slot: SLOT_R },
 ];
 
 function bookSource(spec: ItemSpec, geometry: typeof geom.value): Point {
@@ -293,19 +296,20 @@ function bookSource(spec: ItemSpec, geometry: typeof geom.value): Point {
 }
 
 type FlightItem = ItemSpec & {
+  label: string;
   rested: boolean;
   style: CSSProperties;
-  labelStyle: CSSProperties;
 };
 
 const items = computed<FlightItem[]>(() => {
   const g = geom.value;
   const arc = compact.value ? ARC_PX.mobile : ARC_PX.desktop;
-    const dim = p.value >= 0.85 && !final.value ? 0.82 : 1;
+  const dim = p.value >= 0.85 && !final.value ? 0.82 : 1;
   const unmeasured = g.w <= 0 || g.guiW <= 0;
   return ITEMS.map((spec) => {
+    const label = tp(spec.labelKey);
     if (unmeasured) {
-      return { ...spec, rested: false, style: { opacity: 0, pointerEvents: 'none' }, labelStyle: {} };
+      return { ...spec, label, rested: false, style: { opacity: 0, pointerEvents: 'none' } };
     }
     const t = clamp01((p.value - spec.stagger) / FLIGHT_SPAN);
     const f = final.value ? 1 : t;
@@ -333,8 +337,7 @@ const items = computed<FlightItem[]>(() => {
           ? `0 0 ${(10 + 18 * trailStrength).toFixed(0)}px ${(3 + 2 * trailStrength).toFixed(1)}px rgba(217, 180, 90, ${(0.4 * trailStrength).toFixed(3)})`
           : undefined,
     };
-    const labelStyle: CSSProperties = { opacity: (1 - slotBlend).toFixed(4) };
-    return { ...spec, rested: f >= 1, style, labelStyle };
+    return { ...spec, label, rested: f >= 1, style };
   });
 });
 
@@ -410,16 +413,12 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 
 <style scoped>
 .altar-scene {
-  --gold: #c69b52;
-  --pale-gold: #87691d;
-  --green: #6ea89e;
-  --ease: cubic-bezier(.22, 1, .36, 1);
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   color: var(--ink, #221c14);
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-body, "Manrope", sans-serif);
 }
 
 /* shared hotspot base: 44px min touch target, gold focus ring */
@@ -562,10 +561,6 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   -webkit-user-drag: none;
   filter: drop-shadow(0 2px 4px rgba(60, 48, 30, .22));
 }
-.item__label {
-  display: none;
-  will-change: opacity;
-}
 .item:hover,
 .item:focus-visible {
   border-color: rgba(116, 88, 232, .45);
@@ -585,9 +580,6 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   width: 26px;
   height: 26px;
   filter: drop-shadow(0 2px 4px rgba(60, 48, 30, .28));
-}
-.item.is-rested .item__label {
-  display: none;
 }
 .item.is-rested:hover,
 .item.is-rested:focus-visible {
@@ -691,10 +683,6 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   .item__icon {
     width: 34px;
     height: 34px;
-  }
-  .item__label {
-    max-width: 112px;
-    font-size: .72rem;
   }
   .item.is-rested {
     padding: 0;

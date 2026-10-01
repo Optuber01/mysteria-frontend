@@ -1,15 +1,15 @@
 <template>
-  <div class="book-scene" :class="{ 'is-readable': readable }" :style="sceneVars" aria-label="Written formula opening scene">
+  <div class="book-scene" :class="{ 'is-readable': readable }" :style="sceneVars" role="group" :aria-label="tp('book.sceneLabel')">
     <p class="book-scene__caption" aria-hidden="true">
-      <span>Sequence 9 · Written formula</span>
+      <span>{{ tp('book.caption') }}</span>
     </p>
 
     <div class="book-viewport">
       <div class="book-scene__glow" aria-hidden="true" />
-      <VanillaBookRig :progress="rigProgress" :reduced-motion="reducedMotion" />
+      <VanillaBookRig :progress="rigProgress" :reduced-motion="reducedMotion" :warm="warm" :labels="bookLabels" />
 
       <div class="formula-hotspots" :aria-hidden="!readable">
-        <section class="hotspot-page hotspot-page--left" aria-label="Main ingredients page">
+        <section class="hotspot-page hotspot-page--left" :aria-label="tp('book.mainPage')">
           <button
             v-for="(entry, index) in mainEntries"
             :key="entry.id"
@@ -17,7 +17,6 @@
             class="formula-hotspot"
             :class="`formula-hotspot--main-${index + 1}`"
             :tabindex="readable ? 0 : -1"
-            :aria-label="`${entry.name}, ${entry.role}`"
             @mouseenter="inspect(entry.id, $event)"
             @mouseleave="emit('clear-inspect')"
             @focus="inspect(entry.id, $event)"
@@ -28,14 +27,13 @@
           </button>
         </section>
 
-        <section class="hotspot-page hotspot-page--right" aria-label="Supplementary ingredients page">
+        <section class="hotspot-page hotspot-page--right" :aria-label="tp('book.supplementaryPage')">
           <button
             v-for="entry in suppEntries"
             :key="entry.id"
             type="button"
             class="formula-hotspot formula-hotspot--supplementary"
             :tabindex="readable ? 0 : -1"
-            :aria-label="`${entry.name}, ${entry.role}`"
             @mouseenter="inspect(entry.id, $event)"
             @mouseleave="emit('clear-inspect')"
             @focus="inspect(entry.id, $event)"
@@ -49,14 +47,13 @@
             type="button"
             class="formula-hotspot formula-hotspot--seal"
             :tabindex="readable ? 0 : -1"
-            aria-label="Formula seal, Sequence 9 of the Fool Pathway. Ritual note: Build the altar before brewing."
             @mouseenter="inspect('formula-fool', $event)"
             @mouseleave="emit('clear-inspect')"
             @focus="inspect('formula-fool', $event)"
             @blur="emit('clear-inspect')"
             @click="inspect('formula-fool', $event)"
           >
-            <span class="sr-only">Formula seal and ritual note</span>
+            <span class="sr-only">{{ tp('book.sealLabel') }}</span>
           </button>
         </section>
       </div>
@@ -70,13 +67,18 @@
 import { computed } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import VanillaBookRig from './VanillaBookRig.vue';
+import type { BookLabels } from './VanillaBookRig.vue';
+import { useProgressionCopy } from './useProgressionCopy';
 
 const props = withDefaults(defineProps<{
   progress: number;
   active: boolean;
   closingProgress?: number;
+  /** The chapter is near the viewport: start downloading the 3D book. */
+  warm?: boolean;
 }>(), {
   closingProgress: 0,
+  warm: false,
 });
 const emit = defineEmits<{
   (e: 'inspect', id: string, anchor: HTMLElement): void;
@@ -84,13 +86,27 @@ const emit = defineEmits<{
 }>();
 
 const reducedMotion = useReducedMotion();
-const mainEntries = [
-  { id: 'lavos-squid-blood', name: 'Blood of the Lavos Squid', role: 'Main ingredient' },
-  { id: 'stellar-aqua-crystal', name: 'Stellar Aqua Crystal', role: 'Main ingredient' },
-];
-const suppEntries = [
-  { id: 'gold-mint-leaves', name: 'Gold Mint Leaves', role: 'Supplementary ingredient' },
-];
+const { tp, names } = useProgressionCopy();
+const mainEntries = computed(() => [
+  { id: 'lavos-squid-blood', name: tp('ingredients.lavosSquidBlood'), role: tp('ingredients.mainRole') },
+  { id: 'stellar-aqua-crystal', name: tp('ingredients.stellarAquaCrystal'), role: tp('ingredients.mainRole') },
+]);
+const suppEntries = computed(() => [
+  { id: 'gold-mint-leaves', name: tp('ingredients.goldMintLeaves'), role: tp('ingredients.supplementaryRole') },
+]);
+// Text painted into the book's page and cover textures.
+const bookLabels = computed<BookLabels>(() => ({
+  mainHeading: tp('book.mainHeading'),
+  supplementaryHeading: tp('book.supplementaryHeading'),
+  main: mainEntries.value.map(({ name, role }) => ({ name, role })),
+  supplementary: suppEntries.value.map(({ name, role }) => ({ name, role })),
+  noteHeading: tp('book.noteHeading'),
+  note: tp('book.note'),
+  coverPathway: tp('book.coverPathway'),
+  coverSequence: tp('book.coverSequence'),
+  coverName: names.value.sequence,
+  coverRecipe: tp('book.coverRecipe'),
+}));
 
 function clamp01(value: number): number {
   if (!Number.isFinite(value)) return 0;

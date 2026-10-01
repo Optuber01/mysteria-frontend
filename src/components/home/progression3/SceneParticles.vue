@@ -89,6 +89,9 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+// Seeded too, so respawned bubbles keep the field reproducible.
+const respawnRng = mulberry32(SEED ^ 0x2545f491);
+
 function rgba(color: Color, alpha: number): string {
   const clamped = alpha < 0 ? 0 : alpha > 1 ? 1 : alpha;
   return `rgba(${color[0]},${color[1]},${color[2]},${clamped.toFixed(3)})`;
@@ -255,7 +258,7 @@ function renderBubbles(t: number, dt: number, alphaMul: number, speedMul: number
     p.x = p.baseX + Math.sin(p.phase + t * p.wobbleFreq) * p.wobble;
     if (p.y < -p.radius * 2) {
       p.y = height + p.radius * 2;
-      p.baseX = width * (0.5 + (Math.random() - 0.5) * 0.16);
+      p.baseX = width * (0.5 + (respawnRng() - 0.5) * 0.16);
       p.x = p.baseX;
     }
     const alpha = p.baseAlpha * alphaMul;
