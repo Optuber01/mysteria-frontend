@@ -297,6 +297,17 @@ onUnmounted(() => {
   transition: background-color .35s ease, border-color .35s ease, backdrop-filter .35s ease;
 }
 
+.header-stack.is-overlay .season-bar {
+  /* Upstream's bar scrolls away with the page; fixed here, it needs a backing
+     so content doesn't show through it. */
+  background-color: color-mix(in srgb, var(--myst-bg) 94%, transparent);
+  transition: background-color .35s ease;
+}
+
+.header-stack.is-overlay.is-at-top .season-bar {
+  background-color: transparent;
+}
+
 .header-stack.is-overlay.is-at-top .site-header {
   background: transparent;
   border-bottom-color: transparent;

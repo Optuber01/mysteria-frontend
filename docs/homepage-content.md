@@ -3,18 +3,29 @@
 The homepage is one continuous, object-led journey assembled in
 `src/views/HomeView.vue`:
 
-1. Bright arrival in Mysterria
-2. A player's first potion and advancement
-3. Scroll-assembled Pathways and Boons
-4. Real server world systems
-5. The guided join sequence
+1. Bright arrival in Mysterria (`HomeHero`)
+2. What Mysterria is (`WhatIsMysterria`)
+3. A player's first potion and advancement (`ProgressionStoryV3`)
+4. Pathways and Boons (`PathwayOrbit`)
+5. Real server world systems and live stats (`BeyondPathways`)
+6. Getting started and the guided join (`GettingStarted`, `JoinJourney`)
+7. Upstream's companion mod section (`CompanionMod`, the footer's `#companion` anchor)
+
+All copy lives in `src/locales/*.json` under `home.*`. English is the source;
+the other locales start as English placeholders for Weblate, and zh-TW is
+generated from zh-CN by `scripts/build-zh-tw.mjs`. Internal links go through
+`$lp()` so they keep the reader's locale.
 
 Each chapter preserves native scrolling. Sticky visuals enhance the story, while
 reduced-motion and narrow/zoomed layouts retain readable static content.
 
 ## Verified sources
 
-- Server address and status adapter: `src/services/serverStatus.ts`
+- Server address and status: `SERVER_IP` and the shared poller in
+  `src/composables/useServer.ts`, read by the homepage through
+  `src/composables/useSharedServerStatus.ts`
+- Live Beyonder stats: `useBeyonderStats()` (`/api/beyonder-stats`, which needs
+  `CATWALK_API_TOKEN` on the deployment)
 - Latest update: `newsAPI.getLatest()` in `src/views/HomeView.vue`
 - Detailed Sequences and abilities:
   `src/assets/sources/pathway-abilities.json`
@@ -22,12 +33,14 @@ reduced-motion and narrow/zoomed layouts retain readable static content.
   `src/assets/sources/progression-catalog.json`
 - Projection generator: `scripts/generate-progression-catalog.mjs`
 - Progression and world-system copy: the Mysterria wiki and the corresponding
-  guide topics in `src/data/guideContent.ts`
+  guide topics in `src/data/guide/en.json`
 - Gameplay textures: the Mysterria resource pack's Circle of Imagination items
 - World captures: the Mysterria wiki repository's approved server imagery
 
-`npm run build-only` regenerates the compact progression catalog before Vite
-builds. The standard 22 IDs are treated as Pathways; any additional archive
+`npm run build` regenerates the compact progression catalog before Vite
+builds. The generator runs upstream's `src/data/pathways.ts` at build time and
+stores localized pathway names in the catalog, so the homepage never ships the
+full pathway archive. The standard 22 IDs are treated as Pathways; any additional archive
 entry is categorized as a Boon. Starting Sequence, preview abilities, Sequence
 count, and ability count are all derived from the detailed archive. Unknown
 entries receive a safe visual fallback, so a data update cannot silently omit
@@ -38,7 +51,7 @@ then run `npm run generate:progression` when reviewing the homepage locally.
 
 ## Presentation metadata
 
-`src/data/pathways.ts` contains only information missing from the gameplay
+`src/data/homePathways.ts` contains only information missing from the gameplay
 archive: public display names, image aliases, palettes, motifs, and motion
 profiles. Add richer presentation metadata for a new entry when available, but
 do not add Sequence names or abilities there.
@@ -49,20 +62,14 @@ wiki and game archive.
 
 ## Asset provenance
 
-- `mysterria-dawn.webp` is promotional artwork created by re-lighting and
-  art-directing an existing Mysterria castle capture. It is a homepage backdrop,
-  not a gameplay screenshot.
-- `home/progression/` uses a real Mysterria brewery capture, COI-owned potion,
-  ingredient, recipe, ritual-book and acting textures, and vanilla block textures
-  for the plugin's exact 18-block Normal Ritual Altar layout. The animated player
-  uses the standard Steve skin rendered as a real articulated Minecraft rig.
-- `home/world/` uses repo-backed dungeon, creature, boss, Emporium, economy and
-  town captures. These are shown as distinct locations rather than as repeated
-  crops of the hero.
-- `home/world/lobby-portal.png` is an approved Mysterria portal capture from
-  the public Mysterria wiki repository (`src/assets/dungeons/entrance.png`). It
-  is used as the visual threshold for the join sequence; the public copy still
-  accurately directs players through the actual lobby selector.
+- `home/hero/` holds the rotating hero captures listed in
+  `src/data/homeHeroSlides.ts`.
+- `home/progression/` uses a real Mysterria brewery capture, the in-game
+  cauldron interface, COI-owned potion, ingredient and recipe textures, and the
+  vanilla enchanting-table book atlas. The animated player still uses the
+  standard Steve skin as a placeholder until a Mysterria skin is chosen.
+- `home/world/` and `community-archive/` hold the dungeon, creature, Guardian,
+  settlement and church captures used by the world chapter.
 - Pathway and Boon sigils remain the existing project assets in
   `src/assets/images/pathways/` and `public/pathways/`.
 
@@ -83,15 +90,11 @@ When replacing imagery:
 
 The homepage never fills missing server fields with mock facts.
 
-- Player count/status comes from the live status adapter.
+- Player count/status comes from the shared server poller.
+- Beyonder totals and top pathways come from `/api/beyonder-stats`.
 - Latest update comes from the news API.
-- Town/organization, event, and discovery values remain explicitly unavailable
-  until a first-party API exposes them.
-
-Implement `getLivingWorldSnapshot()` in `src/services/serverStatus.ts` when that
-API exists. Preserve nullable fields and the `loading`, `online`, `offline`, and
-`unavailable` state model. `createMockServerDataAdapter()` is for tests and
-previews only and must not be presented as production data.
+- Facts with no first-party source (towns, organizations, events, discoveries)
+  are not shown at all. Add a row only once an API exposes the value.
 
 ## Interaction contracts
 

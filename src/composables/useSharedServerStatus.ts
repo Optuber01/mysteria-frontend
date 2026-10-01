@@ -1,54 +1,24 @@
-import { onMounted, onUnmounted, readonly, ref } from 'vue';
-import { getServerStatus, type ServerStatus } from '@/services/serverStatus';
+import {computed} from 'vue';
+import {useServerStatus} from '@/composables/useServer';
 
-const status = ref<ServerStatus>({
-  state: 'loading',
-  playersOnline: null,
-  checkedAt: null,
-});
+export type ServerStatus = {
+  state: 'loading' | 'online' | 'offline';
+  playersOnline: number | null;
+  checkedAt: Date | null;
+};
 
-let subscribers = 0;
-let pollTimer: ReturnType<typeof setInterval> | null = null;
-let controller: AbortController | null = null;
-
-async function refresh() {
-  controller?.abort();
-  controller = new AbortController();
-  try {
-    status.value = await getServerStatus(controller.signal);
-  } catch (error) {
-    if (!(error instanceof DOMException && error.name === 'AbortError')) {
-      status.value = { state: 'unavailable', playersOnline: null, checkedAt: new Date() };
-    }
-  }
-}
-
-function start() {
-  if (pollTimer) return;
-  void refresh();
-  pollTimer = setInterval(() => {
-    if (document.visibilityState === 'visible') void refresh();
-  }, 60_000);
-}
-
-function stop() {
-  if (subscribers > 0) return;
-  controller?.abort();
-  controller = null;
-  if (pollTimer) clearInterval(pollTimer);
-  pollTimer = null;
-}
-
+/**
+ * The homepage's view of the shared server poller in useServer.ts, so the
+ * header chip and the homepage chapters read one request instead of two.
+ */
 export function useSharedServerStatus() {
-  onMounted(() => {
-    subscribers += 1;
-    start();
-  });
+  const {isOnline, playerCount, checkedAt, refresh} = useServerStatus();
 
-  onUnmounted(() => {
-    subscribers = Math.max(0, subscribers - 1);
-    stop();
-  });
+  const status = computed<ServerStatus>(() => ({
+    state: checkedAt.value === null ? 'loading' : isOnline.value ? 'online' : 'offline',
+    playersOnline: playerCount.value,
+    checkedAt: checkedAt.value,
+  }));
 
-  return { status: readonly(status), refresh };
+  return {status, refresh};
 }

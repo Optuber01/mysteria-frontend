@@ -1,8 +1,10 @@
 <template>
   <Analytics/>
   <div class="app">
+    <!-- The homepage paints its own light canvas; the shared dark one would only
+         sit hidden underneath it. -->
     <MysticBackground v-if="!isHome"/>
-    <NotificationContainer v-if="!isHome"/>
+    <NotificationContainer/>
 
     <!-- Main Content -->
     <RouterView/>
@@ -11,36 +13,25 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch} from "vue";
+import NotificationContainer from "@/components/ui/NotificationContainer.vue";
+import MysticBackground from "@/components/ui/MysticBackground.vue";
+import {computed, onMounted, onUnmounted, ref, watch} from "vue";
 import {RouterView, useRoute} from "vue-router";
+import {useBalanceWatcher} from "@/stores/balance";
+import {useUserWatcher} from "./stores/user";
+import {useServicesWatcher} from "./stores/services";
+import {useDailyBonusWatcher} from "./stores/dailyBonus";
+import {useAccountNotificationsWatcher} from "./stores/notifications";
 import {Analytics} from '@vercel/analytics/vue';
 
-const NotificationContainer = defineAsyncComponent(() => import('@/components/ui/NotificationContainer.vue'));
-const MysticBackground = defineAsyncComponent(() => import('@/components/ui/MysticBackground.vue'));
+useUserWatcher();
+useBalanceWatcher();
+useServicesWatcher();
+useDailyBonusWatcher();
+useAccountNotificationsWatcher();
 
 const route = useRoute();
-const isHome = computed(() => route.path === '/');
-let routeWatchersStarted = false;
-
-watch(() => route.path, (path) => {
-  if (path === '/' || routeWatchersStarted) return;
-  routeWatchersStarted = true;
-  void Promise.all([
-    import('@/stores/auth'),
-    import('@/stores/user'),
-    import('@/stores/balance'),
-    import('@/stores/services'),
-    import('@/stores/dailyBonus'),
-    import('@/stores/notifications'),
-  ]).then(([auth, user, balance, services, dailyBonus, notifications]) => {
-    void auth.useAuthStore().init();
-    user.useUserWatcher();
-    balance.useBalanceWatcher();
-    services.useServicesWatcher();
-    dailyBonus.useDailyBonusWatcher();
-    notifications.useAccountNotificationsWatcher();
-  });
-}, { immediate: true });
+const isHome = computed(() => route.name === "home");
 
 // Force scroll to top on every route change.
 // `behavior: "instant"` overrides the global `scroll-behavior: smooth`, which
@@ -73,6 +64,7 @@ const paintCursor = () => {
 };
 
 const updateCursorPosition = (event: MouseEvent) => {
+  if (!cursor.value) return;
   const halfSize = cursorSize / 2;
   pointerX = event.clientX - halfSize;
   pointerY = event.clientY - halfSize;

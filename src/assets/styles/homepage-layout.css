@@ -99,12 +99,6 @@
   transform: none;
 }
 
-@media (min-width: 901px) and (min-height: 721px) {
-  .mysterria-home .hero {
-    min-height: max(1040px, 190svh) !important;
-  }
-}
-
 @media (max-width: 1050px) {
   .mysterria-home {
     --home-content-gutter: clamp(18px, 4.5vw, 42px);
@@ -219,115 +213,9 @@
     font-weight: 500 !important;
     line-height: 1.6 !important;
   }
-
-  .mysterria-home .world-story {
-    min-height: auto !important;
-  }
-
-  .mysterria-home .world-sticky {
-    display: none !important;
-  }
-
-  .mysterria-home .world-static {
-    box-sizing: border-box !important;
-    width: min(var(--home-content-max), 100%) !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: clamp(42px, 7vw, 76px) clamp(22px, 4vw, 42px) !important;
-    margin: 0 auto !important;
-    padding: var(--home-section-block) var(--home-content-gutter) !important;
-  }
-
-  .mysterria-home .world-static header {
-    grid-column: 1 / -1 !important;
-    margin: 0 !important;
-  }
-
-  .mysterria-home .world-static header h2 {
-    max-width: 760px !important;
-    margin: 12px 0 0 !important;
-    font: 800 clamp(2.1rem, 6vw, 3.8rem)/1 var(--font-display) !important;
-    letter-spacing: -.025em !important;
-  }
-
-  .mysterria-home .world-static article {
-    min-width: 0 !important;
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    align-content: start !important;
-    gap: 0 !important;
-  }
-
-  .mysterria-home .world-static article img {
-    width: 100% !important;
-    aspect-ratio: 16 / 10 !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    object-fit: cover !important;
-    border-radius: 22px !important;
-    box-shadow:
-      0 0 0 1px var(--hairline),
-      0 24px 60px rgba(34, 28, 20, .14) !important;
-  }
-
-  .mysterria-home .world-static article > div {
-    position: relative !important;
-    z-index: 1 !important;
-    width: calc(100% - 18px) !important;
-    margin: -30px 0 0 18px !important;
-    padding: 22px 0 0 20px !important;
-    border-left: 1px solid var(--hairline) !important;
-    background: linear-gradient(90deg, rgba(255, 255, 255, .97) 0 76%, transparent) !important;
-  }
-
-  .mysterria-home .world-static article h3 {
-    margin: 10px 0 !important;
-    font: 800 clamp(1.55rem, 4vw, 2.3rem)/1.03 var(--font-display) !important;
-    letter-spacing: -.02em !important;
-  }
-
-  .mysterria-home .world-static article p {
-    max-width: 480px !important;
-    margin: 0 !important;
-    color: var(--ink-muted) !important;
-    font-size: .82rem !important;
-    font-weight: 500 !important;
-    line-height: 1.6 !important;
-  }
-
-  .mysterria-home .world-static__live {
-    grid-column: 1 / -1 !important;
-    min-height: 320px !important;
-    display: grid !important;
-    align-items: end !important;
-    padding: clamp(24px, 5vw, 38px) !important;
-    overflow: hidden !important;
-    border: 1px solid var(--hairline) !important;
-    border-radius: 22px !important;
-    background: var(--surface) !important;
-    box-shadow: 0 24px 60px rgba(34, 28, 20, .14) !important;
-  }
-
-  .mysterria-home .world-static__live > div {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: none !important;
-  }
 }
 
 @media (max-width: 700px) {
-  .mysterria-home .world-static {
-    grid-template-columns: 1fr !important;
-  }
-
-  .mysterria-home .world-static header,
-  .mysterria-home .world-static__live {
-    grid-column: auto !important;
-  }
-
   .mysterria-home .progression-static li {
     grid-template-columns: 38px minmax(0, 1fr) !important;
   }

@@ -567,5 +567,420 @@
       "notFound": "Această cerere de comandă nu a fost găsită sau nu îți aparține.",
       "contentUnavailable": "Conținutul complet al trimiterii nu este disponibil pentru această cerere."
     }
+  },
+  "home": {
+    "hero": {
+      "title": "A Lord of the Mysteries-inspired Minecraft Server",
+      "summary": "Choose a Pathway, brew your first potion, and step into a world of dungeons, hunts, rituals, and hidden powers.",
+      "primaryCta": "How to join",
+      "addressLabel": "Server address",
+      "copied": "Copied",
+      "copyFailed": "Copy blocked",
+      "copyAria": "Copy server address",
+      "copiedAria": "Server address copied",
+      "copiedAnnouncement": "Server address copied to clipboard.",
+      "copyFailedAnnouncement": "Could not copy automatically. The server address is selected, so you can copy it yourself.",
+      "latestChangelog": "Latest changelog",
+      "worldOnline": "World online",
+      "field": "Field {number}",
+      "scenesAria": "World scenes",
+      "showScene": "Show {scene}",
+      "scrollCue": "Scroll to begin",
+      "scrollCueAria": "Continue to What is Mysterria?",
+      "slides": {
+        "auroraCliffside": {
+          "label": "Aurora Cliffside",
+          "sequence": "World / 01"
+        },
+        "eyeRift": {
+          "label": "The Eye Rift",
+          "sequence": "Rift / 02"
+        },
+        "sanctuaryAwakening": {
+          "label": "Sanctuary Awakening",
+          "sequence": "Rite / 03"
+        },
+        "guardianTrial": {
+          "label": "The Guardian’s Trial",
+          "sequence": "Field / 04"
+        },
+        "corruptedFrontier": {
+          "label": "The Corrupted Frontier",
+          "sequence": "Event / 05"
+        }
+      }
+    },
+    "whatIs": {
+      "eyebrow": "What is Mysterria?",
+      "title": "A Minecraft MMORPG built around the Pathways of Lord of the Mysteries.",
+      "summary": "Mysterria turns advancement into a journey: discover formulas, brew potions, digest their power, complete rituals, and climb the Sequences while exploring a persistent multiplayer world.",
+      "pillars": {
+        "pathway": {
+          "title": "Choose a Pathway",
+          "body": "Your Pathway defines your abilities, progression, strengths, and the risks you take as you advance."
+        },
+        "sequences": {
+          "title": "Advance through Sequences",
+          "body": "Power is earned through potions, digestion and rituals rather than a conventional level grind."
+        },
+        "world": {
+          "title": "Live in the world",
+          "body": "Explore, fight, trade, discover secrets and make choices that matter in a persistent MMORPG world."
+        }
+      }
+    },
+    "gettingStarted": {
+      "eyebrow": "Start your journey",
+      "title": "From first login to your first Sequence.",
+      "steps": {
+        "join": {
+          "title": "Join the server",
+          "body": "Connect to Mysterria and enter the persistent world."
+        },
+        "direction": {
+          "title": "Find your direction",
+          "body": "Explore, learn the systems and decide which Pathway you want to pursue."
+        },
+        "advance": {
+          "title": "Begin advancing",
+          "body": "Work toward formulas, ingredients, potions and the rituals required to move through the Sequences."
+        }
+      },
+      "guideCta": "Read the guide",
+      "pathwaysCta": "Browse Pathways"
+    },
+    "orbit": {
+      "kicker": "Choose your Pathway",
+      "titleLead": "Shape your ascent.",
+      "titleAccent": "Choose your route.",
+      "intro": "Explore {pathways} Pathways and {boons} Boons. Select a seal to compare its abilities, Sequences and playstyle.",
+      "introMobile": "Swipe through {pathways} Pathways and {boons} Boons, then open any archive to see its abilities and Sequences.",
+      "tabsLabel": "Progression type",
+      "tabs": {
+        "pathway": "Pathways",
+        "boon": "Boons"
+      },
+      "ringLabel": {
+        "pathway": "Pathways. Use the arrow keys to turn the orbit, then press Enter to open the selected archive.",
+        "boon": "Boons. Use the arrow keys to turn the orbit, then press Enter to open the selected archive."
+      },
+      "assembling": "The orbit is assembling as you scroll.",
+      "hint": "Drag the orbit or use the arrow keys",
+      "previous": {
+        "pathway": "Previous Pathway",
+        "boon": "Previous Boon"
+      },
+      "next": {
+        "pathway": "Next Pathway",
+        "boon": "Next Boon"
+      },
+      "position": "{current} of {total}",
+      "sequence": "Sequence {number}",
+      "sequenceNamed": "Sequence {number} · {name}",
+      "inspect": "Inspect {name}",
+      "openArchive": "Open archive",
+      "openArchiveNamed": "Open the {name} archive",
+      "sequenceCount": {
+        "one": "{count} Sequence",
+        "few": "{count} Sequences",
+        "many": "{count} Sequences"
+      },
+      "abilityCount": {
+        "one": "{count} ability",
+        "few": "{count} abilities",
+        "many": "{count} abilities"
+      },
+      "dossier": {
+        "kicker": {
+          "pathway": "Pathway dossier",
+          "boon": "Boon dossier"
+        },
+        "close": "Close {name} details",
+        "earlyAbilities": "Early abilities",
+        "archive": "Archive",
+        "cta": "Learn more in the full archive"
+      },
+      "taglineFallback": "Discover the {name} Pathway.",
+      "taglines": {
+        "abyss": "Spread curses, tempt desire, and descend into devilish power.",
+        "chained": "Bind curses, survive corruption, and unleash the monster within.",
+        "darkness": "Weave dreams, hide in shadow, and bring a quiet end.",
+        "death": "Command spirits and the dead beyond life’s last boundary.",
+        "demoness": "Cast curses, rule mirrors, and turn disaster into a weapon.",
+        "door": "Cross barriers, record powers, and step through space.",
+        "emperor": "Exploit loopholes, dispense bribery, and impose your disorder.",
+        "error": "Steal abilities, deceive fate, and exploit every loophole.",
+        "fool": "Divine the unseen, deceive perception, and command marionettes.",
+        "fortune": "Read fate, turn chance, and make luck answer your call.",
+        "giant": "Wield holy steel, stand guard, and bring the twilight war.",
+        "hanged": "Graze souls, wield shadows, and borrow forbidden power.",
+        "hermit": "Read the occult, inscribe spells, and draw power from the stars.",
+        "justiciar": "Declare rules, punish transgression, and enforce order.",
+        "moon": "Brew potions, command beasts, and master blood and renewal.",
+        "mother": "Heal, nurture life, and reshape flesh with alchemy.",
+        "paragon": "Forge artifacts, master machines, and turn knowledge into invention.",
+        "priest": "Provoke conflict, wield fire, and engineer the battlefield.",
+        "sun": "Wield holy light, purge corruption, and bind power with oaths.",
+        "tower": "Analyze all things, imitate powers, and uncover hidden truths.",
+        "tyrant": "Rule sea, storm, and lightning with a sailor’s fury.",
+        "visionary": "Read minds, weave dreams, and make thought touch reality.",
+        "aeon": "Bend time, preserve a moment, and return when fate allows.",
+        "chaos": "Harness unstable power where every choice has a consequence.",
+        "chaosmist": "Shroud the field in uncertainty and make certainty unravel.",
+        "condenser": "Compress raw power into precise, controlled force.",
+        "devouring": "Consume strength, deny resources, and grow from every encounter.",
+        "edict": "Speak a command that turns intention into law.",
+        "everlasting": "Outlast the fight through relentless endurance and renewal.",
+        "patriarch": "Build authority, protect your domain, and lead from the front.",
+        "secondlaw": "Rewrite the rules after the first answer is already chosen.",
+        "sublunary": "Draw on moonlit mysteries, subtle rites, and hidden influence."
+      }
+    },
+    "join": {
+      "kicker": "Begin your ascent",
+      "title": "Your first Sequence starts here.",
+      "intro": "Java Edition, no client mods. Join Mysterria, choose Mysteries in the lobby, and begin with a Pathway of your own.",
+      "chosenKicker": "Chosen in the orbit",
+      "chosenLabel": "{name}, chosen in the orbit above",
+      "stepsLabel": "Your first steps",
+      "steps": {
+        "connect": {
+          "title": "Connect",
+          "copy": "Add {address} in a current Java client."
+        },
+        "choose": {
+          "title": "Choose your Pathway",
+          "copy": "Select Mysteries in the lobby and choose where your ascent begins."
+        },
+        "firstStep": {
+          "title": "Take your first step",
+          "copy": "Use Resolve to learn the potion loop with no permanent cost."
+        }
+      },
+      "addressLabel": "Server address",
+      "copy": "Copy address",
+      "copied": "Copied",
+      "retry": "Try again",
+      "copiedAnnouncement": "Server address copied to your clipboard.",
+      "copyFailed": "Copy failed. Select the address manually: {address}",
+      "guide": "Read the beginner guide",
+      "discord": "Join the Discord",
+      "newTab": "(opens in a new tab)",
+      "note": "Accept the resource pack when prompted. Bedrock can connect, but some custom interfaces may not render."
+    },
+    "progression": {
+      "eyebrow": "Your path to godhood starts here",
+      "title": "Start at Sequence 9.",
+      "tagline": "A {sequence}’s first formula · {pathway} Pathway",
+      "navLabel": "Progression chapters",
+      "navCompleted": "(completed)",
+      "chapters": {
+        "discover": {
+          "short": "Discover",
+          "kicker": "01 · Recover the formula",
+          "title": "Find the written formula.",
+          "copy": "Recover the recipe, gather its ingredients, and learn what a Sequence 9 {sequence} requires.",
+          "hint": "Select an entry in the book to learn the recipe."
+        },
+        "infuse": {
+          "short": "Infuse",
+          "kicker": "02 · Load the cauldron",
+          "title": "Put every ingredient in place.",
+          "copy": "Main ingredients go in the left slots, supplementary ingredients in the right, and the recipe in the centre — every item in the order the recipe lists it.",
+          "hint": "Follow the formula from page to cauldron."
+        },
+        "brew": {
+          "short": "Brew",
+          "kicker": "03 · Brew the potion",
+          "title": "Turn the formula into power.",
+          "copy": "Work the Magic Cauldron and brew the Sequence 9 {sequence} potion. A failed brew keeps your ingredients, so you can try again.",
+          "hint": "Watch the circle for the final step."
+        },
+        "drink": {
+          "short": "Drink",
+          "kicker": "04 · Choose your Pathway",
+          "title": "Take the first step.",
+          "copy": "Drink the potion to commit to the {pathway} Pathway. From here, your abilities — and your risks — begin to change.",
+          "hint": "Choose your moment."
+        },
+        "awaken": {
+          "short": "Awaken",
+          "kicker": "05 · Begin the ascent",
+          "title": "Become a {sequence}.",
+          "copy": "New abilities join your toolkit. Digest the potion through acting, then prepare for Sequence 8.",
+          "hint": "The next Sequence is yours to earn."
+        }
+      },
+      "ingredients": {
+        "formula": "{pathway} recipe",
+        "lavosSquidBlood": "Blood of the Lavos Squid",
+        "stellarAquaCrystal": "Stellar Aqua Crystal",
+        "goldMintLeaves": "Gold Mint Leaves",
+        "mainRole": "Main ingredient",
+        "supplementaryRole": "Supplementary ingredient"
+      },
+      "details": {
+        "formula": {
+          "label": "Written formula · Sequence 9 — {sequence}",
+          "detail": "The first formula on the {pathway} Pathway. Main ingredients are listed on the left page; supplementary ingredients on the right."
+        },
+        "lavosSquidBlood": "Main ingredient · dropped by the Lavos Squid, a Beyonder Creature you must hunt.",
+        "stellarAquaCrystal": "Main ingredient · found only in generated loot chests.",
+        "goldMintLeaves": "Supplementary ingredient · grows as a Gold Mint node in the world; right-click to harvest it.",
+        "recipeSlot": {
+          "label": "Recipe slot",
+          "detail": "The recipe goes in the centre slot. It decides which ingredients the brew expects, and in what order."
+        },
+        "mainSlots": {
+          "label": "Main ingredient slots",
+          "detail": "Main ingredients — or Beyonder Chars in their place — go in the left slots, in the order the recipe lists them."
+        },
+        "supplementarySlots": {
+          "label": "Supplementary ingredient slots",
+          "detail": "Supplementary ingredients go in the right slots, also in the order the recipe lists them."
+        },
+        "circle": {
+          "label": "The brewing circle",
+          "detail": "Follow the recipe’s order exactly or the brew fails. A failed brew does not consume your ingredients."
+        },
+        "sequencePotion": {
+          "label": "Sequence 9 · {sequence} potion",
+          "detail": "A successful brew. A potion lasts two real-time days, so drink it before it expires to commit to the {pathway} Pathway."
+        },
+        "drinkPotion": {
+          "label": "The last sip",
+          "detail": "The potion empties as the awakening takes hold. Your first potion needs no ritual and costs no Madness."
+        },
+        "abilityLabel": "{ability} · {sequence} ability",
+        "nextSequence": {
+          "label": "Sequence 8 · {nextSequence}",
+          "detail": "Digest your potion through acting, then brew Sequence 8. Its ritual is optional, but skipping it adds permanent seasonal Madness."
+        }
+      },
+      "book": {
+        "sceneLabel": "Written formula opening scene",
+        "caption": "Sequence 9 · Written formula",
+        "mainPage": "Main ingredients page",
+        "supplementaryPage": "Supplementary ingredients page",
+        "mainHeading": "Main ingredients",
+        "supplementaryHeading": "Supplementary",
+        "noteHeading": "Brewing note",
+        "note": "Build a Magic Cauldron before brewing.",
+        "sealLabel": "Formula seal, Sequence 9 of the {pathway} Pathway. Brewing note: build a Magic Cauldron before brewing.",
+        "coverPathway": "{pathway} Pathway",
+        "coverSequence": "Sequence 9",
+        "coverRecipe": "Beyonder recipe"
+      },
+      "altar": {
+        "sceneLabel": "Magic Cauldron brewing scene",
+        "circleLabel": "Brewing magic circle",
+        "interfaceLabel": "Magic Cauldron brewing interface",
+        "potionLabel": "Sequence 9 {sequence} potion",
+        "potionCaption": "Sequence 9 · {sequence}"
+      },
+      "drink": {
+        "sceneLabel": "Drink and awaken scene",
+        "potionLabel": "Sequence 9 {sequence} potion",
+        "panelLabel": "Awakened {sequence}",
+        "panelKicker": "Pathway awakened",
+        "panelSub": "Sequence 9 · {pathway} Pathway",
+        "teaser": "Sequence 8 · {nextSequence} — {abilities} await",
+        "cta": "Begin your journey"
+      },
+      "player": {
+        "drink": "A player drinking a Sequence potion",
+        "advance": "A player awakening as a Beyonder"
+      },
+      "inspector": {
+        "kicker": "Inspecting"
+      }
+    },
+    "skipToContent": "Skip to main content",
+    "world": {
+      "eyebrow": "The world beyond your Pathway",
+      "title": "Your choices change what the world gives back.",
+      "fieldNote": "Field note {number} · {name}",
+      "scrollHint": "Scroll to explore",
+      "railLabel": "World systems",
+      "goTo": "Go to {name}",
+      "liveStage": "Live world",
+      "features": {
+        "dungeons": {
+          "short": "Rifts",
+          "kicker": "Prepare the run",
+          "title": "Plan the run. Cross the Rift.",
+          "copy": "Use /subspace to find a dungeon, check its power and cooldown, then weaken its Rift with Energy Shards before your party enters.",
+          "proof": "Each dungeon is an instanced run with its own rooms, classes, and boss.",
+          "marker": "Dungeon Rift",
+          "note": "A Rift gate marks the threshold. Weaken it with Energy Shards before your party commits to the instance beyond.",
+          "alt": "A black-and-white tree Rift gate surrounding a glowing dungeon portal."
+        },
+        "creatures": {
+          "short": "The wilds",
+          "kicker": "Meet the wild",
+          "title": "Your Pathway changes the encounter.",
+          "copy": "Beyonder Creatures can yield XP, acting points, and ingredients. Wild Beyonders may trade with you — or fight you — depending on the relationship you build.",
+          "proof": "Crimson Moon nights raise the stakes outside and turn every hunt into a decision.",
+          "marker": "Beyonder encounter",
+          "note": "Beyonder creatures roam the wild. Each one is worth XP, acting points and ingredients — if you survive the meeting.",
+          "alt": "A floating Beyonder creature surrounded by fragments inside a dark chamber."
+        },
+        "events": {
+          "short": "Guardians",
+          "kicker": "Answer the signal",
+          "title": "Bring the right people.",
+          "copy": "Guardians are open-world bosses that force your party to adapt. When physical damage stops working, the plan has to change.",
+          "proof": "Win and earn a Guardian Reward Token for rare ingredients, recipes, and more.",
+          "marker": "Open-world Guardian",
+          "note": "Guardians wait out in the open world. Rarer still are Cosmos Incursions, which answer a signal of their own.",
+          "alt": "Players fighting a many-headed Guardian inside a radiant arena."
+        },
+        "towns": {
+          "short": "Settlements",
+          "kicker": "Leave your mark",
+          "title": "Build somewhere worth defending.",
+          "copy": "Claim land, build with others, or form a Secret Order. Your choices shape the towns, territory, and communities around you.",
+          "proof": "Grow a town into a Domain — and eventually a Nation.",
+          "marker": "Player settlement",
+          "note": "A waterfront town beneath the aurora. Every street, workshop and landmark here was raised by players.",
+          "alt": "A player-built waterfront settlement glowing beneath a green aurora."
+        },
+        "churches": {
+          "short": "Churches",
+          "kicker": "Gather around a belief",
+          "title": "Make your Pathway visible.",
+          "copy": "Create a player-run Church around a physical Church Core, with members, sites, prayer, and influence that carry into the world.",
+          "proof": "Churches can support members, develop branches, and grant Pathway-based benefits.",
+          "marker": "Consecrated site",
+          "note": "Players laid every stone. The Church Core gives the site its members, its prayers and its Pathway blessings.",
+          "alt": "A monumental player-built cathedral rising into a stormy sky."
+        }
+      },
+      "live": {
+        "eyebrow": "Live from Mysterria",
+        "title": "A world shaped by players.",
+        "lede": "Who is online right now, and how far this season's Beyonders have climbed — read straight from the server.",
+        "server": "Server",
+        "online": "Online",
+        "offline": "Offline",
+        "checking": "Checking…",
+        "checkedAt": "Checked {time}",
+        "playersOnline": "Players online",
+        "playersNow": "Connected right now",
+        "playersOffline": "Back when the server returns",
+        "playersLoading": "Counting players…",
+        "noCount": "No player count yet",
+        "beyonders": "Beyonders this season",
+        "advanced": "Advanced · Seq 3–0",
+        "pathways": "Pathways walked",
+        "pathwaysValue": "{count} / {total}",
+        "topPathways": "Most walked pathways",
+        "statsLoading": "Loading season statistics…",
+        "latestUpdate": "Latest update"
+      }
+    },
+    "deferred": {
+      "loading": "Loading this chapter…"
+    }
   }
 }
