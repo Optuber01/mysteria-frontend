@@ -1,0 +1,349 @@
+@property --hero-scene-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #9e7eae;
+}
+
+@property --hero-scene-glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #edcebe;
+}
+
+@property --hero-scene-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #8d6fe4;
+}
+
+.mysterria-home {
+  --home-content-max: 1440px;
+  --home-content-gutter: clamp(20px, 4vw, 56px);
+  --home-rail-inset: max(
+    var(--home-content-gutter),
+    calc((100vw - var(--home-content-max)) / 2 + var(--home-content-gutter))
+  );
+  --home-section-block: clamp(88px, 10vw, 148px);
+  --home-header-height: 82px;
+  --hero-scene-color: #9e7eae;
+  --hero-scene-glow: #edcebe;
+  --hero-scene-accent: var(--primary);
+  min-width: 0;
+  min-height: 100vh;
+  overflow-x: clip;
+  color: var(--ink);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--journey-top) 84%, var(--hero-scene-color) 16%) 0%,
+    color-mix(in srgb, var(--journey-mid) 92%, var(--hero-scene-color) 8%) 55%,
+    var(--journey-end) 100%
+  );
+  font-family: var(--font-body);
+  transition:
+    --hero-scene-color 1.45s cubic-bezier(.22, 1, .36, 1),
+    --hero-scene-glow 1.45s cubic-bezier(.22, 1, .36, 1),
+    --hero-scene-accent 1.25s cubic-bezier(.22, 1, .36, 1),
+    background 1.45s cubic-bezier(.22, 1, .36, 1);
+}
+
+.mysterria-home main {
+  min-width: 0;
+  outline: 0;
+}
+
+.mysterria-home main > :where(section, .home-chapter),
+.mysterria-home :where(#progression, #pathways, #world, #join) {
+  min-width: 0;
+  scroll-margin-top: calc(var(--home-header-height) + 16px);
+}
+
+.mysterria-home :where(button, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mysterria-home :where(button, a, [tabindex]):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.mysterria-home main:focus-visible {
+  outline: 0;
+}
+
+.mysterria-home :where(h1, h2, h3) {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 2000;
+  top: 10px;
+  left: 12px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: 0 12px 30px rgba(34, 28, 20, .16);
+  font-size: .78rem;
+  font-weight: 750;
+  transform: translateY(-160%);
+  transition: transform .2s ease;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: none;
+}
+
+@media (min-width: 901px) and (min-height: 721px) {
+  .mysterria-home .hero {
+    min-height: max(1040px, 190svh) !important;
+  }
+}
+
+@media (max-width: 1050px) {
+  .mysterria-home {
+    --home-content-gutter: clamp(18px, 4.5vw, 42px);
+    --home-header-height: 76px;
+  }
+}
+
+@media (max-width: 760px) {
+  .mysterria-home {
+    --home-content-gutter: clamp(16px, 5vw, 28px);
+    --home-section-block: clamp(72px, 16vw, 104px);
+    --home-header-height: 72px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mysterria-home { --home-content-gutter: 14px; }
+}
+
+@media (max-width: 280px) {
+  .mysterria-home { --home-content-gutter: 8px; }
+}
+
+/*
+ * Sticky storytelling needs enough physical viewport height for its copy,
+ * controls and media to coexist. Narrow and short viewports use the same
+ * deterministic document-flow presentation instead of receiving a different
+ * partially clipped animation at every device ratio.
+ */
+@media (max-width: 900px), (max-height: 700px) {
+  .mysterria-home .progression-v3 {
+    min-height: auto !important;
+    margin-top: 0 !important;
+    padding: var(--home-section-block) var(--home-content-gutter) !important;
+    background: var(--journey-mid) !important;
+  }
+
+  .mysterria-home .progression-v3::before {
+    content: none !important;
+  }
+
+  .mysterria-home .progression-v3__sticky {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  .mysterria-home .progression-v3__backdrop,
+  .mysterria-home .progression-v3__wash,
+  .mysterria-home .progression-v3__threshold-fog,
+  .mysterria-home .progression-v3__layout,
+  .mysterria-home .progression-nav,
+  .mysterria-home .progression-line {
+    display: none !important;
+  }
+
+  .mysterria-home .progression-v3__heading {
+    position: relative !important;
+    inset: auto !important;
+    width: min(760px, 100%) !important;
+    margin: 0 auto clamp(30px, 6vw, 48px) !important;
+    opacity: 1 !important;
+  }
+
+  .mysterria-home .progression-v3__heading h2 {
+    margin-top: 8px !important;
+    font-size: clamp(2.15rem, 8vw, 4rem) !important;
+  }
+
+  .mysterria-home .progression-static {
+    width: min(880px, 100%) !important;
+    display: block !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    list-style: none !important;
+  }
+
+  .mysterria-home .progression-static li {
+    display: grid !important;
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    gap: clamp(16px, 4vw, 36px) !important;
+    padding: clamp(24px, 5vw, 42px) 0 !important;
+    border-top: 1px solid var(--hairline) !important;
+  }
+
+  .mysterria-home .progression-static li > span {
+    color: #87691d !important;
+    font: 700 .72rem/1 var(--font-body) !important;
+    letter-spacing: .12em !important;
+  }
+
+  .mysterria-home .progression-static small {
+    color: var(--primary-deep) !important;
+    font: 800 .7rem/1 var(--font-body) !important;
+    letter-spacing: .13em !important;
+    text-transform: uppercase !important;
+  }
+
+  .mysterria-home .progression-static h3 {
+    margin: 9px 0 10px !important;
+    color: var(--ink) !important;
+    font: 800 clamp(1.75rem, 6vw, 2.8rem)/1 var(--font-display) !important;
+    letter-spacing: -.025em !important;
+  }
+
+  .mysterria-home .progression-static p {
+    max-width: 620px !important;
+    margin: 0 !important;
+    color: var(--ink-muted) !important;
+    font-size: .9rem !important;
+    font-weight: 500 !important;
+    line-height: 1.6 !important;
+  }
+
+  .mysterria-home .world-story {
+    min-height: auto !important;
+  }
+
+  .mysterria-home .world-sticky {
+    display: none !important;
+  }
+
+  .mysterria-home .world-static {
+    box-sizing: border-box !important;
+    width: min(var(--home-content-max), 100%) !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: clamp(42px, 7vw, 76px) clamp(22px, 4vw, 42px) !important;
+    margin: 0 auto !important;
+    padding: var(--home-section-block) var(--home-content-gutter) !important;
+  }
+
+  .mysterria-home .world-static header {
+    grid-column: 1 / -1 !important;
+    margin: 0 !important;
+  }
+
+  .mysterria-home .world-static header h2 {
+    max-width: 760px !important;
+    margin: 12px 0 0 !important;
+    font: 800 clamp(2.1rem, 6vw, 3.8rem)/1 var(--font-display) !important;
+    letter-spacing: -.025em !important;
+  }
+
+  .mysterria-home .world-static article {
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-content: start !important;
+    gap: 0 !important;
+  }
+
+  .mysterria-home .world-static article img {
+    width: 100% !important;
+    aspect-ratio: 16 / 10 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    border-radius: 22px !important;
+    box-shadow:
+      0 0 0 1px var(--hairline),
+      0 24px 60px rgba(34, 28, 20, .14) !important;
+  }
+
+  .mysterria-home .world-static article > div {
+    position: relative !important;
+    z-index: 1 !important;
+    width: calc(100% - 18px) !important;
+    margin: -30px 0 0 18px !important;
+    padding: 22px 0 0 20px !important;
+    border-left: 1px solid var(--hairline) !important;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .97) 0 76%, transparent) !important;
+  }
+
+  .mysterria-home .world-static article h3 {
+    margin: 10px 0 !important;
+    font: 800 clamp(1.55rem, 4vw, 2.3rem)/1.03 var(--font-display) !important;
+    letter-spacing: -.02em !important;
+  }
+
+  .mysterria-home .world-static article p {
+    max-width: 480px !important;
+    margin: 0 !important;
+    color: var(--ink-muted) !important;
+    font-size: .82rem !important;
+    font-weight: 500 !important;
+    line-height: 1.6 !important;
+  }
+
+  .mysterria-home .world-static__live {
+    grid-column: 1 / -1 !important;
+    min-height: 320px !important;
+    display: grid !important;
+    align-items: end !important;
+    padding: clamp(24px, 5vw, 38px) !important;
+    overflow: hidden !important;
+    border: 1px solid var(--hairline) !important;
+    border-radius: 22px !important;
+    background: var(--surface) !important;
+    box-shadow: 0 24px 60px rgba(34, 28, 20, .14) !important;
+  }
+
+  .mysterria-home .world-static__live > div {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .mysterria-home .world-static {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mysterria-home .world-static header,
+  .mysterria-home .world-static__live {
+    grid-column: auto !important;
+  }
+
+  .mysterria-home .progression-static li {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mysterria-home {
+    transition: none;
+  }
+
+  .mysterria-home :where(*) {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
