@@ -2,22 +2,20 @@
   <section
     id="pathways"
     ref="sectionRef"
-    class="pathway-vault"
-    :class="[{ 'is-interactive': interactionReady, 'is-low-power': lowPower }, `motif-${activeEntry.motif}`]"
-    :style="{ '--motif-accent': activeEntry.theme.accent }"
+    class="fog-table"
+    :class="{ 'is-rail': railLayout, 'is-low-power': lowPower }"
     aria-labelledby="pathway-title"
   >
-    <div class="ambient-field" aria-hidden="true"><i class="ambient-field__haze" /></div>
+    <div class="fog-table__fog fog-table__fog--far" aria-hidden="true"></div>
 
-    <div v-if="!compactLayout && !reducedMotion" class="desktop-experience">
-      <div class="sticky-scene">
-        <header class="vault-heading">
-          <p>{{ t('home.orbit.kicker') }}</p>
-          <h2 id="pathway-title">{{ t('home.orbit.titleLead') }}<br><em>{{ t('home.orbit.titleAccent') }}</em></h2>
-          <span>{{ introCopy('home.orbit.intro') }}</span>
-        </header>
-
-        <div class="catalog-tabs" role="tablist" :aria-label="t('home.orbit.tabsLabel')" @keydown="onTabKeydown($event, '')">
+    <header class="table-head">
+      <div class="table-head__title">
+        <p class="fog-label">{{ t('home.orbit.kicker') }}</p>
+        <h2 id="pathway-title">{{ t('home.orbit.titleLead') }} <em>{{ t('home.orbit.titleAccent') }}</em></h2>
+      </div>
+      <div class="table-head__aside">
+        <p>{{ countCopy(railLayout ? 'home.orbit.introMobile' : 'home.orbit.intro') }}</p>
+        <div class="deck-tabs" role="tablist" :aria-label="t('home.orbit.tabsLabel')" @keydown="onTabKeydown">
           <button
             v-for="option in catalogOptions"
             :id="`${option.id}-tab`"
@@ -25,149 +23,121 @@
             type="button"
             role="tab"
             :aria-selected="activeKind === option.id"
-            :aria-controls="activeKind === option.id ? `${option.id}-panel` : undefined"
+            aria-controls="pathways-panel"
             :tabindex="activeKind === option.id ? 0 : -1"
-            @mouseenter="warmCatalog(option.id)"
-            @focus="warmCatalog(option.id)"
             @click="setKind(option.id)"
           >
-            <span>{{ option.label }}</span><b>{{ option.count }}</b>
+            {{ option.label }}<b>{{ option.count }}</b>
           </button>
         </div>
+      </div>
+    </header>
+
+    <div
+      id="pathways-panel"
+      class="table-panel"
+      role="tabpanel"
+      :aria-labelledby="`${activeKind}-tab`"
+    >
+      <div
+        ref="stageRef"
+        class="table-stage"
+        :class="{ 'is-dragging': dragging, 'is-dealing': dealing, 'is-dealt': dealt }"
+        @pointerdown="onPointerDown"
+        @pointermove="onPointerMove"
+        @pointerup="onPointerUp"
+        @pointercancel="onPointerUp"
+        @click.capture="swallowDragClick"
+      >
+        <div class="table-surface" aria-hidden="true"></div>
 
         <div
-          :id="`${activeKind}-panel`"
-          ref="orbitStageRef"
-          class="orbit-stage"
-          role="tabpanel"
-          :aria-labelledby="`${activeKind}-tab`"
-          @pointerdown="startDrag"
-          @pointermove="movePointer"
-          @pointerup="endDrag"
-          @pointercancel="endDrag"
+          ref="deckRef"
+          class="deck"
+          role="radiogroup"
+          :aria-label="t(`home.orbit.deckLabel.${activeKind}`)"
+          @keydown="onDeckKeydown"
+          @scroll.passive="onRailScroll"
         >
-          <div
-            class="orbit-ring"
-            role="radiogroup"
-            :aria-label="interactionReady ? t(`home.orbit.ringLabel.${activeKind}`) : t('home.orbit.assembling')"
-            @keydown="onRingKeydown"
+          <button
+            v-for="(entry, index) in activeCatalog"
+            :key="entry.id"
+            type="button"
+            role="radio"
+            class="tarot"
+            :class="{ 'is-lit': index === shownIndex }"
+            :style="cardStyles[index]"
+            :data-index="index"
+            :tabindex="index === selectedIndex ? 0 : -1"
+            :aria-checked="index === selectedIndex"
+            :aria-label="cardLabel(entry, index)"
+            @click="onCardClick(index, $event)"
           >
-            <template v-for="(entry, index) in activeCatalog" :key="entry.id">
-              <button
-                v-if="!orbitStyles[index].hidden"
-                type="button"
-                role="radio"
-                class="orbit-token"
-                :class="{ 'is-selected': index === shownIndex, 'is-behind': orbitStyles[index].behind }"
-                :style="orbitStyles[index].style"
-                :data-index="index"
-                :tabindex="index === shownIndex ? 0 : -1"
-                :aria-checked="index === shownIndex"
-                :aria-label="tokenLabel(entry)"
-                @pointerenter="warmNative(index)"
-                @focus="warmNative(index)"
-                @click.stop="chooseToken(index, $event)"
-              >
-                <span class="token-seal">
-                  <img :src="entry.thumbnail" alt="" width="96" height="96" :loading="index < 4 ? 'eager' : 'lazy'" :fetchpriority="index < 2 ? 'high' : 'auto'" decoding="async" @error="replaceBrokenImage">
-                </span>
-                <strong>{{ nameOf(entry) }}</strong>
-              </button>
-            </template>
-          </div>
-
-          <Transition name="orbit-story">
-            <article
-              v-if="hasActiveEntry"
-              class="orbit-story"
-              :aria-live="interactionReady ? 'polite' : 'off'"
-              @click="openEntry(shownIndex, $event)"
-            >
-              <div class="motif-stage" aria-hidden="true">
-                <img :src="interactionReady ? activeEntry.image : activeEntry.thumbnail" alt="" width="220" height="220" loading="eager" fetchpriority="high" decoding="async" @error="replaceBrokenImage">
-              </div>
-              <h3>{{ nameOf(activeEntry) }}</h3>
-              <span class="entry-kind">{{ sequenceLabel(activeEntry) }}</span>
-              <small>{{ taglineOf(activeEntry) }}</small>
-            </article>
-          </Transition>
-
-          <Transition name="orbit-ui">
-            <div v-if="interactionReady" class="orbit-controls">
-              <p>{{ t('home.orbit.hint') }}</p>
-              <button type="button" :aria-label="t(`home.orbit.previous.${activeKind}`)" @click="previous"><span aria-hidden="true">←</span></button>
-              <span aria-hidden="true"><b>{{ pad(shownIndex + 1) }}</b> / {{ pad(activeCatalog.length) }}</span>
-              <button type="button" :aria-label="t(`home.orbit.next.${activeKind}`)" @click="next"><span aria-hidden="true">→</span></button>
-            </div>
-          </Transition>
-
-          <button v-if="hasActiveEntry" type="button" class="open-dossier" @click="openEntry(shownIndex, $event)">
-            {{ t('home.orbit.inspect').replace('{name}', nameOf(activeEntry)) }}<span aria-hidden="true">↗</span>
+            <span class="tarot__frame">
+              <span class="tarot__numeral" aria-hidden="true">{{ numeral(index) }}</span>
+              <span class="tarot__sigil">
+                <img
+                  :src="entry.thumbnail"
+                  alt=""
+                  width="128"
+                  height="128"
+                  :loading="Math.abs(offsetOf(index)) <= 4 ? 'eager' : 'lazy'"
+                  decoding="async"
+                  draggable="false"
+                  @error="replaceBrokenImage"
+                >
+              </span>
+              <span class="tarot__name">{{ nameOf(entry) }}</span>
+              <span class="tarot__seq">{{ firstSequenceName(entry) }}</span>
+            </span>
           </button>
         </div>
-      </div>
-    </div>
 
-    <div v-else class="mobile-experience">
-      <header class="mobile-heading">
-        <p>{{ t('home.orbit.kicker') }}</p>
-        <h2 id="pathway-title">{{ t('home.orbit.titleLead') }}<br><em>{{ t('home.orbit.titleAccent') }}</em></h2>
-        <span>{{ introCopy('home.orbit.introMobile') }}</span>
-      </header>
-
-      <div class="catalog-tabs catalog-tabs--mobile" role="tablist" :aria-label="t('home.orbit.tabsLabel')" @keydown="onTabKeydown($event, '-mobile')">
-        <button
-          v-for="option in catalogOptions"
-          :id="`${option.id}-mobile-tab`"
-          :key="option.id"
-          type="button"
-          role="tab"
-          :aria-selected="activeKind === option.id"
-          :aria-controls="activeKind === option.id ? `${option.id}-mobile-panel` : undefined"
-          :tabindex="activeKind === option.id ? 0 : -1"
-          @mouseenter="warmCatalog(option.id)"
-          @focus="warmCatalog(option.id)"
-          @click="setKind(option.id)"
-        >
-          <span>{{ option.label }}</span><b>{{ option.count }}</b>
-        </button>
+        <div class="fog-table__fog fog-table__fog--near" aria-hidden="true"></div>
       </div>
 
-      <div
-        :id="`${activeKind}-mobile-panel`"
-        ref="mobileRailRef"
-        class="mobile-rail"
-        role="tabpanel"
-        :aria-labelledby="`${activeKind}-mobile-tab`"
-        tabindex="0"
-        @scroll.passive="handleMobileScroll"
-        @keydown.left.prevent="previousMobile"
-        @keydown.right.prevent="nextMobile"
-      >
-        <article
-          v-for="(entry, index) in activeCatalog"
-          :key="entry.id"
-          class="mobile-card"
-          :data-mobile-index="index"
-        >
-          <div class="mobile-card__visual" aria-hidden="true">
-            <img :src="entry.image" alt="" width="170" height="170" :loading="activeKind === 'boon' ? 'eager' : 'lazy'" decoding="async" @error="replaceBrokenImage">
-            <b>{{ pad(index + 1) }}</b>
+      <div class="deck-controls">
+        <button type="button" class="deck-step" :aria-label="t(`home.orbit.previous.${activeKind}`)" @click="step(-1)"><span aria-hidden="true">←</span></button>
+        <p>
+          <span class="deck-count" aria-hidden="true"><b>{{ pad(selectedIndex + 1) }}</b> / {{ pad(activeCatalog.length) }}</span>
+          <span class="deck-hint">{{ t(railLayout ? 'home.orbit.hintMobile' : 'home.orbit.hint') }}</span>
+        </p>
+        <button type="button" class="deck-step" :aria-label="t(`home.orbit.next.${activeKind}`)" @click="step(1)"><span aria-hidden="true">→</span></button>
+        <span class="visually-hidden" aria-live="polite">{{ announcement }}</span>
+      </div>
+
+      <div :key="`${activeKind}-${selectedEntry.id}`" class="reading">
+        <div class="reading__identity">
+          <p class="fog-label">{{ arcanumLabel(selectedIndex, numeral(selectedIndex)) }}</p>
+          <h3>{{ nameOf(selectedEntry) }}</h3>
+          <p class="reading__sequence">{{ sequenceLabel(selectedEntry) }}</p>
+          <p class="reading__tagline">{{ taglineOf(selectedEntry) }}</p>
+        </div>
+        <dl class="reading__facts">
+          <div>
+            <dt>{{ t('home.orbit.earlyAbilities') }}</dt>
+            <dd><ul><li v-for="ability in abilitiesOf(selectedEntry)" :key="ability">{{ ability }}</li></ul></dd>
           </div>
-          <p>{{ sequenceLabel(entry) }}</p>
-          <h3>{{ nameOf(entry) }}</h3>
-          <small>{{ taglineOf(entry) }}</small>
-          <button type="button" :aria-label="t('home.orbit.openArchiveNamed').replace('{name}', nameOf(entry))" @click="openEntry(index, $event)">
+          <div>
+            <dt>{{ t('home.orbit.archive') }}</dt>
+            <dd class="reading__counts">{{ archiveCounts(selectedEntry) }}</dd>
+          </div>
+        </dl>
+        <div class="reading__actions">
+          <RouterLink class="fog-button" :to="$lp(selectedEntry.route)" :aria-label="t('home.orbit.openArchiveNamed').replace('{name}', nameOf(selectedEntry))">
             {{ t('home.orbit.openArchive') }}<span aria-hidden="true">↗</span>
+          </RouterLink>
+          <button
+            type="button"
+            class="fog-button fog-button--ghost"
+            :aria-label="t('home.orbit.readDossierNamed').replace('{name}', nameOf(selectedEntry))"
+            @pointerenter="warmNative(selectedEntry)"
+            @focus="warmNative(selectedEntry)"
+            @click="openDetails($event)"
+          >
+            {{ t('home.orbit.readDossier') }}
           </button>
-        </article>
-      </div>
-
-      <div class="mobile-pagination">
-        <button type="button" :aria-label="t(`home.orbit.previous.${activeKind}`)" @click="previousMobile"><span aria-hidden="true">←</span></button>
-        <span aria-hidden="true"><b>{{ pad(selectedIndex + 1) }}</b> / {{ pad(activeCatalog.length) }}</span>
-        <button type="button" :aria-label="t(`home.orbit.next.${activeKind}`)" @click="nextMobile"><span aria-hidden="true">→</span></button>
-        <span class="visually-hidden" aria-live="polite">{{ nameOf(selectedEntry) }}. {{ t('home.orbit.position').replace('{current}', String(selectedIndex + 1)).replace('{total}', String(activeCatalog.length)) }}</span>
+        </div>
       </div>
     </div>
 
@@ -184,18 +154,19 @@
             @keydown="trapDossierFocus"
           >
             <button ref="dossierCloseRef" class="dossier-close" type="button" :aria-label="t('home.orbit.dossier.close').replace('{name}', nameOf(selectedEntry))" @click="closeDetails()"><span aria-hidden="true">×</span></button>
-            <div class="dossier-symbol" aria-hidden="true">
-              <img :src="selectedEntry.image" alt="" width="150" height="150" decoding="async" @error="replaceBrokenImage">
+            <div class="dossier-card" aria-hidden="true">
+              <span>{{ numeral(selectedIndex) }}</span>
+              <img :src="selectedEntry.image" alt="" width="200" height="200" decoding="async" @error="replaceBrokenImage">
             </div>
-            <p>{{ t(`home.orbit.dossier.kicker.${selectedEntry.kind}`) }}</p>
+            <p class="dossier-kicker">{{ t(`home.orbit.dossier.kicker.${selectedEntry.kind}`) }}</p>
             <h3 :id="`${selectedEntry.id}-dossier-title`">{{ nameOf(selectedEntry) }}</h3>
             <strong>{{ sequenceLabel(selectedEntry) }}</strong>
             <span>{{ taglineOf(selectedEntry) }}</span>
             <dl>
-              <div><dt>{{ t('home.orbit.dossier.earlyAbilities') }}</dt><dd>{{ selectedEntry.strengths.map((ability) => localize(ability, currentLanguage)).join(' · ') }}</dd></div>
-              <div><dt>{{ t('home.orbit.dossier.archive') }}</dt><dd>{{ countLabel('sequenceCount', selectedEntry.sequenceCount) }} · {{ countLabel('abilityCount', selectedEntry.abilityCount) }}</dd></div>
+              <div><dt>{{ t('home.orbit.earlyAbilities') }}</dt><dd>{{ abilitiesOf(selectedEntry).join(' · ') }}</dd></div>
+              <div><dt>{{ t('home.orbit.archive') }}</dt><dd>{{ archiveCounts(selectedEntry) }}</dd></div>
             </dl>
-            <RouterLink :to="$lp(selectedEntry.route)" @click="closeDetails(false)">
+            <RouterLink class="dossier-cta" :to="$lp(selectedEntry.route)" @click="closeDetails(false)">
               {{ t('home.orbit.dossier.cta') }}<span aria-hidden="true">↗</span>
             </RouterLink>
           </aside>
@@ -213,75 +184,54 @@ import { useI18n } from '@/composables/useI18n';
 
 const emit = defineEmits<{ selected: [pathway: HomePathway] }>();
 const { t, plural, currentLanguage } = useI18n();
+const reducedMotion = useReducedMotion();
+
 const sectionRef = ref<HTMLElement | null>(null);
-const orbitStageRef = ref<HTMLElement | null>(null);
-const mobileRailRef = ref<HTMLElement | null>(null);
+const stageRef = ref<HTMLElement | null>(null);
+const deckRef = ref<HTMLElement | null>(null);
 const dossierRef = ref<HTMLElement | null>(null);
 const dossierCloseRef = ref<HTMLButtonElement | null>(null);
-const reducedMotion = useReducedMotion();
+
+/*
+ * The Fool hosts the gathering above the fog, so it takes arcanum 0 and the
+ * first seat; the rest keep archive order. Twenty-two Pathways, twenty-two
+ * Major Arcana, numbered 0-XXI.
+ */
+const tablePathways = [
+  ...standardPathways.filter((entry) => entry.id === 'fool'),
+  ...standardPathways.filter((entry) => entry.id !== 'fool'),
+];
+
 const activeKind = ref<ProgressionKind>('pathway');
-const scrollProgress = ref(0);
 const selectedIndex = ref(0);
-const rotation = ref(0);
-const targetRotation = ref(0);
-const velocity = ref(0);
+/** Cards of drag travel not yet committed to a selection. */
+const dragShift = ref(0);
 const dragging = ref(false);
-const inView = ref(false);
-const detailsOpen = ref(false);
-const compactLayout = ref(false);
+const dealt = ref(false);
+const dealing = ref(false);
+const railLayout = ref(false);
 const lowPower = ref(false);
-const stageSize = ref({ width: 0, height: 0 });
+const detailsOpen = ref(false);
+const announcement = ref('');
+const stage = ref({ width: 0, cardWidth: 0 });
 
-let animationFrame = 0;
-let scrollFrame = 0;
-let lastPointerX = 0;
-let lastPointerTime = 0;
-let mobileScrollTimer = 0;
-let dossierTrigger: HTMLElement | null = null;
-let previousBodyOverflow = '';
-let previousBodyPaddingRight = '';
-let sectionObserver: IntersectionObserver | null = null;
-let stageObserver: ResizeObserver | null = null;
-let compactMedia: MediaQueryList | null = null;
-let scrollTravel = 1;
-let catalogWarmTimer = 0;
-let openingSymbolWarmTimer = 0;
-// Set once the visitor picks an entry, so a finished assembly does not
-// silently replace their choice with the last seal to arrive.
-let userChose = false;
-const warmedCatalogs = new Set<ProgressionKind>();
-const warmedNatives = new Set<string>();
-const catalogImageWarmers: HTMLImageElement[] = [];
-let openingSymbolsWarmed = false;
-let orbitStateBeforeDossier: { rotation: number; targetRotation: number; velocity: number } | null = null;
-
-const activeCatalog = computed(() => activeKind.value === 'pathway' ? standardPathways : boonPathways);
+const activeCatalog = computed(() => activeKind.value === 'pathway' ? tablePathways : boonPathways);
 const catalogOptions = computed(() => [
   { id: 'pathway' as const, label: t('home.orbit.tabs.pathway'), count: standardPathways.length },
   { id: 'boon' as const, label: t('home.orbit.tabs.boon'), count: boonPathways.length },
 ]);
-// The assembly begins while the section is approaching the viewport, then
-// accelerates through the sticky scene and leaves a short completed orbit.
-const assemblyProgress = computed(() => clamp(Math.pow(scrollProgress.value, 1.3) / .92, 0, 1));
-const phase = computed<'entry' | 'assembly' | 'orbit'>(() => {
-  if (reducedMotion.value || compactLayout.value) return 'orbit';
-  if (scrollProgress.value < .08) return 'entry';
-  if (assemblyProgress.value < 1) return 'assembly';
-  return 'orbit';
-});
-const interactionReady = computed(() => phase.value === 'orbit');
-const assemblyIndex = computed(() => clamp(Math.floor(assemblyProgress.value * activeCatalog.value.length - 1), 0, activeCatalog.value.length - 1));
-// Hover never changes this: the centre shows the committed choice, or the
-// newest seal while the orbit is still assembling.
-const shownIndex = computed(() => interactionReady.value ? selectedIndex.value : assemblyIndex.value);
-const activeEntry = computed(() => activeCatalog.value[shownIndex.value] ?? activeCatalog.value[0]);
+const focusPosition = computed(() => selectedIndex.value + dragShift.value);
+/** The card under the light: follows a drag before it is committed. */
+const shownIndex = computed(() => normalizeIndex(Math.round(focusPosition.value)));
 const selectedEntry = computed(() => activeCatalog.value[selectedIndex.value] ?? activeCatalog.value[0]);
-const hasActiveEntry = computed(() => reducedMotion.value || compactLayout.value || assemblyProgress.value * activeCatalog.value.length >= 1);
+
+/* ---- Copy ---- */
 
 const nameOf = (entry: HomePathway) => localize(entry.name, currentLanguage.value);
 const pad = (value: number) => String(value).padStart(2, '0');
+const abilitiesOf = (entry: HomePathway) => entry.strengths.map((ability) => localize(ability, currentLanguage.value));
 
-function introCopy(key: string) {
+function countCopy(key: string) {
   return t(key).replace('{pathways}', String(standardPathways.length)).replace('{boons}', String(boonPathways.length));
 }
 
@@ -290,15 +240,30 @@ function countLabel(key: 'sequenceCount' | 'abilityCount', count: number) {
   return plural(count, forms).replace('{count}', String(count));
 }
 
-/** "Sequence 9 · Seer". Chinese names a pathway after its Sequence 9, so the repeat is dropped there. */
+const archiveCounts = (entry: HomePathway) => `${countLabel('sequenceCount', entry.sequenceCount)} · ${countLabel('abilityCount', entry.abilityCount)}`;
+
+/** Chinese names a pathway after its Sequence 9, so the repeat is dropped there. */
+function startingName(entry: HomePathway) {
+  const start = entry.startingSequence;
+  if (!start) return '';
+  const name = localize(start.name, currentLanguage.value);
+  return name && name !== nameOf(entry) ? name : '';
+}
+
+/** "Sequence 9 · Seer" */
 function sequenceLabel(entry: HomePathway) {
   const start = entry.startingSequence;
   if (!start) return countLabel('sequenceCount', entry.sequenceCount);
-  const name = localize(start.name, currentLanguage.value);
+  const name = startingName(entry);
   const number = String(start.number);
-  return name && name !== nameOf(entry)
+  return name
     ? t('home.orbit.sequenceNamed').replace('{number}', number).replace('{name}', name)
     : t('home.orbit.sequence').replace('{number}', number);
+}
+
+/** The small second line on a card face. */
+function firstSequenceName(entry: HomePathway) {
+  return startingName(entry) || (entry.startingSequence ? t('home.orbit.sequence').replace('{number}', String(entry.startingSequence.number)) : '');
 }
 
 function taglineOf(entry: HomePathway) {
@@ -307,126 +272,100 @@ function taglineOf(entry: HomePathway) {
   return tagline === key ? t('home.orbit.taglineFallback').replace('{name}', nameOf(entry)) : tagline;
 }
 
-const tokenLabel = (entry: HomePathway) => `${nameOf(entry)}, ${sequenceLabel(entry)}`;
-
-type OrbitVisual = { hidden: boolean; behind: boolean; style: CSSProperties };
-const ORBIT_RADIUS_X = 42;
-const ORBIT_RADIUS_Y = 34;
-
-/** Positions a seal by transform only; percentages are of the stage box. */
-function place(x: number, y: number, depth: number, scale: number, opacity: number, interactive: boolean): OrbitVisual {
-  const { width, height } = stageSize.value;
-  return {
-    hidden: false,
-    behind: depth < .42,
-    style: {
-      transform: `translate3d(${Math.round(x / 100 * width)}px, ${Math.round(y / 100 * height)}px, 0) translate(-50%, -50%)`,
-      opacity: String(Math.round(opacity * 100) / 100),
-      zIndex: String(18 + Math.round(depth * 46)),
-      '--seal-scale': String(Math.round(scale * 100) / 100),
-      pointerEvents: interactive ? 'auto' : 'none',
-    } as CSSProperties,
-  };
+const ROMAN: [number, string][] = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+/** Pathways are Major Arcana from 0; Boons are numbered from I. */
+function arcanumNumber(index: number) {
+  return activeKind.value === 'pathway' ? index : index + 1;
 }
-
-const orbitStyles = computed<OrbitVisual[]>(() => activeCatalog.value.map((_, index) => {
-  if (phase.value !== 'orbit') return assemblyStyle(index);
-  const delta = signedWrap(index - rotation.value, activeCatalog.value.length);
-  const angle = -Math.PI / 2 - delta * ((Math.PI * 2) / activeCatalog.value.length);
-  const depth = (Math.sin(angle) + 1) / 2;
-  return place(50 + Math.cos(angle) * ORBIT_RADIUS_X, 50 + Math.sin(angle) * ORBIT_RADIUS_Y, depth, .78 + depth * .22, .84 + depth * .16, true);
-}));
-
-function assemblyStyle(index: number): OrbitVisual {
-  const count = activeCatalog.value.length;
-  const visibleCount = assemblyProgress.value * count;
-  const entryProgress = clamp(visibleCount - index, 0, 1);
-  if (entryProgress <= 0) return { hidden: true, behind: true, style: {} };
-  const eased = easeOut(entryProgress);
-  // Each new route arrives beside the top of the orbit and pushes every route
-  // already present around the ring. This converges exactly to the completed
-  // orbit order, avoiding a final-frame remap when the last seal arrives.
-  const orbitSlot = visibleCount - index - rotation.value;
-  const angle = -Math.PI / 2 + orbitSlot * ((Math.PI * 2) / count);
-  const depth = (Math.sin(angle) + 1) / 2;
-  return place(
-    mix(-14, 50 + Math.cos(angle) * ORBIT_RADIUS_X, eased),
-    mix(50, 50 + Math.sin(angle) * ORBIT_RADIUS_Y, eased),
-    depth,
-    .6 + depth * .2 + eased * .2,
-    eased * (.84 + depth * .16),
-    entryProgress > .94,
-  );
+function numeral(index: number) {
+  let value = arcanumNumber(index);
+  if (value === 0) return '0';
+  let out = '';
+  for (const [size, glyph] of ROMAN) while (value >= size) { out += glyph; value -= size; }
+  return out;
 }
+/** Screen readers get the arabic number; the card face shows the numeral. */
+const arcanumLabel = (index: number, shown = String(arcanumNumber(index))) => t('home.orbit.arcanum').replace('{numeral}', shown);
+const cardLabel = (entry: HomePathway, index: number) => `${arcanumLabel(index)}. ${nameOf(entry)}, ${sequenceLabel(entry)}`;
+const positionLabel = () => t('home.orbit.position').replace('{current}', String(selectedIndex.value + 1)).replace('{total}', String(activeCatalog.value.length));
+
+/* ---- The spread: cards fanned along a wide arc at the head of the table ---- */
+
+const VISIBLE = 5;        // cards shown either side of the lit one
+const ARC_STEP = .1;      // radians between neighbouring cards
+const LIFT = 34;          // px the lit card rises off the table
 
 function clamp(value: number, min: number, max: number) { return Math.min(max, Math.max(min, value)); }
-function mix(from: number, to: number, amount: number) { return from + (to - from) * amount; }
-function easeOut(value: number) { return 1 - Math.pow(1 - clamp(value, 0, 1), 3); }
 function normalizeIndex(value: number, length = activeCatalog.value.length) { return ((value % length) + length) % length; }
 function signedWrap(value: number, length: number) { return ((value + length / 2) % length + length) % length - length / 2; }
+const offsetOf = (index: number) => signedWrap(index - focusPosition.value, activeCatalog.value.length);
 
-function measureScroll() {
-  scrollFrame = 0;
-  if (!sectionRef.value || (!inView.value && !reducedMotion.value)) return;
-  const rect = sectionRef.value.getBoundingClientRect();
-  // Start the first route while the preceding section is still on screen.
-  // Include this lead-in in the range so the final orbit always completes
-  // before the sticky scene releases.
-  const entryLead = window.innerHeight * .65;
-  const nextProgress = reducedMotion.value
-    ? 1
-    : clamp((entryLead - rect.top) / (scrollTravel + entryLead), 0, 1);
-  // Avoid invalidating every token style for sub-pixel scroll deltas.
-  if (Math.abs(nextProgress - scrollProgress.value) >= .001 || nextProgress === 0 || nextProgress === 1) {
-    scrollProgress.value = nextProgress;
-  }
+/**
+ * Transform and opacity only. Cards past the visible fan are parked, invisible,
+ * just beyond its ends, so the wrap from one end to the other is never seen.
+ */
+const cardStyles = computed<CSSProperties[]>(() => {
+  if (railLayout.value) return activeCatalog.value.map(() => ({}));
+  const { width, cardWidth } = stage.value;
+  const radius = width * .92;
+  const count = activeCatalog.value.length;
+  // Never show the card opposite the lit one: it is where the deck wraps.
+  const visible = Math.min(VISIBLE, Math.floor(count / 2) - 1);
+  return activeCatalog.value.map((_, index) => {
+    const offset = dealt.value ? signedWrap(index - focusPosition.value, count) : 0;
+    const distance = Math.abs(offset);
+    const parked = clamp(offset, -(visible + 1), visible + 1);
+    const angle = parked * ARC_STEP;
+    const lift = Math.max(0, 1 - distance);
+    // Neighbours step aside so the lifted card is never overlapped.
+    const x = radius * Math.sin(angle) + Math.sign(parked) * Math.min(distance, 1) * cardWidth * .3;
+    const y = radius * (1 - Math.cos(angle)) * .62 - lift * LIFT;
+    const scale = 1 + lift * .2 - Math.min(distance, visible + 1) * .018;
+    const opacity = dealt.value ? clamp(visible + .6 - distance, 0, 1) : (index < 4 ? 1 : 0);
+    return {
+      transform: `translate3d(${(x - cardWidth / 2).toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${(angle * 41).toFixed(2)}deg) scale(${scale.toFixed(3)})`,
+      opacity: String(Math.round(opacity * 100) / 100),
+      zIndex: String(dealt.value ? 100 - Math.round(distance * 8) : 100 - index),
+      pointerEvents: opacity < .3 ? 'none' : undefined,
+      '--veil': String(Math.round(clamp(.32 + distance * .09, 0, .8) * (1 - lift) * 100) / 100),
+      '--deal-delay': `${Math.round(Math.min(distance, visible + 1) * 55)}ms`,
+    } as CSSProperties;
+  });
+});
+
+/* ---- Selection ---- */
+
+function select(index: number, { announce = false } = {}) {
+  const normalized = normalizeIndex(index);
+  dragShift.value = 0;
+  if (normalized === selectedIndex.value) return;
+  selectedIndex.value = normalized;
+  emit('selected', activeCatalog.value[normalized]);
+  if (announce) announcement.value = `${nameOf(activeCatalog.value[normalized])}. ${positionLabel()}`;
+  if (railLayout.value) scrollRailTo(normalized);
+  // Roving tabindex: keep focus on the checked radio after a drag or wheel turn.
+  if (deckRef.value?.contains(document.activeElement)) focusCard(normalized);
 }
 
-function refreshScrollTravel() {
-  if (!sectionRef.value) return;
-  scrollTravel = Math.max(1, sectionRef.value.offsetHeight - window.innerHeight);
+function focusCard(index: number) {
+  void nextTick(() => deckRef.value?.querySelector<HTMLElement>(`[data-index="${index}"]`)?.focus({ preventScroll: true }));
 }
 
-function scheduleScrollMeasure() {
-  if (!scrollFrame) scrollFrame = requestAnimationFrame(measureScroll);
-}
-
-function animateOrbit() {
-  const delta = targetRotation.value - rotation.value;
-  velocity.value = velocity.value * .78 + delta * .095;
-  rotation.value += velocity.value;
-  if (Math.abs(delta) < .002 && Math.abs(velocity.value) < .002) {
-    rotation.value = targetRotation.value;
-    velocity.value = 0;
-    animationFrame = 0;
-    return;
-  }
-  animationFrame = requestAnimationFrame(animateOrbit);
-}
-
-function startOrbitAnimation() {
-  if (reducedMotion.value) {
-    rotation.value = targetRotation.value;
-    return;
-  }
-  if (!animationFrame && inView.value) animationFrame = requestAnimationFrame(animateOrbit);
+function step(direction: number) {
+  select(selectedIndex.value + direction, { announce: true });
 }
 
 function setKind(kind: ProgressionKind) {
   if (kind === activeKind.value) return;
-  warmCatalog(kind);
   activeKind.value = kind;
   selectedIndex.value = 0;
-  rotation.value = 0;
-  targetRotation.value = 0;
-  userChose = true;
-  requestAnimationFrame(() => mobileRailRef.value?.scrollTo({ left: 0, behavior: reducedMotion.value ? 'auto' : 'smooth' }));
-  const entry = activeCatalog.value[0];
-  if (entry) emit('selected', entry);
+  dragShift.value = 0;
+  emit('selected', activeCatalog.value[0]);
+  if (railLayout.value) void nextTick(() => scrollRailTo(0, 'auto'));
 }
 
 /** Tabs pattern: arrows/Home/End move focus and activate (automatic activation). */
-function onTabKeydown(event: KeyboardEvent, suffix: string) {
+function onTabKeydown(event: KeyboardEvent) {
   const ids = catalogOptions.value.map((option) => option.id);
   const current = ids.indexOf(activeKind.value);
   const target = { ArrowLeft: current - 1, ArrowRight: current + 1, Home: 0, End: ids.length - 1 }[event.key];
@@ -434,26 +373,11 @@ function onTabKeydown(event: KeyboardEvent, suffix: string) {
   event.preventDefault();
   const kind = ids[normalizeIndex(target, ids.length)];
   setKind(kind);
-  void nextTick(() => document.getElementById(`${kind}${suffix}-tab`)?.focus());
+  void nextTick(() => document.getElementById(`${kind}-tab`)?.focus());
 }
 
-function snapTo(index: number) {
-  if (!activeCatalog.value.length) return;
-  const normalized = normalizeIndex(index);
-  const current = Math.round(rotation.value);
-  targetRotation.value = current + signedWrap(normalized - normalizeIndex(current), activeCatalog.value.length);
-  selectedIndex.value = normalized;
-  userChose = true;
-  emit('selected', activeCatalog.value[normalized]);
-  startOrbitAnimation();
-}
-
-function previous() { if (interactionReady.value) snapTo(selectedIndex.value - 1); }
-function next() { if (interactionReady.value) snapTo(selectedIndex.value + 1); }
-
-/** Radio-group keys: arrows turn the orbit and keep focus on the chosen seal. */
-function onRingKeydown(event: KeyboardEvent) {
-  if (!interactionReady.value) return;
+/** Radio-group keys with roving tabindex; Enter and Space reach onCardClick natively. */
+function onDeckKeydown(event: KeyboardEvent) {
   const length = activeCatalog.value.length;
   const target = {
     ArrowLeft: selectedIndex.value - 1, ArrowUp: selectedIndex.value - 1,
@@ -462,139 +386,140 @@ function onRingKeydown(event: KeyboardEvent) {
   }[event.key];
   if (target === undefined) return;
   event.preventDefault();
-  snapTo(target);
-  void nextTick(() => orbitStageRef.value?.querySelector<HTMLElement>(`[data-index="${selectedIndex.value}"]`)?.focus());
+  select(target);
+  focusCard(selectedIndex.value);
 }
 
-/** A click on a seal selects it; a click on the selected seal opens its dossier. */
-function chooseToken(index: number, event: Event) {
-  if (interactionReady.value && index !== selectedIndex.value) {
-    snapTo(index);
+/** A click on a card draws it; a click on the drawn card opens its dossier. */
+function onCardClick(index: number, event: Event) {
+  if (index !== selectedIndex.value) {
+    select(index);
     return;
-  }
-  openEntry(index, event);
-}
-
-function openEntry(index: number, event: Event) {
-  if (index !== selectedIndex.value || !userChose) {
-    selectedIndex.value = index;
-    userChose = true;
-    // The assembling layout is driven only by scroll, so it is not rotated.
-    if (interactionReady.value) snapTo(index);
-    else emit('selected', activeCatalog.value[index]);
   }
   void openDetails(event);
 }
 
-function warmCatalog(kind: ProgressionKind) {
-  if (kind === activeKind.value || warmedCatalogs.has(kind)) return;
-  warmedCatalogs.add(kind);
-  catalogWarmTimer = window.setTimeout(() => {
-    (kind === 'pathway' ? standardPathways : boonPathways).forEach((entry) => warmImage(entry.thumbnail));
-  }, 180);
+/* ---- Drag and sideways wheel (fan layout only) ---- */
+
+const DRAG_THRESHOLD = 6;
+let pointer: { id: number; startX: number; lastX: number; lastTime: number; velocity: number; moved: boolean } | null = null;
+let suppressClick = false;
+let dragFrame = 0;
+let pendingShift = 0;
+
+/** Pixels of pointer travel per card: the spacing at the middle of the fan. */
+const cardSpacing = () => Math.max(60, stage.value.width * .92 * Math.sin(ARC_STEP) + stage.value.cardWidth * .15);
+
+function onPointerDown(event: PointerEvent) {
+  suppressClick = false;
+  if (railLayout.value || event.button !== 0 || !dealt.value) return;
+  pointer = { id: event.pointerId, startX: event.clientX, lastX: event.clientX, lastTime: performance.now(), velocity: 0, moved: false };
 }
 
-function warmImage(src: string) {
-  const image = new Image();
-  image.decoding = 'async';
-  image.src = src;
-  catalogImageWarmers.push(image);
-}
-
-function warmNative(index: number) {
-  const entry = activeCatalog.value[normalizeIndex(index)];
-  if (!entry || warmedNatives.has(entry.id)) return;
-  warmedNatives.add(entry.id);
-  warmImage(entry.image);
-}
-
-function warmOpeningSymbols() {
-  if (openingSymbolsWarmed) return;
-  openingSymbolsWarmed = true;
-  openingSymbolWarmTimer = window.setTimeout(() => {
-    standardPathways.slice(0, lowPower.value ? 3 : 8).forEach((entry) => warmImage(entry.thumbnail));
-    warmImage(standardPathways[0].image);
-  }, 0);
-}
-
-function startDrag(event: PointerEvent) {
-  if (!interactionReady.value || event.button !== 0 || (event.target as HTMLElement).closest('button, a')) return;
-  dragging.value = true;
-  lastPointerX = event.clientX;
-  lastPointerTime = performance.now();
-  orbitStageRef.value?.setPointerCapture(event.pointerId);
-}
-
-function movePointer(event: PointerEvent) {
-  if (!dragging.value || event.pointerType === 'touch') return;
-  const now = performance.now();
-  // Move the orbit with the pointer so the symbol field feels pulled,
-  // rather than pushed away from the drag direction.
-  const delta = (event.clientX - lastPointerX) / 92;
-  rotation.value += delta;
-  targetRotation.value = rotation.value;
-  velocity.value = delta / Math.max(8, now - lastPointerTime) * 16;
-  lastPointerX = event.clientX;
-  lastPointerTime = now;
-}
-
-function endDrag(event: PointerEvent) {
-  if (!dragging.value) return;
-  dragging.value = false;
-  if (orbitStageRef.value?.hasPointerCapture(event.pointerId)) orbitStageRef.value.releasePointerCapture(event.pointerId);
-  rotation.value += velocity.value * 8;
-  const index = normalizeIndex(Math.round(rotation.value));
-  targetRotation.value = Math.round(rotation.value);
-  if (index !== selectedIndex.value) {
-    selectedIndex.value = index;
-    userChose = true;
-    emit('selected', activeCatalog.value[index]);
+function onPointerMove(event: PointerEvent) {
+  if (!pointer || event.pointerId !== pointer.id) return;
+  const travel = event.clientX - pointer.startX;
+  if (!pointer.moved) {
+    if (Math.abs(travel) < DRAG_THRESHOLD) return;
+    pointer.moved = true;
+    dragging.value = true;
+    stageRef.value?.setPointerCapture(event.pointerId);
   }
-  startOrbitAnimation();
+  const now = performance.now();
+  const sample = (event.clientX - pointer.lastX) / Math.max(1, now - pointer.lastTime);
+  pointer.velocity = pointer.velocity * .6 + sample * .4;
+  pointer.lastX = event.clientX;
+  pointer.lastTime = now;
+  // Pull the fan with the pointer; coalesce to one style pass per frame.
+  pendingShift = -travel / cardSpacing();
+  if (!dragFrame) dragFrame = requestAnimationFrame(() => { dragFrame = 0; dragShift.value = pendingShift; });
 }
 
-function handleMobileScroll() {
-  window.clearTimeout(mobileScrollTimer);
-  mobileScrollTimer = window.setTimeout(() => {
-    const rail = mobileRailRef.value;
+function onPointerUp(event: PointerEvent) {
+  if (!pointer || event.pointerId !== pointer.id) return;
+  const { moved, velocity } = pointer;
+  pointer = null;
+  if (!moved) return;
+  if (dragFrame) { cancelAnimationFrame(dragFrame); dragFrame = 0; }
+  if (stageRef.value?.hasPointerCapture(event.pointerId)) stageRef.value.releasePointerCapture(event.pointerId);
+  suppressClick = true;
+  dragging.value = false;
+  // A flick carries on a little; the projection is capped so it never spins.
+  const fling = clamp(-velocity * 180 / cardSpacing(), -3, 3);
+  const target = Math.round(selectedIndex.value + pendingShift + fling);
+  pendingShift = 0;
+  if (normalizeIndex(target) === selectedIndex.value) dragShift.value = 0;
+  else select(target, { announce: true });
+}
+
+/** The click that ends a drag must not also draw or open a card. */
+function swallowDragClick(event: MouseEvent) {
+  if (!suppressClick) return;
+  suppressClick = false;
+  event.stopPropagation();
+  event.preventDefault();
+}
+
+let wheelTravel = 0;
+let wheelLast = 0;
+/** Horizontal wheel (trackpads, Shift+wheel) turns the spread; vertical scrolling is never captured. */
+function onWheel(event: WheelEvent) {
+  if (railLayout.value || !dealt.value) return;
+  const sideways = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.shiftKey ? event.deltaY : 0;
+  if (!sideways) return;
+  event.preventDefault();
+  wheelTravel += sideways;
+  const now = performance.now();
+  if (Math.abs(wheelTravel) < 40 || now - wheelLast < 140) return;
+  wheelLast = now;
+  step(Math.sign(wheelTravel));
+  wheelTravel = 0;
+}
+
+/* ---- Mobile rail: a native snap row; the card in the middle is the draw ---- */
+
+let railTimer = 0;
+
+function onRailScroll() {
+  if (!railLayout.value) return;
+  window.clearTimeout(railTimer);
+  railTimer = window.setTimeout(() => {
+    const rail = deckRef.value;
     if (!rail) return;
-    const cards = [...rail.querySelectorAll<HTMLElement>('[data-mobile-index]')];
     const center = rail.scrollLeft + rail.clientWidth / 2;
     let nearest = 0;
-    let distance = Number.POSITIVE_INFINITY;
-    cards.forEach((card, index) => {
-      const nextDistance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
-      if (nextDistance < distance) { distance = nextDistance; nearest = index; }
+    let best = Number.POSITIVE_INFINITY;
+    rail.querySelectorAll<HTMLElement>('[data-index]').forEach((card, index) => {
+      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (distance < best) { best = distance; nearest = index; }
     });
     if (nearest !== selectedIndex.value) {
       selectedIndex.value = nearest;
-      rotation.value = nearest;
-      targetRotation.value = nearest;
-      userChose = true;
       emit('selected', activeCatalog.value[nearest]);
+      announcement.value = `${nameOf(activeCatalog.value[nearest])}. ${positionLabel()}`;
     }
   }, 90);
 }
 
-function scrollMobileTo(index: number) {
-  const normalized = normalizeIndex(index);
-  const rail = mobileRailRef.value;
-  const card = rail?.querySelector<HTMLElement>(`[data-mobile-index="${normalized}"]`);
-  selectedIndex.value = normalized;
+function scrollRailTo(index: number, behavior: ScrollBehavior = reducedMotion.value ? 'auto' : 'smooth') {
+  const rail = deckRef.value;
+  const card = rail?.querySelector<HTMLElement>(`[data-index="${index}"]`);
   if (!rail || !card) return;
-  const left = Math.max(0, card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2);
-  rail.scrollTo({ left, behavior: reducedMotion.value ? 'auto' : 'smooth' });
+  rail.scrollTo({ left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2, behavior });
 }
-function previousMobile() { scrollMobileTo(selectedIndex.value - 1); }
-function nextMobile() { scrollMobileTo(selectedIndex.value + 1); }
+
+/* ---- Dossier ---- */
+
+let dossierTrigger: HTMLElement | null = null;
+let previousBodyOverflow = '';
+let previousBodyPaddingRight = '';
 
 function onWindowKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') { event.preventDefault(); void closeDetails(); }
 }
 
 async function openDetails(event?: Event) {
-  orbitStateBeforeDossier = { rotation: rotation.value, targetRotation: targetRotation.value, velocity: velocity.value };
-  if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
+  if (detailsOpen.value) return;
   dossierTrigger = event?.currentTarget as HTMLElement | null;
   previousBodyOverflow = document.body.style.overflow;
   previousBodyPaddingRight = document.body.style.paddingRight;
@@ -608,26 +533,21 @@ async function openDetails(event?: Event) {
   dossierCloseRef.value?.focus();
 }
 
-async function closeDetails(restoreFocus = true) {
-  if (!detailsOpen.value) return;
-  detailsOpen.value = false;
+function releaseBody() {
   window.removeEventListener('keydown', onWindowKeydown);
   document.body.style.overflow = previousBodyOverflow;
   document.body.style.paddingRight = previousBodyPaddingRight;
   document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
-  if (orbitStateBeforeDossier) {
-    rotation.value = orbitStateBeforeDossier.rotation;
-    targetRotation.value = orbitStateBeforeDossier.targetRotation;
-    velocity.value = orbitStateBeforeDossier.velocity;
-    orbitStateBeforeDossier = null;
-    startOrbitAnimation();
-  }
+}
+
+async function closeDetails(restoreFocus = true) {
+  if (!detailsOpen.value) return;
+  detailsOpen.value = false;
+  releaseBody();
   await nextTick();
-  // The trigger may have been the centre story, which is not focusable; fall
-  // back to the selected seal so focus never drops to <body>.
-  const fallback = orbitStageRef.value?.querySelector<HTMLElement>(`[data-index="${selectedIndex.value}"]`);
-  const target = dossierTrigger?.isConnected && dossierTrigger.tabIndex >= 0 ? dossierTrigger : fallback;
-  if (restoreFocus) target?.focus();
+  const fallback = deckRef.value?.querySelector<HTMLElement>(`[data-index="${selectedIndex.value}"]`);
+  const target = dossierTrigger?.isConnected ? dossierTrigger : fallback;
+  if (restoreFocus) target?.focus({ preventScroll: true });
   dossierTrigger = null;
 }
 
@@ -641,250 +561,754 @@ function trapDossierFocus(event: KeyboardEvent) {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 }
 
-const fallbackImage = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><circle cx="48" cy="48" r="39" fill="none" stroke="#c69b52" stroke-width="2"/><path d="M48 20 58 39l20 9-20 9-10 19-10-19-20-9 20-9Z" fill="#c69b52" opacity=".8"/></svg>')}`;
+/* ---- Images ---- */
+
+const warmedNatives = new Set<string>();
+const imageWarmers: HTMLImageElement[] = [];
+function warmNative(entry: HomePathway) {
+  if (warmedNatives.has(entry.image)) return;
+  warmedNatives.add(entry.image);
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = entry.image;
+  imageWarmers.push(image);
+}
+
+const fallbackImage = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><circle cx="48" cy="48" r="39" fill="none" stroke="#a7acb5" stroke-width="2"/><path d="M48 20 58 39l20 9-20 9-10 19-10-19-20-9 20-9Z" fill="#a7acb5" opacity=".6"/></svg>')}`;
 function replaceBrokenImage(event: Event) {
   const image = event.currentTarget as HTMLImageElement;
   if (image.src !== fallbackImage) image.src = fallbackImage;
 }
 
-function syncCompactLayout(event?: MediaQueryListEvent) {
-  compactLayout.value = event?.matches ?? compactMedia?.matches ?? false;
-  refreshScrollTravel();
+/* ---- Lifecycle ---- */
+
+let railMedia: MediaQueryList | null = null;
+let stageObserver: ResizeObserver | null = null;
+let sectionObserver: IntersectionObserver | null = null;
+let dealTimer = 0;
+
+function measureStage() {
+  const element = stageRef.value;
+  if (!element) return;
+  const card = element.querySelector<HTMLElement>('.tarot');
+  const next = { width: element.clientWidth, cardWidth: card?.offsetWidth ?? 0 };
+  if (next.width !== stage.value.width || next.cardWidth !== stage.value.cardWidth) stage.value = next;
 }
 
-function measureStage(element: Element) {
-  const { width, height } = element.getBoundingClientRect();
-  if (width !== stageSize.value.width || height !== stageSize.value.height) stageSize.value = { width, height };
+function syncLayout() {
+  railLayout.value = railMedia?.matches ?? false;
+  dragShift.value = 0;
+  void nextTick(() => {
+    measureStage();
+    if (railLayout.value) scrollRailTo(selectedIndex.value, 'auto');
+  });
 }
 
-watch(orbitStageRef, (stage) => {
-  stageObserver?.disconnect();
-  if (!stage) return;
-  measureStage(stage);
-  stageObserver ??= new ResizeObserver(([entry]) => measureStage(entry.target));
-  stageObserver.observe(stage);
-});
+/** Deal the spread once, the first time the table comes into view. */
+function deal() {
+  if (dealt.value) return;
+  dealt.value = true;
+  if (reducedMotion.value || railLayout.value) return;
+  dealing.value = true;
+  dealTimer = window.setTimeout(() => { dealing.value = false; }, 1400);
+}
 
-watch(interactionReady, (ready) => {
-  if (!ready) return;
-  if (!userChose) selectedIndex.value = assemblyIndex.value;
-  rotation.value = selectedIndex.value;
-  targetRotation.value = selectedIndex.value;
-});
-
-watch([selectedIndex, activeKind], () => {
-  warmNative(selectedIndex.value);
-  warmNative(selectedIndex.value + 1);
-});
+watch(selectedEntry, (entry) => { if (dealt.value) warmNative(entry); });
 
 onMounted(() => {
-  const browserHints = navigator as Navigator & {
-    deviceMemory?: number;
-    connection?: { saveData?: boolean };
-  };
+  const hints = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
   lowPower.value = Boolean(
-    browserHints.connection?.saveData
-    || (browserHints.deviceMemory !== undefined && browserHints.deviceMemory <= 4)
+    hints.connection?.saveData
+    || (hints.deviceMemory !== undefined && hints.deviceMemory <= 4)
     || navigator.hardwareConcurrency <= 4,
   );
-  compactMedia = window.matchMedia('(max-width: 1050px), (max-height: 720px)');
-  syncCompactLayout();
-  compactMedia.addEventListener('change', syncCompactLayout);
+  railMedia = window.matchMedia('(max-width: 899px)');
+  railMedia.addEventListener('change', syncLayout);
+  syncLayout();
+
+  stageObserver = new ResizeObserver(measureStage);
+  if (stageRef.value) stageObserver.observe(stageRef.value);
+  stageRef.value?.addEventListener('wheel', onWheel, { passive: false });
+
+  if (reducedMotion.value) deal();
   sectionObserver = new IntersectionObserver(([entry]) => {
-    inView.value = entry.isIntersecting;
-    if (entry.isIntersecting) {
-      warmOpeningSymbols();
-      scheduleScrollMeasure();
-    }
-    else if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
-    if (!entry.isIntersecting && detailsOpen.value) void closeDetails(false);
-  }, { rootMargin: '60% 0px' });
-  if (sectionRef.value) sectionObserver.observe(sectionRef.value);
-  window.addEventListener('scroll', scheduleScrollMeasure, { passive: true });
-  window.addEventListener('resize', refreshScrollTravel, { passive: true });
-  window.addEventListener('resize', scheduleScrollMeasure, { passive: true });
-  scheduleScrollMeasure();
+    if (!entry.isIntersecting) return;
+    deal();
+    sectionObserver?.disconnect();
+  }, { threshold: .18 });
+  if (stageRef.value) sectionObserver.observe(stageRef.value);
 });
 
 onUnmounted(() => {
-  compactMedia?.removeEventListener('change', syncCompactLayout);
-  sectionObserver?.disconnect();
+  railMedia?.removeEventListener('change', syncLayout);
   stageObserver?.disconnect();
-  window.removeEventListener('scroll', scheduleScrollMeasure);
-  window.removeEventListener('resize', refreshScrollTravel);
-  window.removeEventListener('resize', scheduleScrollMeasure);
-  window.removeEventListener('keydown', onWindowKeydown);
-  if (animationFrame) cancelAnimationFrame(animationFrame);
-  if (scrollFrame) cancelAnimationFrame(scrollFrame);
-  window.clearTimeout(mobileScrollTimer);
-  window.clearTimeout(catalogWarmTimer);
-  window.clearTimeout(openingSymbolWarmTimer);
-  if (detailsOpen.value) {
-    document.body.style.overflow = previousBodyOverflow;
-    document.body.style.paddingRight = previousBodyPaddingRight;
-    document.querySelector<HTMLElement>('#app')?.removeAttribute('inert');
-  }
+  sectionObserver?.disconnect();
+  stageRef.value?.removeEventListener('wheel', onWheel);
+  if (dragFrame) cancelAnimationFrame(dragFrame);
+  window.clearTimeout(railTimer);
+  window.clearTimeout(dealTimer);
+  if (detailsOpen.value) releaseBody();
 });
 </script>
 
 <style scoped>
-.pathway-vault {
-  --path-accent: var(--primary, #7458e8);
-  --path-ink: var(--ink, #221c14);
-  --path-surface: var(--surface, #fff);
-  --path-haze: #efecfa;
-  --motif-accent: var(--path-accent);
-  --scene-top: calc(var(--home-header-height, 72px) + clamp(18px, 3.4vh, 40px));
+.fog-table {
+  --card-w: clamp(118px, 9.4vw, 150px);
+  --card-h: calc(var(--card-w) * 1.7);
   position: relative;
-  min-height: 210svh;
-  color: var(--path-ink);
-  background-color: transparent;
-}
-
-.ambient-field { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
-.ambient-field__haze {
-  position: sticky; top: 0; display: block; height: 100svh;
+  padding: clamp(72px, 9vh, 104px) 0 clamp(56px, 7vh, 88px);
+  overflow: clip;
+  color: var(--bone);
   background:
-    radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 48%, transparent), transparent 35%),
-    radial-gradient(circle at 15% 70%, color-mix(in srgb, var(--champagne, #c8943f) 18%, transparent), transparent 30%),
-    radial-gradient(circle at 88% 25%, color-mix(in srgb, var(--path-accent) 15%, transparent), transparent 26%);
+    radial-gradient(ellipse 60% 46% at 50% 58%, rgba(30, 34, 43, .7), transparent 72%),
+    var(--fog-0);
+  isolation: isolate;
 }
-.is-low-power .ambient-field__haze { background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--path-haze) 38%, transparent), transparent 42%); }
 
-.desktop-experience { height: 210svh; }
-.sticky-scene { position: sticky; top: 0; height: 100svh; min-height: 700px; overflow: clip; }
-.vault-heading { position: absolute; z-index: 90; top: var(--scene-top); left: var(--home-rail-inset, clamp(20px, 4vw, 56px)); width: min(440px, 31vw); pointer-events: none; }
-/* Seals pass behind the heading; a paper halo keeps it from reading as a collision. */
-.vault-heading::before { content: ""; position: absolute; z-index: -1; inset: -64px -90px -110px -160px; background: radial-gradient(closest-side, color-mix(in srgb, var(--journey-mid, #f5eee1) 94%, transparent) 72%, transparent); }
-.vault-heading > p, .mobile-heading > p { margin: 0 0 14px; color: var(--path-accent); font: 800 .75rem/1 var(--font-body, Manrope, sans-serif); letter-spacing: .16em; text-transform: uppercase; }
-.vault-heading h2, .mobile-heading h2 { margin: 0; font: 700 clamp(2.6rem, 4.6vw, 5rem)/.92 var(--font-display, "IBM Plex Sans Condensed", sans-serif); letter-spacing: -.028em; text-wrap: balance; overflow-wrap: anywhere; }
-.vault-heading h2 em, .mobile-heading h2 em { color: var(--path-accent); font-style: normal; }
-.vault-heading > span { display: block; max-width: 340px; margin-top: 20px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font-size: .875rem; font-weight: 500; line-height: 1.6; }
+/* ---- Fog: two slow banks, transform-only ---- */
+.fog-table__fog {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  pointer-events: none;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+}
 
-.catalog-tabs { position: absolute; z-index: 100; top: var(--scene-top); right: var(--home-rail-inset, clamp(20px, 4vw, 56px)); display: flex; min-height: 48px; padding: 4px; border: 1px solid color-mix(in srgb, var(--path-ink) 18%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--path-surface) 82%, transparent); backdrop-filter: blur(16px); }
-.catalog-tabs button { min-width: 124px; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 10px; border: 0; border-radius: 999px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); background: transparent; cursor: pointer; font: 700 .8rem/1 var(--font-body, Manrope, sans-serif); transition: background-color .2s, color .2s; }
-.catalog-tabs button:hover { color: var(--path-ink); background: var(--primary-tint, rgba(116, 88, 232, .12)); }
-.catalog-tabs button b { min-width: 24px; height: 24px; display: grid; place-items: center; border-radius: 99px; color: currentColor; background: color-mix(in srgb, var(--path-ink) 9%, transparent); font: 700 .7rem/1 var(--font-body, Manrope, sans-serif); }
-.catalog-tabs button[aria-selected="true"] { color: #fff; background: var(--path-accent); }
-.catalog-tabs button[aria-selected="true"] b { background: rgba(255, 255, 255, .22); }
+.fog-table__fog--far {
+  z-index: -1;
+  top: 18%;
+  height: 60%;
+  background-image:
+    radial-gradient(ellipse 14% 30% at 16% 55%, rgba(176, 184, 196, .1), transparent 70%),
+    radial-gradient(ellipse 16% 26% at 48% 38%, rgba(176, 184, 196, .08), transparent 70%),
+    radial-gradient(ellipse 14% 32% at 82% 60%, rgba(176, 184, 196, .1), transparent 70%);
+  animation: table-fog 90s linear infinite;
+}
 
-.orbit-stage { position: absolute; z-index: 10; inset: 0; cursor: grab; touch-action: pan-y; user-select: none; contain: layout paint; }
-.orbit-stage:active { cursor: grabbing; }
-.orbit-ring { position: absolute; inset: 0; pointer-events: none; }
-.orbit-token { position: absolute; top: 0; left: 0; width: 116px; display: grid; justify-items: center; align-content: start; gap: 6px; padding: 4px; border: 0; color: var(--path-ink); background: transparent; cursor: pointer; will-change: transform, opacity; }
-.pathway-vault:not(.is-interactive) .orbit-token { transition: transform .08s cubic-bezier(.22, 1, .36, 1), opacity .06s linear; }
-.orbit-token:hover, .orbit-token:focus-visible, .orbit-token.is-selected { z-index: 75 !important; }
-.orbit-token:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 18px; }
-.token-seal { position: relative; width: 66px; height: 66px; display: grid; place-items: center; border: 1px solid var(--hairline); border-radius: 50%; background: var(--surface, #fff); box-shadow: 0 10px 22px rgba(34,28,20,.12); transform: scale(var(--seal-scale, 1)); transition: transform .16s ease-out, border-color .16s, box-shadow .16s; }
-.token-seal img { width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(34,28,20,.2)); }
-/* Hover only previews: a lift on the seal. The centre keeps the committed choice. */
-.orbit-token:hover .token-seal, .orbit-token:focus-visible .token-seal { border-color: color-mix(in srgb, var(--primary) 55%, var(--hairline)); transform: scale(calc(var(--seal-scale, 1) * 1.1)); }
-.orbit-token.is-selected .token-seal { border: 2px solid var(--primary); box-shadow: 0 0 0 6px var(--primary-tint, rgba(116,88,232,.12)), 0 14px 28px rgba(34,28,20,.16); transform: scale(calc(var(--seal-scale, 1) * 1.16)); }
-.orbit-token > strong { max-width: 116px; color: color-mix(in srgb, var(--path-ink) 82%, transparent); font: 700 .8rem/1.2 var(--font-body, Manrope, sans-serif); text-wrap: balance; }
-.orbit-token.is-behind > strong { color: var(--ink-muted); }
-.orbit-token:hover > strong, .orbit-token:focus-visible > strong { color: var(--path-ink); }
-.orbit-token.is-selected > strong { color: var(--primary-deep, #5c42d0); }
-.is-low-power .token-seal { box-shadow: none; }
-.is-low-power .token-seal img, .is-low-power .motif-stage img { filter: none; }
+/* In front of the outer cards, so the ends of the spread sink into fog.
+   Every bank ends inside its tile, or the repeat shows a seam. */
+.fog-table__fog--near {
+  z-index: 120;
+  bottom: -14%;
+  height: 52%;
+  background-image:
+    radial-gradient(ellipse 15% 38% at 16% 58%, rgba(200, 206, 214, .2), transparent 72%),
+    radial-gradient(ellipse 12% 26% at 50% 70%, rgba(200, 206, 214, .1), transparent 72%),
+    radial-gradient(ellipse 15% 40% at 84% 56%, rgba(200, 206, 214, .2), transparent 72%);
+  animation: table-fog 60s linear infinite reverse;
+}
 
-.orbit-story { position: absolute; z-index: 42; left: 50%; top: 47%; width: min(520px, 40vw); color: inherit; transform: translate(-50%, -50%); text-align: center; cursor: pointer; }
-.orbit-story-enter-active { transition: opacity .34s ease-out, transform .52s cubic-bezier(.22, 1, .36, 1); }
-.orbit-story-enter-from { opacity: 0; transform: translate(-50%, -34%) scale(.92); }
-.orbit-story-leave-active { transition: opacity .24s ease-in, transform .34s cubic-bezier(.4, 0, 1, 1); }
-.orbit-story-leave-to { opacity: 0; transform: translate(-50%, -58%) scale(.96); }
-.motif-stage { position: relative; width: clamp(132px, 13vw, 184px); aspect-ratio: 1; display: grid; place-items: center; margin: 0 auto 13px; }
-.motif-stage::before { content: ""; position: absolute; inset: 4%; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; box-shadow: 0 0 60px color-mix(in srgb, var(--path-haze) 46%, transparent); }
-.motif-stage img { position: relative; z-index: 4; width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(34,28,20,.24)); }
-.orbit-story h3 { margin: 0; max-width: 100%; font: 700 clamp(2.15rem, 3.35vw, 3.8rem)/.98 var(--font-display, "IBM Plex Sans Condensed", sans-serif); letter-spacing: -.028em; overflow-wrap: anywhere; }
-.entry-kind { display: block; margin-top: 10px; color: color-mix(in srgb, var(--path-ink) 78%, transparent); font: 800 .75rem/1.2 var(--font-body, Manrope, sans-serif); letter-spacing: .1em; text-transform: uppercase; }
-.orbit-story > small { display: block; max-width: 420px; margin: 12px auto 0; color: color-mix(in srgb, var(--path-ink) 78%, transparent); font-size: .875rem; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+@keyframes table-fog {
+  to { transform: translate3d(-25%, 0, 0); }
+}
 
-/* Each pathway draws its own figure behind the emblem, in its symbol color. */
-.motif-stage::after { content: ""; position: absolute; inset: 0; border: 1px dashed color-mix(in srgb, var(--motif-accent) 42%, transparent); border-radius: 50%; pointer-events: none; }
-.motif-chain .motif-stage::after { border-radius: 999px; transform: rotate(38deg) scale(.66, 1.2); }
-.motif-eclipse .motif-stage::after, .motif-moon .motif-stage::after { inset: 9% 25% 9% 3%; border-style: solid; box-shadow: 24px 0 0 -3px var(--path-surface); }
-.motif-bone .motif-stage::after, .motif-sword .motif-stage::after, .motif-blade .motif-stage::after { inset: 4% 47%; border-radius: 999px; transform: rotate(42deg); border-style: solid; }
-.motif-door .motif-stage::after, .motif-pages .motif-stage::after, .motif-canvas .motif-stage::after { inset: 7% 24%; border-radius: 50% 50% 4% 4%; border-style: solid; }
-.motif-crown .motif-stage::after, .motif-sun .motif-stage::after, .motif-star .motif-stage::after { inset: 2%; border-radius: 4%; transform: rotate(45deg) scale(.62); border-style: solid; }
-.motif-glitch .motif-stage::after, .motif-fracture .motif-stage::after { inset: 13% 4%; border-radius: 0; transform: skew(-22deg) rotate(-12deg); }
-.motif-cards .motif-stage::after, .motif-runes .motif-stage::after, .motif-sigil .motif-stage::after { inset: 9% 28%; border-radius: 8px; transform: rotate(27deg); border-style: solid; }
-.motif-wheel .motif-stage::after, .motif-gear .motif-stage::after, .motif-clock .motif-stage::after, .motif-ring .motif-stage::after { inset: 8%; border: 7px double color-mix(in srgb, var(--motif-accent) 40%, transparent); }
-.motif-cross .motif-stage::after, .motif-scales .motif-stage::after { inset: 10% 48%; border-radius: 0; border-style: solid; }
-.motif-vine .motif-stage::after, .motif-plague .motif-stage::after { inset: 4% 35% 4% 15%; border-radius: 60% 10% 60% 10%; transform: rotate(32deg); border-style: solid; }
-.motif-flame .motif-stage::after, .motif-maw .motif-stage::after { inset: 7% 28% 12%; border-radius: 70% 25% 65% 35%; transform: rotate(45deg); border-style: solid; }
-.motif-storm .motif-stage::after, .motif-mist .motif-stage::after { inset: 34% -3%; transform: skew(-18deg); border-style: solid; }
-.motif-eye .motif-stage::after { inset: 24% 3%; border-radius: 70% 10% 70% 10%; transform: rotate(45deg); border-style: solid; }
-.motif-coin .motif-stage::after { inset: 11%; transform: rotate(28deg); border: 5px double color-mix(in srgb, var(--motif-accent) 44%, transparent); }
+/* ---- Heading ---- */
+.table-head {
+  width: min(100% - var(--home-content-gutter, 20px) * 2, 1280px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 24px 64px;
+}
 
-.orbit-controls { position: absolute; z-index: 86; left: var(--home-rail-inset, clamp(20px, 4vw, 56px)); bottom: clamp(32px, 5vh, 64px); display: grid; grid-template-columns: 48px auto 48px; align-items: center; gap: 12px; }
-.orbit-controls p { grid-column: 1 / -1; margin: 0; color: var(--ink-muted); font: 600 .75rem/1.3 var(--font-body, Manrope, sans-serif); }
-.orbit-controls button, .mobile-pagination button { width: 48px; height: 48px; border: 1px solid color-mix(in srgb, var(--path-ink) 25%, transparent); border-radius: 50%; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 76%, transparent); cursor: pointer; font-size: 1rem; transition: background-color .2s, color .2s, border-color .2s; }
-.orbit-controls button:hover, .mobile-pagination button:hover { border-color: var(--primary); color: #fff; background: var(--path-accent); }
-.orbit-controls > span, .mobile-pagination > span { min-width: 72px; color: var(--ink-muted); font: 600 .8rem/1 var(--font-body, Manrope, sans-serif); text-align: center; font-variant-numeric: tabular-nums; }
-.orbit-controls > span b, .mobile-pagination > span b { color: var(--path-accent); font-size: 1rem; }
-.orbit-ui-enter-active, .orbit-ui-leave-active { transition: opacity .45s, transform .45s cubic-bezier(.22,1,.36,1); }
-.orbit-ui-enter-from, .orbit-ui-leave-to { opacity: 0; transform: translateY(12px); }
-.open-dossier { position: absolute; z-index: 86; right: var(--home-rail-inset, clamp(20px, 4vw, 56px)); bottom: clamp(32px, 5vh, 64px); min-height: 48px; display: inline-flex; align-items: center; gap: 8px; padding: 0 20px; border: 1px solid color-mix(in srgb, var(--path-ink) 22%, transparent); border-radius: 999px; color: var(--path-ink); background: color-mix(in srgb, var(--path-surface) 76%, transparent); cursor: pointer; transition: background-color .25s, color .25s; font: 750 .8rem/1 var(--font-body, Manrope, sans-serif); white-space: nowrap; }
-.open-dossier:hover { color: #fff; background: var(--path-accent); }
+.table-head h2 {
+  margin: 18px 0 0;
+  font: 600 clamp(36px, 5vw, 72px)/1.02 var(--font-display);
+  text-wrap: balance;
+}
 
-.mobile-experience { display: none; }
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.table-head h2 em {
+  display: block;
+  color: var(--ash);
+  font-style: italic;
+  font-weight: 500;
+}
 
-.dossier-scrim { position: fixed; z-index: 2000; inset: 0; overflow: hidden; isolation: isolate; background: rgba(34, 28, 20, .32); backdrop-filter: blur(8px); }
-.pathway-dossier { --path-accent: #7458E8; position: fixed; top: clamp(12px, 3vw, 38px); right: clamp(12px, 3vw, 38px); bottom: clamp(12px, 3vw, 38px); width: min(490px, calc(100vw - 24px)); box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; overflow: auto; overscroll-behavior: contain; padding: clamp(28px, 4.4vw, 52px); border: 1px solid var(--hairline); border-radius: 28px; color: #221C14; background: #FFFFFF; box-shadow: 0 35px 100px rgba(34,28,20,.22); outline: 0; will-change: transform; }
-.dossier-close { position: absolute; z-index: 3; top: 18px; right: 18px; width: 48px; height: 48px; border: 1px solid var(--hairline); border-radius: 50%; color: #221C14; background: transparent; cursor: pointer; font-size: 1.5rem; }
-.dossier-close:hover { border-color: var(--primary); color: var(--primary-deep); }
-.dossier-symbol { position: relative; flex: none; width: 168px; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 32px; border: 1px solid color-mix(in srgb, var(--path-accent) 52%, transparent); border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--path-accent) 22%, transparent), transparent 68%); }
-.dossier-symbol img { width: 78%; height: 78%; object-fit: contain; }
-.pathway-dossier > p { margin: 0 0 12px; color: var(--path-accent); font: 800 .75rem/1 Manrope, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
-/* Two lines are reserved so short and long names leave the rest of the panel where it was. */
-.pathway-dossier h3 { display: flex; align-items: flex-end; min-height: 1.8em; margin: 0; font: 800 clamp(2.6rem, 4.4vw, 4rem)/.9 Manrope, sans-serif; letter-spacing: -.04em; text-wrap: balance; overflow-wrap: anywhere; }
-.pathway-dossier > strong { display: block; margin-top: 16px; color: var(--path-accent); font: 700 .875rem/1.3 Manrope, sans-serif; }
-.pathway-dossier > span { display: block; min-height: 3em; margin-top: 12px; color: var(--ink-muted); font-size: .9375rem; font-weight: 500; line-height: 1.55; }
-.pathway-dossier dl { align-self: stretch; margin: 28px 0; border-top: 1px solid var(--hairline); }
-.pathway-dossier dl div { display: grid; grid-template-columns: 120px 1fr; gap: 15px; padding: 16px 0; border-bottom: 1px solid var(--hairline); }
-.pathway-dossier dt { color: var(--ink-muted); font: 700 .75rem/1.4 Manrope, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
-.pathway-dossier dd { margin: 0; color: #221C14; font-size: .875rem; font-weight: 500; line-height: 1.5; }
-.pathway-dossier > a { align-self: stretch; min-height: 50px; display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding: 0 20px; border-radius: 999px; color: #fff; background: var(--path-accent); font-size: .875rem; font-weight: 800; text-decoration: none; transition: background-color .2s; }
-.pathway-dossier > a:hover { background: var(--primary-deep, #5c42d0); }
-.dossier-enter-active, .dossier-leave-active { transition: opacity .35s; }
-.dossier-enter-active .pathway-dossier, .dossier-leave-active .pathway-dossier { transition: transform .55s cubic-bezier(.22,1,.36,1); }
+.table-head__aside > p {
+  max-width: 460px;
+  margin: 0 0 22px;
+  color: var(--ash);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.deck-tabs {
+  width: fit-content;
+  display: flex;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(13, 15, 20, .7);
+}
+
+.deck-tabs button {
+  min-width: 128px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--ash);
+  background: transparent;
+  cursor: pointer;
+  font: 600 .9rem/1 var(--font-body);
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.deck-tabs button:hover { color: var(--bone); background: var(--fog-veil); }
+
+.deck-tabs button b {
+  min-width: 26px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 99px;
+  color: var(--ash);
+  background: rgba(214, 220, 228, .08);
+  font: 500 .72rem/1 var(--font-mono);
+}
+
+.deck-tabs button[aria-selected="true"] { color: var(--bone); background: var(--crimson); }
+.deck-tabs button[aria-selected="true"] b { color: var(--bone); background: rgba(7, 8, 11, .28); }
+
+/* ---- Stage ---- */
+.table-stage {
+  position: relative;
+  height: calc(var(--card-h) * 1.86 + 24px);
+  margin-top: clamp(8px, 2vh, 24px);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.table-stage.is-dragging { cursor: grabbing; }
+
+/* The ends of the spread fade into the dark at the sides of the room. */
+.table-stage::before,
+.table-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 125;
+  top: 0;
+  bottom: 0;
+  width: clamp(40px, 9vw, 160px);
+  pointer-events: none;
+}
+.table-stage::before { left: 0; background: linear-gradient(90deg, var(--fog-0), transparent); }
+.table-stage::after { right: 0; background: linear-gradient(270deg, var(--fog-0), transparent); }
+.is-rail .table-stage::before,
+.is-rail .table-stage::after { width: 28px; }
+
+/* The head of the long table: a tabletop seen from the chair, fading into fog. */
+.table-surface {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--card-h) * .78 + 70px);
+  width: min(1500px, 112%);
+  height: 70%;
+  transform: translateX(-50%);
+  border-top: 1px solid var(--line);
+  border-radius: 50% 50% 0 0 / 34% 34% 0 0;
+  background:
+    radial-gradient(ellipse 22% 34% at 50% 0%, rgba(179, 32, 43, .2), transparent 80%),
+    radial-gradient(ellipse 70% 90% at 50% 0%, rgba(30, 34, 43, .85), transparent 70%);
+  pointer-events: none;
+}
+
+.deck {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---- A tarot card ---- */
+.tarot {
+  --veil: .5;
+  position: absolute;
+  top: 70px;
+  left: 50%;
+  width: var(--card-w);
+  height: var(--card-h);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  color: var(--bone);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(169, 198, 214, .07), transparent 55%),
+    linear-gradient(180deg, #181b23, #0e1016);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .5);
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  transition: transform .62s var(--ease-out), opacity .45s ease, border-color .3s ease;
+}
+
+.is-dragging .tarot { transition: border-color .3s ease, opacity .2s ease; }
+.is-dealing .tarot { transition-delay: var(--deal-delay), var(--deal-delay), 0s; transition-duration: .9s, .6s, .3s; }
+
+/* Fog veil over cards that are not drawn. */
+.tarot::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(7, 8, 11, .55), rgba(13, 15, 20, .92));
+  opacity: var(--veil);
+  pointer-events: none;
+  transition: opacity .45s ease;
+}
+
+/* Crimson rim light on the drawn card. */
+.tarot::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 1px var(--crimson), 0 0 46px 4px rgba(179, 32, 43, .38), var(--shadow-deep);
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+
+.tarot.is-lit { border-color: var(--crimson); }
+.tarot.is-lit::before { opacity: 1; }
+.tarot.is-lit::after { opacity: 0; }
+
+.tarot:hover:not(.is-lit)::after { opacity: calc(var(--veil) * .55); }
+
+.tarot:focus-visible { outline: 2px solid var(--crimson-text); outline-offset: 5px; }
+
+.tarot__frame {
+  position: absolute;
+  inset: 6px;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  justify-items: center;
+  padding: 10px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Corner pips, as on a printed deck. */
+.tarot__frame::before,
+.tarot__frame::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border: 1px solid var(--line-strong);
+  transform: rotate(45deg);
+}
+.tarot__frame::before { top: 6px; left: 6px; }
+.tarot__frame::after { right: 6px; bottom: 6px; }
+
+.tarot__numeral {
+  color: var(--ash);
+  font: italic 600 1.75rem/1 var(--font-display);
+  font-variant-numeric: lining-nums;
+  letter-spacing: .04em;
+}
+
+.tarot.is-lit .tarot__numeral { color: var(--crimson-text); }
+
+.tarot__sigil {
+  align-self: center;
+  width: 76%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  transition: border-color .45s ease, box-shadow .45s ease;
+}
+
+.tarot__sigil img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  filter: grayscale(.9) brightness(.62);
+  transition: filter .45s ease;
+}
+
+/* Spirit vision: the drawn sigil takes its colour and a pale rim. */
+.tarot.is-lit .tarot__sigil {
+  border-color: rgba(169, 198, 214, .55);
+  box-shadow: 0 0 26px rgba(169, 198, 214, .16), inset 0 0 18px rgba(169, 198, 214, .1);
+}
+.tarot.is-lit .tarot__sigil img { filter: none; }
+
+.tarot__name {
+  max-width: 100%;
+  margin-top: 8px;
+  font: 600 .8rem/1.2 var(--font-body);
+  letter-spacing: .02em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.tarot__seq {
+  max-width: 100%;
+  margin-top: 3px;
+  color: var(--ash);
+  font: 500 .68rem/1.25 var(--font-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Controls ---- */
+.deck-controls {
+  position: relative;
+  z-index: 130;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: -18px;
+}
+
+.deck-controls p {
+  min-width: 260px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.deck-count {
+  color: var(--ash);
+  font: 500 .75rem/1 var(--font-mono);
+  letter-spacing: .14em;
+  font-variant-numeric: tabular-nums;
+}
+
+.deck-count b { color: var(--bone); font-weight: 500; }
+
+.deck-hint {
+  color: var(--ash-dim);
+  font-size: .8rem;
+  line-height: 1.3;
+}
+
+.deck-step {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--bone);
+  background: rgba(13, 15, 20, .8);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+
+.deck-step:hover { border-color: var(--bone); background: var(--fog-3); }
+
+/* ---- The reading: what the drawn card says ---- */
+.reading {
+  width: min(100% - var(--home-content-gutter, 20px) * 2, 1180px);
+  margin: clamp(28px, 4vh, 44px) auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 28px 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  animation: reading-in .6s var(--ease-out);
+}
+
+@keyframes reading-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+.reading h3 {
+  margin: 14px 0 0;
+  font: 600 clamp(36px, 3.6vw, 54px)/1 var(--font-display);
+  overflow-wrap: anywhere;
+}
+
+.reading__sequence {
+  margin: 10px 0 0;
+  color: var(--spirit);
+  font: 600 .92rem/1.4 var(--font-body);
+}
+
+.reading__tagline {
+  max-width: 440px;
+  margin: 8px 0 0;
+  color: var(--ash);
+  line-height: 1.6;
+}
+
+.reading__facts { display: grid; gap: 18px; margin: 4px 0 0; }
+
+.reading__facts dt {
+  margin-bottom: 8px;
+  color: var(--ash);
+  font: 500 .72rem/1 var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.reading__facts dd { margin: 0; }
+
+.reading__facts ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+
+.reading__facts li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.reading__facts li::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 1px;
+  transform: translateY(-4px);
+  background: var(--crimson-text);
+}
+
+.reading__counts { color: var(--spirit); font-weight: 600; }
+
+.reading__actions { display: grid; gap: 12px; padding-top: 4px; }
+.reading__actions .fog-button { text-decoration: none; white-space: nowrap; }
+
+/* ---- Dossier ---- */
+.dossier-scrim {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgba(7, 8, 11, .62);
+  backdrop-filter: blur(6px);
+}
+
+.pathway-dossier {
+  position: fixed;
+  top: clamp(12px, 3vw, 32px);
+  right: clamp(12px, 3vw, 32px);
+  bottom: clamp(12px, 3vw, 32px);
+  width: min(480px, calc(100vw - 24px));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(28px, 4vw, 48px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--bone);
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(179, 32, 43, .1), transparent 70%),
+    var(--fog-1);
+  box-shadow: var(--shadow-deep);
+  font-family: var(--font-body);
+  outline: 0;
+}
+
+.dossier-close {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--bone);
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.dossier-close:hover { border-color: var(--bone); background: var(--fog-veil); }
+.dossier-close:focus-visible,
+.pathway-dossier a:focus-visible { outline: 2px solid var(--crimson-text); outline-offset: 3px; }
+
+.dossier-card {
+  position: relative;
+  flex: none;
+  width: 150px;
+  aspect-ratio: 1 / 1.7;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  justify-items: center;
+  margin-bottom: 28px;
+  padding: 14px 10px;
+  border: 1px solid var(--crimson);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #181b23, #0e1016);
+  box-shadow: 0 0 46px 4px rgba(179, 32, 43, .3), var(--shadow-deep);
+}
+
+.dossier-card span {
+  color: var(--crimson-text);
+  font: italic 600 1.9rem/1 var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+
+.dossier-card img { align-self: center; width: 100%; height: auto; object-fit: contain; }
+
+.pathway-dossier h3 {
+  margin: 14px 0 0;
+  font: 600 clamp(40px, 4.4vw, 56px)/1 var(--font-display);
+  overflow-wrap: anywhere;
+}
+
+.pathway-dossier > strong { margin-top: 12px; color: var(--spirit); font-size: .95rem; font-weight: 600; }
+
+.pathway-dossier > span { margin-top: 10px; color: var(--ash); line-height: 1.6; }
+
+.pathway-dossier dl { align-self: stretch; margin: 26px 0; border-top: 1px solid var(--line); }
+
+.pathway-dossier dl div {
+  display: grid;
+  grid-template-columns: 128px 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.pathway-dossier dt {
+  color: var(--ash);
+  font: 500 .72rem/1.5 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.pathway-dossier dd { margin: 0; font-size: .92rem; font-weight: 600; line-height: 1.5; }
+
+.dossier-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--ash);
+  font: 500 .72rem/1 var(--font-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.dossier-kicker::before { content: ""; width: 18px; height: 1px; background: var(--crimson-text); }
+
+/* Same as .fog-button, which does not reach the teleported dialog. */
+.dossier-cta {
+  align-self: stretch;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding: 0 24px;
+  border-radius: 999px;
+  color: var(--bone);
+  background: var(--crimson);
+  font: 600 .95rem/1 var(--font-body);
+  text-decoration: none;
+  transition: background-color .2s ease;
+}
+
+.dossier-cta:hover { background: #c42633; }
+.dossier-cta:active { background: var(--crimson-deep); }
+
+.dossier-enter-active, .dossier-leave-active { transition: opacity .35s ease; }
+.dossier-enter-active .pathway-dossier, .dossier-leave-active .pathway-dossier { transition: transform .55s var(--ease-out); }
 .dossier-enter-from, .dossier-leave-to { opacity: 0; }
-.dossier-enter-from .pathway-dossier, .dossier-leave-to .pathway-dossier { transform: translateX(50px); }
+.dossier-enter-from .pathway-dossier, .dossier-leave-to .pathway-dossier { transform: translateX(48px); }
 
-button:focus-visible, a:focus-visible, .mobile-rail:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-
-@media (max-width: 1050px), (max-height: 720px), (prefers-reduced-motion: reduce) {
-  .pathway-vault { min-height: auto; padding: 100px 0 80px; overflow: clip; }
-  .desktop-experience { display: none; }
-  .mobile-experience { display: block; }
-  .mobile-heading { width: min(720px, calc(100% - var(--home-content-gutter, 20px) - var(--home-content-gutter, 20px))); margin: 0 auto 38px; }
-  .mobile-heading h2 { font-size: clamp(3.2rem, 10vw, 6rem); }
-  .mobile-heading > span { display: block; max-width: 480px; margin-top: 18px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font-size: .9375rem; font-weight: 500; line-height: 1.6; }
-  .catalog-tabs--mobile { position: relative; top: auto; right: auto; width: fit-content; margin: 0 auto 28px; margin-left: max(var(--home-content-gutter, 20px), calc((100% - 720px) / 2)); }
-  .mobile-rail { display: flex; gap: 16px; overflow-x: auto; padding: 4px max(20px, calc((100vw - 620px) / 2)) 25px; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
-  .mobile-rail::-webkit-scrollbar { display: none; }
-  .mobile-card { flex: 0 0 min(620px, calc(100vw - 40px)); min-height: 560px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 42px clamp(24px, 7vw, 60px); border: 1px solid color-mix(in srgb, var(--path-ink) 16%, transparent); border-radius: 28px; background: radial-gradient(circle at 50% 34%, color-mix(in srgb, var(--path-haze) 36%, transparent), transparent 33%), color-mix(in srgb, var(--path-surface) 82%, transparent); scroll-snap-align: center; text-align: center; }
-  .mobile-card__visual { position: relative; width: 215px; aspect-ratio: 1; display: grid; place-items: center; margin-bottom: 28px; border: 1px solid color-mix(in srgb, var(--path-accent) 48%, transparent); border-radius: 50%; }
-  .mobile-card__visual img { width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 16px 22px rgba(34,28,20,.22)); }
-  .mobile-card__visual b { position: absolute; right: 2px; bottom: 17px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--path-accent); font: 750 .75rem/1 var(--font-body, Manrope, sans-serif); }
-  .mobile-card > p { margin: 0 0 10px; color: var(--path-accent); font: 800 .75rem/1.2 var(--font-body, Manrope, sans-serif); letter-spacing: .1em; text-transform: uppercase; }
-  .mobile-card h3 { margin: 0; font: 800 clamp(3rem, 10vw, 5.6rem)/.86 var(--font-body, Manrope, sans-serif); letter-spacing: -.045em; text-wrap: balance; overflow-wrap: anywhere; }
-  .mobile-card > small { max-width: 380px; margin: 16px 0 26px; color: color-mix(in srgb, var(--path-ink) 76%, transparent); font-size: .9375rem; font-weight: 500; line-height: 1.5; }
-  .mobile-card > button { min-height: 48px; display: inline-flex; align-items: center; gap: 8px; margin-top: auto; padding: 0 20px; border: 0; border-radius: 999px; color: #fff; background: var(--path-accent); cursor: pointer; font-size: .875rem; font-weight: 800; }
-  .mobile-pagination { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 16px; }
+/* ---- Narrow desktop ---- */
+@media (max-width: 1180px) {
+  .reading { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .reading__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; }
 }
+
+/* ---- Mobile: a snap row of cards, the reading below ---- */
+.is-rail { --card-w: 148px; }
+
+.is-rail .table-head { grid-template-columns: 1fr; gap: 20px; }
+
+.is-rail .deck-tabs { width: 100%; }
+.is-rail .deck-tabs button { flex: 1; min-width: 0; }
+
+.is-rail .table-stage { height: auto; margin-top: 18px; cursor: auto; }
+.is-rail .table-surface { top: calc(var(--card-h) * .62); width: 160%; height: 60%; }
+.is-rail .fog-table__fog--near { bottom: -30%; }
+
+.is-rail .deck {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 44px calc(50% - var(--card-w) / 2) 30px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.is-rail .deck::-webkit-scrollbar { display: none; }
+
+.is-rail .tarot {
+  position: relative;
+  top: auto;
+  left: auto;
+  flex: none;
+  --veil: .55;
+  scroll-snap-align: center;
+  transform: none;
+  will-change: auto;
+  transition: transform .4s var(--ease-out), border-color .3s ease;
+}
+
+.is-rail .tarot.is-lit { transform: translateY(-14px) scale(1.04); }
+/* The rail clips vertically, so its rim light stays tight. */
+.is-rail .tarot::before { box-shadow: 0 0 0 1px var(--crimson), 0 0 22px 2px rgba(179, 32, 43, .34), 0 16px 30px rgba(0, 0, 0, .5); }
+
+.is-rail .deck-controls { margin-top: 0; gap: 14px; }
+.is-rail .deck-controls p { min-width: 0; flex: 1; max-width: 220px; }
+
+.is-rail .reading {
+  grid-template-columns: 1fr;
+  gap: 22px;
+  margin-top: 28px;
+}
+
+.is-rail .reading__actions { display: grid; }
+.is-rail .reading__actions .fog-button { width: 100%; }
 
 @media (max-width: 580px) {
-  .pathway-vault { padding-top: 82px; }
-  .catalog-tabs--mobile { width: calc(100% - 40px); margin-left: 20px; }
-  .catalog-tabs button { flex: 1; min-width: 0; }
-  .mobile-card { min-height: 520px; }
-  .pathway-dossier { top: auto; right: 8px; bottom: 8px; width: calc(100% - 16px); height: min(88svh, 760px); border-radius: 24px; }
+  .pathway-dossier { top: auto; right: 8px; bottom: 8px; width: calc(100% - 16px); height: min(88svh, 760px); }
+  .pathway-dossier dl div { grid-template-columns: 1fr; gap: 6px; }
 }
 
+/* ---- Low power: one fog bank, no filter fades ---- */
+.is-low-power .fog-table__fog--far { display: none; }
+.is-low-power .tarot__sigil img { transition: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  .mobile-rail { scroll-behavior: auto; }
-  .orbit-token, .token-seal, .motif-stage img, .dossier-enter-active, .dossier-leave-active, .dossier-enter-active .pathway-dossier, .dossier-leave-active .pathway-dossier { transition: none !important; }
+  .fog-table__fog { animation: none; }
+  .reading { animation: none; }
+  .tarot,
+  .tarot::before,
+  .tarot::after,
+  .tarot__sigil,
+  .tarot__sigil img,
+  .dossier-enter-active,
+  .dossier-leave-active,
+  .dossier-enter-active .pathway-dossier,
+  .dossier-leave-active .pathway-dossier { transition: none !important; }
+  .is-rail .deck { scroll-behavior: auto; }
 }
 </style>

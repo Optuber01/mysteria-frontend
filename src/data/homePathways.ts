@@ -7,20 +7,15 @@
  * boonPathwayIds). That keeps every label identical to the rest of the site,
  * in every locale, without shipping the full ability archive to the homepage.
  *
- * The only hand-authored values here are what the archive has no notion of:
- * the orbit motif and accent color for each seal. Copy lives in the locale
- * files under home.orbit.
+ * The only hand-authored value here is what the archive has no notion of: the
+ * accent color of each sigil, which the join beat reads. Copy lives in the
+ * locale files under home.orbit.
  */
 import catalog from '@/assets/sources/progression-catalog.json';
 import type { Localized } from '@/data/pathways';
 import type { Language } from '@/locales';
 
 export type ProgressionKind = 'pathway' | 'boon';
-export type ProgressionMotif =
-  | 'eye' | 'chain' | 'eclipse' | 'bone' | 'blade' | 'door' | 'crown' | 'glitch'
-  | 'cards' | 'wheel' | 'sword' | 'cross' | 'runes' | 'scales' | 'moon' | 'vine'
-  | 'gear' | 'flame' | 'sun' | 'pages' | 'storm' | 'spiral' | 'clock' | 'fracture'
-  | 'mist' | 'star' | 'maw' | 'sigil' | 'ring' | 'coin' | 'plague' | 'canvas';
 
 type CatalogEntry = {
   id: string;
@@ -45,24 +40,12 @@ export type HomePathway = {
   strengths: Localized[];
   sequenceCount: number;
   abilityCount: number;
-  motif: ProgressionMotif;
-  /** `accent` holds at least 4.5:1 on the homepage paper; `tint` is a pale wash of it. */
+  /** Read by JoinJourney. `accent` holds at least 4.5:1 on paper; `tint` is a pale wash of it. */
   theme: { accent: string; tint: string };
 };
 
 /** Same fallback rule as pick() in src/data/pathways.ts. */
 export const localize = (value: Localized, language: Language): string => value[language] || value.en;
-
-const motifs: Record<string, ProgressionMotif> = {
-  abyss: 'flame', chained: 'chain', darkness: 'eclipse', death: 'bone',
-  demoness: 'blade', door: 'door', emperor: 'crown', error: 'glitch',
-  fool: 'cards', fortune: 'wheel', giant: 'sword', hanged: 'cross',
-  hermit: 'runes', justiciar: 'scales', moon: 'moon', mother: 'vine',
-  paragon: 'gear', priest: 'flame', sun: 'sun', tower: 'pages',
-  tyrant: 'storm', visionary: 'eye', aeon: 'clock', chaos: 'fracture',
-  chaosmist: 'mist', condenser: 'star', devouring: 'maw', edict: 'sigil',
-  everlasting: 'ring', patriarch: 'coin', secondlaw: 'plague', sublunary: 'canvas',
-};
 
 // Dominant non-transparent color of each shipped symbol.
 const symbolColors: Record<string, string> = {
@@ -112,7 +95,7 @@ function theme(id: string): HomePathway['theme'] {
   return { accent, tint: mixHex(accent, '#ffffff', .9) };
 }
 
-export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntry[]).map((entry) => ({
+const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntry[]).map((entry) => ({
   id: entry.id,
   kind: entry.kind,
   name: entry.name,
@@ -125,7 +108,6 @@ export const progressionCatalog: HomePathway[] = (catalog.entries as CatalogEntr
   strengths: entry.strengths,
   sequenceCount: entry.sequenceCount,
   abilityCount: entry.abilityCount,
-  motif: motifs[entry.id] ?? 'spiral',
   theme: theme(entry.id),
 }));
 

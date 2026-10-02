@@ -1,22 +1,28 @@
 <template>
-  <div class="drink-scene" role="group" :aria-label="tp('drink.sceneLabel')">
-    <!-- gold aura: magic circle + radial glow + aura particles, anchored under the player -->
-    <div class="drink-scene__aura" :style="auraAnchorStyle" aria-hidden="true">
-      <div class="drink-scene__glow" :style="glowStyle" />
+  <div class="drink-scene" :style="sceneVars" role="group" :aria-label="tp('drink.sceneLabel')">
+    <!-- The Crimson Moon rises behind the player as the fog parts. -->
+    <div class="drink-scene__moon" aria-hidden="true" />
+    <!-- Spirit-vision light: a column rising from the ritual circle. -->
+    <div class="drink-scene__beam" aria-hidden="true" />
+
+    <!-- Ritual circle laid on the floor under the player. -->
+    <div class="drink-scene__floor" aria-hidden="true">
+      <div class="drink-scene__pool" />
       <div class="drink-scene__circle" :style="circleStyle">
-        <span class="drink-scene__circle-art" :style="{ maskImage: `url(${magicCircle})` }" />
+        <span class="drink-scene__circle-art" :style="{ maskImage: `url(${magicCircle})`, WebkitMaskImage: `url(${magicCircle})` }" />
       </div>
-      <div class="drink-scene__fx" :style="auraFxStyle">
+      <div class="drink-scene__fx">
         <SceneParticles mode="aura" :active="auraActive" :intensity="auraIntensity" />
       </div>
     </div>
 
-    <!-- The player drinks the potion, then advances -->
-    <div class="drink-scene__player" :style="playerStyle">
+    <!-- The player drinks the potion, then rises -->
+    <div class="drink-scene__player">
       <MinecraftPlayer
         :mode="playerMode"
         :armed="warm"
         :progress="p"
+        :glow="awaken"
         :label="tp(`player.${playerMode}`)"
         @hand="onHand"
       />
@@ -39,15 +45,18 @@
       </button>
     </div>
 
-    <!-- white-gold flash burst -->
+    <!-- low mist over the floor until the awakening burns it off -->
+    <div class="drink-scene__mist" aria-hidden="true" />
+
+    <!-- the moment of awakening: a flash of spirit-vision -->
     <div class="drink-scene__flash" :style="flashStyle" aria-hidden="true" />
     <div class="drink-scene__flash-fx" aria-hidden="true">
       <SceneParticles mode="burst" :active="burstActive" :intensity="1" />
     </div>
 
-    <!-- awakened pathway panel -->
+    <!-- awakened pathway -->
     <section class="panel" :style="panelStyle" role="group" :aria-label="tp('drink.panelLabel')">
-      <p class="panel__kicker" :style="itemStyle(kickerReveal)">{{ tp('drink.panelKicker') }}</p>
+      <p class="fog-label panel__kicker" :style="itemStyle(kickerReveal)">{{ tp('drink.panelKicker') }}</p>
       <h3 class="panel__title" :style="itemStyle(titleReveal)">{{ names.sequence }}</h3>
       <p class="panel__sub" :style="itemStyle(subReveal)">{{ tp('drink.panelSub') }}</p>
       <div v-if="names.abilities.length" class="panel__abilities">
@@ -79,15 +88,15 @@
       >
         {{ teaserText }}
       </button>
+      <RouterLink class="fog-button panel__cta" :to="$lp('/game')" :style="itemStyle(ctaReveal)">
+        {{ tp('drink.cta') }} <span aria-hidden="true">→</span>
+      </RouterLink>
     </section>
-
-    <!-- begin journey CTA -->
-    <RouterLink class="cta" :to="$lp('/game')" :style="ctaStyle">{{ tp('drink.cta') }}</RouterLink>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import type { CSSProperties } from 'vue';
 
 import MinecraftPlayer from '../MinecraftPlayer.vue';
@@ -114,22 +123,16 @@ const teaserText = computed(() => {
   if (!abilities.length) return tp('details.nextSequence.label');
   return tp('drink.teaser', { abilities: list(abilities) });
 });
-const compact = ref(false);
-let mediaQuery: MediaQueryList | null = null;
 
-function syncCompact(): void {
-  compact.value = mediaQuery?.matches ?? false;
-}
-
-onMounted(() => {
-  mediaQuery = window.matchMedia('(max-width: 820px)');
-  syncCompact();
-  mediaQuery.addEventListener('change', syncCompact);
-});
-
-onUnmounted(() => mediaQuery?.removeEventListener('change', syncCompact));
-
-/* ---------------- helpers ---------------- */
+/*
+ * Local beats (0..1 of this scene):
+ *   0.00-0.40  the player drinks; the potion empties; the circle wakes under the fog
+ *   0.38-0.50  flash of spirit-vision
+ *   0.42-0.62  awakening: the fog parts, the moon rises, the light column climbs
+ *   0.62-1.00  held climax with the awakened Sequence and the CTA
+ * ProgressionStoryV3 starts its "Awaken" chapter at 0.40 and parts its own
+ * fog over 0.40-0.62 to match.
+ */
 function clamp01(value: number): number {
   if (Number.isNaN(value)) return 0;
   return Math.min(1, Math.max(0, value));
@@ -142,30 +145,20 @@ function inspect(id: string, event: Event): void {
   if (anchor) emit('inspect', id, anchor);
 }
 
-/* ---------------- local progress (guarded) ---------------- */
 const p = computed(() => clamp01(props.progress));
 const final = computed(() => reduced.value);
+const awaken = computed(() => (final.value ? 1 : easeOutCubic(clamp01((p.value - 0.42) / 0.2))));
 
 /* ---------------- player ---------------- */
-const playerMode = computed<'drink' | 'advance'>(() => (final.value || p.value >= 0.68 ? 'advance' : 'drink'));
-const playerStyle = computed<CSSProperties>(() => ({
-  // The drink beat stays left-biased so the ability panel never covers the
-  // player, then the awakening drifts slightly toward the stage centre.
-  left: compact.value ? '50%' : `${(34 + awaken.value * 2).toFixed(2)}%`,
-  bottom: compact.value ? 'auto' : '0',
-  top: compact.value ? '0' : 'auto',
-  width: compact.value ? 'min(150px, 36vw)' : 'min(172px, 18vw)',
-  height: compact.value ? '44%' : '72%',
-  transform: compact.value ? 'translateX(-50%)' : 'none',
-}));
+const playerMode = computed<'drink' | 'advance'>(() => (final.value || p.value >= 0.42 ? 'advance' : 'drink'));
 
-/* ---------------- potion chip (tracked to the model's raised hand) ---------------- */
+/* ---------------- potion (tracked to the model's raised hand) ---------------- */
 const hand = ref<HandPosition | null>(null);
-const potionIn = computed(() => (final.value ? 0 : clamp01(p.value / 0.06)));
-const potionOut = computed(() => (final.value ? 0 : 1 - clamp01((p.value - 0.68) / 0.05)));
+const potionIn = computed(() => (final.value ? 0 : clamp01(p.value / 0.05)));
+const potionOut = computed(() => (final.value ? 0 : 1 - clamp01((p.value - 0.39) / 0.04)));
 const potionOpacity = computed(() => potionIn.value * potionOut.value);
-const emptyT = computed(() => (final.value ? 1 : clamp01((p.value - 0.12) / 0.48)));
-const potionBob = computed(() => (final.value ? 0 : Math.sin(p.value * 26) * 3.5));
+const emptyT = computed(() => (final.value ? 1 : clamp01((p.value - 0.06) / 0.3)));
+const potionBob = computed(() => (final.value ? 0 : Math.sin(p.value * 40) * 3.5));
 
 function onHand(pos: HandPosition | null): void {
   hand.value = pos;
@@ -175,11 +168,10 @@ const potionStyle = computed<CSSProperties>(() => {
   const tracked = hand.value;
   // tip the bottle up as it empties, as if draining into the mouth
   const tip = emptyT.value * 46;
-  const centered = `translate(-50%, -50%) translateY(${potionBob.value.toFixed(2)}px) rotate(-${tip.toFixed(1)}deg)`;
   const pos = tracked ? { left: `${tracked.x.toFixed(1)}px`, top: `${tracked.y.toFixed(1)}px` } : { left: '50%', top: '16%' };
   return {
     ...pos,
-    transform: centered,
+    transform: `translate(-50%, -50%) translateY(${potionBob.value.toFixed(2)}px) rotate(-${tip.toFixed(1)}deg)`,
     opacity: potionOpacity.value.toFixed(4),
     pointerEvents: potionOpacity.value > 0.4 ? 'auto' : 'none',
   };
@@ -189,98 +181,69 @@ const liquidStyle = computed<CSSProperties>(() => ({
   clipPath: `inset(${(emptyT.value * 100).toFixed(2)}% 0 0 0)`,
 }));
 
-/* ---------------- aura: circle + glow + particles, 0.25 -> 0.72 ---------------- */
-const auraIn = computed(() => (final.value ? 1 : clamp01((p.value - 0.25) / 0.08)));
-// The ritual circle does not disappear when the player awakens: it becomes the
-// quieter, persistent base of the final Seer reveal.
-const auraOut = computed(() => (final.value ? 1 : (p.value >= 0.72 ? 0.76 : 1)));
-const auraOpacity = computed(() => auraIn.value * auraOut.value);
-const inAuraRange = computed(() => p.value >= 0.25);
-const auraActive = computed(() => props.active && (final.value || inAuraRange.value));
-const auraIntensity = computed(() => (final.value || p.value >= 0.72 ? 0.7 : 0.35 + 0.65 * auraOpacity.value));
-
-const auraAnchorStyle = computed<CSSProperties>(() => ({
-  left: compact.value ? '50%' : `${(34 + awaken.value * 2).toFixed(2)}%`,
-  bottom: compact.value ? '38%' : '7%',
-}));
+/* ---------------- ritual circle: wakes under the fog, blazes at the awakening ---------------- */
+const circleWake = computed(() => (final.value ? 1 : clamp01((p.value - 0.12) / 0.12)));
+const auraActive = computed(() => props.active && (final.value || p.value >= 0.12));
+const auraIntensity = computed(() => 0.35 + 0.65 * awaken.value);
 
 const circleStyle = computed<CSSProperties>(() => ({
-  opacity: (auraOpacity.value * 0.92).toFixed(4),
-  transform: `translate(-50%, 50%) rotate(${(final.value ? 96 : p.value * 140).toFixed(2)}deg) scale(${(0.86 + 0.14 * auraOpacity.value).toFixed(4)})`,
-  filter: `brightness(${(0.5 + 0.5 * auraOpacity.value).toFixed(3)}) saturate(${(0.85 + 0.2 * auraOpacity.value).toFixed(3)}) drop-shadow(0 0 ${(8 + 22 * auraOpacity.value).toFixed(1)}px rgba(198,155,82,${(0.22 * auraOpacity.value).toFixed(3)}))`,
+  transform: `rotate(${(final.value ? 96 : p.value * 160).toFixed(2)}deg) scale(${(0.86 + 0.14 * circleWake.value).toFixed(4)})`,
 }));
 
-const glowStyle = computed<CSSProperties>(() => ({
-  opacity: (auraOpacity.value * 0.9).toFixed(4),
-  transform: `translate(-50%, 50%) scale(${(0.72 + 0.55 * auraOpacity.value).toFixed(4)})`,
+// Scene-wide drivers read by the stylesheet.
+const sceneVars = computed(() => ({
+  '--wake': circleWake.value.toFixed(4),
+  '--awaken': awaken.value.toFixed(4),
 }));
 
-const auraFxStyle = computed<CSSProperties>(() => ({
-  opacity: auraOpacity.value.toFixed(4),
-  transform: 'translate(-50%, 50%)',
-}));
-
-/* ---------------- flash burst, 0.6 -> 0.72 ---------------- */
+/* ---------------- flash ---------------- */
 const flashStyle = computed<CSSProperties>(() => {
-  const spike = clamp01((p.value - 0.6) / 0.04);
-  const decay = 1 - clamp01((p.value - 0.64) / 0.08);
-  const intensity = clamp01(spike * decay);
-  return { opacity: intensity.toFixed(4) };
+  const spike = clamp01((p.value - 0.38) / 0.04);
+  const decay = 1 - clamp01((p.value - 0.42) / 0.08);
+  return { opacity: (final.value ? 0 : clamp01(spike * decay)).toFixed(4) };
 });
-const burstActive = computed(() => props.active && !final.value && p.value >= 0.6 && p.value < 0.74);
+const burstActive = computed(() => props.active && !final.value && p.value >= 0.4 && p.value < 0.54);
 
-/* ---------------- awaken panel, 0.72 -> 1 ---------------- */
-const awaken = computed(() => (final.value ? 1 : clamp01((p.value - 0.72) / 0.16)));
-
-const panelStyle = computed<CSSProperties>(() => {
-  const e = easeOutCubic(awaken.value);
-  const slide = (1 - e) * 132;
-  return {
-    left: compact.value ? '50%' : 'auto',
-    right: compact.value ? 'auto' : '6%',
-    top: compact.value ? 'auto' : '50%',
-    bottom: compact.value ? '66px' : 'auto',
-    transform: `translateY(${compact.value ? 0 : -50}%) translateX(calc(${compact.value ? -50 : 0}% + ${slide.toFixed(1)}%))`,
-    opacity: clamp01(awaken.value * 3).toFixed(4),
-    pointerEvents: awaken.value > 0.5 ? 'auto' : 'none',
-  };
-});
+/* ---------------- awakened panel ---------------- */
+const panelStyle = computed<CSSProperties>(() => ({
+  opacity: clamp01(awaken.value * 3).toFixed(4),
+  transform: `translateY(-50%) translateX(${((1 - awaken.value) * 48).toFixed(1)}px)`,
+  pointerEvents: awaken.value > 0.5 ? 'auto' : 'none',
+}));
 
 function itemStyle(reveal: number): CSSProperties {
   return {
     opacity: reveal.toFixed(4),
-    transform: `translateX(${((1 - reveal) * 42).toFixed(1)}px)`,
+    transform: `translateY(${((1 - reveal) * 16).toFixed(1)}px)`,
     pointerEvents: reveal > 0.5 ? 'auto' : 'none',
   };
 }
-const kickerReveal = computed(() => (final.value ? 1 : clamp01(awaken.value / 0.16)));
-const titleReveal = computed(() => (final.value ? 1 : clamp01((awaken.value - 0.03) / 0.16)));
-const subReveal = computed(() => (final.value ? 1 : clamp01((awaken.value - 0.06) / 0.16)));
-const chip1Reveal = computed(() => (final.value ? 1 : clamp01((awaken.value - 0.13) / 0.16)));
-const chip2Reveal = computed(() => (final.value ? 1 : clamp01((awaken.value - 0.21) / 0.16)));
-const teaserReveal = computed(() => (final.value ? 1 : clamp01((awaken.value - 0.29) / 0.16)));
-
-/* ---------------- CTA, 0.9 -> 1 ---------------- */
-const ctaT = computed(() => (final.value ? 1 : clamp01((p.value - 0.9) / 0.08)));
-const ctaStyle = computed<CSSProperties>(() => ({
-  opacity: ctaT.value.toFixed(4),
-  transform: `${compact.value ? 'translateX(-50%) ' : ''}translateY(${((1 - ctaT.value) * 20).toFixed(1)}px)`,
-  pointerEvents: ctaT.value > 0.5 ? 'auto' : 'none',
-}));
+const stagger = (offset: number) => computed(() => (final.value ? 1 : clamp01((p.value - 0.44 - offset) / 0.08)));
+const kickerReveal = stagger(0);
+const titleReveal = stagger(0.02);
+const subReveal = stagger(0.04);
+const chip1Reveal = stagger(0.08);
+const chip2Reveal = stagger(0.11);
+const teaserReveal = stagger(0.14);
+const ctaReveal = stagger(0.17);
 </script>
 
 <style scoped>
 .drink-scene {
-  --ease: cubic-bezier(.22, 1, .36, 1);
+  --wake: 0;
+  --awaken: 0;
+  /* the player's feet: the circle, beam and moon all centre on this */
+  --stand-x: 31%;
+  --floor-y: 8%;
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  color: var(--ink, #221c14);
-  font-family: var(--font-body, "Manrope", sans-serif);
+  color: var(--bone);
+  font-family: var(--font-body);
 }
 
-/* shared hotspot base: 44px min touch target, violet focus ring */
+/* shared hotspot base: 44px min touch target, crimson focus ring */
 .hotspot {
   border: 0;
   background: transparent;
@@ -289,44 +252,91 @@ const ctaStyle = computed<CSSProperties>(() => ({
   font-family: inherit;
 }
 .hotspot:focus-visible {
-  outline: 3px solid var(--primary, #7458e8);
+  outline: 2px solid var(--crimson-text);
   outline-offset: 3px;
 }
 
-/* ---------- aura anchor (zero-size point; children center on it) ---------- */
-.drink-scene__aura {
+/* ---------- the Crimson Moon (matches the hero's) ---------- */
+.drink-scene__moon {
+  position: absolute;
+  top: 5%;
+  left: var(--stand-x);
+  width: min(290px, 29vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 40%, rgba(50, 4, 10, 0.22), transparent 16%),
+    radial-gradient(circle at 63% 63%, rgba(50, 4, 10, 0.18), transparent 21%),
+    radial-gradient(circle at 70% 31%, rgba(50, 4, 10, 0.14), transparent 11%),
+    radial-gradient(circle at 50% 50%, #a51d28 0%, #8e1720 60%, #6c1018 100%);
+  box-shadow:
+    inset -10px -14px 40px rgba(20, 2, 5, 0.45),
+    0 0 60px 8px rgba(179, 32, 43, 0.35),
+    0 0 180px 60px rgba(179, 32, 43, 0.14);
+  opacity: calc(var(--awaken) * 0.9);
+  transform: translate3d(-50%, calc((1 - var(--awaken)) * 70px), 0);
+  pointer-events: none;
+}
+
+/* ---------- spirit-vision light column ---------- */
+.drink-scene__beam {
+  position: absolute;
+  bottom: var(--floor-y);
+  left: var(--stand-x);
+  width: min(260px, 26vw);
+  height: 92%;
+  background: radial-gradient(ellipse 50% 100% at 50% 100%, rgba(229, 84, 93, 0.42), rgba(179, 32, 43, 0.14) 55%, transparent 80%);
+  mix-blend-mode: screen;
+  opacity: var(--awaken);
+  transform: translateX(-50%) scaleY(calc(0.3 + var(--awaken) * 0.7));
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+
+/* ---------- ritual circle on the floor ---------- */
+.drink-scene__floor {
   position: absolute;
   z-index: 1;
+  bottom: var(--floor-y);
+  left: var(--stand-x);
   width: 0;
   height: 0;
   pointer-events: none;
 }
-.drink-scene__glow {
+
+.drink-scene__floor > * {
   position: absolute;
   left: 0;
-  bottom: 0;
-  width: min(320px, 44vw);
-  aspect-ratio: 1;
+  top: 0;
+}
+
+.drink-scene__pool {
+  width: min(460px, 46vw);
+  aspect-ratio: 3;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 180, 90, .3), rgba(116, 88, 232, .14) 46%, transparent 72%);
-  filter: blur(18px);
+  background: radial-gradient(ellipse, rgba(179, 32, 43, 0.5), rgba(142, 23, 32, 0.16) 50%, transparent 72%);
+  opacity: calc(var(--wake) * (0.35 + var(--awaken) * 0.65));
+  transform: translate(-50%, -50%);
+}
+
+/* The circle lies on the ground: a foreshortened sigil, not a backdrop disc. */
+.drink-scene__circle {
+  width: min(400px, 40vw);
+  aspect-ratio: 1;
+  margin: calc(min(400px, 40vw) / -2) 0 0 calc(min(400px, 40vw) / -2);
+  opacity: calc(var(--wake) * (0.45 + var(--awaken) * 0.55));
   transform-origin: 50% 50%;
+  /* rotateX here, spin from the inline transform on the art's parent */
+  scale: 1 0.3;
+  filter: drop-shadow(0 0 calc(6px + var(--awaken) * 18px) rgba(229, 84, 93, 0.75));
   will-change: transform, opacity;
 }
-.drink-scene__circle {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: min(230px, 34vw);
-  aspect-ratio: 1;
-  transform-origin: 50% 50%;
-  will-change: transform, opacity, filter;
-}
+
 .drink-scene__circle-art {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #eeda9f, #c69b52 70%);
+  background: linear-gradient(135deg, var(--crimson-text), var(--crimson) 70%);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
@@ -334,27 +344,29 @@ const ctaStyle = computed<CSSProperties>(() => ({
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  filter: drop-shadow(0 0 12px rgba(198, 155, 82, .5));
-}
-.drink-scene__fx {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: min(300px, 42vw);
-  height: min(300px, 42vw);
-  will-change: opacity;
 }
 
-/* ---------- player (left-of-center, anchored bottom on desktop) ---------- */
+.drink-scene__fx {
+  width: min(340px, 34vw);
+  height: min(340px, 34vw);
+  opacity: var(--wake);
+  transform: translate(-50%, -62%);
+}
+
+/* ---------- player (feet on the circle) ---------- */
 .drink-scene__player {
   position: absolute;
   z-index: 5;
+  bottom: var(--floor-y);
+  left: var(--stand-x);
+  width: min(200px, 20vw);
+  height: 70%;
   min-width: 0;
   pointer-events: none;
-  transition: left .5s var(--ease);
+  transform: translateX(-50%);
 }
 
-/* ---------- potion chip (inside the player wrapper, at the model's hand) ---------- */
+/* ---------- potion (inside the player wrapper, at the model's hand) ---------- */
 .potion {
   position: absolute;
   z-index: 6;
@@ -369,8 +381,8 @@ const ctaStyle = computed<CSSProperties>(() => ({
   display: block;
   width: 64px;
   height: 64px;
-  filter: drop-shadow(0 5px 7px rgba(60, 48, 30, .3));
-  transition: filter .2s ease;
+  filter: drop-shadow(0 5px 7px rgba(0, 0, 0, 0.55));
+  transition: filter 0.2s ease;
 }
 .potion__sprite img {
   display: block;
@@ -381,220 +393,129 @@ const ctaStyle = computed<CSSProperties>(() => ({
 }
 .potion:hover .potion__sprite,
 .potion:focus-visible .potion__sprite {
-  filter: drop-shadow(0 0 11px rgba(116, 88, 232, .5));
+  filter: drop-shadow(0 0 11px rgba(229, 84, 93, 0.7));
 }
 
-/* ---------- flash burst overlay ---------- */
+/* ---------- floor mist, burnt off by the awakening ---------- */
+.drink-scene__mist {
+  position: absolute;
+  z-index: 6;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 40%;
+  /* soft on every side: the stage clips, the mist must not show it */
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 55%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 55%, #000 40%, transparent 100%);
+  background:
+    radial-gradient(ellipse 30% 50% at 22% 70%, rgba(200, 206, 214, 0.22), transparent 72%),
+    radial-gradient(ellipse 34% 46% at 58% 80%, rgba(200, 206, 214, 0.16), transparent 72%),
+    radial-gradient(ellipse 24% 40% at 88% 70%, rgba(200, 206, 214, 0.14), transparent 72%);
+  opacity: calc(1 - var(--awaken) * 0.85);
+  transform: translateY(calc(var(--awaken) * 30%));
+  pointer-events: none;
+}
+
+/* ---------- flash ---------- */
 .drink-scene__flash {
   position: absolute;
   inset: 0;
   z-index: 30;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 42%, rgba(255, 252, 242, .92), rgba(240, 211, 140, .4) 34%, rgba(217, 180, 90, .14) 58%, transparent 80%);
+  /* sized to fade out before the stage edges, which clip it */
+  background: radial-gradient(ellipse 30% 46% at var(--stand-x) 46%, rgba(236, 230, 218, 0.92), rgba(229, 84, 93, 0.45) 34%, rgba(142, 23, 32, 0.2) 66%, transparent 100%);
   will-change: opacity;
 }
 .drink-scene__flash-fx {
   position: absolute;
-  inset: 0;
   z-index: 31;
+  top: 10%;
+  bottom: 10%;
+  left: calc(var(--stand-x) - 25%);
+  width: 50%;
   pointer-events: none;
 }
 
-/* ---------- awaken panel (slides in from the right) ---------- */
+/* ---------- awakened panel ---------- */
 .panel {
   position: absolute;
   z-index: 40;
-  width: min(332px, 30vw);
-  padding: 18px;
-  border: 1px solid var(--hairline, #eae1d0);
-  border-radius: 20px;
-  background: var(--surface, #fff);
-  box-shadow: 0 24px 60px rgba(34, 28, 20, .14);
+  top: 50%;
+  right: 2%;
+  width: min(380px, 38%);
+  padding-left: 28px;
+  border-left: 1px solid rgba(229, 84, 93, 0.5);
   will-change: transform, opacity;
 }
 .panel__kicker {
-  margin: 0 0 4px;
-  color: #87691d;
-  font-size: .7rem;
-  font-weight: 800;
-  letter-spacing: .18em;
-  text-transform: uppercase;
+  margin: 0;
 }
 .panel__title {
-  margin: 0;
-  color: var(--primary, #7458e8);
-  font-family: var(--font-body, "Manrope", sans-serif);
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: .05em;
-  text-transform: uppercase;
+  margin: 14px 0 10px;
+  color: var(--bone);
+  font: 600 clamp(3.4rem, 5.6vw, 5.4rem)/0.88 var(--font-display);
+  text-shadow: 0 0 46px rgba(179, 32, 43, 0.55);
 }
 .panel__sub {
-  margin: 4px 0 12px;
-  color: var(--ink-muted, #756b5c);
-  font-size: .78rem;
-  font-weight: 600;
-  letter-spacing: .06em;
+  margin: 0 0 22px;
+  color: var(--ash);
+  font: italic 500 1.2rem/1.3 var(--font-display);
 }
 .panel__abilities {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  border-top: 1px solid var(--line);
 }
 .panel-ability {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 3px;
-  min-width: 44px;
   min-height: 44px;
-  padding: 9px 10px;
-  border: 1px solid var(--hairline, #eae1d0);
-  border-radius: 12px;
-  background: var(--surface, #fff);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
   text-align: left;
-  will-change: transform, opacity;
-  transition: border-color .2s ease, background-color .2s ease, box-shadow .25s ease;
+  transition: color 0.2s ease;
 }
 .panel-ability__name {
-  color: var(--primary-deep, #5f46d6);
-  font-size: .82rem;
-  font-weight: 700;
-  letter-spacing: .02em;
+  color: var(--bone);
+  font-size: 0.98rem;
+  font-weight: 600;
 }
 .panel-ability__caption {
-  color: var(--ink-muted, #756b5c);
-  font-size: .72rem;
-  font-weight: 500;
-  line-height: 1.35;
+  color: var(--ash);
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
-.panel-ability:hover,
-.panel-ability:focus-visible {
-  border-color: rgba(116, 88, 232, .45);
-  background: rgba(116, 88, 232, .05);
-  box-shadow: 0 10px 24px rgba(34, 28, 20, .1);
+.panel-ability:hover .panel-ability__name,
+.panel-ability:focus-visible .panel-ability__name {
+  color: var(--crimson-text);
 }
 .panel-teaser {
   display: block;
   width: 100%;
-  min-width: 44px;
   min-height: 44px;
-  margin-top: 8px;
-  padding: 8px 10px;
-  border: 1px dashed rgba(116, 88, 232, .35);
-  border-radius: 12px;
-  background: transparent;
-  color: var(--ink-muted, #756b5c);
-  font-size: .72rem;
-  font-weight: 700;
-  line-height: 1.4;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(229, 84, 93, 0.45);
+  border-radius: 6px;
+  color: var(--ash);
+  font-size: 0.84rem;
+  line-height: 1.45;
   text-align: left;
-  will-change: transform, opacity;
-  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 .panel-teaser:hover,
 .panel-teaser:focus-visible {
-  border-color: rgba(116, 88, 232, .6);
-  color: var(--primary-deep, #5f46d6);
-  background: rgba(116, 88, 232, .05);
+  border-color: var(--crimson-text);
+  color: var(--bone);
+  background: var(--crimson-tint);
+}
+.panel__cta {
+  margin-top: 22px;
 }
 
-/* ---------- CTA pill ---------- */
-.cta {
-  position: absolute;
-  z-index: 50;
-  right: 6%;
-  bottom: 7%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 11px 26px;
-  border: 1px solid var(--primary, #7458e8);
-  border-radius: 999px;
-  color: #fff;
-  font-size: .78rem;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  text-decoration: none;
-  background: var(--primary, #7458e8);
-  box-shadow: 0 12px 30px rgba(116, 88, 232, .28);
-  white-space: nowrap;
-  will-change: transform, opacity;
-  transition: background-color .2s ease, box-shadow .25s ease;
-}
-.cta:hover,
-.cta:focus-visible {
-  background: var(--primary-deep, #5f46d6);
-  box-shadow: 0 18px 40px rgba(95, 70, 214, .34);
-}
-.cta:focus-visible {
-  outline: 3px solid var(--primary, #7458e8);
-  outline-offset: 3px;
-}
-
-/* ---------- mobile: player centers, panel docks below the player ---------- */
-@media (max-width: 820px) {
-  .drink-scene__glow {
-    width: min(240px, 60vw);
-  }
-  .drink-scene__circle {
-    width: min(190px, 44vw);
-  }
-  .drink-scene__fx {
-    width: min(230px, 54vw);
-    height: min(230px, 54vw);
-  }
-  .potion__sprite {
-    width: 56px;
-    height: 56px;
-  }
-  .panel {
-    width: min(380px, 94vw);
-    padding: 11px;
-  }
-  .panel__title {
-    font-size: 1.6rem;
-  }
-  .panel__sub {
-    margin-bottom: 9px;
-    font-size: .74rem;
-  }
-  .panel__abilities {
-    gap: 6px;
-  }
-  .panel-ability {
-    padding: 7px 8px;
-  }
-  .panel-ability__caption {
-    font-size: .7rem;
-  }
-  .panel-teaser {
-    margin-top: 6px;
-    font-size: .7rem;
-  }
-  .cta {
-    right: auto;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    font-size: .74rem;
-  }
-}
-
-/* ---------- reduced motion: static final state, no transitions ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .drink-scene__glow,
-  .drink-scene__circle,
-  .drink-scene__fx,
-  .potion,
-  .drink-scene__flash,
-  .panel,
+  .potion__sprite,
   .panel-ability,
-  .panel-teaser,
-  .cta {
+  .panel-teaser {
     transition: none;
   }
 }

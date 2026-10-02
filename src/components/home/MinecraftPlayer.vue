@@ -2,7 +2,8 @@
   <figure
     ref="host"
     class="minecraft-player"
-    :class="[`minecraft-player--${mode}`, { 'is-ready': ready, 'has-error': failed }]"
+    :class="{ 'is-ready': ready }"
+    :style="{ '--glow': glow.toFixed(3) }"
     role="img"
     :aria-label="label || undefined"
   >
@@ -16,7 +17,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import type { Vector3 } from 'three';
+import type { PointLight, Vector3 } from 'three';
 import type { PlayerAnimation, SkinViewer } from 'skinview3d';
 
 // Placeholder: the stock Steve skin until a Mysterria character skin exists.
@@ -33,6 +34,8 @@ const props = withDefaults(
     /** Allow skinview3d (and its WebGL context) to load once in view. */
     armed?: boolean;
     progress?: number;
+    /** 0..1: the awakening's crimson rim light and the lift out of shadow. */
+    glow?: number;
     /** Accessible description of the pose. */
     label?: string;
   }>(),
@@ -40,6 +43,7 @@ const props = withDefaults(
     mode: 'drink',
     armed: true,
     progress: 0,
+    glow: 0,
     label: '',
   },
 );
@@ -66,6 +70,8 @@ let viewerCreationStarted = false;
 // Borrowed from the loaded three.js instance (via clone) so this component
 // never has to import three itself.
 let handVector: Vector3 | null = null;
+// Crimson lights behind the player, cloned from the camera light for the same reason.
+let rimLights: PointLight[] = [];
 // One animation per mode, reused across scroll frames.
 const animations = new Map<MinecraftPlayerMode, PlayerAnimation>();
 // Scroll progress is mapped onto this many animation seconds.
@@ -116,6 +122,16 @@ function animationFor(mode: MinecraftPlayerMode): PlayerAnimation {
     animations.set(mode, animation);
   }
   return animation;
+}
+
+function applyLighting() {
+  if (!viewer) return;
+  const glow = Math.max(0, Math.min(1, props.glow));
+  viewer.globalLight.intensity = 1.1 + glow * 1.2;
+  viewer.cameraLight.intensity = 0.55 + glow * 0.25;
+  rimLights.forEach((light) => {
+    light.intensity = 0.5 + glow * 2.6;
+  });
 }
 
 function sizeViewer() {
@@ -191,9 +207,16 @@ async function createViewer() {
     });
     viewer = instance;
     instance.background = null;
-    // Brighter ambient + camera fill so the figure reads on the ivory stage.
-    instance.globalLight.intensity = 3.05;
-    instance.cameraLight.intensity = 1.0;
+    // A dark stage: low ambient so the figure starts as a near-silhouette, and
+    // two crimson rim lights behind the shoulders that the awakening turns up.
+    rimLights = [-1, 1].map((side) => {
+      const light = instance.cameraLight.clone();
+      light.color.set(0xe5545d);
+      light.position.set(side * 26, 18, -30);
+      instance.scene.add(light);
+      return light;
+    });
+    applyLighting();
 
     resizeObserver = new ResizeObserver(sizeViewer);
     resizeObserver.observe(host.value);
@@ -229,6 +252,10 @@ onMounted(() => {
 });
 
 watch(() => props.armed, maybeCreateViewer);
+watch(() => props.glow, () => {
+  applyLighting();
+  if (inViewport.value && viewer && !viewer.disposed) viewer.render();
+});
 watch(
   () => [props.mode, props.progress, reducedMotion.value] as const,
   () => syncPlayback(),
@@ -240,6 +267,7 @@ onUnmounted(() => {
   intersectionObserver?.disconnect();
   viewer?.dispose();
   viewer = null;
+  rimLights = [];
   skinview = null;
   animations.clear();
 });
@@ -247,6 +275,7 @@ onUnmounted(() => {
 
 <style scoped>
 .minecraft-player {
+  --glow: 0;
   position: relative;
   width: 100%;
   min-width: 0;
@@ -257,15 +286,16 @@ onUnmounted(() => {
   overflow: visible;
 }
 
+/* contact shadow on the floor */
 .minecraft-player::before {
   position: absolute;
   z-index: -1;
   left: 50%;
   bottom: 2%;
-  width: min(56%, 260px);
+  width: min(60%, 260px);
   aspect-ratio: 2.6;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(60, 48, 30, 0.2), transparent 72%);
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.75), transparent 72%);
   content: '';
   opacity: 0;
   transform: translateX(-50%) scale(0.78);
@@ -279,16 +309,16 @@ onUnmounted(() => {
   transform: translateX(-50%) scale(1);
 }
 
-.minecraft-player--advance::before {
-  background: radial-gradient(ellipse, rgba(198, 155, 82, 0.3), transparent 72%);
-}
-
 .minecraft-player__canvas {
   display: block;
   width: 100%;
   height: 100%;
   opacity: 0;
-  filter: brightness(1.04) saturate(1.05) drop-shadow(0 24px 22px rgba(50, 40, 26, 0.26));
+  /* In shadow while drinking; the awakening lifts the figure and haloes it. */
+  filter:
+    brightness(calc(0.78 + var(--glow) * 0.27))
+    drop-shadow(0 0 calc(var(--glow) * 22px) rgba(229, 84, 93, calc(var(--glow) * 0.65)))
+    drop-shadow(0 24px 22px rgba(0, 0, 0, 0.5));
   transition: opacity 0.14s ease;
 }
 
@@ -305,6 +335,7 @@ onUnmounted(() => {
   opacity: 0.7;
 }
 
+/* Steve's own colours: the fallback stands in for the in-game skin. */
 .minecraft-player__fallback-head {
   width: 64%;
   aspect-ratio: 1;

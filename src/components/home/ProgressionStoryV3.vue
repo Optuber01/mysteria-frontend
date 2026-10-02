@@ -3,26 +3,31 @@
     id="progression"
     ref="sectionRef"
     class="progression-v3"
-    :style="{ '--journey': progress.toFixed(4), '--entry': entryProgress.toFixed(4) }"
+    :style="sectionVars"
     aria-labelledby="progression-title"
   >
     <div class="progression-v3__sticky">
       <div class="progression-v3__backdrop" aria-hidden="true">
-        <img :src="breweryScene" alt="" width="1920" height="1017" decoding="async">
+        <img :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
-      <div class="progression-v3__wash" aria-hidden="true" />
-      <div class="progression-v3__threshold-fog" aria-hidden="true"><i /><i /></div>
+      <div class="progression-v3__omen" aria-hidden="true" />
+      <div class="progression-v3__fogbank" aria-hidden="true">
+        <i class="progression-v3__fog progression-v3__fog--far" />
+        <i class="progression-v3__fog progression-v3__fog--near" />
+      </div>
+      <div class="progression-v3__vignette" aria-hidden="true" />
+      <div class="progression-v3__threshold" aria-hidden="true" />
 
       <header class="progression-v3__heading">
-        <p>{{ tp('eyebrow') }}</p>
+        <p class="fog-label">{{ tp('eyebrow') }}</p>
         <h2 id="progression-title">{{ tp('title') }}</h2>
-        <span>{{ tp('tagline') }}</span>
+        <p class="progression-v3__tagline">{{ tp('tagline') }}</p>
       </header>
 
       <div class="progression-v3__layout">
         <Transition name="chapter-copy" mode="out-in">
           <article :key="activeChapter.id" class="chapter-copy">
-            <p class="chapter-copy__kicker">{{ chapterText(activeChapter.id, 'kicker') }}</p>
+            <p class="fog-label">{{ chapterText(activeChapter.id, 'kicker') }}</p>
             <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
             <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
             <p class="chapter-copy__hint"><i aria-hidden="true" />{{ chapterText(activeChapter.id, 'hint') }}</p>
@@ -30,11 +35,7 @@
         </Transition>
 
         <div ref="stageRef" class="progression-v3__stage" @click="onStageClick">
-          <div
-            class="scene-window"
-            :style="bookWindowStyle"
-            :aria-hidden="bookOpacity < 0.5"
-          >
+          <div class="scene-window" :style="bookWindowStyle" :aria-hidden="bookOpacity < 0.5">
             <FormulaBookScene
               :progress="bookLocal"
               :closing-progress="bookClosingLocal"
@@ -44,11 +45,7 @@
               @clear-inspect="clearDetail"
             />
           </div>
-          <div
-            class="scene-window"
-            :style="altarWindowStyle"
-            :aria-hidden="altarOpacity < 0.5"
-          >
+          <div class="scene-window" :style="altarWindowStyle" :aria-hidden="altarOpacity < 0.5">
             <AltarBrewScene
               :progress="altarLocal"
               :active="altarOpacity > 0.5"
@@ -56,11 +53,7 @@
               @clear-inspect="clearDetail"
             />
           </div>
-          <div
-            class="scene-window"
-            :style="drinkWindowStyle"
-            :aria-hidden="drinkOpacity < 0.5"
-          >
+          <div class="scene-window" :style="drinkWindowStyle" :aria-hidden="drinkOpacity < 0.5">
             <DrinkAwakenScene
               :progress="drinkLocal"
               :active="drinkOpacity > 0.5"
@@ -95,22 +88,24 @@
           </i>
           <span>{{ String(index + 1).padStart(2, '0') }}</span>
           <strong>{{ chapterText(chapter.id, 'short') }}</strong>
-          <em v-if="activeChapterIndex > index" class="sr-only">{{ tp('navCompleted') }}</em>
+          <em v-if="activeChapterIndex > index" class="visually-hidden">{{ tp('navCompleted') }}</em>
         </button>
       </nav>
       <div class="progression-line" aria-hidden="true"><i :style="{ transform: `scaleX(${progress.toFixed(4)})` }" /></div>
     </div>
 
-    <ol class="progression-static">
-      <li v-for="(chapter, index) in chapters" :key="chapter.id">
-        <span>{{ String(index + 1).padStart(2, '0') }}</span>
-        <div>
-          <small>{{ chapterText(chapter.id, 'kicker') }}</small>
+    <div class="progression-static">
+      <ol>
+        <li v-for="(chapter, index) in chapters" :key="chapter.id" :class="{ 'is-climax': index === chapters.length - 1 }">
+          <p class="fog-label">{{ chapterText(chapter.id, 'kicker') }}</p>
           <h3>{{ chapterText(chapter.id, 'title') }}</h3>
           <p>{{ chapterText(chapter.id, 'copy') }}</p>
-        </div>
-      </li>
-    </ol>
+        </li>
+      </ol>
+      <RouterLink class="fog-button" :to="$lp('/game')">
+        {{ tp('drink.cta') }} <span aria-hidden="true">→</span>
+      </RouterLink>
+    </div>
   </section>
 </template>
 
@@ -127,38 +122,56 @@ import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 /*
  * One timeline (fractions of the pinned scroll) drives the scenes, the chapter
  * rail and chapter navigation, so the rail can never name a chapter the stage
- * is not showing.
+ * is not showing. The section is 360svh tall: 2.6 viewports of pinned scroll.
  */
-const BOOK = { start: 0, end: 0.28, closeStart: 0.412, closeEnd: 0.515, fadeOutStart: 0.485, fadeOutEnd: 0.525 };
-const ALTAR = { start: 0.38, end: 0.68, fadeInStart: 0.39, fadeInEnd: 0.43, fadeOutStart: 0.68, fadeOutEnd: 0.71 };
-const DRINK = { start: 0.68, end: 1, fadeInStart: 0.66, fadeInEnd: 0.69 };
+const ALTAR = { start: 0.24, end: 0.56 };
+const DRINK = { start: 0.56, end: 1 };
 const altarAt = (local: number) => ALTAR.start + (ALTAR.end - ALTAR.start) * local;
 const drinkAt = (local: number) => DRINK.start + (DRINK.end - DRINK.start) * local;
+// Step two begins with the book still on stage: it closes around the departing
+// ingredients while the cauldron settles underneath it.
+const BOOK = {
+  // The book waits for the title card to clear before it descends.
+  start: 0.015,
+  end: 0.17,
+  closeStart: altarAt(0.1),
+  closeEnd: altarAt(0.42),
+  fadeOutStart: altarAt(0.33),
+  fadeOutEnd: altarAt(0.46),
+};
+const FADES = {
+  altarIn: [altarAt(0.03), altarAt(0.16)],
+  altarOut: [ALTAR.end, ALTAR.end + 0.03],
+  drinkIn: [DRINK.start - 0.005, DRINK.start + 0.025],
+} as const;
 const TIMELINE = {
   // Chapter starts follow the first visible beat of each step: the book
   // closing as the ingredients take flight, the cauldron starting to brew,
   // the altar/drink cross-fade midpoint, and the awakening flash.
   infuse: BOOK.closeStart,
   brew: altarAt(0.55),
-  drink: (ALTAR.fadeOutStart + ALTAR.fadeOutEnd) / 2,
-  awaken: drinkAt(0.6),
+  drink: (FADES.altarOut[0] + FADES.altarOut[1]) / 2,
+  awaken: drinkAt(0.4),
+  // The fog parts while the awakening plays (DrinkAwakenScene: 0.42 -> 0.62).
+  awakenEnd: drinkAt(0.62),
   // Book hotspots stop being readable once the pages start closing.
   bookReadableUntil: BOOK.closeStart,
-  altarReadableUntil: ALTAR.fadeOutEnd,
+  altarReadableUntil: FADES.altarOut[1],
   // skinview3d/WebGL for the player is created only once the story is close.
-  playerWarm: 0.5,
+  playerWarm: 0.36,
 };
 
 type ChapterId = 'discover' | 'infuse' | 'brew' | 'drink' | 'awaken';
-type Chapter = { id: ChapterId; start: number; end: number; landing: number };
+type Chapter = { id: ChapterId; end: number; landing: number };
 
-// `landing` is where chapter navigation scrolls to: a settled frame of that step.
+// A chapter runs until `end` (it starts where the previous one ends); `landing`
+// is where chapter navigation scrolls to: a settled frame of that step.
 const chapters: Chapter[] = [
-  { id: 'discover', start: 0, end: TIMELINE.infuse, landing: BOOK.end + 0.02 },
-  { id: 'infuse', start: TIMELINE.infuse, end: TIMELINE.brew, landing: altarAt(0.5) + 0.005 },
-  { id: 'brew', start: TIMELINE.brew, end: TIMELINE.drink, landing: altarAt(0.93) },
-  { id: 'drink', start: TIMELINE.drink, end: TIMELINE.awaken, landing: drinkAt(0.38) },
-  { id: 'awaken', start: TIMELINE.awaken, end: 1, landing: 1 },
+  { id: 'discover', end: TIMELINE.infuse, landing: BOOK.end + 0.02 },
+  { id: 'infuse', end: TIMELINE.brew, landing: altarAt(0.5) + 0.005 },
+  { id: 'brew', end: TIMELINE.drink, landing: altarAt(0.93) },
+  { id: 'drink', end: TIMELINE.awaken, landing: drinkAt(0.24) },
+  { id: 'awaken', end: 1, landing: 1 },
 ];
 
 const { tp, names } = useProgressionCopy();
@@ -237,28 +250,29 @@ function clamp01(value: number): number {
 function windowProgress(start: number, end: number) {
   return clamp01((progress.value - start) / (end - start));
 }
-function fadeIn(start: number, end: number) {
-  return clamp01((progress.value - start) / (end - start));
-}
 function fadeOut(start: number, end: number) {
-  return 1 - clamp01((progress.value - start) / (end - start));
+  return 1 - windowProgress(start, end);
 }
 
 const bookLocal = computed(() => windowProgress(BOOK.start, BOOK.end));
-// Step two begins with the physical book still on stage. Reverse only the
-// opening portion of its pose while the altar settles underneath it, so the
-// pages close around the departing ingredients instead of the whole book
-// simply cross-fading away.
 const bookClosingLocal = computed(() => windowProgress(BOOK.closeStart, BOOK.closeEnd));
 const altarLocal = computed(() => windowProgress(ALTAR.start, ALTAR.end));
 const drinkLocal = computed(() => windowProgress(DRINK.start, DRINK.end));
 
 const bookOpacity = computed(() => (reducedMotion.value ? 1 : fadeOut(BOOK.fadeOutStart, BOOK.fadeOutEnd)));
 const altarOpacity = computed(() => (reducedMotion.value ? 1 : Math.min(
-  fadeIn(ALTAR.fadeInStart, ALTAR.fadeInEnd),
-  fadeOut(ALTAR.fadeOutStart, ALTAR.fadeOutEnd),
+  windowProgress(...FADES.altarIn),
+  fadeOut(...FADES.altarOut),
 )));
-const drinkOpacity = computed(() => (reducedMotion.value ? 1 : fadeIn(DRINK.fadeInStart, DRINK.fadeInEnd)));
+const drinkOpacity = computed(() => (reducedMotion.value ? 1 : windowProgress(...FADES.drinkIn)));
+
+// CSS drivers for the stage dressing: --journey (whole chapter), --entry (the
+// section rising under the hero), --awaken (the fog parting at the climax).
+const sectionVars = computed(() => ({
+  '--journey': progress.value.toFixed(4),
+  '--entry': entryProgress.value.toFixed(4),
+  '--awaken': windowProgress(TIMELINE.awaken, TIMELINE.awakenEnd).toFixed(4),
+}));
 
 function windowStyle(opacity: number) {
   return {
@@ -272,8 +286,7 @@ const altarWindowStyle = computed(() => windowStyle(altarOpacity.value));
 const drinkWindowStyle = computed(() => windowStyle(drinkOpacity.value));
 
 // The inspector is teleported, so it must never outlive the scene that owns
-// its anchor. Clearing on a chapter/window transition fixes the stray cards
-// that previously remained on-screen after the book or altar had faded away.
+// its anchor: clear it on every chapter change and whenever its scene fades.
 watch(activeChapterIndex, () => clearDetail());
 watch([bookOpacity, altarOpacity, drinkOpacity], ([book, altar, drink]) => {
   const ownerHasFaded =
@@ -303,9 +316,8 @@ function onKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape' && activeHotspotId.value) clearDetail();
 }
 function clearExpiredInspector(nextProgress: number) {
-  // A pointer can remain at the same screen coordinate while the sticky scene
-  // scrolls underneath it. Do not let a teleported tooltip remain attached to
-  // a now-hidden control in that case.
+  // A pointer can rest on one spot while the pinned stage scrolls under it:
+  // never leave a teleported card attached to a control that has left.
   if (
     (inspectorScene.value === 'book' && nextProgress >= TIMELINE.bookReadableUntil) ||
     (inspectorScene.value === 'altar' && nextProgress >= TIMELINE.altarReadableUntil)
@@ -373,11 +385,18 @@ onUnmounted(() => {
 
 <style scoped>
 .progression-v3 {
+  --journey: 0;
   --entry: 0;
+  --awaken: 0;
+  /* The title card owns the entrance; the chapter copy and stage take over
+     as soon as the section pins. */
+  --title-in: clamp(0, calc((var(--entry) - 0.35) * 2.5), 1);
+  --title-out: clamp(0, calc(1 - var(--journey) * 40), 1);
+  --stage-in: clamp(0, calc((var(--journey) - 0.01) * 30), 1);
   position: relative;
-  min-height: 500svh;
-  color: var(--ink, #221c14);
-  background: var(--journey-mid, #f4ecdf);
+  min-height: 360svh;
+  color: var(--bone);
+  background: var(--fog-0);
   isolation: isolate;
 }
 
@@ -387,173 +406,205 @@ onUnmounted(() => {
   height: 100svh;
   min-height: 620px;
   overflow: hidden;
-  background: var(--journey-mid, #f4ecdf);
+  background: var(--fog-0);
 }
+
+/* ---- The brewery capture, sunk into the dark like the hero's scenes ---- */
 .progression-v3__backdrop,
-.progression-v3__wash {
+.progression-v3__omen,
+.progression-v3__fogbank,
+.progression-v3__vignette {
   position: absolute;
   inset: 0;
+  pointer-events: none;
 }
+
 .progression-v3__backdrop {
-  opacity: clamp(0, calc(var(--journey) * 22), 0.18);
-  transform: scale(calc(1.03 + var(--journey) * 0.05)) translate3d(0, calc(var(--journey) * -1.2%), 0);
-  transform-origin: 50% 56%;
+  opacity: calc(clamp(0, (var(--entry) - 0.3) * 1.43, 1) * (0.62 - var(--awaken) * 0.4));
+  transform: scale(calc(1.04 + var(--journey) * 0.06));
+  transform-origin: 50% 60%;
 }
+
 .progression-v3__backdrop img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center 56%;
-  filter: saturate(0.72) contrast(0.92) brightness(1.1);
-  mix-blend-mode: multiply;
-}
-.progression-v3__wash {
-  z-index: 1;
-  opacity: clamp(0, calc(var(--journey) * 18), 1);
-  background:
-    linear-gradient(90deg, rgba(250, 246, 238, 0.88) 0%, rgba(250, 246, 238, 0.42) 36%, rgba(250, 246, 238, 0.58) 100%),
-    linear-gradient(180deg, rgba(250, 246, 238, 0.92), rgba(250, 246, 238, 0.38) 34%, rgba(250, 246, 238, 0.94));
+  object-position: center 58%;
+  filter: grayscale(0.6) brightness(0.4) contrast(1.1);
 }
 
-.progression-v3__threshold-fog {
+/* Spirit-vision light behind the awakened player: the only colour on stage. */
+.progression-v3__omen {
+  opacity: var(--awaken);
+  background:
+    radial-gradient(ellipse 38% 60% at 46% 52%, rgba(179, 32, 43, 0.34), transparent 70%),
+    radial-gradient(ellipse 70% 90% at 46% 60%, rgba(142, 23, 32, 0.22), transparent 78%);
+}
+
+/* ---- Fog: two slow banks, parted at the climax ---- */
+.progression-v3__fogbank {
+  opacity: calc(1 - var(--awaken) * 0.75);
+  transform: translate3d(0, calc(var(--awaken) * 14%), 0);
+}
+
+.progression-v3__fog {
+  position: absolute;
+  left: -50%;
+  width: 200%;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+}
+
+.progression-v3__fog--far {
+  top: 6%;
+  height: 64%;
+  background-image:
+    radial-gradient(ellipse 18% 30% at 14% 58%, rgba(176, 184, 196, 0.14), transparent 70%),
+    radial-gradient(ellipse 22% 26% at 42% 38%, rgba(176, 184, 196, 0.1), transparent 70%),
+    radial-gradient(ellipse 18% 30% at 70% 64%, rgba(176, 184, 196, 0.13), transparent 70%),
+    radial-gradient(ellipse 22% 32% at 92% 44%, rgba(176, 184, 196, 0.1), transparent 70%);
+  animation: progression-fog 95s linear infinite;
+}
+
+.progression-v3__fog--near {
+  bottom: -10%;
+  height: 52%;
+  background-image:
+    radial-gradient(ellipse 26% 38% at 18% 72%, rgba(200, 206, 214, 0.2), transparent 72%),
+    radial-gradient(ellipse 20% 34% at 50% 84%, rgba(200, 206, 214, 0.16), transparent 72%),
+    radial-gradient(ellipse 28% 42% at 84% 76%, rgba(200, 206, 214, 0.2), transparent 72%);
+  animation: progression-fog 60s linear infinite reverse;
+}
+
+@keyframes progression-fog {
+  to { transform: translate3d(-25%, 0, 0); }
+}
+
+/* Copy side and rail stay on near-black; the stage keeps its depth. */
+.progression-v3__vignette {
+  background:
+    linear-gradient(90deg, rgba(7, 8, 11, 0.9) 0%, rgba(7, 8, 11, 0.55) 30%, transparent 58%),
+    radial-gradient(ellipse 85% 75% at 62% 50%, transparent 45%, rgba(7, 8, 11, 0.75) 100%),
+    linear-gradient(180deg, var(--fog-0) 0%, transparent 18%, transparent 78%, var(--fog-0) 100%);
+}
+
+/* The hero's fog rolls straight into this chapter; the book descends out of
+   it and it burns off as the story begins. */
+.progression-v3__threshold {
   position: absolute;
   z-index: 6;
-  top: -1px;
-  right: -8%;
-  left: -8%;
-  height: min(58vh, 560px);
-  overflow: hidden;
+  top: 0;
+  right: -10%;
+  left: -10%;
+  height: 62%;
+  /* Banks at the top edge continue the hero's low fog across the seam. */
   background:
-    radial-gradient(ellipse at 18% 42%, rgba(250, 246, 238, 0.95), transparent 44%),
-    radial-gradient(ellipse at 76% 38%, rgba(232, 225, 237, 0.85), transparent 48%);
-  filter: blur(0.2px);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 76%, transparent 100%);
-  opacity: clamp(0, calc(1.18 - var(--journey) * 9.5), 1);
+    radial-gradient(ellipse 26% 26% at 20% 0%, rgba(200, 206, 214, 0.26), transparent 72%),
+    radial-gradient(ellipse 20% 22% at 52% 2%, rgba(200, 206, 214, 0.2), transparent 72%),
+    radial-gradient(ellipse 28% 28% at 82% 0%, rgba(200, 206, 214, 0.26), transparent 72%),
+    radial-gradient(ellipse 34% 46% at 26% 34%, rgba(176, 184, 196, 0.14), transparent 72%),
+    radial-gradient(ellipse 36% 44% at 72% 30%, rgba(176, 184, 196, 0.12), transparent 72%);
+  opacity: clamp(0, calc(1 - var(--journey) * 7), 1);
   pointer-events: none;
 }
 
-.progression-v3__threshold-fog::before,
-.progression-v3__threshold-fog::after,
-.progression-v3__threshold-fog i {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(250, 246, 238, 0.8);
-  filter: blur(32px);
-  content: '';
-}
-
-.progression-v3__threshold-fog::before {
-  top: 25%;
-  left: 4%;
-  width: 54%;
-  height: 44%;
-}
-
-.progression-v3__threshold-fog::after {
-  top: 18%;
-  right: 0;
-  width: 48%;
-  height: 52%;
-}
-
-.progression-v3__threshold-fog i:first-child {
-  top: 49%;
-  left: 24%;
-  width: 38%;
-  height: 28%;
-}
-
-.progression-v3__threshold-fog i:last-child {
-  top: 55%;
-  right: 19%;
-  width: 31%;
-  height: 24%;
-}
-
+/* ---- Title card: the entrance only ---- */
 .progression-v3__heading {
   position: absolute;
   z-index: 8;
-  top: clamp(88px, 11vh, 110px);
+  top: calc(var(--home-header-height, 68px) + clamp(48px, 9vh, 96px));
+  right: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   display: grid;
-  gap: 7px;
-  /* A title card for the entrance only: it yields to each chapter's own
-     kicker once the book has landed, instead of pinning a stale tagline over
-     the later chapters. */
-  opacity: clamp(0, min(calc((var(--entry) - 0.2) * 2.8), calc(1 - (var(--journey) - 0.1) * 16)), 1);
-  transform: translate3d(0, calc(clamp(0, (var(--journey) - 0.1) * 16, 1) * -10px), 0);
+  justify-items: center;
+  gap: 16px;
+  text-align: center;
+  opacity: min(var(--title-in), var(--title-out));
+  transform: translate3d(0, calc((1 - var(--title-out)) * -18px), 0);
   pointer-events: none;
 }
-.progression-v3__heading p,
-.chapter-copy__kicker {
-  margin: 0;
-  color: #87691d;
-  font: 800 0.72rem/1 var(--font-body, "Manrope", sans-serif);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.progression-v3__heading h2 {
-  margin: 0;
-  color: var(--ink, #221c14);
-  font: 700 clamp(1.55rem, 2.2vw, 2.1rem)/1 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
-  letter-spacing: -0.025em;
-}
-.progression-v3__heading span {
-  color: var(--ink-muted, #756b5c);
-  font: 600 0.72rem/1.3 var(--font-body, "Manrope", sans-serif);
-  letter-spacing: 0.08em;
+
+.progression-v3__heading .fog-label::after {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: var(--crimson-text);
 }
 
+.progression-v3__heading h2 {
+  margin: 0;
+  color: var(--bone);
+  font: 600 clamp(2.6rem, 6vw, 5.4rem)/0.95 var(--font-display);
+  text-shadow: 0 10px 60px rgba(0, 0, 0, 0.6);
+}
+
+.progression-v3__tagline,
+.chapter-copy h3 + p,
+.progression-static p:not(.fog-label) {
+  text-wrap: pretty;
+}
+
+.progression-v3__tagline {
+  margin: 0;
+  color: var(--ash);
+  font: italic 500 clamp(1.15rem, 1.8vw, 1.5rem)/1.3 var(--font-display);
+}
+
+/* ---- Chapter copy + stage ---- */
 .progression-v3__layout {
   position: absolute;
   z-index: 4;
-  inset: clamp(150px, 19vh, 190px) var(--home-rail-inset, clamp(20px, 4vw, 56px)) clamp(84px, 11vh, 112px);
+  inset:
+    calc(var(--home-header-height, 68px) + clamp(20px, 4vh, 48px))
+    var(--home-rail-inset, clamp(20px, 4vw, 56px))
+    clamp(84px, 11vh, 108px);
   display: grid;
-  grid-template-columns: minmax(240px, 0.55fr) minmax(560px, 1.45fr);
+  grid-template-columns: minmax(250px, 0.55fr) minmax(560px, 1.45fr);
   align-items: center;
   gap: clamp(26px, 4vw, 72px);
-  opacity: clamp(0, calc((var(--entry) - 0.52) * 3.2), 1);
+  opacity: var(--stage-in);
 }
+
 .chapter-copy {
   min-width: 0;
-  align-self: center;
 }
+
 .chapter-copy h3 {
-  max-width: 420px;
-  margin: 14px 0 14px;
-  color: var(--ink, #221c14);
-  font: 700 clamp(2.1rem, 3.6vw, 3.5rem)/.94 var(--font-display, "IBM Plex Sans Condensed", sans-serif);
-  letter-spacing: -0.03em;
+  margin: 20px 0 18px;
+  color: var(--bone);
+  font: 600 clamp(2.3rem, 3.4vw, 3.4rem)/0.98 var(--font-display);
   text-wrap: balance;
 }
+
 .chapter-copy__body {
   max-width: 400px;
   margin: 0;
-  color: var(--ink-muted, #756b5c);
-  font-size: clamp(0.85rem, 1vw, 0.95rem);
-  font-weight: 500;
+  color: var(--ash);
+  font-size: clamp(0.95rem, 1.05vw, 1.04rem);
   line-height: 1.6;
 }
+
 .chapter-copy__hint {
+  max-width: 400px;
   display: flex;
   align-items: center;
-  gap: 9px;
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--hairline, #eae1d0);
-  color: var(--ink-muted, #756b5c);
-  font: 600 0.74rem/1.5 var(--font-body, "Manrope", sans-serif);
-  letter-spacing: 0.04em;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--ash);
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
+
 .chapter-copy__hint i {
   flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--primary, #7458e8);
-  box-shadow: 0 0 10px rgba(116, 88, 232, 0.35);
+  background: var(--crimson-text);
+  box-shadow: 0 0 0 4px var(--crimson-tint);
 }
 
 .progression-v3__stage {
@@ -563,39 +614,48 @@ onUnmounted(() => {
   min-height: 420px;
   outline: none;
 }
+
 .scene-window {
   position: absolute;
   inset: 0;
   transition: opacity 0.18s linear;
 }
 
+/* ---- Chapter rail ---- */
 .progression-nav {
   position: absolute;
   z-index: 20;
   right: var(--home-rail-inset, clamp(20px, 4vw, 56px));
-  bottom: 16px;
+  bottom: 14px;
   left: var(--home-rail-inset, clamp(20px, 4vw, 56px));
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  border-top: 1px solid var(--hairline, #eae1d0);
+  border-top: 1px solid var(--line);
 }
+
 .progression-nav button {
   position: relative;
   min-width: 44px;
   min-height: 56px;
   display: grid;
-  grid-template-columns: 14px 22px minmax(0, 1fr);
+  grid-template-columns: 14px 24px minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
   border: 0;
-  color: var(--ink-muted, #756b5c);
+  color: var(--ash);
   background: transparent;
   cursor: pointer;
   text-align: left;
+  transition: color 0.2s ease;
 }
+
+.progression-nav button:hover {
+  color: var(--bone);
+}
+
 /* States differ by shape, not only hue (WCAG 1.4.1): upcoming = hollow ring,
-   active = filled dot + bar on the rail + bold label, complete = check mark. */
+   active = filled crimson dot + bar on the rail + bold label, complete = check. */
 .progression-nav button > i {
   width: 8px;
   height: 8px;
@@ -604,85 +664,77 @@ onUnmounted(() => {
   border: 1.5px solid currentColor;
   border-radius: 50%;
 }
+
 .progression-nav button.active {
-  color: var(--primary, #7458e8);
+  color: var(--bone);
 }
+
 .progression-nav button.active::before {
   content: '';
   position: absolute;
-  top: -2px;
+  top: -1px;
   right: 8px;
   left: 8px;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background: var(--primary, #7458e8);
+  height: 2px;
+  background: var(--crimson);
+  box-shadow: 0 0 14px rgba(179, 32, 43, 0.7);
 }
+
 .progression-nav button.active > i {
   width: 10px;
   height: 10px;
-  border-color: var(--primary, #7458e8);
-  background: var(--primary, #7458e8);
-  box-shadow: 0 0 0 3px var(--primary-tint, rgba(116, 88, 232, 0.12));
+  border-color: var(--crimson-text);
+  background: var(--crimson);
+  box-shadow: 0 0 0 4px var(--crimson-tint);
 }
+
 .progression-nav button.active strong {
-  font-weight: 800;
+  font-weight: 700;
 }
-.progression-nav button.complete {
-  color: var(--ink, #221c14);
-}
+
 .progression-nav button.complete > i {
   width: 14px;
   height: 14px;
-  border-color: var(--ink, #221c14);
-  background: var(--ink, #221c14);
+  border-color: var(--line-strong);
+  background: var(--fog-3);
 }
+
 .progression-nav button > i svg {
   width: 10px;
   height: 10px;
   fill: none;
-  stroke: #fff;
+  stroke: var(--bone);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
 .progression-nav span {
-  font: 700 0.68rem/1 var(--font-body, "Manrope", sans-serif);
-  letter-spacing: 0.08em;
+  font: 500 0.7rem/1 var(--font-mono);
+  letter-spacing: 0.12em;
 }
+
 .progression-nav strong {
-  font-size: 0.74rem;
-  font-weight: 700;
+  font-size: 0.84rem;
+  font-weight: 500;
 }
-.progression-nav button:focus-visible {
-  outline: 3px solid var(--primary, #7458e8);
-  outline-offset: 2px;
-}
+
 .progression-line {
   position: absolute;
   z-index: 21;
   right: 0;
   bottom: 0;
   left: 0;
-  height: 3px;
-  background: rgba(34, 28, 20, 0.08);
+  height: 2px;
+  background: var(--line);
 }
+
 .progression-line i {
   display: block;
   width: 100%;
   height: 100%;
-  background: var(--primary, #7458e8);
+  background: linear-gradient(90deg, var(--crimson-deep), var(--crimson));
   transform-origin: left center;
-}
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 .progression-static {
@@ -691,12 +743,14 @@ onUnmounted(() => {
 
 .chapter-copy-enter-active,
 .chapter-copy-leave-active {
-  transition: opacity 0.25s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.3s ease, transform 0.6s var(--ease-out);
 }
+
 .chapter-copy-enter-from {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(16px);
 }
+
 .chapter-copy-leave-to {
   opacity: 0;
   transform: translateY(-8px);
@@ -704,67 +758,31 @@ onUnmounted(() => {
 
 @media (max-width: 1120px) {
   .progression-v3__layout {
-    grid-template-columns: minmax(210px, 0.55fr) minmax(480px, 1.3fr);
+    grid-template-columns: minmax(220px, 0.55fr) minmax(480px, 1.3fr);
     gap: 24px;
   }
+
   .progression-nav strong {
     display: none;
   }
+
   .progression-nav button {
     grid-template-columns: 14px 1fr;
     justify-items: center;
   }
 }
-@media (max-width: 820px) {
-  .progression-v3 {
-    min-height: 560svh;
-  }
-  .progression-v3__layout {
-    inset: 132px var(--home-content-gutter, clamp(20px, 4vw, 56px)) 70px;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(320px, 1fr);
-    gap: 6px;
-    align-items: start;
-  }
-  .chapter-copy h3 {
-    margin: 8px 0 8px;
-    font-size: clamp(1.7rem, 7.5vw, 2.6rem);
-  }
-  .chapter-copy__body {
-    max-width: 620px;
-    font-size: 0.8rem;
-    line-height: 1.45;
-  }
-  .chapter-copy__hint {
-    display: none;
-  }
-  .progression-v3__stage {
-    height: 100%;
-    min-height: 320px;
-  }
-}
-@media (max-width: 520px) {
-  .progression-v3__heading {
-    top: 80px;
-    right: var(--home-content-gutter, 20px);
-    left: var(--home-content-gutter, 20px);
-  }
-  .progression-v3__heading span {
-    display: none;
-  }
-  .progression-v3__layout {
-    /* The two-line mobile heading finishes around 142px. Start the chapter
-       copy below it so the stage never clips the kicker into the title. */
-    inset: 154px var(--home-content-gutter, 20px) 62px;
-  }
-}
 
-@media (prefers-reduced-motion: reduce), (max-height: 640px) {
+/*
+ * Sticky storytelling needs room for its copy, controls and media to coexist.
+ * Narrow and short viewports, and reduced motion, get one document-flow list.
+ */
+@media (max-width: 900px), (max-height: 700px), (prefers-reduced-motion: reduce) {
   .progression-v3 {
     min-height: auto;
-    padding: clamp(96px, 12vw, 140px) clamp(16px, 4vw, 58px);
-    background: transparent;
+    padding: var(--home-section-block, 96px) var(--home-content-gutter, 20px);
+    overflow: hidden;
   }
+
   .progression-v3__sticky {
     position: relative;
     height: auto;
@@ -772,74 +790,120 @@ onUnmounted(() => {
     overflow: visible;
     background: transparent;
   }
+
+  /* The capture becomes a band behind the heading, fading into the list. */
   .progression-v3__backdrop,
-  .progression-v3__wash,
+  .progression-v3__vignette {
+    inset: calc(-1 * var(--home-section-block, 96px)) calc(-1 * var(--home-content-gutter, 20px)) auto;
+    height: min(560px, 80vh);
+  }
+
+  .progression-v3__backdrop {
+    opacity: 0.55;
+    transform: none;
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 20%, #000 45%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 20%, #000 45%, transparent);
+  }
+
+  .progression-v3__omen,
+  .progression-v3__fogbank,
+  .progression-v3__threshold,
   .progression-v3__layout,
   .progression-nav,
   .progression-line {
     display: none;
   }
+
+  /* low fog carried over from the hero, then the copy side kept dark */
+  .progression-v3__vignette {
+    background:
+      radial-gradient(ellipse 40% 22% at 15% 0%, rgba(200, 206, 214, 0.2), transparent 72%),
+      radial-gradient(ellipse 36% 18% at 60% 0%, rgba(200, 206, 214, 0.16), transparent 72%),
+      radial-gradient(ellipse 40% 22% at 95% 0%, rgba(200, 206, 214, 0.2), transparent 72%),
+      linear-gradient(90deg, rgba(7, 8, 11, 0.7), transparent 70%);
+  }
+
   .progression-v3__heading {
     position: relative;
-    top: auto;
-    left: auto;
-    width: min(760px, 100%);
-    margin: 0 auto 40px;
+    inset: auto;
+    width: min(880px, 100%);
+    margin: 0 auto clamp(36px, 7vw, 56px);
+    justify-items: start;
+    text-align: left;
     opacity: 1;
     transform: none;
   }
-  .progression-v3__heading h2 {
-    margin-top: 8px;
-    font-size: clamp(2.2rem, 7vw, 4rem);
+
+  .progression-v3__heading .fog-label::after {
+    display: none;
   }
+
+  .progression-v3__heading h2 {
+    font-size: clamp(2.5rem, 9vw, 4.2rem);
+  }
+
   .progression-static {
+    position: relative;
     width: min(880px, 100%);
     display: block;
     margin: 0 auto;
+  }
+
+  .progression-static ol {
+    margin: 0;
     padding: 0;
     list-style: none;
   }
+
   .progression-static li {
-    display: grid;
-    grid-template-columns: 52px minmax(0, 1fr);
-    gap: clamp(16px, 4vw, 40px);
-    padding: clamp(24px, 4.5vw, 42px) 0;
-    border-top: 1px solid var(--hairline, #eae1d0);
+    position: relative;
+    padding: clamp(26px, 5vw, 40px) 0;
+    border-top: 1px solid var(--line);
   }
-  .progression-static li > span {
-    color: #87691d;
-    font: 700 0.72rem/1 var(--font-body, "Manrope", sans-serif);
-    letter-spacing: 0.12em;
-  }
-  .progression-static small {
-    color: var(--primary-deep, #5f46d6);
-    font: 800 0.72rem/1 var(--font-body, "Manrope", sans-serif);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
+
   .progression-static h3 {
-    margin: 9px 0 10px;
-    color: var(--ink, #221c14);
-    font: 800 clamp(1.8rem, 5vw, 3rem)/1 var(--font-body, "Manrope", sans-serif);
-    letter-spacing: -0.03em;
+    margin: 14px 0 10px;
+    color: var(--bone);
+    font: 600 clamp(2rem, 7vw, 2.9rem)/1 var(--font-display);
+    text-wrap: balance;
   }
-  .progression-static p {
+
+  .progression-static p:not(.fog-label) {
     max-width: 620px;
     margin: 0;
-    color: var(--ink-muted, #756b5c);
-    font-size: 0.9rem;
-    font-weight: 500;
+    color: var(--ash);
+    font-size: 0.98rem;
     line-height: 1.6;
   }
+
+  /* The awakening is the climax: a crimson rule under a faint crimson moon. */
+  .progression-static li.is-climax {
+    border-top-color: rgba(229, 84, 93, 0.45);
+  }
+
+  .progression-static li.is-climax::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0 -20% -30% -10%;
+    background: radial-gradient(ellipse 50% 60% at 18% 40%, rgba(179, 32, 43, 0.2), transparent 70%);
+    content: '';
+    pointer-events: none;
+  }
+
+  .progression-static .fog-button {
+    margin-top: 8px;
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .chapter-copy-enter-active,
   .chapter-copy-leave-active,
   .scene-window {
     transition: none;
   }
-  .progression-v3__backdrop {
-    transform: none;
+
+  .progression-v3__fog {
+    animation: none;
   }
 }
 </style>

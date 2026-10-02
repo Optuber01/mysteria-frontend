@@ -267,6 +267,10 @@ onUnmounted(() => {
       radial-gradient(ellipse 28% 44% at 82% 74%, rgba(200, 206, 214, .3), transparent 72%);
   background-size: 50% 100%;
   animation: fog-drift 55s linear infinite reverse;
+  /* Fade out before the section edge so the bank never shows a cut line where
+     the next chapter begins. */
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 88%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 88%);
 }
 
 @keyframes fog-drift {

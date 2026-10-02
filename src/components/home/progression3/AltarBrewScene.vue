@@ -1,9 +1,9 @@
 <template>
   <div ref="sceneRef" class="altar-scene" role="group" :aria-label="tp('altar.sceneLabel')">
-    <!-- soft gold vignette pulse during the reveal -->
+    <!-- a crimson bloom behind the print as the potion is revealed -->
     <div class="altar-scene__vignette" :style="vignetteStyle" aria-hidden="true" />
 
-    <!-- magic circle behind the GUI (brew-circle hotspot) -->
+    <!-- magic circle behind the print (brew-circle hotspot) -->
     <button
       type="button"
       class="hotspot altar-scene__circle-hotspot"
@@ -18,56 +18,59 @@
       <span class="altar-scene__circle-art" :style="circleMaskStyle" aria-hidden="true" />
     </button>
 
-    <!-- Actual in-game cauldron interface, cropped to its central GUI. -->
-    <div ref="guiRef" class="gui" :style="guiStyle" role="group" :aria-label="tp('altar.interfaceLabel')">
-      <img class="gui__img" :src="cauldronInterface" alt="" width="636" height="284" decoding="async" draggable="false" />
+    <!-- The real in-game cauldron screen, printed and pinned like evidence. -->
+    <div class="print" :style="printStyle">
+      <div ref="guiRef" class="gui" role="group" :aria-label="tp('altar.interfaceLabel')">
+        <img class="gui__img" :src="cauldronInterface" alt="" width="636" height="284" decoding="async" draggable="false" />
 
-      <!-- green confirm button glows as the brew completes -->
-      <span class="gui__confirm" :style="confirmStyle" aria-hidden="true" />
+        <!-- the confirm slot lights as the brew completes -->
+        <span class="gui__confirm" :style="confirmStyle" aria-hidden="true" />
 
-      <!-- zone hotspots: recipe / main / supplementary slots -->
-      <button
-        type="button"
-        class="hotspot gui__zone gui__zone--recipe"
-        :style="recipeZoneStyle"
-        :aria-label="tp('details.recipeSlot.label')"
-        @mouseenter="inspect('brew-recipe-slot', $event)"
-        @mouseleave="emit('clear-inspect')"
-        @focus="inspect('brew-recipe-slot', $event)"
-        @blur="emit('clear-inspect')"
-        @click="inspect('brew-recipe-slot', $event)"
-      />
-      <button
-        type="button"
-        class="hotspot gui__zone gui__zone--main"
-        :style="mainZoneStyle"
-        :aria-label="tp('details.mainSlots.label')"
-        @mouseenter="inspect('brew-main-slots', $event)"
-        @mouseleave="emit('clear-inspect')"
-        @focus="inspect('brew-main-slots', $event)"
-        @blur="emit('clear-inspect')"
-        @click="inspect('brew-main-slots', $event)"
-      />
-      <button
-        type="button"
-        class="hotspot gui__zone gui__zone--supp"
-        :style="suppZoneStyle"
-        :aria-label="tp('details.supplementarySlots.label')"
-        @mouseenter="inspect('brew-supp-slots', $event)"
-        @mouseleave="emit('clear-inspect')"
-        @focus="inspect('brew-supp-slots', $event)"
-        @blur="emit('clear-inspect')"
-        @click="inspect('brew-supp-slots', $event)"
-      />
+        <!-- zone hotspots: recipe / main / supplementary slots -->
+        <button
+          type="button"
+          class="hotspot gui__zone"
+          :style="recipeZoneStyle"
+          :aria-label="tp('details.recipeSlot.label')"
+          @mouseenter="inspect('brew-recipe-slot', $event)"
+          @mouseleave="emit('clear-inspect')"
+          @focus="inspect('brew-recipe-slot', $event)"
+          @blur="emit('clear-inspect')"
+          @click="inspect('brew-recipe-slot', $event)"
+        />
+        <button
+          type="button"
+          class="hotspot gui__zone"
+          :style="mainZoneStyle"
+          :aria-label="tp('details.mainSlots.label')"
+          @mouseenter="inspect('brew-main-slots', $event)"
+          @mouseleave="emit('clear-inspect')"
+          @focus="inspect('brew-main-slots', $event)"
+          @blur="emit('clear-inspect')"
+          @click="inspect('brew-main-slots', $event)"
+        />
+        <button
+          type="button"
+          class="hotspot gui__zone"
+          :style="suppZoneStyle"
+          :aria-label="tp('details.supplementarySlots.label')"
+          @mouseenter="inspect('brew-supp-slots', $event)"
+          @mouseleave="emit('clear-inspect')"
+          @focus="inspect('brew-supp-slots', $event)"
+          @blur="emit('clear-inspect')"
+          @click="inspect('brew-supp-slots', $event)"
+        />
+      </div>
+      <p class="print__caption" aria-hidden="true">{{ tp('altar.printCaption') }}</p>
     </div>
 
-    <!-- flying / resting ingredient chips -->
+    <!-- flying / resting ingredients -->
     <button
       v-for="item in items"
       :key="item.id"
       type="button"
       class="hotspot item"
-      :class="{ 'is-rested': item.rested, 'is-brewing': brewing }"
+      :class="{ 'is-rested': item.rested }"
       :style="item.style"
       :aria-label="item.label"
       @mouseenter="inspect(item.id, $event)"
@@ -76,9 +79,7 @@
       @blur="emit('clear-inspect')"
       @click="inspect(item.id, $event)"
     >
-      <span class="item__chip">
-        <img class="item__icon" :src="item.asset" alt="" width="16" height="16" decoding="async" draggable="false" />
-      </span>
+      <img class="item__icon" :src="item.asset" alt="" width="16" height="16" decoding="async" draggable="false" />
     </button>
 
     <!-- bubbles rising from the cauldron while brewing -->
@@ -101,7 +102,7 @@
       >
         <span class="altar-scene__halo" :style="potionHaloStyle" aria-hidden="true" />
         <img class="altar-scene__potion-img" :src="sequencePotion" alt="" width="16" height="16" decoding="async" draggable="false" />
-        <span class="altar-scene__caption" :style="captionStyle" aria-hidden="true">{{ tp('altar.potionCaption') }}</span>
+        <span class="altar-scene__caption" aria-hidden="true">{{ tp('altar.potionCaption') }}</span>
       </button>
     </div>
   </div>
@@ -130,27 +131,10 @@ const emit = defineEmits<{
 
 const reduced = useReducedMotion();
 const { tp } = useProgressionCopy();
-const compact = ref(false);
-let mediaQuery: MediaQueryList | null = null;
 
-function syncCompact(): void {
-  compact.value = mediaQuery?.matches ?? false;
-}
-
-onMounted(() => {
-  mediaQuery = window.matchMedia('(max-width: 820px)');
-  syncCompact();
-  mediaQuery.addEventListener('change', syncCompact);
-  syncGeom();
-  if (sceneRef.value) resizeObserver = new ResizeObserver(syncGeom);
-  if (sceneRef.value) resizeObserver?.observe(sceneRef.value);
-});
-
-onUnmounted(() => {
-  mediaQuery?.removeEventListener('change', syncCompact);
-  resizeObserver?.disconnect();
-  resizeObserver = null;
-});
+/* The print sits at the right of the stage, pinned slightly askew. */
+const PRINT = { x: 70, y: 53, tiltDeg: -1.4 };
+const TILT = (PRINT.tiltDeg * Math.PI) / 180;
 
 /* ---------------- helpers ---------------- */
 function clamp01(value: number): number {
@@ -181,13 +165,15 @@ const final = computed(() => reduced.value); // reduced motion => static final c
 const altarIn = computed(() => (final.value ? 1 : clamp01(p.value / 0.1)));
 const brew = computed(() => (final.value ? 1 : clamp01((p.value - 0.55) / 0.3)));
 const reveal = computed(() => (final.value ? 1 : clamp01((p.value - 0.78) / 0.14)));
-const brewing = computed(() => p.value >= 0.55);
 
 /* ---------------- scene geometry (px, measured) ---------------- */
 const sceneRef = ref<HTMLElement | null>(null);
 const guiRef = ref<HTMLElement | null>(null);
 let resizeObserver: ResizeObserver | null = null;
-const geom = ref({ w: 0, h: 0, guiLeft: 0, guiTop: 0, guiW: 0, guiH: 0 });
+// The screen's centre and its untransformed size: slot positions are rotated
+// with the print's tilt, so the bounding box (which grows with rotation) is
+// only used for the centre.
+const geom = ref({ w: 0, h: 0, cx: 0, cy: 0, guiW: 0, guiH: 0 });
 
 function syncGeom(): void {
   const scene = sceneRef.value;
@@ -198,35 +184,57 @@ function syncGeom(): void {
   geom.value = {
     w: scene.clientWidth,
     h: scene.clientHeight,
-    guiLeft: g.left - s.left,
-    guiTop: g.top - s.top,
-    guiW: g.width,
-    guiH: g.height,
+    cx: g.left + g.width / 2 - s.left,
+    cy: g.top + g.height / 2 - s.top,
+    guiW: gui.offsetWidth,
+    guiH: gui.offsetHeight,
   };
 }
+
+onMounted(() => {
+  syncGeom();
+  if (sceneRef.value) {
+    resizeObserver = new ResizeObserver(syncGeom);
+    resizeObserver.observe(sceneRef.value);
+  }
+});
+onUnmounted(() => {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+});
 
 /* re-measure whenever the entrance transform settles (rects include the transform) */
 watch(altarIn, () => requestAnimationFrame(syncGeom));
 
-/* ---------------- GUI panel ---------------- */
-const guiStyle = computed<CSSProperties>(() => {
-  const inValue = altarIn.value;
-  const x = compact.value ? 50 : 70;
-  const y = compact.value ? 50 : 53;
+type Point = { x: number; y: number };
+
+/** A point given in % of the screen capture, in scene px (tilt applied). */
+function onPrint(point: Point): Point {
+  const g = geom.value;
+  const dx = (point.x / 100 - 0.5) * g.guiW;
+  const dy = (point.y / 100 - 0.5) * g.guiH;
   return {
-    left: `${x}%`,
-    top: `${y}%`,
-    width: compact.value ? 'min(340px, 84vw)' : 'min(470px, 49vw)',
+    x: g.cx + dx * Math.cos(TILT) - dy * Math.sin(TILT),
+    y: g.cy + dx * Math.sin(TILT) + dy * Math.cos(TILT),
+  };
+}
+
+/* ---------------- print ---------------- */
+const printStyle = computed<CSSProperties>(() => {
+  const inValue = altarIn.value;
+  return {
+    left: `${PRINT.x}%`,
+    top: `${PRINT.y}%`,
     opacity: inValue.toFixed(4),
-    transform: `translate(-50%, -50%) scale(${(0.9 + 0.1 * inValue).toFixed(4)}) translateY(${((1 - inValue) * 26).toFixed(1)}px)`,
+    transform: `translate(-50%, -50%) translateY(${((1 - inValue) * 26).toFixed(1)}px) rotate(${PRINT.tiltDeg}deg) scale(${(0.9 + 0.1 * inValue).toFixed(4)})`,
     pointerEvents: inValue > 0.5 ? 'auto' : 'none',
   };
 });
 
 /*
- * Pixel-verified slot centres on the actual in-game Ritual Altar capture.
- * The scene crops the 636 px image to x=143..493, so X values are relative
- * to that 350 px GUI region while Y values remain relative to all 284 px.
+ * Pixel-verified slot centres on the actual in-game capture. The print crops
+ * the 636 px image to x=143..493, so X values are relative to that 350 px
+ * region while Y values remain relative to all 284 px.
  */
 const SLOT_R = { x: 50.3, y: 36.6 };
 const SLOT_M1 = { x: 19.5, y: 49.3 };
@@ -234,35 +242,33 @@ const SLOT_M2 = { x: 29.6, y: 62 };
 const SLOT_S1 = { x: 70.9, y: 49.3 };
 const SLOT_C = { x: 50.3, y: 74.6 };
 
-function zoneStyle(slot: { x: number; y: number }, w: number, h: number): CSSProperties {
+function zoneStyle(slot: Point, w: number, h: number): CSSProperties {
   return {
     left: `${slot.x.toFixed(2)}%`,
     top: `${slot.y.toFixed(2)}%`,
     width: `${w.toFixed(2)}%`,
     height: `${h.toFixed(2)}%`,
-    pointerEvents: altarIn.value > 0.5 ? 'auto' : 'none',
   };
 }
-const recipeZoneStyle = computed<CSSProperties>(() => zoneStyle(SLOT_R, 11, 9));
-const mainZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 24.55, y: 55.65 }, 28, 28));
-const suppZoneStyle = computed<CSSProperties>(() => zoneStyle({ x: 76, y: 55.65 }, 28, 28));
+const recipeZoneStyle = zoneStyle(SLOT_R, 11, 9);
+const mainZoneStyle = zoneStyle({ x: 24.55, y: 55.65 }, 28, 28);
+const suppZoneStyle = zoneStyle({ x: 76, y: 55.65 }, 28, 28);
 
 const confirmStyle = computed<CSSProperties>(() => {
   const b = brew.value;
   return {
     left: `${SLOT_C.x.toFixed(2)}%`,
     top: `${SLOT_C.y.toFixed(2)}%`,
-    opacity: (b * 0.85).toFixed(4),
+    opacity: (b * 0.9).toFixed(4),
     transform: `translate(-50%, -50%) scale(${(0.7 + 0.45 * b).toFixed(4)})`,
-    boxShadow: `0 0 ${(6 + 14 * b).toFixed(1)}px ${(3 + 4 * b).toFixed(1)}px rgba(131, 216, 105, ${(0.35 * b).toFixed(3)})`,
+    boxShadow: `0 0 ${(6 + 16 * b).toFixed(1)}px ${(3 + 4 * b).toFixed(1)}px rgba(229, 84, 93, ${(0.45 * b).toFixed(3)})`,
   };
 });
 
-/* ---------------- ingredient flight: book -> GUI slots ---------------- */
+/* ---------------- ingredient flight: book -> screen slots ---------------- */
 const FLIGHT_SPAN = 0.2;
-const ARC_PX = { desktop: 42, mobile: 24 };
+const ARC_PX = 42;
 
-type Point = { x: number; y: number };
 type ItemSpec = {
   id: string;
   labelKey: string;
@@ -270,12 +276,12 @@ type ItemSpec = {
   stagger: number;
   bookX: number; // normalised position inside the 680 x 548 book viewport
   bookY: number;
-  slot: Point; // % of the GUI texture
+  slot: Point; // % of the screen capture
 };
 
 const ITEMS: ItemSpec[] = [
   // Positions match the icons painted onto the physical book leaves. The
-  // launch is delayed until the altar panel has reached its resting geometry.
+  // launch is delayed until the print has reached its resting geometry.
   // Loading order follows the in-game guide: main ingredients (left slots),
   // supplementary ingredients (right slots), then the recipe in the centre.
   { id: 'lavos-squid-blood', labelKey: 'ingredients.lavosSquidBlood', asset: lavosSquidBlood, stagger: 0.12, bookX: 0.2226, bookY: 0.3071, slot: SLOT_M1 },
@@ -303,7 +309,6 @@ type FlightItem = ItemSpec & {
 
 const items = computed<FlightItem[]>(() => {
   const g = geom.value;
-  const arc = compact.value ? ARC_PX.mobile : ARC_PX.desktop;
   const dim = p.value >= 0.85 && !final.value ? 0.82 : 1;
   const unmeasured = g.w <= 0 || g.guiW <= 0;
   return ITEMS.map((spec) => {
@@ -311,20 +316,16 @@ const items = computed<FlightItem[]>(() => {
     if (unmeasured) {
       return { ...spec, label, rested: false, style: { opacity: 0, pointerEvents: 'none' } };
     }
-    const t = clamp01((p.value - spec.stagger) / FLIGHT_SPAN);
-    const f = final.value ? 1 : t;
+    const f = final.value ? 1 : clamp01((p.value - spec.stagger) / FLIGHT_SPAN);
     const e = smoothstep(f);
     const source = bookSource(spec, g);
-    const sx = source.x;
-    const sy = source.y;
-    const ex = g.guiLeft + (spec.slot.x / 100) * g.guiW;
-    const ey = g.guiTop + (spec.slot.y / 100) * g.guiH;
-    const x = lerp(sx, ex, e);
-    const y = lerp(sy, ey, e) - arc * Math.sin(f * Math.PI);
+    const target = onPrint(spec.slot);
+    const x = lerp(source.x, target.x, e);
+    const y = lerp(source.y, target.y, e) - ARC_PX * Math.sin(f * Math.PI);
     const slotBlend = smoothstep(clamp01((f - 0.42) / 0.58));
     const scale = (1.15 - 0.15 * f) * (1 - 0.38 * slotBlend);
-    const rotate = (1 - f) * 7;
-    const trailStrength = 1 - f;
+    const rotate = (1 - f) * 7 + f * PRINT.tiltDeg;
+    const trail = 1 - f;
     const style: CSSProperties = {
       left: `${x.toFixed(2)}px`,
       top: `${y.toFixed(2)}px`,
@@ -332,10 +333,10 @@ const items = computed<FlightItem[]>(() => {
       opacity: (clamp01(f * 14) * dim).toFixed(4),
       pointerEvents: f > 0 ? 'auto' : 'none',
       zIndex: String(f >= 1 ? 8 : 9),
-      boxShadow:
-        trailStrength > 0.02
-          ? `0 0 ${(10 + 18 * trailStrength).toFixed(0)}px ${(3 + 2 * trailStrength).toFixed(1)}px rgba(217, 180, 90, ${(0.4 * trailStrength).toFixed(3)})`
-          : undefined,
+      // A pale spirit trail while in flight; none once seated in the slot.
+      filter: trail > 0.02
+        ? `drop-shadow(0 0 ${(6 + 10 * trail).toFixed(1)}px rgba(236, 230, 218, ${(0.55 * trail).toFixed(3)}))`
+        : undefined,
     };
     return { ...spec, label, rested: f >= 1, style };
   });
@@ -343,34 +344,34 @@ const items = computed<FlightItem[]>(() => {
 
 /* ---------------- magic circle (brew phase) ---------------- */
 const circleIn = computed(() => (final.value ? 1 : clamp01((p.value - 0.5) / 0.12)));
-const circleMaskStyle = computed<CSSProperties>(() => ({
+const circleMaskStyle: CSSProperties = {
   maskImage: `url(${magicCircle})`,
   WebkitMaskImage: `url(${magicCircle})`,
-}));
+};
 const circleStyle = computed<CSSProperties>(() => {
   const inValue = circleIn.value;
   const bright = brew.value;
   const rotation = final.value ? 100 : p.value * 120;
+  const g = geom.value;
+  const centre = g.guiW > 0 ? { left: `${g.cx.toFixed(1)}px`, top: `${g.cy.toFixed(1)}px` } : { left: `${PRINT.x}%`, top: `${PRINT.y}%` };
   return {
-    left: `${compact.value ? 50 : 70}%`,
-    top: `${compact.value ? 50 : 53}%`,
-    opacity: (inValue * 0.92).toFixed(4),
+    ...centre,
+    opacity: (inValue * 0.95).toFixed(4),
     transform: `translate(-50%, -50%) rotate(${rotation.toFixed(2)}deg) scale(${(0.84 + 0.16 * inValue).toFixed(4)})`,
-    filter: `brightness(${(0.5 + 0.5 * bright).toFixed(3)}) saturate(${(0.8 + 0.3 * bright).toFixed(3)}) drop-shadow(0 0 ${(10 + 20 * bright).toFixed(1)}px rgba(198, 155, 82, ${(0.16 + 0.28 * bright).toFixed(3)}))`,
+    filter: `brightness(${(0.55 + 0.6 * bright).toFixed(3)}) drop-shadow(0 0 ${(8 + 22 * bright).toFixed(1)}px rgba(179, 32, 43, ${(0.3 + 0.4 * bright).toFixed(3)}))`,
     pointerEvents: inValue > 0.4 ? 'auto' : 'none',
   };
 });
 
-/* ---------------- FX layer over the cauldron pot (top-left of the GUI) ---------------- */
+/* ---------------- FX layer over the cauldron (centre of the screen) ---------------- */
 const fxStyle = computed<CSSProperties>(() => {
   const g = geom.value;
   if (g.guiW <= 0) return { opacity: 0 };
-  const cx = g.guiLeft + 0.5 * g.guiW;
-  const cy = g.guiTop + 0.43 * g.guiH;
-  const size = compact.value ? 130 : 180;
+  const centre = onPrint({ x: 50, y: 43 });
+  const size = 180;
   return {
-    left: `${(cx - size / 2).toFixed(1)}px`,
-    top: `${(cy - size / 2).toFixed(1)}px`,
+    left: `${(centre.x - size / 2).toFixed(1)}px`,
+    top: `${(centre.y - size / 2).toFixed(1)}px`,
     width: `${size}px`,
     height: `${size}px`,
   };
@@ -384,8 +385,8 @@ const revealWrapStyle = computed<CSSProperties>(() => ({
 const potionStyle = computed<CSSProperties>(() => {
   const r = reveal.value;
   return {
-    left: `${compact.value ? 50 : 70}%`,
-    top: `${compact.value ? 10 : 13}%`,
+    left: `${PRINT.x}%`,
+    top: '9%',
     transform: `translate(-50%, -50%) scale(${easeOutBack(r).toFixed(4)})`,
     filter: `brightness(${(0.35 + 0.65 * r).toFixed(3)})`,
     pointerEvents: r > 0.5 ? 'auto' : 'none',
@@ -395,10 +396,6 @@ const potionStyle = computed<CSSProperties>(() => {
 const potionHaloStyle = computed<CSSProperties>(() => ({
   opacity: (0.5 + 0.5 * reveal.value).toFixed(4),
   transform: `scale(${(0.9 + 0.2 * reveal.value).toFixed(4)})`,
-}));
-
-const captionStyle = computed<CSSProperties>(() => ({
-  opacity: reveal.value.toFixed(4),
 }));
 
 const vignetteStyle = computed<CSSProperties>(() => ({
@@ -417,11 +414,11 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  color: var(--ink, #221c14);
-  font-family: var(--font-body, "Manrope", sans-serif);
+  color: var(--bone);
+  font-family: var(--font-body);
 }
 
-/* shared hotspot base: 44px min touch target, gold focus ring */
+/* shared hotspot base: 44px min touch target, crimson focus ring */
 .hotspot {
   min-width: 44px;
   min-height: 44px;
@@ -432,40 +429,33 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   font-family: inherit;
 }
 .hotspot:focus-visible {
-  outline: 3px solid var(--primary, #7458e8);
+  outline: 2px solid var(--crimson-text);
   outline-offset: 3px;
 }
 
-/* ---------- vignette ---------- */
+/* ---------- reveal bloom (fades out well inside the stage edges) ---------- */
 .altar-scene__vignette {
   position: absolute;
   inset: 0;
-  z-index: 20;
+  z-index: 0;
   pointer-events: none;
-  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(217, 180, 90, .1) 78%, rgba(34, 28, 20, .12) 100%);
-  animation: vignette-pulse 3s ease-in-out infinite;
-}
-@keyframes vignette-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
+  background: radial-gradient(ellipse 40% 50% at 70% 45%, rgba(179, 32, 43, 0.22), transparent 100%);
 }
 
-/* ---------- magic circle (behind the GUI panel) ---------- */
+/* ---------- magic circle (behind the print) ---------- */
 .altar-scene__circle-hotspot {
   position: absolute;
   z-index: 1;
-  width: min(500px, 58vw);
+  width: min(620px, 62vw);
   aspect-ratio: 1;
   padding: 0;
-  border: 0;
   border-radius: 50%;
-  background: transparent;
 }
 .altar-scene__circle-art {
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #eeda9f, #c69b52 70%);
+  background: linear-gradient(135deg, var(--crimson-text), var(--crimson-deep) 70%);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
@@ -473,24 +463,40 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  -webkit-mask-mode: luminance;
-  filter: drop-shadow(0 0 12px rgba(198, 155, 82, .45));
 }
 
-/* ---------- CauldronGUI panel ---------- */
-.gui {
+/* ---------- the print: a paper photograph of the in-game screen ---------- */
+.print {
   position: absolute;
   z-index: 3;
+  width: min(440px, 54%);
+  padding: 11px 11px 0;
+  border-radius: 3px;
+  background: var(--paper);
+  box-shadow: var(--shadow-deep), 0 2px 6px rgba(0, 0, 0, 0.5);
+  will-change: transform, opacity;
+}
+
+/* a strip of tape holding it to the board */
+.print::before {
+  position: absolute;
+  z-index: 2;
+  top: -11px;
+  left: 50%;
+  width: 92px;
+  height: 22px;
+  background: rgba(232, 224, 207, 0.55);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  content: '';
+  transform: translateX(-50%) rotate(2.5deg);
+}
+
+.gui {
+  position: relative;
   aspect-ratio: 350 / 284;
   overflow: hidden;
-  border-radius: 12px;
-  /* Light matte frame: cream spread rings + hairline keep the dark in-game
-     capture reading intentionally on the ivory stage. */
-  box-shadow:
-    0 0 0 12px rgba(255, 253, 244, .95),
-    0 0 0 13px var(--hairline, #eae1d0),
-    0 30px 50px rgba(34, 28, 20, .18);
-  will-change: transform, opacity;
+  border-radius: 2px;
+  background: var(--fog-0);
 }
 .gui__img {
   position: absolute;
@@ -506,14 +512,23 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   -webkit-user-drag: none;
 }
 
+.print__caption {
+  margin: 0;
+  padding: 11px 2px 12px;
+  color: var(--paper-ink-muted);
+  font: 500 0.7rem/1.2 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .gui__confirm {
   position: absolute;
   z-index: 2;
   width: 34px;
   height: 34px;
-  border: 1px solid rgba(170, 226, 58, .65);
-  border-radius: 8px;
-  background: rgba(170, 226, 58, .3);
+  border: 1px solid rgba(229, 84, 93, 0.7);
+  border-radius: 6px;
+  background: rgba(179, 32, 43, 0.28);
   pointer-events: none;
   will-change: transform, opacity;
 }
@@ -523,35 +538,28 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   z-index: 2;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
+  border-radius: 4px;
+  /* zone styles give the centre of each slot group */
+  transform: translate(-50%, -50%);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 .gui__zone:hover,
 .gui__zone:focus-visible {
-  border-color: rgba(116, 88, 232, .5);
-  background: rgba(116, 88, 232, .08);
-  box-shadow: 0 0 0 3px rgba(116, 88, 232, .12), inset 0 0 12px rgba(110, 168, 158, .16);
+  border-color: var(--crimson-text);
+  background: var(--crimson-tint);
+  box-shadow: 0 0 0 3px rgba(179, 32, 43, 0.25);
 }
 
-/* ---------- flying / resting ingredient chips ---------- */
+/* ---------- flying / resting ingredients ---------- */
 .item {
   position: absolute;
-  display: block;
-  min-width: 44px;
-  min-height: 44px;
+  display: grid;
+  place-items: center;
   padding: 2px;
   border: 1px solid transparent;
   border-radius: 4px;
-  background: transparent;
-  text-align: center;
   will-change: transform, opacity;
-  transition: border-color .2s ease, box-shadow .25s ease, background-color .2s ease;
-}
-.item__chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 .item__icon {
   width: 46px;
@@ -559,41 +567,23 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   object-fit: contain;
   image-rendering: pixelated;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 2px 4px rgba(60, 48, 30, .22));
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
 }
 .item:hover,
 .item:focus-visible {
-  border-color: rgba(116, 88, 232, .45);
-  background: rgba(255, 255, 255, .92);
-  box-shadow: 0 10px 24px rgba(34, 28, 20, .12);
-}
-.item.is-rested {
-  padding: 0;
-  border-color: transparent;
-  background: transparent;
-  box-shadow: none;
-}
-.item.is-rested .item__chip {
-  gap: 0;
+  border-color: var(--crimson-text);
+  background: rgba(13, 15, 20, 0.85);
 }
 .item.is-rested .item__icon {
   width: 26px;
   height: 26px;
-  filter: drop-shadow(0 2px 4px rgba(60, 48, 30, .28));
 }
 .item.is-rested:hover,
 .item.is-rested:focus-visible {
   background: transparent;
 }
-.item.is-rested:hover .item__icon,
-.item.is-rested:focus-visible .item__icon {
-  filter: drop-shadow(0 0 8px rgba(116, 88, 232, .5));
-}
-.item.is-brewing {
-  box-shadow: none;
-}
 
-/* ---------- bubbles FX (positioned over the cauldron pot) ---------- */
+/* ---------- bubbles FX (positioned over the cauldron) ---------- */
 .altar-scene__fx {
   position: absolute;
   z-index: 4;
@@ -612,17 +602,14 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   width: 76px;
   height: 76px;
   padding: 0;
-  border: 0;
   border-radius: 50%;
-  background: transparent;
   will-change: transform, opacity, filter;
 }
 .altar-scene__halo {
   position: absolute;
-  inset: -20px;
+  inset: -24px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 180, 90, .42), rgba(116, 88, 232, .16) 46%, transparent 72%);
-  filter: blur(7px);
+  background: radial-gradient(circle, rgba(229, 84, 93, 0.45), rgba(179, 32, 43, 0.16) 46%, transparent 72%);
   pointer-events: none;
   will-change: transform, opacity;
 }
@@ -635,7 +622,7 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   object-fit: contain;
   image-rendering: pixelated;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 4px 10px rgba(60, 48, 30, .35));
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
   animation: potion-float 3.4s ease-in-out infinite;
 }
 @keyframes potion-float {
@@ -644,68 +631,26 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
 }
 .altar-scene__caption {
   position: absolute;
-  top: calc(100% - 2px);
+  top: calc(100% + 2px);
   left: 50%;
-  transform: translateX(-50%);
   width: max-content;
-  max-width: 180px;
-  margin: 0;
-  color: var(--ink-muted, #756b5c);
-  font-size: .72rem;
-  font-weight: 600;
-  line-height: 1.3;
-  letter-spacing: .04em;
+  max-width: 220px;
+  color: var(--bone);
+  font: 500 0.7rem/1.3 var(--font-mono);
+  letter-spacing: 0.12em;
   text-align: center;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, .65);
-}
-
-/* ---------- mobile: panel centers, shorter flights ---------- */
-@media (max-width: 820px) {
-  .altar-scene__circle-hotspot {
-    width: min(290px, 70vw);
-  }
-  .gui__confirm {
-    width: 26px;
-    height: 26px;
-  }
-  .altar-scene__potion {
-    width: 60px;
-    height: 60px;
-  }
-  .altar-scene__potion-img {
-    width: 50px;
-    height: 50px;
-    margin-top: 5px;
-  }
-  .item {
-    padding: 6px 7px;
-  }
-  .item__icon {
-    width: 34px;
-    height: 34px;
-  }
-  .item.is-rested {
-    padding: 0;
-  }
-  .item.is-rested .item__icon {
-    width: 22px;
-    height: 22px;
-  }
-  .altar-scene__caption {
-    font-size: .72rem;
-  }
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+  transform: translateX(-50%);
 }
 
 /* ---------- reduced motion: final composed state, no loops ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .altar-scene__vignette,
   .altar-scene__potion-img {
     animation: none;
   }
   .item,
-  .gui,
-  .altar-scene__potion,
-  .altar-scene__circle-hotspot {
+  .gui__zone {
     transition: none;
   }
 }

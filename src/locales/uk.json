@@ -604,44 +604,44 @@
         }
       }
     },
-    "whatIs": {
-      "eyebrow": "What is Mysterria?",
-      "title": "A Minecraft MMORPG built around the Pathways of Lord of the Mysteries.",
-      "summary": "Mysterria turns advancement into a journey: discover formulas, brew potions, digest their power, complete rituals, and climb the Sequences while exploring a persistent multiplayer world.",
-      "pillars": {
-        "pathway": {
-          "title": "Choose a Pathway",
-          "body": "Your Pathway defines your abilities, progression, strengths, and the risks you take as you advance."
-        },
-        "sequences": {
-          "title": "Advance through Sequences",
-          "body": "Power is earned through potions, digestion and rituals rather than a conventional level grind."
-        },
-        "world": {
-          "title": "Live in the world",
-          "body": "Explore, fight, trade, discover secrets and make choices that matter in a persistent MMORPG world."
-        }
-      }
-    },
-    "gettingStarted": {
-      "eyebrow": "Start your journey",
-      "title": "From first login to your first Sequence.",
+    "join": {
+      "kicker": "Begin your ascent",
+      "title": "Your first Sequence starts here.",
+      "statement": "Mysterria is a Minecraft MMORPG built on the Pathways of Lord of the Mysteries. Brew the potion, act out its nature until it digests, survive the ritual, and climb the Sequences in a persistent world shared with every other Beyonder.",
+      "stepsLabel": "Your first steps",
       "steps": {
-        "join": {
-          "title": "Join the server",
-          "body": "Connect to Mysterria and enter the persistent world."
+        "connect": {
+          "title": "Connect",
+          "copy": "Add {address} in a current Java client."
         },
-        "direction": {
-          "title": "Find your direction",
-          "body": "Explore, learn the systems and decide which Pathway you want to pursue."
+        "choose": {
+          "title": "Choose your Pathway",
+          "copy": "Select Mysteries in the lobby and choose where your ascent begins."
         },
-        "advance": {
-          "title": "Begin advancing",
-          "body": "Work toward formulas, ingredients, potions and the rituals required to move through the Sequences."
+        "firstStep": {
+          "title": "Take your first step",
+          "copy": "Use Resolve to learn the potion loop with no permanent cost."
         }
       },
-      "guideCta": "Read the guide",
-      "pathwaysCta": "Browse Pathways"
+      "invitationLabel": "Invitation to the gathering",
+      "invitationKicker": "Admit one, above the gray fog",
+      "seatLabel": "Your seat",
+      "seatAria": "Your seat: {name}",
+      "seatLink": "Read the {name} archive",
+      "emptySeatTitle": "An empty seat",
+      "emptySeatCopy": "Choose a Pathway above, or decide in the lobby once you arrive.",
+      "emptySeatLink": "Choose a Pathway",
+      "addressLabel": "Server address",
+      "copy": "Copy address",
+      "copied": "Copied",
+      "retry": "Try again",
+      "copiedAnnouncement": "Server address copied to your clipboard.",
+      "copyFailed": "Copy failed. Select the address manually: {address}",
+      "connectCta": "How to connect",
+      "guide": "Read the beginner guide",
+      "discord": "Join the Discord",
+      "newTab": "(opens in a new tab)",
+      "note": "Accept the resource pack when prompted. Bedrock can connect, but some custom interfaces may not render."
     },
     "orbit": {
       "kicker": "Choose your Pathway",
@@ -654,12 +654,12 @@
         "pathway": "Pathways",
         "boon": "Boons"
       },
-      "ringLabel": {
-        "pathway": "Pathways. Use the arrow keys to turn the orbit, then press Enter to open the selected archive.",
-        "boon": "Boons. Use the arrow keys to turn the orbit, then press Enter to open the selected archive."
+      "deckLabel": {
+        "pathway": "Pathways. Use the arrow keys to draw another card, then press Enter to open its dossier.",
+        "boon": "Boons. Use the arrow keys to draw another card, then press Enter to open its dossier."
       },
-      "assembling": "The orbit is assembling as you scroll.",
       "hint": "Drag the orbit or use the arrow keys",
+      "hintMobile": "Swipe to draw another card",
       "previous": {
         "pathway": "Previous Pathway",
         "boon": "Previous Boon"
@@ -669,11 +669,15 @@
         "boon": "Next Boon"
       },
       "position": "{current} of {total}",
+      "arcanum": "Arcanum {numeral}",
       "sequence": "Sequence {number}",
       "sequenceNamed": "Sequence {number} · {name}",
-      "inspect": "Inspect {name}",
       "openArchive": "Open archive",
       "openArchiveNamed": "Open the {name} archive",
+      "readDossier": "Read the dossier",
+      "readDossierNamed": "Read the {name} dossier",
+      "earlyAbilities": "Early abilities",
+      "archive": "In the archive",
       "sequenceCount": {
         "one": "{count} Sequence",
         "few": "{count} Sequences",
@@ -690,8 +694,6 @@
           "boon": "Boon dossier"
         },
         "close": "Close {name} details",
-        "earlyAbilities": "Early abilities",
-        "archive": "Archive",
         "cta": "Learn more in the full archive"
       },
       "taglineFallback": "Discover the {name} Pathway.",
@@ -729,38 +731,6 @@
         "secondlaw": "Rewrite the rules after the first answer is already chosen.",
         "sublunary": "Draw on moonlit mysteries, subtle rites, and hidden influence."
       }
-    },
-    "join": {
-      "kicker": "Begin your ascent",
-      "title": "Your first Sequence starts here.",
-      "intro": "Java Edition, no client mods. Join Mysterria, choose Mysteries in the lobby, and begin with a Pathway of your own.",
-      "chosenKicker": "Chosen in the orbit",
-      "chosenLabel": "{name}, chosen in the orbit above",
-      "stepsLabel": "Your first steps",
-      "steps": {
-        "connect": {
-          "title": "Connect",
-          "copy": "Add {address} in a current Java client."
-        },
-        "choose": {
-          "title": "Choose your Pathway",
-          "copy": "Select Mysteries in the lobby and choose where your ascent begins."
-        },
-        "firstStep": {
-          "title": "Take your first step",
-          "copy": "Use Resolve to learn the potion loop with no permanent cost."
-        }
-      },
-      "addressLabel": "Server address",
-      "copy": "Copy address",
-      "copied": "Copied",
-      "retry": "Try again",
-      "copiedAnnouncement": "Server address copied to your clipboard.",
-      "copyFailed": "Copy failed. Select the address manually: {address}",
-      "guide": "Read the beginner guide",
-      "discord": "Join the Discord",
-      "newTab": "(opens in a new tab)",
-      "note": "Accept the resource pack when prompted. Bedrock can connect, but some custom interfaces may not render."
     },
     "progression": {
       "eyebrow": "Your path to godhood starts here",
@@ -870,7 +840,8 @@
         "circleLabel": "Brewing magic circle",
         "interfaceLabel": "Magic Cauldron brewing interface",
         "potionLabel": "Sequence 9 {sequence} potion",
-        "potionCaption": "Sequence 9 · {sequence}"
+        "potionCaption": "Sequence 9 · {sequence}",
+        "printCaption": "Magic Cauldron · captured in game"
       },
       "drink": {
         "sceneLabel": "Drink and awaken scene",
@@ -891,85 +862,59 @@
     },
     "skipToContent": "Skip to main content",
     "world": {
-      "eyebrow": "The world beyond your Pathway",
-      "title": "Your choices change what the world gives back.",
-      "fieldNote": "Field note {number} · {name}",
-      "scrollHint": "Scroll to explore",
-      "railLabel": "World systems",
-      "goTo": "Go to {name}",
-      "liveStage": "Live world",
-      "features": {
-        "dungeons": {
-          "short": "Rifts",
-          "kicker": "Prepare the run",
+      "kicker": "Nighthawk case files",
+      "titleLead": "What waits",
+      "titleAccent": "beyond your Pathway.",
+      "intro": "Three open files from the world outside the potion: where parties go, what they face together, and what players build around a belief.",
+      "caseNumber": "Case {number}",
+      "exhibit": "Exhibit {letter}",
+      "cases": {
+        "rifts": {
+          "stamp": "Rift",
           "title": "Plan the run. Cross the Rift.",
           "copy": "Use /subspace to find a dungeon, check its power and cooldown, then weaken its Rift with Energy Shards before your party enters.",
-          "proof": "Each dungeon is an instanced run with its own rooms, classes, and boss.",
-          "marker": "Dungeon Rift",
-          "note": "A Rift gate marks the threshold. Weaken it with Energy Shards before your party commits to the instance beyond.",
-          "alt": "A black-and-white tree Rift gate surrounding a glowing dungeon portal."
+          "proof": "Each dungeon is an instanced run with its own rooms, classes and boss.",
+          "caption": "The Eye Rift",
+          "alt": "A dark Rift fortress with a glowing red eye above its swirling dungeon portal.",
+          "detailAlt": "A ring-shaped Rift gate standing in the snow."
         },
-        "creatures": {
-          "short": "The wilds",
-          "kicker": "Meet the wild",
-          "title": "Your Pathway changes the encounter.",
-          "copy": "Beyonder Creatures can yield XP, acting points, and ingredients. Wild Beyonders may trade with you — or fight you — depending on the relationship you build.",
-          "proof": "Crimson Moon nights raise the stakes outside and turn every hunt into a decision.",
-          "marker": "Beyonder encounter",
-          "note": "Beyonder creatures roam the wild. Each one is worth XP, acting points and ingredients — if you survive the meeting.",
-          "alt": "A floating Beyonder creature surrounded by fragments inside a dark chamber."
-        },
-        "events": {
-          "short": "Guardians",
-          "kicker": "Answer the signal",
+        "guardians": {
+          "stamp": "Guardian",
           "title": "Bring the right people.",
           "copy": "Guardians are open-world bosses that force your party to adapt. When physical damage stops working, the plan has to change.",
-          "proof": "Win and earn a Guardian Reward Token for rare ingredients, recipes, and more.",
-          "marker": "Open-world Guardian",
-          "note": "Guardians wait out in the open world. Rarer still are Cosmos Incursions, which answer a signal of their own.",
-          "alt": "Players fighting a many-headed Guardian inside a radiant arena."
-        },
-        "towns": {
-          "short": "Settlements",
-          "kicker": "Leave your mark",
-          "title": "Build somewhere worth defending.",
-          "copy": "Claim land, build with others, or form a Secret Order. Your choices shape the towns, territory, and communities around you.",
-          "proof": "Grow a town into a Domain — and eventually a Nation.",
-          "marker": "Player settlement",
-          "note": "A waterfront town beneath the aurora. Every street, workshop and landmark here was raised by players.",
-          "alt": "A player-built waterfront settlement glowing beneath a green aurora."
+          "proof": "Win and earn a Guardian Reward Token for rare ingredients, recipes and more.",
+          "caption": "Guardian encounter",
+          "alt": "Players fighting a many-headed dragon Guardian inside a radiant arena.",
+          "detailAlt": "A party casting abilities at a radiant Guardian."
         },
         "churches": {
-          "short": "Churches",
-          "kicker": "Gather around a belief",
+          "stamp": "Church",
           "title": "Make your Pathway visible.",
-          "copy": "Create a player-run Church around a physical Church Core, with members, sites, prayer, and influence that carry into the world.",
-          "proof": "Churches can support members, develop branches, and grant Pathway-based benefits.",
-          "marker": "Consecrated site",
-          "note": "Players laid every stone. The Church Core gives the site its members, its prayers and its Pathway blessings.",
-          "alt": "A monumental player-built cathedral rising into a stormy sky."
+          "copy": "Create a player-run Church around a physical Church Core, with members, sites, prayer and influence that carry into the world.",
+          "proof": "Raised by players, like the towns, Domains and Nations around them.",
+          "caption": "Player-built cathedral",
+          "alt": "A monumental player-built cathedral rising into a stormy sky.",
+          "detailAlt": "The candle-lit nave of a player-built cathedral."
         }
       },
-      "live": {
-        "eyebrow": "Live from Mysterria",
-        "title": "A world shaped by players.",
-        "lede": "Who is online right now, and how far this season's Beyonders have climbed — read straight from the server.",
+      "ledger": {
+        "kicker": "The live ledger",
+        "title": "The world, as it stands.",
+        "lede": "Every figure on this page is read straight from the server.",
         "server": "Server",
         "online": "Online",
         "offline": "Offline",
         "checking": "Checking…",
         "checkedAt": "Checked {time}",
         "playersOnline": "Players online",
-        "playersNow": "Connected right now",
-        "playersOffline": "Back when the server returns",
-        "playersLoading": "Counting players…",
         "noCount": "No player count yet",
         "beyonders": "Beyonders this season",
         "advanced": "Advanced · Seq 3–0",
         "pathways": "Pathways walked",
-        "pathwaysValue": "{count} / {total}",
-        "topPathways": "Most walked pathways",
-        "statsLoading": "Loading season statistics…",
+        "pathwaysValue": "{count} of {total}",
+        "topPathways": "Most walked",
+        "walkers": "{count} Beyonders",
+        "statsLoading": "Loading season figures…",
         "latestUpdate": "Latest update"
       }
     },

@@ -3,7 +3,7 @@
     :id="ready ? undefined : name"
     ref="chapterRef"
     class="home-chapter"
-    :class="[`home-chapter--${name}`, { 'is-reserved': !settled, 'is-pending': !ready }]"
+    :class="[`home-chapter--${name}`, { 'is-reserved': !settled, 'is-pending': !ready, 'has-season': hasSeason }]"
     :style="reservedStyle"
     :aria-busy="settled ? undefined : 'true'"
     :tabindex="ready ? undefined : 0"
@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useI18n } from '@/composables/useI18n';
+import { useBeyonderStats } from '@/composables/useBeyonderStats';
 
 type ChapterName = 'pathways' | 'world' | 'join';
 
@@ -41,6 +42,9 @@ const HEIGHT_CACHE_KEY = 'mysterria-home-chapter-heights-v1';
 const FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 const { t } = useI18n();
+const { stats } = useBeyonderStats();
+/** The world chapter's ledger gains a row of season figures when stats exist. */
+const hasSeason = computed(() => props.name === 'world' && (stats.value?.totalBeyonders ?? 0) > 0);
 const chapterRef = ref<HTMLElement | null>(null);
 const ready = ref(false);
 /** False until the slot has painted real content; the reservation holds until then. */
@@ -156,7 +160,6 @@ onUnmounted(() => {
 .home-chapter {
   position: relative;
   min-width: 0;
-  border-top: 1px solid color-mix(in srgb, var(--ink) 7%, transparent);
 }
 
 .home-chapter.is-pending {
@@ -166,46 +169,55 @@ onUnmounted(() => {
 }
 
 .home-chapter.is-pending:focus-visible {
-  outline: 3px solid var(--primary);
+  outline: 2px solid var(--crimson-text);
   outline-offset: -6px;
 }
 
+.home-chapter.is-reserved { background: var(--fog-0); }
+
 /*
- * Reservations mirror each chapter's own layout switch so the document does
- * not jump when the real content replaces the placeholder:
- * - pathways: PathwayOrbit pins for 210svh above 1050×720, else flows (~1.1–1.9k px)
- * - world: BeyondPathways pins for 460svh above 900×700, else flows
- * - join: JoinJourney is at least one viewport tall
+ * First-visit reservations, fitted to each chapter's measured height so the
+ * document barely moves when real content replaces the placeholder. Each band
+ * follows the chapter's own layout switch:
+ * - pathways (PathwayOrbit): table above 899px wide, card rail below
+ * - world (BeyondPathways): three files in a row above 960px (ledger in two
+ *   columns above 1100px), file beside print to 641px, then stacked; the
+ *   ledger's season row adds --season when stats exist
+ * - join (JoinJourney): at least one viewport tall
+ * Re-measure after changing any of those chapters.
  */
-.home-chapter--pathways.is-reserved,
-.home-chapter--world.is-reserved { background: var(--journey-mid); }
-.home-chapter--join.is-reserved { background: var(--journey-end); }
+.home-chapter--pathways.is-reserved { min-height: calc(650px + 50vh); }
+.home-chapter--world { --season-row: 157px; --season: 0px; }
+.home-chapter--world.has-season { --season: var(--season-row); }
+.home-chapter--world.is-reserved { min-height: calc(1039px + 35vh + var(--season)); }
+.home-chapter--join.is-reserved { min-height: max(100svh, 860px); }
 
-.home-chapter--pathways.is-reserved { min-height: 210svh; }
-.home-chapter--world.is-reserved { min-height: 460svh; }
-.home-chapter--join.is-reserved { min-height: max(100svh, 1000px); }
-
-@media (max-width: 1050px), (max-height: 720px), (prefers-reduced-motion: reduce) {
-  .home-chapter--pathways.is-reserved { min-height: 1400px; }
+@media (max-width: 1320px) {
+  .home-chapter--join.is-reserved { min-height: max(100svh, 840px); }
 }
 
-/* BeyondPathways in document flow: fitted to measured heights with live stats loaded. */
-@media (max-width: 900px), (max-height: 700px), (prefers-reduced-motion: reduce) {
-  .home-chapter--world.is-reserved { min-height: calc(1758px + 95vw); }
+@media (max-width: 1100px) {
+  .home-chapter--world { --season-row: 210px; }
+  .home-chapter--world.is-reserved { min-height: calc(1080px + 35vh + var(--season)); }
 }
 
-@media (max-width: 900px) {
-  .home-chapter--pathways.is-reserved { min-height: 1250px; }
-  .home-chapter--world.is-reserved { min-height: calc(2007px + 67vw); }
+@media (max-width: 960px) {
+  .home-chapter--world { --season-row: 222px; }
+  .home-chapter--world.is-reserved { min-height: calc(2517px - 108vw + 35vh + var(--season)); }
+  .home-chapter--join.is-reserved { min-height: max(100svh, 1340px); }
 }
 
-@media (max-width: 700px) {
-  .home-chapter--world.is-reserved { min-height: calc(1546px + 407vw); }
-  .home-chapter--join.is-reserved { min-height: 1040px; }
+@media (max-width: 899px) {
+  .home-chapter--pathways.is-reserved { min-height: max(1340px, 1256px + 20vw); }
+}
+
+@media (max-width: 640px) {
+  .home-chapter--world { --season-row: 400px; }
+  .home-chapter--world.is-reserved { min-height: calc(max(2610px, 1960px + 137vw) + var(--season)); }
 }
 
 @media (max-width: 560px) {
-  .home-chapter--world.is-reserved { min-height: 3650px; }
+  .home-chapter--join.is-reserved { min-height: max(1300px, 2016px - 167vw); }
 }
 
 .home-chapter__placeholder {
@@ -226,7 +238,7 @@ onUnmounted(() => {
 .home-chapter__placeholder b {
   display: block;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  background: var(--line-strong);
 }
 
 .home-chapter__placeholder i { width: 88px; height: 8px; }

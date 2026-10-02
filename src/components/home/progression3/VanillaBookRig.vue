@@ -130,18 +130,20 @@ function recolorCoverTexture(context: CanvasRenderingContext2D) {
   const { width, height } = context.canvas;
   const image = context.getImageData(0, 0, width, height);
   const data = image.data;
-  const plumRamp = [
-    [43, 23, 58],
-    [59, 34, 79],
-    [75, 50, 92],
+  // Oxblood leather, bone clasps and worn grey edges: the Crimson Moon's
+  // palette, keeping the vanilla texture's pixel structure intact.
+  const leatherRamp = [
+    [34, 9, 13],
+    [54, 14, 20],
+    [78, 21, 28],
   ] as const;
-  const goldRamp = [
-    [184, 154, 88],
-    [209, 186, 122],
+  const claspRamp = [
+    [186, 178, 162],
+    [222, 215, 201],
   ] as const;
-  const lavenderRamp = [
-    [111, 90, 130],
-    [137, 116, 155],
+  const wornRamp = [
+    [96, 84, 86],
+    [124, 112, 112],
   ] as const;
 
   for (let index = 0; index < data.length; index += 4) {
@@ -153,13 +155,13 @@ function recolorCoverTexture(context: CanvasRenderingContext2D) {
     const min = Math.min(red, green, blue);
     const brightness = (red + green + blue) / (3 * 255);
     const saturation = max === 0 ? 0 : (max - min) / max;
-    const isBrightGold =
+    const isClasp =
       red >= 205 &&
       green >= 135 &&
       blue <= 105 &&
       brightness >= 0.58 &&
       saturation >= 0.46;
-    const ramp = isBrightGold ? goldRamp : saturation < 0.16 && brightness > 0.58 ? lavenderRamp : plumRamp;
+    const ramp = isClasp ? claspRamp : saturation < 0.16 && brightness > 0.58 ? wornRamp : leatherRamp;
     const rampIndex = Math.min(ramp.length - 1, Math.floor(brightness * ramp.length));
     const [nextRed, nextGreen, nextBlue] = ramp[rampIndex];
     data[index] = nextRed;
@@ -271,9 +273,9 @@ function drawPixelLineWithShadow(
   centerX: number,
   y: number,
   pixelSize: number,
-  color = '#f2cf75',
+  color = '#e8e0cf',
 ) {
-  context.fillStyle = 'rgba(18, 8, 26, 0.84)';
+  context.fillStyle = 'rgba(10, 4, 6, 0.84)';
   drawPixelLine(context, label, centerX + 3, y + 3, pixelSize);
   context.fillStyle = color;
   drawPixelLine(context, label, centerX, y, pixelSize);
@@ -303,7 +305,7 @@ function drawCoverLine(
   context.font = `800 ${pixelSize * 7}px "Manrope", sans-serif`;
   context.textAlign = 'center';
   context.textBaseline = 'top';
-  context.fillStyle = 'rgba(18, 8, 26, 0.84)';
+  context.fillStyle = 'rgba(10, 4, 6, 0.84)';
   context.fillText(text, centerX + 3, y + 3, maxWidth);
   context.fillStyle = color;
   context.fillText(text, centerX, y, maxWidth);
@@ -313,20 +315,21 @@ function drawCoverLine(
 function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTMLImageElement, labels: BookLabels) {
   const width = context.canvas.width;
   const height = context.canvas.height;
-  const gold = '#c1a464';
-  const paleGold = '#eadca4';
-  const ink = 'rgba(26, 13, 36, 0.88)';
+  const crimson = '#b3202b';
+  const crimsonText = '#e5545d';
+  const bone = '#e8e0cf';
+  const boneDim = 'rgba(232, 224, 207, 0.42)';
 
-  context.fillStyle = 'rgba(43, 23, 58, 0.76)';
+  context.fillStyle = 'rgba(30, 7, 11, 0.8)';
   context.fillRect(28, 30, width - 56, height - 60);
-  context.strokeStyle = gold;
+  context.strokeStyle = crimson;
   context.lineWidth = 6;
   context.strokeRect(34, 36, width - 68, height - 72);
-  context.strokeStyle = 'rgba(169, 151, 181, 0.68)';
+  context.strokeStyle = boneDim;
   context.lineWidth = 2;
   context.strokeRect(50, 52, width - 100, height - 104);
 
-  context.fillStyle = gold;
+  context.fillStyle = bone;
   const corner = 30;
   const notch = 12;
   for (const [x, y, xDirection, yDirection] of [
@@ -340,38 +343,38 @@ function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTM
     context.fillRect(x + notch * xDirection, y + notch * yDirection, 8 * xDirection, 8 * yDirection);
   }
 
-  context.fillStyle = ink;
+  context.fillStyle = 'rgba(12, 4, 6, 0.9)';
   context.fillRect(92, 88, width - 184, 168);
-  context.strokeStyle = 'rgba(193, 164, 100, 0.76)';
+  context.strokeStyle = crimson;
   context.lineWidth = 3;
   context.strokeRect(98, 94, width - 196, 156);
   context.imageSmoothingEnabled = true;
   context.drawImage(pathwaySymbol, width / 2 - 68, 101, 136, 136);
   context.imageSmoothingEnabled = false;
 
-  drawCoverLine(context, labels.coverPathway, width / 2, 286, 3, paleGold);
-  context.fillStyle = 'rgba(193, 164, 100, 0.78)';
+  drawCoverLine(context, labels.coverPathway, width / 2, 286, 3, bone);
+  context.fillStyle = crimson;
   context.fillRect(86, 345, 126, 4);
   context.fillRect(width - 212, 345, 126, 4);
   context.fillRect(width / 2 - 8, 337, 16, 16);
 
-  drawCoverLine(context, labels.coverSequence, width / 2, 392, 5, '#eadca4');
-  drawCoverLine(context, labels.coverName, width / 2, 474, 4, '#a997bb');
+  drawCoverLine(context, labels.coverSequence, width / 2, 392, 5, bone);
+  drawCoverLine(context, labels.coverName, width / 2, 474, 4, crimsonText);
 
-  context.strokeStyle = 'rgba(193, 164, 100, 0.72)';
+  context.strokeStyle = boneDim;
   context.lineWidth = 3;
   context.strokeRect(100, 550, width - 200, 96);
-  context.fillStyle = 'rgba(126, 108, 145, 0.2)';
+  context.fillStyle = 'rgba(179, 32, 43, 0.18)';
   context.fillRect(108, 558, width - 216, 80);
-  drawCoverLine(context, labels.coverRecipe, width / 2, 582, 3, paleGold);
+  drawCoverLine(context, labels.coverRecipe, width / 2, 582, 3, bone);
 
-  context.fillStyle = 'rgba(193, 164, 100, 0.7)';
+  context.fillStyle = crimson;
   for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
 }
 
 function drawRule(context: CanvasRenderingContext2D, y: number, width: number, dashed = false) {
   context.save();
-  context.strokeStyle = 'rgba(116, 71, 42, 0.52)';
+  context.strokeStyle = 'rgba(90, 82, 70, 0.5)';
   context.lineWidth = 2;
   context.setLineDash(dashed ? [10, 8] : []);
   context.beginPath();
@@ -383,10 +386,10 @@ function drawRule(context: CanvasRenderingContext2D, y: number, width: number, d
 
 function drawHeading(context: CanvasRenderingContext2D, label: string, width: number) {
   context.save();
-  context.fillStyle = '#7f211b';
-  context.font = '800 40px "IBM Plex Sans Condensed", sans-serif';
-  context.letterSpacing = '3px';
-  context.fillText(label.toUpperCase(), 48, 82);
+  context.fillStyle = '#8e1720';
+  context.font = '600 48px "Cormorant Garamond", Georgia, serif';
+  context.letterSpacing = '2px';
+  context.fillText(label.toLocaleUpperCase(), 48, 84);
   context.restore();
   drawRule(context, 108, width);
 }
@@ -430,11 +433,11 @@ function drawIngredient(
   context.drawImage(image, 44, top + 22, iconSize, iconSize);
   context.imageSmoothingEnabled = true;
 
-  context.fillStyle = '#744527';
-  context.font = '800 31px "IBM Plex Mono", monospace';
+  context.fillStyle = '#1d1b17';
+  context.font = '700 31px "Manrope", sans-serif';
   const lastLineY = wrapText(context, name, 184, top + 53, width - 214, 38);
-  context.fillStyle = '#5f4a3d';
-  context.font = '650 23px "IBM Plex Mono", monospace';
+  context.fillStyle = '#5a5246';
+  context.font = '500 22px "IBM Plex Mono", monospace';
   context.fillText(role, 184, Math.max(top + 116, lastLineY + 38));
   context.restore();
 }
@@ -460,7 +463,7 @@ function paintRightFormula(images: FormulaImages, labels: BookLabels): TexturePa
 
     drawRule(context, 775, width, true);
     context.save();
-    context.strokeStyle = 'rgba(127, 33, 27, 0.48)';
+    context.strokeStyle = 'rgba(142, 23, 32, 0.5)';
     context.lineWidth = 3;
     context.beginPath();
     context.arc(104, 872, 59, 0, Math.PI * 2);
@@ -469,13 +472,13 @@ function paintRightFormula(images: FormulaImages, labels: BookLabels): TexturePa
     context.drawImage(images.foolRecipe, 62, 830, 84, 84);
     context.imageSmoothingEnabled = true;
 
-    context.fillStyle = '#18763a';
-    context.font = '700 23px "IBM Plex Mono", monospace';
+    context.fillStyle = '#8e1720';
+    context.font = '600 23px "IBM Plex Mono", monospace';
     context.letterSpacing = '2px';
     context.fillText(labels.noteHeading.toLocaleUpperCase(), 184, 842, width - 228);
     context.letterSpacing = '0px';
-    context.fillStyle = '#49352c';
-    context.font = '500 22px "IBM Plex Mono", monospace';
+    context.fillStyle = '#5a5246';
+    context.font = '500 23px "Manrope", sans-serif';
     wrapText(context, labels.note, 184, 883, width - 228, 31);
     context.restore();
   };
@@ -570,7 +573,7 @@ function buildBook(formulaImages: FormulaImages, labels: BookLabels) {
     height: 10,
     depth: 0.24,
     z: -0.42,
-    color: 0x2b173a,
+    color: 0x2a0b10,
     front: [16, 0, 6, 10],
     back: [22, 0, 6, 10],
     useCoverPalette: true,
@@ -609,7 +612,7 @@ function buildBook(formulaImages: FormulaImages, labels: BookLabels) {
     height: 10,
     depth: 0.24,
     z: 0.55,
-    color: 0x2b173a,
+    color: 0x2a0b10,
     front: [0, 0, 6, 10],
     back: [6, 0, 6, 10],
     useCoverPalette: true,
@@ -673,7 +676,7 @@ function buildBook(formulaImages: FormulaImages, labels: BookLabels) {
       context.save();
       context.translate(36, 256);
       context.rotate(Math.PI / 2);
-      drawPixelLineWithShadow(context, 'MYSTERRIA', 0, -18, 5, '#f0ce78');
+      drawPixelLineWithShadow(context, 'MYSTERRIA', 0, -18, 5);
       context.restore();
     }),
     transparent: true,
@@ -892,7 +895,7 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-/* warm ground bloom under the transparent-canvas book so it sits on ivory */
+/* Contact shadow under the transparent-canvas book so it rests on the desk. */
 .vanilla-book-rig::after {
   content: '';
   position: absolute;
@@ -902,7 +905,7 @@ onBeforeUnmount(() => {
   width: 64%;
   aspect-ratio: 2.4;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(60, 48, 30, 0.16), transparent 70%);
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.6), transparent 70%);
   filter: blur(14px);
   transform: translateX(-50%);
   pointer-events: none;

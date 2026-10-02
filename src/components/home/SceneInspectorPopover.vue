@@ -42,13 +42,6 @@ const { t } = useI18n();
 const positioned = ref(false);
 let cleanup: (() => void) | null = null;
 
-const notchBorders: Record<string, string[]> = {
-  top: ['borderBottomWidth', 'borderRightWidth'],
-  bottom: ['borderTopWidth', 'borderLeftWidth'],
-  right: ['borderLeftWidth', 'borderBottomWidth'],
-  left: ['borderRightWidth', 'borderTopWidth'],
-};
-
 async function position() {
   if (!props.anchor || !popoverRef.value || !props.boundary) return;
   const popover = popoverRef.value;
@@ -81,17 +74,10 @@ async function position() {
   if (!arrowRef.value || !result.middlewareData.arrow) return;
   const side = result.placement.split('-')[0];
   const staticSide = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }[side];
-  const [firstBorder, secondBorder] = notchBorders[side] ?? notchBorders.right;
   Object.assign(arrowRef.value.style, {
     left: result.middlewareData.arrow.x == null ? '' : `${result.middlewareData.arrow.x}px`,
     top: result.middlewareData.arrow.y == null ? '' : `${result.middlewareData.arrow.y}px`,
     right: '', bottom: '',
-    borderTopWidth: '',
-    borderRightWidth: '',
-    borderBottomWidth: '',
-    borderLeftWidth: '',
-    [firstBorder]: '1px',
-    [secondBorder]: '1px',
     [staticSide ?? 'left']: '-5px',
   });
 }
@@ -116,64 +102,47 @@ onUnmounted(() => cleanup?.());
 </script>
 
 <style scoped>
+/* A paper tag tied to the exhibit: cream card, ink text, crimson kicker. */
 .inspector {
   position: fixed;
   z-index: 80;
   top: 0;
   left: 0;
   visibility: hidden;
-  width: min(286px, calc(100vw - 24px));
-  padding: 15px 17px 16px;
+  width: min(290px, calc(100vw - 24px));
+  padding: 14px 16px 16px;
   overflow: visible;
-  border: 1px solid rgba(140, 105, 45, .35);
-  border-radius: 10px;
-  color: #2c2418;
-  background:
-    radial-gradient(120% 90% at 14% 0%, rgba(255, 252, 240, .85), transparent 58%),
-    radial-gradient(130% 100% at 86% 108%, rgba(176, 138, 76, .18), transparent 60%),
-    repeating-linear-gradient(112deg, rgba(140, 105, 45, .05) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(24deg, rgba(140, 105, 45, .032) 0 1px, transparent 1px 11px),
-    linear-gradient(168deg, #f8f1e0, #f3ead6 46%, #e9dcbe);
-  box-shadow: 0 12px 32px rgba(60, 40, 10, .35), inset 0 1px 0 rgba(255, 252, 240, .55);
+  border-radius: 4px;
+  color: var(--paper-ink);
+  background: var(--paper);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
 .inspector.is-positioned { visibility: visible; }
 .inspector > span {
   display: flex;
   align-items: center;
-  gap: 7px;
-  color: #96742a;
-  font: 700 .57rem/1 "IBM Plex Mono", monospace;
-  letter-spacing: .16em;
+  gap: 8px;
+  color: var(--crimson-deep);
+  font: 500 .66rem/1 var(--font-mono);
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
-.inspector > span::before { width: 5px; height: 5px; border-radius: 50%; background: #dfb968; box-shadow: 0 0 8px rgba(223, 185, 104, .55); content: ''; }
-.inspector strong { display: block; margin-top: 9px; color: #2c2418; font: 650 .95rem/1.15 "IBM Plex Sans Condensed", sans-serif; letter-spacing: .01em; }
-.inspector p { margin: 8px 0 0; color: rgba(44, 36, 24, .78); font-size: .73rem; line-height: 1.52; }
+.inspector > span::before { width: 14px; height: 1px; background: currentColor; content: ''; }
+.inspector strong { display: block; margin-top: 10px; color: var(--paper-ink); font: 700 .95rem/1.25 var(--font-body); }
+.inspector p { margin: 6px 0 0; color: var(--paper-ink-muted); font-size: .82rem; line-height: 1.5; }
 .inspector__arrow {
   position: absolute;
   width: 10px;
   height: 10px;
-  border: 0 solid rgba(140, 105, 45, .35);
-  background: #f3ead6;
+  background: var(--paper);
   transform: rotate(45deg);
 }
-.inspector-enter-active { transition: opacity .18s cubic-bezier(.22, .61, .36, 1), transform .18s cubic-bezier(.22, .61, .36, 1); }
-.inspector-leave-active { transition: opacity .12s cubic-bezier(.22, .61, .36, 1), transform .12s cubic-bezier(.22, .61, .36, 1); }
+.inspector-enter-active { transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); }
+.inspector-leave-active { transition: opacity .12s var(--ease-out), transform .12s var(--ease-out); }
 .inspector-enter-from { opacity: 0; transform: translateY(6px) scale(.97); }
 .inspector-leave-to { opacity: 0; transform: translateY(4px); }
-.inspector-enter-active > span,
-.inspector-enter-active strong,
-.inspector-enter-active p { transition: opacity .18s cubic-bezier(.22, .61, .36, 1), transform .18s cubic-bezier(.22, .61, .36, 1); }
-.inspector-enter-active strong { transition-delay: 30ms; }
-.inspector-enter-active p { transition-delay: 60ms; }
-.inspector-enter-from > span,
-.inspector-enter-from strong,
-.inspector-enter-from p { opacity: 0; transform: translateY(5px); }
 .inspector--instant.inspector-enter-active,
-.inspector--instant.inspector-leave-active,
-.inspector--instant.inspector-enter-active > span,
-.inspector--instant.inspector-enter-active strong,
-.inspector--instant.inspector-enter-active p { transition: none; }
-@media (max-width:600px){.inspector{width:min(236px,calc(100vw - 24px));overflow-wrap:anywhere}}
+.inspector--instant.inspector-leave-active { transition: none; }
+@media (max-width: 600px) { .inspector { width: min(236px, calc(100vw - 24px)); overflow-wrap: anywhere; } }
 </style>

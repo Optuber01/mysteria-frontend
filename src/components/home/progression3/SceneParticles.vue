@@ -10,9 +10,11 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 type ParticleMode = 'sparkles' | 'bubbles' | 'aura' | 'burst';
 type Color = readonly [number, number, number];
 
-const VIOLET: Color = [139, 118, 232];
-const CHAMPAGNE: Color = [217, 180, 90];
-const TEAL: Color = [110, 168, 158];
+// Homepage v2 palette: crimson (--crimson-text), bone (--bone) and the
+// spirit-vision blue (--spirit) for liquid and sight.
+const CRIMSON: Color = [229, 84, 93];
+const BONE: Color = [236, 230, 218];
+const SPIRIT: Color = [169, 198, 214];
 const TAU = Math.PI * 2;
 const SEED = 0x5eedcafe;
 
@@ -105,7 +107,7 @@ function newParticle(): Particle {
     vy: 0,
     radius: 1,
     baseAlpha: 0.5,
-    color: VIOLET,
+    color: BONE,
     phase: 0,
     twinkle: 0,
     baseX: 0,
@@ -140,7 +142,7 @@ function createParticle(rng: () => number): Particle {
       p.vy = -(2 + rng() * 9);
       p.radius = 1 + rng() * 1.7;
       p.baseAlpha = 0.22 + rng() * 0.4;
-      p.color = rng() < 0.6 ? VIOLET : CHAMPAGNE;
+      p.color = rng() < 0.6 ? CRIMSON : BONE;
       p.phase = rng() * TAU;
       p.twinkle = 0.6 + rng() * 1.6;
       return p;
@@ -154,7 +156,7 @@ function createParticle(rng: () => number): Particle {
       p.vy = -(14 + rng() * 22);
       p.radius = 2 + rng() * 3.4;
       p.baseAlpha = 0.3 + rng() * 0.3;
-      p.color = rng() < 0.62 ? TEAL : rng() < 0.5 ? VIOLET : CHAMPAGNE;
+      p.color = rng() < 0.62 ? SPIRIT : rng() < 0.5 ? BONE : CRIMSON;
       p.phase = rng() * TAU;
       p.wobble = 6 + rng() * 12;
       p.wobbleFreq = 0.8 + rng() * 1.4;
@@ -167,7 +169,7 @@ function createParticle(rng: () => number): Particle {
       p.angle = rng() * TAU;
       p.dirSpeed = (rng() < 0.5 ? -1 : 1) * (0.22 + rng() * 0.4);
       p.baseAlpha = 0.26 + rng() * 0.34;
-      p.color = rng() < 0.55 ? VIOLET : CHAMPAGNE;
+      p.color = rng() < 0.6 ? CRIMSON : BONE;
       p.phase = rng() * TAU;
       p.twinkle = 0.5 + rng() * 1.2;
       p.tailLen = 14 + rng() * 20;
@@ -191,7 +193,7 @@ function createBurstParticle(rng: () => number): Particle {
   p.vy = Math.sin(angle) * speed;
   p.radius = 1.2 + rng() * 2.2;
   p.baseAlpha = 0.6 + rng() * 0.3;
-  p.color = rng() < 0.55 ? VIOLET : rng() < 0.85 ? CHAMPAGNE : TEAL;
+  p.color = rng() < 0.55 ? CRIMSON : rng() < 0.85 ? BONE : SPIRIT;
   p.maxLife = maxLife;
   p.life = maxLife;
   p.drag = 0.93;

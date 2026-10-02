@@ -1,8 +1,6 @@
 <template>
   <div class="book-scene" :class="{ 'is-readable': readable }" :style="sceneVars" role="group" :aria-label="tp('book.sceneLabel')">
-    <p class="book-scene__caption" aria-hidden="true">
-      <span>{{ tp('book.caption') }}</span>
-    </p>
+    <p class="fog-label book-scene__caption" aria-hidden="true">{{ tp('book.caption') }}</p>
 
     <div class="book-viewport">
       <div class="book-scene__glow" aria-hidden="true" />
@@ -23,7 +21,7 @@
             @blur="emit('clear-inspect')"
             @click="inspect(entry.id, $event)"
           >
-            <span class="sr-only">{{ entry.name }}, {{ entry.role }}</span>
+            <span class="visually-hidden">{{ entry.name }}, {{ entry.role }}</span>
           </button>
         </section>
 
@@ -40,7 +38,7 @@
             @blur="emit('clear-inspect')"
             @click="inspect(entry.id, $event)"
           >
-            <span class="sr-only">{{ entry.name }}, {{ entry.role }}</span>
+            <span class="visually-hidden">{{ entry.name }}, {{ entry.role }}</span>
           </button>
 
           <button
@@ -53,7 +51,7 @@
             @blur="emit('clear-inspect')"
             @click="inspect('formula-fool', $event)"
           >
-            <span class="sr-only">{{ tp('book.sealLabel') }}</span>
+            <span class="visually-hidden">{{ tp('book.sealLabel') }}</span>
           </button>
         </section>
       </div>
@@ -130,7 +128,7 @@ const readable = computed(() => props.active && readT.value > 0.92 && closeT.val
 const sceneVars = computed(() => ({
   '--read': readT.value.toFixed(4),
   '--caption-opacity': (reducedMotion.value ? 1 : smoothstep((p.value - 0.26) / 0.15)).toFixed(4),
-  '--glow-opacity': (reducedMotion.value ? 0.45 : smoothstep(p.value / 0.22) * (0.28 + readT.value * 0.22)).toFixed(4),
+  '--glow-opacity': (reducedMotion.value ? 1 : smoothstep(p.value / 0.22) * (0.55 + readT.value * 0.45)).toFixed(4),
   '--mote-opacity': (reducedMotion.value ? 0.35 : smoothstep((p.value - 0.32) / 0.45)).toFixed(4),
 }));
 
@@ -147,34 +145,25 @@ function inspect(id: string, event: Event) {
   place-items: center;
 }
 
+/* Evidence tag over the exhibit. */
 .book-scene__caption {
   position: absolute;
   z-index: 8;
   top: clamp(4px, 2vh, 18px);
   left: 50%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   margin: 0;
-  color: #87691d;
-  font: 800 clamp(0.68rem, 1vw, 0.78rem)/1 "Manrope", sans-serif;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
   white-space: nowrap;
   opacity: var(--caption-opacity, 0);
   pointer-events: none;
   transform: translateX(-50%);
 }
 
-.book-scene__caption::before,
 .book-scene__caption::after {
-  width: clamp(24px, 6vw, 70px);
+  content: "";
+  width: 18px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(217, 180, 90, 0.55));
-  content: '';
+  background: var(--crimson-text);
 }
-
-.book-scene__caption::after { transform: scaleX(-1); }
 
 .book-viewport {
   position: relative;
@@ -184,13 +173,13 @@ function inspect(id: string, event: Event) {
   margin-top: clamp(22px, 5vh, 46px);
 }
 
+/* A single lamp over the desk: cold light, no colour. */
 .book-scene__glow {
   position: absolute;
   z-index: -1;
-  inset: 10% 4% 0;
+  inset: 4% 0 -2%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(217, 180, 90, 0.2), rgba(116, 88, 232, 0.1) 48%, transparent 72%);
-  filter: blur(20px);
+  background: radial-gradient(ellipse 50% 46% at 50% 52%, rgba(236, 230, 218, 0.16), rgba(169, 198, 214, 0.05) 55%, transparent 74%);
   opacity: var(--glow-opacity, 0);
   pointer-events: none;
 }
@@ -219,10 +208,11 @@ function inspect(id: string, event: Event) {
   position: absolute;
   left: 6%;
   width: 88%;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .formula-hotspot--main-1,
@@ -230,53 +220,33 @@ function inspect(id: string, event: Event) {
 .formula-hotspot--main-2 { top: 33%; height: 17%; }
 .formula-hotspot--seal { top: 74%; height: 20%; }
 
+/* Ink-red pencil marks on the page (the hotspot sits on paper). */
 .formula-hotspot:hover,
 .formula-hotspot:focus-visible {
-  border-color: rgba(116, 88, 232, 0.45);
+  border-color: rgba(142, 23, 32, 0.7);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(116, 88, 232, 0.16);
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  background: rgba(142, 23, 32, 0.07);
+  box-shadow: 0 0 0 3px rgba(229, 84, 93, 0.35);
 }
 
 .book-scene__motes { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
 .book-scene__motes i {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 180, 90, 0.65), transparent 70%);
-  opacity: calc(var(--mote-opacity, 0) * 0.55);
-  animation: mote-drift 7s ease-in-out infinite;
+  background: rgba(236, 230, 218, 0.7);
+  box-shadow: 0 0 8px rgba(236, 230, 218, 0.45);
+  opacity: calc(var(--mote-opacity, 0) * 0.5);
+  animation: mote-drift 9s ease-in-out infinite;
 }
 .book-scene__motes i:nth-child(1) { top: 29%; left: 29%; }
-.book-scene__motes i:nth-child(2) { top: 58%; left: 70%; animation-delay: -2.4s; }
-.book-scene__motes i:nth-child(3) { top: 42%; left: 55%; animation-delay: -4.8s; }
+.book-scene__motes i:nth-child(2) { top: 58%; left: 70%; animation-delay: -3s; }
+.book-scene__motes i:nth-child(3) { top: 42%; left: 55%; animation-delay: -6s; }
 
 @keyframes mote-drift {
   0%, 100% { transform: translate3d(0, 0, 0); }
   50% { transform: translate3d(10px, -16px, 0); }
-}
-
-@media (max-width: 820px) {
-  .book-viewport { width: min(610px, 100%); }
-}
-
-@media (max-width: 520px) {
-  .book-scene__caption { top: 0; letter-spacing: 0.1em; }
-  .book-scene__caption::before,
-  .book-scene__caption::after { width: 14px; }
-  .formula-hotspots { width: 68%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
