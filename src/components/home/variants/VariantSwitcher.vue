@@ -91,4 +91,26 @@ function choose(param: string, id: string) {
   color: var(--bone);
   background: var(--fog-2);
 }
+
+/* On phones it docks small at the left edge, clear of full-width buttons. */
+@media (max-width: 720px) {
+  .variant-switcher {
+    left: 0;
+    bottom: 38vh;
+  }
+
+  .variant-switcher__toggle {
+    min-height: 32px;
+    padding: 0 10px;
+    border-left: 0;
+    border-radius: 0 999px 999px 0;
+    font-size: .6rem;
+    opacity: .85;
+  }
+
+  .variant-switcher__panel {
+    left: 8px;
+    bottom: 42px;
+  }
+}
 </style>

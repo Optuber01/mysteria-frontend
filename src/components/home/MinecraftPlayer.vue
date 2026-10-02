@@ -3,7 +3,7 @@
     ref="host"
     class="minecraft-player"
     :class="{ 'is-ready': ready }"
-    :style="{ '--glow': glow.toFixed(3) }"
+    :style="{ '--glow': glow.toFixed(3), '--shade': shade.toFixed(3) }"
     role="img"
     :aria-label="label || undefined"
   >
@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import type { PointLight, Vector3 } from 'three';
+import type { Mesh, MeshStandardMaterial, Object3D, PointLight, Vector3 } from 'three';
 import type { PlayerAnimation, SkinViewer } from 'skinview3d';
 
 // Placeholder: the stock Steve skin until a Mysterria character skin exists.
@@ -36,6 +36,14 @@ const props = withDefaults(
     progress?: number;
     /** 0..1: the awakening's crimson rim light and the lift out of shadow. */
     glow?: number;
+    /** 0..1: how far the figure is in silhouette (low front light). */
+    shade?: number;
+    /** 0..1 (drink): the potion raised from the chest to the mouth. */
+    lift?: number;
+    /** 0..1 (drink): how far the head has tipped back over the gulps. */
+    sip?: number;
+    /** A dark frock coat and top hat over the skin, built from its own boxes. */
+    costume?: boolean;
     /** Accessible description of the pose. */
     label?: string;
   }>(),
@@ -44,6 +52,10 @@ const props = withDefaults(
     armed: true,
     progress: 0,
     glow: 0,
+    shade: 0,
+    lift: 1,
+    sip: 0,
+    costume: false,
     label: '',
   },
 );
@@ -81,18 +93,20 @@ function makeAnimation(mode: MinecraftPlayerMode): PlayerAnimation {
   if (!skinview) throw new Error('The player renderer is not ready.');
 
   if (mode === 'advance') {
+    // Awakened: lifted off the circle, arms opening, face up to the moon.
     const animation = new skinview.FunctionAnimation((player, progress) => {
-      const lift = (Math.sin(progress * 1.25) + 1) * 0.34;
-      const pulse = Math.sin(progress * 1.25) * 0.06;
-      player.skin.rightArm.rotation.x = -2.14 + pulse;
-      player.skin.rightArm.rotation.z = -0.82;
-      player.skin.leftArm.rotation.x = -2.14 - pulse;
-      player.skin.leftArm.rotation.z = 0.82;
-      player.skin.head.rotation.x = -0.08;
-      player.skin.rightLeg.rotation.x = -0.07;
+      const open = clamp01((progress - 1.6) / 1.2);
+      const float = Math.sin(progress * 1.25) * 0.05;
+      player.skin.rightArm.rotation.x = lerp(-0.12, -0.3, open) + float;
+      player.skin.rightArm.rotation.z = lerp(-0.06, -0.36, open);
+      player.skin.leftArm.rotation.x = lerp(-0.12, -0.3, open) - float;
+      player.skin.leftArm.rotation.z = lerp(0.06, 0.36, open);
+      player.skin.head.rotation.x = lerp(-0.08, -0.3, open);
+      player.skin.head.rotation.y = 0;
+      player.skin.rightLeg.rotation.x = -0.05;
       player.skin.leftLeg.rotation.x = 0.07;
-      player.position.y = lift;
-      player.rotation.y = Math.sin(progress * 0.36) * 0.16;
+      player.position.y = 0.4 + open * 0.6 + float * 4;
+      player.rotation.y = lerp(-0.1, 0.06, open);
     });
     animation.speed = 0.68;
     return animation;
@@ -100,19 +114,75 @@ function makeAnimation(mode: MinecraftPlayerMode): PlayerAnimation {
 
   const animation = new skinview.FunctionAnimation((player, progress) => {
     const breath = Math.sin(progress * 2.2) * 0.035;
-    const sip = Math.sin(progress * 1.35) * 0.05;
-    // arm extended toward the camera so the hand overlaps the mouth on screen; head tilted back to drink
-    player.skin.rightArm.rotation.x = -1.65 + sip;
-    player.skin.rightArm.rotation.z = 0.65;
-    player.skin.leftArm.rotation.x = -0.22 - breath;
-    player.skin.leftArm.rotation.z = -0.1;
-    player.skin.head.rotation.x = 0.26 + breath;
+    const lift = clamp01(props.lift);
+    const sip = clamp01(props.sip);
+    // The potion is held at the chest, then raised: the arm comes forward and
+    // in so the hand overlaps the mouth on screen; the head tips back to drink.
+    player.skin.rightArm.rotation.x = lerp(-0.62, -1.65, lift) + sip * 0.12;
+    player.skin.rightArm.rotation.z = lerp(0.18, 0.65, lift);
+    player.skin.leftArm.rotation.x = -0.22 - breath - sip * 0.1;
+    player.skin.leftArm.rotation.z = -0.1 - sip * 0.12;
+    player.skin.head.rotation.x = lerp(0.3, 0.12, lift) - sip * 0.34 + breath;
     player.skin.head.rotation.y = -0.06;
-    player.rotation.y = -0.15;
+    player.rotation.y = -0.15 + sip * 0.06;
     player.position.y = breath * 1.6;
   });
   animation.speed = 0.82;
   return animation;
+}
+
+function clamp01(value: number): number {
+  return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
+}
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+/*
+ * A frock coat and top hat for the awakening's silhouette, made by cloning the
+ * skin's own unit-box arm mesh (so three.js is never imported here) with a
+ * plain dark material. The skin itself is untouched: the face, hands and legs
+ * still read as the player's.
+ */
+function dress(instance: SkinViewer): void {
+  const skin = instance.playerObject.skin;
+  const unit = skin.rightArm.innerLayer as Mesh;
+  const base = unit.material as MeshStandardMaterial;
+  const cloth = (color: number) => {
+    const material = base.clone();
+    material.map = null;
+    material.color.setHex(color);
+    material.roughness = 0.95;
+    material.metalness = 0;
+    material.needsUpdate = true;
+    return material;
+  };
+  const coat = cloth(0x17181d);
+  const hat = cloth(0x0e0e11);
+  const band = cloth(0x5e0f17);
+  const box = (parent: Object3D, material: MeshStandardMaterial, size: [number, number, number], at: [number, number, number]) => {
+    const mesh = unit.clone();
+    mesh.material = material;
+    mesh.scale.set(...size);
+    mesh.position.set(...at);
+    parent.add(mesh);
+  };
+  // top hat: brim, crown, crimson band (the head spans y 0..8)
+  box(skin.head, hat, [10.6, 0.7, 10.6], [0, 8.55, 0]);
+  box(skin.head, hat, [7.4, 6.6, 7.4], [0, 12.1, 0]);
+  box(skin.head, band, [7.6, 1.1, 7.6], [0, 9.5, 0]);
+  // open coat: two front panels leave the shirt showing down the middle
+  box(skin.body, coat, [3.3, 12.7, 4.9], [-2.6, 0, 0]);
+  box(skin.body, coat, [3.3, 12.7, 4.9], [2.6, 0, 0]);
+  box(skin.body, coat, [8.9, 12.7, 1.2], [0, 0, -1.9]);
+  // coat skirts to the knee, split at the front
+  box(skin.body, coat, [4.3, 7, 5], [-2.25, -9.4, 0]);
+  box(skin.body, coat, [4.3, 7, 5], [2.25, -9.4, 0]);
+  // sleeves to the wrist (each arm's pivot spans y -6..6)
+  [skin.rightArm, skin.leftArm].forEach((arm) => {
+    const pivot = arm.innerLayer.parent;
+    if (pivot) box(pivot, coat, [4.7, 9.6, 4.7], [0, 1.3, 0]);
+  });
 }
 
 function animationFor(mode: MinecraftPlayerMode): PlayerAnimation {
@@ -126,11 +196,13 @@ function animationFor(mode: MinecraftPlayerMode): PlayerAnimation {
 
 function applyLighting() {
   if (!viewer) return;
-  const glow = Math.max(0, Math.min(1, props.glow));
-  viewer.globalLight.intensity = 1.1 + glow * 1.2;
-  viewer.cameraLight.intensity = 0.55 + glow * 0.25;
+  const glow = clamp01(props.glow);
+  const shade = clamp01(props.shade);
+  // In silhouette the front light falls away and the rim carries the figure.
+  viewer.globalLight.intensity = (1.1 + glow * 1.2) * (1 - 0.72 * shade);
+  viewer.cameraLight.intensity = (0.55 + glow * 0.25) * (1 - 0.6 * shade);
   rimLights.forEach((light) => {
-    light.intensity = 0.5 + glow * 2.6;
+    light.intensity = 0.5 + glow * 2.6 + shade * 0.8;
   });
 }
 
@@ -223,6 +295,7 @@ async function createViewer() {
 
     await instance.loadSkin(steveSkinUrl, { model: 'default' });
     if (disposed || !viewer) return;
+    if (props.costume) dress(instance);
 
     ready.value = true;
     sizeViewer();
@@ -252,12 +325,12 @@ onMounted(() => {
 });
 
 watch(() => props.armed, maybeCreateViewer);
-watch(() => props.glow, () => {
+watch(() => [props.glow, props.shade] as const, () => {
   applyLighting();
   if (inViewport.value && viewer && !viewer.disposed) viewer.render();
 });
 watch(
-  () => [props.mode, props.progress, reducedMotion.value] as const,
+  () => [props.mode, props.progress, props.lift, props.sip, reducedMotion.value] as const,
   () => syncPlayback(),
 );
 
@@ -276,6 +349,7 @@ onUnmounted(() => {
 <style scoped>
 .minecraft-player {
   --glow: 0;
+  --shade: 0;
   position: relative;
   width: 100%;
   min-width: 0;
@@ -316,7 +390,7 @@ onUnmounted(() => {
   opacity: 0;
   /* In shadow while drinking; the awakening lifts the figure and haloes it. */
   filter:
-    brightness(calc(0.78 + var(--glow) * 0.27))
+    brightness(calc(0.78 + var(--glow) * 0.27 - var(--shade) * 0.3))
     drop-shadow(0 0 calc(var(--glow) * 22px) rgba(229, 84, 93, calc(var(--glow) * 0.65)))
     drop-shadow(0 24px 22px rgba(0, 0, 0, 0.5));
   transition: opacity 0.14s ease;

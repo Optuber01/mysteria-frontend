@@ -12,11 +12,26 @@
         <img :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
       <div class="progression-v3__omen" aria-hidden="true" />
+      <!-- the cauldron's light on the room while it brews -->
+      <div class="progression-v3__hearth" aria-hidden="true" />
+      <!-- Decorative: the Crimson Moon rises behind the player, sunk in fog
+           bands that drift across it (it may bleed past the frame). -->
+      <div class="progression-v3__moon" aria-hidden="true" data-sweep-ignore>
+        <i class="progression-v3__moon-halo" />
+        <i class="progression-v3__moon-disc" :style="{ backgroundImage: `url(${crimsonMoon})` }" />
+        <i class="progression-v3__moon-band progression-v3__moon-band--1" />
+        <i class="progression-v3__moon-band progression-v3__moon-band--2" />
+        <i class="progression-v3__moon-band progression-v3__moon-band--3" />
+      </div>
       <div class="progression-v3__fogbank" aria-hidden="true">
         <i class="progression-v3__fog progression-v3__fog--far" />
         <i class="progression-v3__fog progression-v3__fog--near" />
       </div>
       <div class="progression-v3__vignette" aria-hidden="true" />
+      <!-- the dark closing in on the drink, with the heart's beat in it -->
+      <div class="progression-v3__dread" aria-hidden="true" data-sweep-ignore />
+      <!-- and the awakening's flash, thrown across the whole room -->
+      <div class="progression-v3__burst" aria-hidden="true" />
       <div class="progression-v3__threshold" aria-hidden="true" />
 
       <header class="progression-v3__heading">
@@ -57,12 +72,14 @@
               :active="altarOpacity > 0.5"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
+              @handoff="onHandoff"
             />
           </div>
           <div class="scene-window scene-window--drink" :style="drinkWindowStyle" :aria-hidden="drinkOpacity < 0.5">
             <DrinkAwakenScene
               :progress="drinkLocal"
               :active="drinkOpacity > 0.5"
+              :handoff="handoff"
               :warm="progress >= TIMELINE.playerWarm"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
@@ -123,14 +140,18 @@ import AltarBrewScene from './progression3/AltarBrewScene.vue';
 import DrinkAwakenScene from './progression3/DrinkAwakenScene.vue';
 import SceneInspectorPopover from './SceneInspectorPopover.vue';
 import { preloadPathwayNames, useProgressionCopy } from './progression3/useProgressionCopy';
+import { DRINK_BEATS, blackoutAt, flashAt, gulpPulse, riskAt } from './progression3/drinkBeats';
+import type { BrewHandoff } from './progression3/AltarBrewScene.vue';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
+import crimsonMoon from '@/assets/images/home/progression/crimson-moon.webp';
 
 /*
  * One timeline (fractions of the pinned scroll) drives the scenes, the chapter
  * rail and chapter navigation, so the rail can never name a chapter the stage
- * is not showing. The section is 360svh tall: 2.6 viewports of pinned scroll.
+ * is not showing. The section is 400svh tall: 3 viewports of pinned scroll
+ * (the book keeps its first 0.62 viewports; brewing and drinking get the rest).
  */
-const ALTAR = { start: 0.24, end: 0.56 };
+const ALTAR = { start: 0.208, end: 0.56 };
 const DRINK = { start: 0.56, end: 1 };
 const altarAt = (local: number) => ALTAR.start + (ALTAR.end - ALTAR.start) * local;
 const drinkAt = (local: number) => DRINK.start + (DRINK.end - DRINK.start) * local;
@@ -138,37 +159,41 @@ const drinkAt = (local: number) => DRINK.start + (DRINK.end - DRINK.start) * loc
 // ingredients while the cauldron settles underneath it.
 const BOOK = {
   // The book waits for the title card to clear before it descends.
-  start: 0.015,
-  end: 0.17,
-  closeStart: altarAt(0.1),
-  closeEnd: altarAt(0.42),
-  fadeOutStart: altarAt(0.33),
-  fadeOutEnd: altarAt(0.46),
+  start: 0.013,
+  end: 0.147,
+  // It closes and slides clear before the cauldron screen arrives, so the
+  // two never overlap; the ingredients hover in between.
+  closeStart: altarAt(0.079),
+  closeEnd: altarAt(0.25),
+  fadeOutStart: altarAt(0.24),
+  fadeOutEnd: altarAt(0.33),
   // As it closes, the book slides this fraction of the stage to the left, out
   // of the way of the cauldron print arriving on the right.
   shift: 0.3,
 };
 const FADES = {
-  altarIn: [altarAt(0.03), altarAt(0.16)],
-  altarOut: [ALTAR.end, ALTAR.end + 0.03],
-  // Starts as the altar is half gone, so the player never overlaps the print.
-  drinkIn: [DRINK.start + 0.005, DRINK.start + 0.032],
+  altarIn: [altarAt(0.024), altarAt(0.126)],
+  // By ALTAR.end the cauldron and the print have sunk into the fog and only
+  // the potion is left. The drink scene arrives on top with the same potion in
+  // the same place, then the altar goes: the potion never blinks.
+  drinkIn: [DRINK.start, DRINK.start + 0.006],
+  altarOut: [DRINK.start + 0.006, DRINK.start + 0.012],
 } as const;
 const TIMELINE = {
   // Chapter starts follow the first visible beat of each step: the book
   // closing as the ingredients take flight, the cauldron starting to brew,
   // the altar/drink cross-fade midpoint, and the awakening flash.
   infuse: BOOK.closeStart,
-  brew: altarAt(0.55),
-  drink: (FADES.altarOut[0] + FADES.altarOut[1]) / 2,
-  awaken: drinkAt(0.4),
+  brew: altarAt(0.43),
+  drink: DRINK.start,
+  awaken: drinkAt(DRINK_BEATS.flash),
   // The fog parts while the awakening plays (DrinkAwakenScene: 0.42 -> 0.62).
-  awakenEnd: drinkAt(0.62),
+  awakenEnd: drinkAt(DRINK_BEATS.awaken[0] + DRINK_BEATS.awaken[1]),
   // Book hotspots stop being readable once the pages start closing.
   bookReadableUntil: BOOK.closeStart,
   altarReadableUntil: FADES.altarOut[1],
   // skinview3d/WebGL for the player is created only once the story is close.
-  playerWarm: 0.36,
+  playerWarm: 0.31,
 };
 
 type ChapterId = 'discover' | 'infuse' | 'brew' | 'drink' | 'awaken';
@@ -177,10 +202,10 @@ type Chapter = { id: ChapterId; end: number; landing: number };
 // A chapter runs until `end` (it starts where the previous one ends); `landing`
 // is where chapter navigation scrolls to: a settled frame of that step.
 const chapters: Chapter[] = [
-  { id: 'discover', end: TIMELINE.infuse, landing: BOOK.end + 0.02 },
-  { id: 'infuse', end: TIMELINE.brew, landing: altarAt(0.5) + 0.005 },
-  { id: 'brew', end: TIMELINE.drink, landing: altarAt(0.93) },
-  { id: 'drink', end: TIMELINE.awaken, landing: drinkAt(0.24) },
+  { id: 'discover', end: TIMELINE.infuse, landing: BOOK.end + 0.017 },
+  { id: 'infuse', end: TIMELINE.brew, landing: altarAt(0.42) },
+  { id: 'brew', end: TIMELINE.drink, landing: altarAt(0.9) },
+  { id: 'drink', end: TIMELINE.awaken, landing: drinkAt(0.25) },
   { id: 'awaken', end: 1, landing: 1 },
 ];
 
@@ -278,11 +303,47 @@ const drinkOpacity = computed(() => (reducedMotion.value ? 1 : windowProgress(..
 
 // CSS drivers for the stage dressing: --journey (whole chapter), --entry (the
 // section rising under the hero), --awaken (the fog parting at the climax).
-const sectionVars = computed(() => ({
-  '--journey': progress.value.toFixed(4),
-  '--entry': entryProgress.value.toFixed(4),
-  '--awaken': windowProgress(TIMELINE.awaken, TIMELINE.awakenEnd).toFixed(4),
-}));
+// --brew lights the room from the cauldron; --risk, --thump and --blackout
+// close the fog in on the drink (drinkBeats), --awaken bursts it open.
+const sectionVars = computed(() => {
+  const d = drinkLocal.value;
+  const motion = !reducedMotion.value;
+  const brewing = windowProgress(altarAt(0.4), altarAt(0.84)) * fadeOut(altarAt(0.9), ALTAR.end);
+  return {
+    '--journey': progress.value.toFixed(4),
+    '--entry': entryProgress.value.toFixed(4),
+    '--brew': (motion ? brewing : 0).toFixed(4),
+    '--risk': (motion ? riskAt(d) : 0).toFixed(4),
+    '--thump': (motion ? gulpPulse(d) : 0).toFixed(4),
+    '--blackout': (motion ? blackoutAt(d) : 0).toFixed(4),
+    '--flash': (motion ? flashAt(d) : 0).toFixed(4),
+    '--moon': windowProgress(drinkAt(0.3), TIMELINE.awakenEnd).toFixed(4),
+    '--awaken': windowProgress(TIMELINE.awaken, TIMELINE.awakenEnd).toFixed(4),
+    ...stageVars.value,
+  };
+});
+
+// Where the stage (and the player on it) sits in the pinned frame, so the
+// full-bleed moon rises right behind him.
+const stageVars = ref<Record<string, string>>({});
+const handoff = ref<BrewHandoff | null>(null);
+function measureStage() {
+  const stage = stageRef.value;
+  const sticky = stage?.closest('.progression-v3__sticky');
+  if (!stage || !sticky) return;
+  const s = stage.getBoundingClientRect();
+  const k = sticky.getBoundingClientRect();
+  const standX = handoff.value ? handoff.value.floor.x : s.width * 0.31;
+  stageVars.value = {
+    '--stand-x': `${(s.left - k.left + standX).toFixed(1)}px`,
+    '--stage-top': `${(s.top - k.top).toFixed(1)}px`,
+    '--stage-h': `${s.height.toFixed(1)}px`,
+  };
+}
+function onHandoff(value: BrewHandoff) {
+  handoff.value = value;
+  measureStage();
+}
 
 function windowStyle(opacity: number) {
   return {
@@ -299,9 +360,11 @@ const bookShift = computed(() => {
   const t = clamp01(bookClosingLocal.value / 0.7);
   return BOOK.shift * t * t * (3 - 2 * t);
 });
+// As it fades, the closed book sinks into the fog the cauldron rises out of.
+const bookSink = computed(() => (reducedMotion.value ? 0 : windowProgress(BOOK.fadeOutStart, BOOK.fadeOutEnd)));
 const bookWindowStyle = computed(() => ({
   ...windowStyle(bookOpacity.value),
-  transform: `translate3d(${(-bookShift.value * 100).toFixed(2)}%, 0, 0)`,
+  transform: `translate3d(${(-bookShift.value * 100).toFixed(2)}%, ${(bookSink.value * 7).toFixed(2)}%, 0) scale(${(1 - 0.05 * bookSink.value).toFixed(4)})`,
 }));
 const altarWindowStyle = computed(() => windowStyle(altarOpacity.value));
 const drinkWindowStyle = computed(() => windowStyle(drinkOpacity.value));
@@ -377,7 +440,10 @@ function goToChapter(index: number) {
 onMounted(() => {
   observer = new IntersectionObserver(([entry]) => {
     visible.value = entry.isIntersecting;
-    if (visible.value) update();
+    if (visible.value) {
+      measureStage();
+      update();
+    }
   }, { rootMargin: '120px 0px' });
   nearObserver = new IntersectionObserver(([entry]) => {
     if (!entry.isIntersecting) return;
@@ -392,6 +458,8 @@ onMounted(() => {
   }
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', update, { passive: true });
+  addEventListener('resize', measureStage, { passive: true });
+  measureStage();
   addEventListener('keydown', onKeydown);
 });
 onUnmounted(() => {
@@ -399,6 +467,7 @@ onUnmounted(() => {
   nearObserver?.disconnect();
   removeEventListener('scroll', update);
   removeEventListener('resize', update);
+  removeEventListener('resize', measureStage);
   removeEventListener('keydown', onKeydown);
   if (frame) cancelAnimationFrame(frame);
 });
@@ -412,10 +481,16 @@ onUnmounted(() => {
   /* The title card owns the entrance; the chapter copy and stage take over
      as soon as the section pins. */
   --title-in: clamp(0, calc((var(--entry) - 0.35) * 2.5), 1);
-  --title-out: clamp(0, calc(1 - var(--journey) * 40), 1);
-  --stage-in: clamp(0, calc((var(--journey) - 0.01) * 30), 1);
+  --title-out: clamp(0, calc(1 - var(--journey) * 46), 1);
+  --stage-in: clamp(0, calc((var(--journey) - 0.0087) * 34.6), 1);
+  --brew: 0;
+  --risk: 0;
+  --thump: 0;
+  --blackout: 0;
+  --flash: 0;
+  --moon: 0;
   position: relative;
-  min-height: 360svh;
+  min-height: 400svh;
   color: var(--bone);
   background: var(--fog-0);
   isolation: isolate;
@@ -433,15 +508,19 @@ onUnmounted(() => {
 /* ---- The brewery capture, sunk into the dark like the hero's scenes ---- */
 .progression-v3__backdrop,
 .progression-v3__omen,
+.progression-v3__hearth,
 .progression-v3__fogbank,
-.progression-v3__vignette {
+.progression-v3__vignette,
+.progression-v3__burst,
+.progression-v3__dread {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
 .progression-v3__backdrop {
-  opacity: calc(clamp(0, (var(--entry) - 0.3) * 1.43, 1) * (0.62 - var(--awaken) * 0.4));
+  /* the room sinks into the dark while the potion is drunk */
+  opacity: calc(clamp(0, (var(--entry) - 0.3) * 1.43, 1) * max(0, 0.62 - var(--awaken) * 0.4 - var(--risk) * 0.32 - var(--blackout) * 0.3));
   transform: scale(calc(1.04 + var(--journey) * 0.06));
   transform-origin: 50% 60%;
 }
@@ -463,10 +542,78 @@ onUnmounted(() => {
     radial-gradient(ellipse 70% 90% at 46% 60%, rgba(142, 23, 32, 0.22), transparent 78%);
 }
 
-/* ---- Fog: two slow banks, parted at the climax ---- */
+/* Soul fire and the brew light the room from where the cauldron stands. */
+.progression-v3__hearth {
+  opacity: var(--brew);
+  background:
+    radial-gradient(ellipse 26% 30% at var(--stand-x, 50%) 72%, rgba(169, 198, 214, 0.1), transparent 70%),
+    radial-gradient(ellipse 34% 46% at var(--stand-x, 50%) 58%, rgba(179, 32, 43, 0.16), transparent 72%);
+}
+
+/* ---- The Crimson Moon: textured, limb-darkened, sinking into fog ---- */
+.progression-v3__moon {
+  position: absolute;
+  top: calc(var(--stage-top, 14vh) + var(--stage-h, 70vh) * 0.44);
+  left: var(--stand-x, 55%);
+  width: min(70vh, 620px);
+  aspect-ratio: 1;
+  /* below the horizon until the fog parts; a faint omen while drinking */
+  opacity: calc(min(1, var(--moon) * 0.35 + var(--awaken)) * (1 - var(--blackout) * 0.7));
+  transform: translate3d(-50%, calc(-50% + (1 - var(--moon)) * 26%), 0);
+  pointer-events: none;
+}
+
+/* The disc and its glow sink into the dark below the fog line (masked one by
+   one: a mask on the box would clip the glow and the bands at its sides). */
+.progression-v3__moon-halo,
+.progression-v3__moon-disc {
+  -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent 86%);
+  mask-image: linear-gradient(180deg, #000 50%, transparent 86%);
+}
+
+.progression-v3__moon > i {
+  position: absolute;
+}
+
+.progression-v3__moon-halo {
+  inset: -30%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(179, 32, 43, 0.3) 30%, rgba(142, 23, 32, 0.12) 46%, transparent 68%);
+}
+
+.progression-v3__moon-disc {
+  inset: 0;
+  border-radius: 50%;
+  /* generated texture: maria, rimmed craters, lit from the upper left */
+  background-color: #5c0d14;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 0 70px 6px rgba(179, 32, 43, 0.32);
+}
+
+/* fog bands drifting across the face of the moon */
+.progression-v3__moon-band {
+  left: -45%;
+  width: 190%;
+  background: linear-gradient(90deg, transparent, rgba(170, 160, 166, 0.5) 18%, rgba(130, 122, 128, 0.22) 46%, rgba(170, 160, 166, 0.46) 74%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
+  animation: moon-band 46s ease-in-out infinite alternate;
+}
+
+.progression-v3__moon-band--1 { top: 40%; height: 9%; opacity: 0.7; }
+.progression-v3__moon-band--2 { top: 56%; height: 14%; animation-duration: 60s; animation-direction: alternate-reverse; }
+.progression-v3__moon-band--3 { top: 70%; height: 22%; opacity: 0.9; animation-duration: 38s; }
+
+@keyframes moon-band {
+  from { transform: translate3d(-6%, 0, 0); }
+  to { transform: translate3d(6%, 0, 0); }
+}
+
+/* ---- Fog: two slow banks; they close in on the drink and part at the climax ---- */
 .progression-v3__fogbank {
   opacity: calc(1 - var(--awaken) * 0.75);
-  transform: translate3d(0, calc(var(--awaken) * 14%), 0);
+  transform: translate3d(0, calc(var(--awaken) * 14% - var(--risk) * 10%), 0);
 }
 
 .progression-v3__fog {
@@ -510,6 +657,43 @@ onUnmounted(() => {
     linear-gradient(180deg, var(--fog-0) 0%, transparent 18%, transparent 78%, var(--fog-0) 100%);
 }
 
+/* The dark closing in on the player while he drinks. It is scaled about the
+   player, tightening with every gulp, and a slow heartbeat throbs in it. */
+.progression-v3__burst {
+  z-index: 3;
+  background: radial-gradient(ellipse 46% 60% at var(--stand-x, 50%) 46%, rgba(236, 230, 218, 0.3), rgba(229, 84, 93, 0.22) 36%, transparent 72%);
+  opacity: var(--flash);
+}
+
+.progression-v3__dread {
+  /* the player's chest, in this box (which overhangs the frame by 30%) */
+  --dread-x: calc(18.75% + var(--stand-x, 34vw));
+  --dread-y: calc(18.75% + var(--stage-top, 14vh) + var(--stage-h, 70vh) * 0.42);
+  z-index: 3;
+  inset: -30%;
+  background: radial-gradient(ellipse 22% 30% at var(--dread-x) var(--dread-y), transparent 30%, rgba(3, 3, 5, 0.9) 80%);
+  opacity: min(1, calc(var(--risk) * 0.92 + var(--blackout)));
+  transform: scale(calc(1.3 - var(--risk) * 0.24 - var(--thump) * 0.06 - var(--blackout) * 0.08));
+  transform-origin: var(--dread-x) var(--dread-y);
+}
+
+.progression-v3__dread::after {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 30% 40% at var(--dread-x) var(--dread-y), transparent 55%, rgba(110, 10, 18, 0.32) 100%);
+  content: '';
+  opacity: 0;
+  animation: heartbeat 1.15s ease-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { opacity: 0; }
+  8% { opacity: 0.85; }
+  18% { opacity: 0.2; }
+  28% { opacity: 0.7; }
+  48% { opacity: 0; }
+}
+
 /* The hero's fog rolls straight into this chapter; the book descends out of
    it and it burns off as the story begins. */
 .progression-v3__threshold {
@@ -526,7 +710,7 @@ onUnmounted(() => {
     radial-gradient(ellipse 28% 28% at 82% 0%, rgba(200, 206, 214, 0.26), transparent 72%),
     radial-gradient(ellipse 34% 46% at 26% 34%, rgba(176, 184, 196, 0.14), transparent 72%),
     radial-gradient(ellipse 36% 44% at 72% 30%, rgba(176, 184, 196, 0.12), transparent 72%);
-  opacity: clamp(0, calc(1 - var(--journey) * 7), 1);
+  opacity: clamp(0, calc(1 - var(--journey) * 8.1), 1);
   pointer-events: none;
 }
 
@@ -849,6 +1033,10 @@ onUnmounted(() => {
   }
 
   .progression-v3__omen,
+  .progression-v3__hearth,
+  .progression-v3__moon,
+  .progression-v3__dread,
+  .progression-v3__burst,
   .progression-v3__fogbank,
   .progression-v3__threshold,
   .progression-v3__layout,
@@ -947,7 +1135,9 @@ onUnmounted(() => {
     transition: none;
   }
 
-  .progression-v3__fog {
+  .progression-v3__fog,
+  .progression-v3__moon-band,
+  .progression-v3__dread::after {
     animation: none;
   }
 }

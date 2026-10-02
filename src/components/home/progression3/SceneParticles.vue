@@ -7,7 +7,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
-type ParticleMode = 'sparkles' | 'bubbles' | 'aura' | 'burst';
+// 'brew' and 'steam' draw square texels, like Minecraft's own particles.
+type ParticleMode = 'sparkles' | 'bubbles' | 'aura' | 'burst' | 'brew' | 'steam';
 type Color = readonly [number, number, number];
 
 // Homepage v2 palette: crimson (--crimson-text), bone (--bone) and the
@@ -23,11 +24,14 @@ const props = withDefaults(
     mode: ParticleMode;
     active: boolean;
     intensity: number;
+    /** Colour of 'brew' bubbles (r, g, b); follows the liquid. */
+    tint?: readonly [number, number, number];
   }>(),
   {
     mode: 'sparkles',
     active: false,
     intensity: 0.5,
+    tint: undefined,
   },
 );
 
@@ -129,6 +133,8 @@ function targetCount(): number {
   if (props.mode === 'sparkles') return Math.round(34 * intensity.value);
   if (props.mode === 'bubbles') return Math.round(22 * intensity.value);
   if (props.mode === 'aura') return Math.round(26 * intensity.value);
+  if (props.mode === 'brew') return Math.round(34 * intensity.value);
+  if (props.mode === 'steam') return Math.round(34 * intensity.value);
   return Math.round(60 * intensity.value);
 }
 
@@ -174,6 +180,36 @@ function createParticle(rng: () => number): Particle {
       p.twinkle = 0.5 + rng() * 1.2;
       p.tailLen = 14 + rng() * 20;
       p.lineWidth = 1.4 + rng() * 1.2;
+      return p;
+    }
+    case 'brew': {
+      // Pops on the liquid surface: the lower fifth of the box.
+      const p = newParticle();
+      p.baseX = width * (0.5 + (rng() - 0.5) * 0.62);
+      p.x = p.baseX;
+      p.y = height * (0.8 + rng() * 0.16);
+      p.vy = -(10 + rng() * 26);
+      p.radius = 3 + Math.floor(rng() * 3) * 2;
+      p.baseAlpha = 0.5 + rng() * 0.4;
+      p.maxLife = 0.5 + rng() * 0.9;
+      p.life = rng() * p.maxLife;
+      p.phase = rng();
+      return p;
+    }
+    case 'steam': {
+      const p = newParticle();
+      p.baseX = width * (0.5 + (rng() - 0.5) * 0.4);
+      p.x = p.baseX;
+      // seeded through the whole column so a fresh field is not empty on top
+      p.y = height * (0.15 + rng() * 0.85);
+      p.vy = -(16 + rng() * 22);
+      p.vx = (rng() - 0.5) * 10;
+      p.radius = 6 + rng() * 8;
+      p.baseAlpha = 0.14 + rng() * 0.16;
+      p.color = rng() < 0.75 ? BONE : SPIRIT;
+      p.phase = rng() * TAU;
+      p.wobble = 8 + rng() * 14;
+      p.wobbleFreq = 0.3 + rng() * 0.5;
       return p;
     }
     case 'burst':
@@ -343,6 +379,48 @@ function renderBurst(t: number, dt: number, alphaMul: number): void {
   }
 }
 
+/* Square bubbles that rise a short way off the brew and pop. */
+function renderBrew(dt: number, alphaMul: number, speedMul: number): void {
+  if (!ctx) return;
+  const tint = props.tint ?? SPIRIT;
+  for (const p of particles) {
+    p.life += dt * speedMul;
+    if (p.life >= p.maxLife) {
+      p.life = 0;
+      p.baseX = width * (0.5 + (respawnRng() - 0.5) * 0.62);
+      p.y = height * (0.8 + respawnRng() * 0.16);
+    }
+    const age = p.life / p.maxLife;
+    const y = p.y + p.vy * p.life;
+    const size = Math.round(p.radius * (0.6 + age * 0.7));
+    // light texels near the surface, then the bubble thins out and pops
+    const alpha = p.baseAlpha * alphaMul * (age < 0.8 ? 1 : (1 - age) / 0.2);
+    const lift = p.phase < 0.35 ? BONE : tint;
+    ctx.fillStyle = rgba(lift, alpha);
+    ctx.fillRect(Math.round(p.baseX - size / 2), Math.round(y - size / 2), size, size);
+  }
+}
+
+/* Large faint square puffs that grow and fade as they climb. */
+function renderSteam(t: number, dt: number, alphaMul: number, speedMul: number): void {
+  if (!ctx) return;
+  for (const p of particles) {
+    p.y += p.vy * speedMul * dt;
+    p.baseX += p.vx * dt;
+    if (p.y < -p.radius * 3) {
+      p.y = height * (0.78 + respawnRng() * 0.22);
+      p.baseX = width * (0.5 + (respawnRng() - 0.5) * 0.4);
+    }
+    const climb = 1 - Math.max(0, Math.min(1, p.y / height));
+    const x = p.baseX + Math.sin(p.phase + t * 0.001 * p.wobbleFreq * 6) * p.wobble * climb;
+    const size = Math.round(p.radius * (1 + climb * 1.8));
+    // fade in off the surface, out before the top of the box
+    const alpha = p.baseAlpha * alphaMul * Math.min(1, climb * 4) * (1 - climb) ** 1.4;
+    ctx.fillStyle = rgba(p.color, alpha);
+    ctx.fillRect(Math.round(x - size / 2), Math.round(p.y - size / 2), size, size);
+  }
+}
+
 function render(t: number, dt: number): void {
   if (!ctx) return;
   ctx.clearRect(0, 0, width, height);
@@ -360,6 +438,12 @@ function render(t: number, dt: number): void {
       break;
     case 'burst':
       renderBurst(t, dt, alphaMul);
+      break;
+    case 'brew':
+      renderBrew(dt, alphaMul, speedMul);
+      break;
+    case 'steam':
+      renderSteam(t, dt, alphaMul, speedMul);
       break;
   }
 }

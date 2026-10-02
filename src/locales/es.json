@@ -569,6 +569,54 @@
     }
   },
   "home": {
+    "heroVariants": {
+      "sefirah": {
+        "kicker": "Sefirah Castle · above the gray fog",
+        "summary": "Twenty-two seats at a long table above the fog, and one of them is empty. Drink a Sequence 9 potion, act out its role, and climb toward godhood on a Lord of the Mysteries Minecraft server.",
+        "yourSeat": "Your seat",
+        "census": {
+          "one": "{count} Beyonder at the table tonight",
+          "few": "{count} Beyonders at the table tonight",
+          "many": "{count} Beyonders at the table tonight"
+        },
+        "censusLoading": "Counting the seats…",
+        "censusOffline": "The castle is quiet right now"
+      },
+      "tarot": {
+        "kicker": "The Tarot Club is in session",
+        "summary": "Twenty-two Pathways, twenty-two cards. The Fool is already drawn; turn the others to see where each one begins. Then drink its Sequence 9 potion on a Lord of the Mysteries Minecraft server.",
+        "hint": "Run your cursor along the hand to turn a card",
+        "hintTouch": "Tap a card to turn it, tap again to open it",
+        "handLabel": "The 22 Pathways as tarot cards. Use the arrow keys to turn another card, Enter to open its archive.",
+        "sequence": "Sequence {number} · {name}",
+        "cardLabel": "{name}, {sequence}. Open its archive."
+      },
+      "gazette": {
+        "name": "The Mysterria Gazette",
+        "edition": "Backlund · Night edition",
+        "volume": "Fifth Epoch · One copper penny",
+        "latest": "Latest dispatch",
+        "extra": "Extra",
+        "kicker": "A crimson moon rises over Backlund",
+        "deck": "Twenty-two Pathways of power have surfaced in the city. Drink a Sequence 9 potion, act out its role, and climb toward godhood on a Lord of the Mysteries Minecraft server — before the Fog claims you.",
+        "stopPress": "Stop press",
+        "stopPressCount": {
+          "one": "{count} Beyonder sighted in the streets tonight",
+          "few": "{count} Beyonders sighted in the streets tonight",
+          "many": "{count} Beyonders sighted in the streets tonight"
+        },
+        "stopPressNone": "The streets are empty tonight. For now.",
+        "stopPressLoading": "Our correspondent is counting heads…",
+        "stopPressOffline": "The city gates are shut tonight",
+        "stopPressFoot": "Live from the server",
+        "noticeTitle": "Nighthawks notice",
+        "noticeBody": "Residents are advised that anyone who drinks a potion must act its role with care. Those who rush their Sequence risk losing control.",
+        "continued": "Continued on p. 2",
+        "classifiedTitle": "Classified",
+        "classifiedBody": "Wanted: Seers, Apothecaries, Spectators and the like. No experience required. Apply in person at:",
+        "copy": "Copy"
+      }
+    },
     "hero": {
       "primaryCta": "How to join",
       "addressLabel": "Server address",
@@ -733,6 +781,54 @@
         "sublunary": "Draw on moonlit mysteries, subtle rites, and hidden influence."
       }
     },
+    "pathwayVariants": {
+      "orbit": {
+        "kicker": "Spirit vision",
+        "titleLead": "Twenty-two seals",
+        "titleAccent": "turn in the fog.",
+        "intro": "{pathways} Pathways circle above the gray fog, and {boons} Boons turn on a ring of their own. Draw a seal into the light to read its first Sequence and early abilities.",
+        "introMobile": "Swipe the ring to draw one of {pathways} Pathways or {boons} Boons into the light.",
+        "ringLabel": {
+          "pathway": "Pathway seals. Use the arrow keys to turn the ring.",
+          "boon": "Boon seals. Use the arrow keys to turn the ring."
+        },
+        "hint": "Drag the ring, scroll sideways or use the arrow keys",
+        "hintMobile": "Swipe the ring or tap a seal"
+      },
+      "table": {
+        "kicker": "Sefirah Castle",
+        "titleLead": "Twenty-two seats",
+        "titleAccent": "at the stone table.",
+        "intro": "Every Pathway has a chair above the fog, and the {boons} Boons keep a table of their own. Choose a seat to see who sits in it.",
+        "seatsLabel": {
+          "pathway": "Seats at the Pathway table. Use the arrow keys to walk around the table.",
+          "boon": "Seats at the Boon table. Use the arrow keys to walk around the table."
+        },
+        "seat": "Seat {numeral}",
+        "occupant": "Seat {numeral} · occupant",
+        "hint": "Choose a seat, or walk around the table with the arrow keys",
+        "previous": "Previous seat",
+        "next": "Next seat"
+      },
+      "codex": {
+        "kicker": "Beyonder archive",
+        "titleLead": "The codex",
+        "titleAccent": "of the Pathways.",
+        "intro": "{pathways} Pathways and {boons} Boons, indexed like a Nighthawk catalogue. Open an entry to read its first Sequence and early abilities.",
+        "listLabel": {
+          "pathway": "Pathway index. Use the arrow keys to move between entries.",
+          "boon": "Boon index. Use the arrow keys to move between entries."
+        },
+        "columns": {
+          "number": "No.",
+          "pathway": "Pathway",
+          "sequence": "First Sequence",
+          "overview": "Overview"
+        },
+        "entry": "Entry {numeral}",
+        "folio": "Folio {from}–{to}"
+      }
+    },
     "progression": {
       "eyebrow": "Your path to godhood starts here",
       "title": "Start at Sequence 9.",
@@ -851,7 +947,13 @@
         "panelKicker": "Pathway awakened",
         "panelSub": "Sequence 9 · {pathway} Pathway",
         "teaser": "Sequence 8 · {nextSequence} — {abilities} await",
-        "cta": "Begin your journey"
+        "cta": "Begin your journey",
+        "whisper1": "Can you hear us?",
+        "whisper2": "Hold on to yourself.",
+        "whisper3": "Don't answer them.",
+        "whisper4": "Above the gray fog…",
+        "whisper5": "Don't lose control.",
+        "card": "The {pathway}"
       },
       "player": {
         "drink": "A player drinking a Sequence potion",
