@@ -1,19 +1,21 @@
 <template>
   <Analytics/>
   <div class="app">
-    <MysticBackground/>
+    <!-- The homepage paints its own light canvas; the shared dark one would only
+         sit hidden underneath it. -->
+    <MysticBackground v-if="!isHome"/>
     <NotificationContainer/>
 
     <!-- Main Content -->
     <RouterView/>
   </div>
-  <div ref="cursor" class="cursor-background"></div>
+  <div v-if="!isHome" ref="cursor" class="cursor-background"></div>
 </template>
 
 <script lang="ts" setup>
 import NotificationContainer from "@/components/ui/NotificationContainer.vue";
 import MysticBackground from "@/components/ui/MysticBackground.vue";
-import {onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, onMounted, onUnmounted, ref, watch} from "vue";
 import {RouterView, useRoute} from "vue-router";
 import {useBalanceWatcher} from "@/stores/balance";
 import {useUserWatcher} from "./stores/user";
@@ -29,6 +31,7 @@ useDailyBonusWatcher();
 useAccountNotificationsWatcher();
 
 const route = useRoute();
+const isHome = computed(() => route.name === "home");
 
 // Force scroll to top on every route change.
 // `behavior: "instant"` overrides the global `scroll-behavior: smooth`, which
@@ -61,6 +64,7 @@ const paintCursor = () => {
 };
 
 const updateCursorPosition = (event: MouseEvent) => {
+  if (!cursor.value) return;
   const halfSize = cursorSize / 2;
   pointerX = event.clientX - halfSize;
   pointerY = event.clientY - halfSize;

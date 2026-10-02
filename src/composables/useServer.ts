@@ -8,6 +8,8 @@ export const SERVER_IP = "mc.mysterria.net";
 
 const isOnline = ref(false);
 const playerCount = ref<number | null>(null);
+/** When the last check finished, so callers can tell "checking" from "offline". */
+const checkedAt = ref<Date | null>(null);
 
 let pollInterval: ReturnType<typeof setInterval> | null = null;
 let consumers = 0;
@@ -22,6 +24,8 @@ async function fetchStatus() {
     } catch {
         isOnline.value = false;
         playerCount.value = null;
+    } finally {
+        checkedAt.value = new Date();
     }
 }
 
@@ -43,6 +47,7 @@ export function useServerStatus() {
     return {
         isOnline: readonly(isOnline),
         playerCount: readonly(playerCount),
+        checkedAt: readonly(checkedAt),
         refresh: fetchStatus,
     };
 }

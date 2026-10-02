@@ -1,4 +1,5 @@
 <template>
+  <div ref="stackRef" :class="['header-stack', {'is-overlay': overlay, 'is-at-top': overlay && isAtTop}]">
   <!-- Season announcement, shown above the header on the pages that ask for it -->
   <div v-if="showAnnouncement && announcement && !announcementDismissed" class="season-bar">
     <span class="season-headline">{{ announcement.headline }}</span>
@@ -52,6 +53,7 @@
       </div>
     </div>
   </header>
+  </div>
 
   <Teleport to="body">
     <Transition name="mobile-nav">
@@ -112,7 +114,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onUnmounted, ref, watch} from "vue";
+import {computed, onMounted, onUnmounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import AuthButton from "@/components/ui/AuthButton.vue";
 import BalanceButton from "@/components/ui/BalanceButton.vue";
@@ -136,7 +138,11 @@ interface NavLink {
   matches?: string[];
 }
 
-withDefaults(defineProps<{ showAnnouncement?: boolean }>(), {showAnnouncement: false});
+const props = withDefaults(defineProps<{
+  showAnnouncement?: boolean;
+  /** Fixed over the page and transparent until scrolled; used by the homepage hero. */
+  overlay?: boolean;
+}>(), {showAnnouncement: false, overlay: false});
 
 const route = useRoute();
 const {t} = useI18n();
@@ -228,12 +234,87 @@ watch(isMobileNavOpen, isOpen => {
 
 watch(() => route.path, closeMobileNav);
 
+/*
+ * Overlay mode: the header sits transparent on top of the hero and turns solid
+ * once the reader scrolls. Two thresholds instead of one keep it from flickering
+ * when scroll position jitters around the edge (overscroll, trackpad momentum).
+ */
+const stackRef = ref<HTMLElement | null>(null);
+const isAtTop = ref(true);
+const SOLID_AFTER = 48;
+const CLEAR_BEFORE = 8;
+let scrollFrame: number | null = null;
+let stackObserver: ResizeObserver | null = null;
+
+const readScroll = () => {
+  scrollFrame = null;
+  const y = window.scrollY;
+  if (isAtTop.value && y > SOLID_AFTER) isAtTop.value = false;
+  else if (!isAtTop.value && y < CLEAR_BEFORE) isAtTop.value = true;
+};
+
+const onScroll = () => {
+  if (scrollFrame === null) scrollFrame = requestAnimationFrame(readScroll);
+};
+
+onMounted(() => {
+  if (!props.overlay) return;
+  readScroll();
+  window.addEventListener("scroll", onScroll, {passive: true});
+  // Pages under an overlay header offset their content by its live height,
+  // which changes when the announcement bar is shown or dismissed.
+  stackObserver = new ResizeObserver(([entry]) => {
+    document.documentElement.style.setProperty("--site-header-stack", `${Math.round(entry.borderBoxSize[0].blockSize)}px`);
+  });
+  if (stackRef.value) stackObserver.observe(stackRef.value);
+});
+
 onUnmounted(() => {
   document.body.style.overflow = "";
+  window.removeEventListener("scroll", onScroll);
+  if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+  stackObserver?.disconnect();
+  document.documentElement.style.removeProperty("--site-header-stack");
 });
 </script>
 
 <style scoped>
+.header-stack {
+  display: contents;
+}
+
+.header-stack.is-overlay {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: block;
+}
+
+.header-stack.is-overlay .site-header {
+  position: relative;
+  transition: background-color .35s ease, border-color .35s ease, backdrop-filter .35s ease;
+}
+
+.header-stack.is-overlay .season-bar {
+  /* Upstream's bar scrolls away with the page; fixed here, it needs a backing
+     so content doesn't show through it. */
+  background-color: color-mix(in srgb, var(--myst-bg) 94%, transparent);
+  transition: background-color .35s ease;
+}
+
+.header-stack.is-overlay.is-at-top .season-bar {
+  background-color: transparent;
+}
+
+.header-stack.is-overlay.is-at-top .site-header {
+  background: transparent;
+  border-bottom-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 /* ---- Season announcement ---- */
 .season-bar {
   position: relative;
