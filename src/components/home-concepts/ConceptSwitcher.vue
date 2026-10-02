@@ -45,16 +45,18 @@ function choose(param: string, id: string) {
 .variant-switcher {
   position: fixed;
   z-index: 1500;
-  left: 16px;
-  bottom: 16px;
+  left: 0;
+  top: 50%;
   font: 500 .8rem/1.2 system-ui, sans-serif;
 }
 
 .variant-switcher__toggle {
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: 30px;
+  padding: 0 10px;
   border: 1px solid rgba(255,255,255,.22);
-  border-radius: 999px;
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
+  opacity: .8;
   color: #f2f0eb;
   background: #16181d;
   font: 500 .72rem/1 ui-monospace, monospace;
@@ -65,8 +67,8 @@ function choose(param: string, id: string) {
 
 .variant-switcher__panel {
   position: absolute;
-  left: 0;
-  bottom: 50px;
+  left: 8px;
+  top: 40px;
   display: grid;
   gap: 12px;
   min-width: 230px;
@@ -92,25 +94,4 @@ function choose(param: string, id: string) {
   background: #16181d;
 }
 
-/* On phones it docks small at the left edge, clear of full-width buttons. */
-@media (max-width: 720px) {
-  .variant-switcher {
-    left: 0;
-    bottom: 38vh;
-  }
-
-  .variant-switcher__toggle {
-    min-height: 32px;
-    padding: 0 10px;
-    border-left: 0;
-    border-radius: 0 999px 999px 0;
-    font-size: .6rem;
-    opacity: .85;
-  }
-
-  .variant-switcher__panel {
-    left: 8px;
-    bottom: 42px;
-  }
-}
 </style>

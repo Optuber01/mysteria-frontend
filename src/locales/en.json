@@ -567,5 +567,676 @@
       "notFound": "This commission request couldn't be found, or doesn't belong to you.",
       "contentUnavailable": "The full submission content isn't available for this request."
     }
+  },
+  "home": {
+    "arcana": {
+      "hero": {
+        "eyebrow": "Lord of the Mysteries · Minecraft MMORPG",
+        "titleA": "Draw your",
+        "titleB": "Pathway.",
+        "lede": "Mysterria turns Lord of the Mysteries into a Minecraft MMORPG. Choose one of 22 Beyonder Pathways, brew its potions, act out its role and climb from Sequence 9 toward godhood.",
+        "join": "How to join",
+        "shuffle": "Shuffle & draw",
+        "fanLabel": "The deck of 22 Pathways. Pick a face-down card to draw it.",
+        "cardLabel": "Draw face-down card {n} of {total}",
+        "youDrew": "You drew",
+        "beginsAs": "Begins as a {role}",
+        "readCard": "Read your card",
+        "hint": "Pick any face-down card, or shuffle the deck. The page becomes your Pathway.",
+        "seqRole": "Sequence 9 · {role}",
+        "announce": "You drew {name}. Sequence 9: {role}."
+      },
+      "ip": {
+        "label": "Server",
+        "copy": "Copy",
+        "copied": "Copied",
+        "failed": "Copy failed",
+        "failedHelp": "Your browser blocked the clipboard. Select the address above and copy it by hand."
+      },
+      "status": {
+        "checking": "Checking the server…",
+        "offline": "Server offline",
+        "onlineCount": "Online · {count} playing now"
+      },
+      "reading": {
+        "kicker": "Your reading",
+        "statSequences": "Sequences",
+        "statAbilities": "Abilities",
+        "statStart": "You start as",
+        "firstAbilities": "First abilities of a {role}",
+        "open": "Open the {name} Pathway",
+        "browse": "See the whole deck",
+        "ladderLabel": "The {name} Sequence ladder",
+        "throne": "Sequence 0 · the throne",
+        "boonCap": "Boons stop at Sequence 5",
+        "youStart": "You start here",
+        "loading": "Reading the card…",
+        "story": "You drew the {name} card. On Mysterria your climb begins at Sequence 9 as a {role}, and runs {count} Sequences up to the throne at Sequence 0, with {abilities} abilities to earn along the way.",
+        "storyBoon": "You drew {name}, one of the 10 Boons: a supplementary path beside the 22. It begins at Sequence 9 as a {role} and stops at Sequence 5, with {abilities} abilities across its {count} Sequences."
+      },
+      "past": {
+        "position": "The Past",
+        "titleA": "A novel, rebuilt",
+        "titleB": "block by block.",
+        "lede": "Mysterria is a Minecraft server that turns Lord of the Mysteries into a seasonal MMORPG. Potions, Sequences, acting, rituals, Madness: the whole Beyonder system runs on our own server plugin, so a plain Java client is all you need.",
+        "factPathways": "Pathways and Boons to walk",
+        "factBeyonders": "Beyonders awakened this season",
+        "factBeyondersFallback": "1,600+",
+        "factSeason": "A fresh world, about every six months",
+        "factSeasonValue": "Season II",
+        "factEdition": "Bedrock can join too, with limits",
+        "factEditionValue": "Java 26.1.2+",
+        "turn": "Turn the card: the novel on one side, the server on the other",
+        "novelAlt": "Fan art of Klein Moretti seated on his throne above the grey fog",
+        "novelTag": "The novel",
+        "gameAlt": "A giant eye above a Rift on the Mysterria server",
+        "gameTag": "The server",
+        "hint": "Tap to turn the card",
+        "hintBack": "Tap to turn it back"
+      },
+      "present": {
+        "position": "The Present",
+        "titleA": "You don't level up.",
+        "titleB": "You drink.",
+        "lede": "There are no XP bars. Every Sequence is a potion. To become a {role} you find its formula, gather what it needs, brew it and drink it. Then you live the role until it settles.",
+        "steps": {
+          "formula": {
+            "title": "Find the formula",
+            "body": "Loot chests, trade with players or hunt Beyonder creatures for the {role} potion formula."
+          },
+          "ingredients": {
+            "title": "Gather ingredients",
+            "body": "Main and supplementary ingredients come from chests, creatures, resource nodes and trades."
+          },
+          "cauldron": {
+            "title": "Brew in the cauldron",
+            "body": "Build a Magic Cauldron from an Altar Scroll blueprint. A failed brew keeps your ingredients."
+          },
+          "drink": {
+            "title": "Drink the potion",
+            "body": "Swallow it and you are a Beyonder. Your first potion needs no acting and no ritual."
+          },
+          "act": {
+            "title": "Act & digest",
+            "body": "Each ability has its own acting method. Combine acting, bounties, dungeons and Incursions to digest."
+          },
+          "ritual": {
+            "title": "Perform the ritual",
+            "body": "Optional for Sequences 8–6, though skipping adds Madness. Mandatory from Sequence 5 up."
+          }
+        },
+        "guiAlt": "The in-game Magic Cauldron interface with recipe, ingredient and confirm slots",
+        "guiLabel": "The real cauldron screen",
+        "guiBody": "The recipe goes in the middle, main ingredients (or Beyonder Chars) on the left, supplementary ones on the right. Better cauldrons raise your odds of success.",
+        "madnessWord": "Madness",
+        "madnessLabel": "The card, reversed",
+        "madnessTitle": "Rush it, and the potion drinks you.",
+        "madnessBody": "Advancing unsafely, skipping rituals and dying all build Madness. Some of it fades with rest, some never does, and high Madness has real effects that can end in Mutation."
+      },
+      "forces": {
+        "position": "The Forces around you",
+        "titleA": "A world that",
+        "titleB": "fights back.",
+        "lede": "Between potions, this is where you spend your nights: dungeons behind Rifts, bosses that need a party, a moon that turns red, and towns that grow into nations.",
+        "items": {
+          "rifts": {
+            "tag": "/subspace",
+            "title": "Rifts & dungeons",
+            "body": "Run /subspace to see every dungeon, its Rift, your relative power and cooldowns. Weaken a Rift with Energy Shards, form a party and go in for repeatable loot and acting.",
+            "alt": "A huge eye glowing above a dungeon Rift"
+          },
+          "guardians": {
+            "tag": "World bosses",
+            "title": "Guardians",
+            "body": "Open-world bosses that protect key objectives. Built for groups, so bring friends.",
+            "alt": "Players fighting a Guardian dragon inside a temple"
+          },
+          "moon": {
+            "tag": "About once a week",
+            "title": "The Crimson Moon",
+            "body": "Beyonder creatures roam, and under the red moon fishing turns into a rich but risky loot run.",
+            "alt": "The Crimson Moon"
+          },
+          "churches": {
+            "tag": "Late game",
+            "title": "Churches",
+            "body": "Player-run faiths built on a Church Core: prayer, anchors, land and perks.",
+            "alt": "A great cathedral rising through the clouds"
+          },
+          "towns": {
+            "tag": "Towns → Domains → Nations",
+            "title": "Claim your land",
+            "body": "Join a town for protected claims and shared cauldrons. Level it up, and Domain-level towns can found Nations.",
+            "alt": "A player-built town street with market stalls"
+          },
+          "emporium": {
+            "tag": "Economy",
+            "title": "The Brilliant Emporium",
+            "body": "Coppets, Licks and Verl d'or. Trade surplus ingredients for Energy Shards, and spend Emporium points on its rotating stock.",
+            "alt": "The Emporium building"
+          }
+        }
+      },
+      "deck": {
+        "position": "The whole deck",
+        "titleA": "22 Pathways.",
+        "titleB": "10 Boons.",
+        "lede": "Every card leads to its full Pathway page: each Sequence, every ability. Or make any one of them your card and watch the page change.",
+        "openLabel": "Open the {name} Pathway",
+        "drawLabel": "Make {name} your card",
+        "draw": "Draw",
+        "yours": "Yours",
+        "boon": "Boon",
+        "boonsLabel": "The 10 Boons",
+        "boonsBody": "Supplementary paths beside the 22. They start at Sequence 9 and stop at Sequence 5.",
+        "archive": "Open the Pathway archive"
+      },
+      "future": {
+        "position": "The Future",
+        "titleA": "Take",
+        "titleB": "your seat.",
+        "lede": "The deck has spoken. A {role} is a free download and about an evening away. Here is how you sit down at the table.",
+        "step1Title": "Copy the address",
+        "step2Title": "Launch Java and accept the pack",
+        "step2Body": "Use a current Java client (26.1.2 or newer) and accept the server resource pack when Minecraft asks. Bedrock can join through Geyser, but some custom screens look wrong.",
+        "step3Title": "Choose Mysteries and verify",
+        "step3Body": "Pick Mysteries in the lobby, then verify through your website profile. Ask in chat or on Discord for a town that takes newcomers.",
+        "guide": "Full joining guide",
+        "discord": "Join the Discord",
+        "liveLabel": "Live from the server",
+        "liveUnit": "Beyonders online now",
+        "liveMeta": "Checked at {time} · refreshes every minute",
+        "liveMetaChecking": "Asking the server…",
+        "newsLabel": "Latest update",
+        "newsRead": "Read",
+        "newsFallbackTitle": "Season II has begun",
+        "newsFallbackBody": "A fresh world and a full reset of Beyonder progress: everyone starts at Sequence 9 again. Read the announcement."
+      },
+      "dock": {
+        "label": "Your card",
+        "spreadLabel": "The reading",
+        "yourCard": "Your card: {name}. Jump to your reading",
+        "your": "Your card",
+        "draw": "Draw again"
+      }
+    },
+    "ascent": {
+      "spine": {
+        "label": "Your ascent, Sequence 9 to 0",
+        "sequence": "Sequence {n}",
+        "short": "Sequence",
+        "ground": "Ground",
+        "r9": "The first potion",
+        "r8": "Act the role",
+        "r7": "Rituals & Madness",
+        "r6": "Rifts",
+        "r5": "Parties & dungeons",
+        "r4": "Demigod",
+        "r3": "Churches",
+        "r2": "Domains",
+        "r1": "Nations & wealth",
+        "r0": "Godhood"
+      },
+      "status": {
+        "checking": "Checking server status…",
+        "online": "Online · {n} playing now",
+        "offline": "Server offline right now"
+      },
+      "ip": {
+        "label": "Server address",
+        "copy": "Copy",
+        "copied": "Copied",
+        "copiedLive": "Address copied - paste it into Multiplayer → Add Server.",
+        "failedShort": "Select",
+        "failed": "Couldn't reach the clipboard - the address is selected, press Ctrl+C (⌘C).",
+        "copyAria": "Copy the server address {ip}"
+      },
+      "hero": {
+        "eyebrow": "A Lord of the Mysteries Minecraft server",
+        "titleA": "Drink the potion.",
+        "titleB": "Climb to godhood.",
+        "lede": "Mysterria turns the web novel Lord of the Mysteries into a playable MMORPG. Choose one of 22 Beyonder Pathways, brew your first potion at Sequence 9 and climb, rung by rung, toward Sequence 0 - before the madness climbs faster.",
+        "join": "How to join",
+        "clients": "Java 26.1.2+ · Bedrock via Geyser",
+        "latest": "Latest",
+        "latestFallback": "Season II has begun - read the news",
+        "cue": "Begin the ascent"
+      },
+      "paths": {
+        "eyebrow": "Before the first potion",
+        "titleA": "Choose the ladder",
+        "titleB": "you climb.",
+        "lede": "22 Beyonder Pathways, each a ladder of ten Sequences from a mortal at 9 to a god at 0. Your pathway isn't picked from a menu - it is whichever Sequence 9 potion you drink first.",
+        "all": "Browse all 22 pathways",
+        "listLabel": "The 22 Beyonder Pathways",
+        "reading": "Reading the ladder",
+        "ladderLabel": "{name} pathway - from {first} at Sequence 9 to {last} at Sequence 0",
+        "ladderShort": "{name} pathway",
+        "boonsTitle": "+ 10 Boons",
+        "boonsBody": "A second, separate track advanced at Sacrificial Altars. Boons add to your pathway - they never replace it.",
+        "boonsLabel": "The 10 Boons"
+      },
+      "brew": {
+        "eyebrow": "The first potion",
+        "title": "Brew your way in.",
+        "lede": "There is no XP bar to grind. You become a Beyonder the way the novel says you do: find the formula, gather what it asks for, brew it, and drink.",
+        "s1Title": "Find the formula",
+        "s1Body": "Recipes turn up in naturally generated chests that refill over time, drop from Beyonder creatures, or change hands between players.",
+        "s2Title": "Gather the ingredients",
+        "s2Body": "Some are found in loot chests, some drop from creatures, some grow as glowing nodes you harvest in the world.",
+        "s3Title": "Brew in a Magic Cauldron",
+        "s3Body": "Build it from an Altar Scroll. Mains left, supplementaries right, recipe in the centre. A failed brew costs you nothing.",
+        "s4Title": "Drink before it fades",
+        "s4Body": "A potion lasts two real-time days. Drink it, and you are a Sequence 9 Beyonder.",
+        "starter": "New here? Path of Resolve guarantees a recipe in your next chest. Path of Shortcut skips the brew - for 10% of your Spirituality, forever.",
+        "guide": "Brewing guide",
+        "sceneLabel": "A Magic Cauldron brewing a Sequence 9 potion: three ingredients and a recipe go in, the potion rises out.",
+        "itemMint": "Gold mint leaves",
+        "itemBlood": "Lavos squid blood",
+        "itemCrystal": "Stellar aqua crystal",
+        "itemRecipe": "Seer recipe",
+        "resultKicker": "Sequence 9 reached",
+        "resultName": "Seer"
+      },
+      "act": {
+        "eyebrow": "Digestion",
+        "title": "Become what you drank.",
+        "lede": "A potion is digested, not ground out. Every ability has its own acting method - play the role and the action bar tells you it landed. Then the ritual decides whether you rise clean, or carry the cost.",
+        "meterKicker": "Acting",
+        "meterTitle": "No single source fills it",
+        "meterDone": "Digested - ready to advance",
+        "meterNote": "Combine several sources to reach 100%. Check your digestion, Spirituality and Madness from the pathway icon in your inventory.",
+        "srcRole": "Living the role",
+        "srcBottles": "Acting Bottles",
+        "srcBounties": "Rotating bounties",
+        "srcDungeons": "Dungeon clears",
+        "srcIncursions": "Cosmos Incursions",
+        "ritualKicker": "Advancement",
+        "ritualTitle": "Then, the ritual",
+        "ritualBody": "Advancing to Sequence 8, 7 or 6, the ritual is optional. From Sequence 5 on, it is mandatory.",
+        "choiceLabel": "Try the choice",
+        "choicePerform": "Perform it",
+        "choiceSkip": "Skip it",
+        "madnessLabel": "Madness",
+        "madnessCalm": "Stable",
+        "madnessHigh": "Losing control",
+        "madnessBody": "Rest and some mechanics ease the recoverable part. Death and unsafe advancement always add a little.",
+        "madnessSkip": "Skipping adds permanent Madness for the whole season. High Madness has real effects - and can end in Mutation."
+      },
+      "rift": {
+        "eyebrow": "Rifts",
+        "titleA": "Tear into a Rift.",
+        "titleB": "Bring a party.",
+        "lede": "Dungeons wait behind Rifts scattered across the world. They are instanced, built for groups, and the richest repeatable source of materials and acting.",
+        "s1Cmd": "/subspace",
+        "s1Title": "Find your dungeon",
+        "s1Body": "Every dungeon, its Rift location, your relative power and your cooldowns - in one menu.",
+        "s2Cmd": "Energy Shards",
+        "s2Title": "Weaken the Rift",
+        "s2Body": "Walk to it and feed it shards until it can be entered. Distance matters: there are no teleport commands.",
+        "s3Cmd": "/party",
+        "s3Title": "Go in together",
+        "s3Body": "Form your group and dive. Low-manning is allowed, with no cut to the rewards.",
+        "f1Value": "3 days",
+        "f1Label": "Real loot once per dungeon in that window",
+        "f2Value": "2 a day",
+        "f2Label": "Help Card runs to carry newer players",
+        "f3Value": "Seq 5",
+        "f3Label": "Where rituals stop being optional",
+        "imgEye": "The Eye Rift: a vast dungeon gate with a glowing eye above a swirling portal",
+        "imgSnow": "A ring-shaped Rift standing in a snowfield",
+        "imgDungeon": "Inside an instanced dungeon: crystals orbiting a glowing core",
+        "guide": "Dungeons & activities guide"
+      },
+      "crimson": {
+        "eyebrow": "Demigod",
+        "title": "Now the world fights back.",
+        "lede": "Past the line of demigods, Mysterria stops being a garden. Guardians hold the important ground, Wild Beyonders roam, and roughly once a week the moon turns red.",
+        "guardianTitle": "Guardians",
+        "guardianBody": "Open-world bosses protecting key objectives - designed for groups, not lone heroes.",
+        "moonTitle": "The Crimson Moon",
+        "moonBody": "Beyonder creatures surge, and fishing turns into a rich, dangerous second loot stream.",
+        "wildTitle": "Wild Beyonders",
+        "wildBody": "Their mood depends on how your pathways relate. Peaceful ones offer the best targeted trades in the game; hostile ones are serious fights.",
+        "imgDragon": "Players fighting a Guardian dragon inside a great hall",
+        "imgRadiant": "A party facing a radiant Guardian amid beams of light",
+        "capDragon": "Guardian encounter",
+        "capRadiant": "Radiant Guardian"
+      },
+      "dom": {
+        "eyebrow": "Saint · Angel · Archangel",
+        "title": "Build something that outlasts you.",
+        "lede": "Near the top, power turns into institutions. Players found Churches, raise towns into Domains and Domains into Nations, and run the economy everyone below depends on.",
+        "churchKicker": "Faith",
+        "churchTitle": "Found a Church",
+        "churchBody": "Player-run faiths built around a Church Core, anchors, prayer and land - with perks for the faithful and Honorific Names that grow shorter as their owner rises.",
+        "churchChip1": "Church Core",
+        "churchChip2": "Prayer",
+        "churchChip3": "Honorific Names",
+        "landKicker": "Land",
+        "landTitle": "Towns, Domains, Nations",
+        "landBody": "Claim protected land, level your town for population and perks, then unite Domain-level towns into a Nation. Wars exist - and they are opt-in.",
+        "tierTown": "Town",
+        "tierDomain": "Domain",
+        "tierNation": "Nation",
+        "wealthKicker": "Wealth",
+        "wealthTitle": "Run the economy",
+        "wealthBody": "Three currencies in your /wallet, Energy Shards for trades and Rifts, and the Brilliant Emporium rotating rare goods - recipes included.",
+        "imgChurch": "A player-built cathedral tower rising into storm clouds",
+        "imgTown": "The town square of Agora at dusk",
+        "imgEmporium": "The Brilliant Emporium, a glass-roofed market hall",
+        "linkTowns": "Towns & nations guide",
+        "linkEconomy": "Economy guide"
+      },
+      "summit": {
+        "eyebrow": "Godhood",
+        "titleA": "One throne",
+        "titleB": "per pathway.",
+        "lede": "Above the demigods the seats run out. Each pathway holds at most 18 Saints, 9 Angels, 3 Archangels - and a single god. Holding a pathway's Uniqueness is part of the road to Sequence 0.",
+        "registry": "View the Ascension Registry",
+        "seatsLabel": "High seats, per pathway, per season",
+        "rank0": "Deity",
+        "rank1": "Archangel",
+        "rank2": "Angel",
+        "rank3": "Saint",
+        "seatOne": "1 seat",
+        "seatMany": "{n} seats",
+        "seatsNote": "Every seat empties when the season resets - and every god on the Registry started at Sequence 9.",
+        "seatsHeld": "{n} of {total} high seats are held this season. Every one of those Beyonders started at Sequence 9."
+      },
+      "join": {
+        "eyebrow": "Every god started here",
+        "titleA": "Your climb",
+        "titleB": "starts tonight.",
+        "s1Title": "Add the server",
+        "s1Body": "Multiplayer → Add Server → mc.mysterria.net. Java 26.1.2 or newer is the full experience; Bedrock joins through Geyser with some custom interfaces limited.",
+        "s2Title": "Accept the resource pack",
+        "s2Body": "It draws pathways, potions and interfaces - no mods required. Then choose Mysteries in the lobby.",
+        "s3Title": "Pick your starter bonus",
+        "s3Body": "Resolve: a recipe guaranteed in your next chest. Shortcut: instant Sequence 9, at a permanent cost. Choose carefully - it can't be repicked.",
+        "s4Title": "Brew your first potion",
+        "s4Body": "Recipe, cauldron, ingredients. Your first Sequence is about an evening away.",
+        "cardLabel": "Join Mysterria",
+        "guide": "How to join",
+        "discord": "Join the Discord",
+        "discordNote": "Find a town, a party, or a hand with your first brew.",
+        "beyonders": "{n} Beyonders this season",
+        "beyondersFallback": "1,600+ Beyonders this season",
+        "latest": "Latest update",
+        "newsAll": "All news"
+      }
+    },
+    "broadcast": {
+      "newTab": "(opens in a new tab)",
+      "copy": {
+        "label": "Server address",
+        "action": "Copy",
+        "done": "Copied",
+        "doneLong": "Address copied. Paste it into Minecraft's Multiplayer screen.",
+        "failedShort": "Copy failed",
+        "failed": "Your browser blocked the clipboard. Type it in by hand: {address}",
+        "aria": "Copy the server address {address}"
+      },
+      "hero": {
+        "live": "Live",
+        "season": "Season {season} · Day {day}",
+        "cam": "Cam",
+        "scenes": {
+          "rift": "A Rift gate to an instanced dungeon",
+          "dragon": "A Guardian fight in the open world",
+          "coast": "The Season II overworld at dusk"
+        },
+        "kicker": "Minecraft server · Java & Bedrock · Free to play",
+        "titleOne": "Lord of the Mysteries,",
+        "titleTwo": "playable in Minecraft.",
+        "sub": "Choose one of 22 Beyonder Pathways, brew your first potion and climb from Sequence 9 toward godhood. It all happens in a shared seasonal world of Rifts, Guardians, Churches and Nations.",
+        "join": "How to join",
+        "pathways": "Explore the 22 Pathways",
+        "camsLabel": "Scenes from the server",
+        "showScene": "Show scene: {name}",
+        "pause": "Pause the scene rotation",
+        "play": "Resume the scene rotation"
+      },
+      "stats": {
+        "online": "Online now",
+        "playersNow": "players",
+        "offline": "Offline",
+        "checking": "Checking…",
+        "beyonders": "Beyonders this season",
+        "beyondersFallback": "1,600+",
+        "season": "Season",
+        "day": "Day {day}",
+        "pathways": "Pathways",
+        "boons": "+ 10 Boons"
+      },
+      "features": {
+        "label": "What you do here",
+        "title": "An MMORPG, built inside Minecraft.",
+        "lede": "Mysterria turns the Beyonder system of Lord of the Mysteries into a survival MMORPG. You don't grind XP for power. You earn it with potions, roles and rituals, and with the people you play alongside.",
+        "tiles": {
+          "pathway": {
+            "title": "Choose a Pathway",
+            "body": "22 Beyonder Pathways from the novel, each with its own powers and ten Sequences to climb.",
+            "more": "See the Pathways"
+          },
+          "brew": {
+            "title": "Brew & drink the potion",
+            "body": "Find a formula, gather its ingredients and brew it in a Magic Cauldron. Drink it to become a Beyonder.",
+            "more": "Your first potion",
+            "alt": "An in-game brewery with potion shelves and a cauldron over a fire"
+          },
+          "act": {
+            "title": "Act the role, perform the ritual",
+            "body": "Digest each potion by living your Sequence's role, then perform the ritual that opens the next one.",
+            "more": "How advancing works",
+            "alt": "The candlelit nave of a player-built cathedral"
+          },
+          "fight": {
+            "title": "Fight in Rifts and against Guardians",
+            "body": "Party up for instanced dungeons through /subspace, and bring a group to open-world Guardian bosses.",
+            "more": "Dungeons & bosses",
+            "alt": "Players fighting a dragon Guardian inside a sandstone temple"
+          },
+          "build": {
+            "title": "Build towns, Nations and Churches",
+            "body": "Claim land, grow a town into a Domain, form a Nation, or found a Church around its Core.",
+            "more": "Towns & Nations",
+            "alt": "A player-built town square with timbered houses"
+          },
+          "trade": {
+            "title": "Trade in the Emporium",
+            "body": "Coppets, Licks and Verl d'or, Wild Beyonder trades and the rotating Brilliant Emporium.",
+            "more": "The economy",
+            "alt": "The glass-roofed Brilliant Emporium building"
+          }
+        }
+      },
+      "pathways": {
+        "label": "22 Beyonder Pathways",
+        "title": "Pick the power you'll spend a season becoming.",
+        "lede": "Every Pathway is a ladder of ten Sequences, from a Sequence 9 apprentice role to a Sequence 0 god. Hover over a sigil to preview its ladder, or open one to see every ability.",
+        "sigilAlt": "The {name} Pathway sigil",
+        "index": "Pathway {n} / 22",
+        "ladderLabel": "Sequences 9 to 0",
+        "open": "Open the {name} Pathway",
+        "seqNine": "Seq 9",
+        "archive": "Open the full Pathway archive",
+        "boonsTitle": "Boons",
+        "boonsBody": "A separate progression track, advanced at Sacrificial Altars. A Boon runs alongside your Pathway and never replaces it."
+      },
+      "progress": {
+        "label": "How progression works",
+        "title": "No XP bar. You drink your way up.",
+        "lede": "Each Sequence is a potion. Find its formula, brew it and drink it, then live the role until the potion is digested. Early Sequences take about a week. The highest take months.",
+        "interfaceAlt": "The Magic Cauldron brewing interface in-game",
+        "interfaceCaption": "The Magic Cauldron, in-game",
+        "meter": "Acting",
+        "steps": {
+          "recipe": {
+            "title": "Find the formula",
+            "body": "Loot refilling chests, trade, or hunt Beyonder creatures for a recipe. Focus a chest category to guarantee one."
+          },
+          "gather": {
+            "title": "Gather ingredients",
+            "body": "Main and supplementary ingredients come from loot chests, Beyonder creatures and world nodes."
+          },
+          "brew": {
+            "title": "Brew in the Cauldron",
+            "body": "Build a Magic Cauldron from an Altar Scroll and slot everything in order. A failed brew keeps your ingredients."
+          },
+          "drink": {
+            "title": "Drink the potion",
+            "body": "You're a Sequence 9 Beyonder with real abilities. Drink it within two days, before it seals into an artifact."
+          },
+          "act": {
+            "title": "Act the role",
+            "body": "Each ability has its own acting method. Dungeons, bounties and Incursions also count toward digestion."
+          },
+          "ritual": {
+            "title": "Ritual, then climb",
+            "body": "From Sequence 8, a ritual opens the way, and from Sequence 5 it's mandatory. Then you brew again."
+          }
+        },
+        "ladderTitle": "Sequence 9 → 0",
+        "ladderNote": "Ten rungs per Pathway. The top seats are limited.",
+        "rungs": {
+          "s9": "Start here. No ritual",
+          "s8": "Ritual optional",
+          "s7": "Ritual optional",
+          "s6": "Skipping a ritual adds Madness",
+          "s5": "Ritual mandatory",
+          "s4": "Demigod",
+          "s3": "Saint · 18 seats",
+          "s2": "Angel · 9 seats",
+          "s1": "Archangel · 3 seats",
+          "s0": "Deity · 1 seat"
+        },
+        "madnessTitle": "Rush it and the potion fights back.",
+        "madnessBody": "Deaths and unsafe advancement build Madness, and Madness left unchecked means losing control.",
+        "cta": "Read the progression guide"
+      },
+      "world": {
+        "label": "The world",
+        "title": "A world that's really there.",
+        "lede": "Season II runs on a bounded overworld built for Beyonders. There are Rifts to clear, Guardians to topple, a moon that turns red, and cities run entirely by players.",
+        "panels": {
+          "rifts": {
+            "tag": "Rifts & /subspace",
+            "title": "Instanced dungeons behind every Rift",
+            "body": "/subspace lists every dungeon, its Rift and your relative power. Weaken the Rift with Energy Shards, form a party and go in. Each dungeon gives real loot once every three days.",
+            "alt": "A stone ring Rift standing in a snowfield"
+          },
+          "churches": {
+            "tag": "Churches",
+            "title": "Faith you can build",
+            "body": "Churches are late-game institutions. Anchor a Church Core, gather prayer, hold land and unlock perks for the faithful.",
+            "alt": "A towering player-built cathedral under storm clouds"
+          },
+          "moon": {
+            "tag": "Crimson Moon",
+            "title": "Some nights, the moon turns red",
+            "body": "Roughly once a week, Beyonder creatures prowl and fishing becomes a rich but dangerous loot stream.",
+            "alt": "A pixel-art crimson moon"
+          },
+          "guardians": {
+            "tag": "Guardians",
+            "title": "Open-world bosses built for groups",
+            "body": "Guardians protect important objectives. Bring a party, and bring a plan.",
+            "alt": "Players battling a radiant Guardian beneath shafts of light"
+          },
+          "nations": {
+            "tag": "Towns → Domains → Nations",
+            "title": "Cities run by players",
+            "body": "Towns claim land and level up into Domains. Domains can band together into Nations and wage structured, opt-in wars.",
+            "alt": "A player-built castle town lit up at night"
+          }
+        },
+        "facts": {
+          "size": {
+            "value": "15,000 × 15,000",
+            "label": "Bounded overworld, so distance matters"
+          },
+          "travel": {
+            "value": "No /home, no /tpa",
+            "label": "Mobility is a Pathway reward"
+          },
+          "safety": {
+            "value": "Safe to explore",
+            "label": "No wilderness PvP, and griefing is banned"
+          },
+          "loot": {
+            "value": "Chests refill",
+            "label": "Every generated chest is renewable Beyonder loot"
+          },
+          "season": {
+            "value": "~6-month seasons",
+            "label": "A fresh start, so joining mid-season still pays off"
+          }
+        }
+      },
+      "live": {
+        "label": "On air",
+        "title": "Season II, live right now.",
+        "allNews": "All news",
+        "serverLabel": "Server status",
+        "online": "Online",
+        "offline": "Offline right now",
+        "playersNow": "players in-game right now",
+        "playersUnknown": "player count unavailable",
+        "checked": "Checked at {time}",
+        "censusLabel": "Season census",
+        "censusSub": "Beyonders awakened this season",
+        "advanced": "Seq 3–0",
+        "average": "Average Sequence",
+        "active": "Pathways in play",
+        "seasonLabel": "Season",
+        "dayLabel": "Day",
+        "opened": "Opened",
+        "topLabel": "Most walked Pathways",
+        "seatsLabel": "Ascension seats",
+        "seatsLede": "The highest Sequences have a fixed number of seats per Pathway. When they are full, nobody else can rise until one opens.",
+        "seq": "Seq {n}",
+        "seatCount": "{n}",
+        "registry": "Ascension Registry",
+        "latest": "Latest update",
+        "read": "Read the update",
+        "newsFallbackDate": "Season announcement",
+        "newsFallbackTitle": "Season II has just begun",
+        "newsFallbackBody": "The world and every Beyonder have reset. Read what changed for the new season, then claim your Sequence 9 before the high seats fill.",
+        "newsFallbackAlt": "A Beyonder flying beside a blocky planet in space"
+      },
+      "community": {
+        "label": "Community",
+        "title": "Find your party before you log in.",
+        "lede": "Town recruiting, dungeon groups, trades and lore arguments all happen on Discord. The wiki and live map cover the rest.",
+        "discord": {
+          "title": "Discord",
+          "body": "Announcements, town recruiting, party finder and support tickets.",
+          "cta": "Join the Discord"
+        },
+        "wiki": {
+          "title": "Wiki",
+          "body": "Every Pathway, item, creature and system, written up by the community.",
+          "cta": "Open the wiki"
+        },
+        "map": {
+          "title": "Live map",
+          "body": "See towns, Nations and the world border in real time.",
+          "cta": "Open the map"
+        }
+      },
+      "join": {
+        "label": "Join tonight",
+        "title": "Your first Sequence is about an evening away.",
+        "steps": {
+          "add": "Open Multiplayer and add {address}",
+          "pack": "Accept the server resource pack",
+          "lobby": "Choose Mysteries in the lobby selector"
+        },
+        "requirements": "Java 26.1.2+ recommended. Bedrock joins through Geyser with some UI limits.",
+        "guide": "Full joining guide",
+        "discord": "Join the Discord"
+      }
+    }
   }
 }
