@@ -715,15 +715,16 @@ onUnmounted(() => {
 
 .table-head h2 {
   margin: 18px 0 0;
-  font: 600 clamp(36px, 5vw, 72px)/1.02 var(--font-display);
+  font: 800 clamp(36px, 5vw, 72px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-wrap: balance;
 }
 
 .table-head h2 em {
   display: block;
-  color: var(--ash);
-  font-style: italic;
-  font-weight: 500;
+  color: var(--crimson-text);
+  font-style: normal;
 }
 
 .table-head__aside > p {
@@ -909,7 +910,8 @@ onUnmounted(() => {
 
 .tarot__numeral {
   color: var(--ash);
-  font: italic 600 1.75rem/1 var(--font-display);
+  font: 800 1.75rem/1 var(--font-display);
+  letter-spacing: .04em;
   font-variant-numeric: lining-nums;
   letter-spacing: .04em;
 }
@@ -1030,7 +1032,9 @@ onUnmounted(() => {
 
 .reading h3 {
   margin: 14px 0 0;
-  font: 600 clamp(36px, 3.6vw, 54px)/1 var(--font-display);
+  font: 800 clamp(36px, 3.6vw, 54px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   overflow-wrap: anywhere;
 }
 
@@ -1156,7 +1160,8 @@ onUnmounted(() => {
 
 .dossier-card span {
   color: var(--crimson-text);
-  font: italic 600 1.9rem/1 var(--font-display);
+  font: 800 1.9rem/1 var(--font-display);
+  letter-spacing: .04em;
   font-variant-numeric: lining-nums;
 }
 
@@ -1164,7 +1169,9 @@ onUnmounted(() => {
 
 .pathway-dossier h3 {
   margin: 14px 0 0;
-  font: 600 clamp(40px, 4.4vw, 56px)/1 var(--font-display);
+  font: 800 clamp(40px, 4.4vw, 56px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   overflow-wrap: anywhere;
 }
 

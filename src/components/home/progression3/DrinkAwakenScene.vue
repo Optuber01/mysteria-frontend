@@ -8,9 +8,7 @@
     <!-- Ritual circle laid on the floor under the player. -->
     <div class="drink-scene__floor" aria-hidden="true">
       <div class="drink-scene__pool" />
-      <div class="drink-scene__circle" :style="circleStyle">
-        <span class="drink-scene__circle-art" :style="{ maskImage: `url(${magicCircle})`, WebkitMaskImage: `url(${magicCircle})` }" />
-      </div>
+      <div class="drink-scene__circle" :style="circleStyle" />
       <div class="drink-scene__fx">
         <SceneParticles mode="aura" :active="auraActive" :intensity="auraIntensity" />
       </div>
@@ -186,8 +184,12 @@ const circleWake = computed(() => (final.value ? 1 : clamp01((p.value - 0.12) / 
 const auraActive = computed(() => props.active && (final.value || p.value >= 0.12));
 const auraIntensity = computed(() => 0.35 + 0.65 * awaken.value);
 
-const circleStyle = computed<CSSProperties>(() => ({
-  transform: `rotate(${(final.value ? 96 : p.value * 160).toFixed(2)}deg) scale(${(0.86 + 0.14 * circleWake.value).toFixed(4)})`,
+// Only the painted sigil (a pseudo-element) spins: the foreshortened disc's
+// box stays put inside the stage.
+const circleStyle = computed(() => ({
+  '--circle-mask': `url(${magicCircle})`,
+  '--circle-spin': `${(final.value ? 96 : p.value * 160).toFixed(2)}deg`,
+  transform: `scale(${(0.86 + 0.14 * circleWake.value).toFixed(4)})`,
 }));
 
 // Scene-wide drivers read by the stylesheet.
@@ -207,7 +209,9 @@ const burstActive = computed(() => props.active && !final.value && p.value >= 0.
 /* ---------------- awakened panel ---------------- */
 const panelStyle = computed<CSSProperties>(() => ({
   opacity: clamp01(awaken.value * 3).toFixed(4),
-  transform: `translateY(-50%) translateX(${((1 - awaken.value) * 48).toFixed(1)}px)`,
+  // Fades in place (its lines rise in on their own): sliding it in from the
+  // right pushed the panel past the clipped stage edge mid-reveal.
+  transform: 'translateY(-50%)',
   pointerEvents: awaken.value > 0.5 ? 'auto' : 'none',
 }));
 
@@ -234,7 +238,10 @@ const ctaReveal = stagger(0.17);
   --awaken: 0;
   /* the player's feet: the circle, beam and moon all centre on this */
   --stand-x: 31%;
-  --floor-y: 8%;
+  /* high enough that the foreshortened circle (0.15 x its width below the
+     feet) and its glow stay inside the clipped stage */
+  --circle-size: min(400px, 40vw);
+  --floor-y: max(8%, calc(var(--circle-size) * 0.15 + 22px));
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -321,9 +328,9 @@ const ctaReveal = stagger(0.17);
 
 /* The circle lies on the ground: a foreshortened sigil, not a backdrop disc. */
 .drink-scene__circle {
-  width: min(400px, 40vw);
+  width: var(--circle-size);
   aspect-ratio: 1;
-  margin: calc(min(400px, 40vw) / -2) 0 0 calc(min(400px, 40vw) / -2);
+  margin: calc(var(--circle-size) / -2) 0 0 calc(var(--circle-size) / -2);
   opacity: calc(var(--wake) * (0.45 + var(--awaken) * 0.55));
   transform-origin: 50% 50%;
   /* rotateX here, spin from the inline transform on the art's parent */
@@ -332,11 +339,14 @@ const ctaReveal = stagger(0.17);
   will-change: transform, opacity;
 }
 
-.drink-scene__circle-art {
-  display: block;
-  width: 100%;
-  height: 100%;
+.drink-scene__circle::before {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(135deg, var(--crimson-text), var(--crimson) 70%);
+  content: '';
+  transform: rotate(var(--circle-spin, 0deg));
+  mask-image: var(--circle-mask);
+  -webkit-mask-image: var(--circle-mask);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
@@ -453,13 +463,15 @@ const ctaReveal = stagger(0.17);
 .panel__title {
   margin: 14px 0 10px;
   color: var(--bone);
-  font: 600 clamp(3.4rem, 5.6vw, 5.4rem)/0.88 var(--font-display);
+  font: 800 clamp(3.4rem, 5.6vw, 5.4rem)/0.88 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-shadow: 0 0 46px rgba(179, 32, 43, 0.55);
 }
 .panel__sub {
   margin: 0 0 22px;
   color: var(--ash);
-  font: italic 500 1.2rem/1.3 var(--font-display);
+  font: 500 1.02rem/1.45 var(--font-body);
 }
 .panel__abilities {
   display: grid;

@@ -7,7 +7,8 @@
     aria-labelledby="progression-title"
   >
     <div class="progression-v3__sticky">
-      <div class="progression-v3__backdrop" aria-hidden="true">
+      <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
+      <div class="progression-v3__backdrop" aria-hidden="true" data-sweep-ignore>
         <img :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
       <div class="progression-v3__omen" aria-hidden="true" />
@@ -25,17 +26,21 @@
       </header>
 
       <div class="progression-v3__layout">
-        <Transition name="chapter-copy" mode="out-in">
-          <article :key="activeChapter.id" class="chapter-copy">
-            <p class="fog-label">{{ chapterText(activeChapter.id, 'kicker') }}</p>
-            <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
-            <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
-            <p class="chapter-copy__hint"><i aria-hidden="true" />{{ chapterText(activeChapter.id, 'hint') }}</p>
-          </article>
-        </Transition>
+        <!-- Outgoing and incoming copy share one grid cell and cross over
+             quickly, so the column is never empty while the stage moves on. -->
+        <div class="chapter-copy-slot">
+          <Transition name="chapter-copy">
+            <article :key="activeChapter.id" class="chapter-copy">
+              <p class="fog-label">{{ chapterText(activeChapter.id, 'kicker') }}</p>
+              <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
+              <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
+              <p class="chapter-copy__hint"><i aria-hidden="true" />{{ chapterText(activeChapter.id, 'hint') }}</p>
+            </article>
+          </Transition>
+        </div>
 
         <div ref="stageRef" class="progression-v3__stage" @click="onStageClick">
-          <div class="scene-window" :style="bookWindowStyle" :aria-hidden="bookOpacity < 0.5">
+          <div class="scene-window scene-window--book" :style="bookWindowStyle" :aria-hidden="bookOpacity < 0.5">
             <FormulaBookScene
               :progress="bookLocal"
               :closing-progress="bookClosingLocal"
@@ -45,15 +50,16 @@
               @clear-inspect="clearDetail"
             />
           </div>
-          <div class="scene-window" :style="altarWindowStyle" :aria-hidden="altarOpacity < 0.5">
+          <div class="scene-window scene-window--altar" :style="altarWindowStyle" :aria-hidden="altarOpacity < 0.5">
             <AltarBrewScene
               :progress="altarLocal"
+              :book-shift="bookShift"
               :active="altarOpacity > 0.5"
               @inspect="showDetail"
               @clear-inspect="clearDetail"
             />
           </div>
-          <div class="scene-window" :style="drinkWindowStyle" :aria-hidden="drinkOpacity < 0.5">
+          <div class="scene-window scene-window--drink" :style="drinkWindowStyle" :aria-hidden="drinkOpacity < 0.5">
             <DrinkAwakenScene
               :progress="drinkLocal"
               :active="drinkOpacity > 0.5"
@@ -138,11 +144,15 @@ const BOOK = {
   closeEnd: altarAt(0.42),
   fadeOutStart: altarAt(0.33),
   fadeOutEnd: altarAt(0.46),
+  // As it closes, the book slides this fraction of the stage to the left, out
+  // of the way of the cauldron print arriving on the right.
+  shift: 0.3,
 };
 const FADES = {
   altarIn: [altarAt(0.03), altarAt(0.16)],
   altarOut: [ALTAR.end, ALTAR.end + 0.03],
-  drinkIn: [DRINK.start - 0.005, DRINK.start + 0.025],
+  // Starts as the altar is half gone, so the player never overlaps the print.
+  drinkIn: [DRINK.start + 0.005, DRINK.start + 0.032],
 } as const;
 const TIMELINE = {
   // Chapter starts follow the first visible beat of each step: the book
@@ -281,7 +291,18 @@ function windowStyle(opacity: number) {
     pointerEvents: opacity > 0.5 ? 'auto' : 'none',
   } as const;
 }
-const bookWindowStyle = computed(() => windowStyle(bookOpacity.value));
+// Fraction of the stage width the closing book has moved left (AltarBrewScene
+// launches the ingredients from the book's current position).
+const bookShift = computed(() => {
+  if (reducedMotion.value) return 0;
+  // done by 70% of the close, so it has cleared the print before it fades
+  const t = clamp01(bookClosingLocal.value / 0.7);
+  return BOOK.shift * t * t * (3 - 2 * t);
+});
+const bookWindowStyle = computed(() => ({
+  ...windowStyle(bookOpacity.value),
+  transform: `translate3d(${(-bookShift.value * 100).toFixed(2)}%, 0, 0)`,
+}));
 const altarWindowStyle = computed(() => windowStyle(altarOpacity.value));
 const drinkWindowStyle = computed(() => windowStyle(drinkOpacity.value));
 
@@ -535,7 +556,9 @@ onUnmounted(() => {
 .progression-v3__heading h2 {
   margin: 0;
   color: var(--bone);
-  font: 600 clamp(2.6rem, 6vw, 5.4rem)/0.95 var(--font-display);
+  font: 800 clamp(2.6rem, 6vw, 5.4rem)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-shadow: 0 10px 60px rgba(0, 0, 0, 0.6);
 }
 
@@ -548,7 +571,7 @@ onUnmounted(() => {
 .progression-v3__tagline {
   margin: 0;
   color: var(--ash);
-  font: italic 500 clamp(1.15rem, 1.8vw, 1.5rem)/1.3 var(--font-display);
+  font: 500 1.02rem/1.45 var(--font-body);
 }
 
 /* ---- Chapter copy + stage ---- */
@@ -566,14 +589,23 @@ onUnmounted(() => {
   opacity: var(--stage-in);
 }
 
+.chapter-copy-slot {
+  min-width: 0;
+  display: grid;
+  align-items: center;
+}
+
 .chapter-copy {
+  grid-area: 1 / 1;
   min-width: 0;
 }
 
 .chapter-copy h3 {
   margin: 20px 0 18px;
   color: var(--bone);
-  font: 600 clamp(2.3rem, 3.4vw, 3.4rem)/0.98 var(--font-display);
+  font: 800 clamp(2.3rem, 3.4vw, 3.4rem)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-wrap: balance;
 }
 
@@ -615,11 +647,17 @@ onUnmounted(() => {
   outline: none;
 }
 
+/* Fixed stacking: the cauldron print and the flying ingredients always pass
+   in front of the closing book, whatever either window's opacity is. */
 .scene-window {
   position: absolute;
   inset: 0;
   transition: opacity 0.18s linear;
 }
+
+.scene-window--book { z-index: 1; }
+.scene-window--altar { z-index: 2; }
+.scene-window--drink { z-index: 3; }
 
 /* ---- Chapter rail ---- */
 .progression-nav {
@@ -741,19 +779,24 @@ onUnmounted(() => {
   display: none;
 }
 
-.chapter-copy-enter-active,
+/* The old copy is gone in 0.12s; the new one starts as it goes. */
+.chapter-copy-enter-active {
+  transition: opacity 0.22s ease 0.08s, transform 0.36s var(--ease-out) 0.08s;
+}
+
 .chapter-copy-leave-active {
-  transition: opacity 0.3s ease, transform 0.6s var(--ease-out);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  pointer-events: none;
 }
 
 .chapter-copy-enter-from {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(12px);
 }
 
 .chapter-copy-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-6px);
 }
 
 @media (max-width: 1120px) {
@@ -864,7 +907,9 @@ onUnmounted(() => {
   .progression-static h3 {
     margin: 14px 0 10px;
     color: var(--bone);
-    font: 600 clamp(2rem, 7vw, 2.9rem)/1 var(--font-display);
+    font: 800 clamp(2rem, 7vw, 2.9rem)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
     text-wrap: balance;
   }
 

@@ -15,7 +15,6 @@
       @blur="emit('clear-inspect')"
       @click="inspect('brew-circle', $event)"
     >
-      <span class="altar-scene__circle-art" :style="circleMaskStyle" aria-hidden="true" />
     </button>
 
     <!-- The real in-game cauldron screen, printed and pinned like evidence. -->
@@ -123,7 +122,12 @@ import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leav
 import magicCircle from '@/assets/images/home/progression/real/magic-circle.png';
 import sequencePotion from '@/assets/images/home/progression/real/sequence-potion.png';
 
-const props = defineProps<{ progress: number; active: boolean }>();
+const props = withDefaults(defineProps<{
+  progress: number;
+  active: boolean;
+  /** How far (fraction of the stage width) the closing book has slid left. */
+  bookShift?: number;
+}>(), { bookShift: 0 });
 const emit = defineEmits<{
   (e: 'inspect', id: string, anchor: HTMLElement): void;
   (e: 'clear-inspect'): void;
@@ -133,7 +137,7 @@ const reduced = useReducedMotion();
 const { tp } = useProgressionCopy();
 
 /* The print sits at the right of the stage, pinned slightly askew. */
-const PRINT = { x: 70, y: 53, tiltDeg: -1.4 };
+const PRINT = { x: 70, y: 52, tiltDeg: -1.4 };
 const TILT = (PRINT.tiltDeg * Math.PI) / 180;
 
 /* ---------------- helpers ---------------- */
@@ -162,7 +166,9 @@ const p = computed(() => clamp01(props.progress));
 const final = computed(() => reduced.value); // reduced motion => static final composed state
 
 /* ---------------- phase drivers ---------------- */
-const altarIn = computed(() => (final.value ? 1 : clamp01(p.value / 0.1)));
+// The print arrives as the book starts to close (ProgressionStoryV3 closes it
+// over 0.10-0.42 of this scene and slides it left, out of the print's way).
+const altarIn = computed(() => (final.value ? 1 : smoothstep(clamp01((p.value - 0.15) / 0.14))));
 const brew = computed(() => (final.value ? 1 : clamp01((p.value - 0.55) / 0.3)));
 const reveal = computed(() => (final.value ? 1 : clamp01((p.value - 0.78) / 0.14)));
 
@@ -219,14 +225,44 @@ function onPrint(point: Point): Point {
   };
 }
 
+/*
+ * Stage composition, sized from the scene box so the circle (and its glow),
+ * the print and the potion all stay inside the stage at every viewport: the
+ * circle is bounded by the stage height and width, the print by the circle,
+ * and the circle's right edge keeps clear of the stage edge.
+ */
+const EDGE = 24; // room for the circle's glow inside the clipped stage
+const layout = computed(() => {
+  const { w, h } = geom.value;
+  if (w <= 0 || h <= 0) return null;
+  const circle = Math.max(240, Math.min(620, h - 2 * EDGE - 16, w * 0.62));
+  const print = Math.min(440, circle * 0.76, w * 0.54);
+  const x = Math.min(w * (PRINT.x / 100), w - circle / 2 - EDGE);
+  const y = h * (PRINT.y / 100);
+  // The revealed potion floats where the player will hold it next chapter,
+  // clear of the circle's left edge.
+  const potionX = Math.max(56, Math.min(w * 0.3, x - circle / 2 - 64));
+  return { circle, print, x, y, potionX, potionY: h * 0.44 };
+});
+
+// The print moves when the stage is resized: re-measure the screen after it.
+watch(
+  () => (layout.value ? `${layout.value.x.toFixed(1)},${layout.value.y.toFixed(1)},${layout.value.print.toFixed(1)}` : ''),
+  () => requestAnimationFrame(syncGeom),
+);
+
 /* ---------------- print ---------------- */
 const printStyle = computed<CSSProperties>(() => {
   const inValue = altarIn.value;
+  const l = layout.value;
   return {
-    left: `${PRINT.x}%`,
-    top: `${PRINT.y}%`,
-    opacity: inValue.toFixed(4),
-    transform: `translate(-50%, -50%) translateY(${((1 - inValue) * 26).toFixed(1)}px) rotate(${PRINT.tiltDeg}deg) scale(${(0.9 + 0.1 * inValue).toFixed(4)})`,
+    left: l ? `${l.x.toFixed(1)}px` : `${PRINT.x}%`,
+    top: l ? `${l.y.toFixed(1)}px` : `${PRINT.y}%`,
+    width: l ? `${l.print.toFixed(1)}px` : undefined,
+    // opaque early: it is laid over the closing book, not seen through it
+    opacity: clamp01(inValue * 2.5).toFixed(4),
+    // slides in a short way inside the stage, never from beyond its edge
+    transform: `translate(-50%, -50%) translateX(${((1 - inValue) * 36).toFixed(1)}px) rotate(${PRINT.tiltDeg}deg) scale(${(0.94 + 0.06 * inValue).toFixed(4)})`,
     pointerEvents: inValue > 0.5 ? 'auto' : 'none',
   };
 });
@@ -266,7 +302,7 @@ const confirmStyle = computed<CSSProperties>(() => {
 });
 
 /* ---------------- ingredient flight: book -> screen slots ---------------- */
-const FLIGHT_SPAN = 0.2;
+const FLIGHT_SPAN = 0.22;
 const ARC_PX = 42;
 
 type ItemSpec = {
@@ -280,21 +316,24 @@ type ItemSpec = {
 };
 
 const ITEMS: ItemSpec[] = [
-  // Positions match the icons painted onto the physical book leaves. The
-  // launch is delayed until the print has reached its resting geometry.
+  // Positions match the icons painted onto the physical book leaves. All four
+  // leave the pages before the print (which is laid over the book) covers
+  // them, and head for slots it carries in with it.
   // Loading order follows the in-game guide: main ingredients (left slots),
   // supplementary ingredients (right slots), then the recipe in the centre.
   { id: 'lavos-squid-blood', labelKey: 'ingredients.lavosSquidBlood', asset: lavosSquidBlood, stagger: 0.12, bookX: 0.2226, bookY: 0.3071, slot: SLOT_M1 },
-  { id: 'stellar-aqua-crystal', labelKey: 'ingredients.stellarAquaCrystal', asset: stellarAquaCrystal, stagger: 0.18, bookX: 0.2226, bookY: 0.4374, slot: SLOT_M2 },
-  { id: 'gold-mint-leaves', labelKey: 'ingredients.goldMintLeaves', asset: goldMintLeaves, stagger: 0.24, bookX: 0.5537, bookY: 0.3071, slot: SLOT_S1 },
-  { id: 'formula-fool', labelKey: 'ingredients.formula', asset: foolRecipe, stagger: 0.3, bookX: 0.5547, bookY: 0.7299, slot: SLOT_R },
+  { id: 'stellar-aqua-crystal', labelKey: 'ingredients.stellarAquaCrystal', asset: stellarAquaCrystal, stagger: 0.15, bookX: 0.2226, bookY: 0.4374, slot: SLOT_M2 },
+  { id: 'gold-mint-leaves', labelKey: 'ingredients.goldMintLeaves', asset: goldMintLeaves, stagger: 0.18, bookX: 0.5537, bookY: 0.3071, slot: SLOT_S1 },
+  { id: 'formula-fool', labelKey: 'ingredients.formula', asset: foolRecipe, stagger: 0.21, bookX: 0.5547, bookY: 0.7299, slot: SLOT_R },
 ];
 
+/** Mirrors FormulaBookScene's .book-viewport box (and the book's slide left). */
 function bookSource(spec: ItemSpec, geometry: typeof geom.value): Point {
-  const viewportW = Math.min(680, geometry.w);
+  const marginTop = Math.min(46, Math.max(22, innerHeight * 0.05));
+  const viewportW = Math.max(0, Math.min(680, geometry.w, (geometry.h - marginTop - 8) * 1.24));
   const viewportH = viewportW / 1.24;
-  const viewportLeft = (geometry.w - viewportW) / 2;
-  const viewportTop = (geometry.h - viewportH) / 2 + Math.min(23, geometry.h * 0.035);
+  const viewportLeft = (geometry.w - viewportW) / 2 - geometry.w * props.bookShift;
+  const viewportTop = (geometry.h - viewportH - marginTop) / 2 + marginTop;
   return {
     x: viewportLeft + viewportW * spec.bookX,
     y: viewportTop + viewportH * spec.bookY,
@@ -344,23 +383,25 @@ const items = computed<FlightItem[]>(() => {
 
 /* ---------------- magic circle (brew phase) ---------------- */
 const circleIn = computed(() => (final.value ? 1 : clamp01((p.value - 0.5) / 0.12)));
-const circleMaskStyle: CSSProperties = {
-  maskImage: `url(${magicCircle})`,
-  WebkitMaskImage: `url(${magicCircle})`,
-};
+// The hotspot stays an upright disc; only its painted sigil (a pseudo-element)
+// spins, so the hit area and its box never grow with the rotation.
 const circleStyle = computed<CSSProperties>(() => {
   const inValue = circleIn.value;
   const bright = brew.value;
   const rotation = final.value ? 100 : p.value * 120;
   const g = geom.value;
+  const l = layout.value;
   const centre = g.guiW > 0 ? { left: `${g.cx.toFixed(1)}px`, top: `${g.cy.toFixed(1)}px` } : { left: `${PRINT.x}%`, top: `${PRINT.y}%` };
   return {
     ...centre,
+    width: l ? `${l.circle.toFixed(1)}px` : undefined,
+    '--circle-mask': `url(${magicCircle})`,
+    '--circle-spin': `${rotation.toFixed(2)}deg`,
     opacity: (inValue * 0.95).toFixed(4),
-    transform: `translate(-50%, -50%) rotate(${rotation.toFixed(2)}deg) scale(${(0.84 + 0.16 * inValue).toFixed(4)})`,
-    filter: `brightness(${(0.55 + 0.6 * bright).toFixed(3)}) drop-shadow(0 0 ${(8 + 22 * bright).toFixed(1)}px rgba(179, 32, 43, ${(0.3 + 0.4 * bright).toFixed(3)}))`,
+    transform: `translate(-50%, -50%) scale(${(0.84 + 0.16 * inValue).toFixed(4)})`,
+    filter: `brightness(${(0.55 + 0.6 * bright).toFixed(3)}) drop-shadow(0 0 ${(6 + 14 * bright).toFixed(1)}px rgba(179, 32, 43, ${(0.3 + 0.4 * bright).toFixed(3)}))`,
     pointerEvents: inValue > 0.4 ? 'auto' : 'none',
-  };
+  } as CSSProperties;
 });
 
 /* ---------------- FX layer over the cauldron (centre of the screen) ---------------- */
@@ -382,11 +423,23 @@ const revealWrapStyle = computed<CSSProperties>(() => ({
   opacity: reveal.value.toFixed(4),
 }));
 
+// The potion rises out of the cauldron and drifts left to where the player
+// takes it in the next chapter.
 const potionStyle = computed<CSSProperties>(() => {
   const r = reveal.value;
+  const l = layout.value;
+  const g = geom.value;
+  let pos: CSSProperties = { left: '30%', top: '44%' };
+  if (l) {
+    const from = g.guiW > 0 ? onPrint({ x: 50, y: 43 }) : { x: l.x, y: l.y };
+    const t = smoothstep(r);
+    pos = {
+      left: `${lerp(from.x, l.potionX, t).toFixed(1)}px`,
+      top: `${(lerp(from.y, l.potionY, t) - 30 * Math.sin(t * Math.PI)).toFixed(1)}px`,
+    };
+  }
   return {
-    left: `${PRINT.x}%`,
-    top: '9%',
+    ...pos,
     transform: `translate(-50%, -50%) scale(${easeOutBack(r).toFixed(4)})`,
     filter: `brightness(${(0.35 + 0.65 * r).toFixed(3)})`,
     pointerEvents: r > 0.5 ? 'auto' : 'none',
@@ -398,9 +451,14 @@ const potionHaloStyle = computed<CSSProperties>(() => ({
   transform: `scale(${(0.9 + 0.2 * reveal.value).toFixed(4)})`,
 }));
 
-const vignetteStyle = computed<CSSProperties>(() => ({
-  opacity: reveal.value.toFixed(4),
-}));
+const vignetteStyle = computed<CSSProperties>(() => {
+  const l = layout.value;
+  return {
+    opacity: reveal.value.toFixed(4),
+    '--bloom-x': l ? `${l.x.toFixed(1)}px` : `${PRINT.x}%`,
+    '--bloom-y': l ? `${(l.y - 20).toFixed(1)}px` : '45%',
+  } as CSSProperties;
+});
 
 /* ---------------- particles ---------------- */
 const particleMode = computed<'bubbles' | 'sparkles'>(() => (p.value >= 0.85 && !final.value ? 'sparkles' : 'bubbles'));
@@ -439,23 +497,26 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 40% 50% at 70% 45%, rgba(179, 32, 43, 0.22), transparent 100%);
+  background: radial-gradient(ellipse 36% 46% at var(--bloom-x, 70%) var(--bloom-y, 45%), rgba(179, 32, 43, 0.22), transparent 100%);
 }
 
 /* ---------- magic circle (behind the print) ---------- */
 .altar-scene__circle-hotspot {
   position: absolute;
   z-index: 1;
-  width: min(620px, 62vw);
+  width: min(480px, 62%);
   aspect-ratio: 1;
   padding: 0;
   border-radius: 50%;
 }
-.altar-scene__circle-art {
-  display: block;
-  width: 100%;
-  height: 100%;
+.altar-scene__circle-hotspot::before {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(135deg, var(--crimson-text), var(--crimson-deep) 70%);
+  content: '';
+  transform: rotate(var(--circle-spin, 0deg));
+  mask-image: var(--circle-mask);
+  -webkit-mask-image: var(--circle-mask);
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
@@ -498,16 +559,16 @@ const particleIntensity = computed(() => (particleMode.value === 'sparkles' ? 0.
   border-radius: 2px;
   background: var(--fog-0);
 }
+/* The capture is cropped to its centre 350 px (x = 143..493 of 636): exactly
+   what a centred cover fit of the full-height image shows. */
 .gui__img {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   display: block;
-  width: calc(100% * 636 / 350);
-  max-width: none;
+  width: 100%;
   height: 100%;
-  transform: translateX(calc(-100% * 143 / 636));
-  object-fit: fill;
+  object-fit: cover;
+  object-position: 50% 50%;
   image-rendering: pixelated;
   -webkit-user-drag: none;
 }

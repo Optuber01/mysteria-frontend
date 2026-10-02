@@ -1,47 +1,21 @@
-import auroraCliffside from '@/assets/images/home/hero/hero-aurora-cliffside.webp';
 import eyeRift from '@/assets/images/home/hero/hero-eye-rift.webp';
-import radiantAwakening from '@/assets/images/home/hero/hero-radiant-awakening.webp';
+import cathedral from '@/assets/images/community-archive/churches/great-cathedral/cathedral-exterior.webp';
 import guardianDragon from '@/assets/images/home/hero/hero-guardian-dragon.webp';
-import corruptedFrontier from '@/assets/images/home/hero/hero-corrupted-frontier.webp';
+import auroraCliffside from '@/assets/images/home/hero/hero-aurora-cliffside.webp';
 
 export type HomeHeroSlide = Readonly<{
+  id: string;
   src: string;
+  /** object-position for the capture, so the subject stays clear of the copy. */
   position: string;
-  /** i18n key for the scene name shown in the hero caption. */
-  labelKey: string;
-  /** i18n key for the short scene tag beside the caption ("World / 01"). */
-  sequenceKey: string;
+  /** Where the Spirit Vision lens rests when no pointer is steering it (% of the stage). */
+  focus: Readonly<{ x: number; y: number }>;
 }>;
 
-export const HOME_HERO_SLIDES = [
-  {
-    src: auroraCliffside,
-    position: '64% 54%',
-    labelKey: 'home.hero.slides.auroraCliffside.label',
-    sequenceKey: 'home.hero.slides.auroraCliffside.sequence',
-  },
-  {
-    src: eyeRift,
-    position: '61% 56%',
-    labelKey: 'home.hero.slides.eyeRift.label',
-    sequenceKey: 'home.hero.slides.eyeRift.sequence',
-  },
-  {
-    src: radiantAwakening,
-    position: '58% 55%',
-    labelKey: 'home.hero.slides.sanctuaryAwakening.label',
-    sequenceKey: 'home.hero.slides.sanctuaryAwakening.sequence',
-  },
-  {
-    src: guardianDragon,
-    position: '59% 53%',
-    labelKey: 'home.hero.slides.guardianTrial.label',
-    sequenceKey: 'home.hero.slides.guardianTrial.sequence',
-  },
-  {
-    src: corruptedFrontier,
-    position: '61% 64%',
-    labelKey: 'home.hero.slides.corruptedFrontier.label',
-    sequenceKey: 'home.hero.slides.corruptedFrontier.sequence',
-  },
-] as const satisfies readonly HomeHeroSlide[];
+/* Copy for each scene lives under home.hero.scenes.<id>.{label,place}. */
+export const HOME_HERO_SLIDES: readonly HomeHeroSlide[] = [
+  {id: 'eyeRift', src: eyeRift, position: '50% 42%', focus: {x: 66, y: 44}},
+  {id: 'cathedral', src: cathedral, position: '50% 30%', focus: {x: 56, y: 52}},
+  {id: 'guardian', src: guardianDragon, position: '40% 50%', focus: {x: 62, y: 46}},
+  {id: 'cliffside', src: auroraCliffside, position: '62% 54%', focus: {x: 70, y: 52}},
+];

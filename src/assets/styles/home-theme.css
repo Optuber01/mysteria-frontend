@@ -24,7 +24,7 @@
     --paper-ink-muted: #5a5246;
     --live: #4cc38a;
 
-    --font-display: "Cormorant Garamond", "Cormorant", Georgia, serif;
+    --font-display: "Sofia Sans Extra Condensed", "Arial Narrow", sans-serif;
     --font-body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -103,8 +103,10 @@ body:has(.mysterria-home) #app {
 
 .mysterria-home :where(h1, h2, h3) {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -.005em;
+    font-weight: 800;
+    line-height: .92;
+    letter-spacing: .005em;
+    text-transform: uppercase;
 }
 
 .mysterria-home ::selection {

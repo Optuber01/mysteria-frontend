@@ -280,7 +280,9 @@ onUnmounted(() => {
 .join-intro h2 {
   margin: 20px 0 22px;
   color: var(--bone);
-  font: 600 clamp(2.75rem, 5vw, 4.5rem)/1.02 var(--font-display);
+  font: 800 clamp(2.75rem, 5vw, 4.5rem)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-wrap: balance;
 }
 
@@ -464,7 +466,9 @@ onUnmounted(() => {
 .seat__text strong {
   margin-top: 6px;
   color: var(--paper-ink);
-  font: 600 2rem/1.05 var(--font-display);
+  font: 800 2rem/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   overflow-wrap: anywhere;
 }
 

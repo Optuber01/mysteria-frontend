@@ -579,28 +579,29 @@
       "copiedAnnouncement": "Server address copied to clipboard.",
       "copyFailedAnnouncement": "Could not copy automatically. The server address is selected, so you can copy it yourself.",
       "latestChangelog": "Latest changelog",
-      "scrollCue": "Scroll to begin",
-      "scrollCueAria": "Continue to What is Mysterria?",
-      "slides": {
-        "auroraCliffside": {
-          "label": "Aurora Cliffside",
-          "sequence": "World / 01"
-        },
+      "headlineLead": "Drink the potion.",
+      "headlineAccent": "Act the role.",
+      "summary": "Climb 22 Pathways from Sequence 9 toward godhood on a Lord of the Mysteries Minecraft server — before the Fog claims you.",
+      "lensLabel": "Spirit Vision",
+      "lensHint": "Move your cursor to see through the fog",
+      "lensHintTouch": "Touch the scene to see through the fog",
+      "scenesAria": "Places in Mysterria",
+      "scenes": {
         "eyeRift": {
           "label": "The Eye Rift",
-          "sequence": "Rift / 02"
+          "place": "Dungeon rift"
         },
-        "sanctuaryAwakening": {
-          "label": "Sanctuary Awakening",
-          "sequence": "Rite / 03"
+        "cathedral": {
+          "label": "The Great Cathedral",
+          "place": "Player-built church"
         },
-        "guardianTrial": {
-          "label": "The Guardian’s Trial",
-          "sequence": "Field / 04"
+        "guardian": {
+          "label": "Guardian of the Hall",
+          "place": "Open-world boss"
         },
-        "corruptedFrontier": {
-          "label": "The Corrupted Frontier",
-          "sequence": "Event / 05"
+        "cliffside": {
+          "label": "Aurora Cliffside",
+          "place": "The overworld"
         }
       }
     },

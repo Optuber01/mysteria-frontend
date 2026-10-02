@@ -289,15 +289,16 @@ onUnmounted(() => observer?.disconnect());
 
 .case-head h2 {
   margin: 18px 0 0;
-  font: 600 clamp(36px, 5vw, 72px)/1.02 var(--font-display);
+  font: 800 clamp(36px, 5vw, 72px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-wrap: balance;
 }
 
 .case-head h2 em {
   display: block;
-  color: var(--ash);
-  font-style: italic;
-  font-weight: 500;
+  color: var(--crimson-text);
+  font-style: normal;
 }
 
 .case-head > p {
@@ -450,7 +451,9 @@ onUnmounted(() => observer?.disconnect());
 
 .case__file h3 {
   margin: 0;
-  font: 600 clamp(28px, 2.3vw, 34px)/1.05 var(--font-display);
+  font: 800 clamp(28px, 2.3vw, 34px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-wrap: balance;
 }
 
@@ -508,7 +511,9 @@ onUnmounted(() => observer?.disconnect());
 
 .ledger__head h3 {
   margin: 14px 0 10px;
-  font: 600 clamp(30px, 3vw, 42px)/1.02 var(--font-display);
+  font: 800 clamp(30px, 3vw, 42px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   text-wrap: balance;
 }
 
@@ -558,7 +563,9 @@ onUnmounted(() => observer?.disconnect());
 }
 
 .ledger__entry strong {
-  font: 600 clamp(36px, 3.4vw, 50px)/1 var(--font-display);
+  font: 800 clamp(36px, 3.4vw, 50px)/0.94 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: .005em;
   font-variant-numeric: lining-nums tabular-nums;
   white-space: nowrap;
 }
@@ -617,7 +624,8 @@ onUnmounted(() => observer?.disconnect());
 .ledger__rank {
   grid-row: span 2;
   color: var(--crimson);
-  font: italic 600 1.9rem/1 var(--font-display);
+  font: 800 1.9rem/1 var(--font-display);
+  letter-spacing: .04em;
 }
 
 .ledger__name {

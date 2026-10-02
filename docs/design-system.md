@@ -51,13 +51,14 @@ rules keep working while they are migrated.
 
 ## 3. Type
 
-- **Display — Cormorant Garamond** 500/600, italic for emphasis. Large sizes
-  only (≥ 28px); never for body copy. Cyrillic included.
+- **Display — Sofia Sans Extra Condensed** 700/800, uppercase, like Victorian
+  posters and newspaper mastheads. Headings and short labels only; never body
+  copy. Cyrillic included. (Serif display faces were tried and rejected.)
 - **Body — Manrope** 400/600, 16–17px, line-height 1.6.
 - **Labels — IBM Plex Mono** 500, 11–12px, `.14em` tracking, uppercase.
   Use sparingly: one label per block, not a terminal voice everywhere.
-- Hero wordmark: Cormorant 600, `clamp(56px, 11vw, 168px)`, tracking `.04em`.
-- Section titles: `clamp(36px, 5vw, 72px)`, line-height 1.02.
+- Hero headline: 800, `clamp(58px, 8.4vw, 134px)`, line-height .86.
+- Section titles: `clamp(40px, 5.6vw, 84px)`, line-height .92.
 
 ## 4. Shape & depth
 

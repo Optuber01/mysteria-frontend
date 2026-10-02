@@ -139,10 +139,12 @@ function inspect(id: string, event: Event) {
 
 <style scoped>
 .book-scene {
+  --book-margin: clamp(22px, 5vh, 46px);
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
+  container-type: size;
 }
 
 /* Evidence tag over the exhibit. */
@@ -168,9 +170,11 @@ function inspect(id: string, event: Event) {
 .book-viewport {
   position: relative;
   z-index: 2;
-  width: min(680px, 100%);
+  /* Fits the stage height too (short screens), below the caption.
+     AltarBrewScene's bookSource() mirrors this box. */
+  width: min(680px, 100%, (100cqh - var(--book-margin) - 8px) * 1.24);
   aspect-ratio: 1.24;
-  margin-top: clamp(22px, 5vh, 46px);
+  margin-top: var(--book-margin);
 }
 
 /* A single lamp over the desk: cold light, no colour. */
