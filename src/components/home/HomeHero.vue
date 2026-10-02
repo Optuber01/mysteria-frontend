@@ -1,214 +1,121 @@
 <template>
-  <section
-    ref="heroRef"
-    class="hero"
-    :class="{ 'is-ready': isReady, 'is-faded': stackFaded }"
-    :style="heroStyle"
-    aria-labelledby="home-title"
-  >
-    <div class="hero-sticky">
-      <div class="hero-backdrop" aria-hidden="true" />
+  <section ref="heroRef" class="hero" :class="{ 'is-ready': isReady }" aria-labelledby="home-title">
+    <div class="hero-scenes" aria-hidden="true">
+      <img
+          v-for="(slide, index) in HOME_HERO_SLIDES"
+          v-show="index === 0 || scenesLoaded"
+          :key="slide.src"
+          class="hero-scene"
+          :class="{ 'is-active': index === activeSlide }"
+          :src="slide.src"
+          :style="{ objectPosition: slide.position }"
+          alt=""
+          :loading="index === 0 ? 'eager' : 'lazy'"
+          :fetchpriority="index === 0 ? 'high' : 'low'"
+          decoding="async"
+      >
+    </div>
 
-      <div class="hero-content">
-        <div class="hero-copy">
-          <h1 id="home-title">{{ t('home.hero.title') }}</h1>
-          <p class="hero-summary">{{ t('home.hero.summary') }}</p>
+    <div class="hero-moon" aria-hidden="true"></div>
+    <div class="hero-fog hero-fog--far" aria-hidden="true"></div>
+    <div class="hero-fog hero-fog--near" aria-hidden="true"></div>
+    <div class="hero-vignette" aria-hidden="true"></div>
 
-          <div class="hero-actions">
-            <RouterLink class="hero-action hero-action--primary" :to="$lp('/guide/connect')">
-              <span>{{ t('home.hero.primaryCta') }}</span>
-              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h11m-4.5-4.5L15 10l-4.5 4.5" /></svg>
-            </RouterLink>
+    <div class="hero-content">
+      <p class="fog-label hero-eyebrow">{{ eyebrow }}</p>
+      <h1 id="home-title" class="hero-wordmark">Mysterria</h1>
+      <p class="hero-tagline">{{ t('homePage.heroTagline') }}</p>
 
-            <div class="connection-pill" :class="`is-${copyState}`">
-              <span class="connection-text">
-                <!-- All three labels share one grid cell so the pill keeps the
-                     width of the longest one and never nudges its neighbours. -->
-                <small class="connection-label">
-                  <span
-                    v-for="state in COPY_STATES"
-                    :key="state"
-                    :class="{ 'is-shown': copyState === state }"
-                    :aria-hidden="copyState !== state"
-                  >{{ t(COPY_LABEL_KEYS[state]) }}</span>
-                </small>
-                <strong ref="addressRef" class="connection-address">{{ SERVER_IP }}</strong>
-              </span>
-              <button
-                class="connection-copy"
-                type="button"
-                :aria-label="copyState === 'copied' ? t('home.hero.copiedAria') : t('home.hero.copyAria')"
-                @click="copyAddress"
-              >
-                <svg v-if="copyState !== 'copied'" aria-hidden="true" viewBox="0 0 18 18">
-                  <rect x="6.5" y="6.5" width="8" height="8" rx="1.5" />
-                  <path d="M11.5 3.5h-6a2 2 0 0 0-2 2v6" />
-                </svg>
-                <svg v-else aria-hidden="true" viewBox="0 0 18 18"><path d="M4 9.5l3.5 3.5L14 5.5" /></svg>
-              </button>
-              <span class="visually-hidden" aria-live="polite">{{ copyAnnouncement }}</span>
-            </div>
-          </div>
-
-          <RouterLink class="hero-link-quiet" :to="$lp(latestSlug ? `/news/${latestSlug}` : '/news')">
-            <span>{{ t('home.hero.latestChangelog') }}</span>
-            <svg aria-hidden="true" viewBox="0 0 20 20">
-              <path d="M5.5 2.75h6l3 3v11.5h-9z" />
-              <path d="M11.5 2.75v3h3M8 9h4.5M8 12h4.5" />
-            </svg>
-          </RouterLink>
-        </div>
-
-        <figure class="hero-plate">
-          <div class="hero-plate__frame">
-            <img
-              v-for="(slide, index) in HOME_HERO_SLIDES"
-              :key="slide.src"
-              class="hero-slide"
-              :class="{ 'is-active': activeSlide === index }"
-              :src="index === 0 || slidesLoaded ? slide.src : undefined"
-              :style="slideStyle(slide)"
-              alt=""
-              :loading="index === 0 ? 'eager' : undefined"
-              :fetchpriority="index === 0 ? 'high' : undefined"
-              decoding="async"
-            >
-
-            <div class="hero-plate__signal" :class="{ 'is-live': status.state === 'online' }" aria-hidden="true">
-              <template v-if="status.state === 'online'">
-                <i />
-                <span>{{ t('home.hero.worldOnline') }}</span>
-              </template>
-              <b>{{ t('home.hero.field').replace('{number}', slideNumber(activeSlide)) }}</b>
-            </div>
-          </div>
-
-          <div class="hero-plate__footer">
-            <figcaption class="hero-plate__caption">
-              <span>{{ t(HOME_HERO_SLIDES[activeSlide].labelKey) }}</span>
-              <b>{{ t(HOME_HERO_SLIDES[activeSlide].sequenceKey) }}</b>
-            </figcaption>
-
-            <div class="hero-plate__controls" role="tablist" :aria-label="t('home.hero.scenesAria')">
-              <button
-                v-for="(slide, index) in HOME_HERO_SLIDES"
-                :key="slide.src"
-                class="hero-plate__control"
-                :class="{ 'is-active': activeSlide === index }"
-                type="button"
-                role="tab"
-                :tabindex="activeSlide === index ? 0 : -1"
-                :aria-selected="activeSlide === index"
-                :aria-label="t('home.hero.showScene').replace('{scene}', t(slide.labelKey))"
-                @click="selectSlide(index)"
-                @keydown.left.prevent="selectSlide(index - 1, true)"
-                @keydown.right.prevent="selectSlide(index + 1, true)"
-                @keydown.home.prevent="selectSlide(0, true)"
-                @keydown.end.prevent="selectSlide(HOME_HERO_SLIDES.length - 1, true)"
-              >
-                <span>{{ slideNumber(index) }}</span>
-                <i aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        </figure>
+      <div class="hero-actions">
+        <RouterLink class="fog-button" :to="$lp('/guide/connect')">
+          {{ t('home.hero.primaryCta') }}
+          <span aria-hidden="true">→</span>
+        </RouterLink>
+        <a class="fog-button fog-button--ghost" href="#pathways">{{ t('homePage.heroSecondaryCta') }}</a>
       </div>
 
-      <a class="scroll-cue" href="#what-is" :aria-label="t('home.hero.scrollCueAria')">
+      <div class="hero-address" :class="`is-${copyState}`">
+        <span class="hero-address__dot" :class="`is-${status.state}`" aria-hidden="true"></span>
+        <span class="hero-address__label">{{ t(COPY_LABEL_KEYS[copyState]) }}</span>
+        <strong ref="addressRef" class="hero-address__value">{{ SERVER_IP }}</strong>
+        <button
+            type="button"
+            class="hero-address__copy"
+            :aria-label="copyState === 'copied' ? t('home.hero.copiedAria') : t('home.hero.copyAria')"
+            @click="copyAddress"
+        >
+          <svg v-if="copyState === 'copied'" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>
+          <svg v-else viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V6a1 1 0 0 1 1-1h9"/></svg>
+        </button>
+        <span class="visually-hidden" aria-live="polite">{{ copyAnnouncement }}</span>
+      </div>
+    </div>
+
+    <div class="hero-footer">
+      <p class="hero-caption" aria-hidden="true">
+        <span>{{ t(HOME_HERO_SLIDES[activeSlide].labelKey) }}</span>
+        <b>{{ t(HOME_HERO_SLIDES[activeSlide].sequenceKey) }}</b>
+      </p>
+      <a class="hero-scroll" href="#progression" :aria-label="t('home.hero.scrollCueAria')">
         <span>{{ t('home.hero.scrollCue') }}</span>
-        <i aria-hidden="true"><b /></i>
+        <i aria-hidden="true"></i>
       </a>
+      <RouterLink class="hero-changelog" :to="$lp(latestSlug ? `/news/${latestSlug}` : '/news')">
+        {{ t('home.hero.latestChangelog') }} <span aria-hidden="true">↗</span>
+      </RouterLink>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  onMounted,
-  onUnmounted,
-  ref,
-  watch,
-  type CSSProperties,
-} from 'vue';
-import { useElementScrollProgress } from '@/composables/useElementScrollProgress';
-import { useI18n } from '@/composables/useI18n';
-import { useReducedMotion } from '@/composables/useReducedMotion';
-import { HOME_HERO_SLIDES, type HomeHeroSlide } from '@/data/homeHeroSlides';
-import { SERVER_IP } from '@/composables/useServer';
-import type { ServerStatus } from '@/composables/useSharedServerStatus';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {useI18n} from '@/composables/useI18n';
+import {useReducedMotion} from '@/composables/useReducedMotion';
+import {HOME_HERO_SLIDES} from '@/data/homeHeroSlides';
+import {SERVER_IP} from '@/composables/useServer';
+import type {ServerStatus} from '@/composables/useSharedServerStatus';
 
-/*
- * `status` only drives the plate's decorative "World online" tag. The live
- * player count lives in the header chip, so the hero does not repeat it.
- */
+/* `status` only drives the address dot; the player count lives in the header chip. */
 defineProps<{ status: ServerStatus; latestSlug?: string | null }>();
 
-const ROTATE_INTERVAL = 7000;
-/* Same confirmation window as the header chip (useCopyIp), so both copy
-   affordances on the page behave alike. Failure stays up longer: it asks the
-   reader to do something. */
+const ROTATE_INTERVAL = 8000;
+/* Same confirmation window as the header chip (useCopyIp). Failure stays up
+   longer: it asks the reader to do something. */
 const COPIED_MS = 1800;
 const FAILED_MS = 4000;
-type HeroCssProperties = CSSProperties & Record<`--${string}`, string>;
 type CopyState = 'idle' | 'copied' | 'failed';
-const COPY_STATES: readonly CopyState[] = ['idle', 'copied', 'failed'];
 const COPY_LABEL_KEYS: Record<CopyState, string> = {
   idle: 'home.hero.addressLabel',
   copied: 'home.hero.copied',
   failed: 'home.hero.copyFailed',
 };
 
-const { t } = useI18n();
+const {t} = useI18n();
+const reducedMotion = useReducedMotion();
 const heroRef = ref<HTMLElement | null>(null);
 const addressRef = ref<HTMLElement | null>(null);
 const activeSlide = ref(0);
-const slidesLoaded = ref(false);
+const scenesLoaded = ref(false);
 const isReady = ref(false);
 const copyState = ref<CopyState>('idle');
-const reducedMotion = useReducedMotion();
-const { progress, inView } = useElementScrollProgress(heroRef, {
-  rootMargin: '20% 0px',
-  disabled: reducedMotion,
-});
 
-let readyFrame = 0;
 let copyTimer: ReturnType<typeof setTimeout> | null = null;
-let deferredSlidesTimer: ReturnType<typeof setTimeout> | null = null;
 let rotateTimer: ReturnType<typeof setInterval> | null = null;
+let loadTimer: ReturnType<typeof setTimeout> | null = null;
 
-const heroStyle = computed<HeroCssProperties>(() => ({
-  '--hero-progress': reducedMotion.value ? '0' : progress.value.toFixed(4),
-}));
-
+/* Upstream's translated eyebrow is split around the brand name for styling;
+   the fog label reads it as one line. */
+const eyebrow = computed(() =>
+    [t('homePage.heroEyebrowBefore'), t('homePage.heroEyebrowBrand'), t('homePage.heroEyebrowAfter')]
+        .filter(Boolean)
+        .join(' '),
+);
 
 const copyAnnouncement = computed(() => {
   if (copyState.value === 'copied') return t('home.hero.copiedAnnouncement');
   if (copyState.value === 'failed') return t('home.hero.copyFailedAnnouncement');
   return '';
 });
-
-const stackFaded = computed(() => progress.value >= .18);
-
-function slideNumber(index: number) {
-  return String(index + 1).padStart(2, '0');
-}
-
-function slideStyle(slide: HomeHeroSlide): HeroCssProperties {
-  return {
-    '--slide-position': slide.position,
-    '--slide-position-mobile': slide.mobilePosition,
-    '--slide-scale': String(slide.scale),
-    '--slide-saturation': String(slide.saturation),
-    '--slide-brightness': String(slide.brightness),
-    '--slide-contrast': String(slide.contrast),
-  };
-}
-
-function normalizeSlide(index: number) {
-  return ((index % HOME_HERO_SLIDES.length) + HOME_HERO_SLIDES.length) % HOME_HERO_SLIDES.length;
-}
 
 /** Leaves the address selected so a blocked clipboard is one keystroke from done. */
 function selectAddress() {
@@ -229,803 +136,399 @@ async function copyAddress() {
     copyState.value = 'failed';
     selectAddress();
   }
-
   if (copyTimer) clearTimeout(copyTimer);
   copyTimer = setTimeout(() => {
     copyState.value = 'idle';
   }, copyState.value === 'copied' ? COPIED_MS : FAILED_MS);
 }
 
-async function revealSlide(index: number) {
-  const normalized = normalizeSlide(index);
-  const image = heroRef.value?.querySelectorAll<HTMLImageElement>('.hero-slide')[normalized] ?? null;
-
-  if (image && (!image.complete || image.naturalWidth === 0)) {
-    try {
-      await image.decode();
-    } catch {
-      return;
-    }
-  }
-
-  activeSlide.value = normalized;
+function rotate() {
+  if (document.visibilityState !== 'visible') return;
+  activeSlide.value = (activeSlide.value + 1) % HOME_HERO_SLIDES.length;
 }
-
-async function selectSlide(index: number, moveFocus = false) {
-  slidesLoaded.value = true;
-  await nextTick();
-  await revealSlide(index);
-
-  if (moveFocus) {
-    await nextTick();
-    heroRef.value
-      ?.querySelectorAll<HTMLButtonElement>('.hero-plate__control')[activeSlide.value]
-      ?.focus();
-  }
-
-  stopRotation();
-  syncRotation();
-}
-
-function advanceSlide() {
-  void revealSlide(activeSlide.value + 1);
-}
-
-function startRotation() {
-  if (rotateTimer) return;
-  rotateTimer = setInterval(advanceSlide, ROTATE_INTERVAL);
-}
-
-function stopRotation() {
-  if (!rotateTimer) return;
-  clearInterval(rotateTimer);
-  rotateTimer = null;
-}
-
-function syncRotation() {
-  const shouldRotate =
-    slidesLoaded.value
-    && inView.value
-    && !reducedMotion.value
-    && !document.hidden;
-
-  if (shouldRotate) startRotation();
-  else stopRotation();
-}
-
-function loadDeferredSlides() {
-  slidesLoaded.value = true;
-  syncRotation();
-}
-
-function queueDeferredSlides() {
-  if (deferredSlidesTimer) clearTimeout(deferredSlidesTimer);
-  deferredSlidesTimer = setTimeout(loadDeferredSlides, 250);
-}
-
-function applySceneTheme() {
-  const host = heroRef.value?.closest<HTMLElement>('.mysterria-home');
-  const theme = HOME_HERO_SLIDES[activeSlide.value]?.theme;
-  if (!host || !theme) return;
-
-  host.style.setProperty('--hero-scene-color', theme.color);
-  host.style.setProperty('--hero-scene-glow', theme.glow);
-  host.style.setProperty('--hero-scene-accent', theme.accent);
-}
-
-watch(activeSlide, applySceneTheme);
-watch([slidesLoaded, reducedMotion, inView], syncRotation);
-
-watch(reducedMotion, (reduced) => {
-  if (reduced) activeSlide.value = 0;
-});
 
 onMounted(() => {
-  readyFrame = requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
     isReady.value = true;
   });
-
-  applySceneTheme();
-  document.addEventListener('visibilitychange', syncRotation);
-  deferredSlidesTimer = setTimeout(loadDeferredSlides, 2800);
-
-  if (document.readyState === 'complete') queueDeferredSlides();
-  else window.addEventListener('load', queueDeferredSlides, { once: true });
+  if (reducedMotion.value) return;
+  // The first scene is the LCP image; the rest load once the page has settled.
+  loadTimer = setTimeout(() => {
+    scenesLoaded.value = true;
+    rotateTimer = setInterval(rotate, ROTATE_INTERVAL);
+  }, 2500);
 });
 
 onUnmounted(() => {
-  const host = heroRef.value?.closest<HTMLElement>('.mysterria-home');
-  host?.style.removeProperty('--hero-scene-color');
-  host?.style.removeProperty('--hero-scene-glow');
-  host?.style.removeProperty('--hero-scene-accent');
-
-  document.removeEventListener('visibilitychange', syncRotation);
-  window.removeEventListener('load', queueDeferredSlides);
-  if (readyFrame) cancelAnimationFrame(readyFrame);
   if (copyTimer) clearTimeout(copyTimer);
-  if (deferredSlidesTimer) clearTimeout(deferredSlidesTimer);
-  stopRotation();
+  if (rotateTimer) clearInterval(rotateTimer);
+  if (loadTimer) clearTimeout(loadTimer);
 });
 </script>
 
 <style scoped>
 .hero {
-  --hero-progress: 0;
   position: relative;
-  min-height: clamp(860px, 140svh, 1260px);
-  color: var(--ink);
-  background: transparent;
+  min-height: max(680px, 100svh);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  color: var(--bone);
+  background: var(--fog-0);
   isolation: isolate;
 }
 
-.hero-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  min-height: 640px;
-  overflow: hidden;
-  isolation: isolate;
-  background: color-mix(in srgb, var(--journey-top) 82%, var(--hero-scene-color) 18%);
-  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-backdrop {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 56% 78% at 78% 42%, color-mix(in srgb, var(--hero-scene-glow) 28%, transparent), transparent 68%),
-    radial-gradient(ellipse 54% 86% at 18% 48%, color-mix(in srgb, var(--hero-scene-color) 20%, transparent), transparent 72%),
-    linear-gradient(180deg, transparent 58%, color-mix(in srgb, var(--journey-mid) 88%, var(--hero-scene-color) 12%) 84%, var(--journey-mid));
-  pointer-events: none;
-  transition: background 1.45s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  width: min(100%, var(--home-content-max, 1440px));
-  height: 100%;
-  display: grid;
-  grid-template-columns: minmax(300px, .82fr) minmax(500px, 1.18fr);
-  align-items: center;
-  gap: clamp(24px, 4vw, 68px);
-  margin: 0 auto;
-  padding:
-    calc(var(--home-header-height, 82px) + env(safe-area-inset-top) + 28px)
-    var(--home-content-gutter, clamp(20px, 4vw, 56px))
-    clamp(112px, 14svh, 156px);
-  /* Fades only part-way while pinned, so it is still readable as it scrolls off
-     and the next chapter follows directly instead of after an empty screen. */
-  opacity: clamp(0, calc(1 - var(--hero-progress) * .6), 1);
-  transform: translate3d(0, calc(var(--hero-progress) * -30px), 0);
-  will-change: transform, opacity;
-}
-
-.hero.is-faded .hero-content {
-  pointer-events: none;
-}
-
-.hero-copy {
-  position: relative;
-  z-index: 4;
-  min-width: 0;
-  max-width: 650px;
-}
-
-/*
- * Text protection. The scene tint behind the copy shifts with every slide, so
- * the copy sits on its own near-paper plate: solid across the whole text block,
- * feathered only beyond it (two intersected masks give a soft-edged rectangle
- * without a blur layer). Contrast no longer depends on which scene is showing.
- */
-.hero-copy::before {
-  --scrim-x: 112px;
-  --scrim-y: 72px;
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: calc(var(--scrim-y) * -1) calc(var(--scrim-x) * -1);
-  background: color-mix(in srgb, color-mix(in srgb, var(--journey-top) 94%, var(--hero-scene-glow) 6%) 84%, transparent);
-  -webkit-mask-image:
-    linear-gradient(90deg, transparent, #000 var(--scrim-x), #000 calc(100% - var(--scrim-x)), transparent),
-    linear-gradient(180deg, transparent, #000 var(--scrim-y), #000 calc(100% - var(--scrim-y)), transparent);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(90deg, transparent, #000 var(--scrim-x), #000 calc(100% - var(--scrim-x)), transparent),
-    linear-gradient(180deg, transparent, #000 var(--scrim-y), #000 calc(100% - var(--scrim-y)), transparent);
-  mask-composite: intersect;
-  pointer-events: none;
-}
-
-.hero h1 {
-  max-width: 680px;
-  margin: 0 0 22px;
-  color: color-mix(in srgb, var(--ink) 94%, var(--hero-scene-color) 6%);
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 5vw, 4.8rem);
-  font-weight: 800;
-  line-height: .98;
-  letter-spacing: -.035em;
-  text-wrap: balance;
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-    opacity .9s .12s cubic-bezier(.22, 1, .36, 1),
-    transform .9s .12s cubic-bezier(.22, 1, .36, 1),
-    color 1.25s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-summary {
-  max-width: 520px;
-  margin: 0 0 30px;
-  color: color-mix(in srgb, var(--ink) 80%, transparent);
-  font-size: clamp(1rem, 1.25vw, 1.13rem);
-  line-height: 1.65;
-  text-wrap: balance;
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity .85s .24s cubic-bezier(.22, 1, .36, 1), transform .85s .24s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-actions {
-  max-width: 650px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 0 0 10px;
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity .8s .36s cubic-bezier(.22, 1, .36, 1), transform .8s .36s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-action {
-  min-width: 0;
-  min-height: 52px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 24px;
-  border-radius: 999px;
-  font-size: .88rem;
-  font-weight: 700;
-  transition: transform .28s cubic-bezier(.22, 1, .36, 1), background-color .25s, box-shadow .28s, color .25s;
-}
-
-.hero-action svg,
-.hero-link-quiet svg,
-.connection-copy svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.hero-action svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 1.7;
-  transition: transform .28s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-action--primary {
-  color: #fff;
-  background: color-mix(in srgb, var(--primary) 78%, var(--hero-scene-accent) 22%);
-  box-shadow: 0 12px 30px color-mix(in srgb, var(--hero-scene-accent) 30%, transparent);
-}
-
-/* Hover only ever adds: darker fill, larger glow in the same hue, lift. */
-.hero-action--primary:hover {
-  color: #fff;
-  background: var(--primary-deep);
-  box-shadow: 0 18px 40px color-mix(in srgb, var(--primary-deep) 38%, transparent);
-  transform: translateY(-2px);
-}
-
-.hero-action--primary:hover svg { transform: translateX(3px); }
-
-.hero-action--primary:active {
-  background: color-mix(in srgb, var(--primary-deep) 84%, var(--ink) 16%);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--primary-deep) 30%, transparent);
-  transform: translateY(0) scale(.98);
-  transition-duration: .08s;
-}
-
-.connection-pill {
-  min-width: 0;
-  max-width: 100%;
-  min-height: 52px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px;
-  padding: 6px 7px 6px 20px;
-  border: 1px solid color-mix(in srgb, var(--hairline) 72%, var(--hero-scene-color) 28%);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface-glass) 86%, var(--hero-scene-color) 14%);
-  backdrop-filter: blur(14px) saturate(1.05);
-  box-shadow: 0 10px 30px color-mix(in srgb, var(--hero-scene-color) 18%, transparent);
-  opacity: 0;
-  transform: translateY(14px);
-  transition:
-    opacity .8s .48s cubic-bezier(.22, 1, .36, 1),
-    transform .8s .48s cubic-bezier(.22, 1, .36, 1),
-    background-color .3s,
-    border-color .3s,
-    box-shadow .3s;
-}
-
-.connection-pill.is-copied {
-  border-color: color-mix(in srgb, var(--live) 70%, var(--ink) 30%);
-  background: color-mix(in srgb, var(--surface) 88%, var(--live) 12%);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 22%, transparent);
-}
-
-.connection-pill.is-failed {
-  border-color: color-mix(in srgb, var(--danger) 72%, var(--ink) 28%);
-  background: color-mix(in srgb, var(--surface) 92%, var(--danger) 8%);
-}
-
-.connection-text {
-  min-width: 0;
-  display: grid;
-  gap: 3px;
-}
-
-.connection-label {
-  display: grid;
-  overflow: hidden;
-  color: color-mix(in srgb, var(--ink) 74%, transparent);
-  font-size: .68rem;
-  font-weight: 800;
-  letter-spacing: .08em;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transition: color .2s;
-}
-
-.connection-label > span {
-  grid-area: 1 / 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  visibility: hidden;
-}
-
-.connection-label > .is-shown { visibility: visible; }
-
-.is-copied .connection-label { color: color-mix(in srgb, var(--live) 45%, var(--ink) 55%); }
-.is-failed .connection-label { color: color-mix(in srgb, var(--danger) 72%, var(--ink) 28%); }
-
-.connection-address {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: .86rem;
-  font-weight: 650;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  user-select: all;
-}
-
-.connection-copy {
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
-  border-radius: 50%;
-  color: color-mix(in srgb, var(--ink) 78%, transparent);
-  background: transparent;
-  cursor: pointer;
-  transition: background-color .2s, border-color .2s, color .2s, transform .2s;
-}
-
-.connection-copy svg { width: 16px; height: 16px; stroke-width: 1.6; }
-.connection-copy:hover { border-color: var(--primary); color: var(--primary-deep); background: var(--primary-tint); }
-.connection-copy:active { transform: scale(.92); background: color-mix(in srgb, var(--primary) 20%, transparent); }
-
-.is-copied .connection-copy {
-  border-color: transparent;
-  color: #fff;
-  background: color-mix(in srgb, var(--live) 70%, var(--ink) 30%);
-}
-
-.is-copied .connection-copy svg { stroke-width: 2.2; }
-
-.hero-link-quiet {
-  width: fit-content;
-  min-height: 32px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0 4px;
-  color: color-mix(in srgb, var(--ink) 76%, transparent);
-  font-size: .82rem;
-  font-weight: 700;
-  transition: color .25s;
-}
-
-.hero-link-quiet svg {
-  width: 17px;
-  height: 17px;
-  stroke-width: 1.45;
-  transition: transform .28s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-link-quiet:hover { color: var(--primary-deep); }
-.hero-link-quiet:active { color: var(--ink); }
-.hero-link-quiet:hover svg { transform: translateX(3px); }
-
-.hero-plate {
-  position: relative;
-  z-index: 2;
-  min-width: 0;
-  min-height: clamp(440px, 68svh, 760px);
-  max-height: 780px;
-  align-self: center;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: 14px;
-  margin: 0;
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity .9s .42s cubic-bezier(.22, 1, .36, 1), transform .9s .42s cubic-bezier(.22, 1, .36, 1);
-}
-
-.hero-plate__frame {
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
-  border-radius: 30px;
-  background: color-mix(in srgb, var(--journey-mid) 84%, var(--hero-scene-color) 16%);
-  -webkit-mask-image:
-    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .12) 5%, rgba(0, 0, 0, .68) 14%, #000 25%, #000 92%, rgba(0, 0, 0, .48) 97%, transparent 100%),
-    linear-gradient(180deg, #000 0%, #000 74%, rgba(0, 0, 0, .62) 84%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .12) 5%, rgba(0, 0, 0, .68) 14%, #000 25%, #000 92%, rgba(0, 0, 0, .48) 97%, transparent 100%),
-    linear-gradient(180deg, #000 0%, #000 74%, rgba(0, 0, 0, .62) 84%, transparent 100%);
-  mask-composite: intersect;
-}
-
-.hero-plate__frame::before,
-.hero-plate__frame::after {
-  content: "";
-  position: absolute;
-  z-index: 3;
-  inset: 0;
-  pointer-events: none;
-}
-
-.hero-plate__frame::before {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--journey-top) 48%, transparent), transparent 34%);
-}
-
-.hero-plate__frame::after {
-  background:
-    linear-gradient(125deg, rgba(12, 14, 22, .08), transparent 38%, rgba(12, 14, 22, .02) 68%, rgba(12, 14, 22, .2)),
-    linear-gradient(180deg, rgba(12, 14, 22, .08), transparent 28%, transparent 70%, rgba(12, 14, 22, .24));
-}
-
-.hero-slide {
+/* ---- Scenes: real captures, sunk into the dark ---- */
+.hero-scenes,
+.hero-scene {
   position: absolute;
   inset: 0;
+}
+
+.hero-scenes {
+  z-index: -5;
+}
+
+.hero-scene {
   width: 100%;
   height: 100%;
-  max-width: none;
   object-fit: cover;
-  object-position: var(--slide-position, 50% 50%);
-  filter:
-    saturate(var(--slide-saturation, 1.08))
-    contrast(var(--slide-contrast, 1.02))
-    brightness(var(--slide-brightness, 1.08));
   opacity: 0;
-  transform: scale(1.045) translateX(10px);
-  transition: opacity 1.05s cubic-bezier(.45, 0, .25, 1), transform 1.05s cubic-bezier(.22, 1, .36, 1);
-  will-change: opacity;
+  filter: grayscale(.55) brightness(.42) contrast(1.08);
+  transform: scale(1.06);
+  transition: opacity 2.2s ease, transform 9s linear;
 }
 
-.hero-slide.is-active {
+.hero-scene.is-active {
   opacity: 1;
-  transform: scale(var(--slide-scale, 1));
+  transform: scale(1.12);
 }
 
-.hero-plate__signal {
+/* ---- The Crimson Moon ---- */
+.hero-moon {
   position: absolute;
-  z-index: 5;
-  top: 22px;
-  left: 12%;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, .22);
-  border-radius: 10px;
-  color: #fff;
-  background: rgba(18, 20, 28, .62);
-  backdrop-filter: blur(12px);
-  font: 700 .66rem/1 var(--font-mono);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.hero-plate__signal i {
-  width: 6px;
-  height: 6px;
+  z-index: -4;
+  top: clamp(90px, 14vh, 150px);
+  right: clamp(24px, 11vw, 200px);
+  width: clamp(120px, 19vmin, 240px);
+  aspect-ratio: 1;
   border-radius: 50%;
-  background: var(--live);
-  box-shadow: 0 0 0 4px rgba(52, 199, 123, .16);
+  /* A flat, mottled disc with a rim glow reads as a moon; a central highlight
+     reads as a ball. */
+  background:
+      radial-gradient(circle at 32% 40%, rgba(50, 4, 10, .22), transparent 16%),
+      radial-gradient(circle at 63% 63%, rgba(50, 4, 10, .18), transparent 21%),
+      radial-gradient(circle at 70% 31%, rgba(50, 4, 10, .14), transparent 11%),
+      radial-gradient(circle at 44% 70%, rgba(255, 140, 140, .06), transparent 14%),
+      radial-gradient(circle at 50% 50%, #a51d28 0%, #8e1720 60%, #6c1018 100%);
+  box-shadow:
+      inset -10px -14px 40px rgba(20, 2, 5, .45),
+      0 0 50px 6px rgba(179, 32, 43, .32),
+      0 0 160px 50px rgba(179, 32, 43, .12);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 2.4s ease .3s, transform 2.4s var(--ease-out) .3s;
 }
 
-.hero-plate__signal b {
-  color: rgba(255, 255, 255, .8);
-  font-weight: 700;
+.is-ready .hero-moon {
+  opacity: .85;
+  transform: none;
 }
 
-.hero-plate__footer {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0 clamp(8px, 2vw, 24px) 0 12%;
-}
-
-.hero-plate__caption {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: color-mix(in srgb, var(--ink) 78%, transparent);
-  font-size: .72rem;
-  font-weight: 800;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-
-.hero-plate__caption span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hero-plate__caption b {
-  flex: 0 0 auto;
-  color: color-mix(in srgb, var(--hero-scene-accent) 45%, var(--ink) 55%);
-  font-weight: 800;
-}
-
-.hero-plate__controls {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 3px;
-  border: 1px solid color-mix(in srgb, var(--hairline) 72%, var(--hero-scene-color) 28%);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface-glass) 88%, var(--hero-scene-color) 12%);
-  backdrop-filter: blur(12px);
-}
-
-.hero-plate__control {
-  position: relative;
-  width: 38px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 8px;
-  color: color-mix(in srgb, var(--ink) 74%, transparent);
-  background: transparent;
-  font: 800 .7rem/1 var(--font-mono);
-  letter-spacing: .06em;
-  cursor: pointer;
-  transition: color .2s, background-color .2s;
-}
-
-.hero-plate__control i {
+/* ---- Fog: wide soft banks drifting at two speeds, no filters ---- */
+.hero-fog {
   position: absolute;
-  right: 7px;
-  bottom: 4px;
-  left: 7px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--hero-scene-accent);
-  transform: scaleX(0);
-  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+  left: -50%;
+  width: 200%;
+  pointer-events: none;
+  background-repeat: repeat-x;
 }
 
-.hero-plate__control:hover,
-.hero-plate__control:focus-visible {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--hero-scene-color) 12%, transparent);
+.hero-fog--far {
+  z-index: -2;
+  top: 8%;
+  height: 70%;
+  background-image:
+      radial-gradient(ellipse 18% 32% at 12% 60%, rgba(176, 184, 196, .22), transparent 70%),
+      radial-gradient(ellipse 22% 28% at 38% 40%, rgba(176, 184, 196, .17), transparent 70%),
+      radial-gradient(ellipse 16% 30% at 64% 66%, rgba(176, 184, 196, .2), transparent 70%),
+      radial-gradient(ellipse 24% 34% at 88% 46%, rgba(176, 184, 196, .17), transparent 70%);
+  background-size: 50% 100%;
+  animation: fog-drift 90s linear infinite;
 }
 
-.hero-plate__control.is-active {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--journey-top) 78%, var(--hero-scene-color) 22%);
+.hero-fog--near {
+  z-index: -1;
+  bottom: -8%;
+  height: 58%;
+  background-image:
+      radial-gradient(ellipse 26% 40% at 20% 70%, rgba(200, 206, 214, .3), transparent 72%),
+      radial-gradient(ellipse 20% 36% at 52% 82%, rgba(200, 206, 214, .24), transparent 72%),
+      radial-gradient(ellipse 28% 44% at 82% 74%, rgba(200, 206, 214, .3), transparent 72%);
+  background-size: 50% 100%;
+  animation: fog-drift 55s linear infinite reverse;
 }
 
-.hero-plate__control:active { background: color-mix(in srgb, var(--hero-scene-color) 22%, transparent); }
-.hero-plate__control.is-active i { transform: scaleX(1); }
+@keyframes fog-drift {
+  to { transform: translate3d(-25%, 0, 0); }
+}
 
-.is-ready h1,
-.is-ready .hero-summary,
-.is-ready .hero-actions,
-.is-ready .connection-pill,
-.is-ready .hero-plate {
+.hero-vignette {
+  position: absolute;
+  z-index: -3;
+  inset: 0;
+  background:
+      radial-gradient(ellipse 80% 70% at 50% 45%, transparent 40%, rgba(7, 8, 11, .7) 100%),
+      linear-gradient(180deg, rgba(7, 8, 11, .55) 0%, transparent 22%, transparent 62%, var(--fog-0) 100%);
+}
+
+/* ---- Content ---- */
+.hero-content {
+  align-self: center;
+  width: min(100%, 1040px);
+  margin: 0 auto;
+  padding:
+      calc(var(--home-header-height, 68px) + 48px)
+      var(--home-content-gutter, clamp(20px, 4vw, 56px))
+      40px;
+  text-align: center;
+}
+
+.hero-content > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .9s ease, transform .9s var(--ease-out);
+}
+
+.is-ready .hero-content > * {
   opacity: 1;
   transform: none;
 }
 
-.scroll-cue {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  bottom: clamp(18px, 4vh, 38px);
+.is-ready .hero-content > :nth-child(2) { transition-delay: .1s; }
+.is-ready .hero-content > :nth-child(3) { transition-delay: .25s; }
+.is-ready .hero-content > :nth-child(4) { transition-delay: .4s; }
+.is-ready .hero-content > :nth-child(5) { transition-delay: .5s; }
+
+.hero-eyebrow {
+  justify-content: center;
+}
+
+.hero-eyebrow::after {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: var(--crimson-text);
+}
+
+.hero-wordmark {
+  margin: 22px 0 10px;
+  color: var(--bone);
+  font: 600 clamp(4rem, 13vw, 11.5rem)/.86 var(--font-display);
+  letter-spacing: .015em;
+  text-shadow: 0 10px 60px rgba(0, 0, 0, .6);
+}
+
+.hero-tagline {
+  max-width: 34ch;
+  margin: 0 auto;
+  color: var(--bone);
+  font: italic 500 clamp(1.3rem, 2.3vw, 1.85rem)/1.35 var(--font-display);
+  text-wrap: balance;
+}
+
+.hero-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 38px;
+}
+
+/* ---- Address: one quiet line, copy on demand ---- */
+.hero-address {
+  width: fit-content;
+  max-width: 100%;
+  display: inline-flex;
   align-items: center;
   gap: 12px;
-  color: color-mix(in srgb, var(--ink) 78%, transparent);
-  font-size: .72rem;
-  font-weight: 800;
+  margin: 26px auto 0;
+  padding: 6px 6px 6px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(13, 15, 20, .55);
+  transition: border-color .2s ease;
+}
+
+.hero-address.is-copied { border-color: rgba(76, 195, 138, .6); }
+.hero-address.is-failed { border-color: var(--crimson-text); }
+
+.hero-address__dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ash-dim);
+}
+
+.hero-address__dot.is-online {
+  background: var(--live);
+  box-shadow: 0 0 0 4px rgba(76, 195, 138, .16);
+}
+
+.hero-address__dot.is-offline { background: var(--crimson-text); }
+
+.hero-address__label {
+  color: var(--ash);
+  font: 500 .72rem/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.is-copied .hero-address__label { color: var(--live); }
+.is-failed .hero-address__label { color: var(--crimson-text); }
+
+.hero-address__value {
+  color: var(--bone);
+  font: 500 .92rem/1 var(--font-mono);
+  user-select: all;
+}
+
+.hero-address__copy {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--bone);
+  background: var(--fog-3);
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.hero-address__copy:hover { background: #2a2f3a; }
+.hero-address__copy:active { background: var(--crimson-deep); }
+
+.hero-address__copy svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---- Footer row ---- */
+.hero-footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 16px;
+  padding: 0 var(--home-content-gutter, clamp(20px, 4vw, 56px)) 28px;
+}
+
+.hero-caption {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  color: var(--ash-dim);
+  font: 500 .7rem/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.hero-caption b {
+  color: var(--ash);
+  font-weight: 500;
+}
+
+.hero-scroll {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--ash);
+  font: 500 .7rem/1 var(--font-mono);
   letter-spacing: .14em;
   text-transform: uppercase;
-  opacity: clamp(0, calc((.6 - var(--hero-progress)) * 4), 1);
-  transform: translateX(-50%);
-  transition: color .25s;
+  text-decoration: none;
 }
 
-.scroll-cue:hover { color: var(--primary-deep); }
-
-.scroll-cue > i {
-  position: relative;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--primary);
-}
-
-.scroll-cue > i > b {
-  position: absolute;
-  inset: 0;
-  border: 1px solid var(--primary);
-  border-radius: 50%;
-  animation: hero-cue 2s cubic-bezier(.22, 1, .36, 1) infinite;
-}
-
-.visually-hidden {
-  position: absolute;
+.hero-scroll i {
   width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  height: 38px;
+  background: linear-gradient(var(--crimson-text), transparent);
+  animation: scroll-hint 2.4s ease-in-out infinite;
+  transform-origin: top;
 }
 
-@keyframes hero-cue {
-  0% { opacity: .65; transform: scale(1); }
-  70%, 100% { opacity: 0; transform: scale(2.4); }
+.hero-scroll:hover { color: var(--bone); }
+
+@keyframes scroll-hint {
+  0% { transform: scaleY(0); opacity: 1; }
+  60% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0; }
 }
 
-@media (max-width: 1120px) {
-  .hero-content {
-    grid-template-columns: minmax(280px, .86fr) minmax(420px, 1.14fr);
-    gap: clamp(18px, 3vw, 38px);
-  }
-
-  .hero h1 { font-size: clamp(2.8rem, 5.2vw, 4.25rem); }
-  .hero-plate__footer { padding-left: 9%; }
+.hero-changelog {
+  justify-self: end;
+  color: var(--ash);
+  font-size: .85rem;
+  text-decoration: none;
 }
 
-@media (max-height: 720px) and (min-width: 901px) {
-  .hero { min-height: auto; }
-  .hero-sticky { position: relative; height: auto; min-height: 720px; }
-  .hero-content { min-height: 720px; opacity: 1; transform: none; will-change: auto; }
-  .hero-plate { min-height: 430px; }
-  .scroll-cue { display: none; }
-}
+.hero-changelog:hover { color: var(--bone); }
 
-@media (max-width: 900px) {
-  .hero { min-height: auto; }
-
-  .hero-sticky {
-    position: relative;
-    height: auto;
-    min-height: 0;
-    overflow: hidden;
+@media (max-width: 720px) {
+  .hero-moon {
+    top: calc(var(--home-header-height, 68px) + 10px);
+    right: 16px;
+    width: 88px;
   }
 
   .hero-content {
-    height: auto;
-    grid-template-columns: minmax(0, 1fr);
-    gap: clamp(38px, 8vw, 64px);
-    padding:
-      calc(var(--home-header-height, 76px) + env(safe-area-inset-top) + 36px)
-      var(--home-content-gutter, 20px)
-      var(--home-section-block, 88px);
-    opacity: 1;
-    transform: none;
-    will-change: auto;
+    padding-top: calc(var(--home-header-height, 68px) + 104px);
   }
 
-  .hero-copy { max-width: 680px; }
-  .hero-copy::before { --scrim-x: 32px; --scrim-y: 40px; }
-  .hero h1 { max-width: 640px; font-size: clamp(2.65rem, 8.5vw, 4.5rem); }
-  .hero-summary { max-width: 620px; }
-
-  .hero-plate {
-    width: 100%;
-    min-height: 0;
-    max-height: none;
-    gap: 12px;
+  .hero-actions .fog-button {
+    flex: 1 1 100%;
   }
 
-  .hero-plate__frame {
-    min-height: 0;
-    aspect-ratio: 16 / 9;
+  .hero-eyebrow {
+    max-width: 28ch;
+    text-wrap: balance;
   }
 
-  .hero-slide { object-position: var(--slide-position-mobile, var(--slide-position)); }
-  .hero-plate__footer { padding-inline: 7%; }
-  .scroll-cue { display: none; }
-}
+  .hero-eyebrow::before,
+  .hero-eyebrow::after {
+    display: none;
+  }
 
-@media (max-width: 600px) {
-  .hero-content { padding-top: calc(var(--home-header-height, 72px) + env(safe-area-inset-top) + 28px); }
-  .hero h1 { font-size: clamp(2.3rem, 11vw, 3.65rem); }
-  .hero-summary { margin-bottom: 24px; font-size: .94rem; }
-  .hero-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .hero-action { width: 100%; justify-content: space-between; padding-inline: 20px; }
-  .connection-pill { width: 100%; }
-  .hero-plate__frame { aspect-ratio: 4 / 3; border-radius: 22px; }
-  .hero-plate__signal { top: 14px; left: 10%; }
-  .hero-plate__signal b { display: none; }
-  .hero-plate__signal:not(.is-live) { display: none; }
-  .hero-plate__footer { align-items: flex-start; padding-inline: 8%; }
-  .hero-plate__caption { display: grid; gap: 4px; }
-}
+  .hero-address__label {
+    display: none;
+  }
 
-@media (max-width: 430px) {
-  .hero h1 { font-size: clamp(2.2rem, 11.5vw, 3.15rem); }
-  .hero-summary { font-size: .88rem; }
-  .connection-pill { gap: 10px; padding-left: 16px; }
-  .connection-address { font-size: .8rem; }
-  .hero-plate__footer { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .hero-plate__controls { justify-self: end; }
-}
+  .hero-footer {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
 
-@media (max-width: 290px) {
-  .hero-content { padding-inline: 8px; }
-  .hero h1 { font-size: 2rem; }
-  .connection-pill { border-radius: 20px; }
-  .connection-label,
-  .connection-address { white-space: normal; overflow-wrap: anywhere; }
+  .hero-caption,
+  .hero-changelog {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero { min-height: auto; }
-  .hero-sticky { position: relative; height: auto; min-height: 100svh; transition: none; }
-  .hero-backdrop { transition: none; }
-  .hero-content { height: auto; min-height: 100svh; opacity: 1; transform: none; will-change: auto; }
-  .hero-slide { transition: none; will-change: auto; }
-  .hero-slide:nth-of-type(n + 2) { display: none; }
-  .hero h1,
-  .hero-summary,
-  .hero-actions,
-  .connection-pill,
-  .hero-plate { opacity: 1; transform: none; transition: none; }
-  .scroll-cue > i > b { animation: none; }
+  .hero-fog { animation: none; }
+  .hero-scroll i { animation: none; }
+  .hero-scene { transition: none; transform: none; }
+  .hero-content > *,
+  .hero-moon {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 </style>

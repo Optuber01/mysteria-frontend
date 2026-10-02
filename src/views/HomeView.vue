@@ -5,7 +5,6 @@
 
     <main id="main-content" tabindex="-1">
       <HomeHero :status="serverStatus" :latest-slug="latestUpdate?.slug ?? null"/>
-      <WhatIsMysterria/>
       <ProgressionStory/>
 
       <DeferredHomeChapter name="pathways">
@@ -15,8 +14,6 @@
       <DeferredHomeChapter name="world">
         <BeyondPathways :status="serverStatus" :latest-update="latestUpdate"/>
       </DeferredHomeChapter>
-
-      <GettingStarted/>
 
       <DeferredHomeChapter name="join" root-margin="1000px 0px">
         <JoinJourney :selected-pathway="selectedPathway"/>
@@ -36,8 +33,6 @@ import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import HomeHero from '@/components/home/HomeHero.vue';
-import WhatIsMysterria from '@/components/home/WhatIsMysterria.vue';
-import GettingStarted from '@/components/home/GettingStarted.vue';
 import ProgressionStory from '@/components/home/ProgressionStoryV3.vue';
 import DeferredHomeChapter from '@/components/home/DeferredHomeChapter.vue';
 import CompanionMod from '@/components/home/CompanionMod.vue';

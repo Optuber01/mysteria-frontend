@@ -1,21 +1,3 @@
-@property --hero-scene-color {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #9e7eae;
-}
-
-@property --hero-scene-glow {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #edcebe;
-}
-
-@property --hero-scene-accent {
-  syntax: "<color>";
-  inherits: true;
-  initial-value: #8d6fe4;
-}
-
 .mysterria-home {
   --home-content-max: 1440px;
   --home-content-gutter: clamp(20px, 4vw, 56px);
@@ -25,25 +7,12 @@
   );
   --home-section-block: clamp(88px, 10vw, 148px);
   --home-header-height: var(--site-header-stack, 68px);
-  --hero-scene-color: #9e7eae;
-  --hero-scene-glow: #edcebe;
-  --hero-scene-accent: var(--primary);
   min-width: 0;
   min-height: 100vh;
   overflow-x: clip;
-  color: var(--ink);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--journey-top) 84%, var(--hero-scene-color) 16%) 0%,
-    color-mix(in srgb, var(--journey-mid) 92%, var(--hero-scene-color) 8%) 55%,
-    var(--journey-end) 100%
-  );
+  color: var(--bone);
+  background: var(--fog-0);
   font-family: var(--font-body);
-  transition:
-    --hero-scene-color 1.45s cubic-bezier(.22, 1, .36, 1),
-    --hero-scene-glow 1.45s cubic-bezier(.22, 1, .36, 1),
-    --hero-scene-accent 1.25s cubic-bezier(.22, 1, .36, 1),
-    background 1.45s cubic-bezier(.22, 1, .36, 1);
 }
 
 .mysterria-home main {
@@ -62,7 +31,7 @@
 }
 
 .mysterria-home :where(button, a, [tabindex]):focus-visible {
-  outline: 3px solid var(--primary);
+  outline: 2px solid var(--crimson-text);
   outline-offset: 3px;
 }
 
@@ -87,7 +56,7 @@
   border-radius: 9px;
   color: var(--ink);
   background: var(--surface);
-  box-shadow: 0 12px 30px rgba(34, 28, 20, .16);
+  box-shadow: var(--shadow-deep);
   font-size: .78rem;
   font-weight: 750;
   transform: translateY(-160%);

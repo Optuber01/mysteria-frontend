@@ -570,8 +570,6 @@
   },
   "home": {
     "hero": {
-      "title": "A Lord of the Mysteries-inspired Minecraft Server",
-      "summary": "Choose a Pathway, brew your first potion, and step into a world of dungeons, hunts, rituals, and hidden powers.",
       "primaryCta": "How to join",
       "addressLabel": "Server address",
       "copied": "Copied",
@@ -581,12 +579,8 @@
       "copiedAnnouncement": "Server address copied to clipboard.",
       "copyFailedAnnouncement": "Could not copy automatically. The server address is selected, so you can copy it yourself.",
       "latestChangelog": "Latest changelog",
-      "worldOnline": "World online",
-      "field": "Field {number}",
-      "scenesAria": "World scenes",
-      "showScene": "Show {scene}",
       "scrollCue": "Scroll to begin",
-      "scrollCueAria": "Continue to What is Mysterria?",
+      "scrollCueAria": "Continue to your first potion",
       "slides": {
         "auroraCliffside": {
           "label": "Aurora Cliffside",
