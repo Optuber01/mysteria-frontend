@@ -4,11 +4,11 @@
     <HeaderItem overlay show-announcement/>
 
     <main id="main-content" tabindex="-1">
-      <HomeHero :status="serverStatus" :latest-slug="latestUpdate?.slug ?? null"/>
+      <component :is="heroVariant.component" :key="heroVariant.id" :status="serverStatus" :latest-slug="latestUpdate?.slug ?? null"/>
       <ProgressionStory/>
 
       <DeferredHomeChapter name="pathways">
-        <PathwayOrbit @selected="selectedPathway = $event"/>
+        <component :is="pathwayVariant.component" :key="pathwayVariant.id" @selected="selectedPathway = $event"/>
       </DeferredHomeChapter>
 
       <DeferredHomeChapter name="world">
@@ -24,6 +24,7 @@
 
     <FooterItem variant="full"/>
     <DailyBonusCat page="home"/>
+    <VariantSwitcher :groups="variantGroups"/>
   </div>
 </template>
 
@@ -32,7 +33,10 @@ import {computed, defineAsyncComponent, onMounted, ref} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
-import HomeHero from '@/components/home/HomeHero.vue';
+import VariantSwitcher from '@/components/home/variants/VariantSwitcher.vue';
+import {useHomeVariant} from '@/components/home/variants/useHomeVariant';
+import {HERO_VARIANTS} from '@/components/home/variants/heroVariants';
+import {PATHWAY_VARIANTS} from '@/components/home/variants/pathwayVariants';
 import ProgressionStory from '@/components/home/ProgressionStoryV3.vue';
 import DeferredHomeChapter from '@/components/home/DeferredHomeChapter.vue';
 import CompanionMod from '@/components/home/CompanionMod.vue';
@@ -46,11 +50,16 @@ import {newsAPI} from '@/utils/api/news';
 import '@/assets/styles/home-theme.css';
 import '@/assets/styles/homepage-layout.css';
 
-const PathwayOrbit = defineAsyncComponent(() => import('@/components/home/PathwayOrbit.vue'));
 const BeyondPathways = defineAsyncComponent(() => import('@/components/home/BeyondPathways.vue'));
 const JoinJourney = defineAsyncComponent(() => import('@/components/home/JoinJourney.vue'));
 
 const {t, locale} = useI18n();
+const heroVariant = useHomeVariant('hero', HERO_VARIANTS);
+const pathwayVariant = useHomeVariant('pathways', PATHWAY_VARIANTS);
+const variantGroups = [
+  {param: 'hero', label: 'Hero', variants: HERO_VARIANTS},
+  {param: 'pathways', label: 'Pathways', variants: PATHWAY_VARIANTS},
+];
 const {totalBeyonders} = useBeyonderStats();
 
 useSeo(() => ({
