@@ -11,10 +11,10 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 type ParticleMode = 'sparkles' | 'bubbles' | 'aura' | 'burst' | 'brew' | 'steam';
 type Color = readonly [number, number, number];
 
-// Homepage v2 palette: crimson (--crimson-text), bone (--bone) and the
-// spirit-vision blue (--spirit) for liquid and sight.
-const CRIMSON: Color = [229, 84, 93];
-const BONE: Color = [236, 230, 218];
+// The drawn Pathway's accent (mutated in place when the card changes, so live
+// particles pick it up), near-white ink and the spirit-vision blue.
+const CRIMSON: [number, number, number] = [167, 139, 250];
+const BONE: Color = [239, 238, 243];
 const SPIRIT: Color = [169, 198, 214];
 const TAU = Math.PI * 2;
 const SEED = 0x5eedcafe;
@@ -26,14 +26,27 @@ const props = withDefaults(
     intensity: number;
     /** Colour of 'brew' bubbles (r, g, b); follows the liquid. */
     tint?: readonly [number, number, number];
+    /** The Pathway accent, as #rrggbb. */
+    accent?: string;
   }>(),
   {
     mode: 'sparkles',
     active: false,
     intensity: 0.5,
     tint: undefined,
+    accent: '#a78bfa',
   },
 );
+
+function applyAccent(hex: string): void {
+  const value = Number.parseInt(hex.replace('#', '').slice(0, 6), 16);
+  if (!Number.isFinite(value)) return;
+  CRIMSON[0] = (value >> 16) & 255;
+  CRIMSON[1] = (value >> 8) & 255;
+  CRIMSON[2] = value & 255;
+}
+applyAccent(props.accent);
+watch(() => props.accent, applyAccent);
 
 const host = ref<HTMLElement | null>(null);
 const canvasEl = ref<HTMLCanvasElement | null>(null);

@@ -2,6 +2,10 @@
   <div class="concept-arcana" :style="themeStyle">
     <!-- The drawn card's sigil, watching over the whole page -->
     <div class="arc-ambient" aria-hidden="true">
+      <!-- The re-theme happens here: two fixed layers crossfade (opacity only), the rest of the page just switches colour. -->
+      <Transition name="arc-wash">
+        <span :key="card.id" class="arc-ambient__wash" :style="{'--wash': card.accent}"></span>
+      </Transition>
       <Transition name="arc-sigil">
         <img :key="card.id" :src="sigilNative(card.id)" alt="" class="arc-ambient__sigil" width="512" height="512" decoding="async">
       </Transition>
@@ -13,12 +17,10 @@
     <main id="main-content" class="arc-main">
       <ArcanaHero/>
       <ProgressionStory/>
-      <ArcanaReading/>
-      <ArcanaPast/>
-      <ArcanaPresent/>
-      <ArcanaForces/>
-      <ArcanaDeck/>
+      <ArcanaOrbit/>
+      <WorldChapter/>
       <ArcanaFuture/>
+      <SectionCompanion/>
     </main>
 
     <FooterItem variant="full"/>
@@ -35,12 +37,10 @@ import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import {useConceptFonts} from './useConceptFonts';
 import ArcanaHero from './ArcanaHero.vue';
 import ProgressionStory from './progression/ProgressionStory.vue';
-import ArcanaReading from './ArcanaReading.vue';
-import ArcanaPast from './ArcanaPast.vue';
-import ArcanaPresent from './ArcanaPresent.vue';
-import ArcanaForces from './ArcanaForces.vue';
-import ArcanaDeck from './ArcanaDeck.vue';
+import ArcanaOrbit from './ArcanaOrbit.vue';
+import WorldChapter from './WorldChapter.vue';
 import ArcanaFuture from './ArcanaFuture.vue';
+import SectionCompanion from './SectionCompanion.vue';
 import ArcanaDeckControl from './ArcanaDeckControl.vue';
 import {sigilNative} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
@@ -68,7 +68,13 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* Registered so the accent can glide between pathways instead of snapping. */
+/*
+ * Registered as a colour so color-mix() and transitions on the properties that read it
+ * interpolate. The accent itself is NOT transitioned page-wide (that repainted every
+ * element each frame for over a second): it switches at once, the ambient wash and sigil
+ * crossfade, and a few key elements (labels, solid buttons, head cards) ease their own
+ * colour properties.
+ */
 @property --acc {
   syntax: '<color>';
   inherits: true;
@@ -88,6 +94,18 @@ body:has(.concept-arcana) {
   --arc-body: 'Golos Text', 'Segoe UI', system-ui, sans-serif;
   --arc-caps: 'Tenor Sans', 'Segoe UI', system-ui, sans-serif;
   --arc-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* one rhythm for every chapter: gutters, section padding, block gaps, radii, type */
+  --arc-gutter: clamp(18px, 4vw, 64px);
+  --arc-section-pad: clamp(64px, 7vw, 112px);
+  --arc-block-gap: clamp(64px, 7vw, 112px);
+  --arc-radius: 14px;
+  --arc-radius-lg: 18px;
+  --arc-fs-display: clamp(36px, 4.8vw, 68px);
+  --arc-fs-h2: clamp(28px, 3vw, 42px);
+  --arc-fs-h3: clamp(24px, 2.3vw, 34px);
+  --arc-fs-lede: clamp(16px, 1.15vw, 18px);
+  --arc-fs-body: clamp(15px, 1.05vw, 16.5px);
 
   /* upstream tokens, re-pointed at this concept (header, footer, chips, drawer) */
   --myst-bg: #0b0b0e;
@@ -130,11 +148,14 @@ body:has(.concept-arcana) {
   color: var(--arc-ink);
   font-family: var(--arc-body);
   font-synthesis: none;
-  transition: --acc 1.1s cubic-bezier(.4, 0, .2, 1);
 }
 
-body:has(.concept-arcana) {
-  transition: --acc 1.1s cubic-bezier(.4, 0, .2, 1);
+/* From 1280px the reading's spread (ArcanaDeckControl) sits in the right gutter:
+   keep every chapter's content clear of it. */
+@media (min-width: 1280px) {
+  .concept-arcana {
+    --arc-gutter: 64px;
+  }
 }
 
 .concept-arcana ::selection {
@@ -175,6 +196,27 @@ body:has(.concept-arcana) {
   margin-top: -39vmax;
   opacity: .055;
   filter: saturate(.6);
+  will-change: opacity, transform;
+}
+
+.arc-ambient__wash {
+  position: absolute;
+  inset: 0;
+  opacity: .5;
+  background:
+    radial-gradient(60vmax 50vmax at 100% 50%, color-mix(in oklab, var(--wash) 9%, transparent), transparent 70%),
+    radial-gradient(50vmax 40vmax at 0% 100%, color-mix(in oklab, var(--wash) 6%, transparent), transparent 70%);
+  will-change: opacity;
+}
+
+.arc-wash-enter-active,
+.arc-wash-leave-active {
+  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.arc-wash-enter-from,
+.arc-wash-leave-to {
+  opacity: 0;
 }
 
 .arc-ambient__grain {
@@ -219,7 +261,7 @@ body:has(.concept-arcana) {
 
 .concept-arcana .arc-section {
   position: relative;
-  padding: clamp(56px, 6.5vw, 96px) clamp(18px, 4vw, 64px);
+  padding: var(--arc-section-pad) var(--arc-gutter);
   scroll-margin-top: var(--site-header-stack, 106px);
 }
 
@@ -240,6 +282,7 @@ body:has(.concept-arcana) {
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--acc);
+  transition: color .6s ease;
 }
 
 .concept-arcana .arc-eyebrow {
@@ -281,7 +324,7 @@ body:has(.concept-arcana) {
   line-height: 1.2;
   cursor: pointer;
   text-decoration: none;
-  transition: transform .3s cubic-bezier(.2, .8, .2, 1), filter .2s, background-color .2s, box-shadow .2s;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), filter .2s, background-color .6s ease, box-shadow .6s ease;
 }
 
 .concept-arcana .arc-btn--solid {
@@ -446,11 +489,6 @@ body:has(.concept-arcana) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .concept-arcana,
-  body:has(.concept-arcana) {
-    transition: none;
-  }
-
   .concept-arcana *,
   .concept-arcana *::before,
   .concept-arcana *::after {
@@ -459,7 +497,9 @@ body:has(.concept-arcana) {
   }
 
   .arc-sigil-enter-active,
-  .arc-sigil-leave-active {
+  .arc-sigil-leave-active,
+  .arc-wash-enter-active,
+  .arc-wash-leave-active {
     transition: opacity .3s ease;
   }
 

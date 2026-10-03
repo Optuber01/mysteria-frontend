@@ -1,20 +1,17 @@
 /*
- * Copy helper shared by the progression chapter and its scenes.
+ * Copy and data for the progression chapter, all following the drawn card.
  *
  * Strings live under `home.progression.*` and may contain {pathway},
  * {sequence} and {nextSequence} placeholders, filled from the localized
- * pathway archive in src/data/pathways.ts.
- *
- * That archive is ~1.7 MB of JSON, so it is not pulled into the homepage entry
- * chunk: `preloadPathwayNames()` imports it once the chapter approaches the
- * viewport. Until it resolves, the English names below stand in - in practice
- * the module has loaded long before the chapter is on screen.
+ * pathway archive that useArcana() loads lazily (it is ~1.3 MB, so it is
+ * never imported statically). Until it arrives, the card's English name
+ * stands in.
  */
-import {computed, shallowRef} from 'vue';
+import {computed} from 'vue';
 import {useI18n} from '@/composables/useI18n';
-import type {Language} from '@/locales';
-
-const PATHWAY_ID = 'fool';
+import {cardById} from '../../arcana-data';
+import {ensurePathwayData, useArcana} from '../../useArcana';
+import {hasRecipe, recipeFor} from '../recipes';
 
 type Ability = { id: string; name: string; description: string };
 type PathwayCopy = {
@@ -25,53 +22,62 @@ type PathwayCopy = {
   nextAbilities: Ability[];
 };
 
-const FALLBACK: PathwayCopy = {
-  pathway: 'Fool',
-  sequence: 'Seer',
-  nextSequence: 'Clown',
-  abilities: [],
-  nextAbilities: [],
+const FOOL: PathwayCopy = {pathway: 'Fool', sequence: 'Seer', nextSequence: 'Clown', abilities: [], nextAbilities: []};
+
+export type StoryIngredient = {
+  key: string;
+  name: string;
+  role: 'main' | 'supplementary';
+  source: string;
+  icon: string | null;
 };
 
-type PathwaysModule = typeof import('@/data/pathways');
 type ListFormatConstructor = new (locale: string, options: { type: 'conjunction' }) => { format(items: string[]): string };
-const pathwaysModule = shallowRef<PathwaysModule | null>(null);
-let pending: Promise<void> | null = null;
 
-export function preloadPathwayNames(): Promise<void> {
-  pending ??= import('@/data/pathways')
-    .then((module) => {
-      pathwaysModule.value = module;
-    })
-    .catch(() => {
-      pending = null;
-    });
-  return pending;
-}
-
-function resolveCopy(module: PathwaysModule | null, language: Language): PathwayCopy {
-  if (!module) return FALLBACK;
-  const pathway = module.pathwayById(PATHWAY_ID);
-  const rung = (sequence: number) => pathway?.sequences.find((entry) => entry.sequence === sequence);
-  const abilities = (sequence: number): Ability[] =>
-    (rung(sequence)?.abilities ?? []).map((ability) => ({
-      id: ability.id,
-      name: module.pick(ability.name, language),
-      description: module.pick(ability.description, language),
-    }));
-  const next = rung(8);
-  return {
-    pathway: module.pathwayName(PATHWAY_ID, language),
-    sequence: module.sequenceNineName(PATHWAY_ID, language) || FALLBACK.sequence,
-    nextSequence: next ? module.pick(next.name, language) : FALLBACK.nextSequence,
-    abilities: abilities(9),
-    nextAbilities: abilities(8),
-  };
+/** Starts loading the pathway archive (the chapter is getting close). */
+export function preloadPathwayNames(): Promise<unknown> {
+  return ensurePathwayData().catch(() => undefined);
 }
 
 export function useProgressionCopy() {
   const {t, currentLanguage, intlLocale} = useI18n();
-  const names = computed(() => resolveCopy(pathwaysModule.value, currentLanguage.value));
+  const {currentId, data, card} = useArcana();
+
+  /** The Pathway the story brews: the drawn card (Boons fall back to the Fool's recipe). */
+  const pathwayId = computed(() => (hasRecipe(currentId.value) ? currentId.value : 'fool'));
+
+  const names = computed<PathwayCopy>(() => {
+    const id = pathwayId.value;
+    const module = data.value;
+    const language = currentLanguage.value;
+    if (!module) return id === 'fool' ? FOOL : {...FOOL, pathway: cardById(id).en, sequence: '', nextSequence: ''};
+    const pathway = module.pathwayById(id);
+    const rung = (n: number) => pathway?.sequences.find((entry) => entry.sequence === n);
+    const abilities = (n: number): Ability[] =>
+      (rung(n)?.abilities ?? []).map((ability) => ({
+        id: ability.id,
+        name: module.pick(ability.name, language),
+        description: module.pick(ability.description, language),
+      }));
+    const next = rung(8);
+    return {
+      pathway: module.pathwayName(id, language),
+      sequence: module.sequenceNineName(id, language) || cardById(id).en,
+      nextSequence: next ? module.pick(next.name, language) : '',
+      abilities: abilities(9),
+      nextAbilities: abilities(8),
+    };
+  });
+
+  const recipe = computed(() => recipeFor(pathwayId.value));
+  const ingredients = computed<StoryIngredient[]>(() => {
+    const language = currentLanguage.value;
+    const r = recipe.value;
+    return [
+      ...r.main.map((item) => ({key: item.key, name: item.name(language), role: 'main' as const, source: item.source, icon: item.icon})),
+      ...r.supplementary.map((item) => ({key: item.key, name: item.name(language), role: 'supplementary' as const, source: item.source, icon: item.icon})),
+    ];
+  });
 
   /** Joins names the way the active locale lists things ("A and B", "A 和 B"). */
   function list(items: string[]): string {
@@ -99,5 +105,5 @@ export function useProgressionCopy() {
     );
   }
 
-  return {tp, names, list};
+  return {tp, names, list, recipe, ingredients, pathwayId, card, currentId};
 }

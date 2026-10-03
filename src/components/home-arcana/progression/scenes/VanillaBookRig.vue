@@ -6,27 +6,32 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-// Types only: three.js itself is imported on demand (see loadAssets) so it
+// Types only: three.js itself is imported on demand (see loadThree) so it
 // stays out of the homepage entry chunk until the chapter approaches.
 import type * as THREE from 'three';
 import bookAtlasUrl from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_1.21.8.png';
-import lavosSquidBlood from '@/assets/images/home/progression/real/lavos-squid-blood.png';
-import stellarAquaCrystal from '@/assets/images/home/progression/real/stellar-aqua-crystal.png';
-import goldMintLeaves from '@/assets/images/home/progression/real/gold-mint-leaves.png';
-import foolRecipe from '@/assets/images/home/progression/recipes/fool.png';
+import { hexToRgb, loadImage, mixRgb, rgbCss } from '../art';
+import type { Rgb } from '../art';
 
+export type BookEntry = { key: string; name: string; role: string; icon: string | null };
 export type BookLabels = {
   mainHeading: string;
   supplementaryHeading: string;
-  main: Array<{ name: string; role: string }>;
-  supplementary: Array<{ name: string; role: string }>;
+  main: BookEntry[];
+  supplementary: BookEntry[];
   noteHeading: string;
   note: string;
   coverPathway: string;
   coverSequence: string;
   coverName: string;
   coverRecipe: string;
+  /** The Pathway's recipe-book item (cover emblem and the page seal). */
+  recipeBook: string | null;
+  accent: string;
 };
+/** A point on the book, normalised to the rig's box (0..1), with the icon's size. */
+export type BookAnchor = { x: number; y: number; size: number; rect: { l: number; t: number; r: number; b: number } };
+export type BookAnchors = Record<string, BookAnchor>;
 
 const props = withDefaults(defineProps<{
   progress: number;
@@ -34,10 +39,14 @@ const props = withDefaults(defineProps<{
   reducedMotion?: boolean;
   /** Start downloading three.js and the artwork before the book is needed. */
   warm?: boolean;
+  /** Ingredient keys that have left the page (their icons are hidden). */
+  hidden?: string[];
 }>(), {
   reducedMotion: false,
   warm: false,
+  hidden: () => [],
 });
+const emit = defineEmits<{ (e: 'anchors', value: BookAnchors): void }>();
 
 const hostRef = ref<HTMLElement | null>(null);
 const canvasRef = ref<HTMLCanvasElement | null>(null);
@@ -55,33 +64,38 @@ let sourceTexture: THREE.Texture | null = null;
 let disposed = false;
 let inView = false;
 let three!: typeof import('three');
-let formulaImages: FormulaImages | null = null;
-let builtLabels = '';
+let builtKey = '';
+let buildToken = 0;
 const ownedTextures: THREE.Texture[] = [];
 const ownedMaterials: THREE.Material[] = [];
 const ownedGeometries: THREE.BufferGeometry[] = [];
+/** Ingredient icon meshes by key, plus 'seal' (the recipe book on the right page). */
+const iconMeshes = new Map<string, THREE.Mesh>();
+/** Hotspot rectangles in face-local units, by the same keys. */
+const entryRects = new Map<string, { mesh: THREE.Object3D; l: number; t: number; r: number; b: number }>();
+
+/* The page canvases: 630 x 1038 px mapped onto 5.25 x 8.65 units. */
+const PAGE = { w: 630, h: 1038, uw: 5.25, uh: 8.65 };
+const ENTRY_TOPS = [150, 360] as const;
+const ICON = { x: 44, dy: 26, size: 112 };
+const SEAL = { cx: 104, cy: 872, size: 84 };
 
 function clamp01(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.min(1, Math.max(0, value));
 }
-
 function smoothstep(value: number): number {
   const x = clamp01(value);
   return x * x * (3 - 2 * x);
 }
-
 function phase(progress: number, start: number, end: number): number {
   return smoothstep((progress - start) / (end - start));
 }
 
-type FormulaImages = {
-  lavosSquidBlood: HTMLImageElement;
-  stellarAquaCrystal: HTMLImageElement;
-  goldMintLeaves: HTMLImageElement;
-  foolRecipe: HTMLImageElement;
-  mysterriaLogo: HTMLImageElement;
-  foolPathwaySymbol: HTMLImageElement;
+const FONT = {
+  display: '"Commissioner", "Segoe UI", system-ui, sans-serif',
+  body: '"Golos Text", "Segoe UI", system-ui, sans-serif',
+  caps: '"Tenor Sans", "Segoe UI", system-ui, sans-serif',
 };
 
 type TexturePainter = (context: CanvasRenderingContext2D, width: number, height: number) => void;
@@ -92,60 +106,40 @@ function makeRegionTexture(
   width: number,
   height: number,
   painter?: TexturePainter,
-  useCoverPalette = false,
+  coverPalette?: Rgb,
 ): THREE.Texture {
   if (!sourceTexture) throw new Error('Book atlas has not loaded.');
   const crop = document.createElement('canvas');
   const isIllustratedPage = Boolean(painter);
-  crop.width = isIllustratedPage ? 630 : width;
-  crop.height = isIllustratedPage ? 1038 : height;
+  crop.width = isIllustratedPage ? PAGE.w : width;
+  crop.height = isIllustratedPage ? PAGE.h : height;
   const context = crop.getContext('2d');
   if (!context) throw new Error('A 2D canvas is required to slice the book atlas.');
   context.imageSmoothingEnabled = false;
-  context.drawImage(
-    sourceTexture.image as CanvasImageSource,
-    u,
-    v,
-    width,
-    height,
-    0,
-    0,
-    crop.width,
-    crop.height,
-  );
-  if (useCoverPalette) recolorCoverTexture(context);
+  context.drawImage(sourceTexture.image as CanvasImageSource, u, v, width, height, 0, 0, crop.width, crop.height);
+  if (coverPalette) recolorCoverTexture(context, coverPalette);
   painter?.(context, crop.width, crop.height);
   const texture = new three.CanvasTexture(crop);
   texture.colorSpace = three.SRGBColorSpace;
   texture.magFilter = isIllustratedPage ? three.LinearFilter : three.NearestFilter;
   texture.minFilter = isIllustratedPage ? three.LinearMipmapLinearFilter : three.NearestFilter;
   texture.generateMipmaps = isIllustratedPage;
+  texture.anisotropy = isIllustratedPage && renderer ? Math.min(4, renderer.capabilities.getMaxAnisotropy()) : 1;
   texture.wrapS = three.ClampToEdgeWrapping;
   texture.wrapT = three.ClampToEdgeWrapping;
   ownedTextures.push(texture);
   return texture;
 }
 
-function recolorCoverTexture(context: CanvasRenderingContext2D) {
+/** Leather in the drawn Pathway's colour (deep shades of the accent), bone clasps. */
+function recolorCoverTexture(context: CanvasRenderingContext2D, accent: Rgb) {
   const { width, height } = context.canvas;
   const image = context.getImageData(0, 0, width, height);
   const data = image.data;
-  // Oxblood leather, bone clasps and worn grey edges: the Crimson Moon's
-  // palette, keeping the vanilla texture's pixel structure intact.
-  const leatherRamp = [
-    [34, 9, 13],
-    [54, 14, 20],
-    [78, 21, 28],
-  ] as const;
-  const claspRamp = [
-    [186, 178, 162],
-    [222, 215, 201],
-  ] as const;
-  const wornRamp = [
-    [96, 84, 86],
-    [124, 112, 112],
-  ] as const;
-
+  const black: Rgb = [10, 8, 12];
+  const leatherRamp = [mixRgb(accent, black, 0.86), mixRgb(accent, black, 0.76), mixRgb(accent, black, 0.64)];
+  const claspRamp: Rgb[] = [[186, 182, 194], [228, 226, 236]];
+  const wornRamp = [mixRgb(accent, [120, 116, 128], 0.7), mixRgb(accent, [150, 146, 158], 0.72)];
   for (let index = 0; index < data.length; index += 4) {
     if (data[index + 3] === 0) continue;
     const red = data[index];
@@ -155,28 +149,23 @@ function recolorCoverTexture(context: CanvasRenderingContext2D) {
     const min = Math.min(red, green, blue);
     const brightness = (red + green + blue) / (3 * 255);
     const saturation = max === 0 ? 0 : (max - min) / max;
-    const isClasp =
-      red >= 205 &&
-      green >= 135 &&
-      blue <= 105 &&
-      brightness >= 0.58 &&
-      saturation >= 0.46;
+    const isClasp = red >= 205 && green >= 135 && blue <= 105 && brightness >= 0.58 && saturation >= 0.46;
     const ramp = isClasp ? claspRamp : saturation < 0.16 && brightness > 0.58 ? wornRamp : leatherRamp;
-    const rampIndex = Math.min(ramp.length - 1, Math.floor(brightness * ramp.length));
-    const [nextRed, nextGreen, nextBlue] = ramp[rampIndex];
-    data[index] = nextRed;
-    data[index + 1] = nextGreen;
-    data[index + 2] = nextBlue;
+    const [r, g, b] = ramp[Math.min(ramp.length - 1, Math.floor(brightness * ramp.length))];
+    data[index] = r;
+    data[index + 1] = g;
+    data[index + 2] = b;
   }
   context.putImageData(image, 0, 0);
 }
 
-function makeImageTexture(image: HTMLImageElement): THREE.Texture {
-  const texture = new three.Texture(image);
+/** A crisp item texture: 128 px pixel art, sampled nearest at every size. */
+function makeIconTexture(source: CanvasImageSource): THREE.Texture {
+  const texture = new three.Texture(source as HTMLImageElement);
   texture.colorSpace = three.SRGBColorSpace;
-  texture.magFilter = three.LinearFilter;
-  texture.minFilter = three.LinearMipmapLinearFilter;
-  texture.generateMipmaps = true;
+  texture.magFilter = three.NearestFilter;
+  texture.minFilter = three.NearestFilter;
+  texture.generateMipmaps = false;
   texture.wrapS = three.ClampToEdgeWrapping;
   texture.wrapT = three.ClampToEdgeWrapping;
   texture.needsUpdate = true;
@@ -184,15 +173,34 @@ function makeImageTexture(image: HTMLImageElement): THREE.Texture {
   return texture;
 }
 
+/** Stand-in for an ingredient without a texture: a pixel rune in the accent. */
+function runeCanvas(accent: Rgb): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16;
+  canvas.height = 16;
+  const context = canvas.getContext('2d');
+  if (!context) return canvas;
+  const rows = ['......XX......', '.....XooX.....', '....XoAAoX....', '...XoA..AoX...', '..XoA.AA.AoX..', '..XoA.AA.AoX..', '...XoA..AoX...', '....XoAAoX....', '.....XooX.....', '......XX......'];
+  const colors: Record<string, string> = { X: rgbCss(mixRgb(accent, [10, 8, 12], 0.7)), o: rgbCss(mixRgb(accent, [10, 8, 12], 0.35)), A: rgbCss(mixRgb(accent, [255, 255, 255], 0.3)) };
+  rows.forEach((row, y) => [...row].forEach((cell, x) => {
+    if (!colors[cell]) return;
+    context.fillStyle = colors[cell];
+    context.fillRect(x + 1, y + 3, 1, 1);
+  }));
+  return canvas;
+}
+
 const PIXEL_GLYPHS: Record<string, readonly string[]> = {
   A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
   B: ['11110', '10001', '10001', '11110', '10001', '10001', '11110'],
   C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
   D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
-  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
-  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
   E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+  F: ['11111', '10000', '10000', '11110', '10000', '10000', '10000'],
+  G: ['01111', '10000', '10000', '10011', '10001', '10001', '01111'],
+  H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
   I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+  J: ['00111', '00010', '00010', '00010', '00010', '10010', '01100'],
   K: ['10001', '10010', '10100', '11000', '10100', '10010', '10001'],
   L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
   M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'],
@@ -208,17 +216,14 @@ const PIXEL_GLYPHS: Record<string, readonly string[]> = {
   W: ['10001', '10001', '10001', '10101', '10101', '10101', '01010'],
   X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
   Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+  Z: ['11111', '00001', '00010', '00100', '01000', '10000', '11111'],
   '9': ['01110', '10001', '10001', '01111', '00001', '00001', '01110'],
   ':': ['00000', '00100', '00100', '00000', '00100', '00100', '00000'],
+  '-': ['00000', '00000', '00000', '11111', '00000', '00000', '00000'],
+  "'": ['00100', '00100', '01000', '00000', '00000', '00000', '00000'],
 };
 
-function drawPixelGlyph(
-  context: CanvasRenderingContext2D,
-  glyph: string,
-  x: number,
-  y: number,
-  pixelSize: number,
-) {
+function drawPixelGlyph(context: CanvasRenderingContext2D, glyph: string, x: number, y: number, pixelSize: number) {
   const rows = PIXEL_GLYPHS[glyph];
   if (!rows) return;
   rows.forEach((row, rowIndex) => {
@@ -228,13 +233,7 @@ function drawPixelGlyph(
   });
 }
 
-function drawPixelLine(
-  context: CanvasRenderingContext2D,
-  label: string,
-  centerX: number,
-  y: number,
-  pixelSize: number,
-) {
+function drawPixelLine(context: CanvasRenderingContext2D, label: string, centerX: number, y: number, pixelSize: number) {
   const glyphWidth = 5 * pixelSize;
   const gap = pixelSize;
   const width = label.length * glyphWidth + Math.max(0, label.length - 1) * gap;
@@ -245,18 +244,12 @@ function drawPixelLine(
   }
 }
 
-function makePixelLabelTexture(
-  width: number,
-  height: number,
-  painter: (context: CanvasRenderingContext2D) => void,
-  smooth = false,
-): THREE.Texture {
+function makeLabelTexture(width: number, height: number, painter: (context: CanvasRenderingContext2D) => void, smooth = false): THREE.Texture {
   const labelCanvas = document.createElement('canvas');
   labelCanvas.width = width;
   labelCanvas.height = height;
   const context = labelCanvas.getContext('2d');
   if (!context) throw new Error('A 2D canvas is required to prepare the book label.');
-  context.clearRect(0, 0, width, height);
   painter(context);
   const texture = new three.CanvasTexture(labelCanvas);
   texture.colorSpace = three.SRGBColorSpace;
@@ -267,15 +260,8 @@ function makePixelLabelTexture(
   return texture;
 }
 
-function drawPixelLineWithShadow(
-  context: CanvasRenderingContext2D,
-  label: string,
-  centerX: number,
-  y: number,
-  pixelSize: number,
-  color = '#e8e0cf',
-) {
-  context.fillStyle = 'rgba(10, 4, 6, 0.84)';
+function drawPixelLineWithShadow(context: CanvasRenderingContext2D, label: string, centerX: number, y: number, pixelSize: number, color = '#efeef3') {
+  context.fillStyle = 'rgba(8, 6, 10, 0.84)';
   drawPixelLine(context, label, centerX + 3, y + 3, pixelSize);
   context.fillStyle = color;
   drawPixelLine(context, label, centerX, y, pixelSize);
@@ -286,50 +272,46 @@ function fitsPixelFont(label: string, pixelSize: number, maxWidth: number): bool
   return width <= maxWidth && [...label].every((glyph) => glyph === ' ' || glyph in PIXEL_GLYPHS);
 }
 
-/** Pixel lettering where the glyph set covers the label; a bold UI face otherwise (Cyrillic, CJK...). */
-function drawCoverLine(
-  context: CanvasRenderingContext2D,
-  label: string,
-  centerX: number,
-  y: number,
-  pixelSize: number,
-  color: string,
-) {
+/** Pixel lettering where the glyph set covers the label (and it fits); the display face otherwise. */
+function drawCoverLine(context: CanvasRenderingContext2D, label: string, centerX: number, y: number, pixelSize: number, color: string) {
   const text = label.toLocaleUpperCase();
   const maxWidth = context.canvas.width - 120;
-  if (fitsPixelFont(text, pixelSize, maxWidth)) {
-    drawPixelLineWithShadow(context, text, centerX, y, pixelSize, color);
-    return;
+  for (const size of [pixelSize, pixelSize - 1]) {
+    if (size >= 2 && fitsPixelFont(text, size, maxWidth)) {
+      drawPixelLineWithShadow(context, text, centerX, y + (pixelSize - size) * 3, size, color);
+      return;
+    }
   }
   context.save();
-  context.font = `800 ${pixelSize * 7}px "Manrope", sans-serif`;
+  context.font = `700 ${pixelSize * 7}px ${FONT.display}`;
   context.textAlign = 'center';
   context.textBaseline = 'top';
-  context.fillStyle = 'rgba(10, 4, 6, 0.84)';
+  context.fillStyle = 'rgba(8, 6, 10, 0.84)';
   context.fillText(text, centerX + 3, y + 3, maxWidth);
   context.fillStyle = color;
   context.fillText(text, centerX, y, maxWidth);
   context.restore();
 }
 
-function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTMLImageElement, labels: BookLabels) {
+function paintCoverArtwork(context: CanvasRenderingContext2D, labels: BookLabels) {
   const width = context.canvas.width;
   const height = context.canvas.height;
-  const crimson = '#b3202b';
-  const crimsonText = '#e5545d';
-  const bone = '#e8e0cf';
-  const boneDim = 'rgba(232, 224, 207, 0.42)';
+  const accent = hexToRgb(labels.accent);
+  const acc = rgbCss(accent);
+  const accText = rgbCss(mixRgb(accent, [255, 255, 255], 0.25));
+  const ink = '#efeef3';
+  const inkDim = 'rgba(239, 238, 243, 0.4)';
 
-  context.fillStyle = 'rgba(30, 7, 11, 0.8)';
+  context.fillStyle = rgbCss(mixRgb(accent, [10, 8, 12], 0.88), 0.8);
   context.fillRect(28, 30, width - 56, height - 60);
-  context.strokeStyle = crimson;
+  context.strokeStyle = acc;
   context.lineWidth = 6;
   context.strokeRect(34, 36, width - 68, height - 72);
-  context.strokeStyle = boneDim;
+  context.strokeStyle = inkDim;
   context.lineWidth = 2;
   context.strokeRect(50, 52, width - 100, height - 104);
 
-  context.fillStyle = bone;
+  context.fillStyle = ink;
   const corner = 30;
   const notch = 12;
   for (const [x, y, xDirection, yDirection] of [
@@ -343,38 +325,36 @@ function paintCoverArtwork(context: CanvasRenderingContext2D, pathwaySymbol: HTM
     context.fillRect(x + notch * xDirection, y + notch * yDirection, 8 * xDirection, 8 * yDirection);
   }
 
-  context.fillStyle = 'rgba(12, 4, 6, 0.9)';
+  // the emblem frame: the recipe book itself is a separate, nearest-sampled mesh
+  context.fillStyle = 'rgba(8, 6, 10, 0.9)';
   context.fillRect(92, 88, width - 184, 168);
-  context.strokeStyle = crimson;
+  context.strokeStyle = acc;
   context.lineWidth = 3;
   context.strokeRect(98, 94, width - 196, 156);
-  context.imageSmoothingEnabled = true;
-  context.drawImage(pathwaySymbol, width / 2 - 68, 101, 136, 136);
-  context.imageSmoothingEnabled = false;
 
-  drawCoverLine(context, labels.coverPathway, width / 2, 286, 3, bone);
-  context.fillStyle = crimson;
+  drawCoverLine(context, labels.coverPathway, width / 2, 286, 3, ink);
+  context.fillStyle = acc;
   context.fillRect(86, 345, 126, 4);
   context.fillRect(width - 212, 345, 126, 4);
   context.fillRect(width / 2 - 8, 337, 16, 16);
 
-  drawCoverLine(context, labels.coverSequence, width / 2, 392, 5, bone);
-  drawCoverLine(context, labels.coverName, width / 2, 474, 4, crimsonText);
+  drawCoverLine(context, labels.coverSequence, width / 2, 392, 5, ink);
+  drawCoverLine(context, labels.coverName, width / 2, 474, 4, accText);
 
-  context.strokeStyle = boneDim;
+  context.strokeStyle = inkDim;
   context.lineWidth = 3;
   context.strokeRect(100, 550, width - 200, 96);
-  context.fillStyle = 'rgba(179, 32, 43, 0.18)';
+  context.fillStyle = rgbCss(accent, 0.16);
   context.fillRect(108, 558, width - 216, 80);
-  drawCoverLine(context, labels.coverRecipe, width / 2, 582, 3, bone);
+  drawCoverLine(context, labels.coverRecipe, width / 2, 582, 3, ink);
 
-  context.fillStyle = crimson;
+  context.fillStyle = acc;
   for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
 }
 
 function drawRule(context: CanvasRenderingContext2D, y: number, width: number, dashed = false) {
   context.save();
-  context.strokeStyle = 'rgba(90, 82, 70, 0.5)';
+  context.strokeStyle = 'rgba(70, 62, 52, 0.45)';
   context.lineWidth = 2;
   context.setLineDash(dashed ? [10, 8] : []);
   context.beginPath();
@@ -384,114 +364,101 @@ function drawRule(context: CanvasRenderingContext2D, y: number, width: number, d
   context.restore();
 }
 
-function drawHeading(context: CanvasRenderingContext2D, label: string, width: number) {
-  context.save();
-  context.fillStyle = '#8e1720';
-  context.font = '600 48px "Cormorant Garamond", Georgia, serif';
-  context.letterSpacing = '2px';
-  context.fillText(label.toLocaleUpperCase(), 48, 84);
-  context.restore();
-  drawRule(context, 108, width);
+/** Ink for the accent on cream paper: the accent, darkened until it reads. */
+function inkOf(accent: Rgb): string {
+  return rgbCss(mixRgb(accent, [20, 12, 26], 0.66));
 }
 
-function wrapText(
-  context: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  maxWidth: number,
-  lineHeight: number,
-): number {
-  const words = text.split(' ');
+function drawHeading(context: CanvasRenderingContext2D, label: string, width: number, accent: Rgb) {
+  context.save();
+  context.fillStyle = inkOf(accent);
+  context.font = `600 44px ${FONT.display}`;
+  context.fillText(label, 48, 86, width - 96);
+  context.restore();
+  drawRule(context, 110, width);
+}
+
+function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines = 3): number {
+  // CJK has no spaces: fall back to breaking between characters.
+  const words = text.includes(' ') ? text.split(' ') : [...text];
+  const joiner = text.includes(' ') ? ' ' : '';
   let line = '';
   let lineY = y;
+  let lines = 1;
   for (const word of words) {
-    const candidate = line ? `${line} ${word}` : word;
-    if (line && context.measureText(candidate).width > maxWidth) {
+    const candidate = line ? `${line}${joiner}${word}` : word;
+    if (line && context.measureText(candidate).width > maxWidth && lines < maxLines) {
       context.fillText(line, x, lineY);
       line = word;
       lineY += lineHeight;
+      lines++;
     } else {
       line = candidate;
     }
   }
-  if (line) context.fillText(line, x, lineY);
+  if (line) context.fillText(line, x, lineY, maxWidth);
   return lineY;
 }
 
-function drawIngredient(
-  context: CanvasRenderingContext2D,
-  image: HTMLImageElement,
-  name: string,
-  role: string,
-  top: number,
-  width: number,
-) {
-  const iconSize = 116;
+/** The entry's text; its icon is a mesh laid on the empty slot drawn here. */
+function drawEntry(context: CanvasRenderingContext2D, entry: BookEntry, top: number, width: number, accent: Rgb) {
   context.save();
-  context.imageSmoothingEnabled = false;
-  context.drawImage(image, 44, top + 22, iconSize, iconSize);
-  context.imageSmoothingEnabled = true;
+  // the slot the ingredient rests in: a faint frame that stays when it leaves
+  context.fillStyle = 'rgba(70, 58, 40, 0.1)';
+  context.fillRect(ICON.x - 6, top + ICON.dy - 6, ICON.size + 12, ICON.size + 12);
+  context.strokeStyle = 'rgba(70, 58, 40, 0.32)';
+  context.lineWidth = 2;
+  context.strokeRect(ICON.x - 6, top + ICON.dy - 6, ICON.size + 12, ICON.size + 12);
 
-  context.fillStyle = '#1d1b17';
-  context.font = '700 31px "Manrope", sans-serif';
-  const lastLineY = wrapText(context, name, 184, top + 53, width - 214, 38);
-  context.fillStyle = '#5a5246';
-  context.font = '500 22px "IBM Plex Mono", monospace';
-  context.fillText(role, 184, Math.max(top + 116, lastLineY + 38));
+  const textX = ICON.x + ICON.size + 26;
+  context.fillStyle = '#1d1a16';
+  context.font = `600 31px ${FONT.body}`;
+  const lastLineY = wrapText(context, entry.name, textX, top + 62, width - textX - 30, 37);
+  context.fillStyle = inkOf(accent);
+  context.font = `400 22px ${FONT.caps}`;
+  context.letterSpacing = '2px';
+  context.fillText(entry.role.toLocaleUpperCase(), textX, Math.max(top + 120, lastLineY + 38), width - textX - 30);
   context.restore();
 }
 
-function paintLeftFormula(images: FormulaImages, labels: BookLabels): TexturePainter {
+// Softens the vanilla page's big texels so the writing reads first.
+const PAPER_WASH = 'rgba(244, 236, 210, 0.62)';
+
+function paintLeftFormula(labels: BookLabels): TexturePainter {
+  const accent = hexToRgb(labels.accent);
   return (context, width) => {
-    context.fillStyle = 'rgba(255, 248, 224, 0.14)';
+    context.fillStyle = PAPER_WASH;
     context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-    drawHeading(context, labels.mainHeading, width);
-    const [first, second] = labels.main;
-    if (first) drawIngredient(context, images.lavosSquidBlood, first.name, first.role, 145, width);
-    if (second) drawIngredient(context, images.stellarAquaCrystal, second.name, second.role, 350, width);
+    drawHeading(context, labels.mainHeading, width, accent);
+    labels.main.slice(0, 2).forEach((entry, index) => drawEntry(context, entry, ENTRY_TOPS[index], width, accent));
   };
 }
 
-function paintRightFormula(images: FormulaImages, labels: BookLabels): TexturePainter {
+function paintRightFormula(labels: BookLabels): TexturePainter {
+  const accent = hexToRgb(labels.accent);
   return (context, width, height) => {
-    context.fillStyle = 'rgba(255, 248, 224, 0.14)';
+    context.fillStyle = PAPER_WASH;
     context.fillRect(0, 0, width, height);
-    drawHeading(context, labels.supplementaryHeading, width);
-    const [supplementary] = labels.supplementary;
-    if (supplementary) drawIngredient(context, images.goldMintLeaves, supplementary.name, supplementary.role, 145, width);
+    drawHeading(context, labels.supplementaryHeading, width, accent);
+    labels.supplementary.slice(0, 2).forEach((entry, index) => drawEntry(context, entry, ENTRY_TOPS[index], width, accent));
 
     drawRule(context, 775, width, true);
     context.save();
-    context.strokeStyle = 'rgba(142, 23, 32, 0.5)';
+    context.strokeStyle = rgbCss(mixRgb(accent, [24, 16, 30], 0.5), 0.6);
     context.lineWidth = 3;
     context.beginPath();
-    context.arc(104, 872, 59, 0, Math.PI * 2);
+    context.arc(SEAL.cx, SEAL.cy, 59, 0, Math.PI * 2);
     context.stroke();
-    context.imageSmoothingEnabled = false;
-    context.drawImage(images.foolRecipe, 62, 830, 84, 84);
-    context.imageSmoothingEnabled = true;
-
-    context.fillStyle = '#8e1720';
-    context.font = '600 23px "IBM Plex Mono", monospace';
+    context.fillStyle = inkOf(accent);
+    context.font = `400 22px ${FONT.caps}`;
     context.letterSpacing = '2px';
-    context.fillText(labels.noteHeading.toLocaleUpperCase(), 184, 842, width - 228);
+    context.fillText(labels.noteHeading.toLocaleUpperCase(), 184, 846, width - 228);
     context.letterSpacing = '0px';
-    context.fillStyle = '#5a5246';
-    context.font = '500 23px "Manrope", sans-serif';
-    wrapText(context, labels.note, 184, 883, width - 228, 31);
+    context.fillStyle = '#4c443a';
+    context.font = `400 24px ${FONT.body}`;
+    wrapText(context, labels.note, 184, 886, width - 228, 32);
     context.restore();
   };
-}
-
-function loadImage(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.decoding = 'async';
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error(`Unable to load formula artwork: ${url}`));
-    image.src = url;
-  });
 }
 
 function basicMaterial(parameters: THREE.MeshBasicMaterialParameters): THREE.MeshBasicMaterial {
@@ -517,177 +484,146 @@ function addTexturedLeaf(
     back: [number, number, number, number];
     frontPainter?: TexturePainter;
     backPainter?: TexturePainter;
-    useCoverPalette?: boolean;
+    coverPalette?: Rgb;
   },
-) {
-  const { width, height, depth, z, color, front, back, frontPainter, backPainter, useCoverPalette = false } = options;
+): { front: THREE.Mesh; back: THREE.Mesh } {
+  const { width, height, depth, z, color, front, back, frontPainter, backPainter, coverPalette } = options;
   if (depth > 0) {
-    const bodyMaterial = basicMaterial({ color });
-    const body = new three.Mesh(geometry(new three.BoxGeometry(width, height, depth)), bodyMaterial);
+    const body = new three.Mesh(geometry(new three.BoxGeometry(width, height, depth)), basicMaterial({ color }));
     body.position.set(width / 2, 0, z);
     hinge.add(body);
   }
-
   const faceGeometry = geometry(new three.PlaneGeometry(width, height));
-  const frontMaterial = basicMaterial({
-    map: makeRegionTexture(...front, frontPainter, useCoverPalette),
+  const faceMaterial = (map: THREE.Texture) => basicMaterial({
+    map,
     transparent: false,
-    opacity: 1,
-    alphaTest: 0,
     depthTest: true,
     depthWrite: true,
     blending: three.NoBlending,
     side: three.FrontSide,
   });
-  const frontFace = new three.Mesh(faceGeometry, frontMaterial);
+  const frontFace = new three.Mesh(faceGeometry, faceMaterial(makeRegionTexture(...front, frontPainter, coverPalette)));
   frontFace.position.set(width / 2, 0, z + depth / 2 + 0.006);
   hinge.add(frontFace);
 
-  const backMaterial = basicMaterial({
-    map: makeRegionTexture(...back, backPainter, useCoverPalette),
-    transparent: false,
-    opacity: 1,
-    alphaTest: 0,
-    depthTest: true,
-    depthWrite: true,
-    blending: three.NoBlending,
-    side: three.FrontSide,
-  });
-  const backFace = new three.Mesh(faceGeometry, backMaterial);
+  const backFace = new three.Mesh(faceGeometry, faceMaterial(makeRegionTexture(...back, backPainter, coverPalette)));
   backFace.position.set(width / 2, 0, z - depth / 2 - 0.006);
   backFace.rotation.y = Math.PI;
   hinge.add(backFace);
+  return { front: frontFace, back: backFace };
 }
 
-function buildBook(formulaImages: FormulaImages, labels: BookLabels) {
+/** Canvas px on a page -> that page face's local units. */
+function pageLocal(cx: number, cy: number): [number, number] {
+  return [(cx / PAGE.w - 0.5) * PAGE.uw, (0.5 - cy / PAGE.h) * PAGE.uh];
+}
+
+function addIcon(face: THREE.Object3D, key: string, source: CanvasImageSource, cx: number, cy: number, size: number) {
+  const unit = (size / PAGE.w) * PAGE.uw;
+  const material = basicMaterial({ map: makeIconTexture(source), transparent: true, alphaTest: 0.5, depthTest: true, depthWrite: true, side: three.FrontSide });
+  const mesh = new three.Mesh(geometry(new three.PlaneGeometry(unit, unit)), material);
+  const [x, y] = pageLocal(cx, cy);
+  mesh.position.set(x, y, 0.01);
+  mesh.visible = !props.hidden.includes(key);
+  face.add(mesh);
+  iconMeshes.set(key, mesh);
+}
+
+function addEntries(face: THREE.Object3D, entries: BookEntry[], images: Map<string, CanvasImageSource>) {
+  entries.slice(0, 2).forEach((entry, index) => {
+    const top = ENTRY_TOPS[index];
+    const image = images.get(entry.key);
+    if (image) addIcon(face, entry.key, image, ICON.x + ICON.size / 2, top + ICON.dy + ICON.size / 2, ICON.size);
+    const [l, t] = pageLocal(ICON.x - 14, top + 8);
+    const [r, b] = pageLocal(PAGE.w - 26, top + ICON.dy + ICON.size + 18);
+    entryRects.set(entry.key, { mesh: face, l, t, r, b });
+  });
+}
+
+function buildBook(labels: BookLabels, images: Map<string, CanvasImageSource>) {
   if (!scene) return;
-  builtLabels = JSON.stringify(labels);
+  const accent = hexToRgb(labels.accent);
 
   bookRoot = new three.Group();
   scene.add(bookRoot);
 
   const backCover = new three.Group();
   bookRoot.add(backCover);
-  addTexturedLeaf(backCover, {
-    width: 6,
-    height: 10,
-    depth: 0.24,
-    z: -0.42,
-    color: 0x2a0b10,
-    front: [16, 0, 6, 10],
-    back: [22, 0, 6, 10],
-    useCoverPalette: true,
-  });
+  addTexturedLeaf(backCover, { width: 6, height: 10, depth: 0.24, z: -0.42, color: 0x15121a, front: [16, 0, 6, 10], back: [22, 0, 6, 10], coverPalette: accent });
 
   const rightStack = new three.Group();
   bookRoot.add(rightStack);
-  addTexturedLeaf(rightStack, {
-    width: 5.25,
-    height: 8.65,
-    depth: 0,
-    z: -0.18,
-    color: 0xe8ddb4,
-    front: [13, 11, 5, 8],
-    back: [19, 11, 5, 8],
-    frontPainter: paintRightFormula(formulaImages, labels),
+  const right = addTexturedLeaf(rightStack, {
+    width: PAGE.uw, height: PAGE.uh, depth: 0, z: -0.18, color: 0xe8ddb4,
+    front: [13, 11, 5, 8], back: [19, 11, 5, 8],
+    frontPainter: paintRightFormula(labels),
   });
+  addEntries(right.front, labels.supplementary, images);
+  const seal = images.get('__book');
+  if (seal) addIcon(right.front, 'seal', seal, SEAL.cx, SEAL.cy, SEAL.size);
+  {
+    const [l, t] = pageLocal(30, 800);
+    const [r, b] = pageLocal(PAGE.w - 26, 960);
+    entryRects.set('seal', { mesh: right.front, l, t, r, b });
+  }
 
   leftPages = new three.Group();
   bookRoot.add(leftPages);
-  addTexturedLeaf(leftPages, {
-    width: 5.25,
-    height: 8.65,
-    depth: 0,
-    z: 0.18,
-    color: 0xeee4bd,
-    front: [1, 11, 5, 8],
-    back: [7, 11, 5, 8],
-    backPainter: paintLeftFormula(formulaImages, labels),
+  const left = addTexturedLeaf(leftPages, {
+    width: PAGE.uw, height: PAGE.uh, depth: 0, z: 0.18, color: 0xeee4bd,
+    front: [1, 11, 5, 8], back: [7, 11, 5, 8],
+    backPainter: paintLeftFormula(labels),
   });
+  addEntries(left.back, labels.main, images);
 
   frontCover = new three.Group();
   bookRoot.add(frontCover);
-  addTexturedLeaf(frontCover, {
-    width: 6,
-    height: 10,
-    depth: 0.24,
-    z: 0.55,
-    color: 0x2a0b10,
-    front: [0, 0, 6, 10],
-    back: [6, 0, 6, 10],
-    useCoverPalette: true,
-  });
+  addTexturedLeaf(frontCover, { width: 6, height: 10, depth: 0.24, z: 0.55, color: 0x15121a, front: [0, 0, 6, 10], back: [6, 0, 6, 10], coverPalette: accent });
 
-  const coverLabelMaterial = basicMaterial({
-    map: makePixelLabelTexture(
-      512,
-      800,
-      (context) => paintCoverArtwork(context, formulaImages.foolPathwaySymbol, labels),
-      true,
-    ),
-    transparent: true,
-    alphaTest: 0.08,
-    depthTest: true,
-    depthWrite: true,
-    side: three.FrontSide,
-  });
   const coverLabel = new three.Mesh(
     geometry(new three.PlaneGeometry(4.72, 7.38)),
-    coverLabelMaterial,
+    basicMaterial({
+      map: makeLabelTexture(512, 800, (context) => paintCoverArtwork(context, labels), true),
+      transparent: true,
+      alphaTest: 0.08,
+      side: three.FrontSide,
+    }),
   );
   coverLabel.position.set(3, 0, 0.686);
   frontCover.add(coverLabel);
+  if (seal) {
+    // the recipe book in the cover's emblem frame (canvas 512 x 800 -> 4.72 x 7.38)
+    const size = (136 / 512) * 4.72;
+    const emblem = new three.Mesh(
+      geometry(new three.PlaneGeometry(size, size)),
+      basicMaterial({ map: makeIconTexture(seal), transparent: true, alphaTest: 0.5, side: three.FrontSide }),
+    );
+    emblem.position.set(0, (0.5 - 172 / 800) * 7.38, 0.004);
+    coverLabel.add(emblem);
+  }
 
-  const seamMaterial = basicMaterial({
-    map: makeRegionTexture(12, 0, 2, 10, undefined, true),
-    color: 0xffffff,
-    transparent: false,
-    opacity: 1,
-    alphaTest: 0,
-    depthTest: true,
-    depthWrite: true,
-    blending: three.NoBlending,
-  });
-  const seam = new three.Mesh(geometry(new three.BoxGeometry(0.42, 10.15, 0.76)), seamMaterial);
+  const seam = new three.Mesh(
+    geometry(new three.BoxGeometry(0.42, 10.15, 0.76)),
+    basicMaterial({ map: makeRegionTexture(12, 0, 2, 10, undefined, accent), blending: three.NoBlending }),
+  );
   seam.position.z = 0.06;
   bookRoot.add(seam);
 
-  // The entrance presents the book edge-on, making the seam's -X face the visible
-  // exterior spine. These archive marks live in bookRoot's local space so they
-  // rotate and recede with the physical spine as the cover opens.
-  const spineEmblemMaterial = basicMaterial({
-    map: makeImageTexture(formulaImages.mysterriaLogo),
-    transparent: true,
-    alphaTest: 0.08,
-    depthTest: true,
-    depthWrite: true,
-    side: three.FrontSide,
-  });
-  const spineEmblem = new three.Mesh(
-    geometry(new three.PlaneGeometry(0.62, 0.62)),
-    spineEmblemMaterial,
-  );
-  spineEmblem.position.set(-0.217, 3.58, 0.06);
-  spineEmblem.rotation.y = -Math.PI / 2;
-  bookRoot.add(spineEmblem);
-
-  const spineLabelMaterial = basicMaterial({
-    map: makePixelLabelTexture(72, 512, (context) => {
-      context.save();
-      context.translate(36, 256);
-      context.rotate(Math.PI / 2);
-      drawPixelLineWithShadow(context, 'MYSTERRIA', 0, -18, 5);
-      context.restore();
-    }),
-    transparent: true,
-    alphaTest: 0.08,
-    depthTest: true,
-    depthWrite: true,
-    side: three.FrontSide,
-  });
+  // The entrance presents the book edge-on: the seam's -X face is the spine.
   const spineLabel = new three.Mesh(
     geometry(new three.PlaneGeometry(0.32, 4)),
-    spineLabelMaterial,
+    basicMaterial({
+      map: makeLabelTexture(72, 512, (context) => {
+        context.save();
+        context.translate(36, 256);
+        context.rotate(Math.PI / 2);
+        drawPixelLineWithShadow(context, 'MYSTERRIA', 0, -18, 5);
+        context.restore();
+      }),
+      transparent: true,
+      alphaTest: 0.08,
+      side: three.FrontSide,
+    }),
   );
   spineLabel.position.set(-0.218, 0.45, 0.06);
   spineLabel.rotation.y = -Math.PI / 2;
@@ -696,7 +632,6 @@ function buildBook(formulaImages: FormulaImages, labels: BookLabels) {
 
 function updatePose() {
   if (!bookRoot || !frontCover || !leftPages) return;
-
   const p = props.reducedMotion ? 1 : clamp01(props.progress);
   const descend = phase(p, 0, 0.2);
   const faceCover = phase(p, 0.2, 0.43);
@@ -705,17 +640,17 @@ function updatePose() {
   const settle = phase(p, 0.88, 1);
 
   bookRoot.visible = props.reducedMotion || p > 0.004;
-  bookRoot.position.y = (1 - descend) * 5.8 - settle * 0.08;
-  bookRoot.position.x = -3 * (1 - opening);
+  // a short fall into place (the scene fades it in): never from beyond the canvas edge
+  bookRoot.position.y = (1 - descend) * 1.6 - settle * 0.08;
+  // centred edge-on, then on the cover (which spans x 0..6), then on the open spread
+  bookRoot.position.x = -3 * faceCover * (1 - opening);
   bookRoot.rotation.y = (Math.PI / 2) * (1 - faceCover);
   bookRoot.rotation.x = -0.06 - opening * 0.035;
   bookRoot.rotation.z = -0.045 * (1 - faceCover) + Math.sin(settle * Math.PI) * 0.012;
-  const entranceScale = 0.9 + descend * 0.1;
-  bookRoot.scale.setScalar(entranceScale);
+  bookRoot.scale.setScalar(0.9 + descend * 0.1);
 
   frontCover.rotation.y = -Math.PI * 0.985 * opening;
   leftPages.rotation.y = -Math.PI * pageOpening;
-
   render();
 }
 
@@ -724,7 +659,8 @@ function resize() {
   const width = Math.max(1, hostRef.value.clientWidth);
   const height = Math.max(1, hostRef.value.clientHeight);
   const aspect = width / height;
-  const viewHeight = 12.8;
+  // layout.ts BOOK_FILL mirrors this framing
+  const viewHeight = 11.4;
   camera.left = -(viewHeight * aspect) / 2;
   camera.right = (viewHeight * aspect) / 2;
   camera.top = viewHeight / 2;
@@ -735,9 +671,50 @@ function resize() {
   render();
 }
 
+let projector: THREE.Vector3 | null = null;
+let lastAnchors = '';
+/** Where each ingredient sits on screen (normalised to the rig box). */
+function emitAnchors() {
+  if (!camera || !bookRoot) return;
+  bookRoot.updateMatrixWorld(true);
+  projector ??= new three.Vector3();
+  const v = projector;
+  const project = (object: THREE.Object3D, x: number, y: number): [number, number] => {
+    v.set(x, y, 0);
+    object.localToWorld(v);
+    v.project(camera as THREE.OrthographicCamera);
+    return [(v.x + 1) / 2, (1 - v.y) / 2];
+  };
+  const anchors: BookAnchors = {};
+  for (const [key, rect] of entryRects) {
+    const icon = iconMeshes.get(key);
+    const a = project(rect.mesh, rect.l, rect.t);
+    const b = project(rect.mesh, rect.r, rect.b);
+    let center: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    let size = 0;
+    if (icon) {
+      center = project(icon, 0, 0);
+      const params = (icon.geometry as THREE.PlaneGeometry).parameters;
+      const top = project(icon, 0, params.height / 2);
+      size = Math.abs(center[1] - top[1]) * 2;
+    }
+    anchors[key] = {
+      x: center[0],
+      y: center[1],
+      size,
+      rect: { l: Math.min(a[0], b[0]), t: Math.min(a[1], b[1]), r: Math.max(a[0], b[0]), b: Math.max(a[1], b[1]) },
+    };
+  }
+  const serial = JSON.stringify(anchors, (_, value) => (typeof value === 'number' ? Math.round(value * 2000) / 2000 : value));
+  if (serial === lastAnchors) return;
+  lastAnchors = serial;
+  emit('anchors', anchors);
+}
+
 function render() {
   if (!renderer || !scene || !camera || !bookRoot?.visible) return;
   renderer.render(scene, camera);
+  emitAnchors();
 }
 
 function disposeBookResources() {
@@ -747,55 +724,75 @@ function disposeBookResources() {
   ownedGeometries.length = 0;
   ownedMaterials.length = 0;
   ownedTextures.length = 0;
+  iconMeshes.clear();
+  entryRects.clear();
 }
 
-/** Repaints the page and cover textures, e.g. after a locale switch. */
-function rebuildBook() {
-  if (!scene || !formulaImages || !bookRoot) return;
-  if (JSON.stringify(props.labels) === builtLabels) return;
-  scene.remove(bookRoot);
+function labelsKey(labels: BookLabels): string {
+  return JSON.stringify(labels);
+}
+
+/** Loads every image the book needs for these labels (cached), the fallback rune for missing ones. */
+async function imagesFor(labels: BookLabels): Promise<Map<string, CanvasImageSource>> {
+  const accent = hexToRgb(labels.accent);
+  const entries = [...labels.main, ...labels.supplementary];
+  const images = new Map<string, CanvasImageSource>();
+  await Promise.all([
+    ...entries.map(async (entry) => {
+      const image = entry.icon ? await loadImage(entry.icon).catch(() => null) : null;
+      images.set(entry.key, image ?? runeCanvas(accent));
+    }),
+    (async () => {
+      const image = labels.recipeBook ? await loadImage(labels.recipeBook).catch(() => null) : null;
+      if (image) images.set('__book', image);
+    })(),
+  ]);
+  return images;
+}
+
+/** (Re)builds the book for the current labels: a new card, a new language. */
+async function rebuildBook() {
+  if (!scene || !initialized) return;
+  const key = labelsKey(props.labels);
+  if (key === builtKey) return;
+  const token = ++buildToken;
+  const labels = JSON.parse(key) as BookLabels;
+  const images = await imagesFor(labels);
+  if (disposed || token !== buildToken || !scene) return;
+  if (bookRoot) scene.remove(bookRoot);
   disposeBookResources();
   bookRoot = null;
   frontCover = null;
   leftPages = null;
-  buildBook(formulaImages, props.labels);
+  lastAnchors = '';
+  buildBook(labels, images);
+  builtKey = key;
   updatePose();
 }
 
-type LoadedAssets = { module: typeof import('three'); atlas: HTMLImageElement; images: FormulaImages };
+type LoadedAssets = { module: typeof import('three'); atlas: HTMLImageElement };
 let assets: Promise<LoadedAssets> | null = null;
 
 function loadAssets(): Promise<LoadedAssets> {
+  const fonts = document.fonts;
   assets ??= Promise.all([
     import('three'),
     loadImage(bookAtlasUrl),
-    loadImage(lavosSquidBlood),
-    loadImage(stellarAquaCrystal),
-    loadImage(goldMintLeaves),
-    loadImage(foolRecipe),
-    loadImage('/logo-mark.webp'),
-    loadImage('/pathway-art/native/fool.webp'),
-    document.fonts?.ready ?? Promise.resolve(),
-  ]).then(([module, atlas, lavos, stellar, mint, recipe, logo, symbol]) => ({
-    module,
-    atlas,
-    images: {
-      lavosSquidBlood: lavos,
-      stellarAquaCrystal: stellar,
-      goldMintLeaves: mint,
-      foolRecipe: recipe,
-      mysterriaLogo: logo,
-      foolPathwaySymbol: symbol,
-    },
-  }));
+    fonts
+      ? Promise.all([
+        fonts.load(`600 44px ${FONT.display}`),
+        fonts.load(`600 31px ${FONT.body}`),
+        fonts.load(`400 21px ${FONT.caps}`),
+      ]).catch(() => undefined)
+      : Promise.resolve(),
+  ]).then(([module, atlas]) => ({ module, atlas }));
   assets.catch(() => {
     assets = null;
   });
   return assets;
 }
 
-// The WebGL context is only created once the book actually has to draw: the
-// chapter has started scrolling (or reduced motion shows the final pose).
+// The WebGL context is only created once the book actually has to draw.
 function shouldInitialize() {
   return inView && (props.progress > 0 || props.reducedMotion);
 }
@@ -813,14 +810,8 @@ async function initialize() {
   }
   if (disposed || !canvasRef.value || !hostRef.value) return;
   three = loaded.module;
-  formulaImages = loaded.images;
 
-  renderer = new three.WebGLRenderer({
-    canvas: canvasRef.value,
-    alpha: true,
-    antialias: false,
-    powerPreference: 'high-performance',
-  });
+  renderer = new three.WebGLRenderer({ canvas: canvasRef.value, alpha: true, antialias: false, powerPreference: 'high-performance' });
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = three.SRGBColorSpace;
 
@@ -835,17 +826,15 @@ async function initialize() {
   sourceTexture.minFilter = three.NearestFilter;
   sourceTexture.generateMipmaps = false;
   sourceTexture.needsUpdate = true;
-  buildBook(formulaImages, props.labels);
-  updatePose();
 
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(hostRef.value);
   resize();
+  await rebuildBook();
 }
 
 onMounted(() => {
   if (!canvasRef.value || !hostRef.value) return;
-
   intersectionObserver = new IntersectionObserver(
     ([entry]) => {
       inView = entry?.isIntersecting ?? false;
@@ -864,7 +853,11 @@ watch(() => [props.progress, props.reducedMotion], () => {
   if (!initialized && shouldInitialize()) void initialize();
   updatePose();
 });
-watch(() => props.labels, rebuildBook);
+watch(() => labelsKey(props.labels), () => void rebuildBook());
+watch(() => props.hidden.join('|'), () => {
+  for (const [key, mesh] of iconMeshes) mesh.visible = !props.hidden.includes(key);
+  render();
+});
 
 onBeforeUnmount(() => {
   disposed = true;

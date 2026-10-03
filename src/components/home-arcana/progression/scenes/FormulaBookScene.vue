@@ -1,259 +1,238 @@
 <template>
-  <div class="book-scene" :class="{ 'is-readable': readable }" :style="sceneVars" role="group" :aria-label="tp('book.sceneLabel')">
-    <p class="fog-label book-scene__caption" aria-hidden="true">{{ tp('book.caption') }}</p>
+  <div class="book-scene" :class="{ 'is-readable': readable }" role="group" :aria-label="tp('book.sceneLabel')">
+    <p class="book-scene__caption" :style="captionStyle" aria-hidden="true">{{ tp('book.caption') }}</p>
 
-    <div class="book-viewport">
-      <div class="book-scene__glow" aria-hidden="true" />
-      <VanillaBookRig :progress="rigProgress" :reduced-motion="reducedMotion" :warm="warm" :labels="bookLabels" />
-
-      <div class="formula-hotspots" :aria-hidden="!readable">
-        <section class="hotspot-page hotspot-page--left" :aria-label="tp('book.mainPage')">
-          <button
-            v-for="(entry, index) in mainEntries"
-            :key="entry.id"
-            type="button"
-            class="formula-hotspot"
-            :class="`formula-hotspot--main-${index + 1}`"
-            :tabindex="readable ? 0 : -1"
-            @mouseenter="inspect(entry.id, $event)"
-            @mouseleave="emit('clear-inspect')"
-            @focus="inspect(entry.id, $event)"
-            @blur="emit('clear-inspect')"
-            @click="inspect(entry.id, $event)"
-          >
-            <span class="visually-hidden">{{ entry.name }}, {{ entry.role }}</span>
-          </button>
-        </section>
-
-        <section class="hotspot-page hotspot-page--right" :aria-label="tp('book.supplementaryPage')">
-          <button
-            v-for="entry in suppEntries"
-            :key="entry.id"
-            type="button"
-            class="formula-hotspot formula-hotspot--supplementary"
-            :tabindex="readable ? 0 : -1"
-            @mouseenter="inspect(entry.id, $event)"
-            @mouseleave="emit('clear-inspect')"
-            @focus="inspect(entry.id, $event)"
-            @blur="emit('clear-inspect')"
-            @click="inspect(entry.id, $event)"
-          >
-            <span class="visually-hidden">{{ entry.name }}, {{ entry.role }}</span>
-          </button>
-
-          <button
-            type="button"
-            class="formula-hotspot formula-hotspot--seal"
-            :tabindex="readable ? 0 : -1"
-            @mouseenter="inspect('formula-fool', $event)"
-            @mouseleave="emit('clear-inspect')"
-            @focus="inspect('formula-fool', $event)"
-            @blur="emit('clear-inspect')"
-            @click="inspect('formula-fool', $event)"
-          >
-            <span class="visually-hidden">{{ tp('book.sealLabel') }}</span>
-          </button>
-        </section>
+    <div class="book-scene__box" :style="boxStyle">
+      <div class="book-scene__glow" :style="{ opacity: glow.toFixed(4) }" aria-hidden="true" />
+      <div class="book-scene__rig" :style="{ opacity: entrance.toFixed(4) }">
+        <VanillaBookRig
+          :progress="rigProgress"
+          :reduced-motion="reducedMotion"
+          :warm="warm"
+          :labels="labels"
+          :hidden="hidden"
+          @anchors="onAnchors"
+        />
       </div>
     </div>
 
-    <div class="book-scene__motes" aria-hidden="true"><i /><i /><i /></div>
+    <!-- Hit areas over each entry on the pages, placed from the 3D book itself. -->
+    <div class="book-scene__hotspots" :aria-hidden="!readable">
+      <button
+        v-for="spot in hotspots"
+        :key="spot.key"
+        type="button"
+        class="book-hotspot"
+        :style="spot.style"
+        :tabindex="readable ? 0 : -1"
+        @mouseenter="inspect(spot.key, $event)"
+        @mouseleave="emit('clear-inspect')"
+        @focus="inspect(spot.key, $event)"
+        @blur="emit('clear-inspect')"
+        @click="inspect(spot.key, $event)"
+      >
+        <span class="arc-sr">{{ spot.label }}</span>
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import type { CSSProperties } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import VanillaBookRig from './VanillaBookRig.vue';
-import type { BookLabels } from './VanillaBookRig.vue';
+import type { BookAnchors, BookLabels } from './VanillaBookRig.vue';
 import { useProgressionCopy } from './useProgressionCopy';
+import type { StageLayout } from '../layout';
+import { T, ease, smooth } from '../timeline';
 
 const props = withDefaults(defineProps<{
   progress: number;
+  layout: StageLayout | null;
   active: boolean;
-  closingProgress?: number;
   /** The chapter is near the viewport: start downloading the 3D book. */
   warm?: boolean;
-}>(), {
-  closingProgress: 0,
-  warm: false,
-});
+  /** Ingredient keys that have flown off the pages. */
+  hidden?: string[];
+}>(), { warm: false, hidden: () => [] });
 const emit = defineEmits<{
   (e: 'inspect', id: string, anchor: HTMLElement): void;
   (e: 'clear-inspect'): void;
+  /** Book anchors in this scene's own (untransformed) px. */
+  (e: 'anchors', value: Record<string, { x: number; y: number; size: number }>): void;
 }>();
 
 const reducedMotion = useReducedMotion();
-const { tp, names } = useProgressionCopy();
-const mainEntries = computed(() => [
-  { id: 'lavos-squid-blood', name: tp('ingredients.lavosSquidBlood'), role: tp('ingredients.mainRole') },
-  { id: 'stellar-aqua-crystal', name: tp('ingredients.stellarAquaCrystal'), role: tp('ingredients.mainRole') },
-]);
-const suppEntries = computed(() => [
-  { id: 'gold-mint-leaves', name: tp('ingredients.goldMintLeaves'), role: tp('ingredients.supplementaryRole') },
-]);
-// Text painted into the book's page and cover textures.
-const bookLabels = computed<BookLabels>(() => ({
-  mainHeading: tp('book.mainHeading'),
-  supplementaryHeading: tp('book.supplementaryHeading'),
-  main: mainEntries.value.map(({ name, role }) => ({ name, role })),
-  supplementary: suppEntries.value.map(({ name, role }) => ({ name, role })),
-  noteHeading: tp('book.noteHeading'),
-  note: tp('book.note'),
-  coverPathway: tp('book.coverPathway'),
-  coverSequence: tp('book.coverSequence'),
-  coverName: names.value.sequence,
-  coverRecipe: tp('book.coverRecipe'),
-}));
+const { tp, names, ingredients, recipe, card } = useProgressionCopy();
 
-function clamp01(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  return Math.min(1, Math.max(0, value));
+const labels = computed<BookLabels>(() => {
+  const entry = (role: 'main' | 'supplementary') => ingredients.value
+    .filter((item) => item.role === role)
+    .map((item) => ({ key: item.key, name: item.name, icon: item.icon, role: tp(`ingredients.${role}Role`) }));
+  return {
+    mainHeading: tp('book.mainHeading'),
+    supplementaryHeading: tp('book.supplementaryHeading'),
+    main: entry('main'),
+    supplementary: entry('supplementary'),
+    noteHeading: tp('book.noteHeading'),
+    note: tp('book.note'),
+    coverPathway: tp('book.coverPathway'),
+    coverSequence: tp('book.coverSequence'),
+    coverName: names.value.sequence,
+    coverRecipe: tp('book.coverRecipe'),
+    recipeBook: recipe.value.book,
+    accent: card.value.accent,
+  };
+});
+
+const g = computed(() => props.progress);
+const bookLocal = computed(() => (reducedMotion.value ? 1 : Math.min(1, Math.max(0, (g.value - T.book[0]) / (T.book[1] - T.book[0])))));
+// closes (back to the cover-facing pose) once its ingredients are in the brew
+const closeT = computed(() => (reducedMotion.value ? 0 : ease(g.value, [T.bookOut[0], T.bookOut[0] + (T.bookOut[1] - T.bookOut[0]) * 0.75])));
+const rigProgress = computed(() => (reducedMotion.value ? 1 : bookLocal.value * (1 - closeT.value * 0.56)));
+const entrance = computed(() => (reducedMotion.value ? 1 : smooth(bookLocal.value / 0.16)));
+const readT = computed(() => (reducedMotion.value ? 1 : smooth((bookLocal.value - 0.95) / 0.05)));
+const readable = computed(() => props.active && readT.value > 0.92 && g.value < T.readable[1]);
+const glow = computed(() => entrance.value * (0.55 + readT.value * 0.45));
+
+const boxStyle = computed<CSSProperties>(() => {
+  const b = props.layout?.book;
+  if (!b) return { opacity: 0 };
+  return { left: `${b.x.toFixed(1)}px`, top: `${b.y.toFixed(1)}px`, width: `${b.w.toFixed(1)}px`, height: `${b.h.toFixed(1)}px` };
+});
+const captionStyle = computed<CSSProperties>(() => {
+  const l = props.layout;
+  if (!l) return { opacity: 0 };
+  const shown = reducedMotion.value ? 1 : smooth((bookLocal.value - 0.3) / 0.2) * (1 - ease(g.value, [T.brewIn[0], T.brewIn[0] + 0.02]));
+  return { top: `${l.bookCaptionY.toFixed(1)}px`, opacity: shown.toFixed(4) };
+});
+
+const anchors = ref<BookAnchors>({});
+function onAnchors(value: BookAnchors) {
+  anchors.value = value;
+  const b = props.layout?.book;
+  if (!b) return;
+  const out: Record<string, { x: number; y: number; size: number }> = {};
+  for (const [key, a] of Object.entries(value)) out[key] = { x: b.x + a.x * b.w, y: b.y + a.y * b.h, size: a.size * b.h };
+  emit('anchors', out);
 }
 
-function smoothstep(value: number): number {
-  const x = clamp01(value);
-  return x * x * (3 - 2 * x);
-}
-
-const p = computed(() => clamp01(props.progress));
-const closeT = computed(() => smoothstep(props.closingProgress));
-// 0.44 is the settled, cover-facing pose: the leaves and cover are closed,
-// but the book remains fully risen out of the threshold fog while it exits.
-const rigProgress = computed(() => reducedMotion.value ? 1 : p.value * (1 - closeT.value * 0.56));
-// The formula itself is part of the physical page textures. Only the invisible
-// semantic hit regions wait until the book settles and aligns with the viewport.
-const readT = computed(() => reducedMotion.value ? 1 : smoothstep((p.value - 0.945) / 0.04));
-const readable = computed(() => props.active && readT.value > 0.92 && closeT.value < 0.04);
-const sceneVars = computed(() => ({
-  '--read': readT.value.toFixed(4),
-  '--caption-opacity': (reducedMotion.value ? 1 : smoothstep((p.value - 0.26) / 0.15)).toFixed(4),
-  '--glow-opacity': (reducedMotion.value ? 1 : smoothstep(p.value / 0.22) * (0.55 + readT.value * 0.45)).toFixed(4),
-  '--mote-opacity': (reducedMotion.value ? 0.35 : smoothstep((p.value - 0.32) / 0.45)).toFixed(4),
-}));
+const hotspots = computed(() => {
+  const b = props.layout?.book;
+  if (!b) return [];
+  const label = (key: string) => {
+    if (key === 'seal') return tp('book.sealLabel');
+    const item = ingredients.value.find((entry) => entry.key === key);
+    return item ? `${item.name}, ${tp(`ingredients.${item.role}Role`)}` : key;
+  };
+  // reading order: main ingredients, supplementary ones, then the seal
+  const order = [...ingredients.value.map((item) => item.key), 'seal'];
+  return Object.entries(anchors.value)
+    .filter(([key]) => order.includes(key))
+    .sort(([a], [b]) => order.indexOf(a) - order.indexOf(b))
+    .map(([key, a]) => ({
+    key,
+    label: label(key),
+    style: {
+      left: `${(b.x + a.rect.l * b.w).toFixed(1)}px`,
+      top: `${(b.y + a.rect.t * b.h).toFixed(1)}px`,
+      width: `${((a.rect.r - a.rect.l) * b.w).toFixed(1)}px`,
+      height: `${((a.rect.b - a.rect.t) * b.h).toFixed(1)}px`,
+    } as CSSProperties,
+  }));
+});
 
 function inspect(id: string, event: Event) {
-  if (event.currentTarget instanceof HTMLElement) emit('inspect', id, event.currentTarget);
+  if (event.currentTarget instanceof HTMLElement) emit('inspect', id === 'seal' ? 'formula' : `ingredient:${id}`, event.currentTarget);
 }
 </script>
 
 <style scoped>
 .book-scene {
-  --book-margin: clamp(22px, 5vh, 46px);
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  container-type: size;
 }
 
-/* Evidence tag over the exhibit. */
+/* Exhibit tag over the book. */
 .book-scene__caption {
   position: absolute;
-  z-index: 8;
-  top: clamp(4px, 2vh, 18px);
+  z-index: 3;
   left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
+  color: var(--acc);
+  font: 400 11px/1 var(--arc-caps);
+  letter-spacing: .18em;
+  text-transform: uppercase;
   white-space: nowrap;
-  opacity: var(--caption-opacity, 0);
-  pointer-events: none;
   transform: translateX(-50%);
+  pointer-events: none;
 }
 
+.book-scene__caption::before,
 .book-scene__caption::after {
-  content: "";
   width: 18px;
   height: 1px;
-  background: var(--crimson-text);
+  background: currentColor;
+  content: '';
+  opacity: .7;
 }
 
-.book-viewport {
-  position: relative;
-  z-index: 2;
-  /* Fits the stage height too (short screens), below the caption.
-     AltarBrewScene's bookSource() mirrors this box. */
-  width: min(680px, 100%, (100cqh - var(--book-margin) - 8px) * 1.24);
-  aspect-ratio: 1.24;
-  margin-top: var(--book-margin);
+.book-scene__box {
+  position: absolute;
 }
 
-/* A single lamp over the desk: cold light, no colour. */
+.book-scene__rig {
+  position: absolute;
+  inset: 0;
+}
+
+/* A single lamp over the desk, in the Pathway's colour. */
 .book-scene__glow {
   position: absolute;
-  z-index: -1;
   inset: 4% 0 -2%;
   border-radius: 50%;
-  background: radial-gradient(ellipse 50% 46% at 50% 52%, rgba(236, 230, 218, 0.16), rgba(169, 198, 214, 0.05) 55%, transparent 74%);
-  opacity: var(--glow-opacity, 0);
+  background: radial-gradient(ellipse 50% 46% at 50% 52%, color-mix(in oklab, var(--acc) 22%, transparent), color-mix(in oklab, var(--acc) 6%, transparent) 55%, transparent 74%);
   pointer-events: none;
 }
 
-.formula-hotspots {
+.book-scene__hotspots {
   position: absolute;
+  inset: 0;
   z-index: 4;
-  top: 50%;
-  left: 50%;
-  width: 66.2%;
-  aspect-ratio: 10.5 / 8.65;
-  display: flex;
   pointer-events: none;
-  transform: translate(-50%, -50%);
 }
 
-.book-scene.is-readable .formula-hotspots { pointer-events: auto; }
-
-.hotspot-page {
-  position: relative;
-  flex: 1 1 0;
-  min-width: 0;
+.book-scene.is-readable .book-hotspot {
+  pointer-events: auto;
 }
 
-.formula-hotspot {
+.book-hotspot {
   position: absolute;
-  left: 6%;
-  width: 88%;
+  padding: 0;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  pointer-events: none;
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
 }
 
-.formula-hotspot--main-1,
-.formula-hotspot--supplementary { top: 14%; height: 17%; }
-.formula-hotspot--main-2 { top: 33%; height: 17%; }
-.formula-hotspot--seal { top: 74%; height: 20%; }
-
-/* Ink-red pencil marks on the page (the hotspot sits on paper). */
-.formula-hotspot:hover,
-.formula-hotspot:focus-visible {
-  border-color: rgba(142, 23, 32, 0.7);
+/* Pencil marks in the Pathway's ink on the page. */
+.book-hotspot:hover,
+.book-hotspot:focus-visible {
+  border-color: color-mix(in oklab, var(--acc) 70%, #1d1a16);
   outline: none;
-  background: rgba(142, 23, 32, 0.07);
-  box-shadow: 0 0 0 3px rgba(229, 84, 93, 0.35);
-}
-
-.book-scene__motes { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-.book-scene__motes i {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: rgba(236, 230, 218, 0.7);
-  box-shadow: 0 0 8px rgba(236, 230, 218, 0.45);
-  opacity: calc(var(--mote-opacity, 0) * 0.5);
-  animation: mote-drift 9s ease-in-out infinite;
-}
-.book-scene__motes i:nth-child(1) { top: 29%; left: 29%; }
-.book-scene__motes i:nth-child(2) { top: 58%; left: 70%; animation-delay: -3s; }
-.book-scene__motes i:nth-child(3) { top: 42%; left: 55%; animation-delay: -6s; }
-
-@keyframes mote-drift {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(10px, -16px, 0); }
+  background: color-mix(in oklab, var(--acc) 10%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--acc) 45%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .book-scene__motes i { animation: none; }
+  .book-hotspot {
+    transition: none;
+  }
 }
 </style>

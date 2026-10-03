@@ -1,4 +1,4 @@
-import {onUnmounted, ref} from 'vue';
+import {onUnmounted, ref, type Ref} from 'vue';
 import {SERVER_IP} from '@/composables/useServer';
 
 export type CopyState = 'idle' | 'copied' | 'failed';
@@ -22,11 +22,22 @@ function legacyCopy(text: string): boolean {
   return ok;
 }
 
+/** Select an element's text, so a blocked copy leaves the address ready for Ctrl+C. */
+function selectText(el: HTMLElement) {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 /**
  * Copies the server address and reports honestly whether it worked, so the UI
  * can tell the player to select it by hand when the clipboard is unavailable.
+ * Pass the element that shows the address to have it selected on failure.
  */
-export function useCopyAddress() {
+export function useCopyAddress(target?: Ref<HTMLElement | null>) {
   const state = ref<CopyState>('idle');
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -39,6 +50,7 @@ export function useCopyAddress() {
       ok = legacyCopy(SERVER_IP);
     }
     state.value = ok ? 'copied' : 'failed';
+    if (!ok && target?.value) selectText(target.value);
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => (state.value = 'idle'), ok ? 2000 : 4500);
   };

@@ -102,7 +102,7 @@ onUnmounted(() => cleanup?.());
 </script>
 
 <style scoped>
-/* A paper tag tied to the exhibit: cream card, ink text, crimson kicker. */
+/* A note pinned to the exhibit: the page's dark surface, the Pathway's kicker. */
 .inspector {
   position: fixed;
   z-index: 80;
@@ -112,10 +112,11 @@ onUnmounted(() => cleanup?.());
   width: min(290px, calc(100vw - 24px));
   padding: 14px 16px 16px;
   overflow: visible;
-  border-radius: 4px;
-  color: var(--paper-ink);
-  background: var(--paper);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  color: var(--arc-ink, #efeef3);
+  background: color-mix(in oklab, #15151b 94%, var(--acc, #a78bfa));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc, #a78bfa) 40%, transparent), 0 18px 40px rgba(0, 0, 0, 0.55);
+  font-family: var(--arc-body, system-ui, sans-serif);
   pointer-events: none;
 }
 .inspector.is-positioned { visibility: visible; }
@@ -123,23 +124,23 @@ onUnmounted(() => cleanup?.());
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--crimson-deep);
-  font: 500 .66rem/1 var(--font-mono);
-  letter-spacing: .14em;
+  color: var(--acc, #a78bfa);
+  font: 400 10.5px/1 var(--arc-caps, system-ui, sans-serif);
+  letter-spacing: .16em;
   text-transform: uppercase;
 }
 .inspector > span::before { width: 14px; height: 1px; background: currentColor; content: ''; }
-.inspector strong { display: block; margin-top: 10px; color: var(--paper-ink); font: 700 .95rem/1.25 var(--font-body); }
-.inspector p { margin: 6px 0 0; color: var(--paper-ink-muted); font-size: .82rem; line-height: 1.5; }
+.inspector strong { display: block; margin-top: 10px; color: var(--arc-ink, #efeef3); font-size: 15px; font-weight: 600; line-height: 1.3; }
+.inspector p { margin: 6px 0 0; color: var(--arc-muted, #a7a6b2); font-size: 13.5px; line-height: 1.5; }
 .inspector__arrow {
   position: absolute;
   width: 10px;
   height: 10px;
-  background: var(--paper);
+  background: color-mix(in oklab, #15151b 94%, var(--acc, #a78bfa));
   transform: rotate(45deg);
 }
-.inspector-enter-active { transition: opacity .18s var(--ease-out), transform .18s var(--ease-out); }
-.inspector-leave-active { transition: opacity .12s var(--ease-out), transform .12s var(--ease-out); }
+.inspector-enter-active { transition: opacity .18s cubic-bezier(.22, 1, .36, 1), transform .18s cubic-bezier(.22, 1, .36, 1); }
+.inspector-leave-active { transition: opacity .12s cubic-bezier(.22, 1, .36, 1), transform .12s cubic-bezier(.22, 1, .36, 1); }
 .inspector-enter-from { opacity: 0; transform: translateY(6px) scale(.97); }
 .inspector-leave-to { opacity: 0; transform: translateY(4px); }
 .inspector--instant.inspector-enter-active,

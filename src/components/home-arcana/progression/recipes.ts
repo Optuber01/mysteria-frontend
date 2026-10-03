@@ -5,6 +5,8 @@ import type {Language} from '@/locales';
  * The real Sequence 9 recipe for each Pathway, as the server defines it
  * (CircleOfImagination). Textures are the resource pack's 16px item icons,
  * pre-scaled 8x with nearest-neighbour so they stay crisp at any size.
+ * Draw them with image-rendering: pixelated (DOM), imageSmoothingEnabled =
+ * false (canvas) or NearestFilter (three.js).
  */
 
 type Localized = Partial<Record<Language, string>> & { en: string };
@@ -36,7 +38,9 @@ const toIngredient = (raw: SourceIngredient): Ingredient => ({
   key: raw.key,
   source: raw.source,
   name: language => raw.name[language] || raw.name.en,
-  icon: raw.texture ? fileUrl(icons, raw.texture) : null,
+  // The pack has no icon for a few items: a hand-drawn texture named after the
+  // key stands in (ingredients/arbiter-badge.png); otherwise the scenes draw a rune.
+  icon: fileUrl(icons, raw.texture ?? raw.key),
 });
 
 const pathways = (source as { pathways: Record<string, { main: SourceIngredient[]; supplementary: SourceIngredient[] }> }).pathways;

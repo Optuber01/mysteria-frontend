@@ -1,6 +1,10 @@
 <template>
-  <!-- Persistent deck: your card, a redraw, and where you are in the reading -->
-  <aside class="arc-dock" :class="{'is-shown': shown}" :aria-label="t('home.arcana.dock.label')" :inert="!shown || undefined">
+  <!--
+    Persistent deck, once the hero's table has scrolled away: your card as a small
+    sigil that redraws, seated in the header's free space beside its actions (so it
+    never covers the page), plus the reading's four positions in the right gutter.
+  -->
+  <aside class="arc-dock" :class="{'is-shown': visible}" :aria-label="t('home.arcana.dock.label')" :inert="!visible || undefined">
     <nav class="arc-dock__spread" :aria-label="t('home.arcana.dock.spreadLabel')">
       <a
           v-for="spot in spread"
@@ -15,29 +19,26 @@
       </a>
     </nav>
 
-    <div class="arc-dock__card-wrap">
-      <a href="#reading" class="arc-dock__card" :aria-label="t('home.arcana.dock.yourCard').replace('{name}', reading.name)">
-        <span :key="drawCount" class="arc-dock__mini">
-          <img :src="sigilThumb(card.id)" alt="" width="64" height="64">
-        </span>
-      </a>
-      <div class="arc-dock__text">
-        <span class="arc-dock__label">{{ t('home.arcana.dock.your') }}</span>
-        <span class="arc-dock__name">{{ reading.name }}</span>
-      </div>
+    <div class="arc-dock__seat" :class="seat ? 'is-in-header' : 'is-floating'" :style="seatStyle">
       <button
           type="button"
-          class="arc-dock__draw"
-          :aria-label="`${t('home.arcana.dock.draw')} - ${t('home.arcana.dock.yourCard').replace('{name}', reading.name)}`"
+          class="arc-dock__orb"
+          :aria-label="`${t('home.arcana.dock.draw')}. ${t('home.arcana.dock.current').replace('{name}', reading.name)}`"
+          :aria-describedby="tipId"
           @click="draw()"
       >
-        <i class="fa-solid fa-layer-group arc-dock__draw-icon" aria-hidden="true"></i>
-        <span class="arc-dock__draw-label" aria-hidden="true">{{ t('home.arcana.dock.draw') }}</span>
-        <!-- small screens: the whole control collapses into this round sigil -->
-        <span :key="drawCount" class="arc-dock__orb" aria-hidden="true">
-          <img :src="sigilThumb(card.id)" alt="" width="64" height="64">
+        <span :key="drawCount" class="arc-dock__face" aria-hidden="true">
+          <img :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async">
+        </span>
+        <span class="arc-dock__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
         </span>
       </button>
+      <span :id="tipId" class="arc-dock__tip" role="tooltip">
+        <span class="arc-dock__tip-label">{{ t('home.arcana.dock.your') }}</span>
+        <span class="arc-dock__tip-name">{{ reading.name }}</span>
+        <span class="arc-dock__tip-action">{{ t('home.arcana.dock.draw') }}</span>
+      </span>
     </div>
   </aside>
 </template>
@@ -50,25 +51,67 @@ import {useArcana} from './useArcana';
 
 const {t} = useI18n();
 const {card, reading, drawCount, draw} = useArcana();
+const tipId = 'arc-dock-tip';
 
 const spread = computed(() => [
-  {id: 'past', numeral: 'I', label: t('home.arcana.past.position')},
-  {id: 'present', numeral: 'II', label: t('home.arcana.present.position')},
-  {id: 'forces', numeral: 'III', label: t('home.arcana.forces.position')},
-  {id: 'future', numeral: 'IV', label: t('home.arcana.future.position')},
+  {id: 'progression', numeral: 'I', label: t('home.world.spread.potion')},
+  {id: 'deck', numeral: 'II', label: t('home.world.spread.deck')},
+  {id: 'world', numeral: 'III', label: t('home.world.spread.world')},
+  {id: 'future', numeral: 'IV', label: t('home.world.spread.seat')},
 ]);
 
-const shown = ref(false);
+const pastHero = ref(false);
+const navOpen = ref(false);
+/** The Pathways orbit is a deck control of its own: step aside while it is on screen. */
+const atOrbit = ref(false);
 const active = ref('');
+const visible = computed(() => pastHero.value && !navOpen.value && !atOrbit.value);
+
+/* ---------------- the seat: the header's free space, left of its actions ---------------- */
+const ORB = 40;
+const seat = ref<{x: number; y: number} | null>(null);
+const seatStyle = computed(() => (seat.value
+    ? {left: `${seat.value.x}px`, top: `${seat.value.y}px`}
+    : undefined));
+
+function locate() {
+  const bar = document.querySelector<HTMLElement>('.header-stack .site-header');
+  const actions = bar?.querySelector<HTMLElement>('.header-actions');
+  if (!bar || !actions) {
+    seat.value = null;
+    return;
+  }
+  const visibleRight = (el: Element | null) => {
+    const r = el?.getBoundingClientRect();
+    return r && r.width > 0 ? r.right : 0;
+  };
+  const b = bar.getBoundingClientRect();
+  const a = actions.getBoundingClientRect();
+  const leftNeighbour = Math.max(visibleRight(bar.querySelector('.primary-nav')), visibleRight(bar.querySelector('.brand')));
+  const gap = window.innerWidth < 600 ? 10 : 16;
+  const x = a.left - gap - ORB;
+  // Not enough room between the nav and the actions: float in the corner instead.
+  seat.value = x - leftNeighbour >= gap ? {x: Math.round(x), y: Math.round(b.top + (b.height - ORB) / 2)} : null;
+}
+
 let heroObserver: IntersectionObserver | null = null;
+let orbitObserver: IntersectionObserver | null = null;
 let sectionObserver: IntersectionObserver | null = null;
+let headerSizes: ResizeObserver | null = null;
+let headerChanges: MutationObserver | null = null;
 
 onMounted(() => {
   const hero = document.querySelector('.concept-arcana .arc-hero');
   heroObserver = new IntersectionObserver(([entry]) => {
-    shown.value = !entry.isIntersecting;
+    pastHero.value = !entry.isIntersecting;
   }, {rootMargin: '0px 0px -55% 0px'});
   if (hero) heroObserver.observe(hero);
+
+  orbitObserver = new IntersectionObserver(([entry]) => {
+    atOrbit.value = entry.isIntersecting;
+  }, {rootMargin: '-10% 0px -10% 0px'});
+  const orbit = document.getElementById('pathways');
+  if (orbit) orbitObserver.observe(orbit);
 
   sectionObserver = new IntersectionObserver(entries => {
     for (const entry of entries) {
@@ -80,56 +123,226 @@ onMounted(() => {
     const el = document.getElementById(spot.id);
     if (el) sectionObserver?.observe(el);
   });
+
+  // Follow the header: announcement dismissed, language or sign-in changing its actions, mobile menu.
+  const stack = document.querySelector('.header-stack');
+  headerSizes = new ResizeObserver(locate);
+  [stack, stack?.querySelector('.header-actions'), stack?.querySelector('.primary-nav')]
+      .forEach(el => el && headerSizes?.observe(el));
+  if (stack) {
+    headerChanges = new MutationObserver(() => {
+      navOpen.value = !!stack.querySelector('.mobile-nav-overlay');
+      locate();
+    });
+    headerChanges.observe(stack, {childList: true, subtree: true});
+  }
+  window.addEventListener('resize', locate);
+  locate();
 });
 
 onUnmounted(() => {
   heroObserver?.disconnect();
+  orbitObserver?.disconnect();
   sectionObserver?.disconnect();
+  headerSizes?.disconnect();
+  headerChanges?.disconnect();
+  window.removeEventListener('resize', locate);
 });
 </script>
 
 <style scoped>
 .arc-dock {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 950;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  opacity: 0;
-  transform: translateY(24px);
   pointer-events: none;
-  transition: opacity .35s ease, transform .5s cubic-bezier(.2, .8, .2, 1);
 }
 
-.arc-dock.is-shown {
-  opacity: 1;
-  transform: none;
+.arc-dock.is-shown > * {
   pointer-events: auto;
 }
 
-.arc-dock__card-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 8px 8px 10px;
-  border-radius: 16px;
-  background: color-mix(in oklab, #101014 88%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 35%, transparent), 0 18px 40px rgba(0, 0, 0, .5);
-  backdrop-filter: blur(12px);
+/* ---- the seat ---- */
+.arc-dock__seat {
+  position: fixed;
+  z-index: 1001;
+  width: 40px;
+  height: 40px;
+  opacity: 0;
+  transform: translateY(-6px) scale(.6);
+  transition: opacity .3s ease, transform .45s cubic-bezier(.2, .9, .25, 1);
 }
 
-/* the spread: four small cards down the right edge */
+.arc-dock__seat.is-floating {
+  right: 16px;
+  bottom: 16px;
+  width: 52px;
+  height: 52px;
+  transform: translateY(16px) scale(.8);
+}
+
+.is-shown .arc-dock__seat {
+  opacity: 1;
+  transform: none;
+}
+
+.arc-dock__orb {
+  all: unset;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  cursor: pointer;
+  perspective: 300px;
+  background: radial-gradient(circle at 50% 42%, color-mix(in oklab, var(--acc) 34%, #17171d), #0d0d11 76%);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in oklab, var(--acc) 85%, transparent),
+    0 0 18px color-mix(in oklab, var(--acc) 30%, transparent);
+  transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .9, .25, 1);
+}
+
+.is-floating .arc-dock__orb {
+  box-shadow:
+    inset 0 0 0 1.5px var(--acc),
+    0 10px 26px rgba(0, 0, 0, .55),
+    0 0 22px color-mix(in oklab, var(--acc) 30%, transparent);
+}
+
+.arc-dock__orb:hover {
+  transform: scale(1.06);
+  box-shadow:
+    inset 0 0 0 1.5px var(--acc),
+    0 0 26px color-mix(in oklab, var(--acc) 50%, transparent);
+}
+
+.arc-dock__orb:focus-visible {
+  outline: 2px solid var(--arc-ink);
+  outline-offset: 3px;
+}
+
+.arc-dock__face {
+  display: grid;
+  place-items: center;
+  animation: arc-dock-flip .7s cubic-bezier(.2, .8, .2, 1);
+}
+
+.arc-dock__face img {
+  width: 30px;
+  height: 30px;
+}
+
+.is-floating .arc-dock__face img {
+  width: 40px;
+  height: 40px;
+}
+
+@keyframes arc-dock-flip {
+  from { transform: rotateY(180deg) scale(.7); opacity: .2; }
+  to { transform: none; opacity: 1; }
+}
+
+/* A small redraw mark, so the sigil reads as an action. */
+.arc-dock__badge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 0 0 2px #0b0b0e;
+  transition: transform .4s cubic-bezier(.2, .9, .25, 1);
+}
+
+.arc-dock__badge svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: var(--arc-on-acc);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.arc-dock__orb:hover .arc-dock__badge,
+.arc-dock__orb:focus-visible .arc-dock__badge {
+  transform: rotate(-120deg);
+}
+
+/* ---- the tooltip: your card, and what the button does ---- */
+.arc-dock__tip {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: -6px;
+  display: grid;
+  gap: 2px;
+  min-width: 150px;
+  max-width: 220px;
+  padding: 9px 12px 10px;
+  border-radius: 10px;
+  background: rgba(15, 15, 19, .96);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 35%, transparent), 0 14px 30px rgba(0, 0, 0, .5);
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .2s ease, transform .25s ease;
+}
+
+.is-floating .arc-dock__tip {
+  top: auto;
+  bottom: calc(100% + 12px);
+  transform: translateY(4px);
+}
+
+.arc-dock__seat:hover .arc-dock__tip,
+.arc-dock__seat:has(:focus-visible) .arc-dock__tip {
+  opacity: 1;
+  transform: none;
+}
+
+.arc-dock__tip-label {
+  font-family: var(--arc-caps);
+  font-size: 9.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--arc-muted);
+}
+
+.arc-dock__tip-name {
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--arc-ink);
+}
+
+.arc-dock__tip-action {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--acc);
+}
+
+/* ---- the spread: four small cards in the right gutter ---- */
 .arc-dock__spread {
   position: fixed;
+  z-index: 950;
   right: 18px;
   top: 50%;
-  translate: 0 -50%;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 10px;
+  opacity: 0;
+  translate: 12px -50%;
+  transition: opacity .35s ease, translate .5s cubic-bezier(.2, .8, .2, 1);
+}
+
+.is-shown .arc-dock__spread {
+  opacity: 1;
+  translate: 0 -50%;
 }
 
 .arc-dock__spot {
@@ -178,11 +391,13 @@ onUnmounted(() => {
   transform: rotate(-8deg) scale(1.15);
 }
 
+/* The name pops out to the left only while pointed at, so it never sits on the page. */
 .arc-dock__spot-name {
-  order: -1;
+  position: absolute;
+  right: calc(100% + 8px);
   padding: 5px 9px;
   border-radius: 99px;
-  background: rgba(11, 11, 14, .88);
+  background: rgba(11, 11, 14, .92);
   white-space: nowrap;
   opacity: 0;
   translate: 6px 0;
@@ -196,157 +411,23 @@ onUnmounted(() => {
   translate: 0 0;
 }
 
-.arc-dock__card {
-  display: block;
-  perspective: 400px;
-  border-radius: 6px;
-}
-
-.arc-dock__mini {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 55px;
-  border-radius: 5px;
-  background: radial-gradient(circle at 50% 45%, color-mix(in oklab, var(--acc) 35%, #15151a), #0d0d10 75%);
-  box-shadow: inset 0 0 0 1.5px var(--acc);
-  animation: arc-mini-flip .7s cubic-bezier(.2, .8, .2, 1);
-}
-
-.arc-dock__mini img {
-  width: 30px;
-  height: 30px;
-}
-
-@keyframes arc-mini-flip {
-  from { transform: rotateY(180deg) scale(.8); }
-  to { transform: none; }
-}
-
-.arc-dock__text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  max-width: 150px;
-}
-
-.arc-dock__label {
-  font-family: var(--arc-caps);
-  font-size: 9.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--arc-muted);
-}
-
-.arc-dock__name {
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--arc-ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.arc-dock__draw {
-  all: unset;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 11px;
-  background: var(--acc);
-  color: var(--arc-on-acc);
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: filter .2s;
-}
-
-.arc-dock__draw:hover {
-  filter: brightness(1.1);
-}
-
-.arc-dock a:focus-visible,
-.arc-dock__draw:focus-visible {
+.arc-dock__spot:focus-visible {
   outline: 2px solid var(--arc-ink);
   outline-offset: 2px;
 }
 
-@media (max-width: 1240px) {
+/* The gutter is only wide enough for the spread on wide screens. */
+@media (max-width: 1279px) {
   .arc-dock__spread {
     display: none;
   }
 }
 
-.arc-dock__orb {
-  display: none;
-}
-
-/* tablets and phones: one small round sigil button that redraws */
-@media (max-width: 1024px) {
-  .arc-dock {
-    right: 14px;
-    bottom: 14px;
-  }
-
-  .arc-dock__card-wrap {
-    padding: 0;
-    background: none;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-
-  .arc-dock__card,
-  .arc-dock__text,
-  .arc-dock__draw-icon,
-  .arc-dock__draw-label {
-    display: none;
-  }
-
-  .arc-dock__draw {
-    position: relative;
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    justify-content: center;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 45%, color-mix(in oklab, var(--acc) 38%, #15151a), #0d0d10 78%);
-    box-shadow: inset 0 0 0 1.5px var(--acc), 0 10px 26px rgba(0, 0, 0, .55), 0 0 22px color-mix(in oklab, var(--acc) 30%, transparent);
-  }
-
-  .arc-dock__orb {
-    display: grid;
-    place-items: center;
-    animation: arc-mini-flip .7s cubic-bezier(.2, .8, .2, 1);
-  }
-
-  .arc-dock__orb img {
-    width: 40px;
-    height: 40px;
-  }
-
-  /* a tiny redraw badge so it reads as an action, not decoration */
-  .arc-dock__draw::after {
-    content: '';
-    position: absolute;
-    right: -2px;
-    bottom: -2px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b0b0e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 1 0-2.3 5.7'/%3E%3Cpath d='M20 4v7h-7'/%3E%3C/svg%3E") center / 11px no-repeat;
-    box-shadow: 0 0 0 2px #0b0b0e;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .arc-dock,
-  .arc-dock__mini,
-  .arc-dock__orb {
+  .arc-dock__seat,
+  .arc-dock__spread,
+  .arc-dock__face,
+  .arc-dock__badge {
     transition: none;
     animation: none;
   }
