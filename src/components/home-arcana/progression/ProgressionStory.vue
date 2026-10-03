@@ -986,6 +986,38 @@ onUnmounted(() => {
 }
 
 /*
+ * Laptop-height windows: the awakening copy (a long Sequence name, two
+ * abilities and the button) must stay clear of the chapter rail below it.
+ */
+@media (max-height: 820px) {
+  .chapter-copy h3 {
+    margin: 10px 0 12px;
+    font-size: clamp(28px, 5.4vh, 42px);
+  }
+
+  .chapter-copy__sub {
+    margin: -2px 0 12px;
+    font-size: 14px;
+  }
+
+  .chapter-copy__abilities li {
+    padding-block: 7px;
+  }
+
+  .chapter-copy__abilities span {
+    -webkit-line-clamp: 1;
+  }
+
+  .chapter-copy__next {
+    margin-top: 10px;
+  }
+
+  .chapter-copy__cta {
+    margin-top: 14px;
+  }
+}
+
+/*
  * Sticky storytelling needs room for its copy, controls and stage to coexist.
  * Narrow and short viewports, and reduced motion, get one document-flow list.
  */
