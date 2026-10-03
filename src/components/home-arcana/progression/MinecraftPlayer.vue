@@ -20,8 +20,8 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 import type * as THREE from 'three';
 import type { PlayerAnimation, SkinViewer } from 'skinview3d';
 
-// Placeholder: the stock Steve skin until a Mysterria character skin exists.
-import steveSkinUrl from '@/assets/images/home/progression/steve.png';
+// Optuber's own skin (classic arms), from the Mojang session server.
+import playerSkinUrl from '@/assets/images/home/progression/player-skin.png';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { drawVial, hexToRgb, vialRows } from './art';
 
@@ -378,7 +378,7 @@ async function createViewer() {
     resizeObserver = new ResizeObserver(sizeViewer);
     resizeObserver.observe(host.value);
 
-    await instance.loadSkin(steveSkinUrl, { model: 'default' });
+    await instance.loadSkin(playerSkinUrl, { model: 'default' });
     if (disposed || !viewer) return;
     if (props.costume) dress(instance);
     makeBottle(instance);

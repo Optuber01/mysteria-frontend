@@ -38,7 +38,6 @@
         :holding="holding"
         :level="level"
         :accent="card.accent"
-        costume
         :label="tp(`player.${playerMode}`)"
         @bottle="onBottle"
       />
