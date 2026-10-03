@@ -1,19 +1,15 @@
 <template>
-  <component :is="concept.component" v-if="concept" :key="concept.id"/>
-  <ConceptSwitcher :groups="groups"/>
+  <ArcanaHome/>
 </template>
 
 <script setup lang="ts">
-import ConceptSwitcher from '@/components/home-concepts/ConceptSwitcher.vue';
-import {HOME_CONCEPTS, useHomeConcept} from '@/components/home-concepts/concepts';
+import ArcanaHome from '@/components/home-arcana/ArcanaHome.vue';
 import {useI18n} from '@/composables/useI18n';
 import {useSeo, videoGameLd} from '@/composables/useSeo';
 import {useBeyonderStats} from '@/composables/useBeyonderStats';
 
 const {t} = useI18n();
 const {totalBeyonders} = useBeyonderStats();
-const concept = useHomeConcept();
-const groups = [{param: 'concept', label: 'Homepage concept', variants: HOME_CONCEPTS}];
 
 useSeo(() => ({
   // The home page owns the bare brand title; every other route appends it.

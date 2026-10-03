@@ -1,0 +1,1262 @@
+{
+ "_note": "Sequence 9 recipes extracted from CircleOfImagination pathways/*/<Name>Pathway.java; names from its lang_*.properties. Regenerate when the plugin changes.",
+ "pathways": {
+  "abyss": {
+   "main": [
+    {
+     "key": "criminal-mark",
+     "source": "droppable",
+     "name": {
+      "en": "Criminal's Mark",
+      "uk": "Мітка Злочинця",
+      "ro": "Marca Răufăcătorului",
+      "de": "Mal des Verbrechers",
+      "es": "Marca de criminal",
+      "fr": "Marque de Criminel",
+      "zh-CN": "罪犯印记",
+      "zh-TW": "罪犯印記"
+     },
+     "texture": "criminal-mark"
+    },
+    {
+     "key": "tainted-soul",
+     "source": "droppable",
+     "name": {
+      "en": "Tainted Soul",
+      "uk": "Заплямована Душа",
+      "ro": "Suflet întinat",
+      "de": "Befleckte Seele",
+      "es": "Alma contaminada",
+      "fr": "Âme souillée",
+      "zh-CN": "污秽灵魂",
+      "zh-TW": "汙穢靈魂"
+     },
+     "texture": "tainted-soul"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "blood-stained-coin",
+     "source": "foundable",
+     "name": {
+      "en": "Blood-Stained Coin",
+      "uk": "Монета в Крові",
+      "ro": "Monedă pătată de sânge",
+      "de": "Blutbefleckte Münze",
+      "es": "Moneda manchada de sangre",
+      "fr": "Pièce tachée de sang",
+      "zh-CN": "染血硬币",
+      "zh-TW": "染血硬幣"
+     },
+     "texture": "blood-stained-coin"
+    }
+   ]
+  },
+  "chained": {
+   "main": [
+    {
+     "key": "prisoner-shackles",
+     "source": "droppable",
+     "name": {
+      "en": "Prisoner's Shackles",
+      "uk": "Кайдани Бранця",
+      "ro": "Cătușele Prizonierului",
+      "de": "Fesseln des Gefangenen",
+      "es": "Grilletes de Prisionero",
+      "fr": "Entraves de Prisonnier",
+      "zh-CN": "囚犯镣铐",
+      "zh-TW": "囚犯鐐銬"
+     },
+     "texture": "prisoner-shackles"
+    },
+    {
+     "key": "iron-cage-fragment",
+     "source": "droppable",
+     "name": {
+      "en": "Iron Cage Fragment",
+      "uk": "Уламок Залізної Клітки",
+      "ro": "Fragment de cușcă de fier",
+      "de": "Fragment eines Eisenkäfigs",
+      "es": "Fragmento de jaula de hierro",
+      "fr": "Fragment de cage de fer",
+      "zh-CN": "铁笼碎片",
+      "zh-TW": "鐵籠碎片"
+     },
+     "texture": "iron-cage-fragment"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "lockpick-set",
+     "source": "foundable",
+     "name": {
+      "en": "Lockpick Set",
+      "uk": "Набір Відмичок",
+      "ro": "Set de șperacle",
+      "de": "Dietrichset",
+      "es": "Juego de ganzúas",
+      "fr": "Jeu de crochets",
+      "zh-CN": "开锁工具组",
+      "zh-TW": "開鎖工具組"
+     },
+     "texture": "lockpick-set"
+    },
+    {
+     "key": "rusty-chain",
+     "source": "mineable",
+     "name": {
+      "en": "Rusty Chain",
+      "uk": "Іржавий Ланцюг",
+      "ro": "Lanț ruginit",
+      "de": "Rostige Kette",
+      "es": "Cadena oxidada",
+      "fr": "Chaîne rouillée",
+      "zh-CN": "锈蚀锁链",
+      "zh-TW": "鏽蝕鎖鏈"
+     },
+     "texture": "rusty-chain"
+    }
+   ]
+  },
+  "darkness": {
+   "main": [
+    {
+     "key": "insomnia-essence",
+     "source": "foundable",
+     "name": {
+      "en": "Insomnia Essence",
+      "uk": "Есенція Безсоння",
+      "ro": "Esență de insomnie",
+      "de": "Schlaflosigkeitsessenz",
+      "es": "Esencia de insomnio",
+      "fr": "Essence d’insomnie",
+      "zh-CN": "失眠精华",
+      "zh-TW": "失眠精華"
+     },
+     "texture": "insomnia-essence"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "nightshade-leaf",
+     "source": "foundable",
+     "name": {
+      "en": "Leaf of Nightshade",
+      "uk": "Листя Беладони",
+      "ro": "Frunză de mătrăgună",
+      "de": "Blatt des Nachtschattens",
+      "es": "Hoja de belladona",
+      "fr": "Feuille de belladone",
+      "zh-CN": "龙葵叶",
+      "zh-TW": "龍葵葉"
+     },
+     "texture": "nightshade-leaf"
+    },
+    {
+     "key": "shadow-essence",
+     "source": "mineable",
+     "name": {
+      "en": "Shadow Essence",
+      "uk": "Есенція Тіні",
+      "ro": "Esență de umbră",
+      "de": "Schattenessenz",
+      "es": "Esencia de sombra",
+      "fr": "Essence d’ombre",
+      "zh-CN": "暗影精华",
+      "zh-TW": "暗影精華"
+     },
+     "texture": "shadow-essence"
+    }
+   ]
+  },
+  "death": {
+   "main": [
+    {
+     "key": "black-spotted-frog",
+     "source": "droppable",
+     "name": {
+      "en": "Black Spotted Frog",
+      "uk": "Жаба з чорними плямами",
+      "ro": "Broască cu pete negre",
+      "de": "Schwarz gefleckter Frosch",
+      "es": "Rana de manchas negras",
+      "fr": "Grenouille tachetée noire",
+      "zh-CN": "黑斑蛙",
+      "zh-TW": "黑斑蛙"
+     },
+     "texture": "black-spotted-frog"
+    },
+    {
+     "key": "persons-crystal",
+     "source": "droppable",
+     "name": {
+      "en": "Persons Crystal",
+      "uk": "Кристал людей",
+      "ro": "Cristalul Persoanei",
+      "de": "Kristall der Personen",
+      "es": "Cristal de personas",
+      "fr": "Cristal des personnes",
+      "zh-CN": "人格水晶",
+      "zh-TW": "人格水晶"
+     },
+     "texture": "persons-crystal"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "burial-shroud",
+     "source": "foundable",
+     "name": {
+      "en": "Burial Shroud",
+      "uk": "Поховальний саван",
+      "ro": "Giulgiu Funerar",
+      "de": "Leichentuch",
+      "es": "Sudario funerario",
+      "fr": "Linceul funéraire",
+      "zh-CN": "裹尸布",
+      "zh-TW": "裹屍布"
+     },
+     "texture": "burial-shroud"
+    },
+    {
+     "key": "black-lily-hydrosol",
+     "source": "foundable",
+     "name": {
+      "en": "Black Lily Hydrosol",
+      "uk": "Гідрозоль Чорної Лілії",
+      "ro": "Hidrosol de crin negru",
+      "de": "Hydrosol der schwarzen Lilie",
+      "es": "Hidrolato de lirio negro",
+      "fr": "Hydrolat de lys noir",
+      "zh-CN": "黑百合纯露",
+      "zh-TW": "黑百合純露"
+     },
+     "texture": "black-lily-hydrosol"
+    }
+   ]
+  },
+  "demoness": {
+   "main": [
+    {
+     "key": "crimson-rose-thorn",
+     "source": "foundable",
+     "name": {
+      "en": "Thorn of the Crimson Rose",
+      "uk": "Шип Малинової Троянди",
+      "ro": "Spin al Trandafirului Purpuriu",
+      "de": "Dorn der purpurnen Rose",
+      "es": "Espina de la Rosa Carmesí",
+      "fr": "Épine de rose cramoisie",
+      "zh-CN": "深红玫瑰之刺",
+      "zh-TW": "深紅玫瑰之刺"
+     },
+     "texture": "crimson-rose-thorn"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "nightshade-leaf",
+     "source": "foundable",
+     "name": {
+      "en": "Leaf of Nightshade",
+      "uk": "Листя Беладони",
+      "ro": "Frunză de mătrăgună",
+      "de": "Blatt des Nachtschattens",
+      "es": "Hoja de belladona",
+      "fr": "Feuille de belladone",
+      "zh-CN": "龙葵叶",
+      "zh-TW": "龍葵葉"
+     },
+     "texture": "nightshade-leaf"
+    },
+    {
+     "key": "whispering-ghost-mist",
+     "source": "foundable",
+     "name": {
+      "en": "Mist of the Whispering Ghost",
+      "uk": "Мла Шепотливого Привида",
+      "ro": "Ceața Fantomei Șoptitoare",
+      "de": "Nebel des flüsternden Geists",
+      "es": "Niebla del Fantasma Susurrante",
+      "fr": "Brume de Fantôme chuchotant",
+      "zh-CN": "低语幽灵迷雾",
+      "zh-TW": "低語幽靈迷霧"
+     },
+     "texture": "whispering-ghost-mist"
+    }
+   ]
+  },
+  "door": {
+   "main": [
+    {
+     "key": "dimensional-wanderer-eye",
+     "source": "droppable",
+     "name": {
+      "en": "Eye of the Dimensional Wanderer",
+      "uk": "Око Вимірного Мандрівника",
+      "ro": "Ochiul Rătăcitorului Dimensional",
+      "de": "Auge des Dimensionswanderers",
+      "es": "Ojo del Errante Dimensional",
+      "fr": "Œil de l’Errant dimensionnel",
+      "zh-CN": "次元漫游者之眼",
+      "zh-TW": "次元漫遊者之眼"
+     },
+     "texture": "dimensional-wanderer-eye"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "ever-shifting-lotus",
+     "source": "mineable",
+     "name": {
+      "en": "Ever-Shifting Lotus",
+      "uk": "Вічно Мінливий Лотос",
+      "ro": "Lotus mereu schimbător",
+      "de": "Stets wechselnder Lotus",
+      "es": "Loto siempre cambiante",
+      "fr": "Lotus toujours changeant",
+      "zh-CN": "永变莲花",
+      "zh-TW": "永變蓮花"
+     },
+     "texture": "ever-shifting-lotus"
+    }
+   ]
+  },
+  "emperor": {
+   "main": [
+    {
+     "key": "ancient-law-tome",
+     "source": "droppable",
+     "name": {
+      "en": "Ancient Law Tome",
+      "uk": "Том Давнього Закону",
+      "ro": "Tom al Legii Antice",
+      "de": "Foliant des uralten Gesetzes",
+      "es": "Tomo de leyes antiguas",
+      "fr": "Tome de lois anciennes",
+      "zh-CN": "古代律法秘典",
+      "zh-TW": "古代律法秘典"
+     },
+     "texture": "ancient-law-tome"
+    },
+    {
+     "key": "scale-of-justice",
+     "source": "foundable",
+     "name": {
+      "en": "Scale Of Justice",
+      "uk": "Терези Справедливості",
+      "ro": "Balanța Dreptății",
+      "de": "Waage der Gerechtigkeit",
+      "es": "Balanza de justicia",
+      "fr": "Balance de la Justice",
+      "zh-CN": "正义天平",
+      "zh-TW": "正義天平"
+     },
+     "texture": "scale-of-justice"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "obsidian-shard",
+     "source": "mineable",
+     "name": {
+      "en": "Obsidian Shard",
+      "uk": "Осколок Обсидіану",
+      "ro": "Fragment de obsidian",
+      "de": "Obsidiansplitter",
+      "es": "Esquirla de obsidiana",
+      "fr": "Fragment d’obsidienne",
+      "zh-CN": "黑曜石碎片",
+      "zh-TW": "黑曜石碎片"
+     },
+     "texture": "obsidian-shard"
+    }
+   ]
+  },
+  "error": {
+   "main": [
+    {
+     "key": "phantom-mirage-pearl",
+     "source": "foundable",
+     "name": {
+      "en": "Phantom Mirage Pearl",
+      "uk": "Фантомна Міражна Перлина",
+      "ro": "Perlă de Miraj Fantomă",
+      "de": "Phantomtrugbildperle",
+      "es": "Perla de espejismo fantasma",
+      "fr": "Perle de mirage fantôme",
+      "zh-CN": "幻影海市蜃楼珍珠",
+      "zh-TW": "幻影海市蜃樓珍珠"
+     },
+     "texture": "phantom-mirage-pearl"
+    },
+    {
+     "key": "distorted-raven-feather",
+     "source": "droppable",
+     "name": {
+      "en": "Distorted Raven Feather",
+      "uk": "Скажене Перо Ворона",
+      "ro": "Pană de corb distorsionată",
+      "de": "Verzerrte Rabenfeder",
+      "es": "Pluma de cuervo distorsionada",
+      "fr": "Plume de corbeau distordue",
+      "zh-CN": "扭曲乌鸦羽毛",
+      "zh-TW": "扭曲烏鴉羽毛"
+     },
+     "texture": "distorted-raven-feather"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "broken-time-fragment",
+     "source": "foundable",
+     "name": {
+      "en": "Broken Time Fragment",
+      "uk": "Розбитий Фрагмент Часу",
+      "ro": "Fragment de timp spart",
+      "de": "Zerbrochenes Zeitfragment",
+      "es": "Fragmento de tiempo roto",
+      "fr": "Fragment de temps brisé",
+      "zh-CN": "破碎时光碎片",
+      "zh-TW": "破碎時光碎片"
+     },
+     "texture": "broken-time-fragment"
+    },
+    {
+     "key": "echo-lost-thought",
+     "source": "droppable",
+     "name": {
+      "en": "Echo of a Lost Thought",
+      "uk": "Ехо Втраченої Думки",
+      "ro": "Ecoul unui gând pierdut",
+      "de": "Echo eines verlorenen Gedankens",
+      "es": "Eco de un pensamiento perdido",
+      "fr": "Écho d’une pensée perdue",
+      "zh-CN": "失落思绪的回响",
+      "zh-TW": "失落思緒的迴響"
+     },
+     "texture": "echo-lost-thought"
+    }
+   ]
+  },
+  "fool": {
+   "main": [
+    {
+     "key": "lavos-squid-blood",
+     "source": "droppable",
+     "name": {
+      "en": "Blood of the Lavos Squid",
+      "uk": "Кров Лавового Кальмара",
+      "ro": "Sânge de Calmar Lavos",
+      "de": "Blut des Lavos-Kalmars",
+      "es": "Sangre de calamar Lavos",
+      "fr": "Sang du calmar de Lavos",
+      "zh-CN": "拉沃斯乌贼之血",
+      "zh-TW": "拉沃斯烏賊之血"
+     },
+     "texture": "lavos-squid-blood"
+    },
+    {
+     "key": "stellar-aqua-crystal",
+     "source": "foundable",
+     "name": {
+      "en": "Stellar Aqua Crystal",
+      "uk": "Зоряний Аква-Кристал",
+      "ro": "Cristal de Apă Stelară",
+      "de": "Sternenwasser-Kristall",
+      "es": "Cristal de agua estelar",
+      "fr": "Cristal d’eau stellaire",
+      "zh-CN": "星辰水蓝水晶",
+      "zh-TW": "星辰水藍水晶"
+     },
+     "texture": "stellar-aqua-crystal"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "gold-mint-leaves",
+     "source": "mineable",
+     "name": {
+      "en": "Gold Mint Leaves",
+      "uk": "Листя Золотої М’яти",
+      "ro": "Frunze de mentă aurie",
+      "de": "Blätter der Goldminze",
+      "es": "Hojas de menta dorada",
+      "fr": "Feuilles de menthe dorée",
+      "zh-CN": "金薄荷叶",
+      "zh-TW": "金薄荷葉"
+     },
+     "texture": "gold-mint-leaves"
+    }
+   ]
+  },
+  "fortune": {
+   "main": [
+    {
+     "key": "fortune-clover",
+     "source": "foundable",
+     "name": {
+      "en": "Fortune Clover",
+      "uk": "Конюшина Удачі",
+      "ro": "Trifoi al Norocului",
+      "de": "Glücksklee",
+      "es": "Trébol de la fortuna",
+      "fr": "Trèfle de fortune",
+      "zh-CN": "幸运四叶草",
+      "zh-TW": "幸運四葉草"
+     },
+     "texture": "fortune-clover"
+    },
+    {
+     "key": "diviners-crystal",
+     "source": "droppable",
+     "name": {
+      "en": "Diviner's Crystal",
+      "uk": "Кристал Віщуна",
+      "ro": "Cristalul Divinatorului",
+      "de": "Kristall des Weissagers",
+      "es": "Cristal de adivino",
+      "fr": "Cristal de Devin",
+      "zh-CN": "占卜家水晶",
+      "zh-TW": "占卜家水晶"
+     },
+     "texture": "diviners-crystal"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "prophetic-ink-dust",
+     "source": "foundable",
+     "name": {
+      "en": "Prophetic Ink Dust",
+      "uk": "Пророчий Чорнильний Пил",
+      "ro": "Praf de cerneală profetică",
+      "de": "Staub prophetischer Tinte",
+      "es": "Polvo de tinta profética",
+      "fr": "Poussière d’encre prophétique",
+      "zh-CN": "预言墨尘",
+      "zh-TW": "預言墨塵"
+     },
+     "texture": "prophetic-ink-dust"
+    }
+   ]
+  },
+  "giant": {
+   "main": [
+    {
+     "key": "warrior-blood",
+     "source": "droppable",
+     "name": {
+      "en": "Warrior's Blood",
+      "uk": "Кров Воїна",
+      "ro": "Sângele Războinicului",
+      "de": "Blut eines Kriegers",
+      "es": "Sangre de guerrero",
+      "fr": "Sang de Guerrier",
+      "zh-CN": "战士之血",
+      "zh-TW": "戰士之血"
+     },
+     "texture": "warrior-blood"
+    },
+    {
+     "key": "divine-essence",
+     "source": "droppable",
+     "name": {
+      "en": "Divine Essence",
+      "uk": "Божественна Есенція",
+      "ro": "Esență divină",
+      "de": "Göttliche Essenz",
+      "es": "Esencia divina",
+      "fr": "Essence divine",
+      "zh-CN": "神性精华",
+      "zh-TW": "神性精華"
+     },
+     "texture": "divine-essence"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "ancient-combat-manual",
+     "source": "foundable",
+     "name": {
+      "en": "Ancient Combat Manual",
+      "uk": "Стародавній Бойовий Посібник",
+      "ro": "Manual de luptă antic",
+      "de": "Uraltes Kampfhandbuch",
+      "es": "Manual de combate antiguo",
+      "fr": "Manuel de combat ancien",
+      "zh-CN": "古代战斗手册",
+      "zh-TW": "古代戰鬥手冊"
+     },
+     "texture": "ancient-combat-manual"
+    },
+    {
+     "key": "strength-crystal",
+     "source": "mineable",
+     "name": {
+      "en": "Strength Crystal",
+      "uk": "Кристал Сили",
+      "ro": "Cristal de forță",
+      "de": "Stärkekristall",
+      "es": "Cristal de fuerza",
+      "fr": "Cristal de force",
+      "zh-CN": "力量水晶",
+      "zh-TW": "力量水晶"
+     },
+     "texture": "strength-crystal"
+    }
+   ]
+  },
+  "hanged": {
+   "main": [
+    {
+     "key": "whispered-scroll",
+     "source": "foundable",
+     "name": {
+      "en": "Whispered Scroll",
+      "uk": "Шептальний Сувій",
+      "ro": "Sul șoptit",
+      "de": "Geflüsterte Schriftrolle",
+      "es": "Pergamino susurrado",
+      "fr": "Parchemin murmuré",
+      "zh-CN": "低语卷轴",
+      "zh-TW": "低語卷軸"
+     },
+     "texture": "whispered-scroll"
+    },
+    {
+     "key": "echoing-conch",
+     "source": "droppable",
+     "name": {
+      "en": "Echoing Conch",
+      "uk": "Луна-Мушля",
+      "ro": "Scoică ecou",
+      "de": "Widerhallende Muschel",
+      "es": "Caracola resonante",
+      "fr": "Conque résonnante",
+      "zh-CN": "回声海螺",
+      "zh-TW": "回聲海螺"
+     },
+     "texture": "echoing-conch"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "supplicant-teardrop",
+     "source": "foundable",
+     "name": {
+      "en": "Supplicant's Teardrop",
+      "uk": "Сльоза Прохача",
+      "ro": "Lacrima Implorătorului",
+      "de": "Träne des Bittstellers",
+      "es": "Lágrima de Suplicante",
+      "fr": "Larme de Suppliant",
+      "zh-CN": "祈光人之泪",
+      "zh-TW": "祈光人之淚"
+     },
+     "texture": "supplicant-teardrop"
+    }
+   ]
+  },
+  "hermit": {
+   "main": [
+    {
+     "key": "third-eye-crystal",
+     "source": "droppable",
+     "name": {
+      "en": "Third Eye Crystal",
+      "uk": "Кристал Третього Ока",
+      "ro": "Cristal al celui de-al treilea ochi",
+      "de": "Kristall des dritten Auges",
+      "es": "Cristal de tercer ojo",
+      "fr": "Cristal de troisième œil",
+      "zh-CN": "第三眼水晶",
+      "zh-TW": "第三眼水晶"
+     },
+     "texture": "third-eye-crystal"
+    },
+    {
+     "key": "stargazer-essence",
+     "source": "droppable",
+     "name": {
+      "en": "Stargazer Essence",
+      "uk": "Есенція Зоряного Спостерігача",
+      "ro": "Esență de privitor al stelelor",
+      "de": "Essenz eines Sternenbeobachters",
+      "es": "Esencia de observador de estrellas",
+      "fr": "Essence d’Observateur des étoiles",
+      "zh-CN": "观星者精华",
+      "zh-TW": "觀星者精華"
+     },
+     "texture": "stargazer-essence"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "mystic-tome-fragment",
+     "source": "foundable",
+     "name": {
+      "en": "Mystic Tome Fragment",
+      "uk": "Уламок Містичного Тому",
+      "ro": "Fragment de tom mistic",
+      "de": "Fragment eines mystischen Folianten",
+      "es": "Fragmento de tomo místico",
+      "fr": "Fragment de tome mystique",
+      "zh-CN": "神秘秘典碎片",
+      "zh-TW": "神秘秘典碎片"
+     },
+     "texture": "mystic-tome-fragment"
+    },
+    {
+     "key": "orchid-petal",
+     "source": "foundable",
+     "name": {
+      "en": "Orchid Petal",
+      "uk": "Пелюстка Орхідеї",
+      "ro": "Petală de orhidee",
+      "de": "Orchideenblütenblatt",
+      "es": "Pétalo de orquídea",
+      "fr": "Pétale d’orchidée",
+      "zh-CN": "兰花花瓣",
+      "zh-TW": "蘭花花瓣"
+     },
+     "texture": "orchid-petal"
+    }
+   ]
+  },
+  "justiciar": {
+   "main": [
+    {
+     "key": "arbiter-badge",
+     "source": "droppable",
+     "name": {
+      "en": "Arbiter Badge",
+      "uk": "Значок Арбітра",
+      "ro": "Insigna Arbitrului",
+      "de": "Abzeichen des Schlichters",
+      "es": "Insignia de árbitro",
+      "fr": "Insigne d’Arbitre",
+      "zh-CN": "仲裁人徽章",
+      "zh-TW": "仲裁人徽章"
+     },
+     "texture": null
+    },
+    {
+     "key": "scale-of-justice",
+     "source": "foundable",
+     "name": {
+      "en": "Scale Of Justice",
+      "uk": "Терези Справедливості",
+      "ro": "Balanța Dreptății",
+      "de": "Waage der Gerechtigkeit",
+      "es": "Balanza de justicia",
+      "fr": "Balance de la Justice",
+      "zh-CN": "正义天平",
+      "zh-TW": "正義天平"
+     },
+     "texture": "scale-of-justice"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "order-crystal",
+     "source": "mineable",
+     "name": {
+      "en": "Order Crystal",
+      "uk": "Кристал Порядку",
+      "ro": "Cristal al ordinii",
+      "de": "Ordnungskristall",
+      "es": "Cristal de orden",
+      "fr": "Cristal d’ordre",
+      "zh-CN": "秩序水晶",
+      "zh-TW": "秩序水晶"
+     },
+     "texture": "order-crystal"
+    },
+    {
+     "key": "law-scripture",
+     "source": "foundable",
+     "name": {
+      "en": "Law Scripture",
+      "uk": "Писання Закону",
+      "ro": "Scriptură a Legii",
+      "de": "Gesetzesschrift",
+      "es": "Escritura de la ley",
+      "fr": "Écriture de loi",
+      "zh-CN": "律法经文",
+      "zh-TW": "律法經文"
+     },
+     "texture": "law-scripture"
+    }
+   ]
+  },
+  "moon": {
+   "main": [
+    {
+     "key": "flying-unicorn-horn",
+     "source": "droppable",
+     "name": {
+      "en": "Flying Unicorn Horn",
+      "uk": "Ріг Летючого Єдинорога",
+      "ro": "Corn de Unicorn Zburător",
+      "de": "Horn eines fliegenden Einhorns",
+      "es": "Cuerno de Unicornio Volador",
+      "fr": "Corne de Licorne volante",
+      "zh-CN": "飞天独角兽之角",
+      "zh-TW": "飛天獨角獸之角"
+     },
+     "texture": "flying-unicorn-horn"
+    },
+    {
+     "key": "royal-jellyfish-venom-crystal",
+     "source": "droppable",
+     "name": {
+      "en": "Royal Jellyfish Venom Crystal",
+      "uk": "Кристал Отрути Королівської Медузи",
+      "ro": "Cristal de venin de meduză regală",
+      "de": "Giftkristall einer königlichen Qualle",
+      "es": "Cristal de veneno de Medusa Real",
+      "fr": "Cristal de venin de méduse royale",
+      "zh-CN": "皇家水母毒液水晶",
+      "zh-TW": "皇家水母毒液水晶"
+     },
+     "texture": "royal-jellyfish-venom-crystal"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "flying-unicorn-blood",
+     "source": "droppable",
+     "name": {
+      "en": "Flying Unicorn Blood",
+      "uk": "Кров Летючого Єдинорога",
+      "ro": "Sânge de Unicorn Zburător",
+      "de": "Blut eines fliegenden Einhorns",
+      "es": "Sangre de Unicornio Volador",
+      "fr": "Sang de Licorne volante",
+      "zh-CN": "飞天独角兽之血",
+      "zh-TW": "飛天獨角獸之血"
+     },
+     "texture": "flying-unicorn-blood"
+    },
+    {
+     "key": "arsenic-powder",
+     "source": "foundable",
+     "name": {
+      "en": "Arsenic Powder",
+      "uk": "Миш'яковий Порошок",
+      "ro": "Pudră de arsenic",
+      "de": "Arsenpulver",
+      "es": "Polvo de arsénico",
+      "fr": "Poudre d’arsenic",
+      "zh-CN": "砷粉",
+      "zh-TW": "砷粉"
+     },
+     "texture": "arsenic-powder"
+    }
+   ]
+  },
+  "mother": {
+   "main": [
+    {
+     "key": "golden-gorilla-brain",
+     "source": "droppable",
+     "name": {
+      "en": "Brain of a Golden Gorilla",
+      "uk": "Мозок золотої горили",
+      "ro": "Creier de gorilă aurie",
+      "de": "Gehirn eines goldenen Gorillas",
+      "es": "Cerebro de un Gorila Dorado",
+      "fr": "Cerveau de Gorille doré",
+      "zh-CN": "金刚大猩猩大脑",
+      "zh-TW": "金剛大猩猩大腦"
+     },
+     "texture": "golden-gorilla-brain"
+    },
+    {
+     "key": "rainbird-eyeball",
+     "source": "droppable",
+     "name": {
+      "en": "Eyeball of a Rainbird",
+      "uk": "Очне яблуко дощового птаха",
+      "ro": "Ochi de Pasăre de Ploaie",
+      "de": "Augapfel eines Regenvogels",
+      "es": "Ojo de Pájaro de la Lluvia",
+      "fr": "Œil d’Oiseau de pluie",
+      "zh-CN": "雨鸟眼球",
+      "zh-TW": "雨鳥眼球"
+     },
+     "texture": "rainbird-eyeball"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "golden-gorilla-blood",
+     "source": "droppable",
+     "name": {
+      "en": "Blood of a Golden Gorilla",
+      "uk": "Кров золотої горили",
+      "ro": "Sânge de gorilă aurie",
+      "de": "Blut eines goldenen Gorillas",
+      "es": "Sangre de un Gorila Dorado",
+      "fr": "Sang de Gorille doré",
+      "zh-CN": "金刚大猩猩之血",
+      "zh-TW": "金剛大猩猩之血"
+     },
+     "texture": "golden-gorilla-blood"
+    },
+    {
+     "key": "rainbird-feather",
+     "source": "foundable",
+     "name": {
+      "en": "Feather of a Rainbird",
+      "uk": "Перо дощового птаха",
+      "ro": "Pană de Pasăre de Ploaie",
+      "de": "Feder eines Regenvogels",
+      "es": "Pluma de Pájaro de la Lluvia",
+      "fr": "Plume d’Oiseau de pluie",
+      "zh-CN": "雨鸟羽毛",
+      "zh-TW": "雨鳥羽毛"
+     },
+     "texture": "rainbird-feather"
+    }
+   ]
+  },
+  "paragon": {
+   "main": [
+    {
+     "key": "mechanical-gear",
+     "source": "droppable",
+     "name": {
+      "en": "Mechanical Gear",
+      "uk": "Механічна Шестерня",
+      "ro": "Roată mecanică",
+      "de": "Mechanisches Zahnrad",
+      "es": "Engranaje mecánico",
+      "fr": "Engrenage mécanique",
+      "zh-CN": "机械齿轮",
+      "zh-TW": "機械齒輪"
+     },
+     "texture": "mechanical-gear"
+    },
+    {
+     "key": "knowledge-fragment",
+     "source": "droppable",
+     "name": {
+      "en": "Knowledge Fragment",
+      "uk": "Фрагмент Знань",
+      "ro": "Fragment de cunoaștere",
+      "de": "Wissensfragment",
+      "es": "Fragmento de conocimiento",
+      "fr": "Fragment de savoir",
+      "zh-CN": "知识碎片",
+      "zh-TW": "知識碎片"
+     },
+     "texture": "knowledge-fragment"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "precision-oil",
+     "source": "foundable",
+     "name": {
+      "en": "Precision Oil",
+      "uk": "Прецизійна Олія",
+      "ro": "Ulei de precizie",
+      "de": "Präzisionsöl",
+      "es": "Aceite de precisión",
+      "fr": "Huile de précision",
+      "zh-CN": "精密油",
+      "zh-TW": "精密油"
+     },
+     "texture": "precision-oil"
+    }
+   ]
+  },
+  "priest": {
+   "main": [
+    {
+     "key": "red-wolf-heart",
+     "source": "droppable",
+     "name": {
+      "en": "Heart of the Red Wolf",
+      "uk": "Серце Червоного Вовка",
+      "ro": "Inima Lupului Roșu",
+      "de": "Herz des roten Wolfs",
+      "es": "Corazón de Lobo Rojo",
+      "fr": "Cœur de Loup rouge",
+      "zh-CN": "红狼之心",
+      "zh-TW": "紅狼之心"
+     },
+     "texture": "red-wolf-heart"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "red-wine",
+     "source": "foundable",
+     "name": {
+      "en": "Red Wine",
+      "uk": "Червоне Вино",
+      "ro": "Vin roșu",
+      "de": "Rotwein",
+      "es": "Vino tinto",
+      "fr": "Vin rouge",
+      "zh-CN": "红酒",
+      "zh-TW": "紅酒"
+     },
+     "texture": "red-wine"
+    },
+    {
+     "key": "red-chestnut-flower",
+     "source": "mineable",
+     "name": {
+      "en": "Flower of the Red Chestnut",
+      "uk": "Квітка Червоного Каштана",
+      "ro": "Floarea Castanului Roșu",
+      "de": "Blüte der roten Kastanie",
+      "es": "Flor de Castaño Rojo",
+      "fr": "Fleur de châtaignier rouge",
+      "zh-CN": "红栗花",
+      "zh-TW": "紅栗花"
+     },
+     "texture": "red-chestnut-flower"
+    }
+   ]
+  },
+  "sun": {
+   "main": [
+    {
+     "key": "crystal-sunflower",
+     "source": "mineable",
+     "name": {
+      "en": "Crystal Sunflower",
+      "uk": "Кристалічна Соняшниця",
+      "ro": "Floarea-soarelui de cristal",
+      "de": "Kristallsonnenblume",
+      "es": "Girasol de cristal",
+      "fr": "Tournesol cristallin",
+      "zh-CN": "水晶向日葵",
+      "zh-TW": "水晶向日葵"
+     },
+     "texture": "crystal-sunflower"
+    },
+    {
+     "key": "siren-rock",
+     "source": "foundable",
+     "name": {
+      "en": "Siren Rock",
+      "uk": "Камінь Сирени",
+      "ro": "Piatră de sirenă",
+      "de": "Sirenenstein",
+      "es": "Roca de sirena",
+      "fr": "Roche de sirène",
+      "zh-CN": "塞壬之石",
+      "zh-TW": "塞壬之石"
+     },
+     "texture": "siren-rock"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "golden-sap",
+     "source": "droppable",
+     "name": {
+      "en": "Golden Sap",
+      "uk": "Золотава Смола",
+      "ro": "Sevă aurie",
+      "de": "Goldener Saft",
+      "es": "Savia dorada",
+      "fr": "Sève dorée",
+      "zh-CN": "金色树液",
+      "zh-TW": "金色樹液"
+     },
+     "texture": "golden-sap"
+    },
+    {
+     "key": "blade-of-midsummer-grass",
+     "source": "mineable",
+     "name": {
+      "en": "Blade of Midsummer Grass",
+      "uk": "Листок Трави Середини Літа",
+      "ro": "Fir de iarbă de mijlocul verii",
+      "de": "Halm des Mittsommergrases",
+      "es": "Hoja de hierba de pleno verano",
+      "fr": "Brin d’herbe du solstice d’été",
+      "zh-CN": "仲夏草叶",
+      "zh-TW": "仲夏草葉"
+     },
+     "texture": "blade-of-midsummer-grass"
+    }
+   ]
+  },
+  "tower": {
+   "main": [
+    {
+     "key": "ancient-manuscript-fragment",
+     "source": "droppable",
+     "name": {
+      "en": "Ancient Manuscript Fragment",
+      "uk": "Фрагмент Стародавнього Рукопису",
+      "ro": "Fragment de manuscris antic",
+      "de": "Fragment einer uralten Handschrift",
+      "es": "Fragmento de manuscrito antiguo",
+      "fr": "Fragment de manuscrit ancien",
+      "zh-CN": "古代手稿碎片",
+      "zh-TW": "古代手稿碎片"
+     },
+     "texture": "ancient-manuscript-fragment"
+    },
+    {
+     "key": "crystal-of-clarity",
+     "source": "foundable",
+     "name": {
+      "en": "Crystal of Clarity",
+      "uk": "Кристал Ясності",
+      "ro": "Cristal al Clarității",
+      "de": "Kristall der Klarheit",
+      "es": "Cristal de claridad",
+      "fr": "Cristal de clarté",
+      "zh-CN": "澄澈水晶",
+      "zh-TW": "澄澈水晶"
+     },
+     "texture": "crystal-of-clarity"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "scholars-ink",
+     "source": "mineable",
+     "name": {
+      "en": "Scholar's Ink",
+      "uk": "Чорнило Вченого",
+      "ro": "Cerneala Cărturarului",
+      "de": "Tinte des Gelehrten",
+      "es": "Tinta de erudito",
+      "fr": "Encre d’Érudit",
+      "zh-CN": "学者墨水",
+      "zh-TW": "學者墨水"
+     },
+     "texture": "scholars-ink"
+    }
+   ]
+  },
+  "tyrant": {
+   "main": [
+    {
+     "key": "murloc-bladder",
+     "source": "droppable",
+     "name": {
+      "en": "Bladder of the Murloc",
+      "uk": "Міхур Мурлока",
+      "ro": "Vezica Murlocului",
+      "de": "Blase eines Murlocs",
+      "es": "Vejiga de múrloc",
+      "fr": "Vessie de Murloc",
+      "zh-CN": "鱼人膀胱",
+      "zh-TW": "魚人膀胱"
+     },
+     "texture": "murloc-bladder"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "salted-seaweed",
+     "source": "foundable",
+     "name": {
+      "en": "Salted Seaweed",
+      "uk": "Засолені Морські Водорості",
+      "ro": "Alge marine sărate",
+      "de": "Gesalzener Seetang",
+      "es": "Alga marina salada",
+      "fr": "Algue salée",
+      "zh-CN": "盐渍海藻",
+      "zh-TW": "鹽漬海藻"
+     },
+     "texture": "salted-seaweed"
+    },
+    {
+     "key": "pearl-powder",
+     "source": "foundable",
+     "name": {
+      "en": "Pearl Powder",
+      "uk": "Перловий Порошок",
+      "ro": "Pudră de perlă",
+      "de": "Perlenpulver",
+      "es": "Polvo de perla",
+      "fr": "Poudre de perle",
+      "zh-CN": "珍珠粉",
+      "zh-TW": "珍珠粉"
+     },
+     "texture": "pearl-powder"
+    }
+   ]
+  },
+  "visionary": {
+   "main": [
+    {
+     "key": "manhal-fish-eyeball",
+     "source": "droppable",
+     "name": {
+      "en": "Matured Manhal Fish's Eyeball",
+      "uk": "Око Дорослої Риби Манхал",
+      "ro": "Ochiul Peștelui Manhal matur",
+      "de": "Augapfel eines ausgewachsenen Manhal-Fischs",
+      "es": "Ojo de Pez Manhal maduro",
+      "fr": "Œil de Poisson Manhal mature",
+      "zh-CN": "成熟曼哈尔鱼的眼球",
+      "zh-TW": "成熟曼哈爾魚的眼球"
+     },
+     "texture": "manhal-fish-eyeball"
+    },
+    {
+     "key": "goat-horned-blackfish-blood",
+     "source": "droppable",
+     "name": {
+      "en": "Goat-Horned Blackfish Blood",
+      "uk": "Кров Козорогої Чорної Риби",
+      "ro": "Sânge de Pește Negru cu Coarne de Capră",
+      "de": "Blut eines ziegengehörnten Schwarzfischs",
+      "es": "Sangre de Pez Negro Cornudo de Cabra",
+      "fr": "Sang de Poisson noir à cornes de chèvre",
+      "zh-CN": "羊角黑鱼之血",
+      "zh-TW": "羊角黑魚之血"
+     },
+     "texture": "goat-horned-blackfish-blood"
+    }
+   ],
+   "supplementary": [
+    {
+     "key": "autumn-crocus-essence",
+     "source": "foundable",
+     "name": {
+      "en": "Autumn Crocus Essence",
+      "uk": "Есенція Осіннього Крокусу",
+      "ro": "Esență de brândușă de toamnă",
+      "de": "Essenz der Herbstzeitlose",
+      "es": "Esencia de cólquico otoñal",
+      "fr": "Essence de colchique d’automne",
+      "zh-CN": "秋水仙精华",
+      "zh-TW": "秋水仙精華"
+     },
+     "texture": "autumn-crocus-essence"
+    },
+    {
+     "key": "elf-flower-petals",
+     "source": "foundable",
+     "name": {
+      "en": "Elf Flower Petals",
+      "uk": "Пелюстки Ельфійської Квітки",
+      "ro": "Petale de Floare Elfică",
+      "de": "Blütenblätter der Elfenblume",
+      "es": "Pétalos de Flor Élfica",
+      "fr": "Pétales de fleur elfe",
+      "zh-CN": "妖精花花瓣",
+      "zh-TW": "妖精花花瓣"
+     },
+     "texture": "elf-flower-petals"
+    }
+   ]
+  }
+ }
+}
