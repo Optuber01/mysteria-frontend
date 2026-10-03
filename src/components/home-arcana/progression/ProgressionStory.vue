@@ -989,7 +989,7 @@ onUnmounted(() => {
  * Sticky storytelling needs room for its copy, controls and stage to coexist.
  * Narrow and short viewports, and reduced motion, get one document-flow list.
  */
-@media (max-width: 900px), (max-height: 700px), (prefers-reduced-motion: reduce) {
+@media (max-width: 900px), (max-height: 590px), (prefers-reduced-motion: reduce) {
   .progression {
     min-height: auto;
     padding: clamp(64px, 12vw, 96px) clamp(18px, 4vw, 64px);
