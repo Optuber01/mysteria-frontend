@@ -16,11 +16,7 @@
       </ul>
 
       <!-- out there: what to fight -->
-      <section class="world-group" aria-labelledby="world-fight-title">
-        <header class="world-group__head">
-          <h3 id="world-fight-title">{{ t('home.world.groups.fight.title') }}</h3>
-        </header>
-
+      <div class="world-group">
         <article class="world-feature">
           <WorldPhoto
               class="world-feature__photo"
@@ -57,9 +53,6 @@
           <li class="world-card world-card--moon">
             <div class="world-moon" aria-hidden="true">
               <img class="world-moon__disc" :src="moon" alt="" width="640" height="640" loading="lazy" decoding="async">
-              <span class="world-moon__week" :title="t('home.world.moon.week')">
-                <i v-for="n in 7" :key="n" :class="{'is-red': n === 7}"></i>
-              </span>
             </div>
             <div class="world-card__copy">
               <h4>{{ t('home.world.moon.title') }}</h4>
@@ -77,14 +70,10 @@
             </div>
           </li>
         </ul>
-      </section>
+      </div>
 
       <!-- among players: what to build -->
-      <section class="world-group" aria-labelledby="world-build-title">
-        <header class="world-group__head">
-          <h3 id="world-build-title">{{ t('home.world.groups.build.title') }}</h3>
-        </header>
-
+      <div class="world-group">
         <article class="world-feature is-reversed">
           <div class="world-mosaic">
             <WorldPhoto class="world-mosaic__main" :shot="shots.townMain" :alt="t('home.world.towns.altMain')" sizes="(max-width: 900px) 100vw, 58vw"/>
@@ -115,7 +104,7 @@
             </div>
           </li>
         </ul>
-      </section>
+      </div>
 
       <!-- the gallery: everything the players made -->
       <header class="world-gallery__head">
@@ -130,7 +119,7 @@
             <button
                 v-if="!reducedMotion"
                 type="button"
-                class="world-gallery__toggle"
+                class="arc-btn arc-btn--ghost world-gallery__toggle"
                 :aria-pressed="paused"
                 :aria-label="paused ? t('home.world.gallery.play') : t('home.world.gallery.pause')"
                 @click="paused = !paused"
@@ -260,7 +249,7 @@ onUnmounted(() => {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-block: 1px solid var(--arc-line);
+  border-block: var(--arc-bw) solid var(--arc-line);
 }
 
 .world-rules li {
@@ -271,8 +260,17 @@ onUnmounted(() => {
   padding: clamp(18px, 2vw, 26px) clamp(14px, 1.6vw, 24px);
 }
 
+/* the strip's outer items sit on the page's edges, like every other block */
+.world-rules li:first-child {
+  padding-left: 0;
+}
+
+.world-rules li:last-child {
+  padding-right: 0;
+}
+
 .world-rules li + li {
-  border-left: 1px solid var(--arc-line);
+  border-left: var(--arc-bw) solid var(--arc-line);
 }
 
 .world-rules i {
@@ -286,13 +284,13 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 17px;
-  line-height: 1.25;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
   color: var(--arc-ink);
 }
 
 .world-rules span {
-  font-size: 14px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-muted);
   text-wrap: pretty;
@@ -303,11 +301,6 @@ onUnmounted(() => {
   margin-top: var(--arc-block-gap);
 }
 
-.world-group__head {
-  margin-bottom: clamp(22px, 2.6vw, 36px);
-}
-
-.world-group__head h3,
 .world-gallery__head h3 {
   margin: 0;
   font-family: var(--arc-display);
@@ -338,7 +331,7 @@ onUnmounted(() => {
 
 .world-feature__photo {
   aspect-ratio: 16 / 10;
-  border-radius: var(--arc-radius-lg);
+  border-radius: var(--arc-r-lg);
 }
 
 .world-feature__title {
@@ -376,19 +369,9 @@ onUnmounted(() => {
   align-items: center;
   gap: 14px;
   padding: 10px 0;
-  font-size: 15px;
+  font-size: var(--arc-fs-body);
   line-height: 1.5;
   color: var(--arc-muted);
-}
-
-.world-steps li:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 14px;
-  top: calc(50% + 17px);
-  height: calc(100% - 30px);
-  width: 1.5px;
-  background: color-mix(in oklab, var(--acc) 40%, transparent);
 }
 
 .world-steps strong {
@@ -402,8 +385,8 @@ onUnmounted(() => {
   place-items: center;
   width: 28px;
   height: 40px;
-  border: 1.5px solid var(--acc-ink);
-  border-radius: 4px;
+  border: var(--arc-bw-accent) solid var(--acc-ink);
+  border-radius: var(--arc-r-sm);
   background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
@@ -420,7 +403,7 @@ onUnmounted(() => {
   padding: 16px 0 0;
   display: grid;
   gap: 8px;
-  border-top: 1px solid var(--arc-line);
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
 .world-facts li {
@@ -428,7 +411,7 @@ onUnmounted(() => {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  font-size: 14px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-ink);
 }
@@ -448,17 +431,17 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: clamp(10px, 1vw, 14px);
+  gap: var(--arc-grid-gap);
   aspect-ratio: 16 / 10;
 }
 
 .world-mosaic__main {
   grid-row: 1 / -1;
-  border-radius: var(--arc-radius-lg);
+  border-radius: var(--arc-r-lg);
 }
 
 .world-mosaic__side {
-  border-radius: var(--arc-radius);
+  border-radius: var(--arc-r-lg);
 }
 
 .world-ladder {
@@ -476,9 +459,9 @@ onUnmounted(() => {
   align-content: start;
   gap: 6px;
   padding: 16px 14px 16px;
-  border-radius: var(--arc-radius);
+  border-radius: var(--arc-r-md);
   background: var(--arc-glass);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 /* the arrow from one rung to the next */
@@ -490,8 +473,8 @@ onUnmounted(() => {
   right: -9px;
   width: 8px;
   height: 8px;
-  border-top: 1.5px solid var(--acc-ink);
-  border-right: 1.5px solid var(--acc-ink);
+  border-top: var(--arc-bw-accent) solid var(--acc-ink);
+  border-right: var(--arc-bw-accent) solid var(--acc-ink);
   transform: rotate(45deg);
 }
 
@@ -504,13 +487,13 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 17px;
+  font-size: var(--arc-fs-h4);
   color: var(--arc-ink);
 }
 
 .world-ladder span:last-child {
   text-wrap: pretty;
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.45;
   color: var(--arc-muted);
 }
@@ -520,18 +503,18 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   margin: 0;
-  font-size: 14.5px;
+  font-size: var(--arc-fs-small);
   color: var(--arc-muted);
 }
 
 /* ---------- cards: a shot on top, its caption rising out of it ---------- */
 .world-cards {
   list-style: none;
-  margin: clamp(18px, 2vw, 28px) 0 0;
+  margin: var(--arc-group-gap) 0 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(14px, 1.6vw, 22px);
+  gap: var(--arc-grid-gap);
 }
 
 .world-card {
@@ -539,10 +522,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: var(--arc-radius-lg);
-  background: linear-gradient(180deg, var(--arc-card), var(--arc-card-2));
+  border-radius: var(--arc-r-lg);
+  background: var(--arc-card);
   isolation: isolate;
-  transition: transform .5s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
 }
 
 .world-card__photo,
@@ -568,21 +550,7 @@ onUnmounted(() => {
   z-index: 2;
   pointer-events: none;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--arc-line);
-  transition: box-shadow .3s;
-}
-
-.world-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 26px 60px var(--arc-shadow);
-}
-
-.world-card:hover::after {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 70%, transparent);
-}
-
-.world-card:hover :deep(.world-photo img) {
-  transform: scale(1.045);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 .world-card__copy {
@@ -601,15 +569,15 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(20px, 1.7vw, 24px);
-  line-height: 1.2;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
   color: var(--arc-ink);
 }
 
 .world-card__copy > p {
   text-wrap: pretty;
   margin: 0;
-  font-size: 14.5px;
+  font-size: var(--arc-fs-body);
   line-height: 1.6;
   color: var(--arc-muted);
 }
@@ -621,7 +589,7 @@ onUnmounted(() => {
   width: 100%;
   margin-top: auto;
   padding-top: 14px;
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-ink);
 }
@@ -631,7 +599,7 @@ onUnmounted(() => {
 }
 
 .world-card__copy > p.world-card__fact {
-  border-top: 1px solid var(--arc-line);
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
 /* the Crimson Moon is a moon, not a photo: give it its own sky */
@@ -653,34 +621,6 @@ onUnmounted(() => {
   aspect-ratio: 1;
   translate: -50% 0;
   filter: drop-shadow(0 0 40px rgba(255, 40, 50, .5));
-  transition: transform 1.2s cubic-bezier(.2, .8, .2, 1);
-}
-
-.world-card:hover .world-moon__disc {
-  transform: scale(1.05) rotate(-4deg);
-}
-
-.world-moon__week {
-  position: absolute;
-  right: 14px;
-  top: 14px;
-  display: flex;
-  gap: 7px;
-  padding: 8px 10px;
-  border-radius: 99px;
-  background: rgba(8, 8, 10, .6);
-}
-
-.world-moon__week i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .25);
-}
-
-.world-moon__week i.is-red {
-  background: #ff3b47;
-  box-shadow: 0 0 8px #ff3b47;
 }
 
 /* ---------- gallery ---------- */
@@ -690,7 +630,7 @@ onUnmounted(() => {
   align-items: end;
   gap: 20px clamp(32px, 5vw, 72px);
   margin-top: var(--arc-block-gap);
-  margin-bottom: clamp(22px, 2.6vw, 36px);
+  margin-bottom: var(--arc-group-gap);
 }
 
 .world-gallery__aside {
@@ -702,8 +642,8 @@ onUnmounted(() => {
 .world-gallery__aside p {
   max-width: 30em;
   margin: 0;
-  font-size: var(--arc-fs-body);
-  line-height: 1.6;
+  font-size: var(--arc-fs-lede);
+  line-height: 1.65;
   color: var(--arc-muted);
   text-align: right;
   text-wrap: balance;
@@ -714,33 +654,16 @@ onUnmounted(() => {
   gap: 10px;
 }
 
-.world-gallery__toggle {
-  display: grid;
-  place-items: center;
-  width: 50px;
-  height: 50px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--arc-glass);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
-  color: var(--arc-ink);
-  cursor: pointer;
-  transition: box-shadow .2s;
+/* an icon-only ghost button: square, as tall as the button beside it */
+.world-gallery__toggle.arc-btn {
+  flex: none;
+  width: var(--arc-btn-h);
+  padding: 0;
 }
 
 .world-gallery__toggle svg {
   width: 15px;
   height: 15px;
-}
-
-.world-gallery__toggle:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 60%, transparent);
-}
-
-.world-gallery__toggle:focus-visible,
-.world-strip:focus-visible {
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 3px;
 }
 
 /* full-bleed: the strip runs edge to edge, fading at both ends */
@@ -780,7 +703,7 @@ onUnmounted(() => {
 
 .world-strip__item :deep(.world-photo) {
   aspect-ratio: 16 / 10;
-  border-radius: var(--arc-radius);
+  border-radius: var(--arc-r-lg);
 }
 
 .world-strip.is-still {
@@ -810,7 +733,15 @@ onUnmounted(() => {
   }
 
   .world-rules li:nth-child(n + 3) {
-    border-top: 1px solid var(--arc-line);
+    border-top: var(--arc-bw) solid var(--arc-line);
+  }
+
+  .world-rules li:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  .world-rules li:nth-child(even) {
+    padding-right: 0;
   }
 }
 
@@ -844,10 +775,6 @@ onUnmounted(() => {
 
   .world-card {
     scroll-snap-align: start;
-  }
-
-  .world-card:hover {
-    transform: none;
   }
 
   .world-gallery__head {
@@ -929,14 +856,5 @@ onUnmounted(() => {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .world-card,
-  .world-moon__disc {
-    transition: none;
-  }
 
-  .world-card:hover {
-    transform: none;
-  }
-}
 </style>

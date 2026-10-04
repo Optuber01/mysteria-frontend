@@ -7,10 +7,16 @@
  *   Brew      the cauldron rises under it; one by one the ingredients leave
  *             the pages and drop into the brew, which takes the Pathway's
  *             colour; the book closes; the brew boils and the potion rises
- *   Drink     the player steps out of the fog, catches the potion, raises it,
- *             tips it and drains it in three gulps, then lowers the empty
- *             bottle while the dark closes in
- *   Awaken    a flash, the moon rises behind him and the card he drew turns up
+ *   Drink     the cauldron sinks and the player steps out of the fog; he holds
+ *             out his hand and the potion settles into it; he looks at it, raises
+ *             it to his mouth and drains it in three swallows, tipping it further
+ *             each time. Nothing else happens while he drinks. Then, one thing at
+ *             a time: he lowers the empty bottle; the room darkens and the first
+ *             voice speaks; his head bows and a hand goes to his temple while the
+ *             circle under him wakes and the voices come faster; at last the
+ *             voices stop and almost nothing is lit
+ *   Awaken    a flash, then he rises: the moon comes up behind him, his arms open
+ *             and the card he drew turns up
  */
 export const T = {
   // Discover
@@ -20,24 +26,33 @@ export const T = {
   brewIn: [0.235, 0.3],
   drops: [0.29, 0.43],
   dropSpan: 0.05,
-  bookOut: [0.425, 0.475],
-  boil: [0.45, 0.525],
-  brewFlash: 0.53,
-  potionUp: [0.53, 0.57],
+  bookOut: [0.42, 0.465],
+  boil: [0.44, 0.505],
+  brewFlash: 0.51,
+  potionUp: [0.51, 0.545],
   // Drink
-  cauldronOut: [0.56, 0.592],
-  playerIn: [0.578, 0.615],
-  catch: [0.6, 0.632],
-  raise: [0.632, 0.66],
-  gulps: [0.675, 0.705, 0.735],
-  gulpWidth: 0.026,
-  lower: [0.752, 0.775],
-  closing: [0.66, 0.1],
-  blackout: [0.775, 0.032],
+  cauldronOut: [0.538, 0.566],
+  playerIn: [0.546, 0.59],
+  /** his hand held out, and the potion settling into it */
+  reach: [0.578, 0.602],
+  catch: [0.584, 0.608],
+  /** a beat with the potion in his hand, looking at it */
+  regard: [0.604, 0.626],
+  raise: [0.626, 0.65],
+  gulps: [0.664, 0.686, 0.708],
+  gulpWidth: 0.016,
+  lower: [0.72, 0.742],
+  /** the potion takes hold: head bowed, hand to the temple, the circle waking */
+  hit: [0.744, 0.8],
+  /** the voices: one after another, from the lowered bottle until the dark */
+  voices: [0.736, 0.806],
+  /** the dark closing in: from the lowered bottle to the flash */
+  closing: [0.726, 0.114],
+  blackout: [0.81, 0.026],
   // Awaken
-  flash: 0.812,
-  awaken: [0.818, 0.09],
-  panel: [0.83, 0.93],
+  flash: 0.84,
+  awaken: [0.842, 0.1],
+  panel: [0.855, 0.95],
 } as const;
 
 export type ChapterId = 'discover' | 'brew' | 'drink' | 'awaken';
@@ -47,7 +62,8 @@ export type Chapter = { id: ChapterId; end: number; landing: number };
 export const CHAPTERS: Chapter[] = [
   { id: 'discover', end: T.brewIn[0] + 0.012, landing: 0.2 },
   { id: 'brew', end: T.potionUp[1], landing: 0.5 },
-  { id: 'drink', end: T.flash, landing: 0.715 },
+  // landing: the second swallow, the bottle tipped at his mouth
+  { id: 'drink', end: T.flash, landing: T.gulps[1] },
   { id: 'awaken', end: 1, landing: 1 },
 ];
 
@@ -94,7 +110,8 @@ export function gulpPulse(g: number): number {
 }
 /** 0..1: the dark closing in while the potion is drunk, gone at the flash. */
 export function riskAt(g: number): number {
-  const rise = smooth((g - T.closing[0]) / T.closing[1]);
+  // slow at first, then faster as the potion takes hold
+  const rise = clamp01((g - T.closing[0]) / T.closing[1]) ** 1.4;
   const burst = smooth((g - T.flash) / 0.02);
   return rise * (1 - burst);
 }
@@ -104,14 +121,15 @@ export function blackoutAt(g: number): number {
   const open = smooth((g - T.flash) / 0.012);
   return close * (1 - open);
 }
-/** 0..1 flash of spirit vision at the awakening. */
+/** 0..1 flash of spirit vision at the awakening: a quick rise, a slower fade. */
 export function flashAt(g: number): number {
-  const spike = clamp01((g - (T.flash - 0.004)) / 0.005);
-  const decay = 1 - clamp01((g - (T.flash + 0.002)) / 0.03);
+  const spike = smooth((g - (T.flash - 0.005)) / 0.006);
+  const decay = 1 - smooth((g - (T.flash + 0.002)) / 0.034);
   return spike * decay;
 }
-/** 0..1 awakening, eased out. */
+/** 0..1 awakening: eased in and out, so nothing arrives all at once. */
 export function awakenAt(g: number): number {
   const t = clamp01((g - T.awaken[0]) / T.awaken[1]);
-  return 1 - (1 - t) ** 3;
+  // a touch faster out of the flash than smoothstep, still settling gently
+  return smooth(t) * 0.8 + (1 - (1 - t) ** 2) * 0.2;
 }

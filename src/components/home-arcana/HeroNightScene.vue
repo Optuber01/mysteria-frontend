@@ -5,37 +5,42 @@
     from the hero, which measures where the deck's pivot is and sets
     --moon-x/--moon-y/--moon-r and --city-* (all px, relative to the hero box).
   -->
-  <div class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true">
-    <picture>
-      <source media="(max-width: 720px)" :srcset="skySmall">
-      <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="async" width="1920" height="1080">
-    </picture>
-    <i class="night__tint"></i>
+  <div ref="rootRef" class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true">
+    <!-- Everything that is far away: on the way down to the brewery it falls behind the page. -->
+    <div ref="viewRef" class="night__view">
+      <picture>
+        <source media="(max-width: 720px)" :srcset="skySmall">
+        <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="async" width="1920" height="1080">
+      </picture>
+      <i class="night__tint"></i>
 
-    <div class="night__moon">
-      <div class="night__moon-rise">
-        <i class="night__moon-glow"></i>
-        <i class="night__moon-corona"></i>
-        <img ref="moonRef" class="night__moon-disc" :src="moon" alt="" decoding="async" width="640" height="640" @load="moonReady = true" @error="moonReady = true">
-        <i class="night__moon-rim"></i>
+      <div ref="moonBoxRef" class="night__moon">
+        <div class="night__moon-rise">
+          <i class="night__moon-glow"></i>
+          <i class="night__moon-corona"></i>
+          <img ref="moonRef" class="night__moon-disc" :src="moon" alt="" decoding="async" width="640" height="640" @load="moonReady = true" @error="moonReady = true">
+          <i class="night__moon-rim"></i>
+        </div>
       </div>
+
+      <div class="night__fog night__fog--a"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
+      <div class="night__fog night__fog--b"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
+
+      <picture>
+        <source media="(max-width: 720px)" :srcset="citySmall">
+        <img class="night__city" :src="city" alt="" decoding="async" width="1920" height="1080">
+      </picture>
+      <i class="night__moonlight" :style="{'--city-mask': `url(${city})`}"></i>
+      <div class="night__fog night__fog--streets"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
     </div>
-
-    <div class="night__fog night__fog--a"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
-    <div class="night__fog night__fog--b"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
-
-    <picture>
-      <source media="(max-width: 720px)" :srcset="citySmall">
-      <img class="night__city" :src="city" alt="" decoding="async" width="1920" height="1080">
-    </picture>
-    <i class="night__moonlight" :style="{'--city-mask': `url(${city})`}"></i>
-    <div class="night__fog night__fog--streets"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
+    <i ref="duskRef" class="night__dusk"></i>
     <i class="night__scrim"></i>
+    <i class="night__horizon"></i>
   </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import sky from './assets/moon/backlund-sky.webp';
 import skySmall from './assets/moon/backlund-sky-960.webp';
 import city from './assets/moon/backlund-skyline.webp';
@@ -49,6 +54,88 @@ const moonRef = ref<HTMLImageElement | null>(null);
 const moonReady = ref(false);
 onMounted(() => {
   if (moonRef.value?.complete) moonReady.value = true;
+});
+
+/*
+ * Leaving the hero is a descent: the far scene (sky, moon, castle) falls behind the
+ * page, the moon sets behind the roofs and the night closes over it, while the potion
+ * story's rooftops rise from below. Transform and opacity only, written straight to
+ * three elements once per frame; the hero box is measured on resize, never per frame.
+ */
+const rootRef = ref<HTMLElement | null>(null);
+const viewRef = ref<HTMLElement | null>(null);
+const moonBoxRef = ref<HTMLElement | null>(null);
+const duskRef = ref<HTMLElement | null>(null);
+/** How much of the scroll the far scene and the moon give back (0 = scrolls with the page). */
+const VIEW_LAG = 0.34;
+const MOON_SINK = 0.24;
+const DUSK = 0.6;
+
+let sceneTop = 0;
+let sceneH = 0;
+let enabled = false;
+let frame = 0;
+let last = -1;
+let resizeObserver: ResizeObserver | null = null;
+let wide: MediaQueryList | null = null;
+let calm: MediaQueryList | null = null;
+
+function measure() {
+  const el = rootRef.value;
+  if (!el) return;
+  const r = el.getBoundingClientRect();
+  sceneTop = r.top + window.scrollY;
+  sceneH = r.height;
+  enabled = !!wide?.matches && !calm?.matches;
+  last = -1;
+  apply();
+}
+
+function apply() {
+  frame = 0;
+  const view = viewRef.value;
+  const moonBox = moonBoxRef.value;
+  const dusk = duskRef.value;
+  if (!view || !moonBox || !dusk || !sceneH) return;
+  if (!enabled) {
+    if (last !== 0) {
+      view.style.transform = moonBox.style.transform = dusk.style.opacity = '';
+      last = 0;
+    }
+    return;
+  }
+  const s = Math.min(Math.max(window.scrollY - sceneTop, 0), sceneH);
+  if (s === last) return;
+  last = s;
+  // eased in, so the first flick of the wheel moves nothing out of step with the deck
+  const a = sceneH * 0.2;
+  const run = s < a ? (s * s) / (2 * a) : s - a / 2;
+  view.style.transform = `translate3d(0, ${(run * VIEW_LAG).toFixed(1)}px, 0)`;
+  moonBox.style.transform = `translate3d(0, ${(run * MOON_SINK).toFixed(1)}px, 0)`;
+  dusk.style.opacity = (Math.min(1, Math.max(0, (s - a) / (sceneH - a))) * DUSK).toFixed(3);
+}
+
+const schedule = () => {
+  if (!frame) frame = requestAnimationFrame(apply);
+};
+
+onMounted(() => {
+  wide = window.matchMedia('(min-width: 901px)');
+  calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  measure();
+  resizeObserver = new ResizeObserver(measure);
+  if (rootRef.value) resizeObserver.observe(rootRef.value);
+  window.addEventListener('scroll', schedule, {passive: true});
+  wide.addEventListener('change', measure);
+  calm.addEventListener('change', measure);
+});
+
+onUnmounted(() => {
+  resizeObserver?.disconnect();
+  window.removeEventListener('scroll', schedule);
+  wide?.removeEventListener('change', measure);
+  calm?.removeEventListener('change', measure);
+  if (frame) cancelAnimationFrame(frame);
 });
 </script>
 
@@ -64,6 +151,23 @@ onMounted(() => {
   overflow: hidden;
   pointer-events: none;
   background: #0d0d11;
+}
+
+/* The far scene: one composited layer, so the descent moves it without repainting it. */
+.night__view {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  will-change: transform;
+}
+
+/* The night closing over the city on the way down (the page colour, so paper in the light theme). */
+.night__dusk {
+  position: absolute;
+  inset: 0;
+  background: var(--arc-bg);
+  opacity: 0;
+  will-change: opacity;
 }
 
 .night__sky {
@@ -89,6 +193,7 @@ onMounted(() => {
 /* ---- the moon ---- */
 .night__moon {
   position: absolute;
+  will-change: transform;
   left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
   top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
   width: calc(var(--moon-r, 200px) * 2);
@@ -251,6 +356,27 @@ onMounted(() => {
     linear-gradient(90deg, color-mix(in srgb, var(--s) 90%, transparent) 0%, color-mix(in srgb, var(--s) 72%, transparent) 30%, color-mix(in srgb, var(--s) 20%, transparent) 52%, transparent 62%),
     linear-gradient(180deg, color-mix(in srgb, var(--s) 60%, transparent) 0%, transparent calc(var(--site-header-stack, 106px) + 60px)),
     linear-gradient(0deg, var(--s) 0%, color-mix(in srgb, var(--s) 85%, transparent) 9%, transparent 24%);
+}
+
+/*
+ * The last of the city's light along the horizon: the roofline of the potion story climbs
+ * out of the hero's bottom edge against it, so the dark room is a silhouette, not a seam.
+ * Static (it scrolls with the hero), plain gradient. The light theme has its own paper sky.
+ */
+.night__horizon {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: calc(var(--roof-h, 120px) * 2.4);
+  background: linear-gradient(0deg,
+      color-mix(in oklab, var(--acc) 30%, #2b2a33) 0%,
+      color-mix(in oklab, var(--acc) 16%, #1a1a20) 38%,
+      transparent 100%);
+}
+
+:root[data-theme="parchment"] .night__horizon {
+  display: none;
 }
 
 /* Stacked layout: the scene is a band behind the title and the deck. */

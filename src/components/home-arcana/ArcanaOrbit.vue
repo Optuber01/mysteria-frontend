@@ -55,7 +55,6 @@
             <span ref="centreSealRef" class="arc-orbit__drawn" :data-motif="motifOf(card.id)" aria-hidden="true">
               <i class="arc-orbit__halo"></i>
               <img :src="sigilNative(card.id)" alt="" width="512" height="512" decoding="async" draggable="false">
-              <b class="arc-orbit__badge">{{ card.boon ? '✶' : card.numeral }}</b>
             </span>
             <h3 id="arc-orbit-name" class="arc-orbit__name">{{ nameOf(card.id) }}</h3>
             <p class="arc-orbit__role">{{ numeralLabel(card) }}</p>
@@ -102,7 +101,6 @@
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           </button>
           <p class="arc-orbit__count">
-            <span aria-hidden="true"><b>{{ pad(selectedIndex + 1) }}</b> / {{ pad(catalog.length) }}</span>
             <span class="arc-orbit__hint">{{ geo.dial ? t('home.arcana.deck.hintTouch') : t('home.arcana.deck.hint') }}</span>
           </p>
           <button type="button" class="arc-orbit__step" :aria-label="t('home.arcana.deck.next')" @click="step(1)">
@@ -183,7 +181,6 @@ watch(currentId, id => {
 
 /* ---------- Copy ---------- */
 
-const pad = (value: number) => String(value).padStart(2, '0');
 const numeralLabel = (item: ArcanaCard) =>
   (item.boon ? t('home.arcana.deck.boon') : t('home.arcana.deck.arcanum').replace('{numeral}', item.numeral));
 const countLabel = (count: number) => plural(count, {
@@ -779,10 +776,11 @@ onUnmounted(() => {
 .arc-orbit__lede {
   max-width: 34em;
   margin: 0;
-  font-size: clamp(15px, 1.1vw, 17px);
-  line-height: 1.6;
+  font-size: var(--arc-fs-lede);
+  line-height: 1.65;
   color: var(--arc-muted);
   text-align: right;
+  text-wrap: balance;
 }
 
 /* a plain two-way switch: the chosen ring is underlined in the accent */
@@ -813,8 +811,8 @@ onUnmounted(() => {
   right: 0;
   bottom: 4px;
   left: 0;
-  height: 2px;
-  border-radius: 2px;
+  height: var(--arc-bw-accent);
+  border-radius: 1px;
   background: var(--acc-ink);
   content: '';
   opacity: 0;
@@ -846,9 +844,9 @@ onUnmounted(() => {
 }
 
 .arc-orbit__tabs button:focus-visible {
-  border-radius: 4px;
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 4px;
+  border-radius: var(--arc-r-sm);
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 .arc-orbit__panel {
@@ -953,28 +951,6 @@ onUnmounted(() => {
   border: 1px dashed color-mix(in oklab, var(--orb-acc) 40%, transparent);
   border-radius: 50%;
   animation: arc-spin 80s linear infinite;
-}
-
-.arc-orbit__badge {
-  position: absolute;
-  z-index: 3;
-  right: 1%;
-  bottom: 4%;
-  min-width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  padding: 0 6px;
-  border-radius: 99px;
-  background: var(--orb-acc);
-  /* part of the seal, which stays a dark medallion in both themes */
-  color: #0b0b0e;
-  box-shadow: 0 0 0 4px #0b0b0e;
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-size: 12px;
-  font-weight: 700;
-  font-style: normal;
 }
 
 /* the motif: one shape per pathway behind its sigil */
@@ -1101,8 +1077,8 @@ onUnmounted(() => {
 }
 
 .arc-seal:focus-visible .arc-seal__orb {
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 4px;
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 .arc-seal__label {
@@ -1123,14 +1099,14 @@ onUnmounted(() => {
 }
 
 .arc-seal__label strong {
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   font-weight: 600;
   line-height: 1.2;
   color: var(--arc-ink);
 }
 
 .arc-seal__label small {
-  font-size: 12px;
+  font-size: var(--arc-fs-caption);
   line-height: 1.2;
   color: var(--arc-muted);
   white-space: nowrap;
@@ -1158,7 +1134,7 @@ onUnmounted(() => {
 .arc-seal.is-drawn .arc-seal__orb {
   background: radial-gradient(circle, color-mix(in oklab, var(--orb-acc) 20%, transparent), #0b0b0e 72%);
   box-shadow:
-    inset 0 0 0 2px var(--orb-acc),
+    inset 0 0 0 var(--arc-bw-accent) var(--orb-acc),
     0 0 32px color-mix(in oklab, var(--orb-acc) 40%, transparent);
 }
 
@@ -1166,8 +1142,9 @@ onUnmounted(() => {
   opacity: .22;
 }
 
+/* the chosen seal's name, in the accent taken a step toward the ink: it sits on the seal's own glow */
 .arc-seal.is-drawn .arc-seal__label strong {
-  color: var(--acc-ink);
+  color: color-mix(in oklab, var(--acc-ink) 72%, var(--arc-ink));
 }
 
 /* ---------- controls ---------- */
@@ -1189,46 +1166,33 @@ onUnmounted(() => {
   border: 0;
   border-radius: 50%;
   background: var(--arc-glass);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 40%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
   color: var(--arc-ink);
   cursor: pointer;
-  transition: background-color .2s, transform .3s cubic-bezier(.2, .8, .2, 1);
+  transition: background-color .25s, box-shadow .25s, transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
+/* the dial's steppers: ghost buttons cut round, with the family's hover and press */
 .arc-orbit__step:hover {
-  background: color-mix(in oklab, var(--acc) 18%, transparent);
+  background: color-mix(in oklab, var(--acc) 12%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+  transform: translateY(-2px);
 }
 
 .arc-orbit__step:active {
-  transform: scale(.94);
-}
-
-.arc-orbit__step:focus-visible {
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 3px;
+  transform: scale(.98);
+  transition-duration: .08s;
 }
 
 .arc-orbit__count {
   min-width: 250px;
-  display: grid;
-  justify-items: center;
-  gap: 6px;
   margin: 0;
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .14em;
-  color: var(--arc-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.arc-orbit__count b {
-  font-weight: 400;
-  color: var(--acc-ink);
+  text-align: center;
 }
 
 .arc-orbit__hint {
   font-family: var(--arc-body);
-  font-size: 13px;
+  font-size: var(--arc-fs-caption);
   letter-spacing: 0;
   color: var(--arc-muted);
   text-align: center;
@@ -1242,7 +1206,7 @@ onUnmounted(() => {
   gap: 24px clamp(28px, 4vw, 56px);
   margin-top: clamp(22px, 3vh, 32px);
   padding-top: clamp(22px, 3vh, 30px);
-  border-top: 1px solid var(--arc-line);
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
 .arc-orbit__lead {
@@ -1254,8 +1218,8 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(19px, 1.5vw, 22px);
-  line-height: 1.25;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
   letter-spacing: -.01em;
   color: var(--arc-ink);
   text-wrap: balance;
@@ -1274,11 +1238,11 @@ onUnmounted(() => {
 
 .arc-orbit__stats div + div {
   padding-left: 28px;
-  border-left: 1px solid var(--arc-line);
+  border-left: var(--arc-bw) solid var(--arc-line);
 }
 
 .arc-orbit__stats dt {
-  font-size: 13.5px;
+  font-size: var(--arc-fs-caption);
   color: var(--arc-muted);
 }
 
@@ -1309,7 +1273,7 @@ onUnmounted(() => {
   align-items: baseline;
   row-gap: 2px;
   padding: 10px 14px;
-  border-left: 2px solid var(--acc-ink);
+  border-left: var(--arc-bw-accent) solid var(--acc-ink);
   background: linear-gradient(90deg, color-mix(in oklab, var(--acc) 9%, transparent), transparent 85%);
   animation: arc-rise .55s cubic-bezier(.2, .8, .2, 1) both;
   animation-delay: calc(var(--i) * 70ms + 80ms);
@@ -1325,21 +1289,21 @@ onUnmounted(() => {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  font-size: 14.5px;
-  line-height: 1.45;
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
   color: var(--arc-muted);
 }
 
 .arc-orbit__loading {
   margin: 0;
-  font-size: 14.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-muted);
 }
 
 .arc-orbit__note {
   margin: 12px 0 0;
-  font-size: 14.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-muted);
 }

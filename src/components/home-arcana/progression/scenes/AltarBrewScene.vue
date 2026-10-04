@@ -429,9 +429,10 @@ const beamStyle = computed<CSSProperties>(() => {
   will-change: transform, opacity;
 }
 
+/* keyboard only: a quiet accent ring, no glow (the story stays a dark room in either theme) */
 .cauldron:focus-visible {
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 4px;
+  outline: 1.5px solid color-mix(in oklab, var(--acc) 80%, #efeef3);
+  outline-offset: 6px;
 }
 
 .cauldron__layer {

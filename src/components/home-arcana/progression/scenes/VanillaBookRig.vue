@@ -20,12 +20,10 @@ export type BookLabels = {
   supplementaryHeading: string;
   main: BookEntry[];
   supplementary: BookEntry[];
-  noteHeading: string;
   note: string;
   coverPathway: string;
   coverSequence: string;
   coverName: string;
-  coverRecipe: string;
   /** The Pathway's recipe-book item (cover emblem and the page seal). */
   recipeBook: string | null;
   accent: string;
@@ -343,13 +341,6 @@ function paintCoverArtwork(context: CanvasRenderingContext2D, labels: BookLabels
   drawCoverLine(context, labels.coverSequence, width / 2, 392, 5, ink);
   drawCoverLine(context, labels.coverName, width / 2, 474, 4, accText);
 
-  context.strokeStyle = inkDim;
-  context.lineWidth = 3;
-  context.strokeRect(100, 550, width - 200, 96);
-  context.fillStyle = rgbCss(accent, 0.16);
-  context.fillRect(108, 558, width - 216, 80);
-  drawCoverLine(context, labels.coverRecipe, width / 2, 582, 3, ink);
-
   context.fillStyle = acc;
   for (let x = 120; x <= width - 120; x += 32) context.fillRect(x, 700, 12, 4);
 }
@@ -378,6 +369,24 @@ function drawHeading(context: CanvasRenderingContext2D, label: string, width: nu
   context.fillText(label, 48, 86, width - 96);
   context.restore();
   drawRule(context, 110, width);
+}
+
+/** How many lines wrapText would set `text` in. */
+function countLines(context: CanvasRenderingContext2D, text: string, maxWidth: number): number {
+  const words = text.includes(' ') ? text.split(' ') : [...text];
+  const joiner = text.includes(' ') ? ' ' : '';
+  let line = '';
+  let lines = 1;
+  for (const word of words) {
+    const candidate = line ? `${line}${joiner}${word}` : word;
+    if (line && context.measureText(candidate).width > maxWidth) {
+      line = word;
+      lines++;
+    } else {
+      line = candidate;
+    }
+  }
+  return lines;
 }
 
 function wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines = 3): number {
@@ -451,14 +460,11 @@ function paintRightFormula(labels: BookLabels): TexturePainter {
     context.beginPath();
     context.arc(SEAL.cx, SEAL.cy, 59, 0, Math.PI * 2);
     context.stroke();
-    context.fillStyle = inkOf(accent);
-    context.font = `400 22px ${FONT.caps}`;
-    context.letterSpacing = '2px';
-    context.fillText(labels.noteHeading.toLocaleUpperCase(), 184, 846, width - 228);
-    context.letterSpacing = '0px';
-    context.fillStyle = '#4c443a';
-    context.font = `400 24px ${FONT.body}`;
-    wrapText(context, labels.note, 184, 886, width - 228, 32);
+    // the note itself, centred on the seal beside it (no kicker over it)
+    context.fillStyle = '#3f382f';
+    context.font = `400 25px ${FONT.body}`;
+    const lineCount = Math.min(3, countLines(context, labels.note, width - 228));
+    wrapText(context, labels.note, 184, SEAL.cy + 9 - ((lineCount - 1) * 33) / 2, width - 228, 33);
     context.restore();
   };
 }

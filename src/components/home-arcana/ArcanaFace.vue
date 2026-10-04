@@ -85,7 +85,8 @@ const card = computed(() => cardById(props.id));
   font-size: 7.5cqw;
   line-height: 1;
   letter-spacing: .08em;
-  color: var(--card-acc);
+  /* lifted toward white: the deepest accents (Abyss, Hermit) sit under 4.5:1 on the dark face */
+  color: color-mix(in oklab, var(--card-acc) 72%, #fff);
 }
 
 .is-boon .arc-face__numeral {

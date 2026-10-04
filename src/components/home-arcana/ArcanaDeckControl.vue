@@ -210,7 +210,7 @@ onUnmounted(() => {
   perspective: 300px;
   background: radial-gradient(circle at 50% 42%, color-mix(in oklab, var(--acc) 34%, #17171d), #0d0d11 76%);
   box-shadow:
-    inset 0 0 0 1.5px color-mix(in oklab, var(--acc) 85%, transparent),
+    inset 0 0 0 var(--arc-bw-accent) color-mix(in oklab, var(--acc) 85%, transparent),
     0 0 18px color-mix(in oklab, var(--acc) 30%, transparent);
   transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .9, .25, 1);
 }
@@ -218,13 +218,13 @@ onUnmounted(() => {
 .arc-dock__orb:hover {
   transform: scale(1.06);
   box-shadow:
-    inset 0 0 0 1.5px var(--acc),
+    inset 0 0 0 var(--arc-bw-accent) var(--acc),
     0 0 26px color-mix(in oklab, var(--acc) 50%, transparent);
 }
 
 .arc-dock__orb:focus-visible {
-  outline: 2px solid var(--arc-ink);
-  outline-offset: 3px;
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 .arc-dock__face {
@@ -297,9 +297,9 @@ onUnmounted(() => {
   min-width: 150px;
   max-width: 220px;
   padding: 9px 12px 10px;
-  border-radius: 10px;
+  border-radius: var(--arc-r-md);
   background: var(--arc-pop);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 35%, transparent), 0 14px 30px var(--arc-shadow);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc), 0 14px 30px var(--arc-shadow);
   text-align: left;
   pointer-events: none;
   opacity: 0;
@@ -362,7 +362,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   padding: 2px;
-  border-radius: 6px;
+  border-radius: var(--arc-r-sm);
   color: var(--arc-muted);
   font-family: var(--arc-caps);
   font-size: 10px;
@@ -385,8 +385,8 @@ onUnmounted(() => {
   place-items: center;
   width: 20px;
   height: 32px;
-  border: 1.5px solid currentColor;
-  border-radius: 3px;
+  border: var(--arc-bw-accent) solid currentColor;
+  border-radius: var(--arc-r-sm);
   background: color-mix(in srgb, var(--arc-bg) 70%, transparent);
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
@@ -407,7 +407,7 @@ onUnmounted(() => {
   position: absolute;
   right: calc(100% + 8px);
   padding: 5px 9px;
-  border-radius: 99px;
+  border-radius: var(--arc-r-sm);
   background: color-mix(in srgb, var(--arc-bg) 92%, transparent);
   white-space: nowrap;
   opacity: 0;
@@ -423,8 +423,8 @@ onUnmounted(() => {
 }
 
 .arc-dock__spot:focus-visible {
-  outline: 2px solid var(--arc-ink);
-  outline-offset: 2px;
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 /* The gutter is only wide enough for the spread on wide screens. */

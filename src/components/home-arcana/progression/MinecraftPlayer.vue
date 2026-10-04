@@ -18,36 +18,49 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import type * as THREE from 'three';
-import type { PlayerAnimation, SkinViewer } from 'skinview3d';
+import type { SkinViewer } from 'skinview3d';
 
 // Optuber's own skin (classic arms), from the Mojang session server.
 import playerSkinUrl from '@/assets/images/home/progression/player-skin.png';
-import { useReducedMotion } from '@/composables/useReducedMotion';
-import { drawVial, hexToRgb, vialRows } from './art';
+import { drawVial, hexToRgb, vialKey } from './art';
 import { isNearby, whenSettled } from './prewarm';
 
-export type MinecraftPlayerMode = 'drink' | 'advance';
 /** The held bottle on screen: centre and height, px relative to this figure. */
 export type BottlePosition = { x: number; y: number; size: number };
 
+/*
+ * The figure is posed straight from the story's beats (all 0..1, scrubbed by
+ * scroll, so every pose plays backwards as well as forwards):
+ *   step -> reach -> regard -> lift -> sip (+ swallow) -> lower -> hit -> awaken
+ */
 const props = withDefaults(
   defineProps<{
-    mode?: MinecraftPlayerMode;
     /** Allow skinview3d (and its WebGL context) to load once in view. */
     armed?: boolean;
+    /** The story's progress: only the breathing and the tremor's phase. */
     progress?: number;
+    /** Stepping out of the fog (one stride). */
+    step?: number;
+    /** The right hand held out for the potion. */
+    reach?: number;
+    /** The potion brought in to look at. */
+    regard?: number;
+    /** Raised to the mouth. */
+    lift?: number;
+    /** 0..1 over the three swallows: the bottle tips up, the head goes back. */
+    sip?: number;
+    /** 0..1 at each swallow. */
+    swallow?: number;
+    /** The empty bottle lowered. */
+    lower?: number;
+    /** The potion takes hold: head bowed, left hand to the temple, a tremor. */
+    hit?: number;
+    /** Awakened: lifted off the circle, arms open, face up. */
+    awaken?: number;
     /** 0..1: the awakening's rim light and the lift out of shadow. */
     glow?: number;
     /** 0..1: how far the figure is in silhouette (low front light). */
     shade?: number;
-    /** 0..1: the right arm held out to take the potion. */
-    reach?: number;
-    /** 0..1: the bottle raised from the chest to the mouth. */
-    lift?: number;
-    /** 0..1: the bottle tipped up and the head back, over the gulps. */
-    sip?: number;
-    /** 0..1: the arm lowered again, the empty bottle still in hand. */
-    lower?: number;
     /** The bottle is in his hand (before that it is a DOM sprite floating to it). */
     holding?: boolean;
     /** 0..1 potion left in the bottle. */
@@ -59,15 +72,19 @@ const props = withDefaults(
     label?: string;
   }>(),
   {
-    mode: 'drink',
     armed: true,
     progress: 0,
-    glow: 0,
-    shade: 0,
+    step: 1,
     reach: 0,
+    regard: 0,
     lift: 0,
     sip: 0,
+    swallow: 0,
     lower: 0,
+    hit: 0,
+    awaken: 0,
+    glow: 0,
+    shade: 0,
     holding: false,
     level: 1,
     accent: '#a78bfa',
@@ -83,19 +100,16 @@ const canvas = ref<HTMLCanvasElement | null>(null);
 const ready = ref(false);
 const failed = ref(false);
 const inViewport = ref(false);
-const reducedMotion = useReducedMotion();
 
 let viewer: SkinViewer | null = null;
-let skinview: typeof import('skinview3d') | null = null;
 let three: typeof import('three') | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let intersectionObserver: IntersectionObserver | null = null;
 let disposed = false;
 let viewerCreationStarted = false;
 let rimLights: THREE.PointLight[] = [];
-const animations = new Map<MinecraftPlayerMode, PlayerAnimation>();
-// Scroll progress is mapped onto this many animation seconds.
-const SCROLL_TIMELINE = 4.2;
+/** The potion's own glow, carried in his hand: it lights his fist, arm and face. */
+let potionLight: THREE.PointLight | null = null;
 
 /* ---- the bottle: a 16 px sprite on a plane, held in the right fist ---- */
 let holder: THREE.Group | null = null;
@@ -103,7 +117,19 @@ let bottle: THREE.Mesh | null = null;
 let bottleCanvas: HTMLCanvasElement | null = null;
 let bottleTexture: THREE.CanvasTexture | null = null;
 let lastBottle = '';
-const BOTTLE_SIZE = 9;
+/** Plane size in skin units (the head is 8): a bottle a hand can close round. */
+const BOTTLE_SIZE = 7;
+const TEXEL = BOTTLE_SIZE / 16;
+/** The fist, in the right arm's own frame (the arm hangs from its pivot to y = -10). */
+const FIST: [number, number, number] = [-1, -9, 0];
+/** Where the fist closes on the vial (texel row 10.5), from the plane's centre. */
+const GRIP_Y = -2.5 * TEXEL;
+/** The vial's lip (texel row 3), from the plane's centre: what goes to his mouth. */
+const LIP_Y = 5 * TEXEL;
+/** The bottle sits a little in front of the fist, toward the camera. */
+const BOTTLE_Z = 1.2;
+/** The mouth in the head's frame (the head is the box y 0..8, z -4..4). */
+const MOUTH: [number, number, number] = [0, 1.6, 4.2];
 
 function clamp01(value: number): number {
   return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
@@ -112,15 +138,214 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-function paintBottle() {
+/* ---------------- poses ---------------- */
+type Pose = {
+  rArmX: number; rArmZ: number;
+  lArmX: number; lArmZ: number;
+  headX: number; headY: number;
+  /** the whole figure turned about its axis (positive: his face toward the reader's right) */
+  turn: number;
+  legR: number; legL: number;
+  /** lift off the floor, in skin units */
+  rise: number;
+  /** sideways lean (the tremor) */
+  roll: number;
+  /** the bottle's tip on screen, rad clockwise from upright */
+  tip: number;
+};
+
+/*
+ * He drinks with his right hand, the one nearer the reader: the figure turns a
+ * little to the reader's right as the potion comes, so that arm swings toward
+ * the camera and reads its whole length, never hidden behind him.
+ * (rArmX < 0 raises the arm forward; rArmZ > 0 brings the right hand in across him.)
+ */
+const REST: Pose = { rArmX: -0.08, rArmZ: 0.05, lArmX: -0.12, lArmZ: -0.05, headX: 0.06, headY: -0.04, turn: 0.04, legR: 0, legL: 0, rise: 0, roll: 0, tip: 0.06 };
+// hand out to his side, palm up, eyes on the potion settling into it
+const REACH: Pose = { ...REST, rArmX: -1.12, rArmZ: -0.34, lArmX: -0.16, headX: 0.36, headY: -0.42, turn: 0.2, tip: 0 };
+// brought up to his eye, out in front of him, and looked at
+const REGARD: Pose = { ...REST, rArmX: -1.42, rArmZ: 0.02, lArmX: -0.16, headX: 0.2, headY: -0.34, turn: 0.28, tip: -0.06 };
+// the empty bottle lowered to his side, the head still level
+const LOWER: Pose = { ...REST, rArmX: -0.3, rArmZ: 0.04, headX: 0.12, headY: 0, turn: 0.12, tip: 0.14 };
+// the potion takes hold: head bowed into his left hand, shoulders down
+const HIT: Pose = { ...REST, rArmX: -0.12, rArmZ: 0.06, lArmX: -2.3, lArmZ: -0.42, headX: 0.44, headY: 0.12, turn: -0.04, rise: -0.5, tip: 0.2 };
+// awakened: off the floor, arms open, face up to the moon
+const AWAKE: Pose = { ...REST, rArmX: -0.34, rArmZ: -0.5, lArmX: -0.34, lArmZ: 0.5, headX: -0.3, headY: 0, turn: 0.02, legR: -0.06, legL: 0.08, rise: 1.4, tip: 0.3 };
+
+function mix(a: Pose, b: Pose, t: number): Pose {
+  if (t <= 0) return a;
+  const out = { ...a };
+  for (const key of Object.keys(a) as (keyof Pose)[]) out[key] = lerp(a[key], b[key], t);
+  return out;
+}
+
+/*
+ * Drinking: the head goes back a little further and the bottle tips up a
+ * little more at each swallow (sip runs 0..1 over the three). The arm is left
+ * to the solver below, which puts the bottle's lip on his mouth as the camera
+ * sees it; until the model is up, a rough guess stands in.
+ */
+function drinkPose(sip: number, swallow: number): Pose {
+  return {
+    ...REST,
+    rArmX: -2.05,
+    rArmZ: 0.5,
+    // the free hand hangs a little out, for balance, as the head goes back
+    lArmX: -0.12 - sip * 0.1,
+    lArmZ: 0.04 + sip * 0.08,
+    headX: lerp(-0.08, -0.44, sip) - swallow * 0.06,
+    headY: -0.06,
+    turn: 0.42,
+    tip: lerp(1.05, 2.25, sip) + swallow * 0.08,
+  };
+}
+
+function poseNow(): Pose {
+  const g = props.progress;
+  const breath = Math.sin(g * 120) * 0.022;
+  const step = clamp01(props.step);
+  const stride = Math.sin(step * Math.PI) * (1 - step * 0.2);
+  let pose: Pose = {
+    ...REST,
+    legR: stride * 0.34,
+    legL: -stride * 0.34,
+    rArmX: REST.rArmX - stride * 0.22,
+    lArmX: REST.lArmX + stride * 0.22,
+    headX: REST.headX + breath,
+  };
+  pose = mix(pose, REACH, clamp01(props.reach));
+  pose = mix(pose, REGARD, clamp01(props.regard));
+  const lift = clamp01(props.lift);
+  const lower = clamp01(props.lower);
+  if (lift > 0 && lower < 1) pose = mix(pose, solveDrinkArm(drinkPose(clamp01(props.sip), clamp01(props.swallow))), lift);
+  pose = mix(pose, LOWER, lower);
+  const hit = clamp01(props.hit);
+  pose = mix(pose, HIT, hit);
+  const awaken = clamp01(props.awaken);
+  pose = mix(pose, AWAKE, awaken);
+  // a tremor while it takes hold; a slow float once he has risen
+  pose.roll += Math.sin(g * 1500) * 0.014 * hit * (1 - awaken);
+  pose.rise += Math.sin(g * 70) * 0.35 * awaken;
+  pose.rArmX += breath * 0.5 * (1 - lift);
+  return pose;
+}
+
+let qParent: THREE.Quaternion | null = null;
+let qTip: THREE.Quaternion | null = null;
+let zAxis: THREE.Vector3 | null = null;
+/** Everything but the bottle. */
+function setBody(pose: Pose) {
+  if (!viewer) return;
+  const player = viewer.playerObject;
+  const skin = player.skin;
+  skin.rightArm.rotation.set(pose.rArmX, 0, pose.rArmZ);
+  skin.leftArm.rotation.set(pose.lArmX, 0, pose.lArmZ);
+  skin.head.rotation.set(pose.headX, pose.headY, 0);
+  skin.rightLeg.rotation.set(pose.legR, 0, 0);
+  skin.leftLeg.rotation.set(pose.legL, 0, 0);
+  player.rotation.set(0, pose.turn, pose.roll);
+  player.position.y = pose.rise;
+}
+/* The bottle faces the camera whatever the arm does (a sprite never turns edge-on), tipped in the picture plane. */
+function orientBottle(tip: number, armOnly = false) {
+  if (!viewer || !three || !holder || !bottle) return;
+  // the solver moves only the arm: the rest of the figure's matrices are already current
+  if (armOnly) viewer.playerObject.skin.rightArm.updateMatrixWorld(true);
+  else viewer.playerWrapper.updateMatrixWorld(true);
+  qParent ??= new three.Quaternion();
+  qTip ??= new three.Quaternion();
+  zAxis ??= new three.Vector3(0, 0, 1);
+  viewer.playerObject.skin.rightArm.getWorldQuaternion(qParent).invert();
+  qTip.setFromAxisAngle(zAxis, -tip);
+  holder.quaternion.copy(qParent.multiply(viewer.camera.quaternion).multiply(qTip));
+  bottle.position.set(0, -GRIP_Y, BOTTLE_Z);
+  holder.updateMatrixWorld(true);
+}
+function applyPose(pose: Pose) {
+  if (!viewer || !three) return;
+  setBody(pose);
+  if (!holder || !bottle) return;
+  holder.visible = props.holding;
+  orientBottle(pose.tip);
+  paintBottle(pose.tip);
+}
+
+/*
+ * The drinking arm, solved on screen: the arm is rigid (as in the game) and
+ * swings from the shoulder, so two angles place the fist; they are found
+ * (Gauss-Newton, warm-started from the last frame) so that the bottle's lip
+ * lands on his mouth in the picture, whatever the head, the turn and the
+ * perspective do. Solving in the picture rather than in the model is what keeps
+ * the bottle at his lips and not at his brow.
+ */
+let solved: [number, number] | null = null;
+/** What the last solution was for: unchanged inputs (most scroll frames) reuse it. */
+let solvedFor = '';
+let vLip: THREE.Vector3 | null = null;
+let vMouth: THREE.Vector3 | null = null;
+function lipError(tip: number, ax: number, az: number): [number, number] {
+  if (!viewer || !three || !bottle || !host.value) return [0, 0];
+  viewer.playerObject.skin.rightArm.rotation.set(ax, 0, az);
+  orientBottle(tip, true);
+  vLip ??= new three.Vector3();
+  vMouth ??= new three.Vector3();
+  bottle.localToWorld(vLip.set(0, LIP_Y, 0)).project(viewer.camera);
+  viewer.playerObject.skin.head.localToWorld(vMouth.set(...MOUTH)).project(viewer.camera);
+  const w = host.value.clientWidth / 2;
+  const h = host.value.clientHeight / 2;
+  return [(vLip.x - vMouth.x) * w, (vLip.y - vMouth.y) * h];
+}
+function solveDrinkArm(pose: Pose): Pose {
+  if (!viewer || !three || !holder || !bottle || !ready.value || !host.value) return pose;
+  const key = `${pose.headX.toFixed(4)}|${pose.tip.toFixed(4)}|${host.value.clientWidth}x${host.value.clientHeight}`;
+  if (solved && key === solvedFor) return { ...pose, rArmX: solved[0], rArmZ: solved[1] };
+  setBody(pose);
+  viewer.playerWrapper.updateMatrixWorld(true);
+  viewer.camera.updateMatrixWorld();
+  let [ax, az] = solved ?? [pose.rArmX, pose.rArmZ];
+  let r = lipError(pose.tip, ax, az);
+  for (let i = 0; i < 5 && Math.hypot(r[0], r[1]) > 0.3; i++) {
+    const e = 0.004;
+    const rx = lipError(pose.tip, ax + e, az);
+    const rz = lipError(pose.tip, ax, az + e);
+    const j11 = (rx[0] - r[0]) / e, j21 = (rx[1] - r[1]) / e;
+    const j12 = (rz[0] - r[0]) / e, j22 = (rz[1] - r[1]) / e;
+    const det = j11 * j22 - j12 * j21;
+    if (Math.abs(det) < 1e-6) break;
+    let dx = -(j22 * r[0] - j12 * r[1]) / det;
+    let dz = -(j11 * r[1] - j21 * r[0]) / det;
+    const step = Math.hypot(dx, dz);
+    if (step > 0.35) {
+      dx *= 0.35 / step;
+      dz *= 0.35 / step;
+    }
+    ax += dx;
+    az += dz;
+    r = lipError(pose.tip, ax, az);
+  }
+  // lost (it never should be): start again from the guess next time
+  solved = Math.hypot(r[0], r[1]) < 4 ? [ax, az] : null;
+  solvedFor = solved ? key : '';
+  return { ...pose, rArmX: ax, rArmZ: az };
+}
+
+let bottleKey = '';
+function paintBottle(tip = lastTip) {
+  lastTip = tip;
   if (!bottleCanvas || !bottleTexture) return;
+  // uncorked as he raises it
+  const open = props.lift > 0.35;
+  const key = `${props.accent}|${vialKey(props.level, tip, open)}`;
+  if (key === bottleKey) return;
+  bottleKey = key;
   // CPU-backed: only ever uploaded as a texture, so the upload needs no GPU readback
   const context = bottleCanvas.getContext('2d', { willReadFrequently: true });
   if (!context) return;
   context.imageSmoothingEnabled = false;
-  drawVial(context, hexToRgb(props.accent), props.level);
+  drawVial(context, hexToRgb(props.accent), props.level, tip, open);
   bottleTexture.needsUpdate = true;
 }
+let lastTip = 0;
 
 function makeBottle(instance: SkinViewer) {
   if (!three) return;
@@ -132,93 +357,25 @@ function makeBottle(instance: SkinViewer) {
   bottleTexture.magFilter = three.NearestFilter;
   bottleTexture.minFilter = three.NearestFilter;
   bottleTexture.generateMipmaps = false;
+  bottleKey = '';
   paintBottle();
   // Unlit: the potion glows in the dark around him; the empty glass stays glass.
-  const material = new three.MeshBasicMaterial({ map: bottleTexture, transparent: true, alphaTest: 0.04, side: three.DoubleSide, depthWrite: false });
+  // Drawn over the figure: the hand that holds it is always on his near side, and
+  // a bottle clipped by his head or sleeve mid-swing would blink out.
+  const material = new three.MeshBasicMaterial({ map: bottleTexture, transparent: true, alphaTest: 0.04, side: three.DoubleSide, depthWrite: false, depthTest: false });
   bottle = new three.Mesh(new three.PlaneGeometry(BOTTLE_SIZE, BOTTLE_SIZE), material);
   bottle.renderOrder = 2;
   holder = new three.Group();
   holder.add(bottle);
-  // the fist: the bottom of the right arm (its pivot spans y -10..2)
-  holder.position.set(0, -10.2, 0.4);
+  holder.position.set(...FIST);
   instance.playerObject.skin.rightArm.add(holder);
   holder.visible = props.holding;
-}
-
-/**
- * Keeps the bottle upright in the player's own frame (so it never turns
- * edge-on as the arm swings), then tips it in the picture plane while he
- * drinks, neck to his mouth. It sits in front of the fist, toward the camera,
- * so it is always drawn over the face, never inside the head.
- */
-let qArm: THREE.Quaternion | null = null;
-let qWant: THREE.Quaternion | null = null;
-let zAxis: THREE.Vector3 | null = null;
-function orientBottle(tip: number) {
-  if (!three || !holder || !bottle || !viewer) return;
-  const arm = viewer.playerObject.skin.rightArm;
-  qArm ??= new three.Quaternion();
-  qWant ??= new three.Quaternion();
-  zAxis ??= new three.Vector3(0, 0, 1);
-  qArm.copy(arm.quaternion).invert();
-  qWant.setFromAxisAngle(zAxis, tip);
-  holder.quaternion.copy(qArm.multiply(qWant));
-  // the neck leads as it tips, so the mouth of the bottle meets his
-  bottle.position.set(-Math.sin(tip) * 1.6, 1.6 + Math.cos(tip) * 0.6, 3.2);
-}
-
-function makeAnimation(mode: MinecraftPlayerMode): PlayerAnimation {
-  if (!skinview) throw new Error('The player renderer is not ready.');
-
-  if (mode === 'advance') {
-    // Awakened: lifted off the circle, arms opening, face up to the moon;
-    // the empty bottle is still in his right hand.
-    const animation = new skinview.FunctionAnimation((player, progress) => {
-      const open = clamp01((progress - 0.4) / 1.6);
-      const float = Math.sin(progress * 1.25) * 0.05;
-      player.skin.rightArm.rotation.x = lerp(-0.3, -0.36, open) + float;
-      player.skin.rightArm.rotation.z = lerp(0.1, -0.42, open);
-      player.skin.leftArm.rotation.x = lerp(-0.12, -0.36, open) - float;
-      player.skin.leftArm.rotation.z = lerp(0.06, 0.42, open);
-      player.skin.head.rotation.x = lerp(-0.05, -0.28, open);
-      player.skin.head.rotation.y = 0;
-      player.skin.rightLeg.rotation.x = -0.05 * open;
-      player.skin.leftLeg.rotation.x = 0.07 * open;
-      player.position.y = open * 1.2 + float * 4;
-      player.rotation.y = lerp(-0.12, 0.04, open);
-      orientBottle(lerp(0.1, 0.3, open));
-    });
-    animation.speed = 0.68;
-    return animation;
-  }
-
-  const animation = new skinview.FunctionAnimation((player, progress) => {
-    const breath = Math.sin(progress * 2.2) * 0.03;
-    const reach = clamp01(props.reach);
-    const lift = clamp01(props.lift);
-    const sip = clamp01(props.sip);
-    const lower = clamp01(props.lower);
-    // rest -> held out for the potion -> raised to the mouth -> tipped -> lowered
-    let armX = lerp(-0.12, -1.25, reach);
-    let armZ = lerp(0.06, 0.1, reach);
-    armX = lerp(armX, -2.05, lift) - sip * 0.32;
-    armZ = lerp(armZ, 0.5, lift) + sip * 0.06;
-    armX = lerp(armX, -0.3, lower);
-    armZ = lerp(armZ, 0.1, lower);
-    player.skin.rightArm.rotation.x = armX + breath * 0.5;
-    player.skin.rightArm.rotation.z = armZ;
-    player.skin.rightArm.rotation.y = 0;
-    player.skin.leftArm.rotation.x = -0.18 - breath - sip * 0.1 * (1 - lower);
-    player.skin.leftArm.rotation.z = -0.08 - sip * 0.1 * (1 - lower);
-    player.skin.head.rotation.x = lerp(0.12, 0.06, lift) - sip * 0.42 * (1 - lower) + breath + lower * 0.18;
-    player.skin.head.rotation.y = -0.05;
-    player.rotation.y = -0.16 + sip * 0.05 * (1 - lower);
-    player.position.y = breath * 1.4;
-    // tipped up as he drinks: neck toward his mouth, bottom to the sky
-    orientBottle(-(lift * 0.35 + sip * 1.55) * (1 - lower) - lower * 0.12);
-  });
-  animation.speed = 0.82;
-  return animation;
+  // on the arm, not in the (sometimes hidden) holder: a hidden light would change
+  // the scene's light count and recompile every shader mid-scroll
+  potionLight = new three.PointLight(0xffffff, 0, 26, 0);
+  potionLight.position.set(FIST[0], FIST[1] + 1.5, 4);
+  instance.playerObject.skin.rightArm.add(potionLight);
+  applyLighting();
 }
 
 /*
@@ -272,15 +429,6 @@ function setBand() {
   bandMaterial.color.setRGB((r / 255) * 0.55, (g / 255) * 0.55, (b / 255) * 0.55);
 }
 
-function animationFor(mode: MinecraftPlayerMode): PlayerAnimation {
-  let animation = animations.get(mode);
-  if (!animation) {
-    animation = makeAnimation(mode);
-    animations.set(mode, animation);
-  }
-  return animation;
-}
-
 function applyLighting() {
   if (!viewer) return;
   const glow = clamp01(props.glow);
@@ -292,6 +440,11 @@ function applyLighting() {
     light.color.setRGB(r / 255, g / 255, b / 255);
     light.intensity = 0.5 + glow * 2.6 + shade * 0.8;
   });
+  if (potionLight) {
+    potionLight.color.setRGB(r / 255, g / 255, b / 255);
+    // brightest full; an empty bottle gives none
+    potionLight.intensity = props.holding ? 2.4 * Math.min(1, clamp01(props.level) * 1.4) : 0;
+  }
 }
 
 function sizeViewer() {
@@ -328,21 +481,15 @@ function emitBottle(): void {
 }
 
 /*
- * The pose is scrubbed by scroll rather than played on a clock: the animation
- * stays paused, its progress is set directly, then one frame is rendered.
+ * The pose is scrubbed by scroll rather than played on a clock: it is computed
+ * from the beats, set on the model, then one frame is rendered.
  */
 function syncPlayback() {
-  if (!viewer || !skinview || viewer.disposed) return;
-  const animation = animationFor(props.mode);
-  viewer.animation = animation;
+  if (!viewer || viewer.disposed) return;
+  viewer.animation = null;
   viewer.autoRotate = false;
   viewer.renderPaused = true;
-  const progress = reducedMotion.value ? SCROLL_TIMELINE : clamp01(props.progress) * SCROLL_TIMELINE;
-  animation.paused = false;
-  animation.progress = progress;
-  animation.update(viewer.playerObject, 0);
-  animation.paused = true;
-  if (holder) holder.visible = props.holding;
+  applyPose(poseNow());
   requestRender();
   emitBottle();
 }
@@ -362,7 +509,8 @@ async function createViewer() {
   if (viewerCreationStarted || disposed || !canvas.value || !host.value) return;
   viewerCreationStarted = true;
   try {
-    [skinview, three] = await Promise.all([import('skinview3d'), import('three')]);
+    const [skinview, threeModule] = await Promise.all([import('skinview3d'), import('three')]);
+    three = threeModule;
     if (disposed || !canvas.value || !host.value || viewer) return;
 
     const instance = new skinview.SkinViewer({
@@ -439,12 +587,14 @@ watch(() => props.accent, () => {
   paintBottle();
   syncPlayback();
 });
-watch(() => vialRows(props.level), () => {
+watch(() => props.level, () => {
   paintBottle();
+  applyLighting();
   requestRender();
 });
+watch(() => props.holding, applyLighting);
 watch(
-  () => [props.mode, props.progress, props.reach, props.lift, props.sip, props.lower, props.holding, reducedMotion.value] as const,
+  () => [props.progress, props.step, props.reach, props.regard, props.lift, props.sip, props.swallow, props.lower, props.hit, props.awaken, props.holding] as const,
   () => syncPlayback(),
 );
 
@@ -456,12 +606,12 @@ onUnmounted(() => {
   bottleTexture?.dispose();
   (bottle?.material as THREE.Material | undefined)?.dispose();
   bottle?.geometry.dispose();
+  potionLight?.dispose();
+  potionLight = null;
   viewer?.dispose();
   viewer = null;
   rimLights = [];
-  skinview = null;
   three = null;
-  animations.clear();
 });
 </script>
 

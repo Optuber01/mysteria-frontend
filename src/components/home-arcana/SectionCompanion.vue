@@ -10,7 +10,6 @@
               <img :key="card.id" :src="sigilNative(card.id)" alt="" class="sec-companion__sigil" width="512" height="512" loading="lazy" decoding="async">
             </Transition>
           </div>
-          <figcaption>{{ sigilCaption }}</figcaption>
         </figure>
 
         <div class="sec-companion__copy">
@@ -31,7 +30,7 @@
                   v-for="platform in platforms"
                   :key="platform.url"
                   :href="platform.url"
-                  class="sec-companion__link"
+                  class="arc-tile sec-companion__link"
                   target="_blank"
                   rel="noopener noreferrer"
               >
@@ -60,11 +59,8 @@ import {useArcana} from './useArcana';
 import circle from '@/assets/images/home-library/items/magic-circle.png';
 
 const {t} = useI18n();
-const {card, reading, hasDrawn} = useArcana();
+const {card, reading} = useArcana();
 
-/* Before a draw the circle shows the Fool as an example, so the caption doesn't call it "yours". */
-const sigilCaption = computed(() => t(hasDrawn.value ? 'home.world.companion.sigilCaptionDrawn' : 'home.world.companion.sigilCaption')
-    .replace('{pathway}', reading.value.name));
 const visualLabel = computed(() => t('home.world.companion.visualLabel').replace('{pathway}', reading.value.name));
 
 const features = computed(() => [
@@ -84,26 +80,22 @@ const platforms = [
 </script>
 
 <style scoped>
-.sec-companion {
-  padding-top: 0;
-}
-
 .sec-companion__panel {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: center;
   gap: clamp(28px, 4vw, 64px);
   padding: clamp(24px, 4vw, 56px);
-  border-radius: var(--arc-radius-lg);
+  border-radius: var(--arc-r-lg);
   background:
     radial-gradient(60% 80% at 22% 50%, color-mix(in oklab, var(--acc) 16%, transparent), transparent 70%),
     var(--arc-surface);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
+/* inside the panel the head sits a group's distance from what follows */
 .sec-companion__copy :deep(.arc-head) {
-  --arc-head-gap: 24px;
-  --arc-fs-display: clamp(32px, 3.6vw, 52px);
+  --arc-head-gap: var(--arc-group-gap);
 }
 
 /* ---- the circle ---- */
@@ -155,15 +147,6 @@ const platforms = [
   transform: scale(1.1) rotate(20deg);
 }
 
-.sec-companion__visual figcaption {
-  max-width: 26em;
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--arc-muted);
-  text-align: center;
-  text-wrap: balance;
-}
-
 /* ---- copy ---- */
 .sec-companion__features {
   list-style: none;
@@ -180,7 +163,7 @@ const platforms = [
   gap: 14px;
   align-items: baseline;
   color: var(--arc-muted);
-  font-size: 15px;
+  font-size: var(--arc-fs-body);
   line-height: 1.55;
 }
 
@@ -199,25 +182,15 @@ const platforms = [
   gap: 10px;
 }
 
+/* download tiles: the page's field/tile look (ArcanaHome .arc-tile) at button height */
 .sec-companion__link {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 50px;
+  gap: 10px;
+  min-height: var(--arc-btn-h);
   padding: 0 14px;
-  border-radius: 12px;
-  background: var(--arc-bg);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
-  color: var(--arc-ink);
-  font-weight: 500;
-  font-size: 14.5px;
-  transition: box-shadow .2s, transform .3s cubic-bezier(.2, .8, .2, 1);
-}
-
-.sec-companion__link:hover {
-  box-shadow: inset 0 0 0 1px var(--acc-ink);
-  transform: translateY(-2px);
-  color: var(--arc-ink);
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .sec-companion__link span {
@@ -240,7 +213,7 @@ const platforms = [
 .sec-companion__note {
   text-wrap: pretty;
   margin: 14px 0 0;
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.55;
   color: var(--arc-muted);
 }

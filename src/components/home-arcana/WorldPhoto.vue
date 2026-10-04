@@ -64,7 +64,7 @@ const creditText = computed(() => {
   transition: transform .9s cubic-bezier(.2, .8, .2, 1);
 }
 
-/* The drawn card's colour, barely: a tinted floor and a hairline ring. */
+/* The drawn card's colour, barely, on the floor; the page's hairline around the edge. */
 .world-photo::after {
   content: '';
   position: absolute;
@@ -72,7 +72,7 @@ const creditText = computed(() => {
   pointer-events: none;
   border-radius: inherit;
   background: linear-gradient(0deg, color-mix(in oklab, var(--acc) 16%, rgba(11, 11, 14, .5)), transparent 38%);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 18%, rgba(255, 255, 255, .06));
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 /*
@@ -88,7 +88,7 @@ const creditText = computed(() => {
   display: flex;
   padding: 26px 14px 11px;
   background: linear-gradient(0deg, rgba(6, 6, 8, .74), rgba(6, 6, 8, .4) 55%, transparent);
-  font-size: 11.5px;
+  font-size: var(--arc-fs-caption);
   line-height: 1.3;
   color: #e4e3ea;
   text-shadow: 0 1px 2px rgba(0, 0, 0, .55);

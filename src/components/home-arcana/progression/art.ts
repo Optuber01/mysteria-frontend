@@ -50,11 +50,54 @@ export function vialRows(level: number): number {
   return l <= 0.001 ? 0 : Math.max(1, Math.round(l * VIAL_LIQUID_ROWS));
 }
 
-/** Paints the vial into a 16 x 16 context (call with smoothing off and scale yourself). */
-export function drawVial(context: CanvasRenderingContext2D, accent: Rgb, level: number): void {
+/* Every texel inside the glass (the neck too), and how many the body holds. */
+type Cell = { x: number; y: number };
+const INTERIOR: Cell[] = [];
+VIAL.forEach((row, y) => {
+  const first = row.indexOf('g');
+  const last = row.lastIndexOf('g');
+  if (first < 0) return;
+  for (let x = first + 1; x < last; x++) if (row[x] === '.') INTERIOR.push({ x, y });
+});
+const BODY_CELLS = INTERIOR.filter((cell) => cell.y >= LIQUID_TOP && cell.y <= LIQUID_BOTTOM).length;
+/** The tilt is drawn in steps this size (rad): the liquid moves a texel at a time anyway. */
+const TILT_STEP = 0.12;
+
+/**
+ * The liquid's texels at `level`, with the bottle tipped `tilt` rad clockwise on
+ * screen: it settles toward whatever is down, so a raised bottle runs into its neck.
+ * Returns the filled cells and, for each, how close it is to the surface.
+ */
+function liquidCells(level: number, tilt: number): Map<string, number> {
+  const filled = new Map<string, number>();
+  const l = Math.min(1, Math.max(0, level));
+  if (l <= 0.001) return filled;
+  const count = Math.max(1, Math.round(l * BODY_CELLS));
+  const a = Math.round(tilt / TILT_STEP) * TILT_STEP;
+  // "down" in the vial's own pixels
+  const dx = Math.sin(a);
+  const dy = Math.cos(a);
+  const depth = INTERIOR.map((cell) => ({ cell, d: (cell.x + 0.5 - 8) * dx + (cell.y + 0.5 - 8) * dy }));
+  depth.sort((p, q) => q.d - p.d);
+  const level0 = depth[Math.min(depth.length, count) - 1].d - 1e-6;
+  for (const { cell, d } of depth) if (d >= level0) filled.set(`${cell.x},${cell.y}`, d - level0);
+  return filled;
+}
+
+/** Changes only when the picture of the vial would (a texel of liquid, a tilt step). */
+export function vialKey(level: number, tilt = 0, open = false): string {
+  const l = Math.min(1, Math.max(0, level));
+  return `${l <= 0.001 ? 0 : Math.max(1, Math.round(l * BODY_CELLS))}:${Math.round(tilt / TILT_STEP)}:${open ? 1 : 0}`;
+}
+
+/**
+ * Paints the vial into a 16 x 16 context (call with smoothing off and scale yourself).
+ * `tilt` (rad, clockwise) is how far the bottle is tipped where it is shown;
+ * `open`: the cork is out (it is drawn from).
+ */
+export function drawVial(context: CanvasRenderingContext2D, accent: Rgb, level: number, tilt = 0, open = false): void {
   context.clearRect(0, 0, 16, 16);
-  const rows = vialRows(level);
-  const surface = LIQUID_BOTTOM - rows + 1;
+  const liquid = liquidCells(level, tilt);
   const px = (x: number, y: number, color: string) => {
     context.fillStyle = color;
     context.fillRect(x, y, 1, 1);
@@ -68,17 +111,19 @@ export function drawVial(context: CanvasRenderingContext2D, accent: Rgb, level: 
     const last = row.lastIndexOf('g');
     for (let x = 0; x < 16; x++) {
       const cell = row[x];
-      if (cell === 'k') px(x, y, '#6e4322');
-      else if (cell === 'K') px(x, y, '#a8723f');
+      if (cell === 'k' || cell === 'K') {
+        if (!open) px(x, y, cell === 'k' ? '#6e4322' : '#a8723f');
+      }
       else if (cell === 'W') px(x, y, '#f2f7ff');
       else if (cell === 'g') px(x, y, x < 8 ? 'rgba(228, 238, 250, 0.96)' : 'rgba(150, 168, 194, 0.96)');
       else if (first >= 0 && x > first && x < last) {
-        const filled = y >= LIQUID_TOP && y >= surface && y <= LIQUID_BOTTOM;
-        if (!filled) {
+        const below = liquid.get(`${x},${y}`);
+        if (below === undefined) {
           px(x, y, 'rgba(225, 235, 250, 0.13)');
           continue;
         }
-        const color = y === surface ? light : x >= last - 2 || y === LIQUID_BOTTOM ? (x === last - 1 ? deep : dark) : x === first + 1 ? light : mid;
+        // the surface catches the light; the glass's shadowed side and foot stay dark
+        const color = below < 1 ? light : x >= last - 2 || y === LIQUID_BOTTOM ? (x === last - 1 ? deep : dark) : x === first + 1 ? light : mid;
         px(x, y, color);
       }
     }

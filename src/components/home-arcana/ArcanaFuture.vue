@@ -217,7 +217,7 @@ const newsDate = computed(() => newsDateValue.value
   grid-template-areas:
     'steps side'
     'actions .';
-  gap: 20px clamp(20px, 2.4vw, 32px);
+  gap: var(--arc-grid-gap);
   /* both columns run to the same line: the news card stretches to the last step's foot */
   align-items: stretch;
 }
@@ -232,7 +232,7 @@ const newsDate = computed(() => newsDateValue.value
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 12px;
+  gap: var(--arc-grid-gap);
 }
 
 .arc-step {
@@ -240,9 +240,9 @@ const newsDate = computed(() => newsDateValue.value
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 20px;
   padding: clamp(20px, 2vw, 26px);
-  border-radius: var(--arc-radius);
-  background: color-mix(in oklab, var(--arc-surface) 88%, transparent);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
+  border-radius: var(--arc-r-lg);
+  background: var(--arc-raised);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 .arc-step__num {
@@ -250,8 +250,8 @@ const newsDate = computed(() => newsDateValue.value
   place-items: center;
   width: 40px;
   height: 58px;
-  border-radius: 5px;
-  border: 1.5px solid var(--acc-ink);
+  border-radius: var(--arc-r-sm);
+  border: var(--arc-bw-accent) solid var(--acc-ink);
   background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
@@ -267,15 +267,15 @@ const newsDate = computed(() => newsDateValue.value
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 19px;
-  line-height: 1.25;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
   color: var(--arc-ink);
 }
 
 .arc-step p {
   text-wrap: pretty;
   margin: 0;
-  font-size: 15px;
+  font-size: var(--arc-fs-body);
   line-height: 1.6;
   color: var(--arc-muted);
 }
@@ -287,7 +287,7 @@ const newsDate = computed(() => newsDateValue.value
 .arc-step p.arc-step__note {
   min-height: 1.6em;
   margin-top: 10px;
-  font-size: 14px;
+  font-size: var(--arc-fs-small);
   transition: color .2s;
 }
 
@@ -311,16 +311,16 @@ const newsDate = computed(() => newsDateValue.value
   grid-area: side;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 12px;
+  gap: var(--arc-grid-gap);
 }
 
 .arc-live,
 .arc-news {
   display: block;
   padding: clamp(20px, 2vw, 26px);
-  border-radius: var(--arc-radius);
-  background: color-mix(in oklab, var(--arc-surface) 88%, transparent);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
+  border-radius: var(--arc-r-lg);
+  background: var(--arc-raised);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 .arc-live__row {
@@ -382,7 +382,7 @@ const newsDate = computed(() => newsDateValue.value
 
 .arc-live__meta {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--arc-fs-caption);
   line-height: 1.4;
   color: var(--arc-muted);
 }
@@ -393,7 +393,7 @@ const newsDate = computed(() => newsDateValue.value
   gap: 12px;
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 1px solid var(--arc-line);
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
 .arc-live__season strong {
@@ -407,7 +407,7 @@ const newsDate = computed(() => newsDateValue.value
 }
 
 .arc-live__season span {
-  font-size: 14px;
+  font-size: var(--arc-fs-small);
   color: var(--arc-muted);
 }
 
@@ -416,18 +416,24 @@ const newsDate = computed(() => newsDateValue.value
   flex-direction: column;
   align-items: flex-start;
   color: inherit;
-  transition: box-shadow .25s, transform .35s cubic-bezier(.2, .8, .2, 1);
+  transition: box-shadow .25s, transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
+/* a link card: the family's hover (2px lift, accent edge) and press */
 .arc-news:hover {
   color: inherit;
-  transform: translateY(-3px);
-  box-shadow: inset 0 0 0 1px var(--acc-ink);
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+.arc-news:active {
+  transform: scale(.98);
+  transition-duration: .08s;
 }
 
 .arc-news__date {
   margin-bottom: 8px;
-  font-size: 13px;
+  font-size: var(--arc-fs-caption);
   line-height: 1.4;
   color: var(--arc-muted);
 }
@@ -437,14 +443,14 @@ const newsDate = computed(() => newsDateValue.value
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 20px;
-  line-height: 1.25;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
   color: var(--arc-ink);
 }
 
 .arc-news__body {
   margin: 0 0 14px;
-  font-size: 15px;
+  font-size: var(--arc-fs-body);
   line-height: 1.55;
   color: var(--arc-muted);
   display: -webkit-box;
@@ -458,7 +464,7 @@ const newsDate = computed(() => newsDateValue.value
   align-items: center;
   gap: 8px;
   margin-top: auto;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
   color: var(--arc-ink);

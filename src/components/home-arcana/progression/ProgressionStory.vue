@@ -5,6 +5,8 @@
     class="progression"
     aria-labelledby="progression-title"
   >
+    <!-- The roofline of Backlund: the room's top edge, rising over the hero's bottom as the room comes up. -->
+    <i class="progression__roofs" :style="dress.roofs" aria-hidden="true" />
     <div class="progression__sticky">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
@@ -28,16 +30,15 @@
       <!-- the dark closing in on the drink, with the heart's beat in it -->
       <div class="progression__dread" :class="{ 'is-lit': dreadLit }" :style="dress.dread" aria-hidden="true" data-sweep-ignore />
       <div class="progression__burst" :style="dress.burst" aria-hidden="true" />
-      <div class="progression__threshold" :style="dress.threshold" aria-hidden="true" />
 
+      <!-- The title card: it rides in with the room and hands over to the first chapter in the same column. -->
       <header class="progression__heading" :style="dress.heading">
         <h2 id="progression-title">{{ tp('title') }}</h2>
-        <p class="progression__tagline">{{ tp('tagline') }}</p>
       </header>
 
-      <div class="progression__layout" :style="layoutStyle">
+      <div class="progression__layout" :class="{ 'is-leaving': copyLeaving }" :style="layoutStyle">
         <!-- Outgoing and incoming copy share one grid cell and cross over. -->
-        <div class="chapter-copy-slot">
+        <div class="chapter-copy-slot" :style="copyStyle">
           <Transition name="chapter-copy">
             <article v-if="activeChapter.id !== 'awaken'" :key="activeChapter.id" class="chapter-copy">
               <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
@@ -109,7 +110,7 @@
         </div>
       </div>
 
-      <nav class="progression-nav" :aria-label="tp('navLabel')">
+      <nav class="progression-nav" :class="{ 'is-leaving': railLeaving }" :aria-label="tp('navLabel')">
         <i class="progression-nav__line" aria-hidden="true"><b :style="{ transform: `scaleX(${progress.toFixed(4)})` }" /></i>
         <button
           v-for="(chapter, index) in CHAPTERS"
@@ -338,8 +339,8 @@ const DRESS_VARS = {
   fogbank: ['--awaken', '--risk'],
   dread: ['--risk', '--thump', '--blackout', '--stand-x', '--stand-y'],
   burst: ['--flash', '--stand-x', '--stand-y'],
-  threshold: ['--journey'],
   heading: ['--entry', '--journey'],
+  roofs: ['--entry'],
 } as const;
 type DressLayer = keyof typeof DRESS_VARS;
 const dress = computed(() => {
@@ -355,6 +356,14 @@ const moonLit = computed(() => Number(sectionVars.value['--moon']) > 0 || Number
 const dreadLit = computed(() => Number(sectionVars.value['--risk']) > 0 || Number(sectionVars.value['--blackout']) > 0);
 /* The stage fades in over the first steps; as an opacity, not a variable, so the scenes under it are not restyled. */
 const layoutStyle = computed(() => ({ opacity: clamp01((progress.value - 0.006) * 40).toFixed(4) }));
+/*
+ * The first chapter's copy takes the title card's place once the card has gone
+ * (.progression__heading leaves by 0.02): one after the other, never two headings at once.
+ */
+const copyStyle = computed(() => {
+  const k = clamp01((progress.value - 0.022) * 36);
+  return { opacity: k.toFixed(4), transform: k < 1 ? `translate3d(0, ${((1 - k) * 16).toFixed(2)}px, 0)` : 'none' };
+});
 
 /* ---------------- inspector plumbing ---------------- */
 watch(activeChapterIndex, () => clearDetail());
@@ -409,6 +418,15 @@ function onResize() {
   measureSection();
   update();
 }
+/*
+ * The last stretch of the pin, where the light theme's paper fade (ArcanaHome, the section's
+ * ::after, up to 34vh) starts to rise over the rail and the copy: their text steps out first
+ * instead of turning into pale ghost text on the paper.
+ */
+const pinLeft = (share: number) => progress.value > 0.5 && (1 - progress.value) * Math.max(1, sectionHeight - innerHeight) < innerHeight * share;
+/* the rail sits at the very foot, the copy higher up: each goes as the fade reaches it */
+const railLeaving = computed(() => pinLeft(0.34));
+const copyLeaving = computed(() => pinLeft(0.15));
 function update() {
   if (!visible.value || !sectionRef.value || frame) return;
   frame = requestAnimationFrame(() => {
@@ -505,7 +523,8 @@ onUnmounted(() => {
   --blackout: 0;
   --flash: 0;
   --moon: 0;
-  --rail: clamp(20px, 4vw, 64px);
+  /* the page's content edge (ArcanaHome --arc-edge): copy, rail and stage line up with every section */
+  --rail: var(--arc-edge, clamp(20px, 4vw, 64px));
   --copy-w: clamp(272px, 27vw, 400px);
   --h3-size: clamp(32px, 3.3vw, 50px);
   --top: calc(var(--site-header-stack, 106px) + clamp(14px, 3vh, 36px));
@@ -514,6 +533,28 @@ onUnmounted(() => {
   color: var(--arc-ink);
   background: var(--arc-bg);
   isolation: isolate;
+}
+
+/*
+ * The room's top edge is the roofline of the city the hero looked over (a stepped, blocky
+ * skyline cut out of the room's own colour). It rises out of the room's top as the story
+ * enters, over the strip the hero keeps free for it (--roof-h), so there is no straight seam:
+ * in the light theme the dark room climbs the paper sky roof by roof, in the dark theme the
+ * roofs are the room's black against the hero's last glow.
+ */
+.progression__roofs {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: calc(100% - 1px);
+  left: 0;
+  height: var(--roof-h, 120px);
+  background: var(--arc-bg);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201600%20220%22%20width%3D%221600%22%20height%3D%22220%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0%20220%20L0%20140%20L24%20140%20L24%20132%20L56%20132%20L56%20108%20L72%20108%20L72%20132%20L104%20132%20L104%20160%20L112%20160%20L112%20144%20L120%20144%20L120%20128%20L128%20128%20L128%20112%20L136%20112%20L136%2096%20L168%2096%20L168%20112%20L176%20112%20L176%20128%20L184%20128%20L184%20144%20L192%20144%20L192%20160%20L200%20160%20L200%20100%20L224%20100%20L224%2068%20L240%2068%20L240%20100%20L264%20100%20L264%20108%20L280%20108%20L280%2084%20L288%2084%20L288%2060%20L296%2060%20L296%2036%20L304%2036%20L304%2012%20L312%2012%20L312%20-12%20L320%20-12%20L320%2012%20L328%2012%20L328%2036%20L336%2036%20L336%2060%20L344%2060%20L344%2084%20L352%2084%20L352%20108%20L368%20108%20L368%20116%20L392%20116%20L392%2076%20L408%2076%20L408%20116%20L432%20116%20L432%20116%20L472%20116%20L472%20160%20L488%20160%20L488%20144%20L504%20144%20L504%20128%20L512%20128%20L512%20144%20L528%20144%20L528%20160%20L544%20160%20L544%20100%20L568%20100%20L568%2060%20L584%2060%20L584%20100%20L608%20100%20L608%20160%20L632%20160%20L632%20144%20L656%20144%20L656%20128%20L664%20128%20L664%20144%20L688%20144%20L688%20160%20L712%20160%20L712%20116%20L736%20116%20L736%2084%20L752%2084%20L752%20116%20L776%20116%20L776%20116%20L832%20116%20L832%20108%20L848%20108%20L848%2084%20L856%2084%20L856%2060%20L864%2060%20L864%2036%20L872%2036%20L872%2012%20L880%2012%20L880%20-12%20L888%20-12%20L888%2012%20L896%2012%20L896%2036%20L904%2036%20L904%2060%20L912%2060%20L912%2084%20L920%2084%20L920%20108%20L936%20108%20L936%20160%20L960%20160%20L960%20144%20L984%20144%20L984%20128%20L1000%20128%20L1000%20144%20L1024%20144%20L1024%20160%20L1048%20160%20L1048%20116%20L1088%20116%20L1088%20116%20L1096%20116%20L1096%20100%20L1104%20100%20L1104%2084%20L1112%2084%20L1112%2068%20L1120%2068%20L1120%2052%20L1128%2052%20L1128%2068%20L1136%2068%20L1136%2084%20L1144%2084%20L1144%20100%20L1152%20100%20L1152%20116%20L1160%20116%20L1160%20100%20L1176%20100%20L1176%2084%20L1192%2084%20L1192%2068%20L1208%2068%20L1208%2084%20L1224%2084%20L1224%20100%20L1240%20100%20L1240%20160%20L1248%20160%20L1248%20144%20L1256%20144%20L1256%20128%20L1264%20128%20L1264%20112%20L1272%20112%20L1272%2096%20L1288%2096%20L1288%20112%20L1296%20112%20L1296%20128%20L1304%20128%20L1304%20144%20L1312%20144%20L1312%20160%20L1320%20160%20L1320%20100%20L1360%20100%20L1360%20100%20L1384%20100%20L1384%2068%20L1400%2068%20L1400%20100%20L1424%20100%20L1424%20148%20L1432%20148%20L1432%20132%20L1440%20132%20L1440%20116%20L1448%20116%20L1448%20100%20L1456%20100%20L1456%2084%20L1464%2084%20L1464%20100%20L1472%20100%20L1472%20116%20L1480%20116%20L1480%20132%20L1488%20132%20L1488%20148%20L1496%20148%20L1496%20148%20L1536%20148%20L1536%20108%20L1552%20108%20L1552%20148%20L1552%20140%20L1600%20140%20L1600%20140%20L1600%20220%20Z%22%20fill%3D%22%23000%22/%3E%3C/svg%3E") 0 100% / auto 100% repeat-x;
+  mask: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201600%20220%22%20width%3D%221600%22%20height%3D%22220%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0%20220%20L0%20140%20L24%20140%20L24%20132%20L56%20132%20L56%20108%20L72%20108%20L72%20132%20L104%20132%20L104%20160%20L112%20160%20L112%20144%20L120%20144%20L120%20128%20L128%20128%20L128%20112%20L136%20112%20L136%2096%20L168%2096%20L168%20112%20L176%20112%20L176%20128%20L184%20128%20L184%20144%20L192%20144%20L192%20160%20L200%20160%20L200%20100%20L224%20100%20L224%2068%20L240%2068%20L240%20100%20L264%20100%20L264%20108%20L280%20108%20L280%2084%20L288%2084%20L288%2060%20L296%2060%20L296%2036%20L304%2036%20L304%2012%20L312%2012%20L312%20-12%20L320%20-12%20L320%2012%20L328%2012%20L328%2036%20L336%2036%20L336%2060%20L344%2060%20L344%2084%20L352%2084%20L352%20108%20L368%20108%20L368%20116%20L392%20116%20L392%2076%20L408%2076%20L408%20116%20L432%20116%20L432%20116%20L472%20116%20L472%20160%20L488%20160%20L488%20144%20L504%20144%20L504%20128%20L512%20128%20L512%20144%20L528%20144%20L528%20160%20L544%20160%20L544%20100%20L568%20100%20L568%2060%20L584%2060%20L584%20100%20L608%20100%20L608%20160%20L632%20160%20L632%20144%20L656%20144%20L656%20128%20L664%20128%20L664%20144%20L688%20144%20L688%20160%20L712%20160%20L712%20116%20L736%20116%20L736%2084%20L752%2084%20L752%20116%20L776%20116%20L776%20116%20L832%20116%20L832%20108%20L848%20108%20L848%2084%20L856%2084%20L856%2060%20L864%2060%20L864%2036%20L872%2036%20L872%2012%20L880%2012%20L880%20-12%20L888%20-12%20L888%2012%20L896%2012%20L896%2036%20L904%2036%20L904%2060%20L912%2060%20L912%2084%20L920%2084%20L920%20108%20L936%20108%20L936%20160%20L960%20160%20L960%20144%20L984%20144%20L984%20128%20L1000%20128%20L1000%20144%20L1024%20144%20L1024%20160%20L1048%20160%20L1048%20116%20L1088%20116%20L1088%20116%20L1096%20116%20L1096%20100%20L1104%20100%20L1104%2084%20L1112%2084%20L1112%2068%20L1120%2068%20L1120%2052%20L1128%2052%20L1128%2068%20L1136%2068%20L1136%2084%20L1144%2084%20L1144%20100%20L1152%20100%20L1152%20116%20L1160%20116%20L1160%20100%20L1176%20100%20L1176%2084%20L1192%2084%20L1192%2068%20L1208%2068%20L1208%2084%20L1224%2084%20L1224%20100%20L1240%20100%20L1240%20160%20L1248%20160%20L1248%20144%20L1256%20144%20L1256%20128%20L1264%20128%20L1264%20112%20L1272%20112%20L1272%2096%20L1288%2096%20L1288%20112%20L1296%20112%20L1296%20128%20L1304%20128%20L1304%20144%20L1312%20144%20L1312%20160%20L1320%20160%20L1320%20100%20L1360%20100%20L1360%20100%20L1384%20100%20L1384%2068%20L1400%2068%20L1400%20100%20L1424%20100%20L1424%20148%20L1432%20148%20L1432%20132%20L1440%20132%20L1440%20116%20L1448%20116%20L1448%20100%20L1456%20100%20L1456%2084%20L1464%2084%20L1464%20100%20L1472%20100%20L1472%20116%20L1480%20116%20L1480%20132%20L1488%20132%20L1488%20148%20L1496%20148%20L1496%20148%20L1536%20148%20L1536%20108%20L1552%20108%20L1552%20148%20L1552%20140%20L1600%20140%20L1600%20140%20L1600%20220%20Z%22%20fill%3D%22%23000%22/%3E%3C/svg%3E") 0 100% / auto 100% repeat-x;
+  transform: translate3d(0, calc((1 - clamp(0, (var(--entry) - 0.02) * 4, 1)) * 101%), 0);
+  pointer-events: none;
+  will-change: transform;
 }
 
 .progression__sticky {
@@ -544,15 +585,21 @@ onUnmounted(() => {
 .progression__hearth,
 .progression__burst,
 .progression__dread,
-.progression__threshold,
 .progression-nav__line b {
   will-change: transform, opacity;
 }
 
+/*
+ * On the way in the room is further away than the page: it rises a quarter slower
+ * than the section (it starts a quarter of a screen up and settles as the section
+ * pins), so the descent from the hero carries on into it. It is a quarter of a
+ * screen taller than the window for that, and lights up as it comes.
+ */
 .progression__backdrop {
-  opacity: calc(clamp(0, (var(--entry) - 0.3) * 1.43, 1) * max(0, 0.5 - var(--awaken) * 0.3 - var(--risk) * 0.26 - var(--blackout) * 0.24));
-  transform: scale(calc(1.04 + var(--journey) * 0.06));
-  transform-origin: 50% 60%;
+  bottom: -25%;
+  opacity: calc(clamp(0, (var(--entry) - 0.02) * 3, 1) * max(0, 0.5 + (1 - var(--entry)) * 0.14 - var(--awaken) * 0.3 - var(--risk) * 0.26 - var(--blackout) * 0.24));
+  transform: translate3d(0, calc((1 - var(--entry)) * -20%), 0) scale(calc(1.04 + var(--journey) * 0.06));
+  transform-origin: 50% 48%;
 }
 
 .progression__backdrop img {
@@ -560,7 +607,7 @@ onUnmounted(() => {
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center 58%;
+  object-position: center 40%;
   filter: grayscale(0.85) brightness(0.36) contrast(1.1);
 }
 
@@ -731,38 +778,27 @@ onUnmounted(() => {
   48% { opacity: 0; }
 }
 
-/* the hero's fog rolls into this chapter; the book falls out of it */
-.progression__threshold {
-  position: absolute;
-  z-index: 6;
-  top: 0;
-  right: -10%;
-  left: -10%;
-  height: 58%;
-  background:
-    radial-gradient(ellipse 26% 26% at 20% 0%, rgba(200, 202, 214, 0.2), transparent 72%),
-    radial-gradient(ellipse 20% 22% at 52% 2%, rgba(200, 202, 214, 0.15), transparent 72%),
-    radial-gradient(ellipse 28% 28% at 82% 0%, rgba(200, 202, 214, 0.2), transparent 72%),
-    radial-gradient(ellipse 34% 46% at 66% 34%, rgba(176, 180, 196, 0.1), transparent 72%);
-  opacity: clamp(0, calc(1 - var(--journey) * 8), 1);
-  pointer-events: none;
-}
-
-/* ---- title card: the entrance only ---- */
+/*
+ * ---- title card: the entrance only ----
+ * It sits where the chapter copy will be (same box, same left edge), comes up a
+ * little faster than the room behind it, and lifts away as the story pins; the
+ * first chapter's copy fades in under it (copyStyle), so one heading follows the
+ * other in one place instead of a centred card cutting to a column.
+ */
 .progression__heading {
-  --title-in: clamp(0, calc((var(--entry) - 0.35) * 2.5), 1);
-  --title-out: clamp(0, calc(1 - var(--journey) * 55), 1);
+  --title-in: clamp(0, calc((var(--entry) - 0.12) * 2.2), 1);
+  --title-out: clamp(0, calc(var(--journey) * 50), 1);
   position: absolute;
   z-index: 8;
-  top: 50%;
-  right: var(--rail);
+  top: var(--top);
+  bottom: clamp(100px, 13vh, 120px);
   left: var(--rail);
+  width: min(56vw, 760px);
   display: grid;
-  justify-items: center;
-  gap: 18px;
-  text-align: center;
-  opacity: min(var(--title-in), var(--title-out));
-  transform: translate3d(0, calc(-50% + (1 - var(--title-out)) * -18px), 0);
+  align-content: center;
+  justify-items: start;
+  opacity: calc(var(--title-in) * (1 - var(--title-out)));
+  transform: translate3d(0, calc((1 - var(--title-in)) * 56px - var(--title-out) * 32px), 0);
   pointer-events: none;
 }
 
@@ -772,26 +808,18 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(44px, 6.4vw, 92px);
+  font-size: var(--arc-fs-display, clamp(36px, 4.8vw, 68px));
   line-height: 0.98;
   letter-spacing: -0.03em;
   text-wrap: balance;
   text-shadow: 0 10px 60px rgba(0, 0, 0, 0.6);
 }
 
-.progression__tagline {
-  margin: 0;
-  color: var(--arc-muted);
-  font-size: clamp(16px, 1.25vw, 19px);
-  line-height: 1.5;
-  text-wrap: pretty;
-}
-
 /* ---- chapter copy + stage ---- */
 .progression__layout {
   position: absolute;
   z-index: 4;
-  inset: var(--top) max(var(--rail), 64px) clamp(100px, 13vh, 120px) var(--rail);
+  inset: var(--top) var(--rail) clamp(100px, 13vh, 120px) var(--rail);
   display: grid;
   grid-template-columns: var(--copy-w) minmax(0, 1fr);
   align-items: center;
@@ -944,6 +972,21 @@ onUnmounted(() => {
   padding-top: 2px;
 }
 
+/*
+ * Light theme only: the dark room dissolves into paper at its foot (see railLeaving). Its
+ * text steps out first, so no light-on-paper ghost of the rail or the copy is left behind.
+ */
+:root[data-theme="parchment"] .progression-nav {
+  transition: opacity .3s ease;
+}
+
+:root[data-theme="parchment"] .progression-nav.is-leaving,
+:root[data-theme="parchment"] .progression__layout.is-leaving .chapter-copy {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease;
+}
+
 .progression-nav__line {
   position: absolute;
   top: 0;
@@ -971,7 +1014,7 @@ onUnmounted(() => {
   gap: 4px;
   padding: 8px 6px 4px 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--arc-r-sm);
   color: var(--arc-muted);
   background: transparent;
   cursor: pointer;
@@ -984,8 +1027,8 @@ onUnmounted(() => {
 }
 
 .progression-nav button:focus-visible {
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 2px;
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 /* states differ by shape, not only hue: active = tick on the rail + bold label */
@@ -995,7 +1038,7 @@ onUnmounted(() => {
   left: 0;
   width: 8px;
   height: 8px;
-  border: 1.5px solid currentColor;
+  border: var(--arc-bw-accent) solid currentColor;
   border-radius: 50%;
   background: var(--arc-bg);
   content: '';
@@ -1020,12 +1063,12 @@ onUnmounted(() => {
 }
 
 .progression-nav span {
-  font: 400 10.5px/1 var(--arc-caps);
+  font: 400 11px/1 var(--arc-caps);
   letter-spacing: 0.14em;
 }
 
 .progression-nav strong {
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   font-weight: 500;
 }
 
@@ -1142,12 +1185,15 @@ onUnmounted(() => {
     mask-image: linear-gradient(180deg, transparent, #000 20%, #000 45%, transparent);
   }
 
+  .progression__roofs {
+    display: none;
+  }
+
   .progression__hearth,
   .progression__moon,
   .progression__dread,
   .progression__burst,
   .progression__fogbank,
-  .progression__threshold,
   .progression__layout,
   .progression-nav {
     display: none;
@@ -1234,7 +1280,7 @@ onUnmounted(() => {
     align-items: center;
     gap: 14px;
     padding: 10px 14px 10px 10px;
-    border-radius: 12px;
+    border-radius: var(--arc-r-md);
     background: color-mix(in oklab, var(--arc-surface) 60%, transparent);
     box-shadow: inset 0 0 0 1px var(--arc-line);
   }

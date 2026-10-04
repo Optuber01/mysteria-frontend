@@ -99,37 +99,45 @@ onUnmounted(() => cleanup?.());
 </script>
 
 <style scoped>
-/* A note pinned to the exhibit: the page's dark surface, the Pathway's kicker. */
+/*
+ * A note pinned to the exhibit. It is teleported to <body>, outside the potion
+ * story, so it brings its own colours: the story is a dark room in both themes,
+ * and the page's --arc-ink turns dark in the light one.
+ */
 .inspector {
+  --ins-bg: #16161c;
+  --ins-ink: #efeef3;
+  --ins-muted: #b4b3be;
   position: fixed;
   z-index: 80;
   top: 0;
   left: 0;
   visibility: hidden;
   width: min(290px, calc(100vw - 24px));
-  padding: 14px 16px 16px;
+  padding: 12px 14px 13px;
   overflow: visible;
-  border-radius: 12px;
-  color: var(--arc-ink, #efeef3);
-  background: color-mix(in oklab, #15151b 94%, var(--acc, #a78bfa));
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc, #a78bfa) 40%, transparent), 0 18px 40px rgba(0, 0, 0, 0.55);
+  border: 1px solid color-mix(in oklab, var(--acc, #a78bfa) 26%, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  color: var(--ins-ink);
+  background: var(--ins-bg);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   font-family: var(--arc-body, system-ui, sans-serif);
   pointer-events: none;
 }
 .inspector.is-positioned { visibility: visible; }
-.inspector strong { display: block; color: var(--arc-ink, #efeef3); font-size: 15px; font-weight: 600; line-height: 1.3; }
-.inspector p { margin: 6px 0 0; color: var(--arc-muted, #a7a6b2); font-size: 13.5px; line-height: 1.5; }
+.inspector strong { display: block; color: var(--ins-ink); font-size: 15px; font-weight: 600; line-height: 1.3; }
+.inspector p { margin: 5px 0 0; color: var(--ins-muted); font-size: 13.5px; line-height: 1.5; }
 .inspector__arrow {
   position: absolute;
   width: 10px;
   height: 10px;
-  background: color-mix(in oklab, #15151b 94%, var(--acc, #a78bfa));
+  background: var(--ins-bg);
   transform: rotate(45deg);
 }
 .inspector-enter-active { transition: opacity .18s cubic-bezier(.22, 1, .36, 1), transform .18s cubic-bezier(.22, 1, .36, 1); }
 .inspector-leave-active { transition: opacity .12s cubic-bezier(.22, 1, .36, 1), transform .12s cubic-bezier(.22, 1, .36, 1); }
-.inspector-enter-from { opacity: 0; transform: translateY(6px) scale(.97); }
-.inspector-leave-to { opacity: 0; transform: translateY(4px); }
+.inspector-enter-from { opacity: 0; transform: translateY(3px); }
+.inspector-leave-to { opacity: 0; }
 .inspector--instant.inspector-enter-active,
 .inspector--instant.inspector-leave-active { transition: none; }
 @media (max-width: 600px) { .inspector { width: min(236px, calc(100vw - 24px)); overflow-wrap: anywhere; } }

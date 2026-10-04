@@ -74,12 +74,10 @@ const labels = computed<BookLabels>(() => {
     supplementaryHeading: tp('book.supplementaryHeading'),
     main: entry('main'),
     supplementary: entry('supplementary'),
-    noteHeading: tp('book.noteHeading'),
     note: tp('book.note'),
     coverPathway: tp('book.coverPathway'),
     coverSequence: tp('book.coverSequence'),
     coverName: names.value.sequence,
-    coverRecipe: tp('book.coverRecipe'),
     recipeBook: recipe.value.book,
     accent: card.value.accent,
   };
@@ -179,21 +177,29 @@ function inspect(id: string, event: Event) {
 .book-hotspot {
   position: absolute;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  border: 0;
+  border-radius: 4px;
   background: transparent;
   cursor: pointer;
   pointer-events: none;
-  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+  transition: background-color .18s ease, box-shadow .18s ease;
 }
 
-/* Pencil marks in the Pathway's ink on the page. */
+/*
+ * A pencil mark on the page, not a box: a faint wash of the Pathway's ink and a
+ * hairline under the entry. Nothing moves or glows. The accent is darkened into
+ * ink so it reads on the cream paper for every card (see inkOf in VanillaBookRig).
+ */
 .book-hotspot:hover,
 .book-hotspot:focus-visible {
-  border-color: color-mix(in oklab, var(--acc) 70%, #1d1a16);
   outline: none;
-  background: color-mix(in oklab, var(--acc) 10%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--acc) 45%, transparent);
+  background: color-mix(in oklab, var(--acc) 9%, transparent);
+  box-shadow: inset 0 -1.5px 0 color-mix(in oklab, var(--acc) 34%, #1d1a16);
+}
+
+/* the keyboard's place stays plain to see, still in pencil */
+.book-hotspot:focus-visible {
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklab, var(--acc) 34%, #1d1a16);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -151,17 +151,52 @@ body:has(.concept-arcana) {
   --arc-caps: 'Tenor Sans', 'Segoe UI', system-ui, sans-serif;
   --arc-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  /* one rhythm for every chapter: gutters, section padding, block gaps, radii, type */
+  /*
+   * One system for every chapter (the spec: /tmp/arcana-design-spec.md).
+   * Container: every section's content sits between the same two edges.
+   */
+  --arc-container: 1320px;
   --arc-gutter: clamp(18px, 4vw, 64px);
-  --arc-section-pad: clamp(64px, 7vw, 112px);
-  --arc-block-gap: clamp(64px, 7vw, 112px);
-  --arc-radius: 14px;
-  --arc-radius-lg: 18px;
+  /* the strip under the hero that the potion story's roofline rises into */
+  --roof-h: clamp(96px, 15vh, 168px);
+  /* The content edge inside a full-width box, for left/right/padding-inline (whose % is the
+     full-width containing block): the header bar, the potion story, the footer. */
+  --arc-edge: max(var(--arc-gutter), (100% - var(--arc-container)) / 2);
+  /* rhythm: section padding (top and bottom), groups inside a section, head -> content */
+  --arc-section-pad: clamp(64px, 6vw, 96px);
+  --arc-block-gap: clamp(56px, 5.5vw, 96px);
+  --arc-head-gap: clamp(32px, 3.5vw, 52px);
+  --arc-group-gap: clamp(20px, 2.2vw, 32px);
+  --arc-grid-gap: clamp(12px, 1.4vw, 20px);
+  /* radii: tokens and chips, controls and rows, surfaces and photos */
+  --arc-r-sm: 6px;
+  --arc-r-md: 12px;
+  --arc-r-lg: 18px;
+  --arc-radius: var(--arc-r-lg);
+  --arc-radius-lg: var(--arc-r-lg);
+  /* lines: every hairline, and the one accent width (selected states, accent strokes) */
+  --arc-bw: 1px;
+  --arc-bw-accent: 2px;
+  --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
+  --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
+  /* the card fill: every raised surface on the page */
+  --arc-raised: color-mix(in oklab, var(--arc-surface) 88%, transparent);
+  /* one button family */
+  --arc-btn-h: 48px;
+  --arc-btn-h-sm: 40px;
+  --arc-btn-fs: 15.5px;
+  /* one focus ring */
+  --arc-focus-w: 2px;
+  --arc-focus-off: 3px;
+  /* type */
   --arc-fs-display: clamp(36px, 4.8vw, 68px);
   --arc-fs-h2: clamp(28px, 3vw, 42px);
   --arc-fs-h3: clamp(24px, 2.3vw, 34px);
+  --arc-fs-h4: clamp(19px, 1.45vw, 22px);
   --arc-fs-lede: clamp(16px, 1.15vw, 18px);
-  --arc-fs-body: clamp(15px, 1.05vw, 16.5px);
+  --arc-fs-body: clamp(15px, 1.05vw, 16px);
+  --arc-fs-small: 14px;
+  --arc-fs-caption: 13px;
 
   /* upstream tokens, re-pointed at this concept (header, footer, chips, drawer) */
   --myst-bg: #0b0b0e;
@@ -249,9 +284,12 @@ body:has(.concept-arcana) {
 
 /*
  * The potion story stays a dark room in the light theme: its brewery, blackout and
- * heartbeat are made of darkness. It gets the dark palette back, and its top and bottom
- * dissolve into the paper (two static gradients that scroll with the section; nothing
- * on them animates).
+ * heartbeat are made of darkness. It gets the dark palette back. Its top is a
+ * deliberate cut, not a gradient (a paper-to-black fade read as a grey fog wall and a
+ * straight edge as a band): the room's own roofline (ProgressionStory's
+ * .progression__roofs) rises out of it over the strip the hero keeps free (--roof-h),
+ * so the dark room climbs the paper sky roof by roof. Its bottom dissolves into the
+ * paper (a static gradient that scrolls with the section).
  */
 :root[data-theme="parchment"] .concept-arcana .progression {
   --arc-bg: #0b0b0e;
@@ -271,32 +309,26 @@ body:has(.concept-arcana) {
   --arc-pop: rgba(15, 15, 19, .96);
   --arc-ok: #86efac;
   --arc-bad: #ffb3a8;
+  /* tokens built from the ones above resolve where they are declared: re-derive them here */
+  --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
+  --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
+  --arc-raised: color-mix(in oklab, var(--arc-surface) 88%, transparent);
 }
 
-:root[data-theme="parchment"] .concept-arcana .progression::before,
 :root[data-theme="parchment"] .concept-arcana .progression::after {
   position: absolute;
   z-index: 30;
   right: 0;
   left: 0;
+  bottom: 0;
   height: clamp(160px, 34vh, 340px);
   pointer-events: none;
   content: '';
-}
-
-:root[data-theme="parchment"] .concept-arcana .progression::before {
-  top: 0;
-  background: linear-gradient(180deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
-}
-
-:root[data-theme="parchment"] .concept-arcana .progression::after {
-  bottom: 0;
   background: linear-gradient(0deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
 }
 
-/* the stacked story (ProgressionStory's fallback): the fades mostly stay inside its padding */
+/* the stacked story (ProgressionStory's fallback): the fade mostly stays inside its padding */
 @media (max-width: 900px), (max-height: 590px), (prefers-reduced-motion: reduce) {
-  :root[data-theme="parchment"] .concept-arcana .progression::before,
   :root[data-theme="parchment"] .concept-arcana .progression::after {
     height: calc(clamp(64px, 12vw, 96px) + 40px);
   }
@@ -356,6 +388,89 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   font-weight: 600;
   font-size: 17px;
   letter-spacing: .02em;
+}
+
+/*
+ * The shared header and footer, on this page only: their content runs between the page's
+ * own two edges, and their controls join the page's family (one height, one radius, the
+ * page's focus ring, the tabs' 2px accent underline for the current page).
+ */
+.concept-arcana .header-stack .header-grid {
+  max-width: calc(var(--arc-container) + 2 * var(--arc-gutter));
+  padding-inline: var(--arc-gutter);
+}
+
+.concept-arcana .header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip) {
+  min-height: 36px;
+  border-radius: var(--arc-r-sm);
+}
+
+.concept-arcana .header-stack .header-actions .ip-chip {
+  padding-block: 0;
+}
+
+.concept-arcana .header-stack .header-actions .login-button {
+  padding-block: 0;
+}
+
+.concept-arcana .header-stack .header-actions .theme-toggle {
+  width: 36px;
+  height: 36px;
+}
+
+.concept-arcana .header-stack .nav-underline {
+  height: var(--arc-bw-accent);
+  border-radius: 1px;
+  background: var(--acc-ink);
+}
+
+.concept-arcana .header-stack :is(a, button):focus-visible,
+.concept-arcana > .site-footer a:focus-visible {
+  border-radius: var(--arc-r-sm);
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
+}
+
+/*
+ * Light theme: the bar floats over the hero's rose haze, where the accent and the green,
+ * tuned for plain paper, drop under 4.5:1. Its small coloured text is inked a step deeper.
+ */
+:root[data-theme="parchment"] .concept-arcana .header-stack :is(.season-headline, .lang-label) {
+  color: color-mix(in oklab, var(--acc-ink) 62%, var(--arc-ink));
+}
+
+/* deep enough to hold 4.5:1 where the bar's glass lies over the potion story's dark room */
+:root[data-theme="parchment"] .concept-arcana .header-stack .chip-players {
+  color: #08401d;
+}
+
+/* the footer is part of the page: no band of its own, a hairline at the content's width */
+.concept-arcana > .site-footer {
+  border-top: 0;
+  background: transparent;
+}
+
+.concept-arcana > .site-footer.full {
+  padding: 0 var(--arc-gutter) 36px;
+}
+
+.concept-arcana > .site-footer .footer-shell {
+  max-width: var(--arc-container);
+  padding-top: clamp(40px, 4vw, 56px);
+  border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.concept-arcana > .site-footer .footer-columns {
+  border-bottom-color: var(--arc-line);
+}
+
+/* over the page's wash (not a solid band) the faded small print needs the full muted ink */
+.concept-arcana > .site-footer :is(.footer-copy, .footer-legal a) {
+  color: var(--arc-muted);
+}
+
+.concept-arcana > .site-footer .footer-legal a:hover {
+  color: var(--acc-ink);
 }
 
 /* ---------- ambient layer ---------- */
@@ -433,6 +548,24 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   z-index: 1;
 }
 
+/*
+ * The potion story is an opaque room; the page around it is the background plus the
+ * fixed wash, sigil and grain. The section after the room starts in the room's own
+ * colour and lets the page fade back in, so there is no line where the room ends.
+ * (A static gradient that scrolls with the section; nothing on it animates.)
+ */
+.concept-arcana .progression + .arc-section::before {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: calc(var(--arc-section-pad) * 2.5);
+  background: linear-gradient(180deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 62%, transparent) 38%, transparent);
+  pointer-events: none;
+  content: '';
+}
+
 /* A loop in a chapter far from the viewport (set by ArcanaHome's observer) holds still. */
 .concept-arcana .arc-held,
 .concept-arcana .arc-held::before,
@@ -449,7 +582,7 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 /* ---------- shared building blocks ---------- */
 .concept-arcana .arc-shell {
   width: 100%;
-  max-width: 1320px;
+  max-width: var(--arc-container);
   margin: 0 auto;
 }
 
@@ -471,54 +604,37 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 .concept-arcana .arc-label {
   margin: 0;
   font-family: var(--arc-caps);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: .16em;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--acc-ink);
   transition: color .6s ease;
 }
 
-.concept-arcana .arc-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  padding: 7px 14px 7px 12px;
-  border-radius: 99px;
-  background: color-mix(in oklab, var(--acc) 12%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 30%, transparent);
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--arc-ink);
-}
-
-.concept-arcana .arc-eyebrow__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--acc);
-  box-shadow: 0 0 10px var(--acc);
-}
-
+/* ---------- one button family: solid, ghost, and the field/tile (copy address, downloads) ---------- */
 .concept-arcana .arc-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  min-height: 50px;
+  min-height: var(--arc-btn-h);
   padding: 0 22px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--arc-r-md);
   font-family: var(--arc-body);
-  font-size: 15.5px;
+  font-size: var(--arc-btn-fs);
   font-weight: 600;
   line-height: 1.2;
   cursor: pointer;
   text-decoration: none;
-  transition: transform .3s cubic-bezier(.2, .8, .2, 1), filter .2s, background-color .6s ease, box-shadow .6s ease;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), filter .2s, background-color .25s ease, box-shadow .25s ease;
+}
+
+.concept-arcana .arc-btn--sm {
+  min-height: var(--arc-btn-h-sm);
+  padding: 0 16px;
+  font-size: 15px;
 }
 
 .concept-arcana .arc-btn--solid {
@@ -530,32 +646,43 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 .concept-arcana .arc-btn--solid:hover {
   color: var(--arc-on-acc);
   filter: brightness(1.08);
-  transform: translateY(-2px);
 }
 
 .concept-arcana .arc-btn--ghost {
   background: var(--arc-glass);
   color: var(--arc-ink);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 45%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
 }
 
 .concept-arcana .arc-btn--ghost:hover {
   color: var(--arc-ink);
-  background: color-mix(in oklab, var(--acc) 14%, transparent);
+  background: color-mix(in oklab, var(--acc) 12%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+/* hover lifts every interactive surface by the same 2px; a press sets it down */
+.concept-arcana .arc-btn:hover,
+.concept-arcana .arc-tile:hover {
   transform: translateY(-2px);
 }
 
+.concept-arcana .arc-btn:active,
+.concept-arcana .arc-tile:active,
+.concept-arcana .arc-ip:active {
+  transform: scale(.98);
+  transition-duration: .08s;
+}
+
 .concept-arcana .arc-btn:disabled {
-  opacity: .6;
+  opacity: .55;
   cursor: progress;
   transform: none;
 }
 
-.concept-arcana .arc-btn:focus-visible,
-.concept-arcana .arc-ip:focus-visible,
-.concept-arcana a:focus-visible {
-  outline: 3px solid var(--arc-ink);
-  outline-offset: 3px;
+/* one focus ring for the whole page (low specificity: things that tilt draw it themselves) */
+.concept-arcana :where(a, button, [tabindex], summary):focus-visible {
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 .concept-arcana .arc-btn__icon {
@@ -563,28 +690,36 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   height: 18px;
 }
 
+/* the field/tile look: a quiet hairline that turns accent on hover */
+.concept-arcana .arc-ip,
+.concept-arcana .arc-tile {
+  border: 0;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+  color: var(--arc-ink);
+  transition: box-shadow .25s ease, background-color .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.concept-arcana .arc-ip:hover,
+.concept-arcana .arc-tile:hover {
+  color: var(--arc-ink);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
 .concept-arcana .arc-ip {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 8px 8px 14px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--arc-glass);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
-  color: var(--arc-ink);
+  min-height: var(--arc-btn-h);
+  padding: 0 7px 0 14px;
   font: inherit;
   cursor: pointer;
-  transition: box-shadow .2s;
-}
-
-.concept-arcana .arc-ip:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 60%, transparent);
 }
 
 .concept-arcana .arc-ip__label {
   font-family: var(--arc-caps);
-  font-size: 10px;
+  font-size: 10.5px;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--arc-muted);
@@ -601,13 +736,19 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: var(--arc-r-sm);
   background: color-mix(in oklab, var(--acc) 16%, transparent);
   color: var(--arc-ink);
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+  transition: background-color .2s ease;
+}
+
+.concept-arcana .arc-ip:hover .arc-ip__hint {
+  background: color-mix(in oklab, var(--acc) 26%, transparent);
 }
 
 .concept-arcana .arc-ip.is-copied .arc-ip__hint {
@@ -623,11 +764,27 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 .concept-arcana .arc-ip--big {
   width: 100%;
   justify-content: space-between;
-  padding: 10px 10px 10px 18px;
+  padding-left: 18px;
 }
 
 .concept-arcana .arc-ip--big .arc-ip__address {
   font-size: clamp(16px, 1.6vw, 20px);
+}
+
+/* links: inline (accent, underlined) and action links (ink, accent arrow that steps on) */
+.concept-arcana .arc-link {
+  color: var(--acc-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in oklab, var(--acc-ink) 45%, transparent);
+  text-underline-offset: 4px;
+  transition: color .2s ease, text-decoration-color .2s ease;
+}
+
+.concept-arcana .arc-link:hover {
+  color: var(--arc-ink);
+  text-decoration-color: currentColor;
 }
 
 .concept-arcana .arc-status {

@@ -573,55 +573,52 @@
   "home": {
     "arcana": {
       "ip": {
-        "label": "Server",
         "copy": "Copy",
         "copied": "Copied",
         "failed": "Copy failed",
-        "failedHelp": "Your browser blocked the clipboard. Select the address above and copy it by hand."
+        "failedHelp": "Clipboard blocked. Select and copy the address manually."
       },
       "status": {
-        "checking": "Checking the server…",
+        "checking": "Checking server…",
         "offline": "Server offline",
-        "onlineCount": "Online · {count} playing now"
+        "onlineCount": "{count} players online"
       },
       "hero": {
         "titleA": "Draw your",
-        "titleB": "Pathway.",
-        "lede": "Mysterria is a Minecraft MMORPG set in Lord of the Mysteries. Choose one of 22 Pathways, brew its potions, act out its role and rise from Sequence 9 toward godhood.",
+        "titleB": "first card",
+        "lede": "A Minecraft MMORPG set in Lord of the Mysteries. Choose one of 22 Pathways. Brew potions and act out their roles to ascend from Sequence 9 toward godhood.",
         "join": "How to join",
-        "changelog": "Latest changelog",
-        "shuffle": "Shuffle & draw",
+        "changelog": "Latest update",
+        "shuffle": "Draw a card",
         "drawAgain": "Draw again",
-        "fanLabel": "The deck of 22 Pathways. Pick a face-down card to draw it.",
-        "cardLabel": "Draw face-down card {n} of {total}",
-        "undrawn": "Each card is one of the 22 Pathways",
+        "fanLabel": "22 Pathways. Choose a face-down card.",
+        "cardLabel": "Draw card {n} of {total}",
         "youDrew": "You drew",
         "beginsAs": "Sequence 9: {role}",
-        "readCard": "See all its Sequences",
-        "hint": "Or pick any card from the ring. The page takes on its colours and powers.",
-        "hintDrawn": "Or pick another face-down card.",
+        "readCard": "View Sequences",
+        "hint": "Pick a card to reveal a Pathway.",
         "seqRole": "Sequence 9 · {role}",
         "announce": "You drew {name}. Sequence 9: {role}."
       },
       "dock": {
         "label": "Pathway card",
-        "spreadLabel": "Sections on this page",
-        "your": "Your card",
+        "spreadLabel": "Page sections",
+        "your": "Drawn",
         "draw": "Draw again",
         "current": "Your card: {name}",
-        "none": "No card yet",
+        "none": "Undrawn",
         "drawFirst": "Draw a card",
-        "drawFirstHint": "Pick one of the 22 Pathways at random"
+        "drawFirstHint": "Random Pathway"
       },
       "deck": {
-        "titleA": "22 Pathways.",
-        "titleB": "10 Boons.",
-        "lede": "Pick a seal to see how a Pathway starts, how far it climbs and its first abilities. Each one has its own page with every Sequence.",
-        "tabsLabel": "Which cards to show",
+        "titleA": "22 Pathways,",
+        "titleB": "10 Boons",
+        "lede": "Choose a seal to view its Sequences and first abilities.",
+        "tabsLabel": "Pathways or Boons",
         "tabPathways": "Pathways",
         "tabBoons": "Boons",
-        "ringPathways": "The 22 Pathways. The checked seal is the one shown below.",
-        "ringBoons": "The 10 Boons. The checked seal is the one shown below.",
+        "ringPathways": "22 Pathways. Selected seal shown below.",
+        "ringBoons": "10 Boons. Selected seal shown below.",
         "arcanum": "Arcanum {numeral}",
         "boon": "Boon",
         "seqRole": "Sequence 9 · {role}",
@@ -632,286 +629,497 @@
         },
         "previous": "Previous seal",
         "next": "Next seal",
-        "hint": "Drag the ring or use the arrow keys",
-        "hintTouch": "Swipe the ring or tap a seal",
+        "hint": "Drag or use arrow keys",
+        "hintTouch": "Swipe or choose a seal",
         "announce": "{name}, {current} of {total}.",
-        "beginsAs": "Starts as the {role} at Sequence 9.",
-        "boonNote": "A Boon is a shorter path beside the 22 Pathways. It runs from Sequence 9 to Sequence 5.",
+        "beginsAs": "Sequence 9: {role}",
+        "boonNote": "Boons progress separately from your Pathway, from Sequence 9 to 5.",
         "statSequences": "Sequences",
         "statAbilities": "Abilities",
-        "firstAbilities": "First abilities of the {role}",
+        "firstAbilities": "{role} abilities",
         "loading": "Loading abilities…",
-        "open": "Open the {name} Pathway",
+        "open": "{name} Pathway",
         "archive": "All Pathways",
-        "climb": "From {first} at Sequence 9 to {last} at Sequence {top}.",
-        "openBoon": "Open the {name} Boon"
+        "climb": "Sequence 9: {first} → Sequence {top}: {last}",
+        "openBoon": "{name} Boon"
       }
     },
     "progression": {
-      "title": "Start at Sequence 9.",
-      "tagline": "Find the formula, brew the potion, drink it. This is how the {pathway} Pathway begins.",
-      "navLabel": "Progression chapters",
+      "title": "Your first potion",
+      "navLabel": "Potion stages",
       "navCompleted": "(completed)",
       "chapters": {
         "discover": {
           "short": "Discover",
-          "title": "Find the formula.",
-          "copy": "Every Pathway starts with a written formula. The {pathway} formula lists its main ingredients on the left page and its supplementary ones on the right.",
-          "hint": "Pick an ingredient in the book to see where to find it."
+          "title": "Find the formula",
+          "copy": "The {pathway} formula lists main ingredients on the left and supplementary ingredients on the right.",
+          "hint": "Select an ingredient to find its source."
         },
         "brew": {
           "short": "Brew",
-          "title": "Brew the potion.",
-          "copy": "Build a Magic Cauldron and add the ingredients in the order the formula lists them. Get the order wrong and the brew fails.",
-          "hint": "A failed brew keeps your ingredients, so you can try again."
+          "title": "Brew the potion",
+          "copy": "Build a Magic Cauldron. Add ingredients in the formula’s order or the brew fails.",
+          "hint": "Failed brews keep your ingredients."
         },
         "drink": {
           "short": "Drink",
-          "title": "Drink the potion.",
-          "copy": "Drinking it puts you on the {pathway} Pathway. Your first potion needs no ritual and costs no Madness.",
-          "hint": "A brewed potion lasts two real-time days, so don’t wait too long."
+          "title": "Drink the potion",
+          "copy": "Enter the {pathway} Pathway. Your first potion needs no ritual and costs no Madness.",
+          "hint": "Potions expire after two real-time days."
         },
         "awaken": {
           "short": "Awaken",
-          "title": "Become the {sequence}.",
-          "copy": "You wake up with your first abilities. Play the role to digest the potion, then get ready for Sequence 8."
+          "title": "Become the {sequence}",
+          "copy": "Gain your first abilities. Act out your role to digest the potion before advancing to Sequence 8."
         }
       },
       "ingredients": {
         "mainRole": "Main ingredient",
         "supplementaryRole": "Supplementary ingredient",
         "source": {
-          "droppable": "Dropped by a creature you have to hunt.",
-          "foundable": "Found in generated loot chests.",
-          "mineable": "Gathered from nodes out in the world.",
-          "other": "Gathered on your travels."
+          "droppable": "Dropped by Beyonder Creatures.",
+          "foundable": "Found in generated chests.",
+          "mineable": "Harvested from world nodes.",
+          "other": "Found while exploring."
         }
       },
       "details": {
         "formula": {
           "label": "Sequence 9 formula: {sequence}",
-          "detail": "The first formula on the {pathway} Pathway. Main ingredients go on the left page, supplementary ones on the right."
+          "detail": "{pathway} formula: main ingredients left, supplementary right."
         },
         "cauldron": {
           "label": "Magic Cauldron",
-          "detail": "Add the ingredients in the formula’s order or the brew fails. A failed brew keeps your ingredients."
+          "detail": "Follow the formula’s ingredient order. Failed brews keep your ingredients."
         },
         "sequencePotion": {
           "label": "{sequence} potion",
-          "detail": "A finished Sequence 9 potion. It lasts two real-time days, so drink it before it expires."
+          "detail": "Sequence 9 potion. Expires after two real-time days."
         },
         "drinkPotion": {
-          "label": "The last sip",
-          "detail": "Your first potion needs no ritual and costs no Madness."
+          "label": "First potion",
+          "detail": "No ritual or Madness cost for your first potion."
         }
       },
       "book": {
-        "sceneLabel": "The {pathway} formula book",
+        "sceneLabel": "{pathway} formula book",
         "mainHeading": "Main ingredients",
         "supplementaryHeading": "Supplementary",
-        "noteHeading": "Brewing note",
-        "note": "Build a Magic Cauldron before brewing.",
-        "sealLabel": "Formula seal, Sequence 9 of the {pathway} Pathway. Brewing note: build a Magic Cauldron before brewing.",
+        "note": "Requires a Magic Cauldron.",
+        "sealLabel": "{pathway} Sequence 9 formula. Requires a Magic Cauldron.",
         "coverPathway": "{pathway} Pathway",
-        "coverSequence": "Sequence 9",
-        "coverRecipe": "Beyonder recipe"
+        "coverSequence": "Sequence 9"
       },
       "altar": {
-        "sceneLabel": "Magic Cauldron brewing scene",
+        "sceneLabel": "Brewing a potion",
         "cauldronLabel": "Magic Cauldron",
-        "potionLabel": "Sequence 9 {sequence} potion",
-        "potionCaption": "{sequence} potion"
+        "potionLabel": "Sequence 9 {sequence} potion"
       },
       "drink": {
-        "sceneLabel": "Drink and awaken scene",
-        "panelSub": "Sequence 9 of the {pathway} Pathway",
+        "sceneLabel": "Becoming a Beyonder",
+        "panelSub": "{pathway} · Sequence 9",
         "abilitiesHeading": "First abilities",
         "teaser": "Next: Sequence 8, {nextSequence}",
-        "cta": "Read the guide",
-        "whisper1": "Can you hear us?",
-        "whisper2": "Hold on to yourself.",
-        "whisper3": "Don't answer them.",
-        "whisper4": "Above the gray fog…",
-        "whisper5": "Don't lose control."
+        "cta": "Game guide",
+        "whisper1": "Listen.",
+        "whisper2": "Remember.",
+        "whisper3": "Silence.",
+        "whisper4": "Gray fog…",
+        "whisper5": "Resist."
       },
       "player": {
-        "drink": "A player drinking a Sequence potion",
-        "advance": "A player awakening as a Beyonder"
+        "drink": "Player drinking a Sequence potion",
+        "advance": "Player becoming a Beyonder"
+      },
+      "ravings": {
+        "fool": {
+          "r1": "The pendulum knows your name.",
+          "r2": "Look above the gray fog.",
+          "r3": "Your eyes were closed before.",
+          "r4": "Ask what stands behind you.",
+          "r5": "The cards remember your face."
+        },
+        "door": {
+          "r1": "Someone is knocking inside.",
+          "r2": "There was no wall here.",
+          "r3": "Which side are you on?",
+          "r4": "The stars are too close.",
+          "r5": "Do not let me return."
+        },
+        "visionary": {
+          "r1": "Watch your hands betray you.",
+          "r2": "We saw that little hesitation.",
+          "r3": "You moved before you decided.",
+          "r4": "Who is watching through you?",
+          "r5": "Stay out of the scene."
+        },
+        "mother": {
+          "r1": "The roots know your warmth.",
+          "r2": "Something stirs beneath your skin.",
+          "r3": "Bury it a little deeper.",
+          "r4": "We grow where you buried them.",
+          "r5": "Come back to the soil."
+        },
+        "emperor": {
+          "r1": "You already agreed to this.",
+          "r2": "Read the exception again.",
+          "r3": "Your words meant something else.",
+          "r4": "The law leaves room for us.",
+          "r5": "Say it was your decision."
+        },
+        "priest": {
+          "r1": "You know that scent.",
+          "r2": "Those tracks circle behind you.",
+          "r3": "Wait for the next footstep.",
+          "r4": "You laid this trap yourself.",
+          "r5": "Follow the blood into the fire."
+        },
+        "demoness": {
+          "r1": "They never heard you land.",
+          "r2": "Stay where the shadow thickens.",
+          "r3": "The throat is still warm.",
+          "r4": "Your reflection moved first.",
+          "r5": "Let them come a little closer."
+        },
+        "tyrant": {
+          "r1": "There is salt beneath your skin.",
+          "r2": "Come down beneath the waves.",
+          "r3": "Let the anger fill you.",
+          "r4": "The thunder knows your voice.",
+          "r5": "You have forgotten the shore."
+        },
+        "giant": {
+          "r1": "Your hands remember every weapon.",
+          "r2": "Keep standing in the dusk.",
+          "r3": "Who holds the line behind you?",
+          "r4": "Your blade is growing heavy.",
+          "r5": "Even giants fall at twilight."
+        },
+        "hermit": {
+          "r1": "You cannot close these eyes.",
+          "r2": "We have more to teach you.",
+          "r3": "The knowledge has found you.",
+          "r4": "You saw what looked back.",
+          "r5": "The Sage is still speaking."
+        },
+        "fortune": {
+          "r1": "You heard tomorrow screaming.",
+          "r2": "Do not take that step.",
+          "r3": "You have died here before.",
+          "r4": "Count the heartbeats still remaining.",
+          "r5": "The next misfortune knows you."
+        },
+        "justiciar": {
+          "r1": "You are outside your jurisdiction.",
+          "r2": "Your silence has been recorded.",
+          "r3": "Doubt is forbidden here.",
+          "r4": "Kneel before the verdict.",
+          "r5": "You must obey yourself."
+        },
+        "hanged": {
+          "r1": "We hear your unspoken prayer.",
+          "r2": "Bring your flesh to the altar.",
+          "r3": "The fallen one is listening.",
+          "r4": "Your shadow has already knelt.",
+          "r5": "Whose name did you invoke?"
+        },
+        "death": {
+          "r1": "We kept a place for you.",
+          "r2": "Do not close my eyes.",
+          "r3": "Your hands are cold enough.",
+          "r4": "There is breathing beneath the shroud.",
+          "r5": "The river carries your name."
+        },
+        "paragon": {
+          "r1": "Count the teeth again.",
+          "r2": "You cannot forget the mechanism.",
+          "r3": "There is one piece missing.",
+          "r4": "Your pulse keeps the gears turning.",
+          "r5": "Remember how it came apart."
+        },
+        "abyss": {
+          "r1": "You wanted to hurt them.",
+          "r2": "Anything in your hand will do.",
+          "r3": "Let that last restraint go.",
+          "r4": "Their fear tastes familiar.",
+          "r5": "Your conscience is getting quieter."
+        },
+        "tower": {
+          "r1": "Read the next line.",
+          "r2": "You have not learned enough.",
+          "r3": "There is another meaning underneath.",
+          "r4": "Sleep after the last page.",
+          "r5": "What did you just understand?"
+        },
+        "darkness": {
+          "r1": "Stay awake a little longer.",
+          "r2": "The dark knows you are here.",
+          "r3": "Let the night cover your face.",
+          "r4": "We heard you in your dream.",
+          "r5": "Walk where the lamplight ends."
+        },
+        "moon": {
+          "r1": "The moon has entered your veins.",
+          "r2": "You know what stops the bleeding.",
+          "r3": "Crush the herbs a little finer.",
+          "r4": "The crimson light is watching.",
+          "r5": "What did you put in it?"
+        },
+        "sun": {
+          "r1": "Your voice belongs to the hymn.",
+          "r2": "Sing until the doubt is gone.",
+          "r3": "The light sees through you.",
+          "r4": "Which part of you is impure?",
+          "r5": "There is no shadow to hide."
+        },
+        "chained": {
+          "r1": "Your skin is still a prison.",
+          "r2": "We move when you hold still.",
+          "r3": "The lock is on the inside.",
+          "r4": "How long can you deny us?",
+          "r5": "The moon will loosen these chains."
+        },
+        "error": {
+          "r1": "Your fingers moved without you.",
+          "r2": "You were holding something precious.",
+          "r3": "That thought was mine first.",
+          "r4": "Count your missing seconds.",
+          "r5": "Someone else answered to your name."
+        },
+        "aeon": {
+          "r1": "You have danced this before.",
+          "r2": "Something follows your steps.",
+          "r3": "We have not finished possessing you.",
+          "r4": "The last step begins the first.",
+          "r5": "You will return to this moment."
+        },
+        "chaos": {
+          "r1": "Make them afraid to look.",
+          "r2": "Their trembling pleases you.",
+          "r3": "You were born with this sin.",
+          "r4": "Something waits inside the blood.",
+          "r5": "The Mother knows what you are."
+        },
+        "chaosmist": {
+          "r1": "You know what they need.",
+          "r2": "We never named the price.",
+          "r3": "There is another party listening.",
+          "r4": "You owe us an introduction.",
+          "r5": "Nothing stays certain in the mist."
+        },
+        "condenser": {
+          "r1": "One star has changed its place.",
+          "r2": "Keep watching the empty sky.",
+          "r3": "You feel the weight of starlight.",
+          "r4": "Your calculations brought us nearer.",
+          "r5": "That light is still falling."
+        },
+        "devouring": {
+          "r1": "You are still hungry.",
+          "r2": "The bones will soften inside.",
+          "r3": "Swallow what remains of it.",
+          "r4": "There is room for more.",
+          "r5": "What else did you ever want?"
+        },
+        "edict": {
+          "r1": "No dreams will find you here.",
+          "r2": "Sleep brings no answer now.",
+          "r3": "You felt the current change.",
+          "r4": "Your fate moved without you.",
+          "r5": "Something waits beyond your waking."
+        },
+        "everlasting": {
+          "r1": "The Formless Door is open.",
+          "r2": "You brought our voice back.",
+          "r3": "Repeat what you heard beyond it.",
+          "r4": "Whose thoughts are you thinking?",
+          "r5": "We continue when you fall silent."
+        },
+        "patriarch": {
+          "r1": "You cannot bear to lose it.",
+          "r2": "Every coin is still yours.",
+          "r3": "Their hunger belongs to you.",
+          "r4": "You know who holds it now.",
+          "r5": "Do not open your hand."
+        },
+        "secondlaw": {
+          "r1": "You carry us without pain.",
+          "r2": "Let the wound stay open.",
+          "r3": "Everyone you touch will know.",
+          "r4": "The rot has time to wait.",
+          "r5": "Nothing returns to what it was."
+        },
+        "sublunary": {
+          "r1": "We noticed your soul reaching out.",
+          "r2": "Your totem marks our way in.",
+          "r3": "The boundary runs through you.",
+          "r4": "Who occupies your sanctuary now?",
+          "r5": "Stay close to the marked ground."
+        }
       }
     },
-    "skipToContent": "Skip to main content",
+    "skipToContent": "Skip to content",
     "world": {
       "spread": {
-        "potion": "The Potion",
-        "deck": "The Deck",
-        "world": "The World",
+        "potion": "Potions",
+        "deck": "Pathways",
+        "world": "World",
         "seat": "Join"
       },
-      "titleA": "A world that",
-      "titleB": "fights back.",
-      "lede": "Your first potion is only the start. After that you head out into one shared world with no teleport commands, dungeons behind Rifts, bosses guarding the wilds, a red moon about once a week, and towns built entirely by players.",
-      "rulesLabel": "How this world works",
+      "titleA": "The",
+      "titleB": "wider world",
+      "lede": "Hunt Beyonder Creatures, enter Rifts and settle in towns built by players.",
+      "rulesLabel": "World rules",
       "rules": {
         "distance": {
-          "value": "No teleports",
-          "note": "There is no /home, /spawn or /tpa. Every trip takes time, so choose where you settle."
+          "value": "Travel",
+          "note": "No /home, /spawn or /tpa. Choose your settlement carefully."
         },
         "safe": {
-          "value": "Safe to explore",
-          "note": "PvP only happens in announced zones, Incursions and claims that turn it on."
+          "value": "PvP zones",
+          "note": "PvP is limited to designated zones, Incursions and enabled claims."
         },
         "chests": {
-          "value": "Chests refill",
-          "note": "Naturally generated chests restock over time with Beyonder loot."
+          "value": "Refilling chests",
+          "note": "Generated chests restock with Beyonder loot."
         },
         "season": {
-          "value": "Seasonal",
-          "note": "The world and all progress reset about every six months. Season II is live."
-        }
-      },
-      "groups": {
-        "fight": {
-          "title": "Danger worth the walk."
-        },
-        "build": {
-          "title": "A society run by players."
+          "value": "Season II",
+          "note": "The world and Beyonder progress reset roughly every six months."
         }
       },
       "rifts": {
         "title": "Rifts & dungeons",
-        "body": "Every dungeon sits behind a Rift. /subspace shows where each one is, how your power compares and when it comes off cooldown. Then you take a party in.",
+        "body": "Dungeons lie behind Rifts. /subspace lists locations, relative power and cooldowns.",
         "steps": {
           "find": {
-            "title": "Find it.",
-            "body": "/subspace lists every dungeon and its Rift."
+            "title": "Find:",
+            "body": "Walk to the Rift listed in /subspace."
           },
           "weaken": {
-            "title": "Weaken it.",
-            "body": "Spend Energy Shards until the Rift gives way."
+            "title": "Weaken:",
+            "body": "Contribute Energy Shards to open the Rift."
           },
           "enter": {
-            "title": "Go in together.",
-            "body": "Form a /party. Going in short-handed is allowed."
+            "title": "Enter:",
+            "body": "Form a /party. Smaller groups can enter if not overpowered."
           }
         },
-        "factLoot": "Each dungeon pays out loot once every three days",
-        "factHelp": "Plus two Help Card runs a day, without loot",
-        "alt": "A swirling orange Rift portal ringed by floating runestones at the foot of a ruined tower"
+        "factLoot": "Loot once per dungeon every three days",
+        "factHelp": "Two daily Help Card runs without normal loot",
+        "alt": "Orange Rift and floating runestones beneath a ruined tower"
       },
       "guardians": {
         "title": "Guardians",
-        "body": "Open-world bosses that guard key objectives. They are built for groups: when one kind of damage stops working, your plan has to change.",
-        "fact": "Beat one for a Guardian Reward Token: rare ingredients and recipes",
-        "alt": "A player standing between a fire dragon and an ice dragon on a snowy ridge"
+        "body": "Bosses guarding key objectives. Bring a group and adapt when a damage type stops working.",
+        "fact": "Guardian Reward Tokens yield rare ingredients and recipes",
+        "alt": "Player between fire and ice dragons on a snowy ridge"
       },
       "moon": {
-        "title": "The Crimson Moon",
-        "body": "Beyonder Creatures roam the world for XP, acting points and ingredients. About once a week the moon turns red, and fishing becomes a richer, far riskier loot run.",
-        "week": "Seven nights, one red moon",
-        "fact": "Wild Beyonders react to your Pathway: peaceful ones trade, hostile ones fight.",
-        "pathwayFact": "Wild Beyonders react to your Pathway. On the {pathway} Pathway, some will trade with you and some will fight."
+        "title": "Crimson Moon",
+        "body": "Beyonder Creatures yield XP, acting points and ingredients. The roughly weekly Crimson Moon makes fishing more rewarding and dangerous.",
+        "fact": "Wild Beyonders trade or fight according to Pathway relationships.",
+        "pathwayFact": "The {pathway} Pathway determines which Wild Beyonders trade and which fight."
       },
       "incursions": {
-        "title": "Incursions & events",
-        "body": "Cosmos Incursions are announced PvP fights over objectives, and you choose whether to enter. Green and Yellow zones risk what you carry. Black zones risk your Sequence.",
-        "fact": "Community events are announced on Discord",
-        "alt": "A vast stone arena with a glowing sigil on its floor"
+        "title": "Cosmos Incursions",
+        "body": "Announced, optional PvP objectives. Green and Yellow zones risk carried items; Black zones risk Sequence regression.",
+        "fact": "Event announcements on Discord",
+        "alt": "Stone arena with a glowing floor sigil"
       },
       "towns": {
-        "title": "Claim land. Raise a nation.",
-        "body": "Join a town for protected land, shared cauldrons and a group for the hard fights. Towns level up into Domains, and Domains can found Nations. Wars between them are structured and opt-in.",
+        "title": "Towns & nations",
+        "body": "Join a town for shared resources and groups. Towns grow into Domains and form Nations. Wars are structured and opt-in.",
         "ladder": {
           "town": {
             "title": "Town",
-            "body": "Protected claims, roles and shared cauldrons"
+            "body": "Protected claims, roles, shared cauldrons"
           },
           "domain": {
             "title": "Domain",
-            "body": "A levelled town with more people, perks and a treasury"
+            "body": "Higher town level: more residents, perks, treasury"
           },
           "nation": {
             "title": "Nation",
-            "body": "An alliance founded by Domain-level towns"
+            "body": "Alliance founded by Domains"
           }
         },
-        "solo": "Rather play alone? Solo play is fully viable.",
-        "altMain": "A harbour town at dusk, its ships and lanterns reflected in the sea",
+        "solo": "Solo play is viable.",
+        "altMain": "Harbour town and lantern-lit ships at dusk",
         "altA": "Red and teal pagodas around a stone plaza",
-        "altB": "A town of pink blossom and towers above a sea of cloud at sunset"
+        "altB": "Blossom trees and towers above sunset clouds"
       },
       "churches": {
         "title": "Churches",
-        "body": "A late-game faith run by players and built around a physical Church Core. Members, prayer, anchors, land and perks grow with it.",
-        "alt": "A black and crimson cathedral under a starry sky",
-        "fact": "Honorific Names let followers reach you by ritual"
+        "body": "Players build late-game faiths around Church Cores, prayer and anchors, with land and perks for members.",
+        "alt": "Black and crimson cathedral beneath the stars",
+        "fact": "Honorific Names enable ritual communication"
       },
       "economy": {
-        "title": "Coin, shards & the Emporium",
-        "body": "Coppets, Licks and Verl d'or live in your /wallet. Trade surplus ingredients for Energy Shards, and spend Emporium points from voting and login streaks in the rotating /emporium.",
-        "alt": "The Brilliant Emporium, a timber and glass hall by a lake",
+        "title": "Trade",
+        "body": "Keep Coppets, Licks and Verl d'or in /wallet. Exchange surplus ingredients for Energy Shards. Voting and login streaks earn separate points for rotating goods in /emporium.",
+        "alt": "Brilliant Emporium beside a lake",
         "income": "Main income: evaluating non-renewable ores mined with Silk Touch"
       },
       "orders": {
         "title": "Secret Orders",
-        "body": "Private groups with their own chat, officers, upgrades and emergency tools. In time they unlock an Instant Summon and a Secret Lair.",
-        "alt": "A vaulted stone hall beneath a great round map of the world",
-        "fact": "/oc opens your Order’s private chat"
+        "body": "Private groups with officers, upgrades and emergency tools. Unlock Instant Summon and a Secret Lair as your Order grows.",
+        "alt": "Vaulted hall beneath a circular world map",
+        "fact": "Private Order chat: /oc"
       },
       "gallery": {
-        "title": "Every screenshot on this page was taken by a player.",
-        "lede": "They come from the showcase channels on our Discord. Share yours in #media-content.",
-        "cta": "See more on Discord",
+        "title": "Player screenshots",
+        "lede": "Share yours in Discord’s #media-content.",
+        "cta": "Browse on Discord",
         "label": "Player screenshots",
-        "pause": "Pause the gallery",
-        "play": "Play the gallery"
+        "pause": "Pause gallery",
+        "play": "Play gallery"
       },
-      "credit": "Shot by {author}",
+      "credit": "By {author}",
       "creditWiki": "Mysterria wiki",
       "join": {
         "titleA": "Join in",
-        "titleB": "three steps.",
-        "lede": "Mysterria is free to play and needs no mods. Copy the address, accept the resource pack, verify your account, and you are in.",
-        "ledeRole": "Mysterria is free to play and needs no mods. Three steps and you are in, ready to work toward your first {role} potion.",
-        "step1Title": "Copy the address",
-        "step1Body": "In Minecraft, open Multiplayer, choose Add Server and paste it in.",
-        "copiedHelp": "Copied. Paste it into Multiplayer under Add Server.",
-        "step2Title": "Join and accept the resource pack",
-        "step2Body": "Use Java Edition 26.1.2 or newer. No mods needed. Bedrock players can join through Geyser, though some custom screens may not display correctly.",
-        "step3Title": "Pick Mysteries and verify",
-        "step3Body": "Choose Mysteries in the lobby, then verify your account with a code from your website profile. Looking for a town that takes newcomers? Ask in chat or on Discord.",
-        "guide": "Read the joining guide",
-        "discord": "Join the Discord",
-        "liveUnit": "players online now",
-        "liveMeta": "Updated {time}, refreshes every minute",
-        "liveMetaChecking": "Checking the server…",
-        "seasonLabel": "players have become Beyonders this season",
+        "titleB": "three steps",
+        "lede": "Free to play. No mods required.",
+        "ledeRole": "Free to play, with no mods required. Begin working toward your {role} potion.",
+        "step1Title": "Add the server",
+        "step1Body": "Copy the address into Minecraft’s Multiplayer → Add Server.",
+        "copiedHelp": "Copied. Paste into Multiplayer → Add Server.",
+        "step2Title": "Accept the resource pack",
+        "step2Body": "Join with Java Edition 26.1.2 or newer and accept the pack. Bedrock works through Geyser, with some custom interface limitations.",
+        "step3Title": "Verify your account",
+        "step3Body": "Select Mysteries in the lobby. Generate a code in your website profile and enter it in-game. Ask in chat or Discord for a town accepting newcomers.",
+        "guide": "Joining guide",
+        "discord": "Join Discord",
+        "liveUnit": "players online",
+        "liveMeta": "Updated {time} · refreshes every minute",
+        "liveMetaChecking": "Checking…",
+        "seasonLabel": "Beyonders this season",
         "seasonFallback": "1,600+",
-        "newsRead": "Read the update",
-        "newsFallbackTitle": "Season II has begun",
-        "newsFallbackBody": "A new world, and everyone’s Beyonder progress starts again from Sequence 9. The announcement covers what changed."
+        "newsRead": "Read update",
+        "newsFallbackTitle": "Season II",
+        "newsFallbackBody": "A new world. Beyonder progress resets to Sequence 9."
       },
       "companion": {
         "title": "COI Client",
-        "lede": "You can play Mysterria on a plain Minecraft client, because every Beyonder mechanic runs on the server. COI Client is a small, optional mod that adds what a vanilla client can’t draw.",
+        "lede": "An optional mod. Every Beyonder mechanic works without it.",
         "features": {
           "hotkeys": {
-            "title": "Cast from the keyboard.",
-            "body": "Bind abilities to hotkeys and cast mid-fight without opening a menu."
+            "title": "Hotkeys:",
+            "body": "Cast abilities without opening a menu."
           },
           "visuals": {
-            "title": "See the magic.",
-            "body": "Ritual circles, sigils and casting effects drawn in full on your screen."
+            "title": "Ritual visuals:",
+            "body": "See circles, sigils and casting effects."
           },
           "presence": {
-            "title": "Hear it and share it.",
-            "body": "Sound design made for the server, and Discord rich presence that shows your Sequence."
+            "title": "Sound & presence:",
+            "body": "Server audio and your Sequence in Discord rich presence."
           }
         },
         "linksLabel": "Download COI Client",
-        "note": "Nothing on the server is locked behind the mod, and no one will ask you to install it. All three sites carry the same build.",
-        "visualLabel": "A ritual circle around the {pathway} sigil",
-        "sigilCaption": "The {pathway} sigil in a ritual circle, as the mod shows it",
-        "sigilCaptionDrawn": "Your {pathway} sigil in a ritual circle, as the mod shows it"
+        "note": "All three sites offer the same build.",
+        "visualLabel": "Ritual circle with the {pathway} sigil"
       }
     }
   }

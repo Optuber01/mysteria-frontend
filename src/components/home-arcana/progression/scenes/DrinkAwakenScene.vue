@@ -26,15 +26,19 @@
     <!-- the player: steps out of the fog, takes the potion, drinks, rises -->
     <div class="drink-scene__player" :style="playerStyle">
       <MinecraftPlayer
-        :mode="playerMode"
         :armed="warm"
-        :progress="animationProgress"
-        :glow="rim"
-        :shade="shade"
+        :progress="g"
+        :step="emerge"
         :reach="reach"
+        :regard="regard"
         :lift="lift"
         :sip="sip"
+        :swallow="pulse"
         :lower="lower"
+        :hit="hit"
+        :awaken="opening"
+        :glow="rim"
+        :shade="shade"
         :holding="holding"
         :level="level"
         :accent="card.accent"
@@ -63,7 +67,6 @@
       <span class="potion__sprite" :style="potionSpriteStyle">
         <PotionVial :accent="card.accent" :level="domLevel" />
       </span>
-      <span class="potion__caption" :style="captionStyle" aria-hidden="true">{{ tp('altar.potionCaption') }}</span>
     </button>
 
     <!-- whispers: what the potion says back while it is drunk -->
@@ -118,6 +121,8 @@ function inspect(id: string, event: Event): void {
 const g = computed(() => props.progress);
 const final = computed(() => reduced.value);
 const at = (range: readonly [number, number]) => (final.value ? 1 : ease(g.value, range));
+/** 0 before the beat, 1 once it is over (reduced motion: the finished scene). */
+const beat = (range: readonly [number, number]) => (final.value ? 0 : ease(g.value, range));
 
 const awaken = computed(() => (final.value ? 1 : awakenAt(g.value)));
 const risk = computed(() => (final.value ? 0 : riskAt(g.value)));
@@ -128,20 +133,26 @@ const gulps = computed(() => (final.value ? 3 : gulpsTaken(g.value)));
 
 /* ---------------- player ---------------- */
 const playerMode = computed<'drink' | 'advance'>(() => (final.value || g.value >= T.flash ? 'advance' : 'drink'));
-const animationProgress = computed(() => (playerMode.value === 'advance' ? (final.value ? 1 : span(g.value, [T.flash, 1])) : span(g.value, [T.playerIn[0], T.flash])));
 const emerge = computed(() => at(T.playerIn));
-const reach = computed(() => (final.value ? 0 : ease(g.value, [T.catch[0] - 0.012, T.catch[1] - 0.004])));
-const lift = computed(() => (final.value ? 0 : at(T.raise)));
-const sip = computed(() => (final.value ? 0 : clamp01(gulps.value / 3 + pulse.value * 0.08)));
-const lower = computed(() => at(T.lower));
+const reach = computed(() => beat(T.reach));
+const regard = computed(() => beat(T.regard));
+const lift = computed(() => beat(T.raise));
+const sip = computed(() => clamp01(gulps.value / 3));
+const lower = computed(() => beat(T.lower));
+// it takes hold over the lowering, until the flash
+const hit = computed(() => beat(T.hit));
 const level = computed(() => clamp01(1 - gulps.value / 3));
-// silhouetted while drinking, backlit once awakened
+// his pose answers the flash at once; the light and the moon take their time (awaken)
+const opening = computed(() => (final.value ? 1 : ease(g.value, [T.flash - 0.002, T.flash + 0.04])));
+// Out of the fog into the potion's light; darker as it takes hold; backlit once awakened.
 const shade = computed(() => {
-  if (final.value) return 0.25;
-  const drinking = 0.55 + 0.4 * blackout.value;
-  return lerp(lerp(0.75, drinking, emerge.value), 0.45, awaken.value) - 0.2 * ease(g.value, [T.panel[0], T.panel[1]]);
+  if (final.value) return 0.15;
+  // lit by the potion while he drinks it (his arm and the bottle must read), then the dark closes in
+  const drinking = 0.1 + 0.2 * risk.value + 0.25 * hit.value + 0.4 * blackout.value;
+  return lerp(lerp(0.75, drinking, emerge.value), 0.15, awaken.value);
 });
-const rim = computed(() => (final.value ? 1 : clamp01(0.25 * emerge.value + 0.2 * risk.value + awaken.value)));
+// a faint edge in the potion's colour while he drinks, so the raised arm reads against the dark
+const rim = computed(() => (final.value ? 1 : clamp01(0.2 * emerge.value + 0.16 * lift.value * (1 - lower.value) + 0.25 * risk.value + 0.2 * hit.value + awaken.value)));
 const rise = computed(() => awaken.value * 12);
 
 const playerStyle = computed<CSSProperties>(() => {
@@ -170,11 +181,11 @@ const handPoint = computed(() => {
   const p = l.player;
   const y = p.y + (1 - emerge.value) * 18 - rise.value;
   if (bottle.value) return { x: p.x + bottle.value.x, y: y + bottle.value.y, size: bottle.value.size };
-  return { x: p.x + p.w * 0.36, y: y + p.h * lerp(0.46, 0.2, lift.value), size: l.potion.size };
+  return { x: p.x + p.w * 0.36, y: y + p.h * 0.4, size: l.potion.size };
 });
 const caught = computed(() => (final.value ? 1 : span(g.value, T.catch)));
-/** Taken by the 3D hand once it arrives (if the player could not load, the sprite stays). */
-const holding = computed(() => final.value || (caught.value >= 1 && Boolean(bottle.value)));
+/** Taken by the 3D hand once it arrives (if the player could not load, the sprite stays); let go at the flash. */
+const holding = computed(() => !final.value && g.value < T.flash && caught.value >= 1 && Boolean(bottle.value));
 
 const potionPoint = computed(() => {
   const l = props.layout;
@@ -183,8 +194,10 @@ const potionPoint = computed(() => {
   // rises out of the brew to float above it...
   const up = final.value ? 1 : 1 - (1 - span(g.value, T.potionUp)) ** 3;
   const bob = Math.sin(g.value * 260) * 3 * up * (1 - caught.value);
-  let x = l.potion.x;
-  let y = lerp(c.liquidY, l.potion.y, up) + bob;
+  // as he steps in under it, it drifts aside to wait by his right hand, not in front of his chest
+  const aside = final.value ? 1 : ease(g.value, [T.cauldronOut[0], T.playerIn[1]]);
+  let x = l.potion.x - l.player.w * 0.19 * aside;
+  let y = lerp(c.liquidY, l.potion.y, up) + bob + l.player.h * 0.02 * aside;
   let size = l.potion.size * (0.4 + 0.6 * up);
   // ...then drifts across into his hand, on a short arc
   const hand = handPoint.value;
@@ -197,7 +210,7 @@ const potionPoint = computed(() => {
   return { x, y, size };
 });
 const domLevel = computed(() => (holding.value ? level.value : 1));
-const potionVisible = computed(() => !final.value && g.value >= T.brewFlash && !holding.value);
+const potionVisible = computed(() => !final.value && g.value >= T.brewFlash && g.value < T.flash && !holding.value);
 const potionInteractive = computed(() => props.active && potionVisible.value && g.value >= T.potionUp[1] - 0.01);
 const potionStyle = computed<CSSProperties>(() => {
   const point = potionPoint.value;
@@ -218,13 +231,9 @@ const potionSpriteStyle = computed<CSSProperties>(() => {
   const size = point ? point.size : 64;
   return { width: `${size.toFixed(1)}px`, height: `${size.toFixed(1)}px`, filter: `brightness(${(1 + 0.8 * clamp01(1 - (g.value - T.brewFlash) / 0.02)).toFixed(3)})` };
 });
-// named as it surfaces, gone before he takes it
-const captionStyle = computed<CSSProperties>(() => ({
-  opacity: (final.value ? 0 : ease(g.value, [T.potionUp[0] + 0.015, T.potionUp[1]]) * (1 - ease(g.value, [T.catch[0] - 0.012, T.catch[0]]))).toFixed(4),
-}));
 const potionLightStyle = computed<CSSProperties>(() => {
   const point = holding.value ? handPoint.value : potionPoint.value;
-  const strength = final.value || g.value < T.brewFlash ? 0 : (0.25 + 0.75 * level.value) * (1 - at(T.lower)) * (0.5 + 0.5 * emerge.value);
+  const strength = final.value || g.value < T.brewFlash ? 0 : (0.25 + 0.75 * level.value) * (1 - lower.value) * (0.5 + 0.5 * emerge.value);
   return {
     left: point ? `${point.x.toFixed(1)}px` : '50%',
     top: point ? `${point.y.toFixed(1)}px` : '40%',
@@ -233,34 +242,56 @@ const potionLightStyle = computed<CSSProperties>(() => {
 });
 
 /* ---------------- whispers ---------------- */
-type Whisper = { id: string; key: string; at: number; side: 'left' | 'right'; dy: number };
+/*
+ * What the potion says back once it is down, never while he drinks: one voice,
+ * a pause, another, then faster and over each other as it takes hold, and
+ * silence in the dark before the awakening. Each Pathway has its own ravings
+ * (home.progression.ravings.<card>.r1..r5); before a draw, or where a card has
+ * none yet, the general whispers stand in. A missing key comes back from t() as
+ * the key itself.
+ */
+type Whisper = { id: string; at: number; side: 'left' | 'right'; dy: number };
+const VOICE_AT = [0, 0.3, 0.52, 0.66, 0.78].map((k) => T.voices[0] + k * (T.voices[1] - T.voices[0] - 0.016));
 const WHISPERS: Whisper[] = [
-  { id: 'w1', key: 'drink.whisper1', at: T.gulps[0], side: 'right', dy: 0.2 },
-  { id: 'w2', key: 'drink.whisper2', at: T.gulps[1], side: 'left', dy: 0.34 },
-  { id: 'w3', key: 'drink.whisper3', at: T.gulps[2], side: 'right', dy: 0.5 },
-  { id: 'w4', key: 'drink.whisper4', at: T.gulps[1] + 0.016, side: 'right', dy: 0.66 },
-  { id: 'w5', key: 'drink.whisper5', at: T.blackout[0], side: 'left', dy: 0.58 },
+  { id: 'w1', at: VOICE_AT[0], side: 'right', dy: 0.14 },
+  { id: 'w2', at: VOICE_AT[1], side: 'left', dy: 0.3 },
+  { id: 'w3', at: VOICE_AT[2], side: 'right', dy: 0.36 },
+  { id: 'w4', at: VOICE_AT[3], side: 'left', dy: 0.12 },
+  { id: 'w5', at: VOICE_AT[4], side: 'right', dy: 0.2 },
 ];
+/** How long each voice is heard (timeline fraction), and its fades. */
+const WHISPER_LIFE = 0.026;
+const lines = computed(() => {
+  const own = (n: number) => {
+    const key = `ravings.${currentId.value}.r${n}`;
+    const text = tp(key);
+    return text && text !== `home.progression.${key}` ? text : '';
+  };
+  const ravings = hasDrawn.value ? [1, 2, 3, 4, 5].map(own) : [];
+  // a card's set is used whole, never mixed with the general lines
+  return ravings.length && ravings.every(Boolean) ? ravings : [1, 2, 3, 4, 5].map((n) => tp(`drink.whisper${n}`));
+});
 const whispers = computed(() => {
   const l = props.layout;
   if (!l || final.value) return [];
   const p = l.player;
-  return WHISPERS.map((whisper) => {
-    const t = (g.value - whisper.at) / 0.045;
-    const on = t > -0.15 && t < 1 ? smooth((t + 0.15) / 0.25) * (1 - smooth((t - 0.55) / 0.45)) : 0;
-    const drift = clamp01(t) * 12;
-    const gap = p.w * 0.3 + 10;
+  return WHISPERS.map((whisper, index) => {
+    const t = (g.value - whisper.at) / WHISPER_LIFE;
+    const on = t > 0 && t < 1 ? smooth(t / 0.18) * (1 - smooth((t - 0.66) / 0.34)) : 0;
+    const drift = clamp01(t) * 10;
+    // clear of his head on the right; on the left, of the raised bottle too
+    const gap = whisper.side === 'right' ? p.w * 0.27 + 8 : p.w * 0.36 + 8;
     const anchorX = whisper.side === 'right' ? l.cx + gap : l.cx - gap;
-    const room = whisper.side === 'right' ? l.w - anchorX - drift - 8 : anchorX - drift - 8;
+    const room = (whisper.side === 'right' ? l.w - anchorX : anchorX) - drift - 12;
     return {
       id: whisper.id,
       side: whisper.side,
-      text: tp(whisper.key),
+      text: lines.value[index] ?? '',
       style: {
         left: `${anchorX.toFixed(1)}px`,
         top: `${(p.y + whisper.dy * p.h).toFixed(1)}px`,
-        maxWidth: `${Math.max(80, Math.min(220, room)).toFixed(0)}px`,
-        opacity: (on * (1 - flash.value)).toFixed(4),
+        maxWidth: `${Math.max(120, Math.min(260, room)).toFixed(0)}px`,
+        opacity: (on * (1 - flash.value) * (1 - blackout.value)).toFixed(4),
         transform: `translate3d(${whisper.side === 'right' ? drift : -drift}px, -50%, 0)`,
         visibility: on > 0.01 ? 'visible' : 'hidden',
       } as CSSProperties,
@@ -271,17 +302,18 @@ const whispers = computed(() => {
 /* ---------------- circle and cards ---------------- */
 const wake = computed(() => at([T.cauldronOut[0], T.playerIn[1]]));
 const auraActive = computed(() => props.active && (final.value || g.value >= T.playerIn[0]));
-const auraIntensity = computed(() => 0.3 + 0.7 * awaken.value);
+// the circle wakes under him as the potion takes hold, then fully at the awakening
+const auraIntensity = computed(() => Math.round((0.3 + 0.35 * hit.value + 0.35 * awaken.value) * 20) / 20);
 const circleStyle = computed(() => ({
   '--circle-mask': `url(${magicCircle})`,
-  '--circle-spin': `${(final.value ? 96 : g.value * 900).toFixed(2)}deg`,
-  transform: `scale(${(0.9 + 0.1 * wake.value + 0.12 * flash.value).toFixed(4)})`,
+  '--circle-spin': `${(final.value ? 96 : g.value * 900 + hit.value * 140).toFixed(2)}deg`,
+  transform: `scale(${(0.9 + 0.1 * wake.value + 0.04 * hit.value + 0.08 * flash.value).toFixed(4)})`,
 }));
 
 type CardSpec = { id: string; face: boolean; at: number; side: -1 | 1; dy: number; tilt: number };
 const CARDS: CardSpec[] = [
-  { id: 'back', face: false, at: T.awaken[0] + 0.012, side: -1, dy: 0.2, tilt: -8 },
-  { id: 'face', face: true, at: T.awaken[0] + 0.03, side: 1, dy: 0.19, tilt: 7 },
+  { id: 'back', face: false, at: T.awaken[0] + 0.026, side: -1, dy: 0.2, tilt: -8 },
+  { id: 'face', face: true, at: T.awaken[0] + 0.046, side: 1, dy: 0.19, tilt: 7 },
 ];
 const cards = computed(() => {
   const l = props.layout;
@@ -325,6 +357,7 @@ const sceneVars = computed(() => {
     '--risk': risk.value.toFixed(4),
     '--blackout': blackout.value.toFixed(4),
     '--flash': flash.value.toFixed(4),
+    '--hit': hit.value.toFixed(4),
     ...(l
       ? {
         '--stand-x': `${l.cx.toFixed(1)}px`,
@@ -336,7 +369,7 @@ const sceneVars = computed(() => {
   } as CSSProperties;
 });
 
-const burstActive = computed(() => props.active && !final.value && g.value >= T.flash && g.value < T.awaken[0] + T.awaken[1]);
+const burstActive = computed(() => props.active && !final.value && g.value >= T.flash - 0.002 && g.value < T.awaken[0] + T.awaken[1]);
 const flashBoxStyle = computed<CSSProperties>(() => {
   const l = props.layout;
   if (!l) return { opacity: 0 };
@@ -357,6 +390,7 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   --risk: 0;
   --blackout: 0;
   --flash: 0;
+  --hit: 0;
   --stand-x: 50%;
   --floor-top: 80%;
   --circle-size: min(460px, 46%);
@@ -405,7 +439,7 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   aspect-ratio: 2.4;
   border-radius: 50%;
   background: radial-gradient(ellipse, color-mix(in oklab, var(--acc) 50%, transparent), color-mix(in oklab, var(--acc) 14%, transparent) 50%, transparent 72%);
-  opacity: calc(var(--wake) * (0.25 + var(--awaken) * 0.75 + var(--flash) * 0.6));
+  opacity: calc(var(--wake) * (0.25 + var(--hit) * 0.3 + var(--awaken) * 0.5 + var(--flash) * 0.4));
   transform: translate(-50%, -50%);
 }
 
@@ -413,9 +447,10 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   width: var(--circle-size);
   aspect-ratio: 1;
   margin: calc(var(--circle-size) / -2) 0 0 calc(var(--circle-size) / -2);
-  opacity: calc(var(--wake) * (0.4 + var(--risk) * 0.2 + var(--awaken) * 0.6) * (1 - var(--blackout) * 0.6));
+  /* the one thing still lit in the blackout: it wakes under him as the potion takes hold */
+  opacity: min(1, calc(var(--wake) * (0.4 + var(--risk) * 0.15 + var(--hit) * 0.45 + var(--awaken) * 0.6)));
   scale: 1 0.5;
-  filter: drop-shadow(0 0 calc(6px + var(--awaken) * 16px) color-mix(in oklab, var(--acc) 75%, transparent));
+  filter: drop-shadow(0 0 calc(6px + var(--hit) * 8px + var(--awaken) * 10px) color-mix(in oklab, var(--acc) 75%, transparent));
   will-change: transform, opacity;
 }
 
@@ -517,8 +552,9 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   will-change: left, top, opacity;
 }
 
+/* keyboard only: a quiet accent ring, no glow (the story stays a dark room in either theme) */
 .potion:focus-visible {
-  outline: 3px solid var(--arc-ink);
+  outline: 1.5px solid color-mix(in oklab, var(--acc) 80%, #efeef3);
   outline-offset: 4px;
 }
 
@@ -537,21 +573,6 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
 }
 
-.potion__caption {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 50%;
-  width: max-content;
-  max-width: 240px;
-  color: var(--arc-ink);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.3;
-  text-align: center;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
-  transform: translateX(-50%);
-}
-
 /* ---------- whispers ---------- */
 .drink-scene__whispers {
   position: absolute;
@@ -563,12 +584,15 @@ const flashBoxStyle = computed<CSSProperties>(() => {
 .whisper {
   position: absolute;
   width: max-content;
-  color: var(--arc-ink);
-  font: 400 11.5px/1.4 var(--arc-caps);
-  letter-spacing: 0.16em;
+  /* the potion story is a dark room in either theme */
+  color: #efeef3;
+  font: 400 13px/1.45 var(--arc-caps);
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  /* a split image, as if heard twice */
-  text-shadow: -1.5px 0 color-mix(in oklab, var(--acc) 80%, transparent), 1.5px 0 rgba(169, 198, 214, 0.55), 0 0 12px rgba(0, 0, 0, 0.9);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  /* a faint split image, as if heard twice, over a dark halo that keeps it legible */
+  text-shadow: -1px 0 color-mix(in oklab, var(--acc) 55%, transparent), 1px 0 rgba(169, 198, 214, 0.35), 0 0 3px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.9);
   animation: whisper-shiver 0.9s steps(3) infinite;
   will-change: transform, opacity;
 }
@@ -611,18 +635,23 @@ const flashBoxStyle = computed<CSSProperties>(() => {
 }
 
 /* ---------- flash ---------- */
+/*
+ * Behind him, not over him: the light breaks from behind his shoulders and he
+ * stands in it as a silhouette, the burst of motes with it, instead of a white
+ * smudge and sparks across his face.
+ */
 .drink-scene__flash {
   position: absolute;
   inset: 0;
-  z-index: 30;
+  z-index: 4;
   pointer-events: none;
-  background: radial-gradient(ellipse 34% 46% at var(--stand-x) var(--chest-y), rgba(255, 255, 255, 0.95), color-mix(in oklab, var(--acc) 50%, transparent) 34%, color-mix(in oklab, var(--acc) 18%, transparent) 66%, transparent 100%);
-  opacity: var(--flash);
+  background: radial-gradient(ellipse 30% 42% at var(--stand-x) var(--chest-y), rgba(255, 255, 255, 0.62), color-mix(in oklab, var(--acc) 48%, transparent) 26%, color-mix(in oklab, var(--acc) 14%, transparent) 62%, transparent 100%);
+  opacity: calc(var(--flash) * 0.9);
 }
 
 .drink-scene__flash-fx {
   position: absolute;
-  z-index: 31;
+  z-index: 4;
   pointer-events: none;
 }
 

@@ -33,7 +33,6 @@
 
         <div class="arc-hero__meta">
           <button type="button" class="arc-ip" :class="`is-${copyState}`" @click="copy">
-            <span class="arc-ip__label">{{ t('home.arcana.ip.label') }}</span>
             <span ref="addressRef" class="arc-ip__address">{{ address }}</span>
             <span class="arc-ip__hint">
               <i :class="copyIcon" aria-hidden="true"></i>
@@ -118,7 +117,7 @@
           </div>
         </div>
 
-        <!-- Under the deck, one group: what you drew (or that nothing is drawn yet), the draw button, the hint -->
+        <!-- Under the deck, one group: what you drew (its room is kept before the first draw), the draw button, the hint -->
         <div class="arc-hero__draw">
           <p class="arc-hero__drew">
             <template v-if="hasDrawn">
@@ -131,13 +130,12 @@
                 {{ t('home.arcana.hero.beginsAs').replace('{role}', reading.seq9) }}
               </span>
             </template>
-            <span v-else class="arc-hero__drew-name">{{ t('home.arcana.hero.undrawn') }}</span>
           </p>
           <div class="arc-hero__draw-row">
             <!-- Never `disabled`: that would drop keyboard focus mid-shuffle. Extra presses queue one more draw. -->
             <button
                 type="button"
-                class="arc-btn arc-btn--ghost arc-hero__shuffle"
+                class="arc-btn arc-btn--ghost arc-btn--sm arc-hero__shuffle"
                 :class="{'is-busy': busy}"
                 :aria-busy="busy || undefined"
                 @click="requestShuffle"
@@ -149,8 +147,8 @@
               </span>
             </button>
             <p class="arc-hero__hint">
-              {{ hasDrawn ? t('home.arcana.hero.hintDrawn') : t('home.arcana.hero.hint') }}
-              <a v-if="hasDrawn" href="#reading" class="arc-hero__read">
+              <template v-if="!hasDrawn">{{ t('home.arcana.hero.hint') }}</template>
+              <a v-else href="#reading" class="arc-link arc-hero__read">
                 {{ t('home.arcana.hero.readCard') }}
                 <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
               </a>
@@ -923,6 +921,10 @@ onUnmounted(() => {
   isolation: isolate;
   min-height: max(600px, 100svh);
   padding: calc(var(--site-header-stack, 106px) + clamp(12px, 2.6vh, 36px)) clamp(18px, 4vw, 64px) clamp(20px, 3.4vh, 44px);
+  /* the page's gutter, so the copy starts on the same edge as every section below */
+  padding-inline: var(--arc-gutter);
+  /* room under the deck before the potion story's dark room begins (a clean edge in the light theme) */
+  padding-bottom: calc(var(--roof-h, 96px) + clamp(0px, 1vh, 12px));
   display: flex;
   align-items: center;
   overflow: clip;
@@ -932,7 +934,7 @@ onUnmounted(() => {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1320px;
+  max-width: var(--arc-container);
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
@@ -1006,8 +1008,8 @@ onUnmounted(() => {
   min-width: 3.4em;
   margin-left: 2px;
   padding-left: 11px;
-  border-left: 1px solid color-mix(in oklab, var(--acc-ink) 40%, transparent);
-  font-size: 14px;
+  border-left: var(--arc-bw) solid var(--arc-line);
+  font-size: var(--arc-fs-small);
   font-weight: 500;
   color: var(--arc-muted);
   text-align: left;
@@ -1056,7 +1058,7 @@ onUnmounted(() => {
   flex-basis: 100%;
   max-width: 30em;
   margin: -2px 0 0;
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-bad);
 }
@@ -1125,7 +1127,7 @@ onUnmounted(() => {
   display: grid;
   place-items: center;
   border-radius: calc(var(--card-w) * .05);
-  border: 1.5px dashed color-mix(in oklab, var(--acc-ink) 60%, transparent);
+  border: var(--arc-bw-accent) dashed color-mix(in oklab, var(--acc-ink) 60%, transparent);
   background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 10%, transparent), color-mix(in srgb, var(--arc-bg) 50%, transparent));
   cursor: pointer;
   transition: opacity .5s ease, border-color .3s ease;
@@ -1180,7 +1182,10 @@ onUnmounted(() => {
 
 /* The focus ring is drawn on the card itself so it lifts and tilts with it. */
 .arc-card:focus-visible .arc-card__side--back {
-  box-shadow: 0 0 0 max(3px, 2.4cqw) var(--arc-ink), 0 1cqw 3cqw var(--arc-shadow-strong);
+  box-shadow:
+    0 0 0 var(--arc-focus-off) var(--arc-bg),
+    0 0 0 calc(var(--arc-focus-off) + var(--arc-focus-w)) var(--arc-ink),
+    0 1cqw 3cqw var(--arc-shadow-strong);
 }
 
 .arc-card__lift {
@@ -1291,7 +1296,8 @@ onUnmounted(() => {
   font-family: var(--arc-caps);
   font-size: 14px;
   font-weight: 500;
-  color: var(--acc-ink);
+  /* lifted toward the ink like the link beside it: the deepest accents dip under 4.5:1 on the sky */
+  color: color-mix(in oklab, var(--acc-ink) 80%, var(--arc-ink));
 }
 
 .arc-hero__draw-row {
@@ -1303,9 +1309,6 @@ onUnmounted(() => {
 
 .arc-hero .arc-hero__shuffle {
   flex: none;
-  min-height: 44px;
-  padding: 0 18px;
-  font-size: 15px;
 }
 
 /* Both labels share one cell, so the button keeps its width when it changes. */
@@ -1324,7 +1327,7 @@ onUnmounted(() => {
 .arc-hero__hint {
   max-width: 24em;
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-muted);
   text-align: left;
@@ -1336,15 +1339,49 @@ onUnmounted(() => {
   align-items: center;
   gap: 6px;
   margin-left: 4px;
-  font-weight: 600;
-  color: var(--acc-ink);
-  text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, var(--acc-ink) 45%, transparent);
-  text-underline-offset: 4px;
   white-space: nowrap;
 }
 
-.arc-hero__read:hover {
+/* on the night sky the deepest accents (Priest) sit just under 4.5:1: the link is lifted toward the ink */
+.arc-hero .arc-hero__read {
+  color: color-mix(in oklab, var(--acc-ink) 80%, var(--arc-ink));
+}
+
+.arc-hero .arc-hero__read:hover {
+  color: var(--arc-ink);
+}
+
+/*
+ * Light theme: the line under the deck sits on the moon's rose haze, not on paper, so the
+ * muted and accent inks (tuned for paper) are taken a step toward the ink to keep 4.5:1.
+ */
+:root[data-theme="parchment"] .arc-hero__drew-label,
+:root[data-theme="parchment"] .arc-hero__drew-role,
+:root[data-theme="parchment"] .arc-hero__hint {
+  color: color-mix(in oklab, var(--arc-muted) 30%, var(--arc-ink));
+}
+
+/* ...and the group gets a soft pool of paper behind it, where the castle's grey shows through the haze */
+:root[data-theme="parchment"] .arc-hero__draw {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-theme="parchment"] .arc-hero__draw::before {
+  position: absolute;
+  z-index: -1;
+  inset: -14px -48px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--arc-bg) 94%, transparent) 64%, transparent);
+  pointer-events: none;
+  content: '';
+}
+
+:root[data-theme="parchment"] .arc-hero__drew-num,
+:root[data-theme="parchment"] .arc-hero__read {
+  color: color-mix(in oklab, var(--acc-ink) 45%, var(--arc-ink));
+}
+
+:root[data-theme="parchment"] .arc-hero__read:hover {
   color: var(--arc-ink);
 }
 
@@ -1356,6 +1393,7 @@ onUnmounted(() => {
 @media (max-width: 900px) {
   .arc-hero {
     min-height: 0;
+    padding-bottom: clamp(28px, 5vh, 60px);
     padding-top: calc(var(--site-header-stack, 106px) + 22px);
     align-items: flex-start;
   }
