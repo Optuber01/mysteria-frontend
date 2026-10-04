@@ -395,4 +395,102 @@ onMounted(() => {
     align-self: flex-start;
   }
 }
+/*
+ * Light theme (<html data-theme="parchment">). The rules above are the dark page and stay
+ * as is; these replace its hardcoded dark greys and white-alpha surfaces with the global
+ * light tokens (gold resolves to the deepened neutral crimson on paper).
+ */
+:root[data-theme="parchment"] .page-header {
+  border-bottom-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .back-button {
+  background: var(--myst-surface);
+  border-color: var(--myst-line);
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .back-button:hover {
+  color: var(--myst-gold);
+  border-color: var(--myst-line-40);
+}
+
+:root[data-theme="parchment"] .mark-all-btn,
+:root[data-theme="parchment"] .entry-cta {
+  background: var(--myst-wash);
+  border-color: var(--myst-line-40);
+}
+
+:root[data-theme="parchment"] .mark-all-btn:hover,
+:root[data-theme="parchment"] .entry-cta:hover {
+  background: var(--myst-gold);
+  border-color: var(--myst-gold);
+  color: var(--myst-on-gold);
+}
+
+:root[data-theme="parchment"] .back-button:focus-visible,
+:root[data-theme="parchment"] .mark-all-btn:focus-visible,
+:root[data-theme="parchment"] .entry-cta:focus-visible,
+:root[data-theme="parchment"] .pagination-btn:focus-visible {
+  outline: 2px solid var(--myst-gold);
+  outline-offset: 2px;
+}
+
+:root[data-theme="parchment"] .state-block,
+:root[data-theme="parchment"] .state-block.empty .empty-icon {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .loading-sigil {
+  border-color: var(--myst-line);
+  border-top-color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .notif-entry {
+  background: var(--myst-surface);
+  border-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .notif-entry:hover {
+  background: var(--myst-surface);
+  border-color: var(--myst-line-40);
+  box-shadow: 0 4px 14px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .notif-entry.unread {
+  background: linear-gradient(90deg, var(--myst-wash), transparent 60%), var(--myst-surface);
+}
+
+:root[data-theme="parchment"] .entry-indicator {
+  background: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .entry-icon {
+  opacity: 1;
+}
+
+:root[data-theme="parchment"] .entry-text,
+:root[data-theme="parchment"] .pagination-info {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .entry-date,
+:root[data-theme="parchment"] .total-count {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .pagination {
+  background: var(--myst-surface);
+  border-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .pagination-btn {
+  color: var(--myst-on-gold);
+}
+
+:root[data-theme="parchment"] .pagination-btn:disabled {
+  background: var(--myst-surface-sunk);
+  color: var(--myst-ink-muted);
+  box-shadow: inset 0 0 0 1px var(--myst-line);
+}
 </style>

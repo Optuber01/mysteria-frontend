@@ -171,6 +171,40 @@ const handleDiscordLogin = async () => {
   margin: 0;
 }
 
+/* Light theme */
+:root[data-theme="parchment"] .login-view {
+  background: var(--myst-bg);
+}
+
+:root[data-theme="parchment"] .login-content {
+  background: var(--myst-bg-2);
+  border-color: var(--myst-line-16);
+  box-shadow: 0 8px 32px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .login-header h1 {
+  color: var(--myst-ink-strong);
+}
+
+:root[data-theme="parchment"] .redirect-message {
+  color: #8f4210;
+  background: rgba(168, 87, 31, 0.08);
+  border-color: rgba(168, 87, 31, 0.3);
+}
+
+/* Discord's blurple, one step deeper so the white label reads at 4.5:1 */
+:root[data-theme="parchment"] .discord-button {
+  background: #4752c4;
+}
+
+:root[data-theme="parchment"] .discord-button:hover:not(:disabled) {
+  background: #3a43a8;
+}
+
+:root[data-theme="parchment"] .login-info {
+  color: var(--myst-ink-muted);
+}
+
 @media (max-width: 480px) {
   .login-content {
     padding: 30px 24px;

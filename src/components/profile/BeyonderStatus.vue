@@ -108,7 +108,7 @@ const currentRungName = computed(
 .pathway-panel {
   position: relative;
   padding: 40px 36px;
-  background: linear-gradient(170deg, rgba(16, 19, 34, 0.9), rgba(8, 10, 18, 0.96));
+  background: linear-gradient(170deg, rgb(var(--bs-101322) / 0.9), rgb(var(--bs-080a12) / 0.96));
   border: 1px solid var(--myst-line-35);
   overflow: hidden;
 }
@@ -126,7 +126,7 @@ const currentRungName = computed(
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 80% 45% at 50% 0%, rgba(200, 178, 115, 0.08), transparent 70%);
+  background: radial-gradient(ellipse 80% 45% at 50% 0%, rgb(var(--bs-c8b273) / 0.08), transparent 70%);
 }
 
 .panel-head {
@@ -145,7 +145,7 @@ const currentRungName = computed(
 .sigil-echo {
   position: absolute;
   inset: -6px;
-  border: 1px solid rgba(200, 178, 115, 0.25);
+  border: 1px solid rgb(var(--bs-c8b273) / 0.25);
   border-radius: 50%;
   animation: pulseEcho 3.2s ease-out infinite;
 }
@@ -168,7 +168,7 @@ const currentRungName = computed(
   place-items: center;
   padding: 20px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgb(var(--bs-000000) / 0.35);
   border: 1px solid var(--myst-line-20);
 }
 
@@ -176,7 +176,7 @@ const currentRungName = computed(
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 14px rgba(200, 178, 115, 0.4));
+  filter: drop-shadow(0 0 14px rgb(var(--bs-c8b273) / 0.4));
 }
 
 .pathway-label {
@@ -185,7 +185,11 @@ const currentRungName = computed(
   font-size: 9.5px;
   letter-spacing: 0.34em;
   text-transform: uppercase;
-  color: rgba(200, 178, 115, 0.6);
+  color: rgb(var(--bs-c8b273) / 0.6);
+}
+
+:root[data-theme="parchment"] .pathway-label {
+  color: var(--myst-gold);
 }
 
 .pathway-name {
@@ -257,18 +261,18 @@ const currentRungName = computed(
   align-items: center;
   gap: 14px;
   padding: 8px 12px;
-  border-left: 2px solid rgba(255, 255, 255, 0.06);
+  border-left: 2px solid rgb(var(--bs-ffffff) / 0.06);
 }
 
 .rung-number {
   font-family: var(--myst-font-mono);
   font-size: 11px;
-  color: rgba(145, 145, 155, 0.4);
+  color: rgb(var(--bs-91919b) / 0.4);
 }
 
 .rung-name {
   font-size: 13px;
-  color: rgba(145, 145, 155, 0.45);
+  color: rgb(var(--bs-91919b) / 0.45);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -279,8 +283,16 @@ const currentRungName = computed(
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(145, 145, 155, 0.5);
+  color: rgb(var(--bs-91919b) / 0.5);
   white-space: nowrap;
+}
+
+/* Light theme: the rungs still ahead fade to muted ink instead of a see-through grey,
+   which drops under 4.5:1 on the paper (the done/current rules below still win). */
+:root[data-theme="parchment"] .rung-number,
+:root[data-theme="parchment"] .rung-name,
+:root[data-theme="parchment"] .rung-tag {
+  color: var(--myst-ink-muted);
 }
 
 .rung.done {
@@ -301,7 +313,7 @@ const currentRungName = computed(
 }
 
 .rung.current {
-  background: rgba(200, 178, 115, 0.1);
+  background: rgb(var(--bs-c8b273) / 0.1);
   border-left-color: var(--myst-gold);
 }
 
@@ -324,3 +336,27 @@ const currentRungName = computed(
   }
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --bs-000000: 0 0 0;
+    --bs-080a12: 8 10 18;
+    --bs-101322: 16 19 34;
+    --bs-91919b: 145 145 155;
+    --bs-c8b273: 200 178 115;
+    --bs-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --bs-000000: 255 255 255;
+    --bs-080a12: 255 255 255;
+    --bs-101322: 255 255 255;
+    --bs-91919b: 85 83 94;
+    --bs-c8b273: 180 44 62;
+    --bs-ffffff: 23 22 28;
+}
+</style>
+

@@ -129,6 +129,37 @@ useSeo(() => ({
   box-shadow: 0 0 20px rgba(200, 178, 115, 0.2);
 }
 
+/* Light theme */
+:root[data-theme="parchment"] .ritual-page {
+  background-color: var(--myst-bg);
+}
+
+:root[data-theme="parchment"] .mist-overlay {
+  background: radial-gradient(circle at 50% 50%, rgba(180, 44, 62, 0.05) 0%, transparent 70%);
+}
+
+:root[data-theme="parchment"] .ritual-box-404 {
+  background: var(--myst-bg-2);
+  border-color: var(--myst-line-16);
+}
+
+:root[data-theme="parchment"] .glitch-text {
+  text-shadow: none;
+}
+
+:root[data-theme="parchment"] .pnf-title {
+  color: var(--myst-ink-strong);
+}
+
+:root[data-theme="parchment"] .pnf-message {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .btn-ritual:hover {
+  background: var(--myst-wash);
+  box-shadow: none;
+}
+
 @media (max-width: 768px) {
   .glitch-text {
     font-size: 80px;

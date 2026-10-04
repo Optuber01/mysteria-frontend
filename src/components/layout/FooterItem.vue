@@ -197,6 +197,11 @@ const year = new Date().getFullYear();
   color: var(--myst-gold);
 }
 
+/* Light theme: the gold mark inked, as on the homepage (whose own rule outranks this) */
+:where(:root[data-theme="parchment"]) .footer-brand img {
+  filter: grayscale(1) brightness(.4) contrast(1.3);
+}
+
 @media (max-width: 900px) {
   .footer-columns {
     grid-template-columns: 1fr 1fr;

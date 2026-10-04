@@ -353,7 +353,7 @@ export default {name: "ShopView"};
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 55% 65% at 50% 0%, rgba(200, 178, 115, 0.07), transparent 65%);
+  background: radial-gradient(ellipse 55% 65% at 50% 0%, rgb(var(--shv-c8b273) / 0.07), transparent 65%);
 }
 
 .shop-hero-inner {
@@ -377,7 +377,7 @@ export default {name: "ShopView"};
    blur of that backdrop is pixel-identical to the backdrop itself - it only
    bought an extra compositing layer. */
 .shop-tabs {
-  background: rgba(8, 10, 18, 0.72);
+  background: rgb(var(--shv-080a12) / 0.72);
 }
 
 /* Main */
@@ -487,7 +487,7 @@ export default {name: "ShopView"};
 }
 
 .shop-empty i {
-  color: rgba(200, 178, 115, 0.5);
+  color: rgb(var(--shv-c8b273) / 0.5);
   font-size: 34px;
 }
 
@@ -510,4 +510,25 @@ export default {name: "ShopView"};
     letter-spacing: 0.12em;
   }
 }
+
+/* Light theme: the tab counts stay at full strength so they clear 4.5:1 on the paper. */
+:root[data-theme="parchment"] .shop-tabs .count {
+  opacity: 1;
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --shv-080a12: 8 10 18;
+    --shv-c8b273: 200 178 115;
+}
+
+:root[data-theme="parchment"] {
+    --shv-080a12: 255 255 255;
+    --shv-c8b273: 180 44 62;
+}
+</style>
+

@@ -338,6 +338,19 @@ onMounted(async () => {
   }
 }
 
+/* Light theme */
+:root[data-theme="parchment"] .order-glow {
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(180, 44, 62, 0.05), transparent 65%);
+}
+
+:root[data-theme="parchment"] .member-avatar {
+  background: #e4e1da;
+}
+
+:root[data-theme="parchment"] .order-cta {
+  background: var(--myst-wash);
+}
+
 @media (max-width: 640px) {
   .order {
     padding: 50px 20px 70px;

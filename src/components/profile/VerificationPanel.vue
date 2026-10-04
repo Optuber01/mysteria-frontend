@@ -136,7 +136,7 @@ const formatExpiry = (expiresAt: string) =>
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  background: rgba(200, 178, 115, 0.08);
+  background: rgb(var(--vp-c8b273) / 0.08);
   border: 1px solid var(--myst-line-20);
   color: var(--myst-gold);
   font-size: 16px;
@@ -170,7 +170,7 @@ const formatExpiry = (expiresAt: string) =>
 .verify-lede code,
 .code-command code {
   padding: 2px 8px;
-  background: rgba(200, 178, 115, 0.08);
+  background: rgb(var(--vp-c8b273) / 0.08);
   border: 1px solid var(--myst-line-18);
   color: var(--myst-gold);
   font-family: var(--myst-font-mono);
@@ -216,7 +216,7 @@ const formatExpiry = (expiresAt: string) =>
   justify-content: space-between;
   gap: 16px;
   padding: 16px 20px;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgb(var(--vp-000000) / 0.35);
   border: 1px dashed var(--myst-line-40);
   cursor: pointer;
   color: var(--myst-gold);
@@ -262,4 +262,28 @@ const formatExpiry = (expiresAt: string) =>
     letter-spacing: 0.2em;
   }
 }
+
+/* Light theme: a half-transparent accent button reads as broken rather than disabled. */
+:root[data-theme="parchment"] .verify-button:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  border-color: transparent;
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --vp-000000: 0 0 0;
+    --vp-c8b273: 200 178 115;
+}
+
+:root[data-theme="parchment"] {
+    --vp-000000: 255 255 255;
+    --vp-c8b273: 180 44 62;
+}
+</style>
+

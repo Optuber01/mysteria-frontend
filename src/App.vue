@@ -109,6 +109,10 @@ onUnmounted(() => {
   will-change: transform;
 }
 
+:root[data-theme="parchment"] .cursor-background {
+  opacity: 0.12;
+}
+
 @media (max-width: 576px) {
   .cursor-background {
     display: none;

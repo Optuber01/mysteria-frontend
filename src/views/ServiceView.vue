@@ -489,7 +489,7 @@ export default {
 }
 
 .service-subscription {
-  background: #10b981;
+  background: rgb(var(--sv-10b981));
   color: white;
 }
 
@@ -504,15 +504,15 @@ export default {
 }
 
 .service-feature.giftable {
-  background: color-mix(in srgb, #10b981 20%, transparent);
-  color: #10b981;
-  border: 1px solid #10b981;
+  background: color-mix(in srgb, rgb(var(--sv-10b981)) 20%, transparent);
+  color: rgb(var(--sv-10b981));
+  border: 1px solid rgb(var(--sv-10b981));
 }
 
 .service-feature.bulkable {
-  background: color-mix(in srgb, #3b82f6 20%, transparent);
-  color: #3b82f6;
-  border: 1px solid #3b82f6;
+  background: color-mix(in srgb, rgb(var(--sv-3b82f6)) 20%, transparent);
+  color: rgb(var(--sv-3b82f6));
+  border: 1px solid rgb(var(--sv-3b82f6));
 }
 
 .service-feature i {
@@ -632,7 +632,7 @@ export default {
 
 .purchase-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(74, 222, 128, 0.4);
+  box-shadow: 0 8px 25px rgb(var(--sv-4ade80) / 0.4);
 }
 
 .purchase-btn:disabled {
@@ -713,7 +713,7 @@ export default {
 
 .error-content {
   background: color-mix(in srgb, var(--myst-bg-2) 80%, transparent);
-  border: 1px solid color-mix(in srgb, #ef4444 30%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--sv-ef4444)) 30%, transparent);
   border-radius: 12px;
   padding: 40px;
   text-align: center;
@@ -723,7 +723,7 @@ export default {
 
 .error-icon {
   font-size: 48px;
-  color: #ef4444;
+  color: rgb(var(--sv-ef4444));
   margin-bottom: 20px;
 }
 
@@ -773,15 +773,15 @@ export default {
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--sv-ffffff) / 0.02);
+  border: 1px solid rgb(var(--sv-ffffff) / 0.05);
   border-radius: 8px;
 }
 
 .item-name {
   font-family: 'Playfair Display', serif;
   font-size: 18px;
-  color: #fff;
+  color: rgb(var(--sv-ffffff));
   margin: 0 0 4px 0;
 }
 
@@ -816,8 +816,8 @@ export default {
 .ritual-checkbox {
   width: 20px;
   height: 20px;
-  border: 1px solid rgba(200, 178, 115, 0.3);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--sv-c8b273) / 0.3);
+  background: rgb(var(--sv-ffffff) / 0.02);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -827,14 +827,14 @@ export default {
 }
 
 .ritual-checkbox.active {
-  background: rgba(200, 178, 115, 0.1);
+  background: rgb(var(--sv-c8b273) / 0.1);
   border-color: var(--myst-gold);
 }
 
 .ritual-label-inline {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  color: #aaa;
+  color: rgb(var(--sv-aaaaaa));
 }
 
 .amount-stepper {
@@ -842,8 +842,8 @@ export default {
   align-items: center;
   gap: 4px;
   width: fit-content;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgb(var(--sv-ffffff) / 0.1);
+  background: rgb(var(--sv-000000) / 0.2);
   padding: 4px;
   border-radius: 4px;
 }
@@ -854,16 +854,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--sv-ffffff) / 0.05);
   border: none;
-  color: #fff;
+  color: rgb(var(--sv-ffffff));
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .step-btn:hover {
   background: var(--myst-gold);
-  color: #000;
+  color: rgb(var(--sv-000000));
 }
 
 .amount-input {
@@ -871,7 +871,7 @@ export default {
   height: 32px;
   background: transparent;
   border: none;
-  color: #fff;
+  color: rgb(var(--sv-ffffff));
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
@@ -886,7 +886,7 @@ export default {
 .total-ritual-price {
   margin-top: 8px;
   padding: 16px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  border-top: 1px dashed rgb(var(--sv-ffffff) / 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -895,7 +895,7 @@ export default {
 .total-label {
   font-family: 'Playfair Display', serif;
   font-size: 16px;
-  color: #888;
+  color: rgb(var(--sv-888888));
 }
 
 .total-value {
@@ -907,9 +907,9 @@ export default {
 
 .insufficient-funds-warning {
   padding: 12px;
-  background: rgba(239, 68, 68, 0.1);
-  border-left: 3px solid #ef4444;
-  color: #f87171;
+  background: rgb(var(--sv-ef4444) / 0.1);
+  border-left: 3px solid rgb(var(--sv-ef4444));
+  color: rgb(var(--sv-f87171));
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -919,7 +919,7 @@ export default {
 .btn-ritual-primary {
   padding: 12px 24px;
   background: var(--myst-gold);
-  color: #05070a;
+  color: rgb(var(--sv-05070a));
   border: none;
   font-family: 'Playfair Display', serif;
   font-weight: 700;
@@ -928,7 +928,7 @@ export default {
 }
 
 .btn-ritual-primary:hover:not(:disabled) {
-  background: #fff;
+  background: rgb(var(--sv-ffffff));
 }
 
 .btn-ritual-primary:disabled {
@@ -939,16 +939,16 @@ export default {
 .btn-ritual-secondary {
   padding: 12px 24px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #888;
+  border: 1px solid rgb(var(--sv-ffffff) / 0.1);
+  color: rgb(var(--sv-888888));
   font-family: 'Playfair Display', serif;
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .btn-ritual-secondary:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: rgb(var(--sv-ffffff) / 0.05);
+  color: rgb(var(--sv-ffffff));
 }
 
 /* Responsive design */
@@ -1024,8 +1024,8 @@ export default {
 
 /* Modern product detail composition */
 .service-page {
-  background: radial-gradient(circle at 78% 12%, rgba(200, 178, 115, 0.07), transparent 28rem),
-  linear-gradient(180deg, #111218, #090b13 70%);
+  background: radial-gradient(circle at 78% 12%, rgb(var(--sv-c8b273) / 0.07), transparent 28rem),
+  linear-gradient(180deg, rgb(var(--sv-111218)), rgb(var(--sv-090b13)) 70%);
 }
 
 .service-detail-container {
@@ -1040,15 +1040,15 @@ export default {
 .back-button {
   min-height: 44px;
   padding: 0 16px;
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.035);
-  color: #b9bdc8;
+  border-color: rgb(var(--sv-ffffff) / 0.1);
+  background: rgb(var(--sv-ffffff) / 0.035);
+  color: rgb(var(--sv-b9bdc8));
   backdrop-filter: blur(10px);
 }
 
 .back-button:hover {
-  border-color: rgba(200, 178, 115, 0.38);
-  background: rgba(200, 178, 115, 0.08);
+  border-color: rgb(var(--sv-c8b273) / 0.38);
+  background: rgb(var(--sv-c8b273) / 0.08);
   color: var(--myst-gold);
 }
 
@@ -1062,9 +1062,9 @@ export default {
   grid-template-columns: minmax(320px, 1.08fr) minmax(340px, 0.92fr);
   min-height: 470px;
   overflow: hidden;
-  border: 1px solid rgba(200, 178, 115, 0.18);
+  border: 1px solid rgb(var(--sv-c8b273) / 0.18);
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(24, 28, 47, 0.94), rgba(10, 12, 23, 0.98));
+  background: linear-gradient(145deg, rgb(var(--sv-181c2f) / 0.94), rgb(var(--sv-0a0c17) / 0.98));
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
 }
 
@@ -1075,7 +1075,7 @@ export default {
   min-height: 470px;
   border: 0;
   border-radius: 0;
-  background: linear-gradient(110deg, #111525 30%, #20263d 45%, #111525 60%);
+  background: linear-gradient(110deg, rgb(var(--sv-111525)) 30%, rgb(var(--sv-20263d)) 45%, rgb(var(--sv-111525)) 60%);
   background-size: 250% 100%;
   animation: serviceShimmer 1.6s linear infinite;
 }
@@ -1085,13 +1085,13 @@ export default {
   inset: 0;
   display: grid;
   place-items: center;
-  color: rgba(200, 178, 115, 0.28);
+  color: rgb(var(--sv-c8b273) / 0.28);
   font-size: 58px;
 }
 
 .service-image-wrapper.loaded, .service-image-wrapper.failed {
   animation: none;
-  background: #111525;
+  background: rgb(var(--sv-111525));
 }
 
 .service-image {
@@ -1110,7 +1110,7 @@ export default {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 58%, rgba(10, 12, 23, 0.3)), linear-gradient(0deg, rgba(5, 7, 14, 0.42), transparent 50%);
+  background: linear-gradient(90deg, transparent 58%, rgb(var(--sv-0a0c17) / 0.3)), linear-gradient(0deg, rgb(var(--sv-05070e) / 0.42), transparent 50%);
   pointer-events: none;
 }
 
@@ -1151,15 +1151,15 @@ export default {
 }
 
 .service-feature.giftable, .service-feature.bulkable {
-  border-color: rgba(200, 178, 115, 0.23);
-  background: rgba(200, 178, 115, 0.07);
-  color: #d8cba9;
+  border-color: rgb(var(--sv-c8b273) / 0.23);
+  background: rgb(var(--sv-c8b273) / 0.07);
+  color: rgb(var(--sv-d8cba9));
 }
 
 .purchase-panel {
   margin-top: 34px;
   padding-top: 26px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgb(var(--sv-ffffff) / 0.08);
 }
 
 .purchase-price {
@@ -1171,7 +1171,7 @@ export default {
 }
 
 .purchase-price span {
-  color: #777e8e;
+  color: rgb(var(--sv-777e8e));
   font: 600 10px 'JetBrains Mono', monospace;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -1190,21 +1190,21 @@ export default {
   border: 1px solid var(--myst-gold);
   border-radius: 10px;
   background: var(--myst-gold);
-  color: #10121a;
+  color: rgb(var(--sv-10121a));
   font: 800 12px 'JetBrains Mono', monospace;
   letter-spacing: 1.3px;
   text-transform: uppercase;
 }
 
 .purchase-btn:hover:not(:disabled) {
-  background: #eee4c6;
-  box-shadow: 0 10px 30px rgba(200, 178, 115, 0.2);
+  background: rgb(var(--sv-eee4c6));
+  box-shadow: 0 10px 30px rgb(var(--sv-c8b273) / 0.2);
 }
 
 .purchase-btn:disabled {
-  border-color: rgba(255, 255, 255, 0.11);
-  background: rgba(255, 255, 255, 0.06);
-  color: #777d8b;
+  border-color: rgb(var(--sv-ffffff) / 0.11);
+  background: rgb(var(--sv-ffffff) / 0.06);
+  color: rgb(var(--sv-777d8b));
 }
 
 .auth-notice {
@@ -1213,16 +1213,16 @@ export default {
   justify-content: center;
   gap: 8px;
   margin: 12px 0 0;
-  color: #767c8b;
+  color: rgb(var(--sv-767c8b));
   font-size: 12px;
 }
 
 .service-content-card {
   margin-top: 28px;
   padding: clamp(24px, 5vw, 58px);
-  border: 1px solid rgba(255, 255, 255, 0.075);
+  border: 1px solid rgb(var(--sv-ffffff) / 0.075);
   border-radius: 18px;
-  background: rgba(16, 19, 32, 0.76);
+  background: rgb(var(--sv-101320) / 0.76);
   box-shadow: 0 20px 55px rgba(0, 0, 0, 0.2);
 }
 
@@ -1240,7 +1240,7 @@ export default {
 .content-label span {
   height: 1px;
   flex: 1;
-  background: linear-gradient(90deg, transparent, rgba(200, 178, 115, 0.3));
+  background: linear-gradient(90deg, transparent, rgb(var(--sv-c8b273) / 0.3));
 }
 
 .content-label span:last-child {
@@ -1250,7 +1250,7 @@ export default {
 .service-content {
   max-width: 780px;
   margin: 0 auto;
-  color: #b9bdc7;
+  color: rgb(var(--sv-b9bdc7));
   font-size: 16px;
   line-height: 1.82;
 }
@@ -1262,7 +1262,7 @@ export default {
 
 .service-content :deep(h2) {
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(200, 178, 115, 0.14);
+  border-bottom: 1px solid rgb(var(--sv-c8b273) / 0.14);
   color: var(--myst-offwhite);
 }
 
@@ -1288,12 +1288,12 @@ export default {
 
 .service-content :deep(th), .service-content :deep(td) {
   padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--sv-ffffff) / 0.1);
 }
 
 .content-empty {
   margin: 0;
-  color: #777d8b;
+  color: rgb(var(--sv-777d8b));
   text-align: center;
 }
 
@@ -1319,7 +1319,7 @@ export default {
   }
 
   .service-image-wrapper::after {
-    background: linear-gradient(0deg, rgba(10, 12, 23, 0.55), transparent 45%);
+    background: linear-gradient(0deg, rgb(var(--sv-0a0c17) / 0.55), transparent 45%);
   }
 
   .service-title-section {
@@ -1396,4 +1396,91 @@ export default {
     transition: none;
   }
 }
+
+/* Light theme: soft paper shadows instead of the dark page's deep black drops, the
+   error detail at full strength, and a disabled modal button as a neutral fill rather
+   than a faded accent. */
+:root[data-theme="parchment"] .service-hero {
+  box-shadow: 0 18px 50px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .service-content-card {
+  box-shadow: 0 12px 36px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .error-details {
+  opacity: 1;
+}
+
+:root[data-theme="parchment"] .btn-ritual-primary:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --sv-000000: 0 0 0;
+    --sv-05070a: 5 7 10;
+    --sv-05070e: 5 7 14;
+    --sv-090b13: 9 11 19;
+    --sv-0a0c17: 10 12 23;
+    --sv-10121a: 16 18 26;
+    --sv-101320: 16 19 32;
+    --sv-10b981: 16 185 129;
+    --sv-111218: 17 18 24;
+    --sv-111525: 17 21 37;
+    --sv-181c2f: 24 28 47;
+    --sv-20263d: 32 38 61;
+    --sv-3b82f6: 59 130 246;
+    --sv-4ade80: 74 222 128;
+    --sv-767c8b: 118 124 139;
+    --sv-777d8b: 119 125 139;
+    --sv-777e8e: 119 126 142;
+    --sv-888888: 136 136 136;
+    --sv-aaaaaa: 170 170 170;
+    --sv-b9bdc7: 185 189 199;
+    --sv-b9bdc8: 185 189 200;
+    --sv-c8b273: 200 178 115;
+    --sv-d8cba9: 216 203 169;
+    --sv-eee4c6: 238 228 198;
+    --sv-ef4444: 239 68 68;
+    --sv-f87171: 248 113 113;
+    --sv-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --sv-000000: 255 255 255;
+    --sv-05070a: 255 255 255;
+    --sv-05070e: 239 237 232;
+    --sv-090b13: 239 237 232;
+    --sv-0a0c17: 248 247 244;
+    --sv-10121a: 255 255 255;
+    --sv-101320: 255 255 255;
+    --sv-10b981: 0 111 76;
+    --sv-111218: 239 237 232;
+    --sv-111525: 236 234 229;
+    --sv-181c2f: 255 255 255;
+    --sv-20263d: 246 245 241;
+    --sv-3b82f6: 17 91 203;
+    --sv-4ade80: 0 112 54;
+    --sv-767c8b: 85 83 94;
+    --sv-777d8b: 85 83 94;
+    --sv-777e8e: 85 83 94;
+    --sv-888888: 85 83 94;
+    --sv-aaaaaa: 85 83 94;
+    --sv-b9bdc7: 23 22 28;
+    --sv-b9bdc8: 23 22 28;
+    --sv-c8b273: 180 44 62;
+    --sv-d8cba9: 180 44 62;
+    --sv-eee4c6: 150 35 54;
+    --sv-ef4444: 195 5 30;
+    --sv-f87171: 178 48 56;
+    --sv-ffffff: 23 22 28;
+}
+</style>
+

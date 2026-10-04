@@ -455,12 +455,12 @@ const cancelEdit = () => {
 }
 
 .delete-btn {
-  background: #ef4444 !important;
+  background: rgb(var(--se-ef4444)) !important;
   color: white !important;
 }
 
 .delete-btn:hover {
-  background: #dc2626 !important;
+  background: rgb(var(--se-dc2626)) !important;
   transform: translateY(-1px);
 }
 
@@ -519,17 +519,17 @@ const cancelEdit = () => {
 .form-group input.error,
 .form-group select.error,
 .form-group textarea.error {
-  border-color: #ef4444;
+  border-color: rgb(var(--se-ef4444));
 }
 
 .form-group input.error:focus,
 .form-group select.error:focus,
 .form-group textarea.error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 3px rgb(var(--se-ef4444) / 0.2);
 }
 
 .field-error {
-  color: #ef4444;
+  color: rgb(var(--se-ef4444));
   font-size: 12px;
   font-weight: 500;
   margin-top: 4px;
@@ -556,7 +556,7 @@ const cancelEdit = () => {
 }
 
 .save-btn {
-  background: #10b981;
+  background: rgb(var(--se-10b981));
   color: white;
   padding: 14px 28px;
   border: none;
@@ -568,9 +568,9 @@ const cancelEdit = () => {
 }
 
 .save-btn:hover:not(:disabled) {
-  background: #059669;
+  background: rgb(var(--se-059669));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgb(var(--se-10b981) / 0.3);
 }
 
 .save-btn:disabled {
@@ -623,7 +623,7 @@ const cancelEdit = () => {
 .button-spinner {
   width: 14px;
   height: 14px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgb(var(--se-ffffff) / 0.3);
   border-top: 1.5px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -641,24 +641,57 @@ const cancelEdit = () => {
 }
 
 .success {
-  background: color-mix(in srgb, #10b981 15%, transparent);
-  color: #10b981;
+  background: color-mix(in srgb, rgb(var(--se-10b981)) 15%, transparent);
+  color: rgb(var(--se-10b981));
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #10b981 40%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--se-10b981)) 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
   font-weight: 500;
 }
 
 .error {
-  background: color-mix(in srgb, #ef4444 15%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, rgb(var(--se-ef4444)) 15%, transparent);
+  color: rgb(var(--se-ef4444));
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--se-ef4444)) 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
   font-weight: 500;
+}
+
+/* Light theme: the back button's hover as an accent wash, and the disabled save button
+   as a neutral fill (white on half-muted grey drops under 3:1). */
+:root[data-theme="parchment"] .back-button:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .save-btn:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
+</style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --se-059669: 5 150 105;
+    --se-10b981: 16 185 129;
+    --se-dc2626: 220 38 38;
+    --se-ef4444: 239 68 68;
+    --se-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --se-059669: 0 90 62;
+    --se-10b981: 0 111 76;
+    --se-dc2626: 150 0 22;
+    --se-ef4444: 195 5 30;
+    --se-ffffff: 23 22 28;
 }
 </style>

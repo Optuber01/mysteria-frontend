@@ -162,15 +162,15 @@ const updateRecipient = (val: string) => {
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--pm-ffffff) / 0.02);
+  border: 1px solid rgb(var(--pm-ffffff) / 0.05);
   border-radius: 8px;
 }
 
 .item-name {
   font-family: 'Playfair Display', serif;
   font-size: 18px;
-  color: #fff;
+  color: rgb(var(--pm-ffffff));
   margin: 0 0 4px 0;
 }
 
@@ -205,8 +205,8 @@ const updateRecipient = (val: string) => {
 .ritual-checkbox {
   width: 20px;
   height: 20px;
-  border: 1px solid rgba(200, 178, 115, 0.3);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgb(var(--pm-c8b273) / 0.3);
+  background: rgb(var(--pm-ffffff) / 0.02);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,14 +216,14 @@ const updateRecipient = (val: string) => {
 }
 
 .ritual-checkbox.active {
-  background: rgba(200, 178, 115, 0.1);
+  background: rgb(var(--pm-c8b273) / 0.1);
   border-color: var(--myst-gold);
 }
 
 .ritual-label-inline {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  color: #aaa;
+  color: rgb(var(--pm-aaaaaa));
 }
 
 .amount-stepper {
@@ -231,8 +231,8 @@ const updateRecipient = (val: string) => {
   align-items: center;
   gap: 4px;
   width: fit-content;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgb(var(--pm-ffffff) / 0.1);
+  background: rgb(var(--pm-000000) / 0.2);
   padding: 4px;
   border-radius: 4px;
 }
@@ -243,16 +243,16 @@ const updateRecipient = (val: string) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgb(var(--pm-ffffff) / 0.05);
   border: none;
-  color: #fff;
+  color: rgb(var(--pm-ffffff));
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .step-btn:hover {
   background: var(--myst-gold);
-  color: #000;
+  color: rgb(var(--pm-000000));
 }
 
 .amount-input {
@@ -260,7 +260,7 @@ const updateRecipient = (val: string) => {
   height: 32px;
   background: transparent;
   border: none;
-  color: #fff;
+  color: rgb(var(--pm-ffffff));
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
@@ -275,7 +275,7 @@ const updateRecipient = (val: string) => {
 .total-ritual-price {
   margin-top: 8px;
   padding: 16px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  border-top: 1px dashed rgb(var(--pm-ffffff) / 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -284,7 +284,7 @@ const updateRecipient = (val: string) => {
 .total-label {
   font-family: 'Playfair Display', serif;
   font-size: 16px;
-  color: #888;
+  color: rgb(var(--pm-888888));
 }
 
 .total-value {
@@ -296,9 +296,9 @@ const updateRecipient = (val: string) => {
 
 .insufficient-funds-warning {
   padding: 12px;
-  background: rgba(239, 68, 68, 0.1);
-  border-left: 3px solid #ef4444;
-  color: #f87171;
+  background: rgb(var(--pm-ef4444) / 0.1);
+  border-left: 3px solid rgb(var(--pm-ef4444));
+  color: rgb(var(--pm-f87171));
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -314,3 +314,29 @@ const updateRecipient = (val: string) => {
   transform: translateY(-10px);
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --pm-000000: 0 0 0;
+    --pm-888888: 136 136 136;
+    --pm-aaaaaa: 170 170 170;
+    --pm-c8b273: 200 178 115;
+    --pm-ef4444: 239 68 68;
+    --pm-f87171: 248 113 113;
+    --pm-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --pm-000000: 255 255 255;
+    --pm-888888: 85 83 94;
+    --pm-aaaaaa: 85 83 94;
+    --pm-c8b273: 180 44 62;
+    --pm-ef4444: 195 5 30;
+    --pm-f87171: 178 48 56;
+    --pm-ffffff: 23 22 28;
+}
+</style>
+

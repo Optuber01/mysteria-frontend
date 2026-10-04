@@ -392,11 +392,11 @@ onMounted(async () => {
 }
 
 .error-message {
-  background: color-mix(in srgb, #ef4444 12%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, rgb(var(--acd-ef4444)) 12%, transparent);
+  color: rgb(var(--acd-ef4444));
   padding: 14px 18px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--acd-ef4444)) 35%, transparent);
   font-size: 13px;
   font-weight: 500;
 }
@@ -446,28 +446,28 @@ onMounted(async () => {
 }
 
 .status-pending_review {
-  background: color-mix(in srgb, #f59e0b 25%, transparent);
-  color: #fbbf24;
+  background: color-mix(in srgb, rgb(var(--acd-f59e0b)) 25%, transparent);
+  color: rgb(var(--acd-fbbf24));
 }
 
 .status-approved {
-  background: color-mix(in srgb, #10b981 25%, transparent);
-  color: #34d399;
+  background: color-mix(in srgb, rgb(var(--acd-10b981)) 25%, transparent);
+  color: rgb(var(--acd-34d399));
 }
 
 .status-rejected {
-  background: color-mix(in srgb, #ef4444 25%, transparent);
-  color: #f87171;
+  background: color-mix(in srgb, rgb(var(--acd-ef4444)) 25%, transparent);
+  color: rgb(var(--acd-f87171));
 }
 
 .status-rescope_required {
-  background: color-mix(in srgb, #3b82f6 25%, transparent);
-  color: #60a5fa;
+  background: color-mix(in srgb, rgb(var(--acd-3b82f6)) 25%, transparent);
+  color: rgb(var(--acd-60a5fa));
 }
 
 .status-completed {
-  background: color-mix(in srgb, #8b5cf6 25%, transparent);
-  color: #a78bfa;
+  background: color-mix(in srgb, rgb(var(--acd-8b5cf6)) 25%, transparent);
+  color: rgb(var(--acd-a78bfa));
 }
 
 .ticket-link {
@@ -476,10 +476,10 @@ onMounted(async () => {
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: color-mix(in srgb, #5865f2 18%, transparent);
-  border: 1px solid color-mix(in srgb, #5865f2 45%, transparent);
+  background: color-mix(in srgb, rgb(var(--acd-5865f2)) 18%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--acd-5865f2)) 45%, transparent);
   border-radius: 7px;
-  color: #a3b1ff;
+  color: rgb(var(--acd-a3b1ff));
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -487,7 +487,7 @@ onMounted(async () => {
 }
 
 .ticket-link:hover {
-  background: color-mix(in srgb, #5865f2 30%, transparent);
+  background: color-mix(in srgb, rgb(var(--acd-5865f2)) 30%, transparent);
 }
 
 .detail-grid {
@@ -584,17 +584,17 @@ onMounted(async () => {
   gap: 10px;
   padding: 12px 14px;
   margin-bottom: 16px;
-  background: color-mix(in srgb, #f59e0b 12%, transparent);
-  border: 1px solid color-mix(in srgb, #f59e0b 35%, transparent);
-  color: #f59e0b;
+  background: color-mix(in srgb, rgb(var(--acd-f59e0b)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--acd-f59e0b)) 35%, transparent);
+  color: rgb(var(--acd-f59e0b));
   font-size: 12px;
   border-radius: 8px;
 }
 
 .prior-notes {
   padding: 14px;
-  background: color-mix(in srgb, #60a5fa 10%, transparent);
-  border-left: 3px solid #60a5fa;
+  background: color-mix(in srgb, rgb(var(--acd-60a5fa)) 10%, transparent);
+  border-left: 3px solid rgb(var(--acd-60a5fa));
   border-radius: 4px;
 }
 
@@ -604,7 +604,7 @@ onMounted(async () => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #60a5fa;
+  color: rgb(var(--acd-60a5fa));
   margin-bottom: 6px;
 }
 
@@ -642,27 +642,27 @@ onMounted(async () => {
 }
 
 .action-select-btn.approve.active {
-  background: color-mix(in srgb, #10b981 18%, transparent);
-  border-color: #10b981;
-  color: #34d399;
+  background: color-mix(in srgb, rgb(var(--acd-10b981)) 18%, transparent);
+  border-color: rgb(var(--acd-10b981));
+  color: rgb(var(--acd-34d399));
 }
 
 .action-select-btn.decline.active {
-  background: color-mix(in srgb, #ef4444 18%, transparent);
-  border-color: #ef4444;
-  color: #f87171;
+  background: color-mix(in srgb, rgb(var(--acd-ef4444)) 18%, transparent);
+  border-color: rgb(var(--acd-ef4444));
+  color: rgb(var(--acd-f87171));
 }
 
 .action-select-btn.rescope.active {
-  background: color-mix(in srgb, #3b82f6 18%, transparent);
-  border-color: #3b82f6;
-  color: #60a5fa;
+  background: color-mix(in srgb, rgb(var(--acd-3b82f6)) 18%, transparent);
+  border-color: rgb(var(--acd-3b82f6));
+  color: rgb(var(--acd-60a5fa));
 }
 
 .action-select-btn.complete.active {
-  background: color-mix(in srgb, #8b5cf6 18%, transparent);
-  border-color: #8b5cf6;
-  color: #a78bfa;
+  background: color-mix(in srgb, rgb(var(--acd-8b5cf6)) 18%, transparent);
+  border-color: rgb(var(--acd-8b5cf6));
+  color: rgb(var(--acd-a78bfa));
 }
 
 .action-form {
@@ -717,11 +717,11 @@ onMounted(async () => {
 
 .form-group input.error,
 .form-group textarea.error {
-  border-color: #ef4444;
+  border-color: rgb(var(--acd-ef4444));
 }
 
 .field-error {
-  color: #ef4444;
+  color: rgb(var(--acd-ef4444));
   font-size: 11px;
   font-weight: 500;
   margin-top: 5px;
@@ -749,12 +749,12 @@ onMounted(async () => {
 }
 
 .action-btn.primary {
-  background: #10b981;
+  background: rgb(var(--acd-10b981));
   color: white;
 }
 
 .action-btn.primary:hover:not(:disabled) {
-  background: #059669;
+  background: rgb(var(--acd-059669));
 }
 
 .action-btn.secondary {
@@ -775,7 +775,7 @@ onMounted(async () => {
 .button-spinner {
   width: 13px;
   height: 13px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgb(var(--acd-ffffff) / 0.3);
   border-top: 1.5px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -786,4 +786,56 @@ onMounted(async () => {
   font-size: 11px;
   color: var(--myst-ink-muted);
 }
+
+/* Light theme: the back button's hover as an accent wash, and disabled buttons as a
+   neutral fill instead of a faded colour that white text can't sit on. */
+:root[data-theme="parchment"] .back-button:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .action-btn:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --acd-059669: 5 150 105;
+    --acd-10b981: 16 185 129;
+    --acd-34d399: 52 211 153;
+    --acd-3b82f6: 59 130 246;
+    --acd-5865f2: 88 101 242;
+    --acd-60a5fa: 96 165 250;
+    --acd-8b5cf6: 139 92 246;
+    --acd-a3b1ff: 163 177 255;
+    --acd-a78bfa: 167 139 250;
+    --acd-ef4444: 239 68 68;
+    --acd-f59e0b: 245 158 11;
+    --acd-f87171: 248 113 113;
+    --acd-fbbf24: 251 191 36;
+    --acd-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --acd-059669: 0 90 62;
+    --acd-10b981: 0 111 76;
+    --acd-34d399: 0 85 58;
+    --acd-3b82f6: 17 91 203;
+    --acd-5865f2: 71 78 218;
+    --acd-60a5fa: 0 73 143;
+    --acd-8b5cf6: 114 62 215;
+    --acd-a3b1ff: 82 91 162;
+    --acd-a78bfa: 85 51 155;
+    --acd-ef4444: 195 5 30;
+    --acd-f59e0b: 137 85 0;
+    --acd-f87171: 141 0 27;
+    --acd-fbbf24: 97 70 0;
+    --acd-ffffff: 23 22 28;
+}
+</style>
+

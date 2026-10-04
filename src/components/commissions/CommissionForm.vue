@@ -519,8 +519,8 @@ watch(() => route.query.resubmit, () => {
 
 <style scoped>
 .commission-form-card {
-  background: rgba(13, 16, 30, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--cf-0d101e) / 0.4);
+  border: 1px solid rgb(var(--cf-ffffff) / 0.05);
   padding: 32px;
   border-radius: 4px;
 }
@@ -528,7 +528,7 @@ watch(() => route.query.resubmit, () => {
 .form-header {
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--cf-ffffff) / 0.05);
 }
 
 .form-eyebrow {
@@ -554,21 +554,21 @@ watch(() => route.query.resubmit, () => {
   gap: 12px;
   padding: 14px 16px;
   margin-bottom: 24px;
-  background: rgba(96, 165, 250, 0.08);
-  border-left: 3px solid #60a5fa;
-  color: #cdd8ea;
+  background: rgb(var(--cf-60a5fa) / 0.08);
+  border-left: 3px solid rgb(var(--cf-60a5fa));
+  color: rgb(var(--cf-cdd8ea));
   font-size: 13px;
 }
 
 .staff-notice i {
-  color: #60a5fa;
+  color: rgb(var(--cf-60a5fa));
   padding-top: 2px;
 }
 
 .staff-notice strong {
   display: block;
   margin-bottom: 4px;
-  color: #93c5fd;
+  color: rgb(var(--cf-93c5fd));
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -587,7 +587,7 @@ watch(() => route.query.resubmit, () => {
   width: 32px;
   height: 32px;
   margin: 0 auto;
-  border: 2px solid rgba(200, 178, 115, 0.2);
+  border: 2px solid rgb(var(--cf-c8b273) / 0.2);
   border-top-color: var(--myst-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -606,25 +606,25 @@ watch(() => route.query.resubmit, () => {
   gap: 12px;
   padding: 32px 24px;
   text-align: center;
-  background: rgba(239, 68, 68, 0.06);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgb(var(--cf-ef4444) / 0.06);
+  border: 1px solid rgb(var(--cf-ef4444) / 0.2);
 }
 
 .buy-more-notice i {
   font-size: 22px;
-  color: #f87171;
+  color: rgb(var(--cf-f87171));
 }
 
 .buy-more-notice p {
   margin: 0;
-  color: #ddd;
+  color: rgb(var(--cf-dddddd));
   font-size: 14px;
 }
 
 .buy-more-link {
   padding: 10px 24px;
   background: var(--myst-gold);
-  color: #05070a;
+  color: rgb(var(--cf-05070a));
   text-decoration: none;
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
@@ -651,7 +651,7 @@ watch(() => route.query.resubmit, () => {
 
 .form-group small {
   display: block;
-  color: #666;
+  color: rgb(var(--cf-666666));
   font-size: 11px;
   margin-top: 5px;
   text-align: right;
@@ -662,12 +662,12 @@ watch(() => route.query.resubmit, () => {
 .form-group textarea {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgb(var(--cf-ffffff) / 0.1);
   border-radius: 4px;
   font-family: inherit;
   font-size: 13px;
-  background: rgba(0, 0, 0, 0.25);
-  color: #eee;
+  background: rgb(var(--cf-000000) / 0.25);
+  color: rgb(var(--cf-eeeeee));
   box-sizing: border-box;
   transition: all 0.2s ease;
 }
@@ -682,17 +682,17 @@ watch(() => route.query.resubmit, () => {
 .form-group textarea:focus {
   outline: none;
   border-color: var(--myst-gold);
-  box-shadow: 0 0 0 3px rgba(200, 178, 115, 0.15);
+  box-shadow: 0 0 0 3px rgb(var(--cf-c8b273) / 0.15);
 }
 
 .form-group input.error,
 .form-group select.error,
 .form-group textarea.error {
-  border-color: #ef4444;
+  border-color: rgb(var(--cf-ef4444));
 }
 
 .field-error {
-  color: #f87171;
+  color: rgb(var(--cf-f87171));
   font-size: 11px;
   font-weight: 500;
   margin-top: 5px;
@@ -713,18 +713,18 @@ watch(() => route.query.resubmit, () => {
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--cf-ffffff) / 0.02);
+  border: 1px solid rgb(var(--cf-ffffff) / 0.05);
   font-size: 13px;
-  color: #ccc;
+  color: rgb(var(--cf-cccccc));
   cursor: pointer;
 }
 
 .budget-meter-group {
   margin-bottom: 28px;
   padding: 18px 20px;
-  background: rgba(200, 178, 115, 0.04);
-  border: 1px solid rgba(200, 178, 115, 0.15);
+  background: rgb(var(--cf-c8b273) / 0.04);
+  border: 1px solid rgb(var(--cf-c8b273) / 0.15);
 }
 
 .budget-meter-header {
@@ -751,13 +751,13 @@ watch(() => route.query.resubmit, () => {
 }
 
 .budget-meter-value.over {
-  color: #f87171;
+  color: rgb(var(--cf-f87171));
 }
 
 .budget-meter-track {
   position: relative;
   height: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgb(var(--cf-ffffff) / 0.06);
   overflow: hidden;
 }
 
@@ -768,13 +768,13 @@ watch(() => route.query.resubmit, () => {
 }
 
 .budget-meter-fill.over {
-  background: #f87171;
+  background: rgb(var(--cf-f87171));
 }
 
 .budget-meter-hint {
   display: block;
   margin-top: 10px;
-  color: #888;
+  color: rgb(var(--cf-888888));
   font-size: 11px;
   text-align: left;
 }
@@ -790,7 +790,7 @@ watch(() => route.query.resubmit, () => {
   gap: 12px;
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgb(var(--cf-ffffff) / 0.06);
 }
 
 .change-section-header h3 {
@@ -802,7 +802,7 @@ watch(() => route.query.resubmit, () => {
 }
 
 .change-section-header small {
-  color: #777;
+  color: rgb(var(--cf-777777));
   font-size: 11.5px;
 }
 
@@ -810,16 +810,16 @@ watch(() => route.query.resubmit, () => {
   flex-shrink: 0;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: #888;
+  color: rgb(var(--cf-888888));
   white-space: nowrap;
 }
 
 .change-row {
   padding: 16px;
   margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-left: 2px solid rgba(255, 255, 255, 0.08);
+  background: rgb(var(--cf-ffffff) / 0.02);
+  border: 1px solid rgb(var(--cf-ffffff) / 0.05);
+  border-left: 2px solid rgb(var(--cf-ffffff) / 0.08);
 }
 
 .change-row.major-row {
@@ -827,7 +827,7 @@ watch(() => route.query.resubmit, () => {
 }
 
 .change-row.minor-row {
-  border-left-color: #60a5fa;
+  border-left-color: rgb(var(--cf-60a5fa));
 }
 
 .change-row-header {
@@ -848,8 +848,8 @@ watch(() => route.query.resubmit, () => {
 
 .row-cost {
   padding: 2px 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #999;
+  background: rgb(var(--cf-ffffff) / 0.05);
+  color: rgb(var(--cf-999999));
   font-size: 10px;
   letter-spacing: 0.5px;
 }
@@ -857,13 +857,13 @@ watch(() => route.query.resubmit, () => {
 .remove-change-btn {
   background: none;
   border: none;
-  color: #888;
+  color: rgb(var(--cf-888888));
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .remove-change-btn:hover {
-  color: #f87171;
+  color: rgb(var(--cf-f87171));
 }
 
 .add-change-btn {
@@ -873,7 +873,7 @@ watch(() => route.query.resubmit, () => {
   padding: 10px 16px;
   margin-bottom: 4px;
   background: transparent;
-  border: 1px dashed rgba(200, 178, 115, 0.3);
+  border: 1px dashed rgb(var(--cf-c8b273) / 0.3);
   color: var(--myst-gold);
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
@@ -884,7 +884,7 @@ watch(() => route.query.resubmit, () => {
 }
 
 .add-change-btn:hover {
-  background: rgba(200, 178, 115, 0.05);
+  background: rgb(var(--cf-c8b273) / 0.05);
 }
 
 .empty-state-hint {
@@ -894,9 +894,9 @@ watch(() => route.query.resubmit, () => {
   gap: 10px;
   padding: 28px 16px;
   margin-bottom: 24px;
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  color: #777;
+  background: rgb(var(--cf-ffffff) / 0.015);
+  border: 1px dashed rgb(var(--cf-ffffff) / 0.1);
+  color: rgb(var(--cf-777777));
   font-size: 13px;
   text-align: center;
 }
@@ -922,7 +922,7 @@ watch(() => route.query.resubmit, () => {
 }
 
 .add-minor-btn:hover {
-  background: rgba(200, 178, 115, 0.05);
+  background: rgb(var(--cf-c8b273) / 0.05);
 }
 
 .confirmations {
@@ -931,8 +931,8 @@ watch(() => route.query.resubmit, () => {
   gap: 12px;
   padding: 18px;
   margin: 24px 0;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--cf-ffffff) / 0.02);
+  border: 1px solid rgb(var(--cf-ffffff) / 0.05);
 }
 
 .confirm-item {
@@ -940,7 +940,7 @@ watch(() => route.query.resubmit, () => {
   align-items: flex-start;
   gap: 10px;
   font-size: 12.5px;
-  color: #bbb;
+  color: rgb(var(--cf-bbbbbb));
   cursor: pointer;
 }
 
@@ -959,7 +959,7 @@ watch(() => route.query.resubmit, () => {
   gap: 10px;
   padding: 12px 32px;
   background: var(--myst-gold);
-  color: #05070a;
+  color: rgb(var(--cf-05070a));
   border: none;
   font-weight: 700;
   font-size: 13px;
@@ -982,8 +982,8 @@ watch(() => route.query.resubmit, () => {
 .button-spinner {
   width: 13px;
   height: 13px;
-  border: 1.5px solid rgba(0, 0, 0, 0.3);
-  border-top: 1.5px solid #05070a;
+  border: 1.5px solid rgb(var(--cf-000000) / 0.3);
+  border-top: 1.5px solid rgb(var(--cf-05070a));
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -993,4 +993,64 @@ watch(() => route.query.resubmit, () => {
     padding: 20px;
   }
 }
+
+/* Light theme: the faded eyebrow would drop under 4.5:1 on the paper, and a
+   half-transparent accent button reads as broken rather than disabled. */
+:root[data-theme="parchment"] .form-eyebrow {
+  opacity: 1;
+}
+
+:root[data-theme="parchment"] .submit-btn:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --cf-000000: 0 0 0;
+    --cf-05070a: 5 7 10;
+    --cf-0d101e: 13 16 30;
+    --cf-60a5fa: 96 165 250;
+    --cf-666666: 102 102 102;
+    --cf-777777: 119 119 119;
+    --cf-888888: 136 136 136;
+    --cf-93c5fd: 147 197 253;
+    --cf-999999: 153 153 153;
+    --cf-bbbbbb: 187 187 187;
+    --cf-c8b273: 200 178 115;
+    --cf-cccccc: 204 204 204;
+    --cf-cdd8ea: 205 216 234;
+    --cf-dddddd: 221 221 221;
+    --cf-eeeeee: 238 238 238;
+    --cf-ef4444: 239 68 68;
+    --cf-f87171: 248 113 113;
+    --cf-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --cf-000000: 255 255 255;
+    --cf-05070a: 255 255 255;
+    --cf-0d101e: 255 255 255;
+    --cf-60a5fa: 0 73 177;
+    --cf-666666: 85 83 94;
+    --cf-777777: 85 83 94;
+    --cf-888888: 85 83 94;
+    --cf-93c5fd: 53 99 150;
+    --cf-999999: 85 83 94;
+    --cf-bbbbbb: 23 22 28;
+    --cf-c8b273: 180 44 62;
+    --cf-cccccc: 23 22 28;
+    --cf-cdd8ea: 23 22 28;
+    --cf-dddddd: 23 22 28;
+    --cf-eeeeee: 23 22 28;
+    --cf-ef4444: 195 5 30;
+    --cf-f87171: 178 48 56;
+    --cf-ffffff: 23 22 28;
+}
+</style>
+

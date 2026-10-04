@@ -48,16 +48,69 @@
     --myst-shell: 1180px;
 }
 
-/* Parchment theme */
+/* Neutral helpers for theme-aware component CSS. Nothing in the dark theme used
+   these before the light theme existed, so components can adopt them in
+   `:root[data-theme="parchment"]` rules (or anywhere the dark value matches). */
+:root {
+    --myst-surface: #13162a;
+    --myst-surface-sunk: rgba(255, 255, 255, 0.04);
+    --myst-hover: rgba(255, 255, 255, 0.05);
+    --myst-line: rgba(255, 255, 255, 0.1);
+    --myst-pop: rgba(10, 12, 22, 0.97);
+    --myst-shadow: rgba(0, 0, 0, 0.5);
+    --myst-overlay: rgba(0, 0, 0, 0.7);
+}
+
+/* Light theme ("parchment" is the stored name): the homepage's palette - bone
+   paper, ink text, one deepened neutral crimson accent (accentInk.ts applied to
+   the homepage's NEUTRAL_ACCENT #e45a64, 5.3:1 on the paper). No gold: every
+   gold token is re-pointed at the accent, and the gold hairlines at ink. */
 :root[data-theme="parchment"] {
-    --myst-bg: #f5f3ed;
-    --myst-bg-2: #e8e4d8;
-    --myst-ink: #2c2416;
-    --myst-ink-muted: #6b6350;
-    --myst-ink-strong: #1a1410;
-    --myst-gold: #b8860b;
-    --myst-gold-soft: #d4a517;
-    --myst-offwhite: #1a1410;
+    --myst-bg: #efede8;
+    --myst-bg-2: #f8f7f4;
+    --myst-bg-deep: #ebe8e2;
+    --myst-ink: #17161c;
+    --myst-ink-muted: #55535e;
+    --myst-ink-strong: #0b0b0e;
+    --myst-offwhite: #17161c;
+    /* accent: text, hairlines, solid fills (white label via --myst-on-gold) */
+    --myst-gold: #b42c3e;
+    /* hover/pressed fill of solid accent controls */
+    --myst-gold-soft: #962336;
+    --myst-on-gold: #ffffff;
+
+    --myst-panel: linear-gradient(160deg, rgba(255, 255, 255, 0.7), rgba(239, 237, 232, 0.92));
+    --myst-panel-strong: linear-gradient(165deg, rgba(255, 255, 255, 0.92), rgba(239, 237, 232, 0.97));
+    --myst-panel-warm: linear-gradient(160deg, rgba(255, 255, 255, 0.75), rgba(236, 233, 227, 0.94));
+
+    /* neutral ink hairlines; the heavier ones carry the accent, as on the homepage */
+    --myst-line-10: rgba(28, 24, 36, 0.08);
+    --myst-line-12: rgba(28, 24, 36, 0.09);
+    --myst-line-14: rgba(28, 24, 36, 0.11);
+    --myst-line-16: rgba(28, 24, 36, 0.12);
+    --myst-line-18: rgba(28, 24, 36, 0.13);
+    --myst-line-20: rgba(28, 24, 36, 0.14);
+    --myst-line-28: rgba(180, 44, 62, 0.3);
+    --myst-line-35: rgba(180, 44, 62, 0.38);
+    --myst-line-40: rgba(180, 44, 62, 0.44);
+    --myst-line-55: rgba(180, 44, 62, 0.58);
+    --myst-wash: rgba(180, 44, 62, 0.06);
+    --myst-wash-strong: rgba(180, 44, 62, 0.12);
+
+    /* status colours, deepened to >= 5:1 on the paper */
+    --myst-green: #17703a;
+    --myst-green-soft: #1f6b38;
+    --myst-red: #b2322b;
+    --myst-red-soft: #9b3a36;
+    --myst-amber: #885600;
+
+    --myst-surface: #f8f7f4;
+    --myst-surface-sunk: rgba(28, 24, 36, 0.04);
+    --myst-hover: rgba(28, 24, 36, 0.05);
+    --myst-line: rgba(28, 24, 36, 0.14);
+    --myst-pop: rgba(251, 250, 247, 0.98);
+    --myst-shadow: rgba(46, 36, 58, 0.14);
+    --myst-overlay: rgba(23, 22, 28, 0.45);
 }
 
 /* Theme switch (useTheme.ts): colours change in one frame instead of each element
@@ -796,6 +849,53 @@ html {
     border-radius: 3px;
     background: linear-gradient(90deg, rgba(200, 178, 115, 0.5), var(--myst-gold));
     transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Light theme: the primitives above hardcode gold and dark glass; re-point them. */
+:root[data-theme="parchment"] .myst-section-head .rule.left {
+    background: linear-gradient(90deg, transparent, var(--myst-line-55));
+}
+
+:root[data-theme="parchment"] .myst-section-head .rule.right {
+    background: linear-gradient(90deg, var(--myst-line-55), transparent);
+}
+
+:root[data-theme="parchment"] .myst-btn-outline:hover {
+    background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .myst-segmented {
+    background: var(--myst-bg-2);
+}
+
+:root[data-theme="parchment"] .myst-segmented button.active {
+    background: var(--myst-wash-strong);
+}
+
+:root[data-theme="parchment"] .myst-callout {
+    background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .myst-callout.warn {
+    background: rgba(136, 86, 0, 0.06);
+    border-color: rgba(136, 86, 0, 0.32);
+}
+
+:root[data-theme="parchment"] .myst-callout.warn p {
+    color: #5c4a2c;
+}
+
+:root[data-theme="parchment"] .myst-meter {
+    background: rgba(28, 24, 36, 0.08);
+}
+
+:root[data-theme="parchment"] .myst-meter > span {
+    background: linear-gradient(90deg, rgba(180, 44, 62, 0.5), var(--myst-gold));
+}
+
+:root[data-theme="parchment"] ::selection {
+    background: var(--myst-gold);
+    color: var(--myst-on-gold);
 }
 
 /* Ambient motion is decorative everywhere in this design. */

@@ -118,4 +118,26 @@ const {t} = useI18n();
   display: flex;
   justify-content: center;
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .mist-overlay {
+  background: radial-gradient(circle at 50% 50%, rgba(180, 44, 62, 0.04) 0%, transparent 70%);
+}
+
+:root[data-theme="parchment"] .ritual-box {
+  background: var(--myst-bg-2);
+  border-color: var(--myst-line-16);
+}
+
+:root[data-theme="parchment"] .ritual-title {
+  color: var(--myst-ink-strong);
+}
+
+:root[data-theme="parchment"] .benefit-item {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .benefit-item i {
+  opacity: 0.85;
+}
 </style>

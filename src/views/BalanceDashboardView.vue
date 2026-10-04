@@ -400,8 +400,8 @@ const divergingVars = computed(() => isParchment.value
 
 const chartChrome = computed<ChartChrome>(() => isParchment.value
     ? {
-      ink: '#2c2416', muted: '#6b6350', grid: 'rgba(44,36,22,0.10)',
-      axis: 'rgba(44,36,22,0.30)', surface: '#e8e4d8', crit: '#d03b3b',
+      ink: '#17161c', muted: '#55535e', grid: 'rgba(28,24,36,0.10)',
+      axis: 'rgba(28,24,36,0.30)', surface: '#f8f7f4', crit: '#d03b3b',
     }
     : {
       ink: '#f5f5f7', muted: '#a1a1aa', grid: 'rgba(245,245,247,0.07)',
@@ -956,12 +956,12 @@ onBeforeUnmount(() => {
 }
 
 .ghost-btn.danger {
-  border-color: color-mix(in srgb, #ef4444 45%, transparent);
-  color: #ef4444;
+  border-color: color-mix(in srgb, rgb(var(--bd-ef4444)) 45%, transparent);
+  color: rgb(var(--bd-ef4444));
 }
 
 .ghost-btn.danger:hover {
-  background: color-mix(in srgb, #ef4444 10%, transparent);
+  background: color-mix(in srgb, rgb(var(--bd-ef4444)) 10%, transparent);
 }
 
 /* ---------- drag & empty ---------- */
@@ -1115,11 +1115,11 @@ onBeforeUnmount(() => {
 }
 
 .meta-chip.ok b {
-  color: #10b981;
+  color: rgb(var(--bd-10b981));
 }
 
 .meta-chip.off b {
-  color: #f59e0b;
+  color: rgb(var(--bd-f59e0b));
 }
 
 /* ---------- cards ---------- */
@@ -1532,7 +1532,7 @@ onBeforeUnmount(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: rgb(var(--bd-f59e0b));
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -1602,11 +1602,11 @@ onBeforeUnmount(() => {
 
 /* ---------- feedback ---------- */
 .error-banner {
-  background: color-mix(in srgb, #ef4444 14%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, rgb(var(--bd-ef4444)) 14%, transparent);
+  color: rgb(var(--bd-ef4444));
   padding: 14px 20px;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--bd-ef4444)) 40%, transparent);
   margin-bottom: 18px;
   font-size: 14px;
   font-weight: 500;
@@ -1635,4 +1635,38 @@ onBeforeUnmount(() => {
     grid-template-columns: 140px 1fr 54px;
   }
 }
+
+/* Light theme: faded labels at full strength (under 4.5:1 on the paper otherwise),
+   and disabled controls less washed out so they stay legible. */
+:root[data-theme="parchment"] .page-subtitle,
+:root[data-theme="parchment"] .control-label em {
+  opacity: 1;
+}
+
+:root[data-theme="parchment"] .empty-or {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .segmented button:disabled,
+:root[data-theme="parchment"] .pathway-chip:disabled {
+  opacity: 0.75;
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --bd-10b981: 16 185 129;
+    --bd-ef4444: 239 68 68;
+    --bd-f59e0b: 245 158 11;
+}
+
+:root[data-theme="parchment"] {
+    --bd-10b981: 0 111 76;
+    --bd-ef4444: 195 5 30;
+    --bd-f59e0b: 137 85 0;
+}
+</style>
+

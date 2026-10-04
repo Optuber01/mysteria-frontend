@@ -191,4 +191,32 @@ defineExpose({
   opacity: 0;
   transform: scale(0.95) translateY(10px);
 }
+
+/* Light theme: a paper sheet over a dimmed page; text inherits the ink colour. */
+:root[data-theme="parchment"] .modal-ritual-overlay {
+  background: var(--myst-overlay);
+}
+
+:root[data-theme="parchment"] .modal-ritual-content {
+  background: var(--myst-pop);
+  border-color: var(--myst-line-20);
+  box-shadow: 0 20px 60px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .modal-ritual-header {
+  border-bottom-color: var(--myst-line-14);
+}
+
+:root[data-theme="parchment"] .modal-ritual-close {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .modal-ritual-close:hover {
+  color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .modal-ritual-footer {
+  border-top-color: var(--myst-line-14);
+  background: var(--myst-surface-sunk);
+}
 </style>

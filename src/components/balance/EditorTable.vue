@@ -346,8 +346,8 @@ const obsMult = (a: EnrichedAbility) => {
 }
 
 .editor-table input.changed {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 1px #f59e0b inset;
+  border-color: rgb(var(--et-f59e0b));
+  box-shadow: 0 0 0 1px rgb(var(--et-f59e0b)) inset;
 }
 
 .unit {
@@ -386,8 +386,8 @@ const obsMult = (a: EnrichedAbility) => {
 }
 
 .key-pill.profiled {
-  border-color: color-mix(in srgb, #14b8a6 55%, transparent);
-  color: #14b8a6;
+  border-color: color-mix(in srgb, rgb(var(--et-14b8a6)) 55%, transparent);
+  color: rgb(var(--et-14b8a6));
 }
 
 .key-pill.profiled.primary {
@@ -421,12 +421,12 @@ const obsMult = (a: EnrichedAbility) => {
 }
 
 .profile-rate {
-  color: #14b8a6;
+  color: rgb(var(--et-14b8a6));
   font-weight: 600;
 }
 
 .profile-rate.unknown {
-  color: #f59e0b;
+  color: rgb(var(--et-f59e0b));
   font-weight: 500;
 }
 
@@ -462,4 +462,31 @@ const obsMult = (a: EnrichedAbility) => {
   margin: 12px 0 0;
   line-height: 1.5;
 }
+
+/* Light theme: faded hints and notes at full muted ink (under 4.5:1 on the paper otherwise). */
+:root[data-theme="parchment"] .th-hint {
+  opacity: 1;
+}
+
+:root[data-theme="parchment"] .assumed-pill,
+:root[data-theme="parchment"] .profile-notes,
+:root[data-theme="parchment"] .table-footnote {
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --et-14b8a6: 20 184 166;
+    --et-f59e0b: 245 158 11;
+}
+
+:root[data-theme="parchment"] {
+    --et-14b8a6: 0 109 98;
+    --et-f59e0b: 137 85 0;
+}
+</style>
+

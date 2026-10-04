@@ -175,19 +175,19 @@ onMounted(async () => {
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgb(var(--cdv-ffffff) / 0.03);
+  border: 1px solid rgb(var(--cdv-ffffff) / 0.08);
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: #888;
+  color: rgb(var(--cdv-888888));
   transition: all 0.2s ease;
 }
 
 .back-button:hover {
   color: var(--myst-gold);
-  border-color: rgba(200, 178, 115, 0.3);
+  border-color: rgb(var(--cdv-c8b273) / 0.3);
 }
 
 .page-title {
@@ -200,12 +200,12 @@ onMounted(async () => {
 .state-block {
   padding: 80px 0;
   text-align: center;
-  color: #666;
+  color: rgb(var(--cdv-666666));
 }
 
 .state-block.empty .empty-icon {
   font-size: 28px;
-  color: #f87171;
+  color: rgb(var(--cdv-f87171));
   margin-bottom: 16px;
   display: block;
 }
@@ -214,7 +214,7 @@ onMounted(async () => {
   width: 32px;
   height: 32px;
   margin: 0 auto;
-  border: 2px solid rgba(200, 178, 115, 0.2);
+  border: 2px solid rgb(var(--cdv-c8b273) / 0.2);
   border-top-color: var(--myst-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -227,8 +227,8 @@ onMounted(async () => {
 }
 
 .detail-card {
-  background: rgba(13, 16, 30, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--cdv-0d101e) / 0.4);
+  border: 1px solid rgb(var(--cdv-ffffff) / 0.05);
   padding: 32px;
   border-radius: 4px;
 }
@@ -239,7 +239,7 @@ onMounted(async () => {
   gap: 12px;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--cdv-ffffff) / 0.05);
 }
 
 .type-tag {
@@ -248,8 +248,8 @@ onMounted(async () => {
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #888;
+  background: rgb(var(--cdv-ffffff) / 0.05);
+  color: rgb(var(--cdv-888888));
 }
 
 .detail-grid {
@@ -265,13 +265,13 @@ onMounted(async () => {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #666;
+  color: rgb(var(--cdv-666666));
   margin-bottom: 4px;
 }
 
 .detail-item span {
   font-size: 13px;
-  color: #ddd;
+  color: rgb(var(--cdv-dddddd));
 }
 
 .detail-section {
@@ -292,22 +292,22 @@ onMounted(async () => {
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
-  color: #ddd;
+  color: rgb(var(--cdv-dddddd));
   white-space: pre-wrap;
 }
 
 .motivation-text {
   margin-top: 6px !important;
-  color: #999 !important;
+  color: rgb(var(--cdv-999999)) !important;
   font-size: 12px !important;
 }
 
 .content-unavailable {
   padding: 16px;
   margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  color: #777;
+  background: rgb(var(--cdv-ffffff) / 0.02);
+  border: 1px dashed rgb(var(--cdv-ffffff) / 0.1);
+  color: rgb(var(--cdv-777777));
   font-size: 12.5px;
   text-align: center;
 }
@@ -317,21 +317,21 @@ onMounted(async () => {
   gap: 12px;
   padding: 14px 16px;
   margin-bottom: 20px;
-  background: rgba(96, 165, 250, 0.08);
-  border-left: 3px solid #60a5fa;
-  color: #cdd8ea;
+  background: rgb(var(--cdv-60a5fa) / 0.08);
+  border-left: 3px solid rgb(var(--cdv-60a5fa));
+  color: rgb(var(--cdv-cdd8ea));
   font-size: 13px;
 }
 
 .staff-notice i {
-  color: #60a5fa;
+  color: rgb(var(--cdv-60a5fa));
   padding-top: 2px;
 }
 
 .staff-notice strong {
   display: block;
   margin-bottom: 4px;
-  color: #93c5fd;
+  color: rgb(var(--cdv-93c5fd));
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -343,9 +343,9 @@ onMounted(async () => {
 
 .resubmit-btn {
   padding: 10px 24px;
-  background: rgba(96, 165, 250, 0.1);
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  color: #60a5fa;
+  background: rgb(var(--cdv-60a5fa) / 0.1);
+  border: 1px solid rgb(var(--cdv-60a5fa) / 0.3);
+  color: rgb(var(--cdv-60a5fa));
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
   text-transform: uppercase;
@@ -355,8 +355,8 @@ onMounted(async () => {
 }
 
 .resubmit-btn:hover {
-  background: #60a5fa;
-  color: #05070a;
+  background: rgb(var(--cdv-60a5fa));
+  color: rgb(var(--cdv-05070a));
 }
 
 @media (max-width: 600px) {
@@ -373,3 +373,41 @@ onMounted(async () => {
   }
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --cdv-05070a: 5 7 10;
+    --cdv-0d101e: 13 16 30;
+    --cdv-60a5fa: 96 165 250;
+    --cdv-666666: 102 102 102;
+    --cdv-777777: 119 119 119;
+    --cdv-888888: 136 136 136;
+    --cdv-93c5fd: 147 197 253;
+    --cdv-999999: 153 153 153;
+    --cdv-c8b273: 200 178 115;
+    --cdv-cdd8ea: 205 216 234;
+    --cdv-dddddd: 221 221 221;
+    --cdv-f87171: 248 113 113;
+    --cdv-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --cdv-05070a: 255 255 255;
+    --cdv-0d101e: 255 255 255;
+    --cdv-60a5fa: 0 73 177;
+    --cdv-666666: 85 83 94;
+    --cdv-777777: 85 83 94;
+    --cdv-888888: 85 83 94;
+    --cdv-93c5fd: 53 99 150;
+    --cdv-999999: 85 83 94;
+    --cdv-c8b273: 180 44 62;
+    --cdv-cdd8ea: 23 22 28;
+    --cdv-dddddd: 23 22 28;
+    --cdv-f87171: 178 48 56;
+    --cdv-ffffff: 23 22 28;
+}
+</style>
+

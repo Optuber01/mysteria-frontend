@@ -350,32 +350,32 @@ loadCommissions();
 }
 
 .status-pending_review {
-  background: color-mix(in srgb, #f59e0b 25%, transparent);
-  color: #fbbf24;
+  background: color-mix(in srgb, rgb(var(--acl-f59e0b)) 25%, transparent);
+  color: rgb(var(--acl-fbbf24));
 }
 
 .status-approved {
-  background: color-mix(in srgb, #10b981 25%, transparent);
-  color: #34d399;
+  background: color-mix(in srgb, rgb(var(--acl-10b981)) 25%, transparent);
+  color: rgb(var(--acl-34d399));
 }
 
 .status-rejected {
-  background: color-mix(in srgb, #ef4444 25%, transparent);
-  color: #f87171;
+  background: color-mix(in srgb, rgb(var(--acl-ef4444)) 25%, transparent);
+  color: rgb(var(--acl-f87171));
 }
 
 .status-rescope_required {
-  background: color-mix(in srgb, #3b82f6 25%, transparent);
-  color: #60a5fa;
+  background: color-mix(in srgb, rgb(var(--acl-3b82f6)) 25%, transparent);
+  color: rgb(var(--acl-60a5fa));
 }
 
 .status-completed {
-  background: color-mix(in srgb, #8b5cf6 25%, transparent);
-  color: #a78bfa;
+  background: color-mix(in srgb, rgb(var(--acl-8b5cf6)) 25%, transparent);
+  color: rgb(var(--acl-a78bfa));
 }
 
 .warning-badge {
-  color: #f59e0b;
+  color: rgb(var(--acl-f59e0b));
   font-size: 12px;
   flex-shrink: 0;
 }
@@ -437,4 +437,53 @@ loadCommissions();
     min-width: 640px;
   }
 }
+
+/* Light theme: hover states as accent washes (mixing the accent into the paper at
+   30-40% reads as a solid pink bar). */
+:root[data-theme="parchment"] .back-button:hover,
+:root[data-theme="parchment"] .commission-row:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .status-tab.active {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .refresh-btn:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --acl-10b981: 16 185 129;
+    --acl-34d399: 52 211 153;
+    --acl-3b82f6: 59 130 246;
+    --acl-60a5fa: 96 165 250;
+    --acl-8b5cf6: 139 92 246;
+    --acl-a78bfa: 167 139 250;
+    --acl-ef4444: 239 68 68;
+    --acl-f59e0b: 245 158 11;
+    --acl-f87171: 248 113 113;
+    --acl-fbbf24: 251 191 36;
+}
+
+:root[data-theme="parchment"] {
+    --acl-10b981: 0 111 76;
+    --acl-34d399: 0 85 58;
+    --acl-3b82f6: 17 91 203;
+    --acl-60a5fa: 0 73 143;
+    --acl-8b5cf6: 114 62 215;
+    --acl-a78bfa: 85 51 155;
+    --acl-ef4444: 195 5 30;
+    --acl-f59e0b: 137 85 0;
+    --acl-f87171: 141 0 27;
+    --acl-fbbf24: 97 70 0;
+}
+</style>
+

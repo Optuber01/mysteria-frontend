@@ -595,4 +595,77 @@ onMounted(reload);
     grid-column: 1 / -1;
   }
 }
+/*
+ * Light theme (<html data-theme="parchment">). Most of the page already runs on the
+ * global --myst-* tokens, which the light theme re-points (gold becomes the deepened
+ * neutral crimson); these rules fix what was hardcoded for the dark page. Bold text is
+ * ink rather than accent.
+ */
+:root[data-theme="parchment"] .article-body {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .article-body :deep(strong) {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .article-body :deep(a) {
+  color: var(--myst-gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:root[data-theme="parchment"] .article-body :deep(a:hover) {
+  color: var(--myst-gold-soft);
+}
+
+:root[data-theme="parchment"] .article-body :deep(blockquote) {
+  border-left-color: var(--myst-gold);
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .article-body :deep(code) {
+  background: var(--myst-wash);
+  border-color: var(--myst-line);
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .article-body :deep(th),
+:root[data-theme="parchment"] .article-body :deep(td) {
+  border-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .article-body :deep(th) {
+  background: var(--myst-surface-sunk);
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .article-body :deep(img:not(.pathway-emoji)) {
+  border-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .article-hero {
+  border-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .article-end {
+  opacity: .55;
+}
+
+:root[data-theme="parchment"] .meta-divider {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .earlier-row:hover {
+  background: var(--myst-hover);
+}
+
+:root[data-theme="parchment"] .earlier-row:focus-visible {
+  outline: 2px solid var(--myst-gold);
+  outline-offset: 2px;
+}
+
+:root[data-theme="parchment"] .earlier-row > i {
+  color: var(--myst-gold);
+}
 </style>

@@ -65,4 +65,13 @@ const {copied, copyIp} = useCopyIp();
   color: var(--myst-green);
   font-size: 11px;
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .status-dot.online {
+  box-shadow: 0 0 5px rgba(23, 112, 58, 0.45);
+}
+
+:root[data-theme="parchment"] .status-dot.offline {
+  background: #8a8894;
+}
 </style>

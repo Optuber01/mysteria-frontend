@@ -124,6 +124,24 @@ dd {
   line-height: 1.55;
 }
 
+:root[data-theme="parchment"] .choice-card {
+  border-color: var(--myst-line-20);
+  background: var(--myst-bg-2);
+}
+
+:root[data-theme="parchment"] .choice-card.recommended {
+  border-color: var(--myst-line-55);
+  background: linear-gradient(145deg, var(--myst-wash-strong), transparent 55%), var(--myst-bg-2);
+}
+
+:root[data-theme="parchment"] .recommended-tag {
+  border-color: var(--myst-line-55);
+}
+
+:root[data-theme="parchment"] dl > div {
+  border-top-color: var(--myst-line-14);
+}
+
 @media (max-width: 1024px) {
   dl > div {
     grid-template-columns: 1fr;

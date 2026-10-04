@@ -917,6 +917,42 @@ watch(activeTab, () => (activeId.value = ''));
   color: var(--myst-red);
 }
 
+/* Light theme: the hardcoded gold and dark glass above, re-pointed at the paper. */
+:root[data-theme="parchment"] .toc-item.active {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .toc-id {
+  color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .chapter-number {
+  color: rgba(180, 44, 62, 0.72);
+}
+
+:root[data-theme="parchment"] .rule-row {
+  background: var(--myst-panel);
+  border-color: var(--myst-line-16);
+}
+
+:root[data-theme="parchment"] .warns.minor,
+:root[data-theme="parchment"] .warns.major {
+  border-color: rgba(136, 86, 0, 0.4);
+}
+
+:root[data-theme="parchment"] .warns.severe {
+  border-color: rgba(178, 50, 43, 0.45);
+}
+
+:root[data-theme="parchment"] .warns.permanent {
+  color: #ffffff;
+}
+
+:root[data-theme="parchment"] .ladder {
+  background: var(--myst-pop);
+  box-shadow: 0 14px 34px var(--myst-shadow);
+}
+
 @media (max-width: 1000px) {
   .covenant-body {
     grid-template-columns: 1fr;

@@ -1,4 +1,7 @@
 <template>
+  <!-- One root (display: contents) so the parent's class and scoped rules reach it:
+       as a fragment, the header's `.header-chip` responsive rule never applied. -->
+  <span class="balance-root">
   <button
       v-if="profile"
       :class="['balance-chip', { 'is-icon-only': iconMode }]"
@@ -69,6 +72,7 @@
       </div>
     </Transition>
   </Teleport>
+  </span>
 </template>
 
 <script lang="ts" setup>
@@ -137,6 +141,10 @@ const handleTopUpClick = () => {
 </script>
 
 <style scoped>
+.balance-root {
+  display: contents;
+}
+
 .balance-chip {
   display: inline-flex;
   align-items: center;
@@ -361,5 +369,73 @@ const handleTopUpClick = () => {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Light theme: the conversion modal as a paper sheet. */
+:root[data-theme="parchment"] .modal-ritual-overlay {
+  background: var(--myst-overlay);
+}
+
+:root[data-theme="parchment"] .modal-ritual-content.compact {
+  background: var(--myst-pop);
+  border-color: var(--myst-line-20);
+  box-shadow: 0 20px 60px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .modal-ritual-header {
+  border-bottom-color: var(--myst-line-14);
+}
+
+:root[data-theme="parchment"] .modal-ritual-close,
+:root[data-theme="parchment"] .curr-name,
+:root[data-theme="parchment"] .curr-rate,
+:root[data-theme="parchment"] .ledger-label,
+:root[data-theme="parchment"] .ritual-section-desc,
+:root[data-theme="parchment"] .warning-ritual-text {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .modal-ritual-close:hover {
+  color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .ritual-section-title,
+:root[data-theme="parchment"] .curr-symbol {
+  color: var(--myst-ink-strong);
+}
+
+:root[data-theme="parchment"] .currency-ritual-option {
+  background: var(--myst-bg-2);
+  border-color: var(--myst-line-16);
+}
+
+:root[data-theme="parchment"] .currency-ritual-option:hover {
+  border-color: var(--myst-line-40);
+}
+
+:root[data-theme="parchment"] .currency-ritual-option.active {
+  border-color: var(--myst-gold);
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .conversion-ledger {
+  background: var(--myst-surface-sunk);
+  border-color: var(--myst-line-14);
+}
+
+:root[data-theme="parchment"] .ledger-row {
+  border-bottom-color: var(--myst-line-12);
+}
+
+:root[data-theme="parchment"] .ritual-warning-box {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .btn-ritual-primary {
+  color: var(--myst-on-gold);
+}
+
+:root[data-theme="parchment"] .btn-ritual-primary:hover {
+  background: var(--myst-gold-soft);
 }
 </style>

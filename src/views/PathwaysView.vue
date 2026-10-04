@@ -1099,4 +1099,273 @@ onUnmounted(() => {
     display: none
   }
 }
+/* Grid items default to min-width:auto, so the Sequence row's min-content (ten 62px buttons
+   on narrow screens) used to widen the whole column past the viewport. With min-width:0 the
+   row scrolls inside its box instead (overflow-x:auto at <= 900px). */
+.pathway-browser, .pathway-detail {
+  min-width: 0
+}
+
+/*
+ * Light theme (<html data-theme="parchment">). Everything above is the dark archive and
+ * stays as is; these rules only apply on paper. Same palette as the homepage's light theme:
+ * paper, ink, hairlines and the deepened neutral crimson (--myst-gold on paper) where dark uses gold.
+ * Rank hues are deepened so they read as text; glows are dropped (they smudge on paper).
+ */
+:root[data-theme="parchment"] .pathways-page {
+  --pw-paper: var(--myst-bg);
+  --pw-surface: var(--myst-surface);
+  --pw-surface-2: var(--myst-bg-deep);
+  --pw-line: var(--myst-line);
+  --pw-line-strong: rgba(28, 24, 36, .24);
+  --pw-ink: var(--myst-ink);
+  --pw-muted: var(--myst-ink-muted);
+  --pw-acc: var(--myst-gold);
+  --pw-acc-line: var(--myst-line-40);
+  --pw-wash: var(--myst-wash-strong);
+  background: var(--pw-paper);
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .archive-hero {
+  background: radial-gradient(circle at 50% 0, var(--pw-wash), transparent 48%), var(--pw-paper);
+  border-bottom-color: var(--pw-line)
+}
+
+:root[data-theme="parchment"] .pathways-page .eyebrow,
+:root[data-theme="parchment"] .pathways-page .pathway-header span,
+:root[data-theme="parchment"] .pathways-page .sequence-title span,
+:root[data-theme="parchment"] .pathways-page .search-label,
+:root[data-theme="parchment"] .pathways-page .browser-heading b,
+:root[data-theme="parchment"] .pathways-page .sigil b,
+:root[data-theme="parchment"] .pathways-page .large-sigil b,
+:root[data-theme="parchment"] .pathways-page .detail-empty span {
+  color: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .archive-hero > p,
+:root[data-theme="parchment"] .pathways-page .archive-stats,
+:root[data-theme="parchment"] .pathways-page .archive-freshness,
+:root[data-theme="parchment"] .pathways-page .browser-heading,
+:root[data-theme="parchment"] .pathways-page .pathway-list small,
+:root[data-theme="parchment"] .pathways-page .chevron,
+:root[data-theme="parchment"] .pathways-page .empty,
+:root[data-theme="parchment"] .pathways-page .pathway-header p,
+:root[data-theme="parchment"] .pathways-page .sequence-jump small,
+:root[data-theme="parchment"] .pathways-page .sequence-number small,
+:root[data-theme="parchment"] .pathways-page .sequence-title > small,
+:root[data-theme="parchment"] .pathways-page .ability p,
+:root[data-theme="parchment"] .pathways-page .detail-empty,
+:root[data-theme="parchment"] .pathways-page .search-box kbd,
+:root[data-theme="parchment"] .pathways-page .search-box button {
+  color: var(--pw-muted)
+}
+
+:root[data-theme="parchment"] .pathways-page .archive-stats b,
+:root[data-theme="parchment"] .pathways-page .ability h4,
+:root[data-theme="parchment"] .pathways-page .detail-empty h3 {
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .archive-stats i {
+  background: var(--pw-line-strong)
+}
+
+:root[data-theme="parchment"] .pathways-page .archive-freshness i {
+  color: var(--pw-muted)
+}
+
+:root[data-theme="parchment"] .pathways-page .freshness-dot {
+  background: var(--pw-acc);
+  box-shadow: none
+}
+
+:root[data-theme="parchment"] .pathways-page .registry-cta {
+  border-color: var(--pw-acc-line);
+  background: var(--myst-wash);
+  color: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .registry-cta:hover {
+  border-color: var(--pw-acc);
+  background: var(--myst-wash-strong);
+  color: var(--myst-gold-soft)
+}
+
+/* Search */
+:root[data-theme="parchment"] .pathways-page .search-box {
+  border-color: var(--pw-acc-line);
+  background: var(--pw-surface);
+  box-shadow: 0 1px 2px rgba(46, 36, 58, .06)
+}
+
+:root[data-theme="parchment"] .pathways-page .search-box:focus-within {
+  border-color: var(--pw-acc);
+  box-shadow: 0 0 0 3px rgba(180, 44, 62, .14)
+}
+
+:root[data-theme="parchment"] .pathways-page .search-box svg {
+  stroke: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .search-box input {
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .search-box input::placeholder {
+  color: var(--pw-muted);
+  opacity: 1
+}
+
+:root[data-theme="parchment"] .pathways-page .search-box button:hover {
+  color: var(--pw-ink)
+}
+
+/* Pathway list */
+:root[data-theme="parchment"] .pathways-page .pathway-list > button {
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .pathway-list > button:hover {
+  background: var(--pw-surface-2);
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .pathway-list > button.active {
+  background: linear-gradient(90deg, var(--pw-wash), transparent), var(--pw-surface);
+  border-color: var(--pw-acc-line);
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .pathway-list > button:focus-visible,
+:root[data-theme="parchment"] .pathways-page .sequence-jump button:focus-visible {
+  outline: 2px solid var(--pw-acc);
+  outline-offset: 1px
+}
+
+:root[data-theme="parchment"] .pathways-page .sigil {
+  border-color: var(--pw-line);
+  background: var(--pw-surface)
+}
+
+/* Detail panel */
+:root[data-theme="parchment"] .pathways-page .pathway-controls {
+  background: var(--pw-paper);
+  box-shadow: 0 12px 22px rgba(239, 237, 232, .92)
+}
+
+:root[data-theme="parchment"] .pathways-page .pathway-header {
+  border-color: var(--pw-line);
+  background: radial-gradient(circle at 10% 50%, var(--pw-wash), transparent 42%), var(--pw-surface)
+}
+
+:root[data-theme="parchment"] .pathways-page .large-sigil img {
+  filter: drop-shadow(0 2px 6px rgba(46, 36, 58, .18))
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button {
+  border-color: var(--pw-line);
+  background: var(--pw-surface);
+  color: var(--pw-ink)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button:hover {
+  border-color: var(--pw-acc);
+  color: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-card {
+  border-color: var(--pw-line);
+  background: var(--pw-surface)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-number,
+:root[data-theme="parchment"] .pathways-page .sequence-title {
+  border-color: var(--pw-line)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-number {
+  background: linear-gradient(135deg, var(--pw-wash), transparent)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-number b {
+  color: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .ability-mark {
+  background: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .detail-empty {
+  border-color: var(--pw-line)
+}
+
+/* Rank hues, deepened for paper: Seq 4 crimson, 3 blue, 2 violet, 1 burnt orange, 0 wine. */
+:root[data-theme="parchment"] .pathways-page .ranked {
+  --pw-rank: #b42c3e
+}
+
+:root[data-theme="parchment"] .pathways-page .rank-3 {
+  --pw-rank: #2f5687
+}
+
+:root[data-theme="parchment"] .pathways-page .rank-2 {
+  --pw-rank: #6a3db8
+}
+
+:root[data-theme="parchment"] .pathways-page .rank-1 {
+  --pw-rank: #a3470f
+}
+
+:root[data-theme="parchment"] .pathways-page .rank-0 {
+  --pw-rank: #9b1b52
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button.ranked {
+  color: var(--pw-rank);
+  border-color: color-mix(in srgb, var(--pw-rank) 40%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pw-rank) 9%, var(--pw-surface)), var(--pw-surface));
+  box-shadow: none
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button.ranked:after {
+  box-shadow: none
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button.rank-0 {
+  border-color: color-mix(in srgb, var(--pw-rank) 60%, transparent);
+  background: color-mix(in srgb, var(--pw-rank) 12%, var(--pw-surface))
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-number.ranked {
+  color: var(--pw-rank);
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--pw-rank) 11%, transparent), transparent 65%)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-number.ranked b {
+  color: currentColor;
+  text-shadow: none
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button.current {
+  color: var(--pw-ink);
+  border-color: var(--pw-acc);
+  background: linear-gradient(145deg, rgba(180, 44, 62, .16), rgba(180, 44, 62, .04)), var(--pw-surface);
+  box-shadow: 0 2px 8px rgba(46, 36, 58, .12)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-jump button.current small {
+  color: var(--pw-acc)
+}
+
+:root[data-theme="parchment"] .pathways-page .sequence-card.current {
+  border-color: var(--pw-acc-line);
+  box-shadow: 0 8px 24px rgba(46, 36, 58, .1)
+}
+
+@media (max-width: 560px) {
+  :root[data-theme="parchment"] .pathways-page .sequence-number {
+    border-bottom-color: var(--pw-line)
+  }
+}
 </style>

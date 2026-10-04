@@ -164,6 +164,33 @@ useSeo(() => ({
   background: rgba(200, 178, 115, 0.05);
 }
 
+/* Light theme */
+:root[data-theme="parchment"] .legal-ritual-page {
+  background-color: var(--myst-bg);
+}
+
+:root[data-theme="parchment"] .legal-ledger {
+  background: var(--myst-bg-2);
+  border-color: var(--myst-line-16);
+}
+
+:root[data-theme="parchment"] .ledger-date {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .ledger-content {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .ledger-link {
+  border-bottom-color: var(--myst-line-40);
+}
+
+:root[data-theme="parchment"] .ledger-link:hover {
+  border-bottom-color: var(--myst-gold);
+  background: var(--myst-wash);
+}
+
 @media (max-width: 768px) {
   .legal-ledger {
     padding: 32px 24px;

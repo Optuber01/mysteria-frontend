@@ -141,7 +141,7 @@ const handlePurchase = () => emit("purchase", props.item.id);
   place-items: center;
   aspect-ratio: 16 / 8;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 120%, rgba(200, 178, 115, 0.12), transparent 60%), #0c0f1c;
+  background: radial-gradient(ellipse at 50% 120%, rgb(var(--sic-c8b273) / 0.12), transparent 60%), rgb(var(--sic-0c0f1c));
   color: inherit;
 }
 
@@ -160,8 +160,8 @@ const handlePurchase = () => emit("purchase", props.item.id);
 
 .ware-glyph {
   font-size: 44px;
-  color: rgba(200, 178, 115, 0.5);
-  filter: drop-shadow(0 0 18px rgba(200, 178, 115, 0.25));
+  color: rgb(var(--sic-c8b273) / 0.5);
+  filter: drop-shadow(0 0 18px rgb(var(--sic-c8b273) / 0.25));
 }
 
 .ware-category,
@@ -179,9 +179,9 @@ const handlePurchase = () => emit("purchase", props.item.id);
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 6px 11px;
-  background: rgba(8, 10, 18, 0.7);
-  border: 1px solid rgba(200, 178, 115, 0.25);
-  color: rgba(200, 178, 115, 0.7);
+  background: rgb(var(--sic-080a12) / 0.7);
+  border: 1px solid rgb(var(--sic-c8b273) / 0.25);
+  color: rgb(var(--sic-c8b273) / 0.7);
   font-size: 9px;
   letter-spacing: 0.24em;
 }
@@ -236,7 +236,7 @@ const handlePurchase = () => emit("purchase", props.item.id);
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  color: #bdc0ca;
+  color: rgb(var(--sic-bdc0ca));
   font-size: 12.5px;
   line-height: 1.5;
 }
@@ -254,7 +254,7 @@ const handlePurchase = () => emit("purchase", props.item.id);
 .ware-tooltip {
   position: relative;
   cursor: help;
-  color: #777f92;
+  color: rgb(var(--sic-777f92));
 }
 
 .ware-tooltip > span {
@@ -268,7 +268,7 @@ const handlePurchase = () => emit("purchase", props.item.id);
   transform: translateY(4px);
   border: 1px solid var(--myst-line-28);
   background: var(--myst-bg-deep);
-  color: #e2e2e6;
+  color: rgb(var(--sic-e2e2e6));
   box-shadow: 0 10px 30px #000;
   transition: 0.2s ease;
   z-index: 10;
@@ -312,7 +312,7 @@ const handlePurchase = () => emit("purchase", props.item.id);
   display: flex;
   align-items: center;
   gap: 3px;
-  color: #6f7481;
+  color: rgb(var(--sic-6f7481));
   font-family: var(--myst-font-mono);
   font-size: 12px;
   text-decoration: line-through;
@@ -345,7 +345,7 @@ const handlePurchase = () => emit("purchase", props.item.id);
   gap: 9px;
   padding: 0 22px;
   border: 1px solid var(--myst-line-55);
-  background: rgba(200, 178, 115, 0.08);
+  background: rgb(var(--sic-c8b273) / 0.08);
   color: var(--myst-gold);
   cursor: pointer;
   font-family: var(--myst-font-mono);
@@ -388,4 +388,35 @@ const handlePurchase = () => emit("purchase", props.item.id);
     min-height: 48px;
   }
 }
+
+/* Light theme: the category tag's faded accent would drop under 4.5:1. */
+:root[data-theme="parchment"] .ware-category {
+  color: var(--myst-gold);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --sic-080a12: 8 10 18;
+    --sic-0c0f1c: 12 15 28;
+    --sic-6f7481: 111 116 129;
+    --sic-777f92: 119 127 146;
+    --sic-bdc0ca: 189 192 202;
+    --sic-c8b273: 200 178 115;
+    --sic-e2e2e6: 226 226 230;
+}
+
+:root[data-theme="parchment"] {
+    --sic-080a12: 255 255 255;
+    --sic-0c0f1c: 255 255 255;
+    --sic-6f7481: 85 83 94;
+    --sic-777f92: 85 83 94;
+    --sic-bdc0ca: 23 22 28;
+    --sic-c8b273: 180 44 62;
+    --sic-e2e2e6: 23 22 28;
+}
+</style>
+

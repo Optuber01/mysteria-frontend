@@ -193,4 +193,44 @@ button:hover {
 .success {
   color: #51cf66;
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .auth-callback {
+  background: var(--myst-bg);
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .callback-content {
+  background: var(--myst-bg-2);
+  border-color: var(--myst-line-16);
+  box-shadow: 0 8px 32px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .spinner {
+  border-color: var(--myst-line-20);
+  border-top-color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .processing p,
+:root[data-theme="parchment"] .error p,
+:root[data-theme="parchment"] .success p {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] button {
+  background: var(--myst-gold);
+  color: var(--myst-on-gold);
+}
+
+:root[data-theme="parchment"] button:hover {
+  background: var(--myst-gold-soft);
+}
+
+:root[data-theme="parchment"] .error {
+  color: var(--myst-red);
+}
+
+:root[data-theme="parchment"] .success {
+  color: var(--myst-green);
+}
 </style>

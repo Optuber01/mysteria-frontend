@@ -189,4 +189,13 @@ const handleClick = async () => {
   opacity: 0;
   transform: scale(0.7);
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .daily-cat-wrapper:hover {
+  filter: drop-shadow(0 0 10px rgba(180, 44, 62, 0.35));
+}
+
+:root[data-theme="parchment"] .daily-cat-glow {
+  background: radial-gradient(circle, rgba(180, 44, 62, 0.12) 0%, transparent 70%);
+}
 </style>

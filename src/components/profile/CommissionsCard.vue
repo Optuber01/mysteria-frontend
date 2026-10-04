@@ -135,6 +135,20 @@ onMounted(load);
 .card-loading span {
   width: 64px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgb(var(--cc-ffffff) / 0.04);
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --cc-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --cc-ffffff: 23 22 28;
+}
+</style>
+

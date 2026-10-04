@@ -154,4 +154,9 @@ const barStyle = (idx: number) => {
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
+
+/* Light theme: the scale labels at full muted ink (under 4.5:1 on the paper otherwise). */
+:root[data-theme="parchment"] .strip-scale {
+  color: var(--myst-ink-muted);
+}
 </style>

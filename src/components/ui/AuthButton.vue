@@ -316,4 +316,18 @@ onUnmounted(() => window.removeEventListener("click", handleClickOutside));
   min-height: 46px;
   max-width: none;
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .auth-skeleton {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .registry-menu {
+  background: var(--myst-pop);
+  box-shadow: 0 18px 50px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .registry-item:hover {
+  background: var(--myst-wash);
+}
 </style>

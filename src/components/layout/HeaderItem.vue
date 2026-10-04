@@ -12,7 +12,7 @@
     </button>
   </div>
 
-  <header class="site-header">
+  <header :class="['site-header', {'is-authed': isAuthenticated}]">
     <div class="header-grid">
       <RouterLink :to="$lp('/')" class="brand" @click="closeMobileNav">
         <img :src="logo" alt="Mysterria" class="brand-mark" width="38" height="38">
@@ -655,6 +655,29 @@ onUnmounted(() => {
   }
 }
 
+/* Signed in, the bar also carries the bell, the profile chip and the staff/logout
+   buttons: below 1025px the full nav no longer fits beside them (it ran into the
+   brand and the actions), so the bar switches to the drawer earlier. The drawer
+   already holds the bell and the account controls. */
+@media (max-width: 1024px) {
+  .site-header.is-authed .primary-nav,
+  .site-header.is-authed .desktop-only {
+    display: none;
+  }
+
+  .site-header.is-authed .mobile-nav-toggle {
+    display: flex;
+  }
+
+  .site-header.is-authed .header-grid {
+    padding: 0 16px;
+  }
+
+  .site-header.is-authed .header-actions {
+    gap: 10px;
+  }
+}
+
 /* ---- Mobile drawer ---- */
 .mobile-nav-overlay {
   position: fixed;
@@ -813,5 +836,26 @@ onUnmounted(() => {
 .mobile-nav-enter-from .mobile-nav,
 .mobile-nav-leave-to .mobile-nav {
   transform: translateX(-100%);
+}
+
+/* ---- Light theme (pages other than the homepage, which re-points these itself) ---- */
+/* on paper the gold mark is inked, as on the homepage */
+:where(:root[data-theme="parchment"]) .brand-mark {
+  filter: grayscale(1) brightness(.4) contrast(1.3) drop-shadow(0 0 6px rgba(180, 44, 62, .3));
+}
+
+/* :where() keeps this below the homepage's own season-bar tint */
+:where(:root[data-theme="parchment"]) .season-bar {
+  background: linear-gradient(90deg, transparent, rgba(180, 44, 62, .1), transparent);
+}
+
+:root[data-theme="parchment"] .mobile-nav-backdrop {
+  background: var(--myst-overlay);
+}
+
+:root[data-theme="parchment"] .mobile-nav-link:hover,
+:root[data-theme="parchment"] .mobile-nav-link.active,
+:root[data-theme="parchment"] .mobile-service-link:hover {
+  background: var(--myst-wash);
 }
 </style>

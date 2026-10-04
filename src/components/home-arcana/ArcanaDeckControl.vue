@@ -428,6 +428,23 @@ onUnmounted(() => {
 }
 
 /* The gutter is only wide enough for the spread on wide screens. */
+/* Light theme: the spread floats over paper and over the dark potion story alike, so its
+   little cards keep the dark theme's look (dark faces, light rims, the card's own accent)
+   and read on both. */
+:root[data-theme="parchment"] .arc-dock__spread {
+  --arc-bg: #0b0b0e;
+  --arc-ink: #efeef3;
+  --arc-muted: #a7a6b2;
+  --arc-on-acc: #0b0b0e;
+  --acc-ink: var(--acc);
+  --acc-solid: var(--acc);
+}
+
+:root[data-theme="parchment"] .arc-dock__spot:not(.is-active) .arc-dock__spot-card {
+  background: color-mix(in srgb, var(--arc-bg) 88%, transparent);
+  box-shadow: 0 4px 10px rgba(46, 36, 58, .18);
+}
+
 @media (max-width: 1279px) {
   .arc-dock__spread {
     display: none;

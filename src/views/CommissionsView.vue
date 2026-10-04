@@ -123,19 +123,19 @@ const handleSubmitted = () => {
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgb(var(--cv-ffffff) / 0.03);
+  border: 1px solid rgb(var(--cv-ffffff) / 0.08);
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  color: #888;
+  color: rgb(var(--cv-888888));
   transition: all 0.2s ease;
 }
 
 .back-button:hover {
   color: var(--myst-gold);
-  border-color: rgba(200, 178, 115, 0.3);
+  border-color: rgb(var(--cv-c8b273) / 0.3);
 }
 
 .title-block {
@@ -152,12 +152,12 @@ const handleSubmitted = () => {
 .page-subtitle {
   margin: 0;
   font-size: 13px;
-  color: #888;
+  color: rgb(var(--cv-888888));
 }
 
 .terms-card {
-  background: rgba(13, 16, 30, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--cv-0d101e) / 0.4);
+  border: 1px solid rgb(var(--cv-ffffff) / 0.05);
   padding: 32px;
   border-radius: 4px;
   margin-bottom: 24px;
@@ -166,7 +166,7 @@ const handleSubmitted = () => {
 .terms-header {
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--cv-ffffff) / 0.05);
 }
 
 .terms-eyebrow {
@@ -199,7 +199,7 @@ const handleSubmitted = () => {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   font-weight: 700;
-  color: #05070a;
+  color: rgb(var(--cv-05070a));
   background: var(--myst-gold);
   padding: 4px 12px;
   border-radius: 3px;
@@ -228,7 +228,7 @@ const handleSubmitted = () => {
   margin: 0;
   font-size: 13.5px;
   line-height: 1.6;
-  color: #bbb;
+  color: rgb(var(--cv-bbbbbb));
 }
 
 .terms-list {
@@ -242,7 +242,7 @@ const handleSubmitted = () => {
 .terms-list li {
   font-size: 13.5px;
   line-height: 1.6;
-  color: #ccc;
+  color: rgb(var(--cv-cccccc));
 }
 
 .terms-list--check {
@@ -278,7 +278,7 @@ const handleSubmitted = () => {
   gap: 12px;
   font-size: 13.5px;
   line-height: 1.6;
-  color: #ccc;
+  color: rgb(var(--cv-cccccc));
 }
 
 .step-number {
@@ -288,7 +288,7 @@ const handleSubmitted = () => {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
-  border: 1px solid rgba(200, 178, 115, 0.4);
+  border: 1px solid rgb(var(--cv-c8b273) / 0.4);
   color: var(--myst-gold);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
@@ -303,9 +303,9 @@ const handleSubmitted = () => {
   gap: 10px;
   margin: 24px 0 0;
   padding: 14px 16px;
-  background: rgba(200, 178, 115, 0.06);
+  background: rgb(var(--cv-c8b273) / 0.06);
   border-left: 3px solid var(--myst-gold);
-  color: #cdc3a8;
+  color: rgb(var(--cv-cdc3a8));
   font-size: 12.5px;
   line-height: 1.5;
 }
@@ -328,4 +328,37 @@ const handleSubmitted = () => {
     padding: 20px;
   }
 }
+
+/* Light theme: the faded eyebrow would drop under 4.5:1 on the paper. */
+:root[data-theme="parchment"] .terms-eyebrow {
+  opacity: 1;
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --cv-05070a: 5 7 10;
+    --cv-0d101e: 13 16 30;
+    --cv-888888: 136 136 136;
+    --cv-bbbbbb: 187 187 187;
+    --cv-c8b273: 200 178 115;
+    --cv-cccccc: 204 204 204;
+    --cv-cdc3a8: 205 195 168;
+    --cv-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --cv-05070a: 255 255 255;
+    --cv-0d101e: 255 255 255;
+    --cv-888888: 85 83 94;
+    --cv-bbbbbb: 23 22 28;
+    --cv-c8b273: 180 44 62;
+    --cv-cccccc: 23 22 28;
+    --cv-cdc3a8: 23 22 28;
+    --cv-ffffff: 23 22 28;
+}
+</style>
+

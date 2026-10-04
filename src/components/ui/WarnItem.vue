@@ -191,4 +191,46 @@ onMounted(() => {
     width: calc(100vw - 40px);
   }
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .notification-ritual-card {
+  background: var(--myst-pop);
+  border-color: var(--myst-line-28);
+  box-shadow: 0 10px 40px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .notification-ritual-icon {
+  border-color: var(--myst-line-28);
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .notification-ritual-icon.error,
+:root[data-theme="parchment"] .notification-ritual-icon.fatal {
+  color: var(--myst-red);
+  border-color: rgba(178, 50, 43, 0.3);
+  background: rgba(178, 50, 43, 0.06);
+}
+
+:root[data-theme="parchment"] .notification-ritual-message {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .copy-ritual-hint,
+:root[data-theme="parchment"] .close-ritual-btn {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .close-ritual-btn:hover {
+  color: var(--myst-gold);
+}
+
+/* the icon paints its own near-white fill */
+:root[data-theme="parchment"] .close-ritual-btn :deep(svg) {
+  fill: currentColor;
+}
+
+:root[data-theme="parchment"] .error .ritual-progress,
+:root[data-theme="parchment"] .fatal .ritual-progress {
+  background: var(--myst-red);
+}
 </style>

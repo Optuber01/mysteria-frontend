@@ -1149,6 +1149,14 @@ onUnmounted(() => {
   color: color-mix(in oklab, var(--acc-ink) 70%, transparent);
 }
 
+/* Light theme: the empty spot is a card like the 22 around it, so it keeps the dark
+   recess and light-accent dashes of the dark theme instead of a milky paper panel. */
+:root[data-theme="parchment"] .arc-stage__slot {
+  --arc-bg: #0b0b0e;
+  --acc-ink: var(--acc);
+  box-shadow: 0 1.5cqw 4cqw var(--arc-shadow);
+}
+
 .arc-card {
   all: unset;
   position: absolute;

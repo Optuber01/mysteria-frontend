@@ -690,28 +690,28 @@ onMounted(() => {
 }
 
 .role-player {
-  background: color-mix(in srgb, #3b82f6 25%, transparent);
-  color: #60a5fa;
+  background: color-mix(in srgb, rgb(var(--ap-3b82f6)) 25%, transparent);
+  color: rgb(var(--ap-60a5fa));
 }
 
 .role-moderator {
-  background: color-mix(in srgb, #f59e0b 25%, transparent);
-  color: #fbbf24;
+  background: color-mix(in srgb, rgb(var(--ap-f59e0b)) 25%, transparent);
+  color: rgb(var(--ap-fbbf24));
 }
 
 .role-leader {
-  background: color-mix(in srgb, #ec4899 25%, transparent);
-  color: #f472b6;
+  background: color-mix(in srgb, rgb(var(--ap-ec4899)) 25%, transparent);
+  color: rgb(var(--ap-f472b6));
 }
 
 .role-admin {
-  background: color-mix(in srgb, #ef4444 25%, transparent);
-  color: #f87171;
+  background: color-mix(in srgb, rgb(var(--ap-ef4444)) 25%, transparent);
+  color: rgb(var(--ap-f87171));
 }
 
 .role-owner {
-  background: color-mix(in srgb, #8b5cf6 25%, transparent);
-  color: #a78bfa;
+  background: color-mix(in srgb, rgb(var(--ap-8b5cf6)) 25%, transparent);
+  color: rgb(var(--ap-a78bfa));
 }
 
 .user-details {
@@ -806,17 +806,17 @@ onMounted(() => {
 .form-group input.error,
 .form-group select.error,
 .form-group textarea.error {
-  border-color: #ef4444;
+  border-color: rgb(var(--ap-ef4444));
 }
 
 .form-group input.error:focus,
 .form-group select.error:focus,
 .form-group textarea.error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  box-shadow: 0 0 0 3px rgb(var(--ap-ef4444) / 0.15);
 }
 
 .field-error {
-  color: #ef4444;
+  color: rgb(var(--ap-ef4444));
   font-size: 11px;
   font-weight: 500;
   margin-top: 5px;
@@ -844,14 +844,14 @@ onMounted(() => {
 }
 
 .action-btn.primary {
-  background: #10b981;
+  background: rgb(var(--ap-10b981));
   color: white;
 }
 
 .action-btn.primary:hover:not(:disabled) {
-  background: #059669;
+  background: rgb(var(--ap-059669));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 12px rgb(var(--ap-10b981) / 0.25);
 }
 
 .action-btn.secondary {
@@ -875,7 +875,7 @@ onMounted(() => {
 .button-spinner {
   width: 13px;
   height: 13px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgb(var(--ap-ffffff) / 0.3);
   border-top: 1.5px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -912,22 +912,22 @@ onMounted(() => {
 }
 
 .success-message {
-  background: color-mix(in srgb, #10b981 12%, transparent);
-  color: #10b981;
+  background: color-mix(in srgb, rgb(var(--ap-10b981)) 12%, transparent);
+  color: rgb(var(--ap-10b981));
   padding: 14px 18px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #10b981 35%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--ap-10b981)) 35%, transparent);
   margin-bottom: 20px;
   font-size: 13px;
   font-weight: 500;
 }
 
 .error-message {
-  background: color-mix(in srgb, #ef4444 12%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, rgb(var(--ap-ef4444)) 12%, transparent);
+  color: rgb(var(--ap-ef4444));
   padding: 14px 18px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--ap-ef4444)) 35%, transparent);
   margin-bottom: 20px;
   font-size: 13px;
   font-weight: 500;
@@ -987,4 +987,63 @@ onMounted(() => {
   font-weight: 400;
   color: var(--myst-ink-muted);
 }
+
+/* Light theme: hover/selection as accent washes (mixing the accent into the paper at
+   30-60% reads as a solid pink bar), and disabled buttons as a neutral fill instead of
+   a faded green that white text can't sit on. */
+:root[data-theme="parchment"] .back-button:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .user-item:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .user-item.selected {
+  background: var(--myst-wash-strong);
+}
+
+:root[data-theme="parchment"] .action-btn:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --ap-059669: 5 150 105;
+    --ap-10b981: 16 185 129;
+    --ap-3b82f6: 59 130 246;
+    --ap-60a5fa: 96 165 250;
+    --ap-8b5cf6: 139 92 246;
+    --ap-a78bfa: 167 139 250;
+    --ap-ec4899: 236 72 153;
+    --ap-ef4444: 239 68 68;
+    --ap-f472b6: 244 114 182;
+    --ap-f59e0b: 245 158 11;
+    --ap-f87171: 248 113 113;
+    --ap-fbbf24: 251 191 36;
+    --ap-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --ap-059669: 0 90 62;
+    --ap-10b981: 0 111 76;
+    --ap-3b82f6: 17 91 203;
+    --ap-60a5fa: 0 73 143;
+    --ap-8b5cf6: 114 62 215;
+    --ap-a78bfa: 85 51 155;
+    --ap-ec4899: 187 6 113;
+    --ap-ef4444: 195 5 30;
+    --ap-f472b6: 135 0 88;
+    --ap-f59e0b: 137 85 0;
+    --ap-f87171: 141 0 27;
+    --ap-fbbf24: 97 70 0;
+    --ap-ffffff: 23 22 28;
+}
+</style>
+

@@ -235,7 +235,7 @@ onMounted(() => {
   gap: 24px;
   align-items: baseline;
   padding: 17px 4px;
-  border-bottom: 1px solid rgba(200, 178, 115, 0.08);
+  border-bottom: 1px solid rgb(var(--th-c8b273) / 0.08);
 }
 
 .row-date {
@@ -262,7 +262,7 @@ onMounted(() => {
 }
 
 .row-type.income {
-  border-color: rgba(107, 207, 127, 0.3);
+  border-color: rgb(var(--th-6bcf7f) / 0.3);
   color: var(--myst-green-soft);
 }
 
@@ -323,7 +323,7 @@ onMounted(() => {
 }
 
 .ledger-state i {
-  color: rgba(200, 178, 115, 0.4);
+  color: rgb(var(--th-c8b273) / 0.4);
   font-size: 28px;
 }
 
@@ -382,3 +382,19 @@ onMounted(() => {
   }
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --th-6bcf7f: 107 207 127;
+    --th-c8b273: 200 178 115;
+}
+
+:root[data-theme="parchment"] {
+    --th-6bcf7f: 0 112 44;
+    --th-c8b273: 180 44 62;
+}
+</style>
+

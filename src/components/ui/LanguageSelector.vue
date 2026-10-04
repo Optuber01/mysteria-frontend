@@ -200,4 +200,9 @@ onBeforeUnmount(() => {
   opacity: 0;
   transform: translateY(-4px);
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .lang-option.active {
+  background: var(--myst-wash);
+}
 </style>

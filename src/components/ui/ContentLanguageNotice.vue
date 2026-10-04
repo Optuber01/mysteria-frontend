@@ -172,4 +172,19 @@ watch(currentLanguage, () => {
     font-size: 12.5px;
   }
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .lang-notice {
+  background: var(--myst-pop);
+  box-shadow: 0 18px 50px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .notice-dismiss {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .notice-dismiss:hover,
+:root[data-theme="parchment"] .notice-dismiss:focus-visible {
+  color: var(--myst-gold);
+}
 </style>

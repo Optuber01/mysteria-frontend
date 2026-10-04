@@ -797,4 +797,212 @@ useSeo(() => ({
     gap: 9px;
   }
 }
+/*
+ * Light theme (<html data-theme="parchment">). The rules above are the dark registry and
+ * stay as is; these only apply on paper, with the homepage's light palette (global
+ * --myst-* tokens): paper, ink, hairlines, the deepened neutral crimson where dark uses
+ * gold. Rank hues match the Pathways archive's light ones; glows are dropped.
+ */
+:root[data-theme="parchment"] .ascension-page {
+  --as-line-strong: rgba(28, 24, 36, .24);
+  background: var(--myst-bg);
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .ascension-page .registry-hero {
+  background: radial-gradient(circle at 50% 0, var(--myst-wash-strong), transparent 48%), var(--myst-bg);
+  border-bottom-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .ascension-page .registry-hero > p,
+:root[data-theme="parchment"] .ascension-page .archive-link,
+:root[data-theme="parchment"] .ascension-page .epoch-callout p,
+:root[data-theme="parchment"] .ascension-page .registry-totals,
+:root[data-theme="parchment"] .ascension-page .group-heading,
+:root[data-theme="parchment"] .ascension-page .card-words small,
+:root[data-theme="parchment"] .ascension-page .card-badge,
+:root[data-theme="parchment"] .ascension-page .seat-designation,
+:root[data-theme="parchment"] .ascension-page .seat-count,
+:root[data-theme="parchment"] .ascension-page .registry-footnote,
+:root[data-theme="parchment"] .ascension-page .registry-footnote i,
+:root[data-theme="parchment"] .ascension-page .registry-error {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .ascension-page .eyebrow,
+:root[data-theme="parchment"] .ascension-page .archive-link:hover,
+:root[data-theme="parchment"] .ascension-page .epoch-mark,
+:root[data-theme="parchment"] .ascension-page .epoch-callout h2,
+:root[data-theme="parchment"] .ascension-page .registry-totals b,
+:root[data-theme="parchment"] .ascension-page .group-heading b,
+:root[data-theme="parchment"] .ascension-page .card-identity:hover strong,
+:root[data-theme="parchment"] .ascension-page .sigil b,
+:root[data-theme="parchment"] .ascension-page .registry-error span,
+:root[data-theme="parchment"] .ascension-page .registry-error button {
+  color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .ascension-page .epoch-mark {
+  text-shadow: none;
+}
+
+/* Legend */
+:root[data-theme="parchment"] .ascension-page .legend-chip {
+  border-color: var(--myst-line);
+  background: var(--myst-surface);
+}
+
+:root[data-theme="parchment"] .ascension-page .legend-chip > b {
+  text-shadow: none;
+}
+
+:root[data-theme="parchment"] .ascension-page .legend-chip strong,
+:root[data-theme="parchment"] .ascension-page .card-words strong,
+:root[data-theme="parchment"] .ascension-page .registry-error h3 {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .ascension-page .legend-chip small {
+  opacity: 1;
+}
+
+/* Rank hues, deepened for paper: 3 blue, 2 violet, 1 burnt orange, 0 wine. */
+:root[data-theme="parchment"] .ascension-page .rank-3 {
+  color: #2f5687;
+}
+
+:root[data-theme="parchment"] .ascension-page .rank-2 {
+  color: #6a3db8;
+}
+
+:root[data-theme="parchment"] .ascension-page .rank-1 {
+  color: #a3470f;
+}
+
+:root[data-theme="parchment"] .ascension-page .rank-0 {
+  color: #9b1b52;
+}
+
+/* Epoch callout, toolbar */
+:root[data-theme="parchment"] .ascension-page .epoch-callout {
+  border-color: var(--myst-line-35);
+  background: radial-gradient(circle at 0 50%, var(--myst-wash-strong), transparent 46%), var(--myst-surface);
+}
+
+:root[data-theme="parchment"] .ascension-page .registry-totals i {
+  background: var(--as-line-strong);
+}
+
+:root[data-theme="parchment"] .ascension-page .group-heading {
+  border-bottom-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .ascension-page .card-skeleton {
+  background: linear-gradient(90deg, rgba(28, 24, 36, .04), rgba(28, 24, 36, .08), rgba(28, 24, 36, .04));
+  background-size: 200% 100%;
+}
+
+/* Cards */
+:root[data-theme="parchment"] .ascension-page .seat-card {
+  border-color: var(--myst-line);
+  background: var(--myst-surface);
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-card:hover {
+  border-color: var(--myst-line-40);
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-card.deity-claimed {
+  border-color: rgba(155, 27, 82, .45);
+  box-shadow: 0 0 0 1px rgba(155, 27, 82, .08), 0 8px 24px rgba(46, 36, 58, .1);
+}
+
+:root[data-theme="parchment"] .ascension-page .card-head {
+  border-bottom-color: var(--myst-line);
+  background: linear-gradient(135deg, var(--myst-wash), transparent 55%);
+}
+
+:root[data-theme="parchment"] .ascension-page .card-identity:focus-visible,
+:root[data-theme="parchment"] .ascension-page .registry-error button:focus-visible {
+  outline: 2px solid var(--myst-gold);
+  outline-offset: 2px;
+}
+
+:root[data-theme="parchment"] .ascension-page .sigil {
+  border-color: var(--myst-line);
+  background: var(--myst-bg);
+}
+
+:root[data-theme="parchment"] .ascension-page .sigil img {
+  filter: drop-shadow(0 1px 3px rgba(46, 36, 58, .2));
+}
+
+:root[data-theme="parchment"] .ascension-page .card-badge {
+  border-color: var(--myst-line);
+}
+
+:root[data-theme="parchment"] .ascension-page .card-badge[data-state="open"] {
+  border-color: rgba(23, 112, 58, .35);
+  color: var(--myst-green);
+}
+
+:root[data-theme="parchment"] .ascension-page .card-badge[data-state="contested"] {
+  border-color: var(--myst-line-40);
+  color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .ascension-page .card-badge[data-state="deity"] {
+  border-color: rgba(155, 27, 82, .5);
+  color: #9b1b52;
+  background: rgba(155, 27, 82, .07);
+  text-shadow: none;
+}
+
+/* Seat rows */
+:root[data-theme="parchment"] .ascension-page .seat-row + .seat-row {
+  border-top-color: var(--myst-line-10);
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-rank b,
+:root[data-theme="parchment"] .ascension-page .seat-row.full .seat-count {
+  text-shadow: none;
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-pips i {
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-pips i.filled {
+  border-color: currentColor;
+  box-shadow: none;
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-row.rank-0.full {
+  background: radial-gradient(circle at 100% 50%, rgba(155, 27, 82, .08), transparent 55%);
+}
+
+:root[data-theme="parchment"] .ascension-page .seat-row.full .seat-count {
+  color: currentColor;
+}
+
+/* Footnote, error */
+:root[data-theme="parchment"] .ascension-page .live-dot {
+  background: var(--myst-gold);
+  box-shadow: none;
+}
+
+:root[data-theme="parchment"] .ascension-page .registry-error {
+  border-color: var(--myst-line);
+  background: var(--myst-surface);
+}
+
+:root[data-theme="parchment"] .ascension-page .registry-error button {
+  border-color: var(--myst-line-40);
+}
+
+:root[data-theme="parchment"] .ascension-page .registry-error button:hover {
+  border-color: var(--myst-gold);
+  background: var(--myst-wash);
+  color: var(--myst-gold-soft);
+}
 </style>

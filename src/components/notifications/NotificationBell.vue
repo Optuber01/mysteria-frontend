@@ -165,6 +165,68 @@ onUnmounted(() => {
   border: 1px solid #080a14;
 }
 
+/* Light theme: a deeper red so the white count reads at 4.5:1 */
+:root[data-theme="parchment"] .notif-badge {
+  background: #c62828;
+  border-color: var(--myst-bg);
+}
+
+:root[data-theme="parchment"] .notif-ritual-trigger {
+  background: var(--myst-wash);
+  border-color: var(--myst-line-28);
+}
+
+:root[data-theme="parchment"] .notif-ritual-trigger:hover,
+:root[data-theme="parchment"] .notif-ritual-trigger.active,
+:root[data-theme="parchment"] .notif-item-cta:hover {
+  background: var(--myst-gold);
+  color: var(--myst-on-gold);
+}
+
+/* the dropdown as a paper sheet */
+:root[data-theme="parchment"] .notif-ritual-menu {
+  background: var(--myst-pop);
+  border-color: var(--myst-line-20);
+  box-shadow: 0 10px 40px var(--myst-shadow);
+}
+
+:root[data-theme="parchment"] .notif-menu-header {
+  border-bottom-color: var(--myst-line-14);
+}
+
+:root[data-theme="parchment"] .notif-menu-title,
+:root[data-theme="parchment"] .notif-item-text {
+  color: var(--myst-ink);
+}
+
+:root[data-theme="parchment"] .notif-empty,
+:root[data-theme="parchment"] .notif-item-date,
+:root[data-theme="parchment"] .notif-view-all {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .notif-spinner {
+  border-color: var(--myst-line-20);
+  border-top-color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .notif-item {
+  border-bottom-color: var(--myst-line-10);
+}
+
+:root[data-theme="parchment"] .notif-item:hover {
+  background: var(--myst-hover);
+}
+
+:root[data-theme="parchment"] .notif-item.unread,
+:root[data-theme="parchment"] .notif-item-cta {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .notif-item-cta {
+  border-color: var(--myst-line-35);
+}
+
 .notif-ritual-menu {
   position: absolute;
   top: calc(100% + 12px);

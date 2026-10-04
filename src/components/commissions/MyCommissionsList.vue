@@ -105,7 +105,7 @@ onMounted(load);
 .list-header {
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgb(var(--mcl-ffffff) / 0.05);
 }
 
 .list-eyebrow {
@@ -129,12 +129,12 @@ onMounted(load);
 .state-block {
   padding: 40px 0;
   text-align: center;
-  color: #666;
+  color: rgb(var(--mcl-666666));
 }
 
 .state-block.empty .empty-icon {
   font-size: 26px;
-  color: #444;
+  color: rgb(var(--mcl-444444));
   margin-bottom: 12px;
   display: block;
 }
@@ -143,7 +143,7 @@ onMounted(load);
   width: 28px;
   height: 28px;
   margin: 0 auto;
-  border: 2px solid rgba(200, 178, 115, 0.2);
+  border: 2px solid rgb(var(--mcl-c8b273) / 0.2);
   border-top-color: var(--myst-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -162,8 +162,8 @@ onMounted(load);
 
 .commission-entry {
   position: relative;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgb(var(--mcl-ffffff) / 0.02);
+  border: 1px solid rgb(var(--mcl-ffffff) / 0.05);
 }
 
 .entry-indicator {
@@ -172,27 +172,27 @@ onMounted(load);
   left: 0;
   bottom: 0;
   width: 3px;
-  background: #555;
+  background: rgb(var(--mcl-555555));
 }
 
 .indicator-pending_review {
-  background: #fbbf24;
+  background: rgb(var(--mcl-fbbf24));
 }
 
 .indicator-approved {
-  background: #34d399;
+  background: rgb(var(--mcl-34d399));
 }
 
 .indicator-rejected {
-  background: #f87171;
+  background: rgb(var(--mcl-f87171));
 }
 
 .indicator-rescope_required {
-  background: #60a5fa;
+  background: rgb(var(--mcl-60a5fa));
 }
 
 .indicator-completed {
-  background: #a78bfa;
+  background: rgb(var(--mcl-a78bfa));
 }
 
 .entry-main {
@@ -212,8 +212,8 @@ onMounted(load);
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #888;
+  background: rgb(var(--mcl-ffffff) / 0.05);
+  color: rgb(var(--mcl-888888));
 }
 
 .entry-meta {
@@ -221,7 +221,7 @@ onMounted(load);
   flex-wrap: wrap;
   gap: 16px;
   font-size: 12px;
-  color: #666;
+  color: rgb(var(--mcl-666666));
   margin-bottom: 4px;
 }
 
@@ -232,13 +232,13 @@ onMounted(load);
 .entry-details {
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.05);
+  border-top: 1px dashed rgb(var(--mcl-ffffff) / 0.05);
 }
 
 .details-trigger {
   background: none;
   border: none;
-  color: #666;
+  color: rgb(var(--mcl-666666));
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -257,9 +257,9 @@ onMounted(load);
 .staff-notes-text {
   margin: 12px 0 0;
   padding: 12px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgb(var(--mcl-000000) / 0.3);
   font-size: 12px;
-  color: #ccc;
+  color: rgb(var(--mcl-cccccc));
   line-height: 1.6;
 }
 
@@ -293,9 +293,9 @@ onMounted(load);
 }
 
 .view-details-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa;
+  background: rgb(var(--mcl-ffffff) / 0.03);
+  border: 1px solid rgb(var(--mcl-ffffff) / 0.1);
+  color: rgb(var(--mcl-aaaaaa));
 }
 
 .view-details-btn:hover {
@@ -304,13 +304,60 @@ onMounted(load);
 }
 
 .resubmit-btn {
-  background: rgba(96, 165, 250, 0.1);
-  border: 1px solid rgba(96, 165, 250, 0.3);
-  color: #60a5fa;
+  background: rgb(var(--mcl-60a5fa) / 0.1);
+  border: 1px solid rgb(var(--mcl-60a5fa) / 0.3);
+  color: rgb(var(--mcl-60a5fa));
 }
 
 .resubmit-btn:hover {
-  background: #60a5fa;
-  color: #05070a;
+  background: rgb(var(--mcl-60a5fa));
+  color: rgb(var(--mcl-05070a));
+}
+
+/* Light theme: the faded eyebrow would drop under 4.5:1 on the paper. */
+:root[data-theme="parchment"] .list-eyebrow {
+  opacity: 1;
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --mcl-000000: 0 0 0;
+    --mcl-05070a: 5 7 10;
+    --mcl-34d399: 52 211 153;
+    --mcl-444444: 68 68 68;
+    --mcl-555555: 85 85 85;
+    --mcl-60a5fa: 96 165 250;
+    --mcl-666666: 102 102 102;
+    --mcl-888888: 136 136 136;
+    --mcl-a78bfa: 167 139 250;
+    --mcl-aaaaaa: 170 170 170;
+    --mcl-c8b273: 200 178 115;
+    --mcl-cccccc: 204 204 204;
+    --mcl-f87171: 248 113 113;
+    --mcl-fbbf24: 251 191 36;
+    --mcl-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --mcl-000000: 255 255 255;
+    --mcl-05070a: 255 255 255;
+    --mcl-34d399: 0 111 77;
+    --mcl-444444: 120 118 128;
+    --mcl-555555: 85 83 94;
+    --mcl-60a5fa: 0 73 177;
+    --mcl-666666: 85 83 94;
+    --mcl-888888: 85 83 94;
+    --mcl-a78bfa: 108 77 182;
+    --mcl-aaaaaa: 85 83 94;
+    --mcl-c8b273: 180 44 62;
+    --mcl-cccccc: 23 22 28;
+    --mcl-f87171: 178 48 56;
+    --mcl-fbbf24: 124 91 0;
+    --mcl-ffffff: 23 22 28;
+}
+</style>
+

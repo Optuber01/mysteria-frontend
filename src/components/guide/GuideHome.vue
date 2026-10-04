@@ -935,4 +935,35 @@ async function focusSearch() {
     text-align: center;
   }
 }
+
+/* ──────────────────── LIGHT THEME ──────────────────── */
+:root[data-theme="parchment"] .hero-glow {
+  background: radial-gradient(ellipse 60% 70% at 78% 20%, rgba(180, 44, 62, 0.05), transparent 65%);
+}
+
+:root[data-theme="parchment"] .checklist-step.done,
+:root[data-theme="parchment"] .search-count,
+:root[data-theme="parchment"] .topic-icon {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .step-number {
+  color: var(--myst-gold);
+}
+
+:root[data-theme="parchment"] .checklist-step.done .step-title {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .search-bar {
+  background: var(--myst-bg-2);
+}
+
+:root[data-theme="parchment"] .search-bar > i {
+  color: rgba(180, 44, 62, 0.7);
+}
+
+:root[data-theme="parchment"] .topic-arrow {
+  color: rgba(180, 44, 62, 0.55);
+}
 </style>

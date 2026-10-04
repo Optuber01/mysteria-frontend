@@ -340,7 +340,7 @@ onMounted(loadProfile);
 }
 
 .no-beyonder i {
-  color: rgba(200, 178, 115, 0.45);
+  color: rgb(var(--pv-c8b273) / 0.45);
   font-size: 28px;
 }
 
@@ -444,7 +444,7 @@ onMounted(loadProfile);
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  background: rgba(200, 178, 115, 0.08);
+  background: rgb(var(--pv-c8b273) / 0.08);
   border: 1px solid var(--myst-line-20);
   color: var(--myst-gold);
 }
@@ -508,3 +508,17 @@ onMounted(loadProfile);
   }
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --pv-c8b273: 200 178 115;
+}
+
+:root[data-theme="parchment"] {
+    --pv-c8b273: 180 44 62;
+}
+</style>
+

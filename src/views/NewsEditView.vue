@@ -832,13 +832,13 @@ const cancelEdit = () => {
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #f59e0b;
+  color: rgb(var(--ne-f59e0b));
 }
 
 .dirty-dot {
   width: 7px;
   height: 7px;
-  background: #f59e0b;
+  background: rgb(var(--ne-f59e0b));
   border-radius: 50%;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -875,8 +875,8 @@ const cancelEdit = () => {
   gap: 16px;
   padding: 14px 20px;
   margin-bottom: 20px;
-  background: color-mix(in srgb, #f59e0b 10%, var(--myst-bg-2));
-  border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent);
+  background: color-mix(in srgb, rgb(var(--ne-f59e0b)) 10%, var(--myst-bg-2));
+  border: 1px solid color-mix(in srgb, rgb(var(--ne-f59e0b)) 40%, transparent);
   border-radius: 10px;
   flex-wrap: wrap;
 }
@@ -891,7 +891,7 @@ const cancelEdit = () => {
 }
 
 .draft-banner-text svg {
-  color: #f59e0b;
+  color: rgb(var(--ne-f59e0b));
   flex-shrink: 0;
 }
 
@@ -902,7 +902,7 @@ const cancelEdit = () => {
 
 .draft-restore-btn {
   padding: 6px 14px;
-  background: #f59e0b;
+  background: rgb(var(--ne-f59e0b));
   color: white;
   border: none;
   border-radius: 6px;
@@ -913,7 +913,7 @@ const cancelEdit = () => {
 }
 
 .draft-restore-btn:hover {
-  background: #d97706;
+  background: rgb(var(--ne-d97706));
 }
 
 .draft-dismiss-btn {
@@ -982,22 +982,22 @@ const cancelEdit = () => {
 }
 
 .pin-btn {
-  background: #f59e0b !important;
+  background: rgb(var(--ne-f59e0b)) !important;
   color: white !important;
 }
 
 .pin-btn:hover {
-  background: #d97706 !important;
+  background: rgb(var(--ne-d97706)) !important;
   transform: translateY(-1px);
 }
 
 .delete-btn {
-  background: #ef4444 !important;
+  background: rgb(var(--ne-ef4444)) !important;
   color: white !important;
 }
 
 .delete-btn:hover {
-  background: #dc2626 !important;
+  background: rgb(var(--ne-dc2626)) !important;
   transform: translateY(-1px);
 }
 
@@ -1130,17 +1130,17 @@ const cancelEdit = () => {
 .form-group input.error,
 .form-group select.error,
 .form-group textarea.error {
-  border-color: #ef4444;
+  border-color: rgb(var(--ne-ef4444));
 }
 
 .form-group input.error:focus,
 .form-group select.error:focus,
 .form-group textarea.error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 0 3px rgb(var(--ne-ef4444) / 0.2);
 }
 
 .field-error {
-  color: #ef4444;
+  color: rgb(var(--ne-ef4444));
   font-size: 12px;
   font-weight: 500;
   margin-top: 4px;
@@ -1261,7 +1261,7 @@ const cancelEdit = () => {
 }
 
 .save-btn {
-  background: #10b981;
+  background: rgb(var(--ne-10b981));
   color: white;
   padding: 14px 28px;
   border: none;
@@ -1276,9 +1276,9 @@ const cancelEdit = () => {
 }
 
 .save-btn:hover:not(:disabled) {
-  background: #059669;
+  background: rgb(var(--ne-059669));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgb(var(--ne-10b981) / 0.3);
 }
 
 .save-btn:disabled {
@@ -1309,7 +1309,7 @@ const cancelEdit = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #3b82f6;
+  background: rgb(var(--ne-3b82f6));
   color: white;
   padding: 14px 28px;
   border: none;
@@ -1321,9 +1321,9 @@ const cancelEdit = () => {
 }
 
 .preview-btn:hover:not(:disabled) {
-  background: #2563eb;
+  background: rgb(var(--ne-2563eb));
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgb(var(--ne-3b82f6) / 0.3);
 }
 
 .preview-btn:disabled {
@@ -1361,7 +1361,7 @@ const cancelEdit = () => {
 .button-spinner {
   width: 14px;
   height: 14px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1.5px solid rgb(var(--ne-ffffff) / 0.3);
   border-top: 1.5px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -1378,22 +1378,22 @@ const cancelEdit = () => {
 }
 
 .success {
-  background: color-mix(in srgb, #10b981 15%, transparent);
-  color: #10b981;
+  background: color-mix(in srgb, rgb(var(--ne-10b981)) 15%, transparent);
+  color: rgb(var(--ne-10b981));
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #10b981 40%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--ne-10b981)) 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
   font-weight: 500;
 }
 
 .error-msg {
-  background: color-mix(in srgb, #ef4444 15%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, rgb(var(--ne-ef4444)) 15%, transparent);
+  color: rgb(var(--ne-ef4444));
   padding: 16px 20px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #ef4444 40%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--ne-ef4444)) 40%, transparent);
   margin-bottom: 24px;
   font-size: 14px;
   font-weight: 500;
@@ -1483,7 +1483,7 @@ const cancelEdit = () => {
 .preview-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgb(var(--ne-000000) / 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1605,8 +1605,8 @@ const cancelEdit = () => {
 }
 
 .preview-status.published {
-  background: color-mix(in srgb, #10b981 20%, transparent);
-  color: #10b981;
+  background: color-mix(in srgb, rgb(var(--ne-10b981)) 20%, transparent);
+  color: rgb(var(--ne-10b981));
 }
 
 .preview-status.draft {
@@ -1615,8 +1615,8 @@ const cancelEdit = () => {
 }
 
 .preview-pinned {
-  background: color-mix(in srgb, #f59e0b 20%, transparent);
-  color: #f59e0b;
+  background: color-mix(in srgb, rgb(var(--ne-f59e0b)) 20%, transparent);
+  color: rgb(var(--ne-f59e0b));
 }
 
 .preview-short-description {
@@ -1764,4 +1764,54 @@ const cancelEdit = () => {
   color: var(--myst-gold);
   font-weight: 600;
 }
+
+/* Light theme: the back button's hover as an accent wash, the disabled save button as
+   a neutral fill (white on half-muted grey drops under 3:1), and the editor's hints and
+   stats at full muted ink. */
+:root[data-theme="parchment"] .back-button:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .save-btn:disabled {
+  opacity: 1;
+  background: rgba(28, 24, 36, 0.1);
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .kb-hint,
+:root[data-theme="parchment"] .content-stats {
+  color: var(--myst-ink-muted);
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --ne-000000: 0 0 0;
+    --ne-059669: 5 150 105;
+    --ne-10b981: 16 185 129;
+    --ne-2563eb: 37 99 235;
+    --ne-3b82f6: 59 130 246;
+    --ne-d97706: 217 119 6;
+    --ne-dc2626: 220 38 38;
+    --ne-ef4444: 239 68 68;
+    --ne-f59e0b: 245 158 11;
+    --ne-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --ne-000000: 255 255 255;
+    --ne-059669: 0 90 62;
+    --ne-10b981: 0 111 76;
+    --ne-2563eb: 14 70 170;
+    --ne-3b82f6: 17 91 203;
+    --ne-d97706: 110 64 0;
+    --ne-dc2626: 150 0 22;
+    --ne-ef4444: 195 5 30;
+    --ne-f59e0b: 137 85 0;
+    --ne-ffffff: 23 22 28;
+}
+</style>
+

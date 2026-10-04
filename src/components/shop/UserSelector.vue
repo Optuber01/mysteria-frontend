@@ -147,10 +147,10 @@ const handleUserSelect = (userId: string) => {
 .ritual-search-input {
   width: 100%;
   padding: 14px 44px 14px 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgb(var(--us-ffffff) / 0.02);
+  border: 1px solid rgb(var(--us-ffffff) / 0.1);
   border-radius: 4px;
-  color: #fff;
+  color: rgb(var(--us-ffffff));
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   transition: all 0.3s ease;
@@ -159,13 +159,13 @@ const handleUserSelect = (userId: string) => {
 .ritual-search-input:focus {
   outline: none;
   border-color: var(--myst-gold);
-  background: rgba(200, 178, 115, 0.05);
-  box-shadow: 0 0 20px rgba(200, 178, 115, 0.1);
+  background: rgb(var(--us-c8b273) / 0.05);
+  box-shadow: 0 0 20px rgb(var(--us-c8b273) / 0.1);
 }
 
 .ritual-search-input.is-selected {
-  border-color: rgba(74, 222, 128, 0.3);
-  color: #4ade80;
+  border-color: rgb(var(--us-4ade80) / 0.3);
+  color: rgb(var(--us-4ade80));
 }
 
 .ritual-search-icon {
@@ -173,12 +173,12 @@ const handleUserSelect = (userId: string) => {
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #444;
+  color: rgb(var(--us-444444));
   font-size: 14px;
 }
 
 .success-ritual {
-  color: #4ade80;
+  color: rgb(var(--us-4ade80));
 }
 
 .ritual-results {
@@ -188,8 +188,8 @@ const handleUserSelect = (userId: string) => {
   right: 0;
   max-height: 240px;
   overflow-y: auto;
-  background: #080a14;
-  border: 1px solid rgba(200, 178, 115, 0.2);
+  background: rgb(var(--us-080a14));
+  border: 1px solid rgb(var(--us-c8b273) / 0.2);
   border-radius: 4px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
   z-index: 1000;
@@ -199,7 +199,7 @@ const handleUserSelect = (userId: string) => {
   padding: 14px 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgb(var(--us-ffffff) / 0.03);
 }
 
 .ritual-user-option:last-child {
@@ -207,11 +207,11 @@ const handleUserSelect = (userId: string) => {
 }
 
 .ritual-user-option:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgb(var(--us-ffffff) / 0.03);
 }
 
 .ritual-user-option.selected {
-  background: rgba(200, 178, 115, 0.05);
+  background: rgb(var(--us-c8b273) / 0.05);
   border-left: 2px solid var(--myst-gold);
 }
 
@@ -227,7 +227,7 @@ const handleUserSelect = (userId: string) => {
   gap: 8px;
   font-family: 'Playfair Display', serif;
   font-size: 16px;
-  color: #fff;
+  color: rgb(var(--us-ffffff));
 }
 
 .gold-seal {
@@ -238,7 +238,7 @@ const handleUserSelect = (userId: string) => {
 .user-ritual-desc {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: #555;
+  color: rgb(var(--us-555555));
 }
 
 .ritual-no-results {
@@ -246,7 +246,7 @@ const handleUserSelect = (userId: string) => {
   text-align: center;
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  color: #444;
+  color: rgb(var(--us-444444));
 }
 
 .ritual-error {
@@ -254,7 +254,7 @@ const handleUserSelect = (userId: string) => {
   align-items: center;
   gap: 8px;
   margin-top: 12px;
-  color: #ff5252;
+  color: rgb(var(--us-ff5252));
   font-size: 13px;
 }
 
@@ -271,3 +271,29 @@ const handleUserSelect = (userId: string) => {
   transform: translateY(-10px);
 }
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --us-080a14: 8 10 20;
+    --us-444444: 68 68 68;
+    --us-4ade80: 74 222 128;
+    --us-555555: 85 85 85;
+    --us-c8b273: 200 178 115;
+    --us-ff5252: 255 82 82;
+    --us-ffffff: 255 255 255;
+}
+
+:root[data-theme="parchment"] {
+    --us-080a14: 255 255 255;
+    --us-444444: 120 118 128;
+    --us-4ade80: 0 112 54;
+    --us-555555: 85 83 94;
+    --us-c8b273: 180 44 62;
+    --us-ff5252: 196 1 33;
+    --us-ffffff: 23 22 28;
+}
+</style>
+

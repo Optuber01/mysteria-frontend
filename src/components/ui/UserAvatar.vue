@@ -130,4 +130,29 @@ const handleError = () => {
   transform: scale(1.05);
   transition: all 0.3s ease;
 }
+
+/* Light theme */
+:root[data-theme="parchment"] .avatar-ritual-frame {
+  box-shadow: inset 0 0 0 2px var(--myst-bg);
+}
+
+:root[data-theme="parchment"] .avatar-img {
+  background: #e4e1da;
+}
+
+:root[data-theme="parchment"] .frame-overlay {
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.18);
+}
+
+:root[data-theme="parchment"] .avatar-nickname {
+  color: var(--myst-ink-muted);
+}
+
+:root[data-theme="parchment"] .has-glow .avatar-ritual-frame {
+  box-shadow: 0 0 16px rgba(180, 44, 62, 0.22);
+}
+
+:root[data-theme="parchment"] .has-glow:hover .avatar-ritual-frame {
+  box-shadow: 0 0 24px rgba(180, 44, 62, 0.32);
+}
 </style>

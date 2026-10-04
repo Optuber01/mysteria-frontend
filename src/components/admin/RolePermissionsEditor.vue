@@ -238,7 +238,7 @@ onMounted(loadData);
 .rpe-state--error {
   flex-direction: column;
   gap: 16px;
-  color: #ef4444;
+  color: rgb(var(--rpe-ef4444));
 }
 
 .rpe-spinner {
@@ -434,7 +434,7 @@ onMounted(loadData);
 }
 
 .rpe-status-saved {
-  color: #10b981;
+  color: rgb(var(--rpe-10b981));
   font-weight: 600;
 }
 
@@ -539,12 +539,43 @@ onMounted(loadData);
 
 /* Save error */
 .rpe-save-error {
-  background: color-mix(in srgb, #ef4444 12%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, rgb(var(--rpe-ef4444)) 12%, transparent);
+  color: rgb(var(--rpe-ef4444));
   padding: 12px 16px;
   border-radius: 8px;
-  border: 1px solid color-mix(in srgb, #ef4444 35%, transparent);
+  border: 1px solid color-mix(in srgb, rgb(var(--rpe-ef4444)) 35%, transparent);
   font-size: 13px;
   font-weight: 500;
 }
+
+/* Light theme: hover/selection as accent washes (mixing the accent into the paper at
+   40-70% reads as a solid pink bar), and the permission keys at full strength. */
+:root[data-theme="parchment"] .rpe-role-btn:hover,
+:root[data-theme="parchment"] .rpe-perm-item:hover {
+  background: var(--myst-wash);
+}
+
+:root[data-theme="parchment"] .rpe-role-btn.active {
+  background: var(--myst-wash-strong);
+}
+
+:root[data-theme="parchment"] .rpe-perm-full {
+  opacity: 1;
+}
 </style>
+
+<style>
+/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
+   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
+   re-points them. Global so teleported content (modals) resolves them too. */
+:root {
+    --rpe-10b981: 16 185 129;
+    --rpe-ef4444: 239 68 68;
+}
+
+:root[data-theme="parchment"] {
+    --rpe-10b981: 0 111 76;
+    --rpe-ef4444: 195 5 30;
+}
+</style>
+
