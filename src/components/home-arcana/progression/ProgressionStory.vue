@@ -5,12 +5,6 @@
     class="progression"
     aria-labelledby="progression-title"
   >
-    <!-- Backlund's roofs in three depths: the room's top edge, rising over the hero's bottom as the room comes up. -->
-    <div class="progression__roofs" :style="dress.roofs" aria-hidden="true">
-      <i class="progression__roof progression__roof--far" />
-      <i class="progression__roof progression__roof--mid" />
-      <i class="progression__roof progression__roof--near" />
-    </div>
     <div class="progression__sticky">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
@@ -40,7 +34,7 @@
         <h2 id="progression-title">{{ tp('title') }}</h2>
       </header>
 
-      <div class="progression__layout" :class="{ 'is-leaving': copyLeaving }" :style="layoutStyle">
+      <div class="progression__layout" :style="layoutStyle">
         <!-- Outgoing and incoming copy share one grid cell and cross over. -->
         <div class="chapter-copy-slot" :style="copyStyle">
           <Transition name="chapter-copy">
@@ -119,7 +113,7 @@
         </div>
       </div>
 
-      <nav class="progression-nav" :class="{ 'is-leaving': railLeaving }" :aria-label="tp('navLabel')">
+      <nav class="progression-nav" :aria-label="tp('navLabel')">
         <i class="progression-nav__line" aria-hidden="true"><b :style="{ transform: `scaleX(${progress.toFixed(4)})` }" /></i>
         <button
           v-for="(chapter, index) in CHAPTERS"
@@ -134,9 +128,6 @@
           <em v-if="activeChapterIndex > index" class="arc-sr">{{ tp('navCompleted') }}</em>
         </button>
       </nav>
-
-      <!-- The way out: once the story has ended, the room dissolves into the page it opens onto. -->
-      <i class="progression__exit" :style="exitStyle" aria-hidden="true" />
     </div>
 
     <!-- Narrow, short and reduced-motion screens: the same story as one list. -->
@@ -370,7 +361,6 @@ const DRESS_VARS = {
   dread: ['--risk', '--thump', '--blackout', '--stand-x', '--stand-y'],
   burst: ['--flash', '--stand-x', '--stand-y'],
   heading: ['--entry', '--journey'],
-  roofs: ['--entry'],
 } as const;
 type DressLayer = keyof typeof DRESS_VARS;
 const dress = computed(() => {
@@ -394,12 +384,6 @@ const layoutStyle = computed(() => ({ opacity: clamp01((progress.value - 0.006) 
 const copyStyle = computed(() => {
   const k = clamp01((progress.value - 0.022) * 36);
   return { opacity: k.toFixed(4), transform: k < 1 ? `translate3d(0, ${((1 - k) * 16).toFixed(2)}px, 0)` : 'none' };
-});
-/* The page's own colour over the whole room at the very end (one opacity), so the room has no bottom edge. */
-const exitProgress = ref(0);
-const exitStyle = computed(() => {
-  const k = exitProgress.value;
-  return { opacity: (k * k * (3 - 2 * k)).toFixed(4), visibility: k <= 0.001 ? 'hidden' : 'visible' } as const;
 });
 
 /* ---------------- inspector plumbing ---------------- */
@@ -443,6 +427,8 @@ function clearExpiredInspector(next: number) {
  */
 let sectionTop = 0;
 let sectionHeight = 0;
+/** The section's bottom padding: the room's foot, where it fades into the page (never pinned). */
+let sectionFoot = 0;
 let pageObserver: ResizeObserver | null = null;
 function measureSection() {
   const section = sectionRef.value;
@@ -450,6 +436,7 @@ function measureSection() {
   const rect = section.getBoundingClientRect();
   sectionTop = rect.top + scrollY;
   sectionHeight = rect.height;
+  sectionFoot = parseFloat(getComputedStyle(section).paddingBottom) || 0;
 }
 function onResize() {
   measureSection();
@@ -457,30 +444,24 @@ function onResize() {
 }
 /*
  * The pinned scroll is 2.8 viewports of story plus the voices' dwell (the section's
- * min-height); storyAt spends the dwell inside the voices, so each line can be read.
- * The story's clock starts `lead` px before the pin, while the room is still rising
- * (the book falls in and the first chapter's copy arrives with the heading, so the way
- * in is never an empty room), and it ends `tail` px before the pin lets go: that last
- * stretch holds the awakening, then dissolves the room into the page over one wheel
- * step (exitProgress). The next section is pulled up over the room's last OVERLAP
- * screens (ArcanaHome); the dissolve is done just as that section's head (one section
- * pad, about HEAD screens, below its top) comes into view: no edge, and no empty page.
+ * min-height, less its foot); storyAt spends the dwell inside the voices, so each raving
+ * can be read. The way in is the room rising out of the hero (`lead`, from the moment its
+ * top crosses the bottom of the window until it pins): it plays the story up to
+ * LEAD_TO, so the heading, the first chapter and the falling book come up with the room
+ * and it is never an empty room. The story ends `tail` px before the pin lets go: that
+ * stretch holds the finished awakening; then the room scrolls away over its foot, which
+ * fades into the page the next section opens on (no dissolve, no empty screen).
  */
-const LEAD = 0.5;
-const TAIL = 0.5;
-const FADE = 0.14;
-const OVERLAP = 0.35;
-const HEAD = 0.1;
-function scrollRange(height = sectionHeight) {
-  const pin = Math.max(1, height - innerHeight);
+const LEAD = 0.85;
+const LEAD_TO = 0.16;
+const TAIL = 0.42;
+function scrollRange(height = sectionHeight, foot = sectionFoot) {
+  const pin = Math.max(1, height - foot - innerHeight);
   const dwell = Math.max(0, Math.min(pin - 1, pin - innerHeight * 2.8));
   const lead = innerHeight * LEAD;
   const tail = Math.min(innerHeight * TAIL, pin * 0.2);
-  return { range: Math.max(1, pin + lead - tail), dwell, lead, tail, pin };
+  return { range: Math.max(1, pin + lead - tail), dwell, lead, leadTo: LEAD_TO, tail, pin };
 }
-/* the copy and the rail step out as the room starts to dissolve (no pale ghost text on the page colour) */
-const railLeaving = computed(() => exitProgress.value > 0);
-const copyLeaving = railLeaving;
 function update() {
   if (!visible.value || !sectionRef.value || frame) return;
   frame = requestAnimationFrame(() => {
@@ -489,11 +470,9 @@ function update() {
     const top = sectionTop - scrollY;
     entryProgress.value = clamp01(1 - Math.max(0, top) / innerHeight);
     if (reducedMotion.value) return;
-    const { range, dwell, lead, pin } = scrollRange();
-    const next = storyAt(Math.max(0, lead - top), range, dwell);
+    const pace = scrollRange();
+    const next = storyAt(pace.lead - top, pace);
     progress.value = next;
-    const fade = innerHeight * FADE;
-    exitProgress.value = clamp01((-top - (pin - innerHeight * (OVERLAP - HEAD) - fade)) / fade);
     clearExpiredInspector(next);
   });
 }
@@ -503,10 +482,10 @@ function goToChapter(index: number) {
   if (!section || !chapter) return;
   clearDetail();
   const rect = section.getBoundingClientRect();
-  const { range, dwell, lead } = scrollRange(rect.height);
+  const pace = scrollRange(rect.height, parseFloat(getComputedStyle(section).paddingBottom) || 0);
   const sectionTop = rect.top + scrollY;
   const maxScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
-  const target = range > 1 ? sectionTop - lead + scrollAt(chapter.landing, range, dwell) : sectionTop;
+  const target = pace.range > 1 ? sectionTop - pace.lead + scrollAt(chapter.landing, pace) : sectionTop;
   const destination = Math.round(Math.min(maxScroll, Math.max(sectionTop, target)));
   scrollTo({ top: destination, behavior: reducedMotion.value ? 'instant' : 'smooth' });
 }
@@ -587,78 +566,62 @@ onUnmounted(() => {
   --top: calc(var(--site-header-stack, 106px) + clamp(14px, 3vh, 36px));
   position: relative;
   /* 2.8 viewports of story, plus the voices' dwell (see scrollRange) */
-  min-height: calc(380svh + max(760px, 84svh));
+  min-height: calc(380svh + max(1160px, 116svh));
   color: var(--arc-ink);
   background: var(--arc-bg);
   isolation: isolate;
 }
 
 /*
- * The room's top edge is Backlund seen from above the brewery: three bands of blocky roofs,
- * each a step nearer and darker, the nearest one the room's own colour. They rise out of the
- * room's top as the story enters, the far roofs first, over the strip the hero keeps free
- * for them (--roof-h): the hero's sky deepens into the room roof by roof instead of
- * meeting it at one hard edge. The strip clips them, so a band still below its line is
- * never seen inside the room. Transform only; each band is its own layer.
+ * The way in and the way out (the pinned story only). The room has no edges: its top is
+ * see-through and deepens into the room colour over --room-in, over the hero's night scene,
+ * which runs on under it (HeroNightScene's tail), so the city sinks into the brewery in
+ * one picture; the brewery photo and the room's shading fade in over the same stretch.
+ * Its foot (the section's bottom padding, which the pinned room never covers) deepens the
+ * other way, into the page the next section opens on. Eased stops (smoothstep), so neither
+ * reads as a band. Static gradients: they scroll with the page and cost nothing per frame.
  */
-.progression__roofs {
-  --roof-far: color-mix(in oklab, var(--acc) 14%, #25232b);
-  --roof-mid: color-mix(in oklab, var(--acc) 7%, #17161c);
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  bottom: calc(100% - 1px);
-  left: 0;
-  height: var(--roof-h, 120px);
-  overflow: hidden;
-  pointer-events: none;
-}
+@media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+  .progression {
+    --room-in: clamp(300px, 46vh, 520px);
+    --room-photo-in: calc(var(--room-in) * .5);
+    min-height: calc(380svh + max(1160px, 116svh) + var(--room-foot, 200px));
+    padding-bottom: var(--room-foot, 200px);
+    background: linear-gradient(180deg,
+        transparent 0,
+        color-mix(in srgb, var(--arc-bg) 10.4%, transparent) calc(var(--room-in) * .2),
+        color-mix(in srgb, var(--arc-bg) 35.2%, transparent) calc(var(--room-in) * .4),
+        color-mix(in srgb, var(--arc-bg) 64.8%, transparent) calc(var(--room-in) * .6),
+        color-mix(in srgb, var(--arc-bg) 89.6%, transparent) calc(var(--room-in) * .8),
+        var(--arc-bg) var(--room-in),
+        var(--arc-bg) calc(100% - var(--room-foot, 200px)),
+        color-mix(in srgb, var(--arc-bg) 89.6%, var(--arc-page)) calc(100% - var(--room-foot, 200px) * .8),
+        color-mix(in srgb, var(--arc-bg) 64.8%, var(--arc-page)) calc(100% - var(--room-foot, 200px) * .6),
+        color-mix(in srgb, var(--arc-bg) 35.2%, var(--arc-page)) calc(100% - var(--room-foot, 200px) * .4),
+        color-mix(in srgb, var(--arc-bg) 10.4%, var(--arc-page)) calc(100% - var(--room-foot, 200px) * .2),
+        var(--arc-page) 100%);
+  }
 
-/* on paper the far roofs sit in the morning haze, the nearer ones darken toward the room */
-:root[data-theme="parchment"] .progression__roofs {
-  --roof-far: color-mix(in oklab, var(--arc-bg) 22%, var(--arc-page, #efede8));
-  --roof-mid: color-mix(in oklab, var(--arc-bg) 52%, var(--arc-page, #efede8));
-  --roof-sky: var(--arc-page, #efede8);
-}
+  /* on paper the dark comes in over a shorter stretch, so the heading never sits on grey */
+  :root[data-theme="parchment"] .progression {
+    --room-in: clamp(170px, 24vh, 240px);
+    --room-photo-in: calc(var(--room-in) * 1.3);
+  }
 
-.progression__roof {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  -webkit-mask: var(--roof-shape) 0 100% / auto 100% repeat-x;
-  mask: var(--roof-shape) 0 100% / auto 100% repeat-x;
-  transform: translate3d(0, calc((1 - var(--k)) * 101%), 0);
-  will-change: transform;
-}
+  /* (the section paints the room's colour, edges included; outranks the base rule below) */
+  .progression .progression__sticky {
+    background: transparent;
+  }
 
-.progression__roof--far {
-  --k: clamp(0, calc((var(--entry) - 0.01) * 4.2), 1);
-  --roof-shape: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%204400%20220%22%20width%3D%224400%22%20height%3D%22220%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0%20220%20L0%20150%20L0%20142%20L8%20142%20L8%20134%20L16%20134%20L16%20126%20L24%20126%20L24%20118%20L32%20118%20L32%20110%20L48%20110%20L48%20118%20L56%20118%20L56%20126%20L64%20126%20L64%20134%20L72%20134%20L72%20142%20L80%20142%20L80%20150%20L88%20150%20L88%20134%20L96%20134%20L96%20150%20L112%20150%20L120%20150%20L120%20102%20L120%2086%20L124%2086%20L124%2070%20L128%2070%20L128%2046%20L136%2046%20L136%2070%20L140%2070%20L140%2086%20L144%2086%20L144%20102%20L144%20150%20L176%20150%20L208%20150%20L208%20134%20L216%20134%20L216%20150%20L272%20150%20L272%20118%20L280%20118%20L280%20102%20L288%20102%20L288%20118%20L304%20118%20L312%20118%20L312%20102%20L320%20102%20L320%20118%20L336%20118%20L344%20118%20L344%20110%20L368%20110%20L368%20118%20L376%20118%20L376%20150%20L424%20150%20L432%20150%20L432%20134%20L440%20134%20L440%20150%20L504%20150%20L504%20126%20L568%20126%20L648%20126%20L648%20142%20L720%20142%20L720%20150%20L784%20150%20L784%20110%20L792%20110%20L792%20102%20L800%20102%20L800%2094%20L808%2094%20L808%2086%20L816%2086%20L816%2078%20L832%2078%20L832%2086%20L840%2086%20L840%2094%20L848%2094%20L848%20102%20L856%20102%20L856%20110%20L864%20110%20L864%20150%20L880%20150%20L880%20134%20L888%20134%20L888%20150%20L904%20150%20L904%20126%20L912%20126%20L912%20118%20L920%20118%20L920%20110%20L936%20110%20L936%20118%20L944%20118%20L944%20126%20L952%20126%20L952%20102%20L992%20102%20L992%20134%20L1072%20134%20L1072%20150%20L1184%20150%20L1184%20110%20L1280%20110%20L1280%2094%20L1288%2094%20L1288%20110%20L1296%20110%20L1368%20110%20L1368%20134%20L1480%20134%20L1480%20150%20L1496%20150%20L1496%20134%20L1504%20134%20L1504%20150%20L1560%20150%20L1568%20150%20L1568%20142%20L1576%20142%20L1576%20134%20L1584%20134%20L1584%20126%20L1592%20126%20L1592%20118%20L1640%20118%20L1640%20126%20L1648%20126%20L1648%20134%20L1656%20134%20L1656%20142%20L1664%20142%20L1664%20150%20L1672%20150%20L1672%20142%20L1728%20142%20L1728%20126%20L1736%20126%20L1736%20142%20L1744%20142%20L1744%20150%20L1816%20150%20L1816%2094%20L1840%2094%20L1840%20150%20L1856%20150%20L1856%20102%20L1952%20102%20L1952%20110%20L2032%20110%20L2032%20150%20L2056%20150%20L2056%20102%20L2056%2086%20L2060%2086%20L2060%2062%20L2068%2062%20L2068%2086%20L2072%2086%20L2072%20102%20L2072%20150%20L2080%20150%20L2080%20134%20L2088%20134%20L2088%20126%20L2096%20126%20L2096%20118%20L2112%20118%20L2112%20126%20L2120%20126%20L2120%20134%20L2128%20134%20L2128%20126%20L2176%20126%20L2176%20142%20L2256%20142%20L2256%20126%20L2288%20126%20L2296%20126%20L2296%20118%20L2304%20118%20L2304%20110%20L2312%20110%20L2312%20102%20L2320%20102%20L2320%2094%20L2352%2094%20L2352%20102%20L2360%20102%20L2360%20110%20L2368%20110%20L2368%20118%20L2376%20118%20L2376%20126%20L2384%20126%20L2392%20126%20L2392%20110%20L2400%20110%20L2400%20126%20L2424%20126%20L2432%20126%20L2432%2094%20L2432%2078%20L2436%2078%20L2436%2062%20L2440%2062%20L2440%2038%20L2448%2038%20L2448%2062%20L2452%2062%20L2452%2078%20L2456%2078%20L2456%2094%20L2456%20126%20L2488%20126%20L2488%20118%20L2496%20118%20L2496%2086%20L2520%2086%20L2520%20118%20L2536%20118%20L2536%20142%20L2632%20142%20L2632%20126%20L2664%20126%20L2664%2064%20L2664%2048%20L2668%2048%20L2668%2032%20L2672%2032%20L2672%208%20L2680%208%20L2680%2032%20L2684%2032%20L2684%2048%20L2688%2048%20L2688%2064%20L2688%20126%20L2712%20126%20L2712%20142%20L2720%20142%20L2720%2064%20L2744%2064%20L2744%20142%20L2752%20142%20L2752%20118%20L2760%20118%20L2760%2078%20L2792%2078%20L2792%20118%20L2800%20118%20L2800%20102%20L2832%20102%20L2832%20110%20L2872%20110%20L2872%20134%20L2920%20134%20L2920%20110%20L2928%20110%20L2928%20102%20L2936%20102%20L2936%2094%20L2944%2094%20L2944%2086%20L2952%2086%20L2952%2078%20L2968%2078%20L2968%2086%20L2976%2086%20L2976%2094%20L2984%2094%20L2984%20102%20L2992%20102%20L2992%20110%20L3000%20110%20L3000%20102%20L3008%20102%20L3008%2094%20L3016%2094%20L3016%2086%20L3024%2086%20L3024%2078%20L3040%2078%20L3040%2086%20L3048%2086%20L3048%2094%20L3056%2094%20L3056%20102%20L3064%20102%20L3064%20110%20L3128%20110%20L3128%2094%20L3136%2094%20L3136%20110%20L3160%20110%20L3216%20110%20L3216%2064%20L3216%2048%20L3220%2048%20L3220%2024%20L3228%2024%20L3228%2048%20L3232%2048%20L3232%2064%20L3232%20110%20L3240%20110%20L3288%20110%20L3288%2094%20L3296%2094%20L3296%20110%20L3304%20110%20L3304%20134%20L3320%20134%20L3320%2064%20L3320%2048%20L3324%2048%20L3324%2024%20L3332%2024%20L3332%2048%20L3336%2048%20L3336%2064%20L3336%20134%20L3384%20134%20L3384%20126%20L3448%20126%20L3456%20126%20L3456%20110%20L3464%20110%20L3464%20126%20L3480%20126%20L3520%20126%20L3520%20142%20L3528%20142%20L3528%20134%20L3536%20134%20L3536%20126%20L3544%20126%20L3544%20118%20L3552%20118%20L3552%20110%20L3600%20110%20L3600%20118%20L3608%20118%20L3608%20126%20L3616%20126%20L3616%20134%20L3624%20134%20L3624%20142%20L3632%20142%20L3632%20150%20L3712%20150%20L3712%20126%20L3720%20126%20L3720%20118%20L3728%20118%20L3728%20110%20L3736%20110%20L3736%20102%20L3744%20102%20L3744%2094%20L3776%2094%20L3776%20102%20L3784%20102%20L3784%20110%20L3792%20110%20L3792%20118%20L3800%20118%20L3800%20126%20L3808%20126%20L3808%20110%20L3816%20110%20L3816%2070%20L3832%2070%20L3832%20110%20L3848%20110%20L3848%20102%20L3960%20102%20L3960%20110%20L4032%20110%20L4032%2094%20L4040%2094%20L4040%20110%20L4072%20110%20L4072%20150%20L4080%20150%20L4080%2064%20L4112%2064%20L4112%20150%20L4120%20150%20L4120%20126%20L4136%20126%20L4136%20110%20L4144%20110%20L4144%20126%20L4168%20126%20L4168%20134%20L4176%20134%20L4176%20126%20L4192%20126%20L4192%20134%20L4200%20134%20L4200%20102%20L4232%20102%20L4232%2086%20L4240%2086%20L4240%20102%20L4264%20102%20L4264%20150%20L4296%20150%20L4296%20134%20L4304%20134%20L4304%20150%20L4312%20150%20L4312%20102%20L4376%20102%20L4376%20150%20L4400%20150%20L4400%20220%20Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
-  height: 100%;
-  background: var(--roof-far);
-}
+  .progression__backdrop img {
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .35) calc(var(--room-photo-in) * .4), rgba(0, 0, 0, .8) calc(var(--room-photo-in) * .7), #000 var(--room-photo-in));
+    mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .35) calc(var(--room-photo-in) * .4), rgba(0, 0, 0, .8) calc(var(--room-photo-in) * .7), #000 var(--room-photo-in));
+  }
 
-/* the farthest roofs fade up into the sky */
-.progression__roof--far::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, var(--roof-sky, transparent), transparent 55%);
-  content: '';
-}
-
-.progression__roof--mid {
-  --k: clamp(0, calc((var(--entry) - 0.03) * 3.8), 1);
-  --roof-shape: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%204000%20220%22%20width%3D%224000%22%20height%3D%22220%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0%20220%20L0%20166%20L32%20166%20L32%20118%20L56%20118%20L56%20166%20L72%20166%20L72%20126%20L80%20126%20L80%20118%20L88%20118%20L88%20110%20L104%20110%20L104%20118%20L112%20118%20L112%20126%20L120%20126%20L120%20166%20L128%20166%20L128%20158%20L136%20158%20L136%20150%20L144%20150%20L144%20142%20L152%20142%20L152%20134%20L200%20134%20L200%20142%20L208%20142%20L208%20150%20L216%20150%20L216%20158%20L224%20158%20L224%20166%20L232%20166%20L296%20166%20L296%20118%20L296%20102%20L300%20102%20L300%2086%20L304%2086%20L304%2070%20L308%2070%20L308%2046%20L316%2046%20L316%2070%20L320%2070%20L320%2086%20L324%2086%20L324%20102%20L328%20102%20L328%20118%20L328%20166%20L344%20166%20L344%20150%20L352%20150%20L352%20134%20L360%20134%20L360%20150%20L440%20150%20L440%20126%20L448%20126%20L448%20118%20L456%20118%20L456%20110%20L464%20110%20L464%20102%20L472%20102%20L472%2094%20L488%2094%20L488%20102%20L496%20102%20L496%20110%20L504%20110%20L504%20118%20L512%20118%20L512%20126%20L520%20126%20L528%20126%20L528%20118%20L536%20118%20L536%20110%20L544%20110%20L544%20102%20L560%20102%20L560%20110%20L568%20110%20L568%20118%20L576%20118%20L576%20126%20L584%20126%20L584%20134%20L592%20134%20L592%20126%20L600%20126%20L600%20118%20L608%20118%20L608%20110%20L616%20110%20L616%20102%20L632%20102%20L632%20110%20L640%20110%20L640%20118%20L648%20118%20L648%20126%20L656%20126%20L656%20134%20L664%20134%20L680%20134%20L680%2070%20L704%2070%20L704%20134%20L744%20134%20L744%20126%20L768%20126%20L768%20110%20L776%20110%20L776%20126%20L856%20126%20L872%20126%20L872%20110%20L880%20110%20L880%20126%20L936%20126%20L936%20166%20L944%20166%20L944%20158%20L968%20158%20L968%20166%20L976%20166%20L976%20134%20L984%20134%20L984%20126%20L992%20126%20L992%20118%20L1000%20118%20L1000%20110%20L1024%20110%20L1024%20118%20L1032%20118%20L1032%20126%20L1040%20126%20L1040%20134%20L1048%20134%20L1048%20166%20L1056%20166%20L1056%20158%20L1064%20158%20L1064%20150%20L1072%20150%20L1072%20142%20L1080%20142%20L1080%20134%20L1096%20134%20L1096%20142%20L1104%20142%20L1104%20150%20L1112%20150%20L1112%20158%20L1120%20158%20L1120%20166%20L1128%20166%20L1128%20134%20L1136%20134%20L1136%20126%20L1144%20126%20L1144%20118%20L1152%20118%20L1152%20110%20L1176%20110%20L1176%20118%20L1184%20118%20L1184%20126%20L1192%20126%20L1192%20134%20L1200%20134%20L1208%20134%20L1208%20126%20L1216%20126%20L1216%20118%20L1224%20118%20L1224%20110%20L1232%20110%20L1232%20102%20L1280%20102%20L1280%20110%20L1288%20110%20L1288%20118%20L1296%20118%20L1296%20126%20L1304%20126%20L1304%20134%20L1312%20134%20L1312%20166%20L1344%20166%20L1344%20150%20L1352%20150%20L1352%20166%20L1360%20166%20L1360%20150%20L1368%20150%20L1368%20142%20L1376%20142%20L1376%20134%20L1384%20134%20L1384%20126%20L1400%20126%20L1400%20134%20L1408%20134%20L1408%20142%20L1416%20142%20L1416%20150%20L1424%20150%20L1424%20142%20L1432%20142%20L1432%20134%20L1456%20134%20L1456%20142%20L1464%20142%20L1464%20166%20L1472%20166%20L1472%20150%20L1480%20150%20L1480%20166%20L1496%20166%20L1496%20126%20L1504%20126%20L1504%2070%20L1520%2070%20L1520%20126%20L1560%20126%20L1616%20126%20L1616%2078%20L1616%2062%20L1620%2062%20L1620%2038%20L1628%2038%20L1628%2062%20L1632%2062%20L1632%2078%20L1632%20126%20L1672%20126%20L1672%20150%20L1680%20150%20L1680%20142%20L1704%20142%20L1704%20150%20L1712%20150%20L1712%20142%20L1720%20142%20L1720%20126%20L1728%20126%20L1728%20142%20L1776%20142%20L1776%20126%20L1784%20126%20L1784%20118%20L1792%20118%20L1792%20110%20L1808%20110%20L1808%20118%20L1816%20118%20L1816%20126%20L1824%20126%20L1824%20150%20L1832%20150%20L1832%20102%20L1848%20102%20L1848%20150%20L1888%20150%20L1888%20158%20L1984%20158%20L1984%20166%20L2080%20166%20L2080%20134%20L2088%20134%20L2088%20126%20L2096%20126%20L2096%20118%20L2104%20118%20L2104%20110%20L2120%20110%20L2120%20118%20L2128%20118%20L2128%20126%20L2136%20126%20L2136%20134%20L2144%20134%20L2144%20150%20L2240%20150%20L2248%20150%20L2248%20110%20L2280%20110%20L2280%20150%20L2272%20150%20L2272%20158%20L2280%20158%20L2280%20150%20L2288%20150%20L2288%20142%20L2296%20142%20L2296%20134%20L2304%20134%20L2304%20126%20L2336%20126%20L2336%20134%20L2344%20134%20L2344%20142%20L2352%20142%20L2352%20150%20L2360%20150%20L2360%20158%20L2368%20158%20L2368%20150%20L2376%20150%20L2376%20142%20L2400%20142%20L2400%20150%20L2408%20150%20L2408%20158%20L2448%20158%20L2448%20126%20L2456%20126%20L2456%20118%20L2464%20118%20L2464%20110%20L2472%20110%20L2472%20102%20L2480%20102%20L2480%2094%20L2528%2094%20L2528%20102%20L2536%20102%20L2536%20110%20L2544%20110%20L2544%20118%20L2552%20118%20L2552%20126%20L2560%20126%20L2560%20142%20L2608%20142%20L2608%2094%20L2608%2078%20L2612%2078%20L2612%2054%20L2620%2054%20L2620%2078%20L2624%2078%20L2624%2094%20L2624%20142%20L2640%20142%20L2640%20158%20L2672%20158%20L2672%20142%20L2712%20142%20L2712%20134%20L2720%20134%20L2720%20126%20L2728%20126%20L2728%20118%20L2744%20118%20L2744%20126%20L2752%20126%20L2752%20134%20L2760%20134%20L2760%20166%20L2768%20166%20L2768%20158%20L2776%20158%20L2776%20150%20L2784%20150%20L2784%20142%20L2808%20142%20L2808%20150%20L2816%20150%20L2816%20158%20L2824%20158%20L2824%20166%20L2832%20166%20L2832%20142%20L2840%20142%20L2840%20134%20L2856%20134%20L2856%20142%20L2864%20142%20L2864%20126%20L2872%20126%20L2872%20118%20L2888%20118%20L2888%20126%20L2896%20126%20L2896%20150%20L2992%20150%20L3024%20150%20L3024%20134%20L3032%20134%20L3032%20150%20L3064%20150%20L3064%20142%20L3096%20142%20L3096%20134%20L3104%20134%20L3104%20126%20L3112%20126%20L3112%20118%20L3120%20118%20L3120%20110%20L3144%20110%20L3144%20118%20L3152%20118%20L3152%20126%20L3160%20126%20L3160%20134%20L3168%20134%20L3168%20142%20L3176%20142%20L3176%20134%20L3200%20134%20L3200%20142%20L3208%20142%20L3208%20158%20L3216%20158%20L3216%20150%20L3224%20150%20L3224%20142%20L3232%20142%20L3232%20134%20L3256%20134%20L3256%20142%20L3264%20142%20L3264%20150%20L3272%20150%20L3272%20158%20L3280%20158%20L3280%20134%20L3288%20134%20L3288%20126%20L3312%20126%20L3312%20134%20L3320%20134%20L3320%20150%20L3328%20150%20L3328%20142%20L3352%20142%20L3352%20150%20L3360%20150%20L3360%20166%20L3376%20166%20L3376%20150%20L3384%20150%20L3384%20166%20L3472%20166%20L3472%20134%20L3480%20134%20L3480%20118%20L3488%20118%20L3488%20134%20L3536%20134%20L3536%20158%20L3544%20158%20L3544%20150%20L3552%20150%20L3552%20142%20L3560%20142%20L3560%20134%20L3584%20134%20L3584%20142%20L3592%20142%20L3592%20150%20L3600%20150%20L3600%20158%20L3608%20158%20L3608%20134%20L3640%20134%20L3640%20118%20L3648%20118%20L3648%20134%20L3656%20134%20L3656%20150%20L3736%20150%20L3736%20166%20L3784%20166%20L3792%20166%20L3792%20158%20L3800%20158%20L3800%20150%20L3816%20150%20L3816%20158%20L3824%20158%20L3824%20166%20L3832%20166%20L3832%20126%20L3840%20126%20L3840%20118%20L3848%20118%20L3848%20110%20L3864%20110%20L3864%20118%20L3872%20118%20L3872%20126%20L3880%20126%20L3880%20134%20L3888%20134%20L3888%20118%20L3896%20118%20L3896%20134%20L3952%20134%20L3952%20166%20L4000%20166%20L4000%20220%20Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
-  height: 78%;
-  background: var(--roof-mid);
-}
-
-.progression__roof--near {
-  --k: clamp(0, calc((var(--entry) - 0.05) * 3.4), 1);
-  --roof-shape: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%203600%20220%22%20width%3D%223600%22%20height%3D%22220%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M0%20220%20L0%20186%20L0%20170%20L8%20170%20L8%20162%20L16%20162%20L16%20154%20L24%20154%20L24%20146%20L32%20146%20L32%20138%20L64%20138%20L64%20146%20L72%20146%20L72%20154%20L80%20154%20L80%20162%20L88%20162%20L88%20170%20L96%20170%20L96%20162%20L104%20162%20L104%20154%20L112%20154%20L112%20146%20L128%20146%20L128%20154%20L136%20154%20L136%20162%20L144%20162%20L144%20154%20L152%20154%20L152%20146%20L160%20146%20L160%20138%20L168%20138%20L168%20130%20L192%20130%20L192%20138%20L200%20138%20L200%20146%20L208%20146%20L208%20154%20L216%20154%20L216%20178%20L248%20178%20L360%20178%20L368%20178%20L368%20170%20L376%20170%20L376%20162%20L384%20162%20L384%20154%20L392%20154%20L392%20146%20L408%20146%20L408%20154%20L416%20154%20L416%20162%20L424%20162%20L424%20170%20L432%20170%20L432%20178%20L440%20178%20L440%20186%20L456%20186%20L456%20170%20L464%20170%20L464%20186%20L472%20186%20L536%20186%20L536%20154%20L552%20154%20L552%20138%20L560%20138%20L560%20154%20L584%20154%20L584%20186%20L592%20186%20L592%20178%20L600%20178%20L600%20170%20L616%20170%20L616%20178%20L624%20178%20L624%20186%20L632%20186%20L632%20154%20L640%20154%20L640%20106%20L672%20106%20L672%20154%20L696%20154%20L696%20170%20L704%20170%20L704%20162%20L720%20162%20L720%20170%20L728%20170%20L728%20186%20L736%20186%20L736%20178%20L760%20178%20L760%20186%20L768%20186%20L768%20162%20L776%20162%20L776%20154%20L784%20154%20L784%20146%20L792%20146%20L792%20138%20L800%20138%20L800%20130%20L848%20130%20L848%20138%20L856%20138%20L856%20146%20L864%20146%20L864%20154%20L872%20154%20L872%20162%20L880%20162%20L880%20178%20L888%20178%20L888%20130%20L920%20130%20L920%20178%20L920%20154%20L968%20154%20L968%20106%20L984%20106%20L984%20154%20L992%20154%20L992%20186%20L1040%20186%20L1040%20178%20L1080%20178%20L1080%20154%20L1088%20154%20L1088%20146%20L1112%20146%20L1112%20154%20L1120%20154%20L1120%20178%20L1128%20178%20L1128%20170%20L1152%20170%20L1152%20178%20L1160%20178%20L1160%20162%20L1240%20162%20L1240%20186%20L1272%20186%20L1272%20170%20L1280%20170%20L1280%20186%20L1352%20186%20L1352%20170%20L1360%20170%20L1360%20162%20L1368%20162%20L1368%20154%20L1376%20154%20L1376%20146%20L1392%20146%20L1392%20154%20L1400%20154%20L1400%20162%20L1408%20162%20L1408%20170%20L1416%20170%20L1416%20154%20L1424%20154%20L1424%20146%20L1432%20146%20L1432%20138%20L1440%20138%20L1440%20130%20L1448%20130%20L1448%20122%20L1464%20122%20L1464%20130%20L1472%20130%20L1472%20138%20L1480%20138%20L1480%20146%20L1488%20146%20L1488%20154%20L1496%20154%20L1496%20162%20L1512%20162%20L1512%20146%20L1520%20146%20L1520%20162%20L1568%20162%20L1568%20186%20L1576%20186%20L1576%20178%20L1584%20178%20L1584%20170%20L1592%20170%20L1592%20162%20L1608%20162%20L1608%20170%20L1616%20170%20L1616%20178%20L1624%20178%20L1624%20186%20L1632%20186%20L1632%20178%20L1704%20178%20L1704%20146%20L1720%20146%20L1720%20178%20L1744%20178%20L1752%20178%20L1752%20170%20L1776%20170%20L1776%20178%20L1784%20178%20L1784%20162%20L1824%20162%20L1936%20162%20L1936%20186%20L1944%20186%20L1944%20178%20L1952%20178%20L1952%20170%20L1960%20170%20L1960%20162%20L1968%20162%20L1968%20154%20L1984%20154%20L1984%20162%20L1992%20162%20L1992%20170%20L2000%20170%20L2000%20178%20L2008%20178%20L2008%20186%20L2016%20186%20L2016%20178%20L2024%20178%20L2024%20170%20L2032%20170%20L2032%20162%20L2048%20162%20L2048%20170%20L2056%20170%20L2056%20178%20L2064%20178%20L2064%20162%20L2112%20162%20L2112%20186%20L2120%20186%20L2120%20178%20L2144%20178%20L2144%20186%20L2152%20186%20L2152%20178%20L2232%20178%20L2232%20170%20L2240%20170%20L2240%20162%20L2248%20162%20L2248%20154%20L2256%20154%20L2256%20146%20L2280%20146%20L2280%20154%20L2288%20154%20L2288%20162%20L2296%20162%20L2296%20170%20L2304%20170%20L2304%20154%20L2312%20154%20L2312%20146%20L2320%20146%20L2320%20138%20L2328%20138%20L2328%20130%20L2336%20130%20L2336%20122%20L2368%20122%20L2368%20130%20L2376%20130%20L2376%20138%20L2384%20138%20L2384%20146%20L2392%20146%20L2392%20154%20L2400%20154%20L2400%20170%20L2440%20170%20L2440%20162%20L2512%20162%20L2512%20146%20L2520%20146%20L2520%20162%20L2536%20162%20L2536%20154%20L2544%20154%20L2544%20146%20L2552%20146%20L2552%20138%20L2560%20138%20L2560%20130%20L2568%20130%20L2568%20122%20L2616%20122%20L2616%20130%20L2624%20130%20L2624%20138%20L2632%20138%20L2632%20146%20L2640%20146%20L2640%20154%20L2648%20154%20L2648%20178%20L2680%20178%20L2680%20162%20L2688%20162%20L2688%20178%20L2760%20178%20L2760%20162%20L2872%20162%20L2872%20154%20L2904%20154%20L2904%20178%20L2912%20178%20L2912%20170%20L2928%20170%20L2928%20178%20L2936%20178%20L2936%20170%20L3048%20170%20L3048%20186%20L3056%20186%20L3056%20178%20L3064%20178%20L3064%20170%20L3072%20170%20L3072%20162%20L3080%20162%20L3080%20154%20L3112%20154%20L3112%20162%20L3120%20162%20L3120%20170%20L3128%20170%20L3128%20178%20L3136%20178%20L3136%20186%20L3144%20186%20L3144%20178%20L3184%20178%20L3184%20130%20L3184%20114%20L3188%20114%20L3188%2098%20L3192%2098%20L3192%2082%20L3196%2082%20L3196%2058%20L3204%2058%20L3204%2082%20L3208%2082%20L3208%2098%20L3212%2098%20L3212%20114%20L3216%20114%20L3216%20130%20L3216%20178%20L3240%20178%20L3240%20154%20L3256%20154%20L3256%20106%20L3288%20106%20L3288%20154%20L3312%20154%20L3320%20154%20L3320%20146%20L3336%20146%20L3336%20154%20L3344%20154%20L3344%20162%20L3352%20162%20L3352%20130%20L3384%20130%20L3384%20162%20L3392%20162%20L3400%20162%20L3400%20154%20L3408%20154%20L3408%20146%20L3416%20146%20L3416%20138%20L3440%20138%20L3440%20146%20L3448%20146%20L3448%20154%20L3456%20154%20L3456%20162%20L3464%20162%20L3464%20186%20L3520%20186%20L3520%20170%20L3528%20170%20L3528%20186%20L3576%20186%20L3600%20186%20L3600%20220%20Z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
-  height: 56%;
-  background: var(--arc-bg);
+  .progression__vignette {
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .35) calc(var(--room-in) * .4), rgba(0, 0, 0, .8) calc(var(--room-in) * .7), #000 var(--room-in));
+    mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .35) calc(var(--room-in) * .4), rgba(0, 0, 0, .8) calc(var(--room-in) * .7), #000 var(--room-in));
+  }
 }
 
 .progression__sticky {
@@ -694,15 +657,13 @@ onUnmounted(() => {
 }
 
 /*
- * On the way in the room is further away than the page: it rises a quarter slower
- * than the section (it starts a quarter of a screen up and settles as the section
- * pins), so the descent from the hero carries on into it. It is a quarter of a
- * screen taller than the window for that, and lights up as it comes.
+ * On the way in the camera carries on down into the room: the brewery comes up already
+ * there under the hero's city and keeps closing in (a slow zoom) as the story goes on.
  */
 .progression__backdrop {
   bottom: -25%;
-  opacity: calc(clamp(0, (var(--entry) - 0.02) * 3, 1) * max(0, 0.5 + 0.16 * (1 - clamp(0, (var(--journey) - 0.2) * 8, 1)) - var(--awaken) * 0.3 - var(--risk) * 0.26 - var(--blackout) * 0.24));
-  transform: translate3d(0, calc((1 - var(--entry)) * -20%), 0) scale(calc(1.04 + var(--journey) * 0.06));
+  opacity: calc(clamp(0, var(--entry) * 6, 1) * max(0, 0.5 + 0.16 * (1 - clamp(0, (var(--journey) - 0.2) * 8, 1)) - var(--awaken) * 0.3 - var(--risk) * 0.26 - var(--blackout) * 0.24));
+  transform: scale(calc(1 + var(--entry) * 0.04 + var(--journey) * 0.06));
   transform-origin: 50% 48%;
 }
 
@@ -884,13 +845,13 @@ onUnmounted(() => {
 
 /*
  * ---- the section's heading: the entrance only ----
- * It rides in at the top of the copy column, just under the roofs, ahead of the first
- * chapter (which comes up under it with the book, see copyStyle), and lifts away as the
- * room settles into its pin (at story time lead / (lead + 2.8 screens), about 0.17).
+ * It comes up at the top of the copy column with the room, the first chapter and the
+ * falling book (see copyStyle and LEAD_TO), stays while the room pins (story time 0.16)
+ * and lifts away just after, before the brew.
  */
 .progression__heading {
-  --title-in: clamp(0, calc((var(--entry) - 0.1) * 3), 1);
-  --title-out: clamp(0, calc((var(--journey) - 0.125) * 24), 1);
+  --title-in: clamp(0, calc((var(--entry) - 0.17) * 5), 1);
+  --title-out: clamp(0, calc((var(--journey) - 0.175) * 33), 1);
   position: absolute;
   z-index: 8;
   top: var(--top);
@@ -963,8 +924,8 @@ onUnmounted(() => {
 .chapter-copy__body {
   margin: 0;
   color: var(--arc-muted);
-  font-size: clamp(15px, 1.1vw, 17px);
-  line-height: 1.62;
+  font-size: var(--arc-fs-body, 15px);
+  line-height: 1.6;
   text-wrap: pretty;
 }
 
@@ -1100,33 +1061,6 @@ onUnmounted(() => {
   padding-top: 2px;
 }
 
-/*
- * At the very end the room dissolves into the page (.progression__exit, see railLeaving):
- * the rail and the copy step out first, so no half-faded text is left on the page colour.
- */
-.progression-nav {
-  transition: opacity .3s ease;
-}
-
-.progression-nav.is-leaving,
-.progression__layout.is-leaving .chapter-copy {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .3s ease;
-}
-
-/* the page's colour (paper in the light theme), over everything in the room */
-.progression__exit {
-  position: absolute;
-  z-index: 40;
-  inset: 0;
-  background: var(--arc-page, var(--arc-bg));
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  will-change: opacity;
-}
-
 .progression-nav__line {
   position: absolute;
   top: 0;
@@ -1246,10 +1180,6 @@ onUnmounted(() => {
     --copy-w: clamp(260px, 30vw, 320px);
   }
 
-  .chapter-copy__body {
-    font-size: 15px;
-  }
-
   .chapter-copy__abilities li {
     padding-block: 9px;
   }
@@ -1343,11 +1273,6 @@ onUnmounted(() => {
     opacity: 0.4;
     transform: none;
     mask-image: linear-gradient(180deg, transparent, #000 20%, #000 45%, transparent);
-  }
-
-  .progression__roofs,
-  .progression__exit {
-    display: none;
   }
 
   .progression__hearth,

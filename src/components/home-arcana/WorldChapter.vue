@@ -35,18 +35,16 @@
             </ol>
             <ul class="world-facts">
               <li><i class="fa-solid fa-gem" aria-hidden="true"></i>{{ t('home.world.rifts.factLoot') }}</li>
-              <li><i class="fa-solid fa-people-group" aria-hidden="true"></i>{{ t('home.world.rifts.factHelp') }}</li>
             </ul>
           </div>
         </article>
 
         <ul class="world-cards">
           <li class="world-card">
-            <WorldPhoto class="world-card__photo" :shot="shots.guardians" :alt="t('home.world.guardians.alt')" credit="tr" sizes="(max-width: 900px) 100vw, 34vw"/>
+            <WorldPhoto class="world-card__photo" :shot="shots.guardians" :alt="t('home.world.guardians.alt')" sizes="(max-width: 900px) 100vw, 34vw"/>
             <div class="world-card__copy">
               <h4>{{ t('home.world.guardians.title') }}</h4>
               <p>{{ t('home.world.guardians.body') }}</p>
-              <p class="world-card__fact"><i class="fa-solid fa-certificate" aria-hidden="true"></i>{{ t('home.world.guardians.fact') }}</p>
             </div>
           </li>
 
@@ -57,12 +55,11 @@
             <div class="world-card__copy">
               <h4>{{ t('home.world.moon.title') }}</h4>
               <p>{{ t('home.world.moon.body') }}</p>
-              <p class="world-card__fact"><i class="fa-solid fa-eye" aria-hidden="true"></i>{{ moonFact }}</p>
             </div>
           </li>
 
           <li class="world-card">
-            <WorldPhoto class="world-card__photo" :shot="shots.incursions" :alt="t('home.world.incursions.alt')" credit="tr" sizes="(max-width: 900px) 100vw, 34vw"/>
+            <WorldPhoto class="world-card__photo" :shot="shots.incursions" :alt="t('home.world.incursions.alt')" sizes="(max-width: 900px) 100vw, 34vw"/>
             <div class="world-card__copy">
               <h4>{{ t('home.world.incursions.title') }}</h4>
               <p>{{ t('home.world.incursions.body') }}</p>
@@ -95,7 +92,7 @@
 
         <ul class="world-cards">
           <li v-for="item in societyCards" :key="item.key" class="world-card">
-            <WorldPhoto class="world-card__photo" :shot="item.shot" :alt="item.alt" credit="tr" sizes="(max-width: 900px) 100vw, 34vw"/>
+            <WorldPhoto class="world-card__photo" :shot="item.shot" :alt="item.alt" sizes="(max-width: 900px) 100vw, 34vw"/>
             <div class="world-card__copy">
               <h4>{{ item.title }}</h4>
               <p>{{ item.body }}</p>
@@ -140,7 +137,7 @@
     >
       <ul class="world-strip__track">
         <li v-for="item in gallery" :key="item.id" class="world-strip__item" :aria-hidden="item.copy || undefined">
-          <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" credit="bl" sizes="360px" :eager="stripWarm"/>
+          <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm"/>
         </li>
       </ul>
     </div>
@@ -154,13 +151,11 @@ import IconDiscord from '@/assets/icons/IconDiscord.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import WorldPhoto from './WorldPhoto.vue';
 import {GALLERY_SHOTS, TOPIC_SHOTS} from './WorldShots';
-import {useArcana} from './useArcana';
 import moon from '@/assets/images/home-library/crimson-moon.webp';
 
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
 
 const {t} = useI18n();
-const {reading, hasDrawn, card} = useArcana();
 const shots = TOPIC_SHOTS;
 
 const rules = computed(() => [
@@ -185,11 +180,6 @@ const ladder = computed(() => ['town', 'domain', 'nation'].map(key => ({
   title: t(`home.world.towns.ladder.${key}.title`),
   body: t(`home.world.towns.ladder.${key}.body`),
 })));
-
-/* Before a draw, or for a Boon (not a Pathway), there is no "your Pathway" to speak of, so the fact stays general. */
-const moonFact = computed(() => (hasDrawn.value && !card.value.boon
-    ? t('home.world.moon.pathwayFact').replace('{pathway}', reading.value.name)
-    : t('home.world.moon.fact')));
 
 const SOCIETY_FACTS = {
   churches: {icon: 'fa-solid fa-scroll', key: 'home.world.churches.fact'},
@@ -388,11 +378,11 @@ onUnmounted(() => {
   background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
-  font-size: 15px;
+  font-size: var(--arc-fs-body);
   font-weight: 700;
-  color: var(--acc-ink);
+  color: var(--arc-ink);
   transform: rotate(-6deg);
-  transition: border-color .6s ease, background-color .6s ease, color .6s ease;
+  transition: border-color .6s ease, background-color .6s ease;
 }
 
 .world-facts {
@@ -527,7 +517,7 @@ onUnmounted(() => {
   inset: 40% 0 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, var(--arc-card));
+  background: linear-gradient(180deg, transparent, var(--arc-card) 78%);
 }
 
 .world-card::after {

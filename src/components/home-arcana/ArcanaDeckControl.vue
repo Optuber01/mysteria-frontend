@@ -62,7 +62,8 @@ const atOrbit = ref(false);
 const visible = computed(() => pastHero.value && !navOpen.value && !atOrbit.value);
 
 /* ---------------- the seat: the header's free space, left of its actions ---------------- */
-const ORB = 40;
+/** The header's control height (its chip, language and theme buttons). */
+const ORB = 36;
 const seat = ref<{x: number; y: number} | null>(null);
 const seatStyle = computed(() => (seat.value
     ? {left: `${seat.value.x}px`, top: `${seat.value.y}px`}
@@ -144,8 +145,8 @@ onUnmounted(() => {
 .arc-dock__seat {
   position: fixed;
   z-index: 1001;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   opacity: 0;
   transform: translateY(-6px) scale(.6);
   transition: opacity .3s ease, transform .45s cubic-bezier(.2, .9, .25, 1);
@@ -172,18 +173,22 @@ onUnmounted(() => {
   border-radius: 50%;
   cursor: pointer;
   perspective: 300px;
-  background: radial-gradient(circle at 50% 42%, color-mix(in oklab, var(--acc) 34%, #17171d), #0d0d11 76%);
-  box-shadow:
-    inset 0 0 0 var(--arc-bw-accent) color-mix(in oklab, var(--acc) 85%, transparent),
-    0 0 18px color-mix(in oklab, var(--acc) 30%, transparent);
-  transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .9, .25, 1);
+  /* the header controls' look: a surface fill tinted by the card, a hairline in the accent */
+  background: color-mix(in oklab, var(--acc) 10%, var(--arc-surface));
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
+  transition: background-color .25s ease, box-shadow .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
+/* the header's hover: lift 2px, the edge hot, a little more of the accent */
 .arc-dock__orb:hover {
-  transform: scale(1.06);
-  box-shadow:
-    inset 0 0 0 var(--arc-bw-accent) var(--acc),
-    0 0 26px color-mix(in oklab, var(--acc) 50%, transparent);
+  transform: translateY(-2px);
+  background: color-mix(in oklab, var(--acc) 18%, var(--arc-surface));
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+.arc-dock__orb:active {
+  transform: scale(.98);
+  transition-duration: .08s;
 }
 
 .arc-dock__orb:focus-visible {
@@ -198,8 +203,8 @@ onUnmounted(() => {
 }
 
 .arc-dock__face img {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
 }
 
 /* Before the first draw: a face-down card. */
@@ -207,12 +212,12 @@ onUnmounted(() => {
   width: 15px;
   height: 22px;
   fill: none;
-  stroke: var(--acc);
+  stroke: var(--acc-ink);
   stroke-width: 1.6;
 }
 
 .arc-dock__back-pupil {
-  fill: var(--acc);
+  fill: var(--acc-ink);
   stroke: none;
 }
 
@@ -228,8 +233,8 @@ onUnmounted(() => {
   bottom: -3px;
   display: grid;
   place-items: center;
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--acc-solid);
   box-shadow: 0 0 0 2px var(--arc-bg);
@@ -279,8 +284,8 @@ onUnmounted(() => {
 
 .arc-dock__tip-label {
   font-family: var(--arc-caps);
-  font-size: 9.5px;
-  letter-spacing: .12em;
+  font-size: 11px;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--arc-muted);
 }
@@ -295,7 +300,7 @@ onUnmounted(() => {
 
 .arc-dock__tip-action {
   margin-top: 4px;
-  font-size: 12.5px;
+  font-size: var(--arc-fs-caption);
   font-weight: 600;
   color: var(--acc-ink);
 }

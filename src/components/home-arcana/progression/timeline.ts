@@ -138,27 +138,39 @@ export function awakenAt(g: number): number {
 }
 
 /*
- * Scroll → story time. The page gives the voices more scroll than their share of
- * the timeline: `dwell` extra px are spent inside T.voices, so every other beat
- * keeps its pace while each raving stays on screen for a few wheel steps. Pure
- * functions of the scroll position, so the story still plays backwards.
+ * Scroll → story time. Two stretches of the page are paced on their own:
+ *  - the way in (`lead` px, while the room rises out of the hero) plays the story up to
+ *    `leadTo`: the book falls in and opens as the room comes up, so it is never empty;
+ *  - the voices get `dwell` extra px inside T.voices, so each raving stays on screen for
+ *    a few wheel steps.
+ * Every other beat keeps one pace. Pure functions of the scroll position, so the story
+ * still plays backwards.
  */
-/** Story time (0..1) at `px` of the pinned scroll (`range` px, `dwell` of them extra). */
-export function storyAt(px: number, range: number, dwell: number): number {
-  const base = Math.max(1, range - dwell);
+export type Pace = { range: number; dwell: number; lead?: number; leadTo?: number };
+function paced({ range, dwell, lead = 0, leadTo = 0 }: Pace) {
+  const from = lead > 0 ? clamp01(leadTo) : 0;
+  const run = Math.max(1, range - lead - dwell);
+  /** px of the paced run per unit of story time */
+  const per = run / Math.max(1e-6, 1 - from);
   const [v0, v1] = T.voices;
-  const start = v0 * base;
-  const length = (v1 - v0) * base + dwell;
-  if (px <= start) return clamp01(px / base);
-  if (px < start + length) return v0 + ((px - start) / length) * (v1 - v0);
-  return clamp01((px - dwell) / base);
+  const vStart = lead + Math.max(0, v0 - from) * per;
+  const vLength = (v1 - v0) * per + dwell;
+  return { from, per, lead, vStart, vLength, v0, v1 };
+}
+/** Story time (0..1) at `px` of the chapter's scroll. */
+export function storyAt(px: number, pace: Pace): number {
+  const { from, per, lead, vStart, vLength, v0, v1 } = paced(pace);
+  if (lead > 0 && px < lead) return clamp01((Math.max(0, px) / lead) * from);
+  if (px <= vStart) return clamp01(from + (px - lead) / per);
+  if (px < vStart + vLength) return v0 + ((px - vStart) / vLength) * (v1 - v0);
+  return clamp01(v1 + (px - vStart - vLength) / per);
 }
 /** The inverse of storyAt: the scroll px where story time `g` is reached. */
-export function scrollAt(g: number, range: number, dwell: number): number {
-  const base = Math.max(1, range - dwell);
-  const [v0, v1] = T.voices;
+export function scrollAt(g: number, pace: Pace): number {
+  const { from, per, lead, vStart, vLength, v0, v1 } = paced(pace);
   const t = clamp01(g);
-  if (t <= v0) return t * base;
-  if (t < v1) return v0 * base + ((t - v0) / (v1 - v0)) * ((v1 - v0) * base + dwell);
-  return t * base + dwell;
+  if (lead > 0 && t < from) return (t / from) * lead;
+  if (t <= v0) return lead + (t - from) * per;
+  if (t < v1) return vStart + ((t - v0) / (v1 - v0)) * vLength;
+  return vStart + vLength + (t - v1) * per;
 }

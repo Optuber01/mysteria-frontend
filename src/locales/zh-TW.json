@@ -585,6 +585,8 @@
       "hero": {
         "titleA": "Draw your",
         "titleB": "first card",
+        "drawnTitleA": "Read your",
+        "drawnTitleB": "{pathway}",
         "lede": "A Minecraft MMORPG set in Lord of the Mysteries. Choose one of 22 Pathways. Brew potions and act out their roles to ascend from Sequence 9 toward godhood.",
         "join": "How to join",
         "changelog": "Latest update",
@@ -626,7 +628,6 @@
         "announce": "{name}, {current} of {total}.",
         "beginsAs": "Sequence 9: {role}",
         "boonNote": "Boons progress separately from your Pathway, from Sequence 9 to 5.",
-        "statSequences": "Sequences",
         "statAbilities": "Abilities",
         "firstAbilities": "{role} abilities",
         "loading": "Loading abilities…",
@@ -737,25 +738,25 @@
           "r2": "There was no wall here.",
           "r3": "Which side are you on?",
           "r4": "The stars are too close.",
-          "r5": "The door opens onto distant stars."
+          "r5": "The threshold leads to silence."
         },
         "visionary": {
           "r1": "Hands betray the watcher.",
           "r2": "We saw that little hesitation.",
-          "r3": "The scene moved first.",
+          "r3": "The reflection moved before you.",
           "r4": "Who watches through the glass?",
           "r5": "The audience sits inside your mind."
         },
         "mother": {
           "r1": "Roots under the skin.",
-          "r2": "Something stirs beneath the skin.",
+          "r2": "Something stirs below the ribs.",
           "r3": "Bury it a little deeper.",
-          "r4": "We grow where roots were buried.",
+          "r4": "Green shoots split the grave.",
           "r5": "Come back to the soil."
         },
         "emperor": {
           "r1": "Read the clause again.",
-          "r2": "Read the exception again.",
+          "r2": "The margin hides a clause.",
           "r3": "The decree changes meaning.",
           "r4": "The law leaves room for us.",
           "r5": "Say the verdict aloud."
@@ -782,11 +783,11 @@
           "r5": "Salt marks the shore."
         },
         "giant": {
-          "r1": "Steel and dusk.",
-          "r2": "Keep standing in the dusk.",
-          "r3": "Who holds the line at dusk?",
+          "r1": "Steel rings against stone.",
+          "r2": "Stand where the mountains break.",
+          "r3": "Who holds the line alone?",
           "r4": "Set down the heavy blade.",
-          "r5": "Even giants fall at twilight."
+          "r5": "Thunder sleeps inside the shield."
         },
         "hermit": {
           "r1": "Close neither eye.",
@@ -831,7 +832,7 @@
           "r5": "Remember how it came apart."
         },
         "abyss": {
-          "r1": "Hurt in the palm.",
+          "r1": "A blade rests in your palm.",
           "r2": "Anything in hand will do.",
           "r3": "Let that last restraint go.",
           "r4": "Their fear tastes familiar.",
@@ -854,7 +855,7 @@
         "moon": {
           "r1": "The moon enters the veins.",
           "r2": "Crush the bleeding herbs.",
-          "r3": "Crush the herbs a little finer.",
+          "r3": "Let crimson powder stain the cup.",
           "r4": "The crimson light is watching.",
           "r5": "What went into the cup?"
         },
@@ -874,17 +875,17 @@
         },
         "error": {
           "r1": "The fingers moved alone.",
-          "r2": "The stolen name glitches in fate.",
+          "r2": "The stolen name stutters in fate.",
           "r3": "That thought was mine first.",
           "r4": "Count the missing seconds.",
           "r5": "Another voice answered the name."
         },
         "aeon": {
-          "r1": "Footsteps repeat the circle.",
-          "r2": "Something follows each step.",
-          "r3": "We have not finished the circle.",
-          "r4": "The last step begins the first.",
-          "r5": "The first step returns."
+          "r1": "Footfalls trace the circle.",
+          "r2": "Something follows each turn.",
+          "r3": "The circle refuses to end.",
+          "r4": "The ending becomes a beginning.",
+          "r5": "Every return leaves me older."
         },
         "chaos": {
           "r1": "Make them afraid to look.",
@@ -964,14 +965,14 @@
         },
         "safe": {
           "value": "PvP zones",
-          "note": "PvP is limited to designated zones, Incursions and enabled claims."
+          "note": "Combat is limited to announced zones, Cosmos Incursions and enabled town claims."
         },
         "chests": {
           "value": "Refilling chests",
-          "note": "Generated chests restock with Beyonder loot."
+          "note": "Generated chests provide renewable Beyonder loot."
         },
         "season": {
-          "value": "Season II",
+          "value": "Seasonal",
           "note": "The world and Beyonder progress reset roughly every six months."
         }
       },
@@ -993,25 +994,21 @@
           }
         },
         "factLoot": "Loot once per dungeon every three days",
-        "factHelp": "Smaller parties can enter when they are not overpowered.",
         "alt": "Orange Rift and floating runestones beneath a ruined tower"
       },
       "guardians": {
         "title": "Guardians",
-        "body": "Bosses guarding key objectives. Bring a group and adapt when a damage type stops working.",
-        "fact": "Guardians protect important objectives and are designed for groups.",
+        "body": "Guardians protect important objectives and are designed for groups.",
         "alt": "Player between fire and ice dragons on a snowy ridge"
       },
       "moon": {
         "title": "Crimson Moon",
-        "body": "The roughly weekly Crimson Moon makes fishing a valuable but dangerous alternate loot stream.",
-        "fact": "A Crimson Moon arrives roughly weekly.",
-        "pathwayFact": "During the Crimson Moon, fishing becomes a valuable but dangerous alternate loot stream."
+        "body": "During the roughly weekly Crimson Moon, fishing becomes valuable but more dangerous."
       },
       "incursions": {
         "title": "Cosmos Incursions",
-        "body": "Announced, optional PvP objectives. Green and Yellow zones risk carried items; Black zones risk Sequence regression.",
-        "fact": "Event announcements on Discord",
+        "body": "Announced PvP objectives: Green and Yellow risk carried items; Black risks Sequence regression.",
+        "fact": "Read the zone colour and rules before entering.",
         "alt": "Stone arena with a glowing floor sigil"
       },
       "towns": {
@@ -1028,7 +1025,7 @@
           },
           "nation": {
             "title": "Nation",
-            "body": "Alliance founded by Domains"
+            "body": "Domain-level towns may form a Nation"
           }
         },
         "altMain": "Harbour town and lantern-lit ships at dusk",
@@ -1037,7 +1034,7 @@
       },
       "churches": {
         "title": "Churches",
-        "body": "Churches are late-game institutions built around faith, anchors, prayer, land, and variable perks.",
+        "body": "Churches are late-game institutions built around faith, anchors, prayer and land, with perks that vary by church.",
         "alt": "Black and crimson cathedral beneath the stars",
         "fact": "Honorific Names enable ritual communication"
       },
@@ -1084,7 +1081,7 @@
       },
       "companion": {
         "title": "COI Client",
-        "lede": "An optional mod. Every Beyonder mechanic works without it.",
+        "lede": "The optional Circle of Imagination mod. Every Beyonder mechanic works without it.",
         "features": {
           "hotkeys": {
             "title": "Hotkeys:",

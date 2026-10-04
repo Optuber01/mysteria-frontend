@@ -331,7 +331,8 @@ const cards = computed(() => {
   const l = props.layout;
   if (!l) return [];
   const p = l.player;
-  const cardW = Math.max(60, Math.min(118, p.h * 0.2, (l.w - p.w * 0.8) / 2 - 24));
+  // big enough to read its numeral and name (the face's type scales with it), still clear of him
+  const cardW = Math.max(60, Math.min(150, p.h * 0.3, (l.w - p.w * 0.8) / 2 - 24));
   const cardH = cardW * 1.6;
   return CARDS.map((card) => {
     const t = final.value ? 1 : smooth((g.value - card.at) / 0.05);

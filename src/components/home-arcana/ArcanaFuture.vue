@@ -48,7 +48,7 @@
               <span class="arc-step__num" aria-hidden="true">3</span>
               <div class="arc-step__body">
                 <h3>{{ t('home.world.join.step3Title') }}</h3>
-                <p>{{ t('home.world.join.step3Body') }}</p>
+                <p><template v-for="(part, i) in step3Parts" :key="i"><span v-if="part.glue" class="arc-nowrap">{{ part.text }}</span><template v-else>{{ part.text }}</template></template></p>
               </div>
             </li>
           </ol>
@@ -134,6 +134,12 @@ const copyNote = computed(() => ({
   failed: t('home.arcana.ip.failedHelp'),
 }[copyState.value]));
 
+/* Hyphenated words ("in-game") stay on one line. */
+const step3Parts = computed(() => t('home.world.join.step3Body')
+    .split(/(\S*\p{L}-\p{L}\S*)/u)
+    .filter(Boolean)
+    .map(text => ({text, glue: /\p{L}-\p{L}/u.test(text)})));
+
 /* ---- live status ---- */
 const statusClass = computed(() => (!checkedAt.value ? 'is-checking' : isOnline.value ? 'is-online' : 'is-offline'));
 const liveUnit = computed(() => {
@@ -200,6 +206,15 @@ const newsDate = computed(() => newsDateValue.value
   z-index: 1;
 }
 
+/* the lede sits over the sky photo: ink, not muted, to stay readable in both themes */
+.arc-future :deep(.arc-head__lede) {
+  color: var(--arc-ink);
+}
+
+.arc-nowrap {
+  white-space: nowrap;
+}
+
 .arc-future__anchor {
   position: absolute;
   top: calc(var(--arc-section-pad) * -1);
@@ -255,10 +270,10 @@ const newsDate = computed(() => newsDateValue.value
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 700;
-  font-size: 15px;
-  color: var(--acc-ink);
+  font-size: var(--arc-fs-body);
+  color: var(--arc-ink);
   transform: rotate(-6deg);
-  transition: border-color .6s ease, background-color .6s ease, color .6s ease;
+  transition: border-color .6s ease, background-color .6s ease;
 }
 
 .arc-step h3 {
@@ -331,7 +346,7 @@ const newsDate = computed(() => newsDateValue.value
 .arc-live__row {
   display: flex;
   align-items: baseline;
-  min-height: 54px;
+  min-height: var(--arc-fs-h2);
   gap: 12px;
   margin: 0;
 }
@@ -374,13 +389,13 @@ const newsDate = computed(() => newsDateValue.value
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 700;
-  font-size: 54px;
+  font-size: var(--arc-fs-h2);
   line-height: 1;
   color: var(--arc-ink);
 }
 
 .arc-live__unit {
-  font-size: 16px;
+  font-size: var(--arc-fs-body);
   line-height: 1.3;
   color: var(--arc-muted);
 }
@@ -398,7 +413,7 @@ const newsDate = computed(() => newsDateValue.value
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 26px;
+  font-size: var(--arc-fs-h4);
   line-height: 1;
   color: var(--acc-ink);
   transition: color .6s ease;
@@ -461,7 +476,7 @@ const newsDate = computed(() => newsDateValue.value
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: var(--arc-fs-small);
   font-weight: 600;
   line-height: 1.3;
   color: var(--arc-ink);

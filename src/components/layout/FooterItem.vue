@@ -134,8 +134,9 @@ const year = new Date().getFullYear();
 .footer-heading {
   margin: 0 0 5px;
   font-family: var(--myst-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.3em;
+  /* the page's label: 11px caps at .14em (as the header's) */
+  font-size: 11px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--myst-gold);
 }
@@ -168,7 +169,7 @@ const year = new Date().getFullYear();
 .footer-copy,
 .footer-legal a {
   font-family: var(--myst-font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   /* was a fixed grey at 55% (about 2.8:1 on the dark page, less on the light one) */

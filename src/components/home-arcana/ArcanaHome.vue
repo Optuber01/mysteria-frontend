@@ -160,8 +160,10 @@ body:has(.concept-arcana) {
    */
   --arc-container: 1320px;
   --arc-gutter: clamp(18px, 4vw, 64px);
-  /* the strip under the hero that the potion story's roofline rises into */
+  /* the strip under the hero's deck, before the potion story's room comes up over the city */
   --roof-h: clamp(96px, 15vh, 168px);
+  /* the potion story's foot: where its room deepens into the page the next section opens on */
+  --room-foot: clamp(180px, 24vh, 280px);
   /* The content edge inside a full-width box, for left/right/padding-inline (whose % is the
      full-width containing block): the header bar, the potion story, the footer. */
   --arc-edge: max(var(--arc-gutter), (100% - var(--arc-container)) / 2);
@@ -289,10 +291,9 @@ body:has(.concept-arcana) {
 /*
  * The potion story stays a dark room in the light theme: its brewery, blackout and
  * heartbeat are made of darkness. On paper it is a deep warm ink rather than the night
- * page's black, with the dark palette's light text. Its top is Backlund's roofs in three
- * depths (ProgressionStory's .progression__roofs), haze-grey to ink, rising over the
- * strip the hero keeps free (--roof-h); at its end the whole room dissolves into the
- * paper (.progression__exit), so it has no bottom edge.
+ * page's black, with the dark palette's light text. It has no edges: its top deepens from
+ * the paper into the room over a short stretch, its foot back into the paper
+ * (ProgressionStory, --room-in and --room-foot).
  */
 :root[data-theme="parchment"] .concept-arcana .progression {
   --arc-bg: #1a1519;
@@ -542,14 +543,14 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 }
 
 /*
- * The pinned story (not its stacked fallback): the next section starts OVERLAP screens up,
- * over the room's last stretch, which by then has dissolved into the page colour
- * (ProgressionStory's exitProgress). Its head rises straight out of the dissolve instead
- * of after a screen of empty page; the seam above starts where the room ends.
+ * The pinned story (not its stacked fallback) scrolls away at its end over its foot, which
+ * deepens into the page colour. The next section starts inside the last of that foot, so
+ * its heading comes up right behind the room, on the plain page; the seam above starts
+ * where the foot ends.
  */
 @media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
   .concept-arcana .progression + .arc-section {
-    --story-overlap: 35vh;
+    --story-overlap: calc(var(--room-foot) * .4);
     margin-top: calc(-1 * var(--story-overlap));
   }
 }

@@ -373,7 +373,7 @@ onUnmounted(() => {
 .season-headline,
 .season-link {
   font-family: var(--myst-font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -623,8 +623,19 @@ onUnmounted(() => {
   transition: color .25s ease, background-color .25s ease, border-color .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
-.header-actions .theme-toggle {
-  color: var(--myst-ink-muted);
+/*
+ * One label for every control in the bar: the 11px label size, in ink (the language code
+ * was accent, the theme icon muted, the address 11.5px and the player count 10px). The
+ * player count keeps its status green. :root and the grid raise this over the homepage's
+ * light-theme tint of the language code.
+ */
+:root .header-stack .header-grid .header-actions :deep(:is(.ip-chip, .lang-label)) {
+  font-size: 11px;
+  color: var(--myst-ink);
+}
+
+.header-actions :deep(:is(.chip-players, .chip-copied)) {
+  font-size: inherit;
 }
 
 .header-actions :deep(:is(.ip-chip, .lang-ritual-trigger, .profile-chip)):hover,

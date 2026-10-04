@@ -108,10 +108,6 @@
             <p class="arc-orbit__begins">{{ beginsLine }}</p>
             <dl class="arc-orbit__stats">
               <div>
-                <dt>{{ t('home.arcana.deck.statSequences') }}</dt>
-                <dd>{{ reading.sequenceCount }}</dd>
-              </div>
-              <div>
                 <dt>{{ t('home.arcana.deck.statAbilities') }}</dt>
                 <dd>{{ reading.abilityCount || '–' }}</dd>
               </div>
@@ -119,9 +115,9 @@
           </div>
 
           <div class="arc-orbit__abilities">
-            <ul v-if="reading.early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
-              <li v-for="(ability, index) in reading.early" :key="ability.name" :style="{'--i': index}">
-                <strong>{{ ability.name }}</strong>
+            <ul v-if="early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
+              <li v-for="(ability, index) in early" :key="ability.key" :style="{'--i': index}">
+                <strong>{{ ability.name }}<small v-if="ability.rung">{{ ability.rung }}</small></strong>
                 <span>{{ abilitySummary(ability.description) }}</span>
               </li>
             </ul>
@@ -153,7 +149,7 @@ import {ensurePathwayData, useArcana} from './useArcana';
 
 type Kind = 'pathway' | 'boon';
 
-const {t, plural} = useI18n();
+const {t, plural, currentLanguage} = useI18n();
 const {currentId, card, reading, readingFor, nameOf, seq9Of, data, draw} = useArcana();
 const reducedMotion = useReducedMotion();
 
@@ -200,9 +196,41 @@ const beginsLine = computed(() => {
     return t('home.arcana.deck.climb')
         .replace('{first}', first.name)
         .replace('{last}', last.name)
-        .replace('{top}', String(last.sequence));
+        .replace('{top}', String(last.sequence))
+        // the arrow stays at the end of the first line, never at the start of the second
+        .replace(/\s+→/gu, '\u00a0→');
   }
   return seq9 ? t('home.arcana.deck.beginsAs').replace('{role}', seq9) : countLabel(sequenceCount);
+});
+/**
+ * Archive entries listed among a Sequence's abilities that are a state, a pact or a
+ * drawback rather than something the player does. The data doesn't mark them.
+ */
+const NOT_ABILITIES = new Set(['hanged/knowledge', 'chained/binding', 'chained/enhanced-binding', 'edict/dreamless-state', 'devouring/hunger']);
+/** Two or three real Sequence 9 abilities; a Pathway with fewer is topped up from Sequence 8 (named on the row). */
+const early = computed(() => {
+  const module = data.value;
+  const id = currentId.value;
+  const pathway = module?.pathwayById(id);
+  if (!module || !pathway) return reading.value.early.map(ability => ({...ability, key: ability.name, rung: ''}));
+  const language = currentLanguage.value;
+  const rows = (n: number) => {
+    const rung = pathway.sequences.find(sequence => sequence.sequence === n);
+    if (!rung) return [];
+    // "Sequence 9: {role}" cut to "Sequence 8" (every locale writes the number as a digit)
+    const label = n === 9 ? '' : t('home.arcana.deck.beginsAs').replace(/[:：]?\s*\{role\}/u, '').replace('9', String(n)).trim();
+    return rung.abilities
+        .filter(ability => !NOT_ABILITIES.has(`${id}/${ability.id}`))
+        .map(ability => ({
+          key: `${n}-${ability.id}`,
+          name: module.pick(ability.name, language),
+          description: module.pick(ability.description, language),
+          rung: label,
+        }));
+  };
+  const list = rows(9).slice(0, 3);
+  if (list.length < 2) list.push(...rows(8).slice(0, 2 - list.length));
+  return list;
 });
 const abilitiesLabel = computed(() =>
   t('home.arcana.deck.firstAbilities').replace('{role}', reading.value.seq9 || reading.value.name));
@@ -362,6 +390,8 @@ function render() {
     element.style.zIndex = String(10 + Math.round(depth * 100));
     element.style.pointerEvents = opacity < .2 ? 'none' : '';
     element.style.setProperty('--lab', String(label));
+    // the page disc under the seal deals in with it (it would cover the drawn seal mid-flight)
+    element.style.setProperty('--enter', enter < 1 ? enter.toFixed(3) : '1');
     element.style.setProperty('--inv', (1 / scale).toFixed(3));
   }
 }
@@ -1035,6 +1065,16 @@ onUnmounted(() => {
   will-change: transform;
 }
 
+/* a disc of the page under each seal: the ring's line runs beneath the faded back row, not through it */
+.arc-seal::before {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--arc-bg);
+  content: '';
+  opacity: var(--enter, 1);
+}
+
 .arc-seal__orb {
   position: absolute;
   inset: 0;
@@ -1064,13 +1104,10 @@ onUnmounted(() => {
     0 14px 30px var(--arc-shadow);
 }
 
+/* the ring sits on the seal itself, so the back row's fade never dims it (spec: rotating things use the shadow ring) */
 .arc-seal:focus-visible {
   outline: none;
-}
-
-.arc-seal:focus-visible .arc-seal__orb {
-  outline: var(--arc-focus-w) solid var(--arc-ink);
-  outline-offset: var(--arc-focus-off);
+  box-shadow: 0 0 0 3px var(--arc-bg), 0 0 0 5px var(--arc-ink);
 }
 
 .arc-seal__label {
@@ -1094,6 +1131,10 @@ onUnmounted(() => {
 
 .arc-seal:focus-visible {
   --hot: 1;
+}
+
+.arc-seal.is-drawn .arc-seal__label {
+  visibility: hidden;
 }
 
 @media (hover: hover) {
@@ -1197,11 +1238,6 @@ onUnmounted(() => {
   gap: 2px;
 }
 
-.arc-orbit__stats div + div {
-  padding-left: 28px;
-  border-left: var(--arc-bw) solid var(--arc-line);
-}
-
 .arc-orbit__stats dt {
   font-size: var(--arc-fs-caption);
   color: var(--arc-muted);
@@ -1212,7 +1248,7 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(28px, 2.4vw, 36px);
+  font-size: var(--arc-fs-h3);
   line-height: 1.1;
   color: var(--acc-ink);
 }
@@ -1243,6 +1279,16 @@ onUnmounted(() => {
 .arc-orbit__abilities strong {
   font-weight: 600;
   color: var(--arc-ink);
+}
+
+/* a row topped up from Sequence 8 names its rung under the ability */
+.arc-orbit__abilities strong small {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--arc-fs-caption);
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--arc-muted);
 }
 
 .arc-orbit__abilities li span {

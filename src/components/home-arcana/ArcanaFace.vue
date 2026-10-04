@@ -82,7 +82,8 @@ const card = computed(() => cardById(props.id));
   position: relative;
   font-family: var(--arc-caps);
   font-weight: 500;
-  font-size: 7.5cqw;
+  /* the page's label size at least (the awaken scene's small face) */
+  font-size: max(11px, 7.5cqw);
   line-height: 1;
   letter-spacing: .08em;
   /* lifted toward white: the deepest accents (Abyss, Hermit) sit under 4.5:1 on the dark face */

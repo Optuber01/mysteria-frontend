@@ -6,8 +6,9 @@
       <!-- Copy: what this is, how to get in. Shown once the fonts are in, so nothing jumps. -->
       <div ref="introRef" class="arc-hero__intro" :class="{'is-ready': fontsReady}">
         <h1 id="arc-hero-title" class="arc-hero__title">
-          <span>{{ t('home.arcana.hero.titleA') }}</span>
-          <span class="arc-hero__title-accent">{{ t('home.arcana.hero.titleB') }}</span>
+          <span>{{ titleA }}</span>
+          <!-- one line in both states: a long name shrinks to the column (fitTitle), so the hero never changes height -->
+          <span class="arc-hero__title-accent"><span ref="accentRef" class="arc-hero__title-fit" :style="{'--fit': titleFit}">{{ titleB }}</span></span>
         </h1>
       </div>
 
@@ -158,6 +159,25 @@ import {useI18n} from '@/composables/useI18n';
 
 const {t, intlLocale} = useI18n();
 const {currentId, hasDrawn, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
+
+/* ---------------- headline: "Draw your first card", then "Read your {pathway}" ---------------- */
+const titleA = computed(() => t(hasDrawn.value ? 'home.arcana.hero.drawnTitleA' : 'home.arcana.hero.titleA'));
+const titleB = computed(() => (hasDrawn.value
+    ? t('home.arcana.hero.drawnTitleB').replace('{pathway}', nameOf(currentId.value))
+    : t('home.arcana.hero.titleB')));
+const accentRef = ref<HTMLElement | null>(null);
+/** Scale of the accent line: 1, or less when the name is wider than the copy column. */
+const titleFit = ref(1);
+function fitTitle() {
+  const line = accentRef.value;
+  // a couple of pixels spare for rounding, so the name never pokes past the column
+  const room = (introRef.value?.clientWidth ?? 0) - 2;
+  if (!line || room <= 0) return;
+  const natural = line.getBoundingClientRect().width / titleFit.value;
+  const next = natural > room ? Math.max(.4, Math.floor((room / natural) * 1000) / 1000) : 1;
+  if (Math.abs(next - titleFit.value) > .002) titleFit.value = next;
+}
+watch(titleB, () => nextTick(fitTitle));
 const addressRef = ref<HTMLElement | null>(null);
 const {state: copyState, copy, address} = useCopyAddress(addressRef);
 
@@ -860,8 +880,10 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(() => {
     measure();
     scheduleScene();
+    fitTitle();
   });
-  [heroRef.value, tableRef.value, introRef.value].forEach(el => el && resizeObserver?.observe(el));
+  // the name line too: it resizes when the display face swaps in, and is fitted again
+  [heroRef.value, tableRef.value, introRef.value, accentRef.value].forEach(el => el && resizeObserver?.observe(el));
   window.addEventListener('resize', measure);
 
   heroObserver = new IntersectionObserver(([entry]) => {
@@ -876,13 +898,19 @@ onMounted(() => {
 
   void introDeal();
   void ensurePathwayData();
-  void waitForFonts().then(() => (fontsReady.value = true));
+  void waitForFonts().then(() => {
+    fitTitle();
+    fontsReady.value = true;
+  });
+  // the display face can land after the capped wait: fit the name again on its real metrics
+  document.fonts?.addEventListener('loadingdone', fitTitle);
 });
 
 onUnmounted(() => {
   resizeObserver?.disconnect();
   heroObserver?.disconnect();
   window.removeEventListener('resize', measure);
+  document.fonts?.removeEventListener('loadingdone', fitTitle);
   unregister?.();
   running.forEach(a => a.cancel());
   if (tiltFrame !== null) cancelAnimationFrame(tiltFrame);
@@ -898,11 +926,19 @@ onUnmounted(() => {
   padding: calc(var(--site-header-stack, 106px) + clamp(12px, 2.6vh, 36px)) clamp(18px, 4vw, 64px) clamp(20px, 3.4vh, 44px);
   /* the page's gutter, so the copy starts on the same edge as every section below */
   padding-inline: var(--arc-gutter);
-  /* room under the deck before the potion story's dark room begins (a clean edge in the light theme) */
+  /* room under the deck before the potion story's room comes up over the city */
   padding-bottom: calc(var(--roof-h, 96px) + clamp(0px, 1vh, 12px));
   display: flex;
   align-items: center;
   overflow: clip;
+}
+
+/* Over the pinned potion story the night runs on below the hero, under the room's see-through top (HeroNightScene). */
+@media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+  .arc-hero {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
 }
 
 .arc-hero__grid {
@@ -956,18 +992,27 @@ onUnmounted(() => {
   text-shadow: 0 2px 30px color-mix(in srgb, var(--arc-bg) 60%, transparent);
 }
 
-.arc-hero__title span {
+.arc-hero__title > span {
   display: block;
 }
 
 .arc-hero__title-accent {
   color: var(--acc-ink);
+  white-space: nowrap;
+}
+
+/* scaled by --fit with the line box kept at the title's own height (top-aligned, line-height compensated) */
+.arc-hero__title-fit {
+  display: inline-block;
+  vertical-align: top;
+  font-size: calc(1em * var(--fit, 1));
+  line-height: calc(.92 / var(--fit, 1));
 }
 
 .arc-hero__lede {
   max-width: 34em;
   margin: 0 0 clamp(20px, 3.2vh, 30px);
-  font-size: clamp(16px, 1.2vw, 19px);
+  font-size: var(--arc-fs-lede);
   line-height: 1.6;
   color: color-mix(in oklab, var(--arc-ink) 72%, var(--arc-muted));
   text-wrap: pretty;
@@ -1023,6 +1068,14 @@ onUnmounted(() => {
 .arc-hero .arc-ip {
   /* the field look (spec, global .arc-ip); blurred where it lies over the night scene */
   backdrop-filter: blur(6px);
+}
+
+/* The header's server chip shows and copies the address on wide screens; the hero's field
+   only stands in where the bar drops the chip (HeaderItem, max-width 1220px). */
+@media (min-width: 1221px) {
+  .arc-hero__meta {
+    display: none;
+  }
 }
 
 .arc-hero__copy-note {
@@ -1276,7 +1329,10 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: 4px;
+  /* padded for a rounded focus ring; the negative margin keeps the text where it was */
+  margin: -4px -6px -4px -2px;
+  padding: 4px 6px;
+  border-radius: var(--arc-r-sm);
   font-weight: 600;
   color: var(--arc-ink);
   text-decoration: none;
@@ -1285,6 +1341,11 @@ onUnmounted(() => {
 
 .arc-hero__read:hover {
   color: var(--arc-ink);
+}
+
+.arc-hero__read:focus-visible {
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 .arc-hero__read i {

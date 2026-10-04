@@ -35,7 +35,6 @@
     </div>
     <i ref="duskRef" class="night__dusk"></i>
     <i class="night__scrim"></i>
-    <i class="night__horizon"></i>
   </div>
 </template>
 
@@ -57,10 +56,12 @@ onMounted(() => {
 });
 
 /*
- * Leaving the hero is a descent: the far scene (sky, moon, castle) falls behind the
- * page, the moon sets behind the roofs and the night closes over it, while the potion
- * story's rooftops rise from below. Transform and opacity only, written straight to
- * three elements once per frame; the hero box is measured on resize, never per frame.
+ * Leaving the hero is a descent: the far scene (sky, moon, castle) falls behind the page
+ * and the camera closes in on the city while the night deepens over it. The scene runs on
+ * under the potion story (its tail, below), whose see-through top deepens into the
+ * brewery over it: the city sinks into the room in one picture. Transform and opacity
+ * only, written straight to three elements once per frame; the hero box is measured on
+ * resize, never per frame.
  */
 const rootRef = ref<HTMLElement | null>(null);
 const viewRef = ref<HTMLElement | null>(null);
@@ -69,7 +70,9 @@ const duskRef = ref<HTMLElement | null>(null);
 /** How much of the scroll the far scene and the moon give back (0 = scrolls with the page). */
 const VIEW_LAG = 0.34;
 const MOON_SINK = 0.24;
-const DUSK = 0.6;
+const DUSK = 0.5;
+/** How far the camera closes in on the city by the time the hero has scrolled away. */
+const ZOOM = 0.12;
 
 let sceneTop = 0;
 let sceneH = 0;
@@ -110,7 +113,8 @@ function apply() {
   // eased in, so the first flick of the wheel moves nothing out of step with the deck
   const a = sceneH * 0.2;
   const run = s < a ? (s * s) / (2 * a) : s - a / 2;
-  view.style.transform = `translate3d(0, ${(run * VIEW_LAG).toFixed(1)}px, 0)`;
+  const near = s / sceneH;
+  view.style.transform = `translate3d(0, ${(run * VIEW_LAG).toFixed(1)}px, 0) scale(${(1 + ZOOM * near * near).toFixed(4)})`;
   moonBox.style.transform = `translate3d(0, ${(run * MOON_SINK).toFixed(1)}px, 0)`;
   dusk.style.opacity = (Math.min(1, Math.max(0, (s - a) / (sceneH - a))) * DUSK).toFixed(3);
 }
@@ -158,6 +162,8 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   background: inherit;
+  /* the camera closes in on the castle's foot */
+  transform-origin: var(--moon-x, 72%) calc(var(--moon-y, 48%) + var(--moon-r, 200px));
   will-change: transform;
 }
 
@@ -358,27 +364,6 @@ onUnmounted(() => {
     linear-gradient(0deg, var(--s) 0%, color-mix(in srgb, var(--s) 85%, transparent) 9%, transparent 24%);
 }
 
-/*
- * The last of the city's light along the horizon: the roofline of the potion story climbs
- * out of the hero's bottom edge against it, so the dark room is a silhouette, not a seam.
- * Static (it scrolls with the hero), plain gradient. The light theme has its own paper sky.
- */
-.night__horizon {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: calc(var(--roof-h, 120px) * 2.4);
-  background: linear-gradient(0deg,
-      color-mix(in oklab, var(--acc) 30%, #2b2a33) 0%,
-      color-mix(in oklab, var(--acc) 16%, #1a1a20) 38%,
-      transparent 100%);
-}
-
-:root[data-theme="parchment"] .night__horizon {
-  display: none;
-}
-
 /* Stacked layout: the scene is a band behind the title and the deck. */
 @media (max-width: 900px) {
   .night__scrim {
@@ -450,6 +435,50 @@ onUnmounted(() => {
     -webkit-mask-composite: source-in;
     mask: var(--city-mask) 0 0 / 100% 100% no-repeat, linear-gradient(180deg, #000 50%, transparent 72%);
     mask-composite: intersect;
+  }
+}
+
+/*
+ * Under the pinned potion story the night runs on below the hero (--night-tail): the
+ * streets go on down instead of fading to the page colour, and the story's see-through
+ * top deepens into the room over them (ProgressionStory --room-in). The sky photo and
+ * the scrims keep the hero's own box, so the hero itself looks as it did.
+ */
+@media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+  .night {
+    /* as far as the story's see-through top reaches (ProgressionStory --room-in); below it the room is opaque */
+    --night-tail: clamp(300px, 46vh, 520px);
+    height: calc(var(--scene-h, 100svh) + var(--night-tail));
+    background-color: #0d0d11;
+  }
+
+  .night__sky {
+    height: var(--scene-h, 100%);
+    -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent);
+    mask-image: linear-gradient(180deg, #000 62%, transparent);
+  }
+
+  /* the city's foot dissolves into the night below it, never a cut */
+  .night__city {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%), linear-gradient(180deg, #000 74%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent 0, #000 22%), linear-gradient(180deg, #000 74%, transparent);
+    mask-composite: intersect;
+  }
+
+  /* the copy column (down the tail too) and the header only: nothing closes the bottom off */
+  .night__scrim {
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--s) 90%, transparent) 0%, color-mix(in srgb, var(--s) 72%, transparent) 30%, color-mix(in srgb, var(--s) 20%, transparent) 52%, transparent 62%),
+      linear-gradient(180deg, color-mix(in srgb, var(--s) 60%, transparent) 0%, transparent calc(var(--site-header-stack, 106px) + 60px));
+  }
+
+  /* first light: the paper sky keeps the hero's box; below it, plain paper */
+  :root[data-theme="parchment"] .night {
+    --night-tail: clamp(170px, 24vh, 240px);
+    background-color: var(--arc-bg);
+    background-repeat: no-repeat;
+    background-size: 100% var(--scene-h, 100%);
   }
 }
 
