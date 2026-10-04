@@ -6,7 +6,7 @@
 
     <div class="arc-shell">
       <span id="join" class="arc-future__anchor" aria-hidden="true"></span>
-      <ArcanaSectionHead split :position="t('home.world.join.position')" title-id="arc-future-title">
+      <ArcanaSectionHead split title-id="arc-future-title">
         <template #title>{{ t('home.world.join.titleA') }} <em>{{ t('home.world.join.titleB') }}</em></template>
         {{ lede }}
       </ArcanaSectionHead>
@@ -52,22 +52,22 @@
               </div>
             </li>
           </ol>
-          <div class="arc-future__actions">
-            <RouterLink :to="$lp('/guide/connect')" class="arc-btn arc-btn--solid">
-              {{ t('home.world.join.guide') }}
-              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </RouterLink>
-            <a :href="DISCORD" class="arc-btn arc-btn--ghost" target="_blank" rel="noopener noreferrer">
-              <IconDiscord class="arc-btn__icon" aria-hidden="true"/>
-              {{ t('home.world.join.discord') }}
-            </a>
-          </div>
+        </div>
+
+        <div class="arc-future__actions">
+          <RouterLink :to="$lp('/guide/connect')" class="arc-btn arc-btn--solid">
+            {{ t('home.world.join.guide') }}
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </RouterLink>
+          <a :href="DISCORD" class="arc-btn arc-btn--ghost" target="_blank" rel="noopener noreferrer">
+            <IconDiscord class="arc-btn__icon" aria-hidden="true"/>
+            {{ t('home.world.join.discord') }}
+          </a>
         </div>
 
         <div class="arc-future__side">
           <!-- live status -->
           <div class="arc-live" :class="statusClass">
-            <p class="arc-label">{{ t('home.world.join.liveLabel') }}</p>
             <div class="arc-live__row">
               <span class="arc-live__dot" aria-hidden="true"></span>
               <span v-if="isOnline && checkedAt" class="arc-live__count">{{ playerCount ?? 0 }}</span>
@@ -82,13 +82,10 @@
 
           <!-- latest update -->
           <RouterLink :to="$lp(newsLink)" class="arc-news">
-            <p class="arc-label">{{ t('home.world.join.newsLabel') }}</p>
+            <time v-if="newsDate" class="arc-news__date" :datetime="newsDateIso">{{ newsDate }}</time>
             <h3>{{ newsTitle }}</h3>
             <p v-if="newsBody" class="arc-news__body">{{ newsBody }}</p>
-            <span class="arc-news__meta">
-              <span>{{ newsDate }}</span>
-              <span class="arc-news__read">{{ t('home.world.join.newsRead') }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
-            </span>
+            <span class="arc-news__read">{{ t('home.world.join.newsRead') }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
           </RouterLink>
         </div>
       </div>
@@ -97,29 +94,31 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref, watch} from 'vue';
+import {computed, ref} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {useServerStatus} from '@/composables/useServer';
 import {useBeyonderStats} from '@/composables/useBeyonderStats';
-import {newsAPI} from '@/utils/api/news';
-import type {NewsArticle} from '@/types/news';
 import {SEASON_ANNOUNCEMENT_SLUG} from '@/constants/season';
 import IconDiscord from '@/assets/icons/IconDiscord.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import {useArcana} from './useArcana';
 import {useCopyAddress} from './useCopyAddress';
+import {useLatestNews} from './useLatestNews';
 import sky from '@/assets/images/home-library/captures/hero-aurora-cliffside.webp';
 
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
 
-const {t, intlLocale, locale, currentLanguage} = useI18n();
-const {reading} = useArcana();
+const {t, intlLocale} = useI18n();
+const {reading, hasDrawn} = useArcana();
 const addressRef = ref<HTMLElement | null>(null);
 const {state: copyState, copy, address} = useCopyAddress(addressRef);
 const {isOnline, playerCount, checkedAt} = useServerStatus();
 const {totalBeyonders} = useBeyonderStats();
 
-const lede = computed(() => t('home.world.join.ledeRole').replace('{role}', reading.value.seq9 || reading.value.name));
+/* Before a draw the lede stays general; after one it can name the first potion of the drawn Pathway. */
+const lede = computed(() => (hasDrawn.value
+    ? t('home.world.join.ledeRole').replace('{role}', reading.value.seq9 || reading.value.name)
+    : t('home.world.join.lede')));
 
 const copyLabel = computed(() => ({
   idle: t('home.arcana.ip.copy'),
@@ -154,27 +153,21 @@ const seasonCount = computed(() => (totalBeyonders.value
     : t('home.world.join.seasonFallback')));
 
 /* ---- latest update ---- */
-const latest = ref<NewsArticle | null>(null);
-async function loadNews() {
-  try {
-    const response = await newsAPI.getLatest(locale.value.articleLocale);
-    latest.value = Array.isArray(response.data) && response.data.length ? response.data[0] : null;
-  } catch {
-    latest.value = null;
-  }
-}
-onMounted(loadNews);
-watch(currentLanguage, loadNews);
+// Shared with the hero's changelog button: one request for both.
+const {latest} = useLatestNews();
 
 const fallbackLink = SEASON_ANNOUNCEMENT_SLUG ? `/news/${SEASON_ANNOUNCEMENT_SLUG}` : '/news';
 const newsLink = computed(() => (latest.value ? `/news/${latest.value.slug}` : fallbackLink));
 const newsTitle = computed(() => latest.value?.title ?? t('home.world.join.newsFallbackTitle'));
 const newsBody = computed(() => latest.value?.shortDescription ?? t('home.world.join.newsFallbackBody'));
-const newsDate = computed(() => {
+const newsDateValue = computed(() => {
   const raw = latest.value?.publishedAt ?? latest.value?.createdAt;
-  if (!raw) return '';
-  return new Date(raw).toLocaleDateString(intlLocale.value, {day: 'numeric', month: 'long', year: 'numeric'});
+  const date = raw ? new Date(raw) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
 });
+const newsDateIso = computed(() => newsDateValue.value?.toISOString());
+const newsDate = computed(() => newsDateValue.value
+    ?.toLocaleDateString(intlLocale.value, {day: 'numeric', month: 'long', year: 'numeric'}) ?? '');
 </script>
 
 <style scoped>
@@ -221,8 +214,16 @@ const newsDate = computed(() => {
 .arc-future__grid {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: clamp(20px, 2.4vw, 32px);
-  align-items: start;
+  grid-template-areas:
+    'steps side'
+    'actions .';
+  gap: 20px clamp(20px, 2.4vw, 32px);
+  /* both columns run to the same line: the news card stretches to the last step's foot */
+  align-items: stretch;
+}
+
+.arc-future__steps {
+  grid-area: steps;
 }
 
 /* ---- steps ---- */
@@ -242,7 +243,6 @@ const newsDate = computed(() => {
   border-radius: var(--arc-radius);
   background: color-mix(in oklab, var(--arc-surface) 88%, transparent);
   box-shadow: inset 0 0 0 1px var(--arc-line);
-  backdrop-filter: blur(6px);
 }
 
 .arc-step__num {
@@ -273,6 +273,7 @@ const newsDate = computed(() => {
 }
 
 .arc-step p {
+  text-wrap: pretty;
   margin: 0;
   font-size: 15px;
   line-height: 1.6;
@@ -299,15 +300,17 @@ const newsDate = computed(() => {
 }
 
 .arc-future__actions {
+  grid-area: actions;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 20px;
 }
 
 /* ---- live + news ---- */
 .arc-future__side {
+  grid-area: side;
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: 12px;
 }
 
@@ -318,7 +321,6 @@ const newsDate = computed(() => {
   border-radius: var(--arc-radius);
   background: color-mix(in oklab, var(--arc-surface) 88%, transparent);
   box-shadow: inset 0 0 0 1px var(--arc-line);
-  backdrop-filter: blur(6px);
 }
 
 .arc-live__row {
@@ -326,7 +328,7 @@ const newsDate = computed(() => {
   align-items: baseline;
   min-height: 54px;
   gap: 12px;
-  margin: 10px 0 6px;
+  margin: 0 0 8px;
 }
 
 .arc-live__dot {
@@ -339,7 +341,17 @@ const newsDate = computed(() => {
 }
 
 .is-online .arc-live__dot {
+  position: relative;
   background: #4ade80;
+}
+
+/* the ring grows and fades (transform + opacity, composited) instead of animating a box-shadow */
+.is-online .arc-live__dot::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, .55);
+  content: '';
   animation: arc-pulse 2s infinite;
 }
 
@@ -348,9 +360,9 @@ const newsDate = computed(() => {
 }
 
 @keyframes arc-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, .55); }
-  70% { box-shadow: 0 0 0 12px rgba(74, 222, 128, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+  0% { transform: scale(1); opacity: 1; }
+  70% { transform: scale(3); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
 }
 
 .arc-live__count {
@@ -370,9 +382,8 @@ const newsDate = computed(() => {
 
 .arc-live__meta {
   margin: 0;
-  font-family: var(--arc-caps);
-  font-size: 10.5px;
-  letter-spacing: .08em;
+  font-size: 13px;
+  line-height: 1.4;
   color: var(--arc-muted);
 }
 
@@ -401,6 +412,9 @@ const newsDate = computed(() => {
 }
 
 .arc-news {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   color: inherit;
   transition: box-shadow .25s, transform .35s cubic-bezier(.2, .8, .2, 1);
 }
@@ -411,8 +425,15 @@ const newsDate = computed(() => {
   box-shadow: inset 0 0 0 1px var(--acc);
 }
 
+.arc-news__date {
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--arc-muted);
+}
+
 .arc-news h3 {
-  margin: 10px 0 8px;
+  margin: 0 0 8px;
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
@@ -432,26 +453,38 @@ const newsDate = computed(() => {
   overflow: hidden;
 }
 
-.arc-news__meta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+.arc-news__read {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--arc-muted);
+  margin-top: auto;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--arc-ink);
 }
 
-.arc-news__read {
-  margin-left: auto;
+.arc-news__read i {
+  font-size: 12px;
   color: var(--acc);
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.arc-news:hover .arc-news__read i {
+  transform: translateX(3px);
 }
 
 @media (max-width: 960px) {
   .arc-future__grid {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'steps'
+      'actions'
+      'side';
+  }
+
+  .arc-future__side {
+    grid-template-rows: none;
   }
 }
 
@@ -469,8 +502,9 @@ const newsDate = computed(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .is-online .arc-live__dot {
+  .is-online .arc-live__dot::after {
     animation: none;
+    opacity: 0;
   }
 }
 </style>

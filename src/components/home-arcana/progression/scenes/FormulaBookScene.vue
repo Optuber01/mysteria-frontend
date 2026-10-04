@@ -1,7 +1,5 @@
 <template>
   <div class="book-scene" :class="{ 'is-readable': readable }" role="group" :aria-label="tp('book.sceneLabel')">
-    <p class="book-scene__caption" :style="captionStyle" aria-hidden="true">{{ tp('book.caption') }}</p>
-
     <div class="book-scene__box" :style="boxStyle">
       <div class="book-scene__glow" :style="{ opacity: glow.toFixed(4) }" aria-hidden="true" />
       <div class="book-scene__rig" :style="{ opacity: entrance.toFixed(4) }">
@@ -69,7 +67,8 @@ const { tp, names, ingredients, recipe, card } = useProgressionCopy();
 const labels = computed<BookLabels>(() => {
   const entry = (role: 'main' | 'supplementary') => ingredients.value
     .filter((item) => item.role === role)
-    .map((item) => ({ key: item.key, name: item.name, icon: item.icon, role: tp(`ingredients.${role}Role`) }));
+    // the page's heading already says which kind each entry is
+    .map((item) => ({ key: item.key, name: item.name, icon: item.icon, role: '' }));
   return {
     mainHeading: tp('book.mainHeading'),
     supplementaryHeading: tp('book.supplementaryHeading'),
@@ -100,12 +99,6 @@ const boxStyle = computed<CSSProperties>(() => {
   const b = props.layout?.book;
   if (!b) return { opacity: 0 };
   return { left: `${b.x.toFixed(1)}px`, top: `${b.y.toFixed(1)}px`, width: `${b.w.toFixed(1)}px`, height: `${b.h.toFixed(1)}px` };
-});
-const captionStyle = computed<CSSProperties>(() => {
-  const l = props.layout;
-  if (!l) return { opacity: 0 };
-  const shown = reducedMotion.value ? 1 : smooth((bookLocal.value - 0.3) / 0.2) * (1 - ease(g.value, [T.brewIn[0], T.brewIn[0] + 0.02]));
-  return { top: `${l.bookCaptionY.toFixed(1)}px`, opacity: shown.toFixed(4) };
 });
 
 const anchors = ref<BookAnchors>({});
@@ -152,33 +145,6 @@ function inspect(id: string, event: Event) {
 .book-scene {
   position: absolute;
   inset: 0;
-}
-
-/* Exhibit tag over the book. */
-.book-scene__caption {
-  position: absolute;
-  z-index: 3;
-  left: 50%;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  color: var(--acc);
-  font: 400 11px/1 var(--arc-caps);
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.book-scene__caption::before,
-.book-scene__caption::after {
-  width: 18px;
-  height: 1px;
-  background: currentColor;
-  content: '';
-  opacity: .7;
 }
 
 .book-scene__box {

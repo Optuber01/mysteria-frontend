@@ -22,6 +22,12 @@ const core = (id: string, numeral: string, accent: string, en: string): ArcanaCa
 const boon = (id: string, accent: string, en: string): ArcanaCard =>
   ({id, numeral: '', accent, en, boon: true});
 
+/**
+ * The page's accent before the visitor has drawn: a lighter cut of the crimson moon
+ * (5.6:1 as text on the page background, and dark text on it reads just as well).
+ */
+export const NEUTRAL_ACCENT = '#e45a64';
+
 /** The 22, in arcana order. Tarot-named pathways keep their canonical numbers. */
 export const CORE_CARDS: readonly ArcanaCard[] = [
   core('fool', '0', '#a78bfa', 'Fool'),

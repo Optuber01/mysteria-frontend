@@ -113,7 +113,8 @@ function lerp(a: number, b: number, t: number): number {
 
 function paintBottle() {
   if (!bottleCanvas || !bottleTexture) return;
-  const context = bottleCanvas.getContext('2d');
+  // CPU-backed: only ever uploaded as a texture, so the upload needs no GPU readback
+  const context = bottleCanvas.getContext('2d', { willReadFrequently: true });
   if (!context) return;
   context.imageSmoothingEnabled = false;
   drawVial(context, hexToRgb(props.accent), props.level);
@@ -341,8 +342,19 @@ function syncPlayback() {
   animation.update(viewer.playerObject, 0);
   animation.paused = true;
   if (holder) holder.visible = props.holding;
-  if (inViewport.value) viewer.render();
+  requestRender();
   emitBottle();
+}
+
+/* Pose, light and bottle changes from one scroll step share a single WebGL frame. */
+let renderQueued = false;
+function requestRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  queueMicrotask(() => {
+    renderQueued = false;
+    if (inViewport.value && viewer && !viewer.disposed) viewer.render();
+  });
 }
 
 async function createViewer() {
@@ -412,7 +424,7 @@ onMounted(() => {
 watch(() => props.armed, maybeCreateViewer);
 watch(() => [props.glow, props.shade] as const, () => {
   applyLighting();
-  if (inViewport.value && viewer && !viewer.disposed) viewer.render();
+  requestRender();
 });
 watch(() => props.accent, () => {
   setBand();
@@ -422,7 +434,7 @@ watch(() => props.accent, () => {
 });
 watch(() => vialRows(props.level), () => {
   paintBottle();
-  if (inViewport.value && viewer && !viewer.disposed) viewer.render();
+  requestRender();
 });
 watch(
   () => [props.mode, props.progress, props.reach, props.lift, props.sip, props.lower, props.holding, reducedMotion.value] as const,

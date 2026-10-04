@@ -9,7 +9,6 @@
       :class="{ 'inspector--instant': reducedMotion, 'is-positioned': positioned }"
       role="tooltip"
     >
-      <span>{{ t('home.progression.inspector.kicker') }}</span>
       <strong>{{ title }}</strong>
       <p>{{ description }}</p>
       <i ref="arrowRef" class="inspector__arrow" />
@@ -22,7 +21,6 @@
 import { autoUpdate, computePosition, flip, offset, shift, size, arrow } from '@floating-ui/dom';
 import { nextTick, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
-import { useI18n } from '@/composables/useI18n';
 
 const props = defineProps<{
   id?: string;
@@ -36,7 +34,6 @@ const props = defineProps<{
 const popoverRef = ref<HTMLElement | null>(null);
 const arrowRef = ref<HTMLElement | null>(null);
 const reducedMotion = useReducedMotion();
-const { t } = useI18n();
 // Stays hidden until floating-ui has placed it, so it never flashes at the
 // viewport origin.
 const positioned = ref(false);
@@ -120,17 +117,7 @@ onUnmounted(() => cleanup?.());
   pointer-events: none;
 }
 .inspector.is-positioned { visibility: visible; }
-.inspector > span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--acc, #a78bfa);
-  font: 400 10.5px/1 var(--arc-caps, system-ui, sans-serif);
-  letter-spacing: .16em;
-  text-transform: uppercase;
-}
-.inspector > span::before { width: 14px; height: 1px; background: currentColor; content: ''; }
-.inspector strong { display: block; margin-top: 10px; color: var(--arc-ink, #efeef3); font-size: 15px; font-weight: 600; line-height: 1.3; }
+.inspector strong { display: block; color: var(--arc-ink, #efeef3); font-size: 15px; font-weight: 600; line-height: 1.3; }
 .inspector p { margin: 6px 0 0; color: var(--arc-muted, #a7a6b2); font-size: 13.5px; line-height: 1.5; }
 .inspector__arrow {
   position: absolute;

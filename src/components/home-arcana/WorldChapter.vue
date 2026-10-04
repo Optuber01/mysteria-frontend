@@ -1,7 +1,7 @@
 <template>
   <section id="world" class="arc-section world" aria-labelledby="world-title">
     <div class="arc-shell">
-      <ArcanaSectionHead split :position="t('home.world.position')" title-id="world-title">
+      <ArcanaSectionHead split title-id="world-title">
         <template #title>{{ t('home.world.titleA') }} <em>{{ t('home.world.titleB') }}</em></template>
         {{ t('home.world.lede') }}
       </ArcanaSectionHead>
@@ -15,10 +15,9 @@
         </li>
       </ul>
 
-      <!-- 01 · out there -->
+      <!-- out there: what to fight -->
       <section class="world-group" aria-labelledby="world-fight-title">
         <header class="world-group__head">
-          <p class="world-group__kicker"><b>01</b>{{ t('home.world.groups.fight.kicker') }}</p>
           <h3 id="world-fight-title">{{ t('home.world.groups.fight.title') }}</h3>
         </header>
 
@@ -30,7 +29,6 @@
               sizes="(max-width: 900px) 100vw, 58vw"
           />
           <div class="world-feature__copy">
-            <p class="world-tag">{{ t('home.world.rifts.tag') }}</p>
             <h4 class="world-feature__title">{{ t('home.world.rifts.title') }}</h4>
             <p class="world-feature__body">{{ t('home.world.rifts.body') }}</p>
             <ol class="world-steps">
@@ -50,7 +48,6 @@
           <li class="world-card">
             <WorldPhoto class="world-card__photo" :shot="shots.guardians" :alt="t('home.world.guardians.alt')" credit="tr" sizes="(max-width: 900px) 100vw, 34vw"/>
             <div class="world-card__copy">
-              <p class="world-tag">{{ t('home.world.guardians.tag') }}</p>
               <h4>{{ t('home.world.guardians.title') }}</h4>
               <p>{{ t('home.world.guardians.body') }}</p>
               <p class="world-card__fact"><i class="fa-solid fa-certificate" aria-hidden="true"></i>{{ t('home.world.guardians.fact') }}</p>
@@ -65,7 +62,6 @@
               </span>
             </div>
             <div class="world-card__copy">
-              <p class="world-tag">{{ t('home.world.moon.tag') }}</p>
               <h4>{{ t('home.world.moon.title') }}</h4>
               <p>{{ t('home.world.moon.body') }}</p>
               <p class="world-card__fact"><i class="fa-solid fa-eye" aria-hidden="true"></i>{{ moonFact }}</p>
@@ -75,7 +71,6 @@
           <li class="world-card">
             <WorldPhoto class="world-card__photo" :shot="shots.incursions" :alt="t('home.world.incursions.alt')" credit="tr" sizes="(max-width: 900px) 100vw, 34vw"/>
             <div class="world-card__copy">
-              <p class="world-tag">{{ t('home.world.incursions.tag') }}</p>
               <h4>{{ t('home.world.incursions.title') }}</h4>
               <p>{{ t('home.world.incursions.body') }}</p>
               <p class="world-card__fact"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>{{ t('home.world.incursions.fact') }}</p>
@@ -84,10 +79,9 @@
         </ul>
       </section>
 
-      <!-- 02 · among players -->
+      <!-- among players: what to build -->
       <section class="world-group" aria-labelledby="world-build-title">
         <header class="world-group__head">
-          <p class="world-group__kicker"><b>02</b>{{ t('home.world.groups.build.kicker') }}</p>
           <h3 id="world-build-title">{{ t('home.world.groups.build.title') }}</h3>
         </header>
 
@@ -98,7 +92,6 @@
             <WorldPhoto class="world-mosaic__side" :shot="shots.townB" :alt="t('home.world.towns.altB')" sizes="(max-width: 900px) 50vw, 29vw"/>
           </div>
           <div class="world-feature__copy">
-            <p class="world-tag">{{ t('home.world.towns.tag') }}</p>
             <h4 class="world-feature__title">{{ t('home.world.towns.title') }}</h4>
             <p class="world-feature__body">{{ t('home.world.towns.body') }}</p>
             <ol class="world-ladder">
@@ -116,7 +109,6 @@
           <li v-for="item in societyCards" :key="item.key" class="world-card">
             <WorldPhoto class="world-card__photo" :shot="item.shot" :alt="item.alt" credit="tr" sizes="(max-width: 900px) 100vw, 34vw"/>
             <div class="world-card__copy">
-              <p class="world-tag">{{ item.tag }}</p>
               <h4>{{ item.title }}</h4>
               <p>{{ item.body }}</p>
               <p class="world-card__fact"><i :class="item.icon" aria-hidden="true"></i>{{ item.fact }}</p>
@@ -127,10 +119,7 @@
 
       <!-- the gallery: everything the players made -->
       <header class="world-gallery__head">
-        <div>
-          <p class="world-group__kicker"><b>✶</b>{{ t('home.world.gallery.kicker') }}</p>
-          <h3>{{ t('home.world.gallery.title') }}</h3>
-        </div>
+        <h3>{{ t('home.world.gallery.title') }}</h3>
         <div class="world-gallery__aside">
           <p>{{ t('home.world.gallery.lede') }}</p>
           <div class="world-gallery__actions">
@@ -164,7 +153,7 @@
     >
       <ul class="world-strip__track">
         <li v-for="item in gallery" :key="item.id" class="world-strip__item" :aria-hidden="item.copy || undefined">
-          <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" credit="bl" sizes="360px"/>
+          <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" credit="bl" sizes="360px" :eager="stripWarm"/>
         </li>
       </ul>
     </div>
@@ -172,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import IconDiscord from '@/assets/icons/IconDiscord.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
@@ -184,7 +173,7 @@ import moon from '@/assets/images/home-library/crimson-moon.webp';
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
 
 const {t} = useI18n();
-const {reading} = useArcana();
+const {reading, hasDrawn} = useArcana();
 const shots = TOPIC_SHOTS;
 
 const rules = computed(() => [
@@ -210,7 +199,10 @@ const ladder = computed(() => ['town', 'domain', 'nation'].map(key => ({
   body: t(`home.world.towns.ladder.${key}.body`),
 })));
 
-const moonFact = computed(() => t('home.world.moon.pathwayFact').replace('{pathway}', reading.value.name));
+/* Before a draw there is no "your Pathway" to speak of, so the fact stays general. */
+const moonFact = computed(() => (hasDrawn.value
+    ? t('home.world.moon.pathwayFact').replace('{pathway}', reading.value.name)
+    : t('home.world.moon.fact')));
 
 const SOCIETY_FACTS = {
   churches: {icon: 'fa-solid fa-scroll', key: 'home.world.churches.fact'},
@@ -222,7 +214,6 @@ const societyCards = computed(() => (['churches', 'economy', 'orders'] as const)
   icon: SOCIETY_FACTS[key].icon,
   fact: t(SOCIETY_FACTS[key].key),
   shot: shots[key],
-  tag: t(`home.world.${key}.tag`),
   title: t(`home.world.${key}.title`),
   body: t(`home.world.${key}.body`),
   alt: t(`home.world.${key}.alt`),
@@ -232,6 +223,9 @@ const societyCards = computed(() => (['churches', 'economy', 'orders'] as const)
 const reducedMotion = ref(false);
 const paused = ref(false);
 const inView = ref(false);
+/* Once the strip is on screen, load every tile: lazy ones clipped by the strip would pop in blank. */
+const stripWarm = ref(false);
+watch(inView, visible => visible && (stripWarm.value = true));
 const stripRef = ref<HTMLElement | null>(null);
 
 const gallery = computed(() => {
@@ -301,6 +295,7 @@ onUnmounted(() => {
   font-size: 14px;
   line-height: 1.5;
   color: var(--arc-muted);
+  text-wrap: pretty;
 }
 
 /* ---------- groups ---------- */
@@ -310,34 +305,6 @@ onUnmounted(() => {
 
 .world-group__head {
   margin-bottom: clamp(22px, 2.6vw, 36px);
-}
-
-.world-group__kicker {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 12px;
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--arc-muted);
-}
-
-.world-group__kicker b {
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0;
-  color: var(--acc);
-}
-
-.world-group__kicker::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--arc-line), transparent);
 }
 
 .world-group__head h3,
@@ -351,22 +318,6 @@ onUnmounted(() => {
   letter-spacing: -.02em;
   color: var(--arc-ink);
   text-wrap: balance;
-}
-
-/* ---------- tag (shared by features and cards) ---------- */
-.world-tag {
-  display: inline-block;
-  margin: 0 0 12px;
-  padding: 4px 10px;
-  border-radius: 99px;
-  background: color-mix(in oklab, var(--acc) 20%, rgba(8, 8, 10, .72));
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 34%, transparent);
-  font-family: var(--arc-caps);
-  font-size: 10.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: #fff;
-  transition: background-color .6s ease, box-shadow .6s ease;
 }
 
 /* ---------- feature: a wide shot and its story ---------- */
@@ -402,6 +353,7 @@ onUnmounted(() => {
 }
 
 .world-feature__body {
+  text-wrap: pretty;
   margin: 0 0 22px;
   font-size: var(--arc-fs-body);
   line-height: 1.65;
@@ -417,6 +369,7 @@ onUnmounted(() => {
 }
 
 .world-steps li {
+  text-wrap: pretty;
   position: relative;
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr);
@@ -464,28 +417,28 @@ onUnmounted(() => {
 .world-facts {
   list-style: none;
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  padding: 16px 0 0;
+  display: grid;
   gap: 8px;
+  border-top: 1px solid var(--arc-line);
 }
 
 .world-facts li {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, .035);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
-  font-size: 13.5px;
-  line-height: 1.35;
+  text-wrap: pretty;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--arc-ink);
 }
 
 .world-facts i,
 .world-feature__note i,
 .world-card__fact i {
+  flex: none;
+  width: 14px;
+  text-align: center;
   color: var(--acc);
   font-size: 12px;
 }
@@ -556,6 +509,7 @@ onUnmounted(() => {
 }
 
 .world-ladder span:last-child {
+  text-wrap: pretty;
   font-size: 13.5px;
   line-height: 1.45;
   color: var(--arc-muted);
@@ -652,7 +606,8 @@ onUnmounted(() => {
   color: var(--arc-ink);
 }
 
-.world-card__copy > p:not(.world-tag) {
+.world-card__copy > p {
+  text-wrap: pretty;
   margin: 0;
   font-size: 14.5px;
   line-height: 1.6;
@@ -671,7 +626,7 @@ onUnmounted(() => {
   color: var(--arc-ink);
 }
 
-.world-card__copy > p:not(.world-tag):not(.world-card__fact) {
+.world-card__copy > p:not(.world-card__fact) {
   margin-bottom: 16px;
 }
 
@@ -751,6 +706,7 @@ onUnmounted(() => {
   line-height: 1.6;
   color: var(--arc-muted);
   text-align: right;
+  text-wrap: balance;
 }
 
 .world-gallery__actions {

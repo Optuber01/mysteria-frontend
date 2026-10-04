@@ -87,6 +87,9 @@ let running = false;
 let lastTime = 0;
 let burstTriggered = false;
 let resizeObserver: ResizeObserver | null = null;
+let viewObserver: IntersectionObserver | null = null;
+/** False while the canvas is scrolled out of view: the loop holds (and keeps its particles). */
+let onScreen = true;
 let reducedQuery: MediaQueryList | null = null;
 const reducedMotion = ref(false);
 
@@ -464,7 +467,7 @@ function render(t: number, dt: number): void {
 function start(): void {
   if (running) return;
   if (!ctx || !width || !height) return;
-  if (!props.active || document.visibilityState !== 'visible' || reducedMotion.value) return;
+  if (!props.active || !onScreen || document.visibilityState !== 'visible' || reducedMotion.value) return;
   running = true;
   lastTime = performance.now();
   rafId = requestAnimationFrame(tick);
@@ -486,6 +489,11 @@ function tick(now: number): void {
   }
   if (!props.active || document.visibilityState !== 'visible' || reducedMotion.value) {
     stop();
+    return;
+  }
+  if (!onScreen) {
+    running = false;
+    rafId = 0;
     return;
   }
   const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
@@ -611,6 +619,11 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(resize);
   if (host.value) resizeObserver.observe(host.value);
   document.addEventListener('visibilitychange', onVisibilityChange);
+  viewObserver = new IntersectionObserver(([entry]) => {
+    onScreen = entry?.isIntersecting ?? true;
+    if (onScreen && !reducedMotion.value) sync();
+  }, { rootMargin: '100px 0px' });
+  if (host.value) viewObserver.observe(host.value);
   resize();
   if (props.mode === 'burst') maybeTriggerBurst();
   if (reducedMotion.value) renderStaticFrame();
@@ -622,6 +635,8 @@ onUnmounted(() => {
   reducedQuery?.removeEventListener('change', onReducedMotionChange);
   resizeObserver?.disconnect();
   resizeObserver = null;
+  viewObserver?.disconnect();
+  viewObserver = null;
   running = false;
   if (rafId) cancelAnimationFrame(rafId);
   rafId = 0;

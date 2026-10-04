@@ -404,6 +404,8 @@ const beamStyle = computed<CSSProperties>(() => {
   transform: rotate(var(--circle-spin, 0deg));
   mask: var(--circle-mask) center / contain no-repeat;
   -webkit-mask: var(--circle-mask) center / contain no-repeat;
+  /* scroll turns it every frame: rotate the composited ring rather than repaint it */
+  will-change: transform;
 }
 
 /* a dark contact shadow where the cauldron stands */
@@ -483,20 +485,32 @@ const beamStyle = computed<CSSProperties>(() => {
   left: 24%;
   width: 52%;
   height: 20%;
+  overflow: hidden;
   mask-image: linear-gradient(0deg, transparent, #000 35%);
-  background-image: var(--fire-sprite);
-  background-size: 100% 200%;
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
   opacity: var(--fire);
   transform: scaleY(calc(0.6 + 0.5 * var(--fire)));
   transform-origin: 50% 100%;
+}
+
+/* The two-frame sprite as a strip twice the box's height, flipped by moving it
+   (composited) rather than by repainting its background-position. */
+.cauldron__fire::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  background-image: var(--fire-sprite);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  content: '';
   animation: soul-fire 0.5s steps(1) infinite;
 }
 
 @keyframes soul-fire {
-  0% { background-position: 0 0; }
-  50% { background-position: 0 100%; }
+  0% { transform: none; }
+  50% { transform: translateY(-50%); }
 }
 
 /* ---------- the drops ---------- */
@@ -580,7 +594,7 @@ const beamStyle = computed<CSSProperties>(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cauldron__fire {
+  .cauldron__fire::before {
     animation: none;
   }
 }

@@ -1,8 +1,9 @@
 <template>
   <!--
     Persistent deck, once the hero's table has scrolled away: your card as a small
-    sigil that redraws, seated in the header's free space beside its actions (so it
-    never covers the page), plus the reading's four positions in the right gutter.
+    sigil that redraws (a face-down card that draws, before the first draw), seated in
+    the header's free space beside its actions (so it never covers the page), plus the
+    page's four sections in the right gutter.
   -->
   <aside class="arc-dock" :class="{'is-shown': visible}" :aria-label="t('home.arcana.dock.label')" :inert="!visible || undefined">
     <nav class="arc-dock__spread" :aria-label="t('home.arcana.dock.spreadLabel')">
@@ -19,25 +20,38 @@
       </a>
     </nav>
 
-    <div class="arc-dock__seat" :class="seat ? 'is-in-header' : 'is-floating'" :style="seatStyle">
+    <!-- Only ever in the header: with no free room there it steps away rather than cover the page. -->
+    <div class="arc-dock__seat" :class="{'is-away': !seat}" :style="seatStyle" :inert="!seat || undefined">
       <button
           type="button"
           class="arc-dock__orb"
-          :aria-label="`${t('home.arcana.dock.draw')}. ${t('home.arcana.dock.current').replace('{name}', reading.name)}`"
+          :aria-label="orbLabel"
           :aria-describedby="tipId"
           @click="draw()"
       >
         <span :key="drawCount" class="arc-dock__face" aria-hidden="true">
-          <img :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async">
+          <img v-if="hasDrawn" :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async">
+          <svg v-else class="arc-dock__back" viewBox="0 0 20 30">
+            <rect x="1" y="1" width="18" height="28" rx="2.5"/>
+            <circle cx="10" cy="15" r="4.2"/>
+            <circle cx="10" cy="15" r="1.3" class="arc-dock__back-pupil"/>
+          </svg>
         </span>
         <span class="arc-dock__badge" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
         </span>
       </button>
       <span :id="tipId" class="arc-dock__tip" role="tooltip">
-        <span class="arc-dock__tip-label">{{ t('home.arcana.dock.your') }}</span>
-        <span class="arc-dock__tip-name">{{ reading.name }}</span>
-        <span class="arc-dock__tip-action">{{ t('home.arcana.dock.draw') }}</span>
+        <template v-if="hasDrawn">
+          <span class="arc-dock__tip-label">{{ t('home.arcana.dock.your') }}</span>
+          <span class="arc-dock__tip-name">{{ reading.name }}</span>
+          <span class="arc-dock__tip-action">{{ t('home.arcana.dock.draw') }}</span>
+        </template>
+        <template v-else>
+          <span class="arc-dock__tip-label">{{ t('home.arcana.dock.none') }}</span>
+          <span class="arc-dock__tip-name">{{ t('home.arcana.dock.drawFirst') }}</span>
+          <span class="arc-dock__tip-action">{{ t('home.arcana.dock.drawFirstHint') }}</span>
+        </template>
       </span>
     </div>
   </aside>
@@ -50,8 +64,11 @@ import {sigilThumb} from './arcana-data';
 import {useArcana} from './useArcana';
 
 const {t} = useI18n();
-const {card, reading, drawCount, draw} = useArcana();
+const {card, hasDrawn, reading, drawCount, draw} = useArcana();
 const tipId = 'arc-dock-tip';
+const orbLabel = computed(() => (hasDrawn.value
+    ? `${t('home.arcana.dock.draw')}. ${t('home.arcana.dock.current').replace('{name}', reading.value.name)}`
+    : t('home.arcana.dock.drawFirst')));
 
 const spread = computed(() => [
   {id: 'progression', numeral: 'I', label: t('home.world.spread.potion')},
@@ -90,7 +107,7 @@ function locate() {
   const leftNeighbour = Math.max(visibleRight(bar.querySelector('.primary-nav')), visibleRight(bar.querySelector('.brand')));
   const gap = window.innerWidth < 600 ? 10 : 16;
   const x = a.left - gap - ORB;
-  // Not enough room between the nav and the actions: float in the corner instead.
+  // Not enough room between the nav and the actions: stay out of sight (the hero and the orbit still draw).
   seat.value = x - leftNeighbour >= gap ? {x: Math.round(x), y: Math.round(b.top + (b.height - ORB) / 2)} : null;
 }
 
@@ -170,17 +187,15 @@ onUnmounted(() => {
   transition: opacity .3s ease, transform .45s cubic-bezier(.2, .9, .25, 1);
 }
 
-.arc-dock__seat.is-floating {
-  right: 16px;
-  bottom: 16px;
-  width: 52px;
-  height: 52px;
-  transform: translateY(16px) scale(.8);
-}
-
 .is-shown .arc-dock__seat {
   opacity: 1;
   transform: none;
+}
+
+.arc-dock .arc-dock__seat.is-away {
+  visibility: hidden;
+  opacity: 0;
+  transition: none;
 }
 
 .arc-dock__orb {
@@ -198,13 +213,6 @@ onUnmounted(() => {
     inset 0 0 0 1.5px color-mix(in oklab, var(--acc) 85%, transparent),
     0 0 18px color-mix(in oklab, var(--acc) 30%, transparent);
   transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .9, .25, 1);
-}
-
-.is-floating .arc-dock__orb {
-  box-shadow:
-    inset 0 0 0 1.5px var(--acc),
-    0 10px 26px rgba(0, 0, 0, .55),
-    0 0 22px color-mix(in oklab, var(--acc) 30%, transparent);
 }
 
 .arc-dock__orb:hover {
@@ -230,9 +238,18 @@ onUnmounted(() => {
   height: 30px;
 }
 
-.is-floating .arc-dock__face img {
-  width: 40px;
-  height: 40px;
+/* Before the first draw: a face-down card. */
+.arc-dock__back {
+  width: 15px;
+  height: 22px;
+  fill: none;
+  stroke: var(--acc);
+  stroke-width: 1.6;
+}
+
+.arc-dock__back-pupil {
+  fill: var(--acc);
+  stroke: none;
 }
 
 @keyframes arc-dock-flip {
@@ -288,12 +305,6 @@ onUnmounted(() => {
   opacity: 0;
   transform: translateY(-4px);
   transition: opacity .2s ease, transform .25s ease;
-}
-
-.is-floating .arc-dock__tip {
-  top: auto;
-  bottom: calc(100% + 12px);
-  transform: translateY(4px);
 }
 
 .arc-dock__seat:hover .arc-dock__tip,

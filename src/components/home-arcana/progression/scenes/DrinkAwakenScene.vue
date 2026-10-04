@@ -17,7 +17,7 @@
       <div v-for="c in cards" :key="c.id" class="reading-card" :style="c.style">
         <!-- turned over in the picture plane: the back narrows away, the face opens -->
         <span v-if="!c.showFace" class="reading-card__back" :style="c.sideStyle"><i /></span>
-        <span v-else class="reading-card__front" :style="c.sideStyle">
+        <span v-else class="reading-card__front" :class="{ 'is-example': !hasDrawn }" :style="c.sideStyle">
           <ArcanaFace :id="currentId" :name="reading.name" :role="reading.seq9" eager />
         </span>
       </div>
@@ -109,7 +109,7 @@ const emit = defineEmits<{ (e: 'inspect', id: string, anchor: HTMLElement): void
 
 const reduced = useReducedMotion();
 const { tp, card, currentId } = useProgressionCopy();
-const { reading } = useArcana();
+const { reading, hasDrawn } = useArcana();
 
 function inspect(id: string, event: Event): void {
   if (event.currentTarget instanceof HTMLElement) emit('inspect', id === 'potion' && g.value >= T.catch[0] ? 'drink-potion' : 'potion', event.currentTarget);
@@ -427,6 +427,8 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   transform: rotate(var(--circle-spin, 0deg));
   mask: var(--circle-mask) center / contain no-repeat;
   -webkit-mask: var(--circle-mask) center / contain no-repeat;
+  /* scroll turns it every frame: rotate the composited ring rather than repaint it */
+  will-change: transform;
 }
 
 .drink-scene__fx {
@@ -456,6 +458,11 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   overflow: hidden;
   border-radius: 7px;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 26px color-mix(in oklab, var(--acc) 30%, transparent);
+}
+
+/* Before a draw the Fool is only the example: its card wears the page's neutral accent, not its own purple. */
+.reading-card__front.is-example :deep(.arc-face) {
+  --card-acc: var(--acc) !important;
 }
 
 .reading-card__back {
@@ -537,10 +544,10 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   width: max-content;
   max-width: 240px;
   color: var(--arc-ink);
-  font: 400 11px/1.3 var(--arc-caps);
-  letter-spacing: 0.16em;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
   text-align: center;
-  text-transform: uppercase;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
   transform: translateX(-50%);
 }
@@ -569,12 +576,20 @@ const flashBoxStyle = computed<CSSProperties>(() => {
 .whisper--left {
   text-align: right;
   translate: -100% 0;
+  animation-name: whisper-shiver-left;
 }
 
+/* the shiver moves the composited text (translate), never its layout box */
 @keyframes whisper-shiver {
-  0%, 100% { margin-left: 0; }
-  33% { margin-left: 1px; }
-  66% { margin-left: -1px; }
+  0%, 100% { translate: 0 0; }
+  33% { translate: 1px 0; }
+  66% { translate: -1px 0; }
+}
+
+@keyframes whisper-shiver-left {
+  0%, 100% { translate: -100% 0; }
+  33% { translate: calc(-100% + 1px) 0; }
+  66% { translate: calc(-100% - 1px) 0; }
 }
 
 /* ---------- floor mist, burnt off by the awakening ---------- */

@@ -5,9 +5,6 @@
     <div class="arc-hero__grid">
       <!-- Copy: what this is, how to get in. Shown once the fonts are in, so nothing jumps. -->
       <div ref="introRef" class="arc-hero__intro" :class="{'is-ready': fontsReady}">
-        <p class="arc-eyebrow">
-          <span class="arc-eyebrow__dot" aria-hidden="true"></span>{{ t('home.arcana.hero.eyebrow') }}
-        </p>
         <h1 id="arc-hero-title" class="arc-hero__title">
           <span>{{ t('home.arcana.hero.titleA') }}</span>
           <span class="arc-hero__title-accent">{{ t('home.arcana.hero.titleB') }}</span>
@@ -22,17 +19,16 @@
             {{ t('home.arcana.hero.join') }}
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </RouterLink>
-          <!-- Never `disabled`: that would drop keyboard focus mid-shuffle. Extra presses queue one more draw. -->
-          <button
-              type="button"
-              class="arc-btn arc-btn--ghost arc-hero__shuffle"
-              :class="{'is-busy': busy}"
-              :aria-busy="busy || undefined"
-              @click="requestShuffle"
-          >
-            <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
-            {{ t('home.arcana.hero.shuffle') }}
-          </button>
+          <RouterLink :to="$lp(changelogLink)" class="arc-btn arc-btn--ghost arc-hero__news" :aria-label="changelogAria">
+            {{ t('home.arcana.hero.changelog') }}
+            <!-- The date's room is kept while the post loads, so the button never resizes. -->
+            <span
+                v-if="changelogDate || !newsSettled"
+                class="arc-hero__news-date"
+                :class="{'is-shown': changelogDate}"
+                aria-hidden="true"
+            >{{ changelogDate }}</span>
+          </RouterLink>
         </div>
 
         <div class="arc-hero__meta">
@@ -55,11 +51,12 @@
         </div>
       </div>
 
-      <!-- The table: the 22 ring the moon; the card you drew stands against it -->
+      <!-- The table: the 22 ring the moon; once drawn, your card stands against it -->
       <div ref="tableRef" class="arc-hero__table">
         <div
             ref="stageRef"
             class="arc-stage"
+            :class="{'is-undrawn': !drawn}"
             :style="stageStyle"
             @pointermove="onStagePointer"
             @pointerleave="onStageLeave"
@@ -71,6 +68,11 @@
               <path v-for="n in 22" :key="n" :transform="`rotate(${(n - 0.5) * (360 / 22)} 100 100)`" d="M100 1.5v3"/>
             </g>
           </svg>
+
+          <!-- Before the first draw: the empty place where your card will stand (a shortcut to the draw button) -->
+          <div class="arc-stage__slot" :class="{'is-gone': drawn}" aria-hidden="true" @click="requestShuffle">
+            <span class="arc-stage__slot-mark">?</span>
+          </div>
 
           <div
               class="arc-stage__fan"
@@ -116,23 +118,44 @@
           </div>
         </div>
 
-        <!-- what you drew, in words -->
-        <div class="arc-hero__caption">
+        <!-- Under the deck, one group: what you drew (or that nothing is drawn yet), the draw button, the hint -->
+        <div class="arc-hero__draw">
           <p class="arc-hero__drew">
-            <span class="arc-hero__drew-label">{{ t('home.arcana.hero.youDrew') }}</span>
-            <span class="arc-hero__drew-name">
-              <span class="arc-hero__drew-num">{{ card.boon ? t('home.arcana.deck.boon') : card.numeral }}</span>
-              {{ reading.name }}
-            </span>
-            <span v-if="reading.seq9" class="arc-hero__drew-role">
-              {{ t('home.arcana.hero.beginsAs').replace('{role}', reading.seq9) }}
-            </span>
-            <a href="#reading" class="arc-hero__read">
-              {{ t('home.arcana.hero.readCard') }}
-              <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
-            </a>
+            <template v-if="hasDrawn">
+              <span class="arc-hero__drew-label">{{ t('home.arcana.hero.youDrew') }}</span>
+              <span class="arc-hero__drew-name">
+                <span class="arc-hero__drew-num">{{ card.boon ? t('home.arcana.deck.boon') : card.numeral }}</span>
+                {{ reading.name }}
+              </span>
+              <span v-if="reading.seq9" class="arc-hero__drew-role">
+                {{ t('home.arcana.hero.beginsAs').replace('{role}', reading.seq9) }}
+              </span>
+            </template>
+            <span v-else class="arc-hero__drew-name">{{ t('home.arcana.hero.undrawn') }}</span>
           </p>
-          <p class="arc-hero__hint">{{ t('home.arcana.hero.hint') }}</p>
+          <div class="arc-hero__draw-row">
+            <!-- Never `disabled`: that would drop keyboard focus mid-shuffle. Extra presses queue one more draw. -->
+            <button
+                type="button"
+                class="arc-btn arc-btn--ghost arc-hero__shuffle"
+                :class="{'is-busy': busy}"
+                :aria-busy="busy || undefined"
+                @click="requestShuffle"
+            >
+              <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+              <span class="arc-hero__shuffle-label">
+                <span :class="{'is-off': hasDrawn}">{{ t('home.arcana.hero.shuffle') }}</span>
+                <span :class="{'is-off': !hasDrawn}">{{ t('home.arcana.hero.drawAgain') }}</span>
+              </span>
+            </button>
+            <p class="arc-hero__hint">
+              {{ hasDrawn ? t('home.arcana.hero.hintDrawn') : t('home.arcana.hero.hint') }}
+              <a v-if="hasDrawn" href="#reading" class="arc-hero__read">
+                {{ t('home.arcana.hero.readCard') }}
+                <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -147,13 +170,14 @@ import ArcanaFace from './ArcanaFace.vue';
 import ArcanaBack from './ArcanaBack.vue';
 import HeroNightScene from './HeroNightScene.vue';
 import {CORE_CARDS, cardById, sigilNative} from './arcana-data';
-import {ensurePathwayData, randomCard, storedCard, useArcana} from './useArcana';
+import {ensurePathwayData, randomCard, useArcana} from './useArcana';
 import {useCopyAddress} from './useCopyAddress';
+import {useLatestNews} from './useLatestNews';
 import {useI18n} from '@/composables/useI18n';
 import {useServerStatus} from '@/composables/useServer';
 
-const {t} = useI18n();
-const {currentId, card, reading, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
+const {t, intlLocale} = useI18n();
+const {currentId, hasDrawn, card, reading, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
 const addressRef = ref<HTMLElement | null>(null);
 const {state: copyState, copy, address} = useCopyAddress(addressRef);
 const {isOnline, playerCount, checkedAt} = useServerStatus();
@@ -176,6 +200,22 @@ const statusLabel = computed(() => {
   return t('home.arcana.status.onlineCount').replace('{count}', String(playerCount.value ?? 0));
 });
 
+/* ---------------- latest changelog ---------------- */
+const {latestChangelog, settled: newsSettled} = useLatestNews();
+/** While the post loads (or if it can't), the button simply opens the news list. */
+const changelogLink = computed(() => (latestChangelog.value ? `/news/${latestChangelog.value.slug}` : '/news'));
+const changelogDay = (options: Intl.DateTimeFormatOptions) => {
+  const raw = latestChangelog.value?.publishedAt ?? latestChangelog.value?.createdAt;
+  const date = raw ? new Date(raw) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString(intlLocale.value, options) : '';
+};
+const changelogDate = computed(() => changelogDay({month: 'short', day: 'numeric'}));
+const changelogAria = computed(() => {
+  const label = t('home.arcana.hero.changelog');
+  const long = changelogDay({day: 'numeric', month: 'long', year: 'numeric'});
+  return long ? `${label}, ${long}` : label;
+});
+
 /* ---------------- deck state ---------------- */
 const shuffled = <T, >(list: T[]): T[] => {
   const out = list.slice();
@@ -186,18 +226,21 @@ const shuffled = <T, >(list: T[]): T[] => {
   return out;
 };
 
-const initial = storedCard() ?? 'fool';
-// A returning visitor's page wears their card from the first paint, not after the intro.
-if (currentId.value !== initial) currentId.value = initial;
+/*
+ * A first visit starts with all 22 face down and nothing in front of the moon;
+ * a returning visitor's card (restored by useArcana) is already standing there.
+ */
+const initial = hasDrawn.value ? currentId.value : null;
 
 /** Cards on the table: the 22, plus any boon drawn from the deck browser. */
-const heroIds = ref<string[]>(CORE_CARDS.map(c => c.id).concat(cardById(initial).boon ? [initial] : []));
-const drawn = ref(initial);
+const heroIds = ref<string[]>(CORE_CARDS.map(c => c.id).concat(initial && cardById(initial).boon ? [initial] : []));
+/** The card standing in front of the moon; null until the visitor draws. */
+const drawn = ref<string | null>(initial);
 /** Fan order (every hero card except the drawn one). */
 const order = ref<string[]>(shuffled(heroIds.value.filter(id => id !== initial)));
 const fanIndex = (id: string) => order.value.indexOf(id);
 /** Cards whose face is rendered (the drawn card and one leaving). */
-const fronts = shallowReactive(new Set<string>([initial]));
+const fronts = shallowReactive(new Set<string>(initial ? [initial] : []));
 /** The card travelling to the front: above everything until it lands. */
 const incoming = ref<string | null>(null);
 const busy = ref(false);
@@ -455,6 +498,8 @@ async function drawFromFan(id: string) {
   const wasLifted = !!el && (el.matches(':focus-visible') || (canHover() && el.matches(':hover')));
   const slot = slotPose(k, count);
   const fromNew = wasLifted ? outward(slot, g.cardH * g.p.fan * LIFT) : slot;
+  // The first draw leaves a gap in the ring: the others close it up behind the card.
+  const before = old ? null : new Map(order.value.map((fid, i) => [fid, slotPose(i, count)]));
 
   fronts.add(id);
   void ensurePathwayData();
@@ -463,16 +508,21 @@ async function drawFromFan(id: string) {
 
   const hadFocus = document.activeElement === el;
   const nextOrder = order.value.slice();
-  nextOrder[k] = old;
+  if (old) nextOrder[k] = old;
+  else nextOrder.splice(k, 1);
   order.value = nextOrder;
   drawn.value = id;
-  focusIndex.value = k;
+  focusIndex.value = Math.min(k, nextOrder.length - 1);
   resetTilt();
+  // Keyboard focus stays in the ring, on the card now in that slot.
+  const keepFocus = () => {
+    if (hadFocus) cardEls.get(nextOrder[focusIndex.value])?.focus({preventScroll: true});
+  };
 
   if (reducedMotion()) {
     await nextTick();
-    if (hadFocus) cardEls.get(old)?.focus({preventScroll: true});
-    fronts.delete(old);
+    keepFocus();
+    if (old) fronts.delete(old);
     reveal(id);
     announce(id);
     return;
@@ -480,7 +530,7 @@ async function drawFromFan(id: string) {
 
   incoming.value = id;
   await nextTick();
-  if (hadFocus) cardEls.get(old)?.focus({preventScroll: true});
+  keepFocus();
 
   const D = 1080;
   const u = g.u;
@@ -489,38 +539,54 @@ async function drawFromFan(id: string) {
   const lifted = outward(fromNew, u * (stacked.value ? 0.28 : 0.5), slot.s * 1.15, 0.85);
   const above: Pose = {x: -side * u * 0.06, y: g.drawnY - u * 0.42, r: -side * 2.5, s: 0.97};
   const landing: Pose = {x: 0, y: g.drawnY + u * 0.025, r: 0, s: 1.012};
-  const travel = play(cardEls.get(id), [
-    {transform: css(fromNew), offset: 0, easing: EASE_LIFT},
-    {transform: css(lifted), offset: 0.2, easing: EASE_SWING},
-    {transform: css(above), offset: 0.64, easing: EASE_LAND},
-    {transform: css(landing), offset: 0.86, easing: 'ease-in-out'},
-    {transform: css(drawnPose()), offset: 1},
-  ], {duration: D});
-  const faceUp = flip(id, 180, 0, {duration: D}, 0.2, 0.7);
+  const moves = [
+    play(cardEls.get(id), [
+      {transform: css(fromNew), offset: 0, easing: EASE_LIFT},
+      {transform: css(lifted), offset: 0.2, easing: EASE_SWING},
+      {transform: css(above), offset: 0.64, easing: EASE_LAND},
+      {transform: css(landing), offset: 0.86, easing: 'ease-in-out'},
+      {transform: css(drawnPose()), offset: 1},
+    ], {duration: D}),
+    flip(id, 180, 0, {duration: D}, 0.2, 0.7),
+  ];
 
-  // The old card holds the centre until the new one is on its way, then bows out
-  // behind it and is tucked into the free slot.
-  const back = slotPose(k, count);
-  const D2 = D * 0.9;
-  const wait = D * 0.26;
-  const sink: Pose = {x: side * u * 0.2, y: g.drawnY + u * 0.28, r: side * 5, s: 0.62};
-  const retreat = play(cardEls.get(old), [
-    {transform: css(drawnPose()), offset: 0, easing: EASE_SWING},
-    {transform: css(sink), offset: 0.4, easing: EASE_SWING},
-    {transform: css(outward(back, u * 0.16)), offset: 0.84, easing: EASE_LAND},
-    {transform: css(back), offset: 1},
-  ], {duration: D2, delay: wait, fill: 'backwards'});
-  const faceDown = flip(old, 0, 180, {duration: D2, delay: wait, fill: 'backwards'}, 0.05, 0.45);
+  if (old) {
+    // The old card holds the centre until the new one is on its way, then bows out
+    // behind it and is tucked into the free slot.
+    const back = slotPose(k, count);
+    const D2 = D * 0.9;
+    const wait = D * 0.26;
+    const sink: Pose = {x: side * u * 0.2, y: g.drawnY + u * 0.28, r: side * 5, s: 0.62};
+    moves.push(
+        play(cardEls.get(old), [
+          {transform: css(drawnPose()), offset: 0, easing: EASE_SWING},
+          {transform: css(sink), offset: 0.4, easing: EASE_SWING},
+          {transform: css(outward(back, u * 0.16)), offset: 0.84, easing: EASE_LAND},
+          {transform: css(back), offset: 1},
+        ], {duration: D2, delay: wait, fill: 'backwards'}),
+        flip(old, 0, 180, {duration: D2, delay: wait, fill: 'backwards'}, 0.05, 0.45),
+    );
+  } else if (before) {
+    const next = nextOrder.length;
+    nextOrder.forEach((fid, i) => {
+      const from = before.get(fid);
+      if (from) {
+        moves.push(play(cardEls.get(fid), [{transform: css(from)}, {transform: css(slotPose(i, next))}], {
+          duration: 760, delay: D * 0.22, easing: EASE_SWING, fill: 'backwards',
+        }));
+      }
+    });
+  }
 
-  await Promise.all([settled([travel, faceUp, retreat, faceDown]), revealAt(id, D * 0.46)]);
+  await Promise.all([settled(moves), revealAt(id, D * 0.46)]);
   incoming.value = null;
-  fronts.delete(old);
+  if (old) fronts.delete(old);
 }
 
 /* ---------------- shuffle the whole deck, then deal one ---------------- */
 async function shuffleAndDraw(targetId?: string) {
   const old = drawn.value;
-  const target = targetId && targetId !== old ? targetId : randomCard(old);
+  const target = targetId && targetId !== old ? targetId : randomCard(old ?? '');
   const ids = heroIds.value.includes(target) ? heroIds.value.slice() : heroIds.value.concat(target);
 
   fronts.add(target);
@@ -531,7 +597,7 @@ async function shuffleAndDraw(targetId?: string) {
     heroIds.value = ids;
     order.value = shuffled(ids.filter(id => id !== target));
     drawn.value = target;
-    fronts.delete(old);
+    if (old) fronts.delete(old);
     resetTilt();
     reveal(target);
     announce(target);
@@ -549,7 +615,7 @@ async function shuffleAndDraw(targetId?: string) {
   };
   resetTilt();
 
-  /* 1 - gather everything into one pile; the drawn card turns face-down on top */
+  /* 1 - gather everything into one pile; the drawn card (if any) turns face-down on top */
   const center = (order.value.length - 1) / 2;
   const gather = before.map(id => {
     const k = fanIndex(id);
@@ -558,7 +624,7 @@ async function shuffleAndDraw(targetId?: string) {
       duration: 420, delay, easing: EASE_SWING, fill: 'both',
     });
   });
-  const flipDown = flip(old, 0, 180, {duration: 400, fill: 'forwards'}, 0, 1);
+  const flipDown = old ? flip(old, 0, 180, {duration: 400, fill: 'forwards'}, 0, 1) : null;
   await settled([...gather, flipDown]);
 
   /* 2 - one riffle: the pile splits in two, the halves tilt in and rain back together */
@@ -612,16 +678,13 @@ async function shuffleAndDraw(targetId?: string) {
 
   await Promise.all([settled(deal), revealAt(target, 140 + DEAL * 0.52)]);
   incoming.value = null;
-  if (old !== target) fronts.delete(old);
+  if (old && old !== target) fronts.delete(old);
 }
 
 /* ---------------- intro: the moon rises and the deal comes out of it ---------------- */
 async function introDeal() {
   risen.value = true;
-  if (reducedMotion()) {
-    reveal(drawn.value);
-    return;
-  }
+  if (reducedMotion()) return;
   busy.value = true;
   const g = geo.value;
   const u = g.u;
@@ -638,17 +701,20 @@ async function introDeal() {
       {transform: css(slot), opacity: 1},
     ], {duration: 1100, delay: 260 + Math.abs(k - mid) * 34, easing: EASE_SWING, fill: 'backwards'});
   });
-  incoming.value = id;
-  const D = 1300;
-  const delay = 620;
-  animations.push(play(cardEls.get(id), [
-    {transform: css({x: 0, y: g.drawnY + u * 0.9, r: 0, s: 0.86}), opacity: 0, offset: 0, easing: EASE_LAND},
-    {transform: css({x: 0, y: g.drawnY - u * 0.3, r: -2, s: 0.95}), opacity: 1, offset: 0.48, easing: EASE_SWING},
-    {transform: css({x: 0, y: g.drawnY + u * 0.025, r: 0, s: 1.012}), opacity: 1, offset: 0.86, easing: 'ease-in-out'},
-    {transform: css(drawnPose()), opacity: 1, offset: 1},
-  ], {duration: D, delay, fill: 'backwards'}));
-  animations.push(flip(id, 180, 0, {duration: D, delay, fill: 'backwards'}, 0.36, 0.8));
-  await Promise.all([settled(animations), revealAt(id, delay + D * 0.56)]);
+  // A returning visitor's card rises back into place; it is already theirs, so nothing is re-drawn.
+  if (id) {
+    incoming.value = id;
+    const D = 1300;
+    const delay = 620;
+    animations.push(play(cardEls.get(id), [
+      {transform: css({x: 0, y: g.drawnY + u * 0.9, r: 0, s: 0.86}), opacity: 0, offset: 0, easing: EASE_LAND},
+      {transform: css({x: 0, y: g.drawnY - u * 0.3, r: -2, s: 0.95}), opacity: 1, offset: 0.48, easing: EASE_SWING},
+      {transform: css({x: 0, y: g.drawnY + u * 0.025, r: 0, s: 1.012}), opacity: 1, offset: 0.86, easing: 'ease-in-out'},
+      {transform: css(drawnPose()), opacity: 1, offset: 1},
+    ], {duration: D, delay, fill: 'backwards'}));
+    animations.push(flip(id, 180, 0, {duration: D, delay, fill: 'backwards'}, 0.36, 0.8));
+  }
+  await settled(animations);
   incoming.value = null;
   busy.value = false;
   syncWithPage();
@@ -660,20 +726,24 @@ async function introDeal() {
 /* ---------------- keep in sync with draws made elsewhere on the page ---------------- */
 function syncWithPage() {
   const id = currentId.value;
-  if (busy.value || id === drawn.value) return;
+  if (busy.value || !hasDrawn.value || id === drawn.value) return;
   const old = drawn.value;
   if (!heroIds.value.includes(id)) {
     heroIds.value = heroIds.value.concat(id);
-    order.value = order.value.concat(old);
+    if (old) order.value = order.value.concat(old);
   } else {
-    order.value = order.value.map(entry => (entry === id ? old : entry));
+    order.value = old
+        ? order.value.map(entry => (entry === id ? old : entry))
+        : order.value.filter(entry => entry !== id);
   }
   fronts.add(id);
-  fronts.delete(old);
+  if (old) fronts.delete(old);
   drawn.value = id;
+  focusIndex.value = Math.min(focusIndex.value, order.value.length - 1);
   resetTilt();
 }
-watch(currentId, syncWithPage);
+// The first draw may be the Fool the page was already showing: watch the flag too.
+watch([currentId, hasDrawn], syncWithPage);
 
 /* ---------------- keyboard: roving focus across the fan ---------------- */
 function onCardFocus(id: string) {
@@ -721,7 +791,7 @@ function stepTilt() {
 }
 
 function onStagePointer(event: PointerEvent) {
-  if (event.pointerType !== 'mouse' || busy.value || reducedMotion()) return;
+  if (event.pointerType !== 'mouse' || busy.value || !drawn.value || reducedMotion()) return;
   const el = cardEls.get(drawn.value);
   if (!el) return;
   const rect = el.getBoundingClientRect();
@@ -768,7 +838,7 @@ function waitForFonts(): Promise<void> {
 const px = (value: string) => parseFloat(value) || 0;
 
 /** Room kept under the deck for the caption, so a long name never resizes the table. */
-const CAPTION_ROOM = {wide: 66, stacked: 104};
+const CAPTION_ROOM = {wide: 88, stacked: 160};
 
 function measure() {
   const hero = heroRef.value;
@@ -897,7 +967,7 @@ onUnmounted(() => {
 
 /* ---- copy ---- */
 .arc-hero__title {
-  margin: 18px 0 22px;
+  margin: 0 0 clamp(18px, 2.6vh, 24px);
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
@@ -913,11 +983,6 @@ onUnmounted(() => {
   display: block;
 }
 
-.arc-hero .arc-eyebrow {
-  font-size: clamp(9.5px, .95vw, 11px);
-  white-space: nowrap;
-}
-
 .arc-hero__title-accent {
   color: var(--acc);
 }
@@ -927,13 +992,39 @@ onUnmounted(() => {
   margin: 0 0 clamp(20px, 3.2vh, 30px);
   font-size: clamp(16px, 1.2vw, 19px);
   line-height: 1.6;
-  color: #c4c3cd;
+  color: color-mix(in oklab, var(--arc-ink) 72%, var(--arc-muted));
+  text-wrap: pretty;
 }
 
 .arc-hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.arc-hero__news-date {
+  min-width: 3.4em;
+  margin-left: 2px;
+  padding-left: 11px;
+  border-left: 1px solid color-mix(in oklab, var(--acc) 40%, transparent);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--arc-muted);
+  text-align: left;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+.arc-hero__news-date.is-shown {
+  opacity: 1;
+}
+
+/* Laptop widths: the copy column is too narrow for both buttons with the date; keep them on one row. */
+@media (min-width: 901px) and (max-width: 1140px) {
+  .arc-hero__news-date {
+    display: none;
+  }
 }
 
 .arc-hero__shuffle.is-busy .fa-layer-group {
@@ -958,7 +1049,7 @@ onUnmounted(() => {
 }
 
 .arc-hero .arc-status {
-  color: #c4c3cd;
+  color: color-mix(in oklab, var(--arc-ink) 72%, var(--arc-muted));
 }
 
 .arc-hero__copy-note {
@@ -1018,6 +1109,44 @@ onUnmounted(() => {
 .arc-stage__fan {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+.arc-stage__fan > .arc-card {
+  pointer-events: auto;
+}
+
+.arc-stage__slot {
+  position: absolute;
+  left: calc(var(--pivot-x) - var(--card-w) / 2);
+  top: calc(var(--pivot-y) + var(--drawn-y) - var(--card-h) / 2);
+  width: var(--card-w);
+  height: var(--card-h);
+  display: grid;
+  place-items: center;
+  border-radius: calc(var(--card-w) * .05);
+  border: 1.5px dashed color-mix(in oklab, var(--acc) 60%, transparent);
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 10%, transparent), rgba(11, 11, 14, .5));
+  cursor: pointer;
+  transition: opacity .5s ease, border-color .3s ease;
+}
+
+.arc-stage__slot:hover {
+  border-color: var(--acc);
+}
+
+.arc-stage__slot.is-gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.arc-stage__slot-mark {
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-weight: 600;
+  font-size: calc(var(--card-w) * .34);
+  line-height: 1;
+  color: color-mix(in oklab, var(--acc) 70%, transparent);
 }
 
 .arc-card {
@@ -1108,11 +1237,15 @@ onUnmounted(() => {
   mix-blend-mode: screen;
 }
 
-/* ---- caption ---- */
-.arc-hero__caption {
-  position: relative;
+/* ---- under the deck: what you drew, the draw button, the hint ---- */
+.arc-hero__draw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
   max-width: 100%;
-  min-height: 62px;
+  /* the same room drawn or not, so the first draw never moves the page */
+  min-height: var(--draw-room, 84px);
   margin-top: 4px;
   text-align: center;
 }
@@ -1123,6 +1256,7 @@ onUnmounted(() => {
   align-items: baseline;
   justify-content: center;
   gap: 4px 12px;
+  min-height: 24px;
   margin: 0;
 }
 
@@ -1132,14 +1266,15 @@ onUnmounted(() => {
   font-size: 11px;
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: #b5b4c0;
+  color: var(--arc-muted);
 }
 
 .arc-hero__drew-name {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 18px;
+  line-height: 24px;
   color: var(--arc-ink);
 }
 
@@ -1151,28 +1286,62 @@ onUnmounted(() => {
   color: var(--acc);
 }
 
+.arc-hero__draw-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 18px;
+}
+
+.arc-hero .arc-hero__shuffle {
+  flex: none;
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+/* Both labels share one cell, so the button keeps its width when it changes. */
+.arc-hero__shuffle-label {
+  display: inline-grid;
+}
+
+.arc-hero__shuffle-label > span {
+  grid-area: 1 / 1;
+}
+
+.arc-hero__shuffle-label > .is-off {
+  visibility: hidden;
+}
+
+.arc-hero__hint {
+  max-width: 24em;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--arc-muted);
+  text-align: left;
+  text-wrap: pretty;
+}
+
 .arc-hero__read {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 6px;
-  padding: 6px 2px;
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  gap: 6px;
+  margin-left: 4px;
+  font-weight: 600;
   color: var(--acc);
-  border-bottom: 1px solid color-mix(in oklab, var(--acc) 45%, transparent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--acc) 45%, transparent);
+  text-underline-offset: 4px;
+  white-space: nowrap;
 }
 
 .arc-hero__read:hover {
   color: var(--arc-ink);
 }
 
-.arc-hero__hint {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: #b5b4c0;
+.arc-hero__read .fa-arrow-down {
+  font-size: .85em;
 }
 
 /* ---- stacked: title, then the deck, then the pitch ---- */
@@ -1200,28 +1369,31 @@ onUnmounted(() => {
     padding-top: 8px;
   }
 
-  .arc-hero__caption {
-    min-height: 100px;
+  .arc-hero__draw {
+    --draw-room: 156px;
+  }
+
+  .arc-hero__draw-row {
+    flex-direction: column;
+  }
+
+  .arc-hero__hint {
+    text-align: center;
   }
 }
 
 @media (max-width: 520px) {
   .arc-hero__title {
     font-size: clamp(42px, 13.5vw, 60px);
-    margin-top: 14px;
-  }
-
-  .arc-hero .arc-eyebrow {
-    font-size: 9.5px;
-    letter-spacing: .06em;
   }
 
   .arc-hero__lede {
     font-size: 16px;
   }
 
-  .arc-hero__read {
-    margin-left: 0;
+  .arc-hero .arc-hero__shuffle {
+    width: auto;
+    min-width: min(100%, 240px);
   }
 }
 

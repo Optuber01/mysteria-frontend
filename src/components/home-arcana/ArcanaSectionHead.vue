@@ -1,12 +1,12 @@
 <template>
   <!--
-    Every chapter opens the same way: a small tarot card carrying the drawn
-    Pathway's sigil, the chapter's caps label, the display title, and a lede
-    (beside the title in `split` mode, below it otherwise).
+    Every chapter opens the same way: the display title and a lede (beside the
+    title in `split` mode, below it otherwise). An optional `position` adds a
+    caps label with a small tarot card carrying the drawn Pathway's sigil.
   -->
   <header class="arc-head" :class="{'is-center': center, 'is-split': split}">
     <div class="arc-head__main">
-      <p class="arc-head__position">
+      <p v-if="position" class="arc-head__position">
         <span class="arc-head__card" aria-hidden="true">
           <Transition name="arc-head-sigil" mode="out-in">
             <img :key="card.id" :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async" loading="lazy">
@@ -34,13 +34,14 @@ import {useArcana} from './useArcana';
 
 withDefaults(defineProps<{
   numeral?: string;
-  position: string;
+  /** Optional caps label above the title; omit it for a plain title-and-lede head. */
+  position?: string;
   title?: string;
   titleId?: string;
   center?: boolean;
   /** Title on the left, lede on the right (stacks below 900px). */
   split?: boolean;
-}>(), {numeral: '', title: '', titleId: undefined, center: false, split: false});
+}>(), {numeral: '', position: '', title: '', titleId: undefined, center: false, split: false});
 
 const {card} = useArcana();
 </script>
@@ -162,6 +163,8 @@ const {card} = useArcana();
   max-width: 34em;
   margin: 0;
   text-align: right;
+  /* right-aligned lines read best evenly balanced, with no short last line */
+  text-wrap: balance;
 }
 
 @media (max-width: 900px) {

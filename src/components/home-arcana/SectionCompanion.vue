@@ -4,7 +4,7 @@
       <div class="sec-companion__panel">
         <!-- what the mod draws: the ritual circle, in the drawn Pathway's colour -->
         <figure class="sec-companion__visual">
-          <div class="sec-companion__circle" role="img" :aria-label="t('home.world.companion.visualLabel')">
+          <div class="sec-companion__circle" role="img" :aria-label="visualLabel">
             <span class="sec-companion__ring" :style="{'--circle': `url(${circle})`}"></span>
             <Transition name="sec-companion-sigil">
               <img :key="card.id" :src="sigilNative(card.id)" alt="" class="sec-companion__sigil" width="512" height="512" loading="lazy" decoding="async">
@@ -14,20 +14,19 @@
         </figure>
 
         <div class="sec-companion__copy">
-          <ArcanaSectionHead :position="t('home.world.companion.position')" title-id="sec-companion-title" :title="t('companion.title')">
-            {{ t('companion.lede') }}
+          <ArcanaSectionHead title-id="sec-companion-title" :title="t('home.world.companion.title')">
+            {{ t('home.world.companion.lede') }}
           </ArcanaSectionHead>
 
           <ul class="sec-companion__features">
-            <li v-for="feature in features" :key="feature.title">
+            <li v-for="feature in features" :key="feature.key">
               <i :class="feature.icon" aria-hidden="true"></i>
               <span><strong>{{ feature.title }}</strong> {{ feature.body }}</span>
             </li>
           </ul>
 
           <div class="sec-companion__get">
-            <p class="arc-label">{{ t('companion.downloadEyebrow') }}</p>
-            <div class="sec-companion__links">
+            <div class="sec-companion__links" role="group" :aria-label="t('home.world.companion.linksLabel')">
               <a
                   v-for="platform in platforms"
                   :key="platform.url"
@@ -41,7 +40,7 @@
                 <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
               </a>
             </div>
-            <p class="sec-companion__note"><strong>{{ t('companion.optionalLabel') }}.</strong> {{ t('companion.optional') }}</p>
+            <p class="sec-companion__note">{{ t('home.world.companion.note') }}</p>
           </div>
         </div>
       </div>
@@ -61,17 +60,24 @@ import {useArcana} from './useArcana';
 import circle from '@/assets/images/home-library/items/magic-circle.png';
 
 const {t} = useI18n();
-const {card, reading} = useArcana();
+const {card, reading, hasDrawn} = useArcana();
 
-const sigilCaption = computed(() => t('home.world.companion.sigilCaption').replace('{pathway}', reading.value.name));
+/* Before a draw the circle shows the Fool as an example, so the caption doesn't call it "yours". */
+const sigilCaption = computed(() => t(hasDrawn.value ? 'home.world.companion.sigilCaptionDrawn' : 'home.world.companion.sigilCaption')
+    .replace('{pathway}', reading.value.name));
+const visualLabel = computed(() => t('home.world.companion.visualLabel').replace('{pathway}', reading.value.name));
 
 const features = computed(() => [
-  {icon: 'fa-solid fa-keyboard', title: t('companion.featureHotkeysTitle'), body: t('companion.featureHotkeysBody')},
-  {icon: 'fa-solid fa-wand-magic-sparkles', title: t('companion.featureVisualsTitle'), body: t('companion.featureVisualsBody')},
-  {icon: 'fa-solid fa-volume-high', title: t('companion.featurePresenceTitle'), body: t('companion.featurePresenceBody')},
-]);
+  {key: 'hotkeys', icon: 'fa-solid fa-keyboard'},
+  {key: 'visuals', icon: 'fa-solid fa-wand-magic-sparkles'},
+  {key: 'presence', icon: 'fa-solid fa-volume-high'},
+].map(feature => ({
+  ...feature,
+  title: t(`home.world.companion.features.${feature.key}.title`),
+  body: t(`home.world.companion.features.${feature.key}.body`),
+})));
 const platforms = [
-  {name: 'GitHub Releases', url: 'https://github.com/ikeepcalm/coi-client/releases', icon: IconGithub},
+  {name: 'GitHub', url: 'https://github.com/ikeepcalm/coi-client/releases', icon: IconGithub},
   {name: 'CurseForge', url: 'https://www.curseforge.com/minecraft/mc-mods/coi-client', icon: IconCurseForge},
   {name: 'Modrinth', url: 'https://modrinth.com/mod/coi-client', icon: IconModrinth},
 ];
@@ -121,7 +127,7 @@ const platforms = [
   -webkit-mask: var(--circle) center / contain no-repeat;
   mask: var(--circle) center / contain no-repeat;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 18px color-mix(in oklab, var(--acc) 60%, transparent));
+  /* no drop-shadow here: it fell under the mask (invisible) and was redrawn every frame of the spin */
   animation: arc-spin 60s linear infinite;
 }
 
@@ -150,12 +156,12 @@ const platforms = [
 }
 
 .sec-companion__visual figcaption {
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  max-width: 26em;
+  font-size: 13.5px;
+  line-height: 1.45;
   color: var(--arc-muted);
   text-align: center;
+  text-wrap: balance;
 }
 
 /* ---- copy ---- */
@@ -168,6 +174,7 @@ const platforms = [
 }
 
 .sec-companion__features li {
+  text-wrap: pretty;
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   gap: 14px;
@@ -184,10 +191,6 @@ const platforms = [
 .sec-companion__features strong {
   color: var(--arc-ink);
   font-weight: 600;
-}
-
-.sec-companion__get .arc-label {
-  margin-bottom: 12px;
 }
 
 .sec-companion__links {
@@ -217,6 +220,10 @@ const platforms = [
   color: var(--arc-ink);
 }
 
+.sec-companion__link span {
+  white-space: nowrap;
+}
+
 .sec-companion__link i {
   margin-left: auto;
   font-size: 11px;
@@ -231,14 +238,11 @@ const platforms = [
 }
 
 .sec-companion__note {
+  text-wrap: pretty;
   margin: 14px 0 0;
   font-size: 13.5px;
   line-height: 1.55;
   color: var(--arc-muted);
-}
-
-.sec-companion__note strong {
-  color: var(--arc-ink);
 }
 
 @media (max-width: 1100px) {
@@ -254,6 +258,17 @@ const platforms = [
 
   .sec-companion__circle {
     width: min(70vw, 300px);
+  }
+
+  /* the copy runs full width again: the three downloads fit side by side */
+  .sec-companion__links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .sec-companion__links {
+    grid-template-columns: 1fr;
   }
 }
 

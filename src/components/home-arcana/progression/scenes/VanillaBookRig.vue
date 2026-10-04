@@ -113,7 +113,8 @@ function makeRegionTexture(
   const isIllustratedPage = Boolean(painter);
   crop.width = isIllustratedPage ? PAGE.w : width;
   crop.height = isIllustratedPage ? PAGE.h : height;
-  const context = crop.getContext('2d');
+  // CPU-backed: it is read back (cover recolour) and uploaded as a texture, never drawn on screen
+  const context = crop.getContext('2d', { willReadFrequently: true });
   if (!context) throw new Error('A 2D canvas is required to slice the book atlas.');
   context.imageSmoothingEnabled = false;
   context.drawImage(sourceTexture.image as CanvasImageSource, u, v, width, height, 0, 0, crop.width, crop.height);
@@ -178,7 +179,7 @@ function runeCanvas(accent: Rgb): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = 16;
   canvas.height = 16;
-  const context = canvas.getContext('2d');
+  const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) return canvas;
   const rows = ['......XX......', '.....XooX.....', '....XoAAoX....', '...XoA..AoX...', '..XoA.AA.AoX..', '..XoA.AA.AoX..', '...XoA..AoX...', '....XoAAoX....', '.....XooX.....', '......XX......'];
   const colors: Record<string, string> = { X: rgbCss(mixRgb(accent, [10, 8, 12], 0.7)), o: rgbCss(mixRgb(accent, [10, 8, 12], 0.35)), A: rgbCss(mixRgb(accent, [255, 255, 255], 0.3)) };
@@ -248,7 +249,7 @@ function makeLabelTexture(width: number, height: number, painter: (context: Canv
   const labelCanvas = document.createElement('canvas');
   labelCanvas.width = width;
   labelCanvas.height = height;
-  const context = labelCanvas.getContext('2d');
+  const context = labelCanvas.getContext('2d', { willReadFrequently: true });
   if (!context) throw new Error('A 2D canvas is required to prepare the book label.');
   painter(context);
   const texture = new three.CanvasTexture(labelCanvas);
@@ -711,10 +712,17 @@ function emitAnchors() {
   emit('anchors', anchors);
 }
 
+/* Pose, hotspot and resize changes in one tick share a single WebGL frame. */
+let renderQueued = false;
 function render() {
-  if (!renderer || !scene || !camera || !bookRoot?.visible) return;
-  renderer.render(scene, camera);
-  emitAnchors();
+  if (renderQueued) return;
+  renderQueued = true;
+  queueMicrotask(() => {
+    renderQueued = false;
+    if (disposed || !renderer || !scene || !camera || !bookRoot?.visible) return;
+    renderer.render(scene, camera);
+    emitAnchors();
+  });
 }
 
 function disposeBookResources() {

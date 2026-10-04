@@ -38,7 +38,8 @@
         <BalanceButton v-if="isAuthenticated" class="header-chip"/>
         <ServerStatusChip v-else class="header-chip"/>
 
-        <LanguageSelector class="desktop-only"/>
+        <!-- Always in the bar: compact (language code only) and the one way to switch at every width. -->
+        <LanguageSelector class="header-lang"/>
         <NotificationBell v-if="isAuthenticated" class="desktop-only"/>
         <AuthButton class="desktop-only"/>
 
@@ -102,7 +103,6 @@
 
             <div class="mobile-nav-footer">
               <ServerStatusChip class="mobile-ip"/>
-              <LanguageSelector/>
               <NotificationBell v-if="isAuthenticated"/>
               <AuthButton mobile-mode @mobile-action="closeMobileNav"/>
             </div>
@@ -263,9 +263,10 @@ onMounted(() => {
   window.addEventListener("scroll", onScroll, {passive: true});
   // Pages under an overlay header offset their content by its live height,
   // which changes when the announcement bar is shown or dismissed.
-  stackObserver = new ResizeObserver(([entry]) => {
-    document.documentElement.style.setProperty("--site-header-stack", `${Math.round(entry.borderBoxSize[0].blockSize)}px`);
-  });
+  const setStack = (height: number) => document.documentElement.style.setProperty("--site-header-stack", `${Math.round(height)}px`);
+  // Measured once now, before the first paint, so the page never lays out under a guessed height.
+  if (stackRef.value) setStack(stackRef.value.getBoundingClientRect().height);
+  stackObserver = new ResizeObserver(([entry]) => setStack(entry.borderBoxSize[0].blockSize));
   if (stackRef.value) stackObserver.observe(stackRef.value);
 });
 
@@ -377,9 +378,18 @@ onUnmounted(() => {
   color: var(--myst-gold);
 }
 
-@media (max-width: 560px) {
+/* On narrow screens the headline and the link always take a line each, so the bar's
+   height never depends on whether its font has arrived (the hero is laid out under it). */
+@media (max-width: 640px) {
   .season-bar {
+    flex-direction: column;
+    gap: 4px;
     padding-right: 40px;
+    padding-left: 40px;
+  }
+
+  .season-divider {
+    display: none;
   }
 }
 
@@ -516,14 +526,15 @@ onUnmounted(() => {
   background: var(--myst-wash-strong);
 }
 
-/* ---- Responsive ladder from the handoff ---- */
-@media (max-width: 1220px) {
-  .header-actions :deep(.lang-ritual-selector) {
-    display: none;
-  }
+/* The language code sits at the same height as the chip and the sign-in button beside it. */
+.header-lang :deep(.lang-ritual-trigger) {
+  min-height: 34px;
+  padding: 0 10px;
 }
 
-@media (max-width: 1140px) {
+/* ---- Responsive ladder: the server chip goes first (the page repeats the address),
+   then the tagline; the language control never leaves the bar. ---- */
+@media (max-width: 1220px) {
   .header-chip {
     display: none;
   }
@@ -556,6 +567,10 @@ onUnmounted(() => {
 
   .header-grid {
     padding: 0 16px;
+  }
+
+  .header-actions {
+    gap: 10px;
   }
 }
 

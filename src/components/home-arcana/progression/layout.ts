@@ -21,7 +21,6 @@ export type StageLayout = {
   cx: number;
   /** The open book while it is read (Discover). */
   book: Box;
-  bookCaptionY: number;
   /** The book while it pours its ingredients (Brew): scale and offset of the whole book window. */
   bookBrew: { s: number; tx: number; ty: number };
   cauldron: { x: number; top: number; w: number; h: number; liquidY: number; floorY: number; circleW: number };
@@ -36,15 +35,12 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
 export function stageLayout(w: number, h: number): StageLayout | null {
   if (w <= 0 || h <= 0) return null;
   const cx = w / 2;
-  const caption = 34;
-
-  // Discover: the biggest book that fits under its caption.
-  const bookW = Math.min(720, w, h * BOOK_RATIO, ((h - caption) / BOOK_FILL.h) * BOOK_RATIO * 0.98);
+  // Discover: the biggest book that fits the stage.
+  const bookW = Math.min(720, w, h * BOOK_RATIO, (h / BOOK_FILL.h) * BOOK_RATIO * 0.98);
   const bookH = bookW / BOOK_RATIO;
   const visualH = bookH * BOOK_FILL.h;
-  const bookY = caption + (h - caption - visualH) / 2 - (bookH - visualH) / 2;
+  const bookY = (h - visualH) / 2 - (bookH - visualH) / 2;
   const book = { x: (w - bookW) / 2, y: bookY, w: bookW, h: bookH };
-  const bookCaptionY = bookY + (bookH - visualH) / 2 - caption + 6;
 
   // Brew: the cauldron stands at the foot of the stage, its circle on the floor.
   const cw = clamp(Math.min(w * 0.24, h * 0.3), 120, 230);
@@ -74,5 +70,5 @@ export function stageLayout(w: number, h: number): StageLayout | null {
   const pw = ph * 0.62;
   const player = { x: cx - pw / 2, y: floorY - PLAYER_FRAME.feet * ph, w: pw, h: ph };
 
-  return { w, h, cx, book, bookCaptionY, bookBrew, cauldron, potion, player };
+  return { w, h, cx, book, bookBrew, cauldron, potion, player };
 }

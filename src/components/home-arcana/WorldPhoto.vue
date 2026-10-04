@@ -9,11 +9,10 @@
         :width="shot.w"
         :height="shot.h"
         :style="{objectPosition: shot.focus}"
-        loading="lazy"
+        :loading="eager ? 'eager' : 'lazy'"
         decoding="async"
     >
     <figcaption v-if="credit !== 'none'" class="world-photo__credit">
-      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 2.5h4.8l1 1.6H14a1 1 0 0 1 1 1V13a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5.1a1 1 0 0 1 1-1h2.6zM8 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg>
       <span>{{ creditText }}</span>
     </figcaption>
   </figure>
@@ -29,7 +28,9 @@ const props = withDefaults(defineProps<{
   alt: string;
   sizes?: string;
   credit?: 'br' | 'tr' | 'bl' | 'none';
-}>(), {sizes: '(max-width: 900px) 100vw, 50vw', credit: 'br'});
+  /** Load now instead of lazily (the drifting strip clips its tiles, which keeps lazy ones from loading early). */
+  eager?: boolean;
+}>(), {sizes: '(max-width: 900px) 100vw, 50vw', credit: 'br', eager: false});
 
 const {t} = useI18n();
 
@@ -74,40 +75,46 @@ const creditText = computed(() => {
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 18%, rgba(255, 255, 255, .06));
 }
 
+/*
+ * The credit is a quiet caption along the photo's edge: plain small text on a
+ * soft scrim, no pill. It always sits on a photograph, so its ink and scrim
+ * stay photo-dark/photo-light in either page theme.
+ */
 .world-photo__credit {
   position: absolute;
   z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  max-width: calc(100% - 24px);
-  padding: 5px 10px;
-  border-radius: 99px;
-  background: rgba(8, 8, 10, .72);
-  backdrop-filter: blur(6px);
+  left: 0;
+  right: 0;
+  display: flex;
+  padding: 26px 14px 11px;
+  background: linear-gradient(0deg, rgba(6, 6, 8, .74), rgba(6, 6, 8, .4) 55%, transparent);
   font-size: 11.5px;
   line-height: 1.3;
-  color: #d9d8e0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.world-photo__credit svg {
-  flex: none;
-  width: 11px;
-  height: 11px;
-  color: var(--acc);
+  color: #e4e3ea;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+  pointer-events: none;
 }
 
 .world-photo__credit span {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  text-align: inherit;
+  text-wrap: balance;
 }
 
-.is-credit-br .world-photo__credit { right: 12px; bottom: 12px; }
-.is-credit-bl .world-photo__credit { left: 12px; bottom: 12px; }
-.is-credit-tr .world-photo__credit { right: 12px; top: 12px; }
+.is-credit-br .world-photo__credit,
+.is-credit-bl .world-photo__credit { bottom: 0; }
+
+.is-credit-tr .world-photo__credit {
+  top: 0;
+  padding: 11px 14px 26px;
+  background: linear-gradient(180deg, rgba(6, 6, 8, .74), rgba(6, 6, 8, .4) 55%, transparent);
+}
+
+.is-credit-br .world-photo__credit,
+.is-credit-tr .world-photo__credit {
+  justify-content: flex-end;
+  text-align: right;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .world-photo img {

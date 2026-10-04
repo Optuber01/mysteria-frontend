@@ -11,7 +11,7 @@
   >
     <div class="arc-shell">
       <div class="arc-orbit__head">
-        <ArcanaSectionHead numeral="✶" :position="t('home.arcana.deck.position')" title-id="arc-deck-title">
+        <ArcanaSectionHead title-id="arc-deck-title">
           <template #title>{{ t('home.arcana.deck.titleA') }} <em>{{ t('home.arcana.deck.titleB') }}</em></template>
         </ArcanaSectionHead>
         <div class="arc-orbit__aside">
@@ -28,7 +28,7 @@
                 :tabindex="kind === option.id ? 0 : -1"
                 @click="chooseKind(option.id)"
             >
-              {{ option.label }}<b>{{ option.count }}</b>
+              {{ option.label }} <b>{{ option.count }}</b>
             </button>
           </div>
         </div>
@@ -58,7 +58,7 @@
               <b class="arc-orbit__badge">{{ card.boon ? '✶' : card.numeral }}</b>
             </span>
             <h3 id="arc-orbit-name" class="arc-orbit__name">{{ nameOf(card.id) }}</h3>
-            <p class="arc-orbit__role">{{ numeralLabel(card) }} · {{ roleLine(card.id) }}</p>
+            <p class="arc-orbit__role">{{ numeralLabel(card) }}</p>
           </div>
 
           <div
@@ -114,7 +114,6 @@
         <!-- The dossier: the drawn card's reading -->
         <div class="arc-orbit__dossier" aria-labelledby="arc-orbit-name" role="group">
           <div :key="`lead-${card.id}`" class="arc-orbit__lead">
-            <p class="arc-label">{{ card.boon ? t('home.arcana.deck.dossierBoon') : t('home.arcana.deck.dossier') }}</p>
             <p class="arc-orbit__begins">{{ beginsLine }}</p>
             <dl class="arc-orbit__stats">
               <div>
@@ -129,8 +128,7 @@
           </div>
 
           <div class="arc-orbit__abilities">
-            <p class="arc-label">{{ abilitiesLabel }}</p>
-            <ul v-if="reading.early.length" :key="`ab-${card.id}`">
+            <ul v-if="reading.early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
               <li v-for="(ability, index) in reading.early" :key="ability.name" :style="{'--i': index}">
                 <strong>{{ ability.name }}</strong>
                 <span>{{ ability.description }}</span>
@@ -142,7 +140,7 @@
 
           <div class="arc-orbit__actions">
             <RouterLink :to="$lp(`/pathways/${card.id}`)" class="arc-btn arc-btn--solid">
-              {{ t('home.arcana.deck.open').replace('{name}', reading.name) }}
+              {{ t(card.boon ? 'home.arcana.deck.openBoon' : 'home.arcana.deck.open').replace('{name}', reading.name) }}
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </RouterLink>
             <RouterLink :to="$lp('/pathways')" class="arc-btn arc-btn--ghost">{{ t('home.arcana.deck.archive') }}</RouterLink>
@@ -201,9 +199,20 @@ const roleLine = (id: string) => {
   const role = seq9Of(id);
   return role ? t('home.arcana.deck.seqRole').replace('{role}', role) : countLabel(sequenceCounts.value[id] ?? 10);
 };
-const beginsLine = computed(() => (reading.value.seq9
-  ? t('home.arcana.deck.beginsAs').replace('{role}', reading.value.seq9)
-  : countLabel(reading.value.sequenceCount)));
+/** "From Seer at Sequence 9 to Fool at Sequence 0": the whole climb in one line. */
+const beginsLine = computed(() => {
+  const {ladder, seq9, sequenceCount} = reading.value;
+  const byRank = [...ladder].sort((a, b) => b.sequence - a.sequence);
+  const first = byRank[0];
+  const last = byRank[byRank.length - 1];
+  if (first && last && first.sequence === 9 && byRank.length > 1) {
+    return t('home.arcana.deck.climb')
+        .replace('{first}', first.name)
+        .replace('{last}', last.name)
+        .replace('{top}', String(last.sequence));
+  }
+  return seq9 ? t('home.arcana.deck.beginsAs').replace('{role}', seq9) : countLabel(sequenceCount);
+});
 const abilitiesLabel = computed(() =>
   t('home.arcana.deck.firstAbilities').replace('{role}', reading.value.seq9 || reading.value.name));
 
@@ -409,6 +418,8 @@ function finishAssembly() {
   assembly = 1;
   window.removeEventListener('scroll', onScroll);
   window.removeEventListener('resize', measure);
+  pageObserver?.disconnect();
+  pageObserver = null;
 }
 
 /* ---------- Choosing ---------- */
@@ -625,21 +636,31 @@ function onWheel(event: WheelEvent) {
 /* ---------- Scroll-in assembly and lifecycle ---------- */
 
 let scrollFrame = 0;
+/** The stage's page offset, cached so a scroll frame reads only scrollY (see measureStageTop). */
+let stageTop = 0;
+function measureStageTop() {
+  if (stageRef.value) stageTop = stageRef.value.getBoundingClientRect().top + window.scrollY;
+}
+
 function measureAssembly() {
   scrollFrame = 0;
   if (assembled || !stageRef.value) return;
-  const top = stageRef.value.getBoundingClientRect().top;
+  const top = stageTop - window.scrollY;
   const progress = clamp((window.innerHeight * .88 - top) / (window.innerHeight * .6), 0, 1);
   if (progress >= 1) finishAssembly();
+  else if (progress === assembly) return;
   else assembly = progress;
   render();
 }
 
 function onScroll() {
+  // far from the ring there is nothing to deal: the observer catches up when it nears
+  if (!inView) return;
   if (!scrollFrame) scrollFrame = requestAnimationFrame(measureAssembly);
 }
 
 let resizeObserver: ResizeObserver | null = null;
+let pageObserver: ResizeObserver | null = null;
 let viewObserver: IntersectionObserver | null = null;
 let dialQuery: MediaQueryList | null = null;
 let lastViewportHeight = 0;
@@ -647,6 +668,7 @@ let lastViewportHeight = 0;
 function measure() {
   const stage = stageRef.value;
   if (!stage) return;
+  measureStageTop();
   const width = stage.clientWidth;
   const dial = dialQuery?.matches ?? false;
   const g = geo.value;
@@ -684,7 +706,15 @@ onMounted(() => {
     assembly = 1;
   }
   measure();
-  if (motion) measureAssembly();
+  if (motion) {
+    measureAssembly();
+    // anything above the ring growing or shrinking moves it on the page
+    const main = stageRef.value?.closest('main');
+    if (main) {
+      pageObserver = new ResizeObserver(measureStageTop);
+      pageObserver.observe(main);
+    }
+  }
   for (const offset of [-1, 1]) warm(catalog.value[normalize(selectedIndex.value + offset, catalog.value.length)].id);
   render();
 
@@ -697,6 +727,10 @@ onMounted(() => {
     inView = entry.isIntersecting;
     if (inView) {
       void ensurePathwayData();
+      if (!assembled) {
+        measureStageTop();
+        onScroll();
+      }
       schedule();
     } else if (frame) {
       cancelAnimationFrame(frame);
@@ -712,6 +746,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   resizeObserver?.disconnect();
+  pageObserver?.disconnect();
   viewObserver?.disconnect();
   dialQuery?.removeEventListener('change', measure);
   stageRef.value?.removeEventListener('wheel', onWheel);
@@ -750,32 +785,41 @@ onUnmounted(() => {
   text-align: right;
 }
 
+/* a plain two-way switch: the chosen ring is underlined in the accent */
 .arc-orbit__tabs {
   display: flex;
-  padding: 4px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .03);
-  box-shadow: inset 0 0 0 1px var(--arc-line);
+  gap: 28px;
 }
 
 .arc-orbit__tabs button {
-  min-width: 132px;
+  position: relative;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 0 18px;
+  gap: 8px;
+  padding: 0;
   border: 0;
-  border-radius: 99px;
   background: transparent;
   color: var(--arc-muted);
-  font-family: var(--arc-caps);
-  font-size: 12px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-family: var(--arc-body);
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color .25s, color .25s;
+  transition: color .25s;
+}
+
+.arc-orbit__tabs button::after {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--acc);
+  content: '';
+  opacity: 0;
+  transform: scaleX(.4);
+  transition: opacity .25s, transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
 .arc-orbit__tabs button:hover {
@@ -783,34 +827,33 @@ onUnmounted(() => {
 }
 
 .arc-orbit__tabs button b {
-  min-width: 26px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .07);
-  font-family: var(--arc-display);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0;
+  font-weight: 500;
+  color: var(--arc-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .arc-orbit__tabs button[aria-selected='true'] {
-  background: var(--acc);
-  color: var(--arc-on-acc);
+  color: var(--arc-ink);
 }
 
 .arc-orbit__tabs button[aria-selected='true'] b {
-  background: rgba(11, 11, 14, .22);
+  color: var(--acc);
+}
+
+.arc-orbit__tabs button[aria-selected='true']::after {
+  opacity: 1;
+  transform: none;
 }
 
 .arc-orbit__tabs button:focus-visible {
+  border-radius: 4px;
   outline: 3px solid var(--arc-ink);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 .arc-orbit__panel {
-  scroll-margin-top: var(--site-header-stack, 106px);
+  /* a jump to the reading leaves the ring's far seals clear of the header */
+  scroll-margin-top: calc(var(--site-header-stack, 106px) + 16px);
 }
 
 /* ---------- the stage ---------- */
@@ -992,12 +1035,10 @@ onUnmounted(() => {
 }
 
 .arc-orbit__role {
-  margin: 10px 0 0;
-  font-family: var(--arc-caps);
-  font-size: 11.5px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--orb-acc);
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--arc-muted);
   animation: arc-rise .6s .2s cubic-bezier(.2, .8, .2, 1) both;
 }
 
@@ -1065,13 +1106,13 @@ onUnmounted(() => {
 
 .arc-seal__label {
   position: absolute;
-  top: calc(100% + 9px);
+  top: calc(100% + 8px);
   left: 50%;
   width: max-content;
   max-width: var(--lab-w);
   display: grid;
   justify-items: center;
-  gap: 4px;
+  gap: 2px;
   text-align: center;
   transform: translateX(-50%) scale(var(--inv));
   transform-origin: 50% 0;
@@ -1088,10 +1129,8 @@ onUnmounted(() => {
 }
 
 .arc-seal__label small {
-  font-family: var(--arc-caps);
-  font-size: 9.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 1.2;
   color: var(--arc-muted);
   white-space: nowrap;
 }
@@ -1210,12 +1249,12 @@ onUnmounted(() => {
 }
 
 .arc-orbit__begins {
-  margin: 12px 0 0;
+  margin: 0;
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(19px, 1.6vw, 24px);
-  line-height: 1.2;
+  font-size: clamp(19px, 1.5vw, 22px);
+  line-height: 1.25;
   letter-spacing: -.01em;
   color: var(--arc-ink);
   text-wrap: balance;
@@ -1238,10 +1277,7 @@ onUnmounted(() => {
 }
 
 .arc-orbit__stats dt {
-  font-family: var(--arc-caps);
-  font-size: 10.5px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-size: 13.5px;
   color: var(--arc-muted);
 }
 
@@ -1255,19 +1291,22 @@ onUnmounted(() => {
   color: var(--acc);
 }
 
+/* one column of names and one of descriptions, shared by every row */
 .arc-orbit__abilities ul {
   list-style: none;
-  margin: 12px 0 0;
+  margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  grid-template-columns: fit-content(12em) minmax(0, 1fr);
+  gap: 8px 18px;
 }
 
 .arc-orbit__abilities li {
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: minmax(120px, auto) minmax(0, 1fr);
+  grid-template-columns: subgrid;
   align-items: baseline;
-  gap: 2px 18px;
+  row-gap: 2px;
   padding: 10px 14px;
   border-left: 2px solid var(--acc);
   background: linear-gradient(90deg, color-mix(in oklab, var(--acc) 9%, transparent), transparent 85%);
@@ -1290,7 +1329,13 @@ onUnmounted(() => {
   color: var(--arc-muted);
 }
 
-.arc-orbit__loading,
+.arc-orbit__loading {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--arc-muted);
+}
+
 .arc-orbit__note {
   margin: 12px 0 0;
   font-size: 14.5px;
@@ -1301,7 +1346,6 @@ onUnmounted(() => {
 .arc-orbit__actions {
   display: grid;
   gap: 10px;
-  padding-top: 26px;
 }
 
 @media (max-width: 1180px) {
@@ -1361,17 +1405,9 @@ onUnmounted(() => {
 }
 
 @media (max-width: 520px) {
-  .arc-orbit__tabs {
-    width: 100%;
-  }
-
-  .arc-orbit__tabs button {
-    flex: 1;
-    min-width: 0;
-  }
-
+  .arc-orbit__abilities ul,
   .arc-orbit__abilities li {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .arc-orbit__actions {

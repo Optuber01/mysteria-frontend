@@ -32,7 +32,6 @@
       <div class="progression__threshold" aria-hidden="true" />
 
       <header class="progression__heading">
-        <p class="arc-eyebrow"><span class="arc-eyebrow__dot" aria-hidden="true" />{{ tp('eyebrow') }}</p>
         <h2 id="progression-title">{{ tp('title') }}</h2>
         <p class="progression__tagline">{{ tp('tagline') }}</p>
       </header>
@@ -42,14 +41,12 @@
         <div class="chapter-copy-slot">
           <Transition name="chapter-copy">
             <article v-if="activeChapter.id !== 'awaken'" :key="activeChapter.id" class="chapter-copy">
-              <p class="chapter-copy__kicker">{{ chapterText(activeChapter.id, 'kicker') }}</p>
               <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
               <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
               <p class="chapter-copy__hint"><i aria-hidden="true" />{{ chapterText(activeChapter.id, 'hint') }}</p>
             </article>
             <article v-else key="awaken" class="chapter-copy chapter-copy--awaken">
-              <p class="chapter-copy__kicker">{{ chapterText('awaken', 'kicker') }} · {{ tp('drink.panelKicker') }}</p>
-              <h3 class="chapter-copy__name">
+              <h3 class="chapter-copy__name" :style="{ '--name-em': nameEm }">
                 <template v-for="(part, index) in awakenTitle" :key="index"><em v-if="part.name">{{ part.text }}</em><template v-else>{{ part.text }}</template></template>
               </h3>
               <p class="chapter-copy__sub">{{ tp('drink.panelSub') }}</p>
@@ -134,8 +131,10 @@
     <div class="progression-static">
       <ol>
         <li v-for="chapter in CHAPTERS" :key="chapter.id" :class="`is-${chapter.id}`">
-          <p class="chapter-copy__kicker">{{ chapterText(chapter.id, 'kicker') }}</p>
-          <h3>{{ chapterText(chapter.id, 'title') }}</h3>
+          <h3 v-if="chapter.id === 'awaken'">
+            <template v-for="(part, index) in awakenTitle" :key="index"><em v-if="part.name">{{ part.text }}</em><template v-else>{{ part.text }}</template></template>
+          </h3>
+          <h3 v-else>{{ chapterText(chapter.id, 'title') }}</h3>
           <p class="progression-static__copy">{{ chapterText(chapter.id, 'copy') }}</p>
           <ul v-if="chapter.id === 'discover'" class="progression-static__ingredients">
             <li v-for="item in ingredients" :key="item.key">
@@ -147,17 +146,21 @@
               </span>
             </li>
           </ul>
-          <div v-else-if="chapter.id === 'brew' || chapter.id === 'drink'" class="progression-static__vial" aria-hidden="true">
-            <PotionVial :accent="card.accent" :level="chapter.id === 'brew' ? 1 : 0" />
-          </div>
+          <p v-else-if="chapter.id === 'brew' || chapter.id === 'drink'" class="progression-static__note">
+            <span class="progression-static__vial" aria-hidden="true">
+              <PotionVial :accent="card.accent" :level="chapter.id === 'brew' ? 0.5 : 1" />
+            </span>
+            {{ chapterText(chapter.id, 'hint') }}
+          </p>
           <template v-else>
-            <ul v-if="firstAbilities.length" class="chapter-copy__abilities">
+            <ul v-if="firstAbilities.length" class="chapter-copy__abilities" :aria-label="tp('drink.abilitiesHeading')">
               <li v-for="ability in firstAbilities" :key="ability.id">
                 <strong>{{ ability.name }}</strong>
                 <span>{{ ability.description }}</span>
               </li>
             </ul>
-            <RouterLink class="arc-btn arc-btn--solid" :to="$lp('/game')">
+            <p v-if="names.nextSequence" class="chapter-copy__next">{{ tp('drink.teaser') }}</p>
+            <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/game')">
               {{ tp('drink.cta') }} <span aria-hidden="true">→</span>
             </RouterLink>
           </template>
@@ -185,11 +188,13 @@ import crimsonMoon from '@/assets/images/home/progression/crimson-moon.webp';
 
 const { tp, names, ingredients, card, currentId } = useProgressionCopy();
 
-function chapterText(id: ChapterId, field: 'short' | 'kicker' | 'title' | 'copy' | 'hint'): string {
+function chapterText(id: ChapterId, field: 'short' | 'title' | 'copy' | 'hint'): string {
   return tp(`chapters.${id}.${field}`);
 }
 
 const firstAbilities = computed(() => names.value.abilities.slice(0, 2));
+/** Rough width of "{name}." in em, so a long name can shrink to one line (see .chapter-copy__name). */
+const nameEm = computed(() => ((names.value.sequence.length + 1) * 0.5 + 0.4).toFixed(2));
 /** "Become a {sequence}." with the name picked out in the accent. */
 const awakenTitle = computed(() => {
   const name = names.value.sequence;
@@ -353,16 +358,35 @@ function clearExpiredInspector(next: number) {
 }
 
 /* ---------------- scroll ---------------- */
+/*
+ * The section's page offset and height are cached (refreshed on resize, when the
+ * page above it changes height, and when it comes into view), so a scroll frame
+ * does no layout read: it only reads scrollY.
+ */
+let sectionTop = 0;
+let sectionHeight = 0;
+let pageObserver: ResizeObserver | null = null;
+function measureSection() {
+  const section = sectionRef.value;
+  if (!section) return;
+  const rect = section.getBoundingClientRect();
+  sectionTop = rect.top + scrollY;
+  sectionHeight = rect.height;
+}
+function onResize() {
+  measureSection();
+  update();
+}
 function update() {
   if (!visible.value || !sectionRef.value || frame) return;
   frame = requestAnimationFrame(() => {
     frame = 0;
-    const rect = sectionRef.value?.getBoundingClientRect();
-    if (!rect) return;
-    entryProgress.value = clamp01(1 - Math.max(0, rect.top) / innerHeight);
+    if (!sectionRef.value) return;
+    const top = sectionTop - scrollY;
+    entryProgress.value = clamp01(1 - Math.max(0, top) / innerHeight);
     if (reducedMotion.value) return;
-    const range = Math.max(1, rect.height - innerHeight);
-    const next = clamp01(-rect.top / range);
+    const range = Math.max(1, sectionHeight - innerHeight);
+    const next = clamp01(-top / range);
     progress.value = next;
     clearExpiredInspector(next);
   });
@@ -385,6 +409,7 @@ onMounted(() => {
   observer = new IntersectionObserver(([entry]) => {
     visible.value = entry.isIntersecting;
     if (visible.value) {
+      measureSection();
       measureStage();
       update();
     }
@@ -404,17 +429,25 @@ onMounted(() => {
     stageObserver = new ResizeObserver(measureStage);
     stageObserver.observe(stageRef.value);
   }
+  // the section's own height, or anything above it growing or shrinking, moves it on the page
+  pageObserver = new ResizeObserver(onResize);
+  if (sectionRef.value) {
+    pageObserver.observe(sectionRef.value);
+    if (sectionRef.value.parentElement) pageObserver.observe(sectionRef.value.parentElement);
+  }
   addEventListener('scroll', update, { passive: true });
-  addEventListener('resize', update, { passive: true });
+  addEventListener('resize', onResize, { passive: true });
   addEventListener('keydown', onKeydown);
+  measureSection();
   measureStage();
 });
 onUnmounted(() => {
   observer?.disconnect();
   nearObserver?.disconnect();
   stageObserver?.disconnect();
+  pageObserver?.disconnect();
   removeEventListener('scroll', update);
-  removeEventListener('resize', update);
+  removeEventListener('resize', onResize);
   removeEventListener('keydown', onKeydown);
   if (frame) cancelAnimationFrame(frame);
 });
@@ -436,6 +469,7 @@ onUnmounted(() => {
   --moon: 0;
   --rail: clamp(20px, 4vw, 64px);
   --copy-w: clamp(272px, 27vw, 400px);
+  --h3-size: clamp(32px, 3.3vw, 50px);
   --top: calc(var(--site-header-stack, 106px) + clamp(14px, 3vh, 36px));
   position: relative;
   min-height: 380svh;
@@ -463,6 +497,18 @@ onUnmounted(() => {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+/* Scroll drives these full-bleed layers' opacity and transform every frame: on their own
+   compositor layers that is a cheap re-composite instead of repainting (and re-filtering
+   the backdrop photo) across the whole sticky screen. */
+.progression__backdrop,
+.progression__hearth,
+.progression__burst,
+.progression__dread,
+.progression__threshold,
+.progression-nav__line b {
+  will-change: transform, opacity;
 }
 
 .progression__backdrop {
@@ -714,24 +760,21 @@ onUnmounted(() => {
   min-width: 0;
 }
 
-.chapter-copy__kicker {
-  margin: 0;
-  color: var(--acc);
-  font: 400 11.5px/1.4 var(--arc-caps);
-  letter-spacing: .18em;
-  text-transform: uppercase;
-}
-
 .chapter-copy h3 {
-  margin: 16px 0 18px;
+  margin: 0 0 18px;
   color: var(--arc-ink);
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(32px, 3.3vw, 50px);
+  font-size: var(--h3-size);
   line-height: 1.02;
   letter-spacing: -0.025em;
   text-wrap: balance;
+}
+
+/* a long Sequence name shrinks until it fits the column on one line */
+.chapter-copy h3.chapter-copy__name {
+  font-size: min(var(--h3-size), calc(var(--copy-w) / var(--name-em, 1)));
 }
 
 .chapter-copy h3 em {
@@ -749,7 +792,7 @@ onUnmounted(() => {
 
 .chapter-copy__hint {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin: 22px 0 0;
   padding-top: 16px;
@@ -757,10 +800,13 @@ onUnmounted(() => {
   color: var(--arc-muted);
   font-size: 14px;
   line-height: 1.5;
+  text-wrap: pretty;
 }
 
+/* the dot sits on the first line, however many lines the hint takes */
 .chapter-copy__hint i {
   flex: 0 0 auto;
+  margin-top: 7px;
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -810,9 +856,8 @@ onUnmounted(() => {
 .chapter-copy__next {
   margin: 14px 0 0;
   color: var(--arc-muted);
-  font: 400 11px/1.4 var(--arc-caps);
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .chapter-copy__cta {
@@ -969,7 +1014,7 @@ onUnmounted(() => {
   }
 
   .chapter-copy h3 {
-    font-size: clamp(28px, 3.3vw, 38px);
+    --h3-size: clamp(28px, 3.3vw, 38px);
   }
 
   .chapter-copy__body {
@@ -991,8 +1036,8 @@ onUnmounted(() => {
  */
 @media (max-height: 820px) {
   .chapter-copy h3 {
-    margin: 10px 0 12px;
-    font-size: clamp(28px, 5.4vh, 42px);
+    margin: 0 0 12px;
+    --h3-size: clamp(28px, 5.4vh, 42px);
   }
 
   .chapter-copy__sub {
@@ -1101,7 +1146,7 @@ onUnmounted(() => {
   }
 
   .progression-static h3 {
-    margin: 12px 0 10px;
+    margin: 0 0 12px;
     color: var(--arc-ink);
     font-family: var(--arc-display);
     font-variation-settings: 'FLAR' 100;
@@ -1110,6 +1155,11 @@ onUnmounted(() => {
     line-height: 1.05;
     letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+
+  .progression-static h3 em {
+    color: var(--acc);
+    font-style: normal;
   }
 
   .progression-static__copy {
@@ -1136,7 +1186,7 @@ onUnmounted(() => {
     gap: 14px;
     padding: 10px 14px 10px 10px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, .03);
+    background: color-mix(in oklab, var(--arc-surface) 60%, transparent);
     box-shadow: inset 0 0 0 1px var(--arc-line);
   }
 
@@ -1166,22 +1216,52 @@ onUnmounted(() => {
   }
 
   .progression-static__ingredients small {
-    color: var(--acc);
-    font: 400 10.5px/1.3 var(--arc-caps);
-    letter-spacing: .12em;
-    text-transform: uppercase;
+    color: var(--arc-muted);
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+
+  /* the chapter's practical note, the potion as its marker */
+  .progression-static__note {
+    max-width: 620px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 20px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--arc-line);
+    color: var(--arc-muted);
+    font-size: 15px;
+    line-height: 1.5;
+    text-wrap: pretty;
   }
 
   .progression-static__vial {
-    width: 64px;
-    height: 64px;
-    margin-top: 18px;
-    filter: drop-shadow(0 0 18px color-mix(in oklab, var(--acc) 45%, transparent));
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 12px color-mix(in oklab, var(--acc) 45%, transparent));
   }
 
   .progression-static .chapter-copy__abilities {
     max-width: 620px;
-    margin: 20px 0 22px;
+    margin: 20px 0 0;
+  }
+
+  .progression-static .chapter-copy__abilities li {
+    padding-block: 11px;
+  }
+
+  .progression-static .chapter-copy__abilities span {
+    -webkit-line-clamp: 3;
+  }
+
+  .progression-static .chapter-copy__next {
+    margin-top: 14px;
+  }
+
+  .progression-static .chapter-copy__cta {
+    margin-top: 22px;
   }
 
   .progression-static li.is-awaken::before {

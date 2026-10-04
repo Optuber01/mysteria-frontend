@@ -1,13 +1,13 @@
 <template>
   <div class="concept-arcana" :style="themeStyle">
-    <!-- The drawn card's sigil, watching over the whole page -->
+    <!-- The drawn card's sigil, watching over the whole page (none until the visitor draws) -->
     <div class="arc-ambient" aria-hidden="true">
       <!-- The re-theme happens here: two fixed layers crossfade (opacity only), the rest of the page just switches colour. -->
       <Transition name="arc-wash">
-        <span :key="card.id" class="arc-ambient__wash" :style="{'--wash': card.accent}"></span>
+        <span :key="themeKey" class="arc-ambient__wash" :style="{'--wash': card.accent}"></span>
       </Transition>
       <Transition name="arc-sigil">
-        <img :key="card.id" :src="sigilNative(card.id)" alt="" class="arc-ambient__sigil" width="512" height="512" decoding="async">
+        <img v-if="hasDrawn" :key="card.id" :src="sigilNative(card.id)" alt="" class="arc-ambient__sigil" width="512" height="512" decoding="async">
       </Transition>
       <span class="arc-ambient__grain" :style="{backgroundImage: `url(${grain})`}"></span>
     </div>
@@ -48,21 +48,36 @@ import grain from './assets/grain.png';
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&family=Golos+Text:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Tenor+Sans&display=swap');
 
-const {card} = useArcana();
+const {card, hasDrawn} = useArcana();
+/** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
+const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
 const themeStyle = computed(() => ({'--acc': card.value.accent}));
 
 /* The header's mobile drawer is teleported to <body>, so the accent rides there too. */
 watch(() => card.value.accent, accent => document.body.style.setProperty('--acc', accent), {immediate: true});
 
+/*
+ * Chapters well outside the viewport get [data-offscreen], which pauses every CSS
+ * animation inside them (see the style block): drifting fog, spinning halos and
+ * pulses then cost nothing while the visitor reads another chapter.
+ */
+let offscreenObserver: IntersectionObserver | null = null;
+
 onMounted(() => {
   // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
   const idle = (window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number}).requestIdleCallback;
   if (idle) idle(() => void ensurePathwayData(), {timeout: 1500});
   else setTimeout(() => void ensurePathwayData(), 600);
+
+  offscreenObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) entry.target.toggleAttribute('data-offscreen', !entry.isIntersecting);
+  }, {rootMargin: '200px 0px'});
+  document.querySelectorAll('.concept-arcana > .arc-main > *').forEach(section => offscreenObserver?.observe(section));
 });
 
 onUnmounted(() => {
+  offscreenObserver?.disconnect();
   document.body.style.removeProperty('--acc');
 });
 </script>
@@ -78,7 +93,8 @@ onUnmounted(() => {
 @property --acc {
   syntax: '<color>';
   inherits: true;
-  initial-value: #a78bfa;
+  /* NEUTRAL_ACCENT in arcana-data.ts: the page before the visitor draws */
+  initial-value: #e45a64;
 }
 
 .concept-arcana,
@@ -172,6 +188,12 @@ body:has(.concept-arcana) {
   background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc) 16%, transparent), transparent);
 }
 
+/* the language code: upstream sets it in a mono face the page doesn't use */
+.concept-arcana .header-stack .lang-label,
+.concept-arcana .header-stack .lang-option-short {
+  font-family: var(--arc-caps);
+}
+
 .concept-arcana .header-stack .brand-name {
   font-weight: 600;
   font-size: 17px;
@@ -185,6 +207,10 @@ body:has(.concept-arcana) {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  /* One composited layer, painted once: the wash, the sigil and the grain are flattened
+     into it (only a crossfade lifts a piece onto its own layer, while it runs). */
+  contain: strict;
+  transform: translateZ(0);
 }
 
 .arc-ambient__sigil {
@@ -196,7 +222,6 @@ body:has(.concept-arcana) {
   margin-top: -39vmax;
   opacity: .055;
   filter: saturate(.6);
-  will-change: opacity, transform;
 }
 
 .arc-ambient__wash {
@@ -206,7 +231,6 @@ body:has(.concept-arcana) {
   background:
     radial-gradient(60vmax 50vmax at 100% 50%, color-mix(in oklab, var(--wash) 9%, transparent), transparent 70%),
     radial-gradient(50vmax 40vmax at 0% 100%, color-mix(in oklab, var(--wash) 6%, transparent), transparent 70%);
-  will-change: opacity;
 }
 
 .arc-wash-enter-active,
@@ -244,6 +268,13 @@ body:has(.concept-arcana) {
 .arc-main {
   position: relative;
   z-index: 1;
+}
+
+/* A chapter far from the viewport (set by ArcanaHome's observer): its loops hold still. */
+.concept-arcana [data-offscreen] *,
+.concept-arcana [data-offscreen] *::before,
+.concept-arcana [data-offscreen] *::after {
+  animation-play-state: paused !important;
 }
 
 .concept-arcana > footer,
