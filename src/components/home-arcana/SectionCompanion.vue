@@ -24,22 +24,19 @@
             </li>
           </ul>
 
-          <div class="sec-companion__get">
-            <div class="sec-companion__links" role="group" :aria-label="t('home.world.companion.linksLabel')">
-              <a
-                  v-for="platform in platforms"
-                  :key="platform.url"
-                  :href="platform.url"
-                  class="arc-tile sec-companion__link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-              >
-                <component :is="platform.icon" class="sec-companion__icon" aria-hidden="true"/>
-                <span>{{ platform.name }}</span>
-                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-              </a>
-            </div>
-            <p class="sec-companion__note">{{ t('home.world.companion.note') }}</p>
+          <div class="sec-companion__links" role="group" :aria-label="t('home.world.companion.linksLabel')">
+            <a
+                v-for="platform in platforms"
+                :key="platform.url"
+                :href="platform.url"
+                class="arc-tile sec-companion__link"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+              <component :is="platform.icon" class="sec-companion__icon" aria-hidden="true"/>
+              <span>{{ platform.name }}</span>
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
           </div>
         </div>
       </div>
@@ -188,9 +185,9 @@ const platforms = [
   align-items: center;
   gap: 10px;
   min-height: var(--arc-btn-h);
-  padding: 0 14px;
+  padding: 0 16px;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--arc-btn-fs);
 }
 
 .sec-companion__link span {
@@ -208,14 +205,6 @@ const platforms = [
   width: 20px;
   height: 20px;
   color: var(--acc-ink);
-}
-
-.sec-companion__note {
-  text-wrap: pretty;
-  margin: 14px 0 0;
-  font-size: var(--arc-fs-small);
-  line-height: 1.55;
-  color: var(--arc-muted);
 }
 
 @media (max-width: 1100px) {

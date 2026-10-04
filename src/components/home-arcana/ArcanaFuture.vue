@@ -21,7 +21,7 @@
                 <h3>{{ t('home.world.join.step1Title') }}</h3>
                 <button
                     type="button"
-                    class="arc-ip arc-ip--big"
+                    class="arc-ip"
                     :class="`is-${copyState}`"
                     :aria-describedby="'arc-future-copy-note'"
                     @click="copy"
@@ -65,29 +65,26 @@
           </a>
         </div>
 
-        <div class="arc-future__side">
-          <!-- live status -->
-          <div class="arc-live" :class="statusClass">
-            <div class="arc-live__row">
-              <span class="arc-live__dot" aria-hidden="true"></span>
-              <span v-if="isOnline && checkedAt" class="arc-live__count">{{ playerCount ?? 0 }}</span>
-              <span class="arc-live__unit">{{ liveUnit }}</span>
-            </div>
-            <p class="arc-live__meta">{{ liveMeta }}</p>
-            <div class="arc-live__season">
-              <strong>{{ seasonCount }}</strong>
-              <span>{{ t('home.world.join.seasonLabel') }}</span>
-            </div>
+        <!-- live status -->
+        <div class="arc-live" :class="statusClass">
+          <div class="arc-live__row">
+            <span class="arc-live__dot" aria-hidden="true"></span>
+            <span v-if="isOnline && checkedAt" class="arc-live__count">{{ playerCount ?? 0 }}</span>
+            <span class="arc-live__unit">{{ liveUnit }}</span>
           </div>
-
-          <!-- latest update -->
-          <RouterLink :to="$lp(newsLink)" class="arc-news">
-            <time v-if="newsDate" class="arc-news__date" :datetime="newsDateIso">{{ newsDate }}</time>
-            <h3>{{ newsTitle }}</h3>
-            <p v-if="newsBody" class="arc-news__body">{{ newsBody }}</p>
-            <span class="arc-news__read">{{ t('home.world.join.newsRead') }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
-          </RouterLink>
+          <div v-if="seasonCount" class="arc-live__season">
+            <strong>{{ seasonCount }}</strong>
+            <span>{{ t('home.world.join.seasonLabel') }}</span>
+          </div>
         </div>
+
+        <!-- latest update -->
+        <RouterLink :to="$lp(newsLink)" class="arc-news">
+          <time v-if="newsDate" class="arc-news__date" :datetime="newsDateIso">{{ newsDate }}</time>
+          <h3>{{ newsTitle }}</h3>
+          <p v-if="newsBody" class="arc-news__body">{{ newsBody }}</p>
+          <span class="arc-news__read">{{ t('home.world.join.newsRead') }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+        </RouterLink>
       </div>
     </div>
   </section>
@@ -109,14 +106,14 @@ import sky from '@/assets/images/home-library/captures/hero-aurora-cliffside.web
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
 
 const {t, intlLocale} = useI18n();
-const {reading, hasDrawn} = useArcana();
+const {reading, hasDrawn, card} = useArcana();
 const addressRef = ref<HTMLElement | null>(null);
 const {state: copyState, copy, address} = useCopyAddress(addressRef);
 const {isOnline, playerCount, checkedAt} = useServerStatus();
 const {totalBeyonders} = useBeyonderStats();
 
-/* Before a draw the lede stays general; after one it can name the first potion of the drawn Pathway. */
-const lede = computed(() => (hasDrawn.value
+/* Before a draw (or for a Boon, which has no potion) the lede stays general; after a Pathway draw it names its first potion. */
+const lede = computed(() => (hasDrawn.value && !card.value.boon
     ? t('home.world.join.ledeRole').replace('{role}', reading.value.seq9 || reading.value.name)
     : t('home.world.join.lede')));
 
@@ -143,14 +140,8 @@ const liveUnit = computed(() => {
   if (!checkedAt.value) return t('home.arcana.status.checking');
   return isOnline.value ? t('home.world.join.liveUnit') : t('home.arcana.status.offline');
 });
-const liveMeta = computed(() => {
-  if (!checkedAt.value) return t('home.world.join.liveMetaChecking');
-  const time = checkedAt.value.toLocaleTimeString(intlLocale.value, {hour: '2-digit', minute: '2-digit'});
-  return t('home.world.join.liveMeta').replace('{time}', time);
-});
-const seasonCount = computed(() => (totalBeyonders.value
-    ? totalBeyonders.value.toLocaleString(intlLocale.value)
-    : t('home.world.join.seasonFallback')));
+/* No number until the real one arrives: a made-up fallback could be wrong. */
+const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.toLocaleString(intlLocale.value) : ''));
 
 /* ---- latest update ---- */
 // Shared with the hero's changelog button: one request for both.
@@ -186,11 +177,15 @@ const newsDate = computed(() => newsDateValue.value
   mask-image: linear-gradient(180deg, transparent, #000 30%, #000 50%, transparent);
 }
 
+/* enlarged from its lower right corner: the photo has a stray spear in its upper left, which
+   would cross the heading, and this crops it out */
 .arc-future__sky img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   opacity: .3;
+  transform: scale(1.5);
+  transform-origin: 100% 100%;
 }
 
 .arc-future__sky::after {
@@ -214,11 +209,14 @@ const newsDate = computed(() => newsDateValue.value
 .arc-future__grid {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  /* the steps run down the left; the live count, the news card and the buttons stack on the right
+     at their own height (whatever the data brings, no card is stretched to fill) */
+  grid-template-rows: auto auto minmax(0, 1fr);
   grid-template-areas:
-    'steps side'
-    'actions .';
+    'steps live'
+    'steps news'
+    'steps actions';
   gap: var(--arc-grid-gap);
-  /* both columns run to the same line: the news card stretches to the last step's foot */
   align-items: stretch;
 }
 
@@ -237,7 +235,7 @@ const newsDate = computed(() => newsDateValue.value
 
 .arc-step {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
   gap: 20px;
   padding: clamp(20px, 2vw, 26px);
   border-radius: var(--arc-r-lg);
@@ -245,18 +243,19 @@ const newsDate = computed(() => newsDateValue.value
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
+/* the step token: the same card as the rift steps and the town ladder (WorldChapter) */
 .arc-step__num {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 58px;
+  width: 32px;
+  height: 46px;
   border-radius: var(--arc-r-sm);
   border: var(--arc-bw-accent) solid var(--acc-ink);
   background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 700;
-  font-size: 19px;
+  font-size: 15px;
   color: var(--acc-ink);
   transform: rotate(-6deg);
   transition: border-color .6s ease, background-color .6s ease, color .6s ease;
@@ -280,7 +279,10 @@ const newsDate = computed(() => newsDateValue.value
   color: var(--arc-muted);
 }
 
+/* the hero's copy field (global .arc-ip), full width */
 .arc-step .arc-ip {
+  width: 100%;
+  justify-content: space-between;
   margin-top: 4px;
 }
 
@@ -301,17 +303,20 @@ const newsDate = computed(() => newsDateValue.value
 
 .arc-future__actions {
   grid-area: actions;
+  align-self: start;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
 
 /* ---- live + news ---- */
-.arc-future__side {
-  grid-area: side;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--arc-grid-gap);
+.arc-live {
+  grid-area: live;
+}
+
+.arc-news {
+  grid-area: news;
+  align-self: start;
 }
 
 .arc-live,
@@ -328,7 +333,7 @@ const newsDate = computed(() => newsDateValue.value
   align-items: baseline;
   min-height: 54px;
   gap: 12px;
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .arc-live__dot {
@@ -380,18 +385,11 @@ const newsDate = computed(() => newsDateValue.value
   color: var(--arc-muted);
 }
 
-.arc-live__meta {
-  margin: 0;
-  font-size: var(--arc-fs-caption);
-  line-height: 1.4;
-  color: var(--arc-muted);
-}
-
 .arc-live__season {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 16px;
   padding-top: 16px;
   border-top: var(--arc-bw) solid var(--arc-line);
 }
@@ -463,7 +461,6 @@ const newsDate = computed(() => newsDateValue.value
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: auto;
   font-size: 15px;
   font-weight: 600;
   line-height: 1.3;
@@ -483,14 +480,12 @@ const newsDate = computed(() => newsDateValue.value
 @media (max-width: 960px) {
   .arc-future__grid {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
     grid-template-areas:
       'steps'
       'actions'
-      'side';
-  }
-
-  .arc-future__side {
-    grid-template-rows: none;
+      'live'
+      'news';
   }
 }
 
@@ -498,12 +493,6 @@ const newsDate = computed(() => newsDateValue.value
   .arc-step {
     grid-template-columns: 1fr;
     gap: 14px;
-  }
-
-  .arc-step__num {
-    width: 32px;
-    height: 46px;
-    font-size: 16px;
   }
 }
 

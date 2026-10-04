@@ -39,10 +39,6 @@
               {{ copyLabel }}
             </span>
           </button>
-          <p class="arc-status" :class="statusClass">
-            <span class="arc-status__dot" aria-hidden="true"></span>
-            {{ statusLabel }}
-          </p>
           <p class="arc-hero__copy-note" :class="{'is-shown': copyState === 'failed'}" role="status">
             <template v-if="copyState === 'failed'">{{ t('home.arcana.ip.failedHelp') }}</template>
             <template v-else-if="copyState === 'copied'"><span class="arc-sr">{{ t('home.arcana.ip.copied') }}</span></template>
@@ -117,20 +113,8 @@
           </div>
         </div>
 
-        <!-- Under the deck, one group: what you drew (its room is kept before the first draw), the draw button, the hint -->
+        <!-- Under the deck: the draw button and, once drawn, the way to the card's reading (the face names the card) -->
         <div class="arc-hero__draw">
-          <p class="arc-hero__drew">
-            <template v-if="hasDrawn">
-              <span class="arc-hero__drew-label">{{ t('home.arcana.hero.youDrew') }}</span>
-              <span class="arc-hero__drew-name">
-                <span class="arc-hero__drew-num">{{ card.boon ? t('home.arcana.deck.boon') : card.numeral }}</span>
-                {{ reading.name }}
-              </span>
-              <span v-if="reading.seq9" class="arc-hero__drew-role">
-                {{ t('home.arcana.hero.beginsAs').replace('{role}', reading.seq9) }}
-              </span>
-            </template>
-          </p>
           <div class="arc-hero__draw-row">
             <!-- Never `disabled`: that would drop keyboard focus mid-shuffle. Extra presses queue one more draw. -->
             <button
@@ -146,9 +130,8 @@
                 <span :class="{'is-off': !hasDrawn}">{{ t('home.arcana.hero.drawAgain') }}</span>
               </span>
             </button>
-            <p class="arc-hero__hint">
-              <template v-if="!hasDrawn">{{ t('home.arcana.hero.hint') }}</template>
-              <a v-else href="#reading" class="arc-link arc-hero__read">
+            <p v-if="hasDrawn" class="arc-hero__hint">
+              <a href="#reading" class="arc-hero__read">
                 {{ t('home.arcana.hero.readCard') }}
                 <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
               </a>
@@ -172,13 +155,11 @@ import {ensurePathwayData, randomCard, useArcana} from './useArcana';
 import {useCopyAddress} from './useCopyAddress';
 import {useLatestNews} from './useLatestNews';
 import {useI18n} from '@/composables/useI18n';
-import {useServerStatus} from '@/composables/useServer';
 
 const {t, intlLocale} = useI18n();
-const {currentId, hasDrawn, card, reading, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
+const {currentId, hasDrawn, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
 const addressRef = ref<HTMLElement | null>(null);
 const {state: copyState, copy, address} = useCopyAddress(addressRef);
-const {isOnline, playerCount, checkedAt} = useServerStatus();
 
 /* ---------------- copy + status labels ---------------- */
 const copyLabel = computed(() => ({
@@ -191,12 +172,6 @@ const copyIcon = computed(() => ({
   copied: 'fa-solid fa-check',
   failed: 'fa-solid fa-triangle-exclamation',
 }[copyState.value]));
-const statusClass = computed(() => (!checkedAt.value ? 'is-checking' : isOnline.value ? 'is-online' : 'is-offline'));
-const statusLabel = computed(() => {
-  if (!checkedAt.value) return t('home.arcana.status.checking');
-  if (!isOnline.value) return t('home.arcana.status.offline');
-  return t('home.arcana.status.onlineCount').replace('{count}', String(playerCount.value ?? 0));
-});
 
 /* ---------------- latest changelog ---------------- */
 const {latestChangelog, settled: newsSettled} = useLatestNews();
@@ -249,7 +224,7 @@ const announcement = ref('');
 
 const roleOf = (id: string) => {
   const role = seq9Of(id);
-  return role ? t('home.arcana.hero.seqRole').replace('{role}', role) : '';
+  return role ? t('home.arcana.hero.beginsAs').replace('{role}', role) : '';
 };
 const cardLabel = (id: string) => t('home.arcana.hero.cardLabel')
     .replace('{n}', String(fanIndex(id) + 1))
@@ -836,7 +811,7 @@ function waitForFonts(): Promise<void> {
 const px = (value: string) => parseFloat(value) || 0;
 
 /** Room kept under the deck for the caption, so a long name never resizes the table. */
-const CAPTION_ROOM = {wide: 88, stacked: 160};
+const CAPTION_ROOM = {wide: 48, stacked: 80};
 
 function measure() {
   const hero = heroRef.value;
@@ -1046,12 +1021,8 @@ onUnmounted(() => {
 }
 
 .arc-hero .arc-ip {
-  background: color-mix(in srgb, var(--arc-bg) 72%, transparent);
+  /* the field look (spec, global .arc-ip); blurred where it lies over the night scene */
   backdrop-filter: blur(6px);
-}
-
-.arc-hero .arc-status {
-  color: color-mix(in oklab, var(--arc-ink) 72%, var(--arc-muted));
 }
 
 .arc-hero__copy-note {
@@ -1180,8 +1151,9 @@ onUnmounted(() => {
   outline: none;
 }
 
-/* The focus ring is drawn on the card itself so it lifts and tilts with it. */
-.arc-card:focus-visible .arc-card__side--back {
+/* The focus ring is drawn on the card itself so it lifts and tilts with it (either face). */
+.arc-card:focus-visible .arc-card__side--back,
+.arc-card.is-drawn:focus-visible .arc-card__side--front {
   box-shadow:
     0 0 0 var(--arc-focus-off) var(--arc-bg),
     0 0 0 calc(var(--arc-focus-off) + var(--arc-focus-w)) var(--arc-ink),
@@ -1250,7 +1222,7 @@ onUnmounted(() => {
   mix-blend-mode: screen;
 }
 
-/* ---- under the deck: what you drew, the draw button, the hint ---- */
+/* ---- under the deck: the draw button and, once drawn, the link to the reading ---- */
 .arc-hero__draw {
   display: flex;
   flex-direction: column;
@@ -1258,46 +1230,9 @@ onUnmounted(() => {
   gap: 12px;
   max-width: 100%;
   /* the same room drawn or not, so the first draw never moves the page */
-  min-height: var(--draw-room, 84px);
+  min-height: var(--draw-room, 44px);
   margin-top: 4px;
   text-align: center;
-}
-
-.arc-hero__drew {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: center;
-  gap: 4px 12px;
-  min-height: 24px;
-  margin: 0;
-}
-
-.arc-hero__drew-label,
-.arc-hero__drew-role {
-  font-family: var(--arc-caps);
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--arc-muted);
-}
-
-.arc-hero__drew-name {
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: 18px;
-  line-height: 24px;
-  color: var(--arc-ink);
-}
-
-.arc-hero__drew-num {
-  margin-right: 6px;
-  font-family: var(--arc-caps);
-  font-size: 14px;
-  font-weight: 500;
-  /* lifted toward the ink like the link beside it: the deepest accents dip under 4.5:1 on the sky */
-  color: color-mix(in oklab, var(--acc-ink) 80%, var(--arc-ink));
 }
 
 .arc-hero__draw-row {
@@ -1309,6 +1244,8 @@ onUnmounted(() => {
 
 .arc-hero .arc-hero__shuffle {
   flex: none;
+  /* compact buttons keep the family's label size (spec) */
+  font-size: var(--arc-btn-fs);
 }
 
 /* Both labels share one cell, so the button keeps its width when it changes. */
@@ -1334,59 +1271,45 @@ onUnmounted(() => {
   text-wrap: pretty;
 }
 
+/* an action link (spec): ink label, accent arrow that steps on */
 .arc-hero__read {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-left: 4px;
+  font-weight: 600;
+  color: var(--arc-ink);
+  text-decoration: none;
   white-space: nowrap;
 }
 
-/* on the night sky the deepest accents (Priest) sit just under 4.5:1: the link is lifted toward the ink */
-.arc-hero .arc-hero__read {
-  color: color-mix(in oklab, var(--acc-ink) 80%, var(--arc-ink));
+.arc-hero__read:hover {
+  color: var(--arc-ink);
 }
 
-.arc-hero .arc-hero__read:hover {
-  color: var(--arc-ink);
+.arc-hero__read i {
+  font-size: 12px;
+  /* lifted toward the ink: the deepest accents (Priest) sit just under 3:1 on the night sky */
+  color: color-mix(in oklab, var(--acc-ink) 80%, var(--arc-ink));
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.arc-hero__read:hover i {
+  transform: translateY(3px);
 }
 
 /*
  * Light theme: the line under the deck sits on the moon's rose haze, not on paper, so the
  * muted and accent inks (tuned for paper) are taken a step toward the ink to keep 4.5:1.
  */
-:root[data-theme="parchment"] .arc-hero__drew-label,
-:root[data-theme="parchment"] .arc-hero__drew-role,
 :root[data-theme="parchment"] .arc-hero__hint {
   color: color-mix(in oklab, var(--arc-muted) 30%, var(--arc-ink));
 }
 
-/* ...and the group gets a soft pool of paper behind it, where the castle's grey shows through the haze */
-:root[data-theme="parchment"] .arc-hero__draw {
-  position: relative;
-  isolation: isolate;
-}
+/* (no patch of paper behind the group: the castle's foot fades into the fog instead, HeroNightScene) */
 
-:root[data-theme="parchment"] .arc-hero__draw::before {
-  position: absolute;
-  z-index: -1;
-  inset: -14px -48px;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--arc-bg) 94%, transparent) 64%, transparent);
-  pointer-events: none;
-  content: '';
-}
-
-:root[data-theme="parchment"] .arc-hero__drew-num,
-:root[data-theme="parchment"] .arc-hero__read {
+:root[data-theme="parchment"] .arc-hero__read i {
   color: color-mix(in oklab, var(--acc-ink) 45%, var(--arc-ink));
-}
-
-:root[data-theme="parchment"] .arc-hero__read:hover {
-  color: var(--arc-ink);
-}
-
-.arc-hero__read .fa-arrow-down {
-  font-size: .85em;
 }
 
 /* ---- stacked: title, then the deck, then the pitch ---- */
@@ -1416,7 +1339,7 @@ onUnmounted(() => {
   }
 
   .arc-hero__draw {
-    --draw-room: 156px;
+    --draw-room: 76px;
   }
 
   .arc-hero__draw-row {

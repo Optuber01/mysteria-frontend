@@ -29,15 +29,12 @@
         <div class="footer-column">
           <p class="footer-heading">{{ t('footer.communityHeading') }}</p>
           <a href="https://discord.com/invite/jc7GSxBWgb" rel="noopener noreferrer" target="_blank">
-            <IconDiscord class="footer-icon"/>
             {{ t('servicesDiscord') }}
           </a>
           <a href="https://wiki.mysterria.net/" rel="noopener noreferrer" target="_blank">
-            <IconWiki class="footer-icon"/>
             {{ t('navWiki') }}
           </a>
           <a href="https://map.mysterria.net/" rel="noopener noreferrer" target="_blank">
-            <IconMap class="footer-icon"/>
             {{ t('servicesMap') }}
           </a>
         </div>
@@ -66,9 +63,6 @@
 <script lang="ts" setup>
 import {useI18n} from "@/composables/useI18n";
 import {SERVER_IP} from "@/composables/useServer";
-import IconDiscord from "@/assets/icons/IconDiscord.vue";
-import IconWiki from "@/assets/icons/IconWiki.vue";
-import IconMap from "@/assets/icons/IconMap.vue";
 import logo from "@/assets/icons/sources/IconLogo.webp";
 
 withDefaults(defineProps<{ variant?: "full" | "slim" }>(), {variant: "slim"});
@@ -127,7 +121,7 @@ const year = new Date().getFullYear();
   margin: 0;
   max-width: 34ch;
   color: var(--myst-ink-muted);
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.7;
 }
 
@@ -150,19 +144,13 @@ const year = new Date().getFullYear();
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--myst-ink-muted);
   transition: color 0.25s ease;
 }
 
 .footer-column a:hover {
   color: var(--myst-gold);
-}
-
-.footer-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
 }
 
 .footer-baseline {

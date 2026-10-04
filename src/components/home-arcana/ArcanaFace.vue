@@ -126,9 +126,10 @@ const card = computed(() => cardById(props.id));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: 8.4cqw;
+  /* legible on the smallest faces (the hero's at laptop sizes): never under 13px */
+  font-size: max(13px, 9.4cqw);
   line-height: 1.1;
-  letter-spacing: .04em;
+  letter-spacing: .03em;
   text-align: center;
   text-transform: uppercase;
   text-wrap: balance;
@@ -138,11 +139,19 @@ const card = computed(() => cardById(props.id));
   position: relative;
   margin-top: 2.6cqw;
   font-family: var(--arc-caps);
-  font-size: 4.6cqw;
+  /* the page's label size at least (11px caps) */
+  font-size: max(11px, 5.6cqw);
   line-height: 1.3;
-  letter-spacing: .1em;
+  letter-spacing: .06em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--card-acc) 70%, #fff);
   text-align: center;
+}
+
+/* Too small a face for a readable sub-line: the name alone (the reading below gives the role). */
+@container (max-width: 150px) {
+  .arc-face__role {
+    display: none;
+  }
 }
 </style>

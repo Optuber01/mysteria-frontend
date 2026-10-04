@@ -90,7 +90,6 @@
                 <span>{{ rung.body }}</span>
               </li>
             </ol>
-            <p class="world-feature__note"><i class="fa-solid fa-compass" aria-hidden="true"></i>{{ t('home.world.towns.solo') }}</p>
           </div>
         </article>
 
@@ -110,7 +109,6 @@
       <header class="world-gallery__head">
         <h3>{{ t('home.world.gallery.title') }}</h3>
         <div class="world-gallery__aside">
-          <p>{{ t('home.world.gallery.lede') }}</p>
           <div class="world-gallery__actions">
             <a :href="DISCORD" class="arc-btn arc-btn--ghost" target="_blank" rel="noopener noreferrer">
               <IconDiscord class="arc-btn__icon" aria-hidden="true"/>
@@ -162,7 +160,7 @@ import moon from '@/assets/images/home-library/crimson-moon.webp';
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
 
 const {t} = useI18n();
-const {reading, hasDrawn} = useArcana();
+const {reading, hasDrawn, card} = useArcana();
 const shots = TOPIC_SHOTS;
 
 const rules = computed(() => [
@@ -188,8 +186,8 @@ const ladder = computed(() => ['town', 'domain', 'nation'].map(key => ({
   body: t(`home.world.towns.ladder.${key}.body`),
 })));
 
-/* Before a draw there is no "your Pathway" to speak of, so the fact stays general. */
-const moonFact = computed(() => (hasDrawn.value
+/* Before a draw, or for a Boon (not a Pathway), there is no "your Pathway" to speak of, so the fact stays general. */
+const moonFact = computed(() => (hasDrawn.value && !card.value.boon
     ? t('home.world.moon.pathwayFact').replace('{pathway}', reading.value.name)
     : t('home.world.moon.fact')));
 
@@ -365,10 +363,10 @@ onUnmounted(() => {
   text-wrap: pretty;
   position: relative;
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
   gap: 14px;
-  padding: 10px 0;
+  padding: 6px 0;
   font-size: var(--arc-fs-body);
   line-height: 1.5;
   color: var(--arc-muted);
@@ -383,14 +381,14 @@ onUnmounted(() => {
 .world-ladder__card {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 40px;
+  width: 32px;
+  height: 46px;
   border: var(--arc-bw-accent) solid var(--acc-ink);
   border-radius: var(--arc-r-sm);
   background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--acc-ink);
   transform: rotate(-6deg);
@@ -417,7 +415,6 @@ onUnmounted(() => {
 }
 
 .world-facts i,
-.world-feature__note i,
 .world-card__fact i {
   flex: none;
   width: 14px;
@@ -446,7 +443,7 @@ onUnmounted(() => {
 
 .world-ladder {
   list-style: none;
-  margin: 0 0 20px;
+  margin: 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -469,7 +466,7 @@ onUnmounted(() => {
   content: '';
   position: absolute;
   z-index: 1;
-  top: 34px;
+  top: 35px;
   right: -9px;
   width: 8px;
   height: 8px;
@@ -480,7 +477,6 @@ onUnmounted(() => {
 
 .world-ladder__card {
   margin-bottom: 6px;
-  font-size: 11px;
 }
 
 .world-ladder strong {
@@ -495,15 +491,6 @@ onUnmounted(() => {
   text-wrap: pretty;
   font-size: var(--arc-fs-small);
   line-height: 1.45;
-  color: var(--arc-muted);
-}
-
-.world-feature__note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: var(--arc-fs-small);
   color: var(--arc-muted);
 }
 
@@ -602,6 +589,43 @@ onUnmounted(() => {
   border-top: var(--arc-bw) solid var(--arc-line);
 }
 
+/*
+ * Cards in a row share their rows (photo / title / text / note), so every title, text block and
+ * note rule lands on the same line whatever the copy length; below 900px they are separate
+ * swipeable cards and keep the plain flex stack.
+ */
+@media (min-width: 901px) {
+  .world-cards {
+    row-gap: 0;
+  }
+
+  .world-card {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+  }
+
+  /* the caption's overlap with the photo moves to the photo's foot, so it can't skew the shared rows */
+  .world-card__photo,
+  .world-moon {
+    margin-bottom: -30px;
+  }
+
+  .world-card__copy {
+    display: grid;
+    margin-top: 0;
+    grid-row: 2 / span 3;
+    grid-template-rows: subgrid;
+    align-items: start;
+    justify-items: stretch;
+  }
+
+  .world-card__copy > p.world-card__fact {
+    margin-top: 0;
+    align-self: stretch;
+  }
+}
+
 /* the Crimson Moon is a moon, not a photo: give it its own sky */
 .world-moon {
   position: relative;
@@ -639,16 +663,6 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-.world-gallery__aside p {
-  max-width: 30em;
-  margin: 0;
-  font-size: var(--arc-fs-lede);
-  line-height: 1.65;
-  color: var(--arc-muted);
-  text-align: right;
-  text-wrap: balance;
-}
-
 .world-gallery__actions {
   display: flex;
   gap: 10px;
@@ -670,8 +684,18 @@ onUnmounted(() => {
 .world-strip {
   margin-inline: calc(var(--arc-gutter) * -1);
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  --strip-fade: clamp(72px, 9vw, 168px);
+  --strip-mask: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 0, 0, .3) calc(var(--strip-fade) * .5),
+    #000 var(--strip-fade),
+    #000 calc(100% - var(--strip-fade)),
+    rgba(0, 0, 0, .3) calc(100% - var(--strip-fade) * .5),
+    transparent
+  );
+  -webkit-mask-image: var(--strip-mask);
+  mask-image: var(--strip-mask);
 }
 
 .world-strip__track {
@@ -783,10 +807,6 @@ onUnmounted(() => {
 
   .world-gallery__aside {
     justify-items: start;
-  }
-
-  .world-gallery__aside p {
-    text-align: left;
   }
 }
 

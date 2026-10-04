@@ -2,24 +2,9 @@
   <!--
     Persistent deck, once the hero's table has scrolled away: your card as a small
     sigil that redraws (a face-down card that draws, before the first draw), seated in
-    the header's free space beside its actions (so it never covers the page), plus the
-    page's four sections in the right gutter.
+    the header's free space beside its actions (so it never covers the page).
   -->
   <aside class="arc-dock" :class="{'is-shown': visible}" :aria-label="t('home.arcana.dock.label')" :inert="!visible || undefined">
-    <nav class="arc-dock__spread" :aria-label="t('home.arcana.dock.spreadLabel')">
-      <a
-          v-for="spot in spread"
-          :key="spot.id"
-          :href="`#${spot.id}`"
-          class="arc-dock__spot"
-          :class="{'is-active': active === spot.id}"
-          :aria-current="active === spot.id ? 'location' : undefined"
-      >
-        <span class="arc-dock__spot-card" aria-hidden="true">{{ spot.numeral }}</span>
-        <span class="arc-dock__spot-name">{{ spot.label }}</span>
-      </a>
-    </nav>
-
     <!-- Only ever in the header: with no free room there it steps away rather than cover the page. -->
     <div class="arc-dock__seat" :class="{'is-away': !seat}" :style="seatStyle" :inert="!seat || undefined">
       <button
@@ -70,18 +55,10 @@ const orbLabel = computed(() => (hasDrawn.value
     ? `${t('home.arcana.dock.draw')}. ${t('home.arcana.dock.current').replace('{name}', reading.value.name)}`
     : t('home.arcana.dock.drawFirst')));
 
-const spread = computed(() => [
-  {id: 'progression', numeral: 'I', label: t('home.world.spread.potion')},
-  {id: 'deck', numeral: 'II', label: t('home.world.spread.deck')},
-  {id: 'world', numeral: 'III', label: t('home.world.spread.world')},
-  {id: 'future', numeral: 'IV', label: t('home.world.spread.seat')},
-]);
-
 const pastHero = ref(false);
 const navOpen = ref(false);
 /** The Pathways orbit is a deck control of its own: step aside while it is on screen. */
 const atOrbit = ref(false);
-const active = ref('');
 const visible = computed(() => pastHero.value && !navOpen.value && !atOrbit.value);
 
 /* ---------------- the seat: the header's free space, left of its actions ---------------- */
@@ -113,7 +90,6 @@ function locate() {
 
 let heroObserver: IntersectionObserver | null = null;
 let orbitObserver: IntersectionObserver | null = null;
-let sectionObserver: IntersectionObserver | null = null;
 let headerSizes: ResizeObserver | null = null;
 let headerChanges: MutationObserver | null = null;
 
@@ -127,19 +103,8 @@ onMounted(() => {
   orbitObserver = new IntersectionObserver(([entry]) => {
     atOrbit.value = entry.isIntersecting;
   }, {rootMargin: '-10% 0px -10% 0px'});
-  const orbit = document.getElementById('pathways');
+  const orbit = document.getElementById('deck');
   if (orbit) orbitObserver.observe(orbit);
-
-  sectionObserver = new IntersectionObserver(entries => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) active.value = entry.target.id;
-      else if (active.value === entry.target.id) active.value = '';
-    }
-  }, {rootMargin: '-45% 0px -45% 0px'});
-  spread.value.forEach(spot => {
-    const el = document.getElementById(spot.id);
-    if (el) sectionObserver?.observe(el);
-  });
 
   // Follow the header: announcement dismissed, language or sign-in changing its actions, mobile menu.
   const stack = document.querySelector('.header-stack');
@@ -160,7 +125,6 @@ onMounted(() => {
 onUnmounted(() => {
   heroObserver?.disconnect();
   orbitObserver?.disconnect();
-  sectionObserver?.disconnect();
   headerSizes?.disconnect();
   headerChanges?.disconnect();
   window.removeEventListener('resize', locate);
@@ -336,124 +300,8 @@ onUnmounted(() => {
   color: var(--acc-ink);
 }
 
-/* ---- the spread: four small cards in the right gutter ---- */
-.arc-dock__spread {
-  position: fixed;
-  z-index: 950;
-  right: 18px;
-  top: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  opacity: 0;
-  translate: 12px -50%;
-  transition: opacity .35s ease, translate .5s cubic-bezier(.2, .8, .2, 1);
-}
-
-.is-shown .arc-dock__spread {
-  opacity: 1;
-  translate: 0 -50%;
-}
-
-.arc-dock__spot {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 2px;
-  border-radius: var(--arc-r-sm);
-  color: var(--arc-muted);
-  font-family: var(--arc-caps);
-  font-size: 10px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  transition: color .2s;
-}
-
-.arc-dock__spot:hover,
-.arc-dock__spot:focus-visible {
-  color: var(--arc-ink);
-}
-
-.arc-dock__spot.is-active {
-  color: var(--acc-ink);
-}
-
-.arc-dock__spot-card {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 32px;
-  border: var(--arc-bw-accent) solid currentColor;
-  border-radius: var(--arc-r-sm);
-  background: color-mix(in srgb, var(--arc-bg) 70%, transparent);
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-size: 8.5px;
-  letter-spacing: 0;
-  transition: transform .4s cubic-bezier(.2, .8, .2, 1), background-color .3s, color .3s;
-}
-
-.arc-dock__spot.is-active .arc-dock__spot-card {
-  background: var(--acc-solid);
-  border-color: var(--acc-solid);
-  color: var(--arc-on-acc);
-  transform: rotate(-8deg) scale(1.15);
-}
-
-/* The name pops out to the left only while pointed at, so it never sits on the page. */
-.arc-dock__spot-name {
-  position: absolute;
-  right: calc(100% + 8px);
-  padding: 5px 9px;
-  border-radius: var(--arc-r-sm);
-  background: color-mix(in srgb, var(--arc-bg) 92%, transparent);
-  white-space: nowrap;
-  opacity: 0;
-  translate: 6px 0;
-  pointer-events: none;
-  transition: opacity .25s, translate .3s;
-}
-
-.arc-dock__spot:hover .arc-dock__spot-name,
-.arc-dock__spot:focus-visible .arc-dock__spot-name {
-  opacity: 1;
-  translate: 0 0;
-}
-
-.arc-dock__spot:focus-visible {
-  outline: var(--arc-focus-w) solid var(--arc-ink);
-  outline-offset: var(--arc-focus-off);
-}
-
-/* The gutter is only wide enough for the spread on wide screens. */
-/* Light theme: the spread floats over paper and over the dark potion story alike, so its
-   little cards keep the dark theme's look (dark faces, light rims, the card's own accent)
-   and read on both. */
-:root[data-theme="parchment"] .arc-dock__spread {
-  --arc-bg: #0b0b0e;
-  --arc-ink: #efeef3;
-  --arc-muted: #a7a6b2;
-  --arc-on-acc: #0b0b0e;
-  --acc-ink: var(--acc);
-  --acc-solid: var(--acc);
-}
-
-:root[data-theme="parchment"] .arc-dock__spot:not(.is-active) .arc-dock__spot-card {
-  background: color-mix(in srgb, var(--arc-bg) 88%, transparent);
-  box-shadow: 0 4px 10px rgba(46, 36, 58, .18);
-}
-
-@media (max-width: 1279px) {
-  .arc-dock__spread {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .arc-dock__seat,
-  .arc-dock__spread,
   .arc-dock__face,
   .arc-dock__badge {
     transition: none;

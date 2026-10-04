@@ -1,13 +1,10 @@
 <template>
   <div class="concept-arcana" :style="themeStyle">
-    <!-- The drawn card's sigil, watching over the whole page (none until the visitor draws) -->
+    <!-- The page's ambient layer: the accent wash and the grain -->
     <div class="arc-ambient" aria-hidden="true">
       <!-- The re-theme happens here: two fixed layers crossfade (opacity only), the rest of the page just switches colour. -->
       <Transition name="arc-wash">
         <span :key="themeKey" class="arc-ambient__wash" :style="{'--wash': card.accent}"></span>
-      </Transition>
-      <Transition name="arc-sigil">
-        <img v-if="hasDrawn" :key="card.id" :src="sigilNative(card.id)" alt="" class="arc-ambient__sigil" width="512" height="512" decoding="async">
       </Transition>
       <span class="arc-ambient__grain" :style="{backgroundImage: `url(${grain})`}"></span>
     </div>
@@ -42,9 +39,8 @@ import WorldChapter from './WorldChapter.vue';
 import ArcanaFuture from './ArcanaFuture.vue';
 import SectionCompanion from './SectionCompanion.vue';
 import ArcanaDeckControl from './ArcanaDeckControl.vue';
-import {sigilNative} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
-import {inkAccent} from './accentInk';
+import {fillAccent, inkAccent} from './accentInk';
 import grain from './assets/grain.png';
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&family=Golos+Text:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Tenor+Sans&display=swap');
@@ -53,13 +49,19 @@ const {card, hasDrawn} = useArcana();
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
 const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
-/* --acc-deep: the accent deepened to read as text on the light theme's paper (accentInk.ts). */
-const themeStyle = computed(() => ({'--acc': card.value.accent, '--acc-deep': inkAccent(card.value.accent)}));
+/* --acc-deep: the accent deepened to read as text on the light theme's paper; --acc-fill: the
+   light theme's solid-control fill (near-black where the deepened accent turns olive). See accentInk.ts. */
+const themeStyle = computed(() => ({
+  '--acc': card.value.accent,
+  '--acc-deep': inkAccent(card.value.accent),
+  '--acc-fill': fillAccent(card.value.accent),
+}));
 
 /* The header's mobile drawer is teleported to <body>, so the accent rides there too. */
 watch(() => card.value.accent, accent => {
   document.body.style.setProperty('--acc', accent);
   document.body.style.setProperty('--acc-deep', inkAccent(accent));
+  document.body.style.setProperty('--acc-fill', fillAccent(accent));
 }, {immediate: true});
 
 /*
@@ -100,6 +102,7 @@ onUnmounted(() => {
   offscreenObserver?.disconnect();
   document.body.style.removeProperty('--acc');
   document.body.style.removeProperty('--acc-deep');
+  document.body.style.removeProperty('--acc-fill');
 });
 </script>
 
@@ -107,8 +110,8 @@ onUnmounted(() => {
 /*
  * Registered as a colour so color-mix() and transitions on the properties that read it
  * interpolate. The accent itself is NOT transitioned page-wide (that repainted every
- * element each frame for over a second): it switches at once, the ambient wash and sigil
- * crossfade, and a few key elements (labels, solid buttons, head cards) ease their own
+ * element each frame for over a second): it switches at once, the ambient wash
+ * crossfades, and a few key elements (labels, solid buttons, head cards) ease their own
  * colour properties.
  */
 @property --acc {
@@ -244,7 +247,8 @@ body:has(.concept-arcana) {
   --arc-muted: #55535e;
   --arc-on-acc: #ffffff;
   --acc-ink: var(--acc-deep, var(--acc));
-  --acc-solid: var(--acc-deep, var(--acc));
+  /* solid fills: near-black for the accents that deepen into olive (Sun, Death, Second Law) */
+  --acc-solid: var(--acc-fill, var(--acc-deep, var(--acc)));
   --arc-glass: rgba(28, 24, 36, .035);
   --arc-shadow: rgba(46, 36, 58, .16);
   --arc-shadow-strong: rgba(40, 30, 52, .34);
@@ -284,29 +288,28 @@ body:has(.concept-arcana) {
 
 /*
  * The potion story stays a dark room in the light theme: its brewery, blackout and
- * heartbeat are made of darkness. It gets the dark palette back. Its top is a
- * deliberate cut, not a gradient (a paper-to-black fade read as a grey fog wall and a
- * straight edge as a band): the room's own roofline (ProgressionStory's
- * .progression__roofs) rises out of it over the strip the hero keeps free (--roof-h),
- * so the dark room climbs the paper sky roof by roof. Its bottom dissolves into the
- * paper (a static gradient that scrolls with the section).
+ * heartbeat are made of darkness. On paper it is a deep warm ink rather than the night
+ * page's black, with the dark palette's light text. Its top is Backlund's roofs in three
+ * depths (ProgressionStory's .progression__roofs), haze-grey to ink, rising over the
+ * strip the hero keeps free (--roof-h); at its end the whole room dissolves into the
+ * paper (.progression__exit), so it has no bottom edge.
  */
 :root[data-theme="parchment"] .concept-arcana .progression {
-  --arc-bg: #0b0b0e;
-  --arc-surface: #15151b;
+  --arc-bg: #1a1519;
+  --arc-surface: #241e23;
   --arc-line: rgba(255, 255, 255, .09);
   --arc-ink: #efeef3;
-  --arc-muted: #a7a6b2;
-  --arc-on-acc: #0b0b0e;
+  --arc-muted: #aaa5ae;
+  --arc-on-acc: #1a1519;
   --acc-ink: var(--acc);
   --acc-solid: var(--acc);
   --arc-glass: rgba(255, 255, 255, .04);
   --arc-shadow: rgba(0, 0, 0, .55);
   --arc-shadow-strong: rgba(0, 0, 0, .7);
-  --arc-chip-bg: #0e0e12;
-  --arc-card: #131318;
-  --arc-card-2: #0f0f13;
-  --arc-pop: rgba(15, 15, 19, .96);
+  --arc-chip-bg: #1d181c;
+  --arc-card: #211b20;
+  --arc-card-2: #1c171b;
+  --arc-pop: rgba(33, 27, 32, .96);
   --arc-ok: #86efac;
   --arc-bad: #ffb3a8;
   /* tokens built from the ones above resolve where they are declared: re-derive them here */
@@ -315,23 +318,27 @@ body:has(.concept-arcana) {
   --arc-raised: color-mix(in oklab, var(--arc-surface) 88%, transparent);
 }
 
-:root[data-theme="parchment"] .concept-arcana .progression::after {
-  position: absolute;
-  z-index: 30;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  height: clamp(160px, 34vh, 340px);
-  pointer-events: none;
-  content: '';
-  background: linear-gradient(0deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
-}
-
-/* the stacked story (ProgressionStory's fallback): the fade mostly stays inside its padding */
+/* the stacked story (ProgressionStory's fallback, no dissolve): its foot fades into the paper inside its padding */
 @media (max-width: 900px), (max-height: 590px), (prefers-reduced-motion: reduce) {
   :root[data-theme="parchment"] .concept-arcana .progression::after {
+    position: absolute;
+    z-index: 30;
+    right: 0;
+    left: 0;
+    bottom: 0;
     height: calc(clamp(64px, 12vw, 96px) + 40px);
+    pointer-events: none;
+    content: '';
+    background: linear-gradient(0deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
   }
+}
+
+/*
+ * Light theme: over the dark room the bar's 78% paper glass turned a muddy grey. On this
+ * page it is near-solid paper, so it reads as the same bar over the hero, the room and the page.
+ */
+:root[data-theme="parchment"] .concept-arcana .header-stack.is-overlay .site-header::before {
+  background: color-mix(in srgb, var(--myst-bg) 95%, transparent);
 }
 
 body:has(.concept-arcana) {
@@ -347,8 +354,7 @@ body:has(.concept-arcana) {
   font-synthesis: none;
 }
 
-/* From 1280px the reading's spread (ArcanaDeckControl) sits in the right gutter:
-   keep every chapter's content clear of it. */
+/* From 1280px the gutter is the spec's full 64px. */
 @media (min-width: 1280px) {
   .concept-arcana {
     --arc-gutter: 64px;
@@ -480,26 +486,10 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  /* One composited layer, painted once: the wash, the sigil and the grain are flattened
+  /* One composited layer, painted once: the wash and the grain are flattened
      into it (only a crossfade lifts a piece onto its own layer, while it runs). */
   contain: strict;
   transform: translateZ(0);
-}
-
-.arc-ambient__sigil {
-  position: absolute;
-  right: -14vmax;
-  top: 50%;
-  width: 78vmax;
-  height: 78vmax;
-  margin-top: -39vmax;
-  opacity: .055;
-  filter: saturate(.6);
-}
-
-/* on paper the sigil's dark strokes read much louder than on the night page */
-:root[data-theme="parchment"] .arc-ambient__sigil {
-  opacity: .035;
 }
 
 .arc-ambient__wash {
@@ -528,42 +518,40 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   background-size: 160px 160px;
 }
 
-.arc-sigil-enter-active,
-.arc-sigil-leave-active {
-  transition: opacity 1.2s ease, transform 1.4s cubic-bezier(.2, .8, .2, 1);
-}
-
-.arc-sigil-enter-from {
-  opacity: 0;
-  transform: rotate(-25deg) scale(.9);
-}
-
-.arc-sigil-leave-to {
-  opacity: 0;
-  transform: rotate(25deg) scale(1.08);
-}
-
 .arc-main {
   position: relative;
   z-index: 1;
 }
 
 /*
- * The potion story is an opaque room; the page around it is the background plus the
- * fixed wash, sigil and grain. The section after the room starts in the room's own
- * colour and lets the page fade back in, so there is no line where the room ends.
- * (A static gradient that scrolls with the section; nothing on it animates.)
+ * The potion story is an opaque room that ends in the plain page colour (its dissolve);
+ * the page around it is the background plus the fixed wash and grain. The section after
+ * the room starts in that plain colour and lets the wash and grain fade back in, so there
+ * is no line where the room ends. (A static gradient that scrolls with the section.)
  */
 .concept-arcana .progression + .arc-section::before {
   position: absolute;
   z-index: -1;
-  top: 0;
+  top: var(--story-overlap, 0px);
   right: 0;
   left: 0;
-  height: calc(var(--arc-section-pad) * 2.5);
+  height: calc(var(--arc-section-pad) * 1.5);
   background: linear-gradient(180deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 62%, transparent) 38%, transparent);
   pointer-events: none;
   content: '';
+}
+
+/*
+ * The pinned story (not its stacked fallback): the next section starts OVERLAP screens up,
+ * over the room's last stretch, which by then has dissolved into the page colour
+ * (ProgressionStory's exitProgress). Its head rises straight out of the dissolve instead
+ * of after a screen of empty page; the seam above starts where the room ends.
+ */
+@media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+  .concept-arcana .progression + .arc-section {
+    --story-overlap: 35vh;
+    margin-top: calc(-1 * var(--story-overlap));
+  }
 }
 
 /* A loop in a chapter far from the viewport (set by ArcanaHome's observer) holds still. */
@@ -712,7 +700,7 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   align-items: center;
   gap: 12px;
   min-height: var(--arc-btn-h);
-  padding: 0 7px 0 14px;
+  padding: 0 7px 0 18px;
   font: inherit;
   cursor: pointer;
 }
@@ -759,16 +747,6 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 .concept-arcana .arc-ip.is-failed .arc-ip__hint {
   background: #f87171;
   color: #2a0606;
-}
-
-.concept-arcana .arc-ip--big {
-  width: 100%;
-  justify-content: space-between;
-  padding-left: 18px;
-}
-
-.concept-arcana .arc-ip--big .arc-ip__address {
-  font-size: clamp(16px, 1.6vw, 20px);
 }
 
 /* links: inline (accent, underlined) and action links (ink, accent arrow that steps on) */
@@ -847,16 +825,9 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
     animation-iteration-count: 1 !important;
   }
 
-  .arc-sigil-enter-active,
-  .arc-sigil-leave-active,
   .arc-wash-enter-active,
   .arc-wash-leave-active {
     transition: opacity .3s ease;
-  }
-
-  .arc-sigil-enter-from,
-  .arc-sigil-leave-to {
-    transform: none;
   }
 }
 </style>

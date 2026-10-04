@@ -44,8 +44,11 @@ export const T = {
   lower: [0.72, 0.742],
   /** the potion takes hold: head bowed, hand to the temple, the circle waking */
   hit: [0.744, 0.8],
-  /** the voices: one after another, from the lowered bottle until the dark */
-  voices: [0.736, 0.806],
+  /**
+   * the voices: one after another, from the lowered bottle until the dark. This
+   * stretch is slowed down on the page (see storyAt), so each line can be read.
+   */
+  voices: [0.736, 0.812],
   /** the dark closing in: from the lowered bottle to the flash */
   closing: [0.726, 0.114],
   blackout: [0.81, 0.026],
@@ -132,4 +135,30 @@ export function awakenAt(g: number): number {
   const t = clamp01((g - T.awaken[0]) / T.awaken[1]);
   // a touch faster out of the flash than smoothstep, still settling gently
   return smooth(t) * 0.8 + (1 - (1 - t) ** 2) * 0.2;
+}
+
+/*
+ * Scroll → story time. The page gives the voices more scroll than their share of
+ * the timeline: `dwell` extra px are spent inside T.voices, so every other beat
+ * keeps its pace while each raving stays on screen for a few wheel steps. Pure
+ * functions of the scroll position, so the story still plays backwards.
+ */
+/** Story time (0..1) at `px` of the pinned scroll (`range` px, `dwell` of them extra). */
+export function storyAt(px: number, range: number, dwell: number): number {
+  const base = Math.max(1, range - dwell);
+  const [v0, v1] = T.voices;
+  const start = v0 * base;
+  const length = (v1 - v0) * base + dwell;
+  if (px <= start) return clamp01(px / base);
+  if (px < start + length) return v0 + ((px - start) / length) * (v1 - v0);
+  return clamp01((px - dwell) / base);
+}
+/** The inverse of storyAt: the scroll px where story time `g` is reached. */
+export function scrollAt(g: number, range: number, dwell: number): number {
+  const base = Math.max(1, range - dwell);
+  const [v0, v1] = T.voices;
+  const t = clamp01(g);
+  if (t <= v0) return t * base;
+  if (t < v1) return v0 * base + ((t - v0) / (v1 - v0)) * ((v1 - v0) * base + dwell);
+  return t * base + dwell;
 }

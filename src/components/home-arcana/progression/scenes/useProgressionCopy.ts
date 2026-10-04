@@ -41,10 +41,12 @@ export function preloadPathwayNames(): Promise<unknown> {
 
 export function useProgressionCopy() {
   const {t, currentLanguage, intlLocale} = useI18n();
-  const {currentId, data, card} = useArcana();
+  const {currentId, data, card, hasDrawn} = useArcana();
 
   /** The Pathway the story brews: the drawn card (Boons fall back to the Fool's recipe). */
   const pathwayId = computed(() => (hasRecipe(currentId.value) ? currentId.value : 'fool'));
+  /** A Boon is drawn: it has no potions, so the story shows the Fool as the example. */
+  const isBoon = computed(() => hasDrawn.value && cardById(currentId.value).boon);
 
   const names = computed<PathwayCopy>(() => {
     const id = pathwayId.value;
@@ -105,5 +107,5 @@ export function useProgressionCopy() {
     );
   }
 
-  return {tp, names, list, recipe, ingredients, pathwayId, card, currentId};
+  return {tp, names, list, recipe, ingredients, pathwayId, card, currentId, isBoon};
 }

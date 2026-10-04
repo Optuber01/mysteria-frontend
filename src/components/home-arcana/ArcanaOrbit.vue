@@ -57,7 +57,6 @@
               <img :src="sigilNative(card.id)" alt="" width="512" height="512" decoding="async" draggable="false">
             </span>
             <h3 id="arc-orbit-name" class="arc-orbit__name">{{ nameOf(card.id) }}</h3>
-            <p class="arc-orbit__role">{{ numeralLabel(card) }}</p>
           </div>
 
           <div
@@ -88,10 +87,7 @@
               <span class="arc-seal__orb">
                 <img :src="sigilThumb(item.id)" alt="" width="128" height="128" decoding="async" draggable="false" :loading="index < 8 ? 'eager' : 'lazy'">
               </span>
-              <span class="arc-seal__label" aria-hidden="true">
-                <strong>{{ nameOf(item.id) }}</strong>
-                <small>{{ countLabel(sequenceCounts[item.id] ?? (item.boon ? 5 : 10)) }}</small>
-              </span>
+              <span class="arc-seal__label" aria-hidden="true">{{ nameOf(item.id) }}</span>
             </button>
           </div>
         </div>
@@ -100,9 +96,6 @@
           <button type="button" class="arc-orbit__step" :aria-label="t('home.arcana.deck.previous')" @click="step(-1)">
             <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
           </button>
-          <p class="arc-orbit__count">
-            <span class="arc-orbit__hint">{{ geo.dial ? t('home.arcana.deck.hintTouch') : t('home.arcana.deck.hint') }}</span>
-          </p>
           <button type="button" class="arc-orbit__step" :aria-label="t('home.arcana.deck.next')" @click="step(1)">
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </button>
@@ -129,7 +122,7 @@
             <ul v-if="reading.early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
               <li v-for="(ability, index) in reading.early" :key="ability.name" :style="{'--i': index}">
                 <strong>{{ ability.name }}</strong>
-                <span>{{ ability.description }}</span>
+                <span>{{ abilitySummary(ability.description) }}</span>
               </li>
             </ul>
             <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
@@ -154,6 +147,7 @@ import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {useReducedMotion} from '@/composables/useReducedMotion';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
+import {abilitySummary} from './abilitySummary';
 import {type ArcanaCard, BOON_CARDS, cardById, CORE_CARDS, sigilNative, sigilThumb} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
 
@@ -194,7 +188,7 @@ const sequenceCounts = computed<Record<string, number>>(() => {
 });
 const roleLine = (id: string) => {
   const role = seq9Of(id);
-  return role ? t('home.arcana.deck.seqRole').replace('{role}', role) : countLabel(sequenceCounts.value[id] ?? 10);
+  return role ? t('home.arcana.deck.beginsAs').replace('{role}', role) : countLabel(sequenceCounts.value[id] ?? 10);
 };
 /** "From Seer at Sequence 9 to Fool at Sequence 0": the whole climb in one line. */
 const beginsLine = computed(() => {
@@ -296,6 +290,8 @@ const announcement = ref('');
 let announcedId = '';
 
 let seals: HTMLElement[] = [];
+/** Each seal's disc: the ring's depth fades the disc only, never its caption. */
+let orbs: HTMLElement[] = [];
 let spin = 0;
 let target = 0;
 let velocity = 0;
@@ -314,6 +310,7 @@ const still = () => reducedMotion.value;
 
 function collectSeals() {
   seals = [...(ringRef.value?.querySelectorAll<HTMLElement>('.arc-seal') ?? [])];
+  orbs = seals.map(seal => seal.querySelector<HTMLElement>('.arc-seal__orb') ?? seal);
 }
 
 function render() {
@@ -344,11 +341,12 @@ function render() {
       const near = clamp((cos - .5) / .5, 0, 1);
       scale = .7 + .3 * near;
       opacity = clamp((cos - .55) / .25, 0, 1);
-      label = clamp((cos - .93) / .05, 0, 1);
+      label = cos > .95 ? 1 : 0;
     } else {
       scale = .5 + .5 * depth;
       opacity = .26 + .74 * depth ** 1.3;
-      label = clamp((depth - .84) / .1, 0, 1);
+      // captions are on or off (full contrast), only for the seals at the front
+      label = depth > .88 ? 1 : 0;
     }
     let x = g.cx + g.a * sin;
     let y = g.cy + g.b * cos;
@@ -357,13 +355,13 @@ function render() {
       y = mix(originY, y, enter);
       scale *= .3 + .7 * enter;
       opacity *= enter;
-      label *= enter;
+      if (enter < 1) label = 0;
     }
     element.style.transform = `translate3d(${(x - g.orb / 2).toFixed(1)}px, ${(y - g.orb / 2).toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-    element.style.opacity = opacity.toFixed(3);
+    orbs[index].style.opacity = opacity.toFixed(3);
     element.style.zIndex = String(10 + Math.round(depth * 100));
     element.style.pointerEvents = opacity < .2 ? 'none' : '';
-    element.style.setProperty('--lab', label.toFixed(2));
+    element.style.setProperty('--lab', String(label));
     element.style.setProperty('--inv', (1 / scale).toFixed(3));
   }
 }
@@ -1002,21 +1000,14 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: clamp(30px, 3.1vw, 50px);
-  line-height: .98;
-  letter-spacing: -.025em;
+  /* the group heading's step of the scale (spec: h3) */
+  font-size: var(--arc-fs-h2);
+  line-height: 1.08;
+  letter-spacing: -.02em;
   color: var(--arc-ink);
   text-wrap: balance;
   overflow-wrap: anywhere;
   animation: arc-rise .6s .12s cubic-bezier(.2, .8, .2, 1) both;
-}
-
-.arc-orbit__role {
-  margin: 8px 0 0;
-  font-size: 15px;
-  line-height: 1.4;
-  color: var(--arc-muted);
-  animation: arc-rise .6s .2s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 /* ---------- seals on the ring ---------- */
@@ -1041,7 +1032,7 @@ onUnmounted(() => {
   font: inherit;
   cursor: pointer;
   transform-origin: 50% 50%;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 .arc-seal__orb {
@@ -1055,6 +1046,7 @@ onUnmounted(() => {
     inset 0 0 0 1px color-mix(in oklab, var(--tok) 38%, transparent),
     0 14px 30px var(--arc-shadow);
   transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
+  will-change: opacity;
 }
 
 .arc-seal__orb img {
@@ -1087,29 +1079,17 @@ onUnmounted(() => {
   left: 50%;
   width: max-content;
   max-width: var(--lab-w);
-  display: grid;
-  justify-items: center;
-  gap: 2px;
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--arc-ink);
   text-align: center;
   transform: translateX(-50%) scale(var(--inv));
   transform-origin: 50% 0;
   opacity: max(var(--lab), var(--hot, 0));
   pointer-events: none;
+  transition: opacity .2s ease;
   text-shadow: 0 1px 10px var(--arc-bg), 0 0 3px var(--arc-bg);
-}
-
-.arc-seal__label strong {
-  font-size: var(--arc-fs-small);
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--arc-ink);
-}
-
-.arc-seal__label small {
-  font-size: var(--arc-fs-caption);
-  line-height: 1.2;
-  color: var(--arc-muted);
-  white-space: nowrap;
 }
 
 .arc-seal:focus-visible {
@@ -1130,21 +1110,15 @@ onUnmounted(() => {
   }
 }
 
-/* the drawn seal leaves an empty socket on the ring */
-.arc-seal.is-drawn .arc-seal__orb {
-  background: radial-gradient(circle, color-mix(in oklab, var(--orb-acc) 20%, transparent), #0b0b0e 72%);
+/* selected (spec): the seal stays whole, ringed in the accent at the accent width */
+.arc-seal.is-drawn .arc-seal__orb,
+.arc-seal.is-drawn:hover .arc-seal__orb,
+.arc-seal.is-drawn:focus-visible .arc-seal__orb {
   box-shadow:
-    inset 0 0 0 var(--arc-bw-accent) var(--orb-acc),
-    0 0 32px color-mix(in oklab, var(--orb-acc) 40%, transparent);
-}
-
-.arc-seal.is-drawn .arc-seal__orb img {
-  opacity: .22;
-}
-
-/* the chosen seal's name, in the accent taken a step toward the ink: it sits on the seal's own glow */
-.arc-seal.is-drawn .arc-seal__label strong {
-  color: color-mix(in oklab, var(--acc-ink) 72%, var(--arc-ink));
+    inset 0 0 0 var(--arc-bw) color-mix(in oklab, var(--tok) 38%, transparent),
+    0 0 0 var(--arc-bw-accent) var(--acc-ink),
+    0 0 26px color-mix(in oklab, var(--orb-acc) 35%, transparent),
+    0 14px 30px var(--arc-shadow);
 }
 
 /* ---------- controls ---------- */
@@ -1154,7 +1128,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 .arc-orbit__step {
@@ -1184,24 +1158,11 @@ onUnmounted(() => {
   transition-duration: .08s;
 }
 
-.arc-orbit__count {
-  min-width: 250px;
-  margin: 0;
-  text-align: center;
-}
-
-.arc-orbit__hint {
-  font-family: var(--arc-body);
-  font-size: var(--arc-fs-caption);
-  letter-spacing: 0;
-  color: var(--arc-muted);
-  text-align: center;
-}
-
 /* ---------- dossier ---------- */
 .arc-orbit__dossier {
   display: grid;
-  grid-template-columns: minmax(0, .9fr) minmax(0, 1.45fr) auto;
+  /* fixed tracks: the columns and buttons stay put from one card to the next */
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.45fr) var(--dossier-actions, 264px);
   align-items: start;
   gap: 24px clamp(28px, 4vw, 56px);
   margin-top: clamp(22px, 3vh, 32px);
@@ -1262,7 +1223,7 @@ onUnmounted(() => {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: fit-content(12em) minmax(0, 1fr);
+  grid-template-columns: 10em minmax(0, 1fr);
   gap: 8px 18px;
 }
 
@@ -1285,10 +1246,6 @@ onUnmounted(() => {
 }
 
 .arc-orbit__abilities li span {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
   font-size: var(--arc-fs-small);
   line-height: 1.5;
   color: var(--arc-muted);
@@ -1357,12 +1314,6 @@ onUnmounted(() => {
 .arc-orbit.is-dial .arc-orbit__name {
   font-size: 34px;
   margin-top: 26px;
-}
-
-.arc-orbit.is-dial .arc-orbit__count {
-  min-width: 0;
-  flex: 1;
-  max-width: 230px;
 }
 
 .arc-orbit.is-dial .arc-orbit__dossier {

@@ -432,6 +432,27 @@ onUnmounted(() => {
   opacity: .3;
 }
 
+/*
+ * ...and its foot is lost in the morning fog, so the line under the deck (what you drew,
+ * the draw button, the hint) sits on plain haze across the whole width, with no patch of
+ * paper of its own behind it. Side by side: the city box is the deck's, so this lines up.
+ */
+@media (min-width: 901px) {
+  :root[data-theme="parchment"] .night__city {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22%), linear-gradient(180deg, #000 50%, rgba(0, 0, 0, .35) 64%, transparent 76%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent 0, #000 22%), linear-gradient(180deg, #000 50%, rgba(0, 0, 0, .35) 64%, transparent 76%);
+    mask-composite: intersect;
+  }
+
+  :root[data-theme="parchment"] .night__moonlight {
+    -webkit-mask: var(--city-mask) 0 0 / 100% 100% no-repeat, linear-gradient(180deg, #000 50%, transparent 72%);
+    -webkit-mask-composite: source-in;
+    mask: var(--city-mask) 0 0 / 100% 100% no-repeat, linear-gradient(180deg, #000 50%, transparent 72%);
+    mask-composite: intersect;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .night__fog-drift {
     animation: none;

@@ -101,3 +101,29 @@ export function inkAccent(hex: string, page = LIGHT_PAGE): string {
   cache.set(key, result);
   return result;
 }
+
+/** Near-black ink (the light theme's `--arc-ink`): the solid fill for accents that turn murky on paper. */
+export const FILL_INK = '#17161c';
+/** OKLCH hues (degrees) where a deepened accent reads as olive, khaki or gold rather than as its colour. */
+const MURKY_HUES: readonly [number, number] = [75, 140];
+
+const fillCache = new Map<string, string>();
+
+/**
+ * The fill for solid controls on the light page (`--acc-fill`): the text-safe accent,
+ * except where deepening lands in the olive/khaki/gold band (the Sun, Death, Second Law),
+ * which would read as mud on a button. Those cards fill with near-black ink and keep
+ * their own colour for thin details (rings, rules, washes).
+ */
+export function fillAccent(hex: string, page = LIGHT_PAGE): string {
+  const key = `${hex}|${page}`;
+  const hit = fillCache.get(key);
+  if (hit) return hit;
+  const deep = inkAccent(hex, page);
+  const [, chroma, hue] = rgbToOklch(parseHex(deep));
+  const degrees = ((hue * 180) / Math.PI + 360) % 360;
+  const murky = chroma > .03 && degrees >= MURKY_HUES[0] && degrees <= MURKY_HUES[1];
+  const result = murky ? FILL_INK : deep;
+  fillCache.set(key, result);
+  return result;
+}

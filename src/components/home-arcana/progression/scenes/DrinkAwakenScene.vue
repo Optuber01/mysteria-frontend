@@ -12,13 +12,13 @@
       </div>
     </div>
 
-    <!-- The reading turns up: the card he drew, and one face down. -->
+    <!-- The reading turns up: the card he drew. -->
     <div class="drink-scene__cards" aria-hidden="true">
       <div v-for="c in cards" :key="c.id" class="reading-card" :style="c.style">
         <!-- turned over in the picture plane: the back narrows away, the face opens -->
         <span v-if="!c.showFace" class="reading-card__back" :style="c.sideStyle"><i /></span>
-        <span v-else class="reading-card__front" :class="{ 'is-example': !hasDrawn }" :style="c.sideStyle">
-          <ArcanaFace :id="currentId" :name="reading.name" :role="reading.seq9" eager />
+        <span v-else class="reading-card__front" :class="{ 'is-example': isExample }" :style="c.sideStyle">
+          <ArcanaFace :id="pathwayId" :name="faceReading.name" :role="faceReading.seq9" eager />
         </span>
       </div>
     </div>
@@ -111,8 +111,14 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{ (e: 'inspect', id: string, anchor: HTMLElement): void; (e: 'clear-inspect'): void }>();
 
 const reduced = useReducedMotion();
-const { tp, card, currentId } = useProgressionCopy();
-const { reading, hasDrawn } = useArcana();
+const { tp, card, currentId, pathwayId } = useProgressionCopy();
+const { readingFor, hasDrawn } = useArcana();
+/*
+ * The story follows a Pathway: a drawn Boon (no potions; it advances at the Sacrificial
+ * Altar) sees the Fool as the example, its card and ravings included, like an undrawn page.
+ */
+const isExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
+const faceReading = computed(() => readingFor(pathwayId.value));
 
 function inspect(id: string, event: Event): void {
   if (event.currentTarget instanceof HTMLElement) emit('inspect', id === 'potion' && g.value >= T.catch[0] ? 'drink-potion' : 'potion', event.currentTarget);
@@ -243,15 +249,20 @@ const potionLightStyle = computed<CSSProperties>(() => {
 
 /* ---------------- whispers ---------------- */
 /*
- * What the potion says back once it is down, never while he drinks: one voice,
- * a pause, another, then faster and over each other as it takes hold, and
- * silence in the dark before the awakening. Each Pathway has its own ravings
- * (home.progression.ravings.<card>.r1..r5); before a draw, or where a card has
- * none yet, the general whispers stand in. A missing key comes back from t() as
- * the key itself.
+ * What the potion says back once it is down, never while he drinks: one voice
+ * at a time, each crossfading into the next on the other side of him, then
+ * silence in the dark before the awakening. The page slows the story down over
+ * T.voices (storyAt), so each line holds for a few wheel steps. Each Pathway has
+ * its own ravings (home.progression.ravings.<pathway>.r1..r5); before a draw, or
+ * where a Pathway has none yet, the general whispers stand in. A missing key
+ * comes back from t() as the key itself.
  */
 type Whisper = { id: string; at: number; side: 'left' | 'right'; dy: number };
-const VOICE_AT = [0, 0.3, 0.52, 0.66, 0.78].map((k) => T.voices[0] + k * (T.voices[1] - T.voices[0] - 0.016));
+/** Share of the voices' stretch each crossfade takes; the five lines fill it end to end. */
+const VOICE_FADE = 0.025;
+const VOICE_STEP = (1 - VOICE_FADE) / 5;
+const VOICE_SPAN = T.voices[1] - T.voices[0];
+const VOICE_AT = [0, 1, 2, 3, 4].map((n) => T.voices[0] + n * VOICE_STEP * VOICE_SPAN);
 const WHISPERS: Whisper[] = [
   { id: 'w1', at: VOICE_AT[0], side: 'right', dy: 0.14 },
   { id: 'w2', at: VOICE_AT[1], side: 'left', dy: 0.3 },
@@ -259,11 +270,13 @@ const WHISPERS: Whisper[] = [
   { id: 'w4', at: VOICE_AT[3], side: 'left', dy: 0.12 },
   { id: 'w5', at: VOICE_AT[4], side: 'right', dy: 0.2 },
 ];
-/** How long each voice is heard (timeline fraction), and its fades. */
-const WHISPER_LIFE = 0.026;
+/** How long each voice is heard (timeline fraction): its step plus the crossfade into the next. */
+const WHISPER_LIFE = (VOICE_STEP + VOICE_FADE) * VOICE_SPAN;
+/** Each fade, as a share of a voice's life. */
+const WHISPER_FADE = VOICE_FADE / (VOICE_STEP + VOICE_FADE);
 const lines = computed(() => {
   const own = (n: number) => {
-    const key = `ravings.${currentId.value}.r${n}`;
+    const key = `ravings.${pathwayId.value}.r${n}`;
     const text = tp(key);
     return text && text !== `home.progression.${key}` ? text : '';
   };
@@ -277,7 +290,7 @@ const whispers = computed(() => {
   const p = l.player;
   return WHISPERS.map((whisper, index) => {
     const t = (g.value - whisper.at) / WHISPER_LIFE;
-    const on = t > 0 && t < 1 ? smooth(t / 0.18) * (1 - smooth((t - 0.66) / 0.34)) : 0;
+    const on = t > 0 && t < 1 ? smooth(t / WHISPER_FADE) * (1 - smooth((t - 1 + WHISPER_FADE) / WHISPER_FADE)) : 0;
     const drift = clamp01(t) * 10;
     // clear of his head on the right; on the left, of the raised bottle too
     const gap = whisper.side === 'right' ? p.w * 0.27 + 8 : p.w * 0.36 + 8;
@@ -290,7 +303,7 @@ const whispers = computed(() => {
       style: {
         left: `${anchorX.toFixed(1)}px`,
         top: `${(p.y + whisper.dy * p.h).toFixed(1)}px`,
-        maxWidth: `${Math.max(120, Math.min(260, room)).toFixed(0)}px`,
+        maxWidth: `${Math.max(140, Math.min(320, room)).toFixed(0)}px`,
         opacity: (on * (1 - flash.value) * (1 - blackout.value)).toFixed(4),
         transform: `translate3d(${whisper.side === 'right' ? drift : -drift}px, -50%, 0)`,
         visibility: on > 0.01 ? 'visible' : 'hidden',
@@ -312,7 +325,6 @@ const circleStyle = computed(() => ({
 
 type CardSpec = { id: string; face: boolean; at: number; side: -1 | 1; dy: number; tilt: number };
 const CARDS: CardSpec[] = [
-  { id: 'back', face: false, at: T.awaken[0] + 0.026, side: -1, dy: 0.2, tilt: -8 },
   { id: 'face', face: true, at: T.awaken[0] + 0.046, side: 1, dy: 0.19, tilt: 7 },
 ];
 const cards = computed(() => {
@@ -586,8 +598,8 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   width: max-content;
   /* the potion story is a dark room in either theme */
   color: #efeef3;
-  font: 400 13px/1.45 var(--arc-caps);
-  letter-spacing: 0.13em;
+  font: 400 clamp(16px, 1.2vw, 18px)/1.4 var(--arc-caps);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   text-wrap: balance;
   overflow-wrap: break-word;

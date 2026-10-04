@@ -7,7 +7,7 @@
     <RouterLink v-if="announcement.to" :to="$lp(announcement.to)" class="season-link">
       {{ announcement.linkLabel }} →
     </RouterLink>
-    <button :aria-label="t('header.closeNav')" class="season-dismiss" @click="dismissAnnouncement">
+    <button :aria-label="t('contentLanguageNotice.dismiss')" class="season-dismiss" type="button" @click="dismissAnnouncement">
       <i class="fa-solid fa-xmark"></i>
     </button>
   </div>
@@ -525,9 +525,10 @@ onUnmounted(() => {
   transition: color 0.25s ease;
 }
 
+/* one language with the page's tabs: hover inks the label, the current page adds the accent underline */
 .nav-link:hover,
 .nav-link.active {
-  color: var(--myst-gold);
+  color: var(--myst-ink);
 }
 
 .nav-underline {
@@ -593,11 +594,6 @@ onUnmounted(() => {
   transition: color .25s ease, border-color .25s ease;
 }
 
-.theme-toggle:hover {
-  color: var(--myst-gold);
-  border-color: var(--myst-line-40);
-}
-
 .theme-toggle:focus-visible {
   outline: 2px solid var(--myst-ink);
   outline-offset: 2px;
@@ -611,6 +607,54 @@ onUnmounted(() => {
   stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/*
+ * One hover for every control in the bar (server chip, language, theme, profile, menu):
+ * the hairline turns accent, a faint accent wash, the label inks, and the control lifts
+ * 2px. The solid sign-in button keeps its fill and brightens instead. A press sets it down.
+ */
+.header-actions :deep(:is(.ip-chip, .lang-ritual-trigger, .profile-chip)),
+.header-actions .theme-toggle,
+.header-actions .mobile-nav-toggle {
+  background: color-mix(in srgb, var(--myst-ink) 3%, transparent);
+  border: 1px solid var(--myst-line-14);
+  color: var(--myst-ink);
+  transition: color .25s ease, background-color .25s ease, border-color .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.header-actions .theme-toggle {
+  color: var(--myst-ink-muted);
+}
+
+.header-actions :deep(:is(.ip-chip, .lang-ritual-trigger, .profile-chip)):hover,
+.header-actions .theme-toggle:hover,
+.header-actions .mobile-nav-toggle:hover {
+  background: var(--myst-wash);
+  border-color: var(--myst-line-55);
+  color: var(--myst-ink);
+  transform: translateY(-2px);
+}
+
+/* The homepage's solid fill where it has one (near-black on paper for the olive accents). */
+.header-actions :deep(.login-button) {
+  background: var(--acc-solid, var(--myst-gold));
+  color: var(--arc-on-acc, var(--myst-on-gold));
+  transition: filter .2s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.header-actions :deep(.login-button):hover {
+  background: var(--acc-solid, var(--myst-gold));
+  color: var(--arc-on-acc, var(--myst-on-gold));
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+.header-actions :deep(:is(.ip-chip, .lang-ritual-trigger, .profile-chip, .login-button)):active,
+.header-actions .theme-toggle:active,
+.header-actions .mobile-nav-toggle:active {
+  transform: scale(.98);
+  transition-duration: .08s;
 }
 
 /* ---- Responsive ladder: the server chip goes first (the page repeats the address),
