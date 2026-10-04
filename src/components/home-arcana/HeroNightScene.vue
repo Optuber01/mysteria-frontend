@@ -243,26 +243,67 @@ onMounted(() => {
 
 /* ---- legibility: the copy column, the header, the hand-off to the page ---- */
 .night__scrim {
+  /* the page colour (dark: rgb(11, 11, 14)) at the scrim's strengths, so the light theme scrims with paper */
+  --s: var(--arc-bg);
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(11, 11, 14, .9) 0%, rgba(11, 11, 14, .72) 30%, rgba(11, 11, 14, .2) 52%, transparent 62%),
-    linear-gradient(180deg, rgba(11, 11, 14, .6) 0%, transparent calc(var(--site-header-stack, 106px) + 60px)),
-    linear-gradient(0deg, var(--arc-bg) 0%, rgba(11, 11, 14, .85) 9%, transparent 24%);
+    linear-gradient(90deg, color-mix(in srgb, var(--s) 90%, transparent) 0%, color-mix(in srgb, var(--s) 72%, transparent) 30%, color-mix(in srgb, var(--s) 20%, transparent) 52%, transparent 62%),
+    linear-gradient(180deg, color-mix(in srgb, var(--s) 60%, transparent) 0%, transparent calc(var(--site-header-stack, 106px) + 60px)),
+    linear-gradient(0deg, var(--s) 0%, color-mix(in srgb, var(--s) 85%, transparent) 9%, transparent 24%);
 }
 
 /* Stacked layout: the scene is a band behind the title and the deck. */
 @media (max-width: 900px) {
   .night__scrim {
     background:
-      linear-gradient(180deg, rgba(11, 11, 14, .78) 0%, rgba(11, 11, 14, .35) calc(var(--site-header-stack, 106px) + 150px), transparent calc(var(--site-header-stack, 106px) + 230px)),
-      linear-gradient(0deg, var(--arc-bg) 0%, rgba(11, 11, 14, .8) 12%, transparent 30%);
+      linear-gradient(180deg, color-mix(in srgb, var(--s) 78%, transparent) 0%, color-mix(in srgb, var(--s) 35%, transparent) calc(var(--site-header-stack, 106px) + 150px), transparent calc(var(--site-header-stack, 106px) + 230px)),
+      linear-gradient(0deg, var(--s) 0%, color-mix(in srgb, var(--s) 80%, transparent) 12%, transparent 30%);
   }
 
   .night__city {
     -webkit-mask-image: none;
     mask-image: none;
   }
+}
+
+/*
+ * Light theme: the same view at first light. A pale misty sky warming to rose around the
+ * crimson moon, Backlund faded into the haze (plain opacity on the same images), the fog
+ * banks reading as white mist across the moon, and paper instead of night under the copy.
+ * Only colours and opacities change; every layer and animation is the dark one.
+ */
+:root[data-theme="parchment"] .night {
+  background:
+    radial-gradient(circle at var(--moon-x, 72%) var(--moon-y, 48%), rgba(214, 120, 120, .2) 0, transparent calc(var(--moon-r, 200px) * 3.4)),
+    linear-gradient(180deg, #e3e1e2 0%, #ece8e4 46%, #efe6e2 72%, var(--arc-bg) 100%);
+}
+
+/* the night sky's far hills and cloud banks, as a faint wash on the paper */
+:root[data-theme="parchment"] .night__sky {
+  opacity: .1;
+}
+
+:root[data-theme="parchment"] .night__tint {
+  background:
+    radial-gradient(circle at var(--moon-x, 72%) var(--moon-y, 48%), rgba(179, 32, 43, .14) 0, transparent calc(var(--moon-r, 200px) * 2.6)),
+    radial-gradient(circle at var(--moon-x, 72%) var(--moon-y, 48%), color-mix(in oklab, var(--acc) 12%, transparent) 0, transparent calc(var(--moon-r, 200px) * 4.2));
+}
+
+:root[data-theme="parchment"] .night__moon-glow {
+  background: radial-gradient(circle,
+      rgba(179, 32, 43, .26) 0%,
+      rgba(179, 32, 43, .08) 30%,
+      transparent 60%);
+}
+
+/* the castle sits back in the haze: a grey-blue silhouette rather than a black one */
+:root[data-theme="parchment"] .night__city {
+  opacity: .5;
+}
+
+:root[data-theme="parchment"] .night__moonlight {
+  opacity: .3;
 }
 
 @media (prefers-reduced-motion: reduce) {

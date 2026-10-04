@@ -815,7 +815,7 @@ onUnmounted(() => {
   left: 0;
   height: 2px;
   border-radius: 2px;
-  background: var(--acc);
+  background: var(--acc-ink);
   content: '';
   opacity: 0;
   transform: scaleX(.4);
@@ -837,7 +837,7 @@ onUnmounted(() => {
 }
 
 .arc-orbit__tabs button[aria-selected='true'] b {
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .arc-orbit__tabs button[aria-selected='true']::after {
@@ -894,7 +894,7 @@ onUnmounted(() => {
 }
 
 .arc-orbit__track {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--orb-acc) 22%, rgba(255, 255, 255, .06));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--orb-acc) 22%, var(--arc-line));
 }
 
 /* a fainter orbit inside the first: the ring has depth */
@@ -904,7 +904,7 @@ onUnmounted(() => {
   width: calc(var(--rx) * 1.44);
   height: calc(var(--ry) * 1.44);
   box-shadow: none;
-  border: 1px dashed rgba(255, 255, 255, .07);
+  border: 1px dashed var(--arc-line);
 }
 
 /* ---------- the drawn seal ---------- */
@@ -934,7 +934,7 @@ onUnmounted(() => {
     0 0 0 9px rgba(11, 11, 14, .78),
     0 0 0 10px color-mix(in oklab, var(--orb-acc) 45%, transparent),
     0 0 80px 10px color-mix(in oklab, var(--orb-acc) 22%, transparent),
-    0 26px 60px rgba(0, 0, 0, .6);
+    0 26px 60px var(--arc-shadow);
 }
 
 .arc-orbit__drawn img {
@@ -967,7 +967,8 @@ onUnmounted(() => {
   padding: 0 6px;
   border-radius: 99px;
   background: var(--orb-acc);
-  color: var(--arc-on-acc);
+  /* part of the seal, which stays a dark medallion in both themes */
+  color: #0b0b0e;
   box-shadow: 0 0 0 4px #0b0b0e;
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
@@ -1076,7 +1077,7 @@ onUnmounted(() => {
   background: radial-gradient(circle at 50% 38%, color-mix(in oklab, var(--tok) 20%, #15151b), #0b0b0e 70%);
   box-shadow:
     inset 0 0 0 1px color-mix(in oklab, var(--tok) 38%, transparent),
-    0 14px 30px rgba(0, 0, 0, .55);
+    0 14px 30px var(--arc-shadow);
   transition: transform .35s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
 }
 
@@ -1092,7 +1093,7 @@ onUnmounted(() => {
   box-shadow:
     inset 0 0 0 1px var(--tok),
     0 0 28px color-mix(in oklab, var(--tok) 40%, transparent),
-    0 14px 30px rgba(0, 0, 0, .55);
+    0 14px 30px var(--arc-shadow);
 }
 
 .arc-seal:focus-visible {
@@ -1118,7 +1119,7 @@ onUnmounted(() => {
   transform-origin: 50% 0;
   opacity: max(var(--lab), var(--hot, 0));
   pointer-events: none;
-  text-shadow: 0 1px 10px #0b0b0e, 0 0 3px #0b0b0e;
+  text-shadow: 0 1px 10px var(--arc-bg), 0 0 3px var(--arc-bg);
 }
 
 .arc-seal__label strong {
@@ -1149,7 +1150,7 @@ onUnmounted(() => {
     box-shadow:
       inset 0 0 0 1px var(--tok),
       0 0 28px color-mix(in oklab, var(--tok) 40%, transparent),
-      0 14px 30px rgba(0, 0, 0, .55);
+      0 14px 30px var(--arc-shadow);
   }
 }
 
@@ -1166,7 +1167,7 @@ onUnmounted(() => {
 }
 
 .arc-seal.is-drawn .arc-seal__label strong {
-  color: var(--orb-acc);
+  color: var(--acc-ink);
 }
 
 /* ---------- controls ---------- */
@@ -1187,8 +1188,8 @@ onUnmounted(() => {
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, .04);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 40%, transparent);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 40%, transparent);
   color: var(--arc-ink);
   cursor: pointer;
   transition: background-color .2s, transform .3s cubic-bezier(.2, .8, .2, 1);
@@ -1222,7 +1223,7 @@ onUnmounted(() => {
 
 .arc-orbit__count b {
   font-weight: 400;
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .arc-orbit__hint {
@@ -1288,7 +1289,7 @@ onUnmounted(() => {
   font-weight: 600;
   font-size: clamp(28px, 2.4vw, 36px);
   line-height: 1.1;
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 /* one column of names and one of descriptions, shared by every row */
@@ -1308,7 +1309,7 @@ onUnmounted(() => {
   align-items: baseline;
   row-gap: 2px;
   padding: 10px 14px;
-  border-left: 2px solid var(--acc);
+  border-left: 2px solid var(--acc-ink);
   background: linear-gradient(90deg, color-mix(in oklab, var(--acc) 9%, transparent), transparent 85%);
   animation: arc-rise .55s cubic-bezier(.2, .8, .2, 1) both;
   animation-delay: calc(var(--i) * 70ms + 80ms);

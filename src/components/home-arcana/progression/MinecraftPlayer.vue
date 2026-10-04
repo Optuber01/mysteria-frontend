@@ -24,6 +24,7 @@ import type { PlayerAnimation, SkinViewer } from 'skinview3d';
 import playerSkinUrl from '@/assets/images/home/progression/player-skin.png';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import { drawVial, hexToRgb, vialRows } from './art';
+import { isNearby, whenSettled } from './prewarm';
 
 export type MinecraftPlayerMode = 'drink' | 'advance';
 /** The held bottle on screen: centre and height, px relative to this figure. */
@@ -408,6 +409,8 @@ function maybeCreateViewer() {
   if (props.armed && inViewport.value) void createViewer();
 }
 
+let cancelPrewarm: (() => void) | null = null;
+
 onMounted(() => {
   if (!canvas.value || !host.value) return;
   intersectionObserver = new IntersectionObserver(
@@ -419,6 +422,10 @@ onMounted(() => {
     { rootMargin: '120px 0px', threshold: 0.01 },
   );
   intersectionObserver.observe(host.value);
+  // The context, shaders and skin are ready before the first scroll into the story (see prewarm.ts).
+  cancelPrewarm = whenSettled(() => {
+    if (isNearby(host.value)) void createViewer();
+  });
 });
 
 watch(() => props.armed, maybeCreateViewer);
@@ -443,6 +450,7 @@ watch(
 
 onUnmounted(() => {
   disposed = true;
+  cancelPrewarm?.();
   resizeObserver?.disconnect();
   intersectionObserver?.disconnect();
   bottleTexture?.dispose();

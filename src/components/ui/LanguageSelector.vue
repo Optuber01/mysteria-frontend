@@ -92,9 +92,9 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.02);
+  background: color-mix(in srgb, var(--myst-ink) 3%, transparent);
   padding: 6px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--myst-line-14, rgba(255, 255, 255, 0.05));
   border-radius: 4px;
   cursor: pointer;
   transition: border-color 0.3s ease, background 0.3s ease;
@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
 
 .lang-caret {
   font-size: 8px;
-  color: #666;
+  color: color-mix(in srgb, var(--myst-ink-muted) 75%, transparent);
   transition: transform 0.25s ease;
 }
 
@@ -133,10 +133,14 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 4px;
   list-style: none;
-  background: #0a0d12;
+  background: var(--myst-bg);
   border: 1px solid var(--myst-line-18, rgba(255, 255, 255, 0.1));
   border-radius: 6px;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme="parchment"] .lang-menu {
+  box-shadow: 0 16px 36px rgba(24, 20, 30, 0.16);
 }
 
 .lang-option {
@@ -154,7 +158,7 @@ onBeforeUnmount(() => {
 }
 
 .lang-option:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--myst-ink) 5%, transparent);
 }
 
 .lang-option.active {
@@ -166,14 +170,14 @@ onBeforeUnmount(() => {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #666;
+  color: var(--myst-ink-muted);
   min-width: 22px;
 }
 
 .lang-option-name {
   flex: 1;
   font-size: 12.5px;
-  color: #b8bec9;
+  color: var(--myst-ink);
 }
 
 .lang-option.active .lang-option-short,

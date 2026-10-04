@@ -9,15 +9,10 @@
 
 <script lang="ts" setup>
 import {onMounted} from "vue";
+import {applyTheme, readSavedTheme} from "@/composables/useTheme";
 
-onMounted(() => {
-  try {
-    const saved = localStorage.getItem("myst-theme");
-    document.documentElement.dataset.theme = saved === "parchment" ? "parchment" : "dark";
-  } catch {
-    document.documentElement.dataset.theme = "dark";
-  }
-});
+/* localStorage['myst-theme']: 'parchment' is light, anything else dark (the header toggle writes it). */
+onMounted(() => applyTheme(readSavedTheme()));
 </script>
 
 <style scoped>

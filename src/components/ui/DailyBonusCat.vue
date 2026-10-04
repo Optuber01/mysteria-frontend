@@ -4,6 +4,7 @@
       <div
           v-if="shouldShow"
           class="daily-cat-wrapper"
+          :class="{'is-idle': pageHidden}"
           :style="positionStyle"
           :title="t('dailyBonusCatTitle')"
           role="button"
@@ -23,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {useAuthStore} from '@/stores/auth';
 import {useDailyBonusStore} from '@/stores/dailyBonus';
 import {useNotification} from '@/services/useNotification';
@@ -54,7 +55,13 @@ const POSITION_PRESETS: PositionPreset[] = [
 
 const positionStyle = ref<Record<string, string>>({});
 
+const pageHidden = ref(false);
+const onVisibility = () => (pageHidden.value = document.hidden);
+onUnmounted(() => document.removeEventListener('visibilitychange', onVisibility));
+
 onMounted(() => {
+  onVisibility();
+  document.addEventListener('visibilitychange', onVisibility);
   const preset = POSITION_PRESETS[Math.floor(Math.random() * POSITION_PRESETS.length)];
   const style: Record<string, string> = {position: 'fixed', zIndex: '900'};
   if (preset.bottom) style.bottom = preset.bottom;
@@ -95,7 +102,8 @@ const handleClick = async () => {
   justify-content: center;
   user-select: none;
   animation: cat-bob 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 6px rgba(200, 178, 115, 0.0));
+  /* No filter at rest (the old transparent drop-shadow was a filter pass on every bob frame); hover eases one in. */
+  filter: none;
   transition: filter 0.3s ease, transform 0.2s ease;
 }
 
@@ -148,6 +156,19 @@ const handleClick = async () => {
   50% {
     opacity: 0.9;
     transform: scale(1.15);
+  }
+}
+
+/* Hidden tab: hold the loops (some browsers keep compositing them). */
+.daily-cat-wrapper.is-idle,
+.daily-cat-wrapper.is-idle .daily-cat-glow {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily-cat-wrapper,
+  .daily-cat-glow {
+    animation: none;
   }
 }
 

@@ -183,7 +183,8 @@ const year = new Date().getFullYear();
   font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(145, 145, 155, 0.55);
+  /* was a fixed grey at 55% (about 2.8:1 on the dark page, less on the light one) */
+  color: color-mix(in srgb, var(--myst-ink-muted) 88%, transparent);
 }
 
 .footer-legal {

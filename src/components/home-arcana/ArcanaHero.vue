@@ -976,7 +976,7 @@ onUnmounted(() => {
   line-height: .92;
   letter-spacing: -.03em;
   color: var(--arc-ink);
-  text-shadow: 0 2px 30px rgba(11, 11, 14, .6);
+  text-shadow: 0 2px 30px color-mix(in srgb, var(--arc-bg) 60%, transparent);
 }
 
 .arc-hero__title span {
@@ -984,7 +984,7 @@ onUnmounted(() => {
 }
 
 .arc-hero__title-accent {
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .arc-hero__lede {
@@ -1006,7 +1006,7 @@ onUnmounted(() => {
   min-width: 3.4em;
   margin-left: 2px;
   padding-left: 11px;
-  border-left: 1px solid color-mix(in oklab, var(--acc) 40%, transparent);
+  border-left: 1px solid color-mix(in oklab, var(--acc-ink) 40%, transparent);
   font-size: 14px;
   font-weight: 500;
   color: var(--arc-muted);
@@ -1044,7 +1044,7 @@ onUnmounted(() => {
 }
 
 .arc-hero .arc-ip {
-  background: rgba(13, 13, 17, .72);
+  background: color-mix(in srgb, var(--arc-bg) 72%, transparent);
   backdrop-filter: blur(6px);
 }
 
@@ -1058,7 +1058,7 @@ onUnmounted(() => {
   margin: -2px 0 0;
   font-size: 13.5px;
   line-height: 1.5;
-  color: #fca5a5;
+  color: var(--arc-bad);
 }
 
 .arc-hero__copy-note:not(.is-shown) {
@@ -1102,7 +1102,7 @@ onUnmounted(() => {
   top: calc(var(--pivot-y) - var(--u) * 1.06);
   width: calc(var(--u) * 2.12);
   height: calc(var(--u) * 2.12);
-  color: color-mix(in oklab, var(--acc) 60%, #fff);
+  color: color-mix(in oklab, var(--acc-ink) 60%, var(--arc-ink));
   pointer-events: none;
 }
 
@@ -1125,14 +1125,14 @@ onUnmounted(() => {
   display: grid;
   place-items: center;
   border-radius: calc(var(--card-w) * .05);
-  border: 1.5px dashed color-mix(in oklab, var(--acc) 60%, transparent);
-  background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 10%, transparent), rgba(11, 11, 14, .5));
+  border: 1.5px dashed color-mix(in oklab, var(--acc-ink) 60%, transparent);
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 10%, transparent), color-mix(in srgb, var(--arc-bg) 50%, transparent));
   cursor: pointer;
   transition: opacity .5s ease, border-color .3s ease;
 }
 
 .arc-stage__slot:hover {
-  border-color: var(--acc);
+  border-color: var(--acc-ink);
 }
 
 .arc-stage__slot.is-gone {
@@ -1146,7 +1146,7 @@ onUnmounted(() => {
   font-weight: 600;
   font-size: calc(var(--card-w) * .34);
   line-height: 1;
-  color: color-mix(in oklab, var(--acc) 70%, transparent);
+  color: color-mix(in oklab, var(--acc-ink) 70%, transparent);
 }
 
 .arc-card {
@@ -1172,7 +1172,7 @@ onUnmounted(() => {
 
 /* The focus ring is drawn on the card itself so it lifts and tilts with it. */
 .arc-card:focus-visible .arc-card__side--back {
-  box-shadow: 0 0 0 max(3px, 2.4cqw) var(--arc-ink), 0 1cqw 3cqw rgba(0, 0, 0, .6);
+  box-shadow: 0 0 0 max(3px, 2.4cqw) var(--arc-ink), 0 1cqw 3cqw var(--arc-shadow-strong);
 }
 
 .arc-card__lift {
@@ -1209,12 +1209,12 @@ onUnmounted(() => {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   border-radius: 5cqw;
-  box-shadow: 0 1.5cqw 4cqw rgba(0, 0, 0, .6);
+  box-shadow: 0 1.5cqw 4cqw var(--arc-shadow-strong);
 }
 
 .arc-card.is-drawn .arc-card__side--front {
   box-shadow:
-    0 5cqw 16cqw rgba(0, 0, 0, .7),
+    0 5cqw 16cqw var(--arc-shadow-strong),
     0 0 0 1px color-mix(in oklab, var(--acc) 40%, transparent),
     0 0 20cqw color-mix(in oklab, var(--acc) 22%, transparent);
 }
@@ -1283,7 +1283,7 @@ onUnmounted(() => {
   font-family: var(--arc-caps);
   font-size: 14px;
   font-weight: 500;
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .arc-hero__draw-row {
@@ -1329,9 +1329,9 @@ onUnmounted(() => {
   gap: 6px;
   margin-left: 4px;
   font-weight: 600;
-  color: var(--acc);
+  color: var(--acc-ink);
   text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, var(--acc) 45%, transparent);
+  text-decoration-color: color-mix(in oklab, var(--acc-ink) 45%, transparent);
   text-underline-offset: 4px;
   white-space: nowrap;
 }

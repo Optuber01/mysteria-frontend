@@ -23,6 +23,7 @@ import {useServicesWatcher} from "./stores/services";
 import {useDailyBonusWatcher} from "./stores/dailyBonus";
 import {useAccountNotificationsWatcher} from "./stores/notifications";
 import {Analytics} from '@vercel/analytics/vue';
+import {applyTheme, readSavedTheme} from "@/composables/useTheme";
 
 useUserWatcher();
 useBalanceWatcher();
@@ -72,8 +73,8 @@ const updateCursorPosition = (event: MouseEvent) => {
 };
 
 onMounted(() => {
-  // Always force dark theme for the mystical aesthetic
-  document.documentElement.dataset.theme = "dark";
+  // The saved light/dark choice (index.html already applied it before first paint).
+  applyTheme(readSavedTheme());
 
   document.addEventListener("mousemove", updateCursorPosition);
 });

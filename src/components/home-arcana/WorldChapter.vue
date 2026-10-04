@@ -279,7 +279,7 @@ onUnmounted(() => {
   grid-row: span 2;
   margin-top: 3px;
   font-size: 15px;
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .world-rules strong {
@@ -402,14 +402,14 @@ onUnmounted(() => {
   place-items: center;
   width: 28px;
   height: 40px;
-  border: 1.5px solid var(--acc);
+  border: 1.5px solid var(--acc-ink);
   border-radius: 4px;
-  background: color-mix(in oklab, var(--acc) 14%, #0e0e12);
+  background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-size: 13px;
   font-weight: 700;
-  color: var(--acc);
+  color: var(--acc-ink);
   transform: rotate(-6deg);
   transition: border-color .6s ease, background-color .6s ease, color .6s ease;
 }
@@ -439,7 +439,7 @@ onUnmounted(() => {
   flex: none;
   width: 14px;
   text-align: center;
-  color: var(--acc);
+  color: var(--acc-ink);
   font-size: 12px;
 }
 
@@ -477,7 +477,7 @@ onUnmounted(() => {
   gap: 6px;
   padding: 16px 14px 16px;
   border-radius: var(--arc-radius);
-  background: rgba(255, 255, 255, .03);
+  background: var(--arc-glass);
   box-shadow: inset 0 0 0 1px var(--arc-line);
 }
 
@@ -490,8 +490,8 @@ onUnmounted(() => {
   right: -9px;
   width: 8px;
   height: 8px;
-  border-top: 1.5px solid var(--acc);
-  border-right: 1.5px solid var(--acc);
+  border-top: 1.5px solid var(--acc-ink);
+  border-right: 1.5px solid var(--acc-ink);
   transform: rotate(45deg);
 }
 
@@ -540,7 +540,7 @@ onUnmounted(() => {
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--arc-radius-lg);
-  background: linear-gradient(180deg, #131318, #0f0f13);
+  background: linear-gradient(180deg, var(--arc-card), var(--arc-card-2));
   isolation: isolate;
   transition: transform .5s cubic-bezier(.2, .8, .2, 1), box-shadow .3s;
 }
@@ -558,7 +558,7 @@ onUnmounted(() => {
   inset: 40% 0 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, #131318);
+  background: linear-gradient(180deg, transparent, var(--arc-card));
 }
 
 .world-card::after {
@@ -574,11 +574,11 @@ onUnmounted(() => {
 
 .world-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 26px 60px rgba(0, 0, 0, .45);
+  box-shadow: 0 26px 60px var(--arc-shadow);
 }
 
 .world-card:hover::after {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 70%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 70%, transparent);
 }
 
 .world-card:hover :deep(.world-photo img) {
@@ -641,7 +641,7 @@ onUnmounted(() => {
   place-items: center;
   background:
     radial-gradient(46% 60% at 50% 46%, rgba(150, 22, 30, .5), transparent 72%),
-    linear-gradient(180deg, #1a0709, #131318);
+    linear-gradient(180deg, #1a0709, #131318 68%, var(--arc-card));
 }
 
 .world-moon__disc {
@@ -721,7 +721,7 @@ onUnmounted(() => {
   height: 50px;
   border: 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, .04);
+  background: var(--arc-glass);
   box-shadow: inset 0 0 0 1px var(--arc-line);
   color: var(--arc-ink);
   cursor: pointer;
@@ -734,7 +734,7 @@ onUnmounted(() => {
 }
 
 .world-gallery__toggle:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 60%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 60%, transparent);
 }
 
 .world-gallery__toggle:focus-visible,

@@ -44,6 +44,7 @@ import SectionCompanion from './SectionCompanion.vue';
 import ArcanaDeckControl from './ArcanaDeckControl.vue';
 import {sigilNative} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
+import {inkAccent} from './accentInk';
 import grain from './assets/grain.png';
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&family=Golos+Text:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Tenor+Sans&display=swap');
@@ -52,17 +53,36 @@ const {card, hasDrawn} = useArcana();
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
 const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
-const themeStyle = computed(() => ({'--acc': card.value.accent}));
+/* --acc-deep: the accent deepened to read as text on the light theme's paper (accentInk.ts). */
+const themeStyle = computed(() => ({'--acc': card.value.accent, '--acc-deep': inkAccent(card.value.accent)}));
 
 /* The header's mobile drawer is teleported to <body>, so the accent rides there too. */
-watch(() => card.value.accent, accent => document.body.style.setProperty('--acc', accent), {immediate: true});
+watch(() => card.value.accent, accent => {
+  document.body.style.setProperty('--acc', accent);
+  document.body.style.setProperty('--acc-deep', inkAccent(accent));
+}, {immediate: true});
 
 /*
- * Chapters well outside the viewport get [data-offscreen], which pauses every CSS
- * animation inside them (see the style block): drifting fog, spinning halos and
- * pulses then cost nothing while the visitor reads another chapter.
+ * Chapters well outside the viewport hold their looping animations still: drifting fog,
+ * spinning halos and pulses then cost nothing while the visitor reads another chapter.
+ * Only the elements that run a loop get the class (.arc-held, see the style block): an
+ * attribute on the chapter matched by "[data-offscreen] *" restyled every element in it
+ * (25-35 ms on a laptop) each time a chapter crossed the edge mid-scroll.
  */
 let offscreenObserver: IntersectionObserver | null = null;
+const held = new WeakMap<Element, Element[]>();
+function holdLoops(section: Element, offscreen: boolean) {
+  held.get(section)?.forEach(el => el.classList.remove('arc-held'));
+  held.delete(section);
+  if (!offscreen) return;
+  const loops = new Set<Element>();
+  for (const animation of section.getAnimations({subtree: true})) {
+    const effect = animation.effect as KeyframeEffect | null;
+    if (animation.playState === 'running' && effect?.target && effect.getTiming().iterations === Infinity) loops.add(effect.target);
+  }
+  loops.forEach(el => el.classList.add('arc-held'));
+  held.set(section, [...loops]);
+}
 
 onMounted(() => {
   // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
@@ -71,7 +91,7 @@ onMounted(() => {
   else setTimeout(() => void ensurePathwayData(), 600);
 
   offscreenObserver = new IntersectionObserver(entries => {
-    for (const entry of entries) entry.target.toggleAttribute('data-offscreen', !entry.isIntersecting);
+    for (const entry of entries) holdLoops(entry.target, !entry.isIntersecting);
   }, {rootMargin: '200px 0px'});
   document.querySelectorAll('.concept-arcana > .arc-main > *').forEach(section => offscreenObserver?.observe(section));
 });
@@ -79,6 +99,7 @@ onMounted(() => {
 onUnmounted(() => {
   offscreenObserver?.disconnect();
   document.body.style.removeProperty('--acc');
+  document.body.style.removeProperty('--acc-deep');
 });
 </script>
 
@@ -105,6 +126,25 @@ body:has(.concept-arcana) {
   --arc-ink: #efeef3;
   --arc-muted: #a7a6b2;
   --arc-on-acc: #0b0b0e;
+  /* the page itself, for chapters that keep their own dark room inside a light page */
+  --arc-page: var(--arc-bg);
+  /* The accent where it colours text or hairlines, and where it fills a solid control
+     (its label in --arc-on-acc). Dark: the accent itself. Light: --acc-deep (see below). */
+  --acc-ink: var(--acc);
+  --acc-solid: var(--acc);
+  /* faint fill for ghost controls, and the shadow under raised pieces */
+  --arc-glass: rgba(255, 255, 255, .04);
+  --arc-shadow: rgba(0, 0, 0, .55);
+  --arc-shadow-strong: rgba(0, 0, 0, .7);
+  /* the face of small accent-edged tokens (step numbers, chapter cards), and status text */
+  --arc-chip-bg: #0e0e12;
+  /* raised cards that hold a photo (world chapter): top and foot of their face */
+  --arc-card: #131318;
+  --arc-card-2: #0f0f13;
+  /* tooltips and pop-outs that float over the page */
+  --arc-pop: rgba(15, 15, 19, .96);
+  --arc-ok: #86efac;
+  --arc-bad: #ffb3a8;
   /* flared grotesk display, wide inscriptional caps for card labels, plain mono for the address */
   --arc-display: 'Commissioner', 'Segoe UI', system-ui, sans-serif;
   --arc-body: 'Golos Text', 'Segoe UI', system-ui, sans-serif;
@@ -153,8 +193,117 @@ body:has(.concept-arcana) {
   --myst-font-mono: var(--arc-caps);
 }
 
+/*
+ * Light theme (<html data-theme="parchment">, the header's sun/moon switch): bone paper,
+ * ink text. The pathway accents are made for the dark page; on paper the accent keeps
+ * tinting washes and fills, while text, hairlines and solid controls use --acc-deep,
+ * the same hue deepened to >= 5.3:1 on the paper for every card (accentInk.ts). No gold:
+ * upstream's parchment tokens are gold-tinted, so every one of them is re-pointed here.
+ */
+:root[data-theme="parchment"] .concept-arcana,
+:root[data-theme="parchment"] body:has(.concept-arcana) {
+  --arc-bg: #efede8;
+  --arc-surface: #f8f7f4;
+  --arc-line: rgba(28, 24, 36, .13);
+  --arc-ink: #17161c;
+  --arc-muted: #55535e;
+  --arc-on-acc: #ffffff;
+  --acc-ink: var(--acc-deep, var(--acc));
+  --acc-solid: var(--acc-deep, var(--acc));
+  --arc-glass: rgba(28, 24, 36, .035);
+  --arc-shadow: rgba(46, 36, 58, .16);
+  --arc-shadow-strong: rgba(40, 30, 52, .34);
+  --arc-chip-bg: #fbfaf7;
+  --arc-card: #f8f7f4;
+  --arc-card-2: #f5f3ef;
+  --arc-pop: rgba(251, 250, 247, .97);
+  --arc-ok: #17703a;
+  --arc-bad: #b2322b;
+
+  --myst-bg: #efede8;
+  --myst-bg-2: #f8f7f4;
+  --myst-bg-deep: #efede8;
+  --myst-ink: #17161c;
+  --myst-ink-muted: #55535e;
+  --myst-ink-strong: #0b0b0e;
+  --myst-offwhite: #17161c;
+  --myst-gold: var(--acc-ink);
+  --myst-gold-soft: var(--acc-ink);
+  --myst-on-gold: #ffffff;
+  --myst-line-10: rgba(28, 24, 36, .08);
+  --myst-line-12: rgba(28, 24, 36, .09);
+  --myst-line-14: rgba(28, 24, 36, .11);
+  --myst-line-16: rgba(28, 24, 36, .12);
+  --myst-line-18: rgba(28, 24, 36, .13);
+  --myst-line-20: rgba(28, 24, 36, .14);
+  --myst-line-28: color-mix(in srgb, var(--acc-ink) 30%, transparent);
+  --myst-line-35: color-mix(in srgb, var(--acc-ink) 38%, transparent);
+  --myst-line-40: color-mix(in srgb, var(--acc-ink) 44%, transparent);
+  --myst-line-55: color-mix(in srgb, var(--acc-ink) 58%, transparent);
+  --myst-wash: color-mix(in srgb, var(--acc) 12%, transparent);
+  --myst-wash-strong: color-mix(in srgb, var(--acc) 22%, transparent);
+  --myst-panel: linear-gradient(160deg, rgba(255, 255, 255, .7), rgba(239, 237, 232, .92));
+  --myst-panel-strong: linear-gradient(165deg, rgba(255, 255, 255, .92), rgba(239, 237, 232, .97));
+  --myst-green: #17703a;
+}
+
+/*
+ * The potion story stays a dark room in the light theme: its brewery, blackout and
+ * heartbeat are made of darkness. It gets the dark palette back, and its top and bottom
+ * dissolve into the paper (two static gradients that scroll with the section; nothing
+ * on them animates).
+ */
+:root[data-theme="parchment"] .concept-arcana .progression {
+  --arc-bg: #0b0b0e;
+  --arc-surface: #15151b;
+  --arc-line: rgba(255, 255, 255, .09);
+  --arc-ink: #efeef3;
+  --arc-muted: #a7a6b2;
+  --arc-on-acc: #0b0b0e;
+  --acc-ink: var(--acc);
+  --acc-solid: var(--acc);
+  --arc-glass: rgba(255, 255, 255, .04);
+  --arc-shadow: rgba(0, 0, 0, .55);
+  --arc-shadow-strong: rgba(0, 0, 0, .7);
+  --arc-chip-bg: #0e0e12;
+  --arc-card: #131318;
+  --arc-card-2: #0f0f13;
+  --arc-pop: rgba(15, 15, 19, .96);
+  --arc-ok: #86efac;
+  --arc-bad: #ffb3a8;
+}
+
+:root[data-theme="parchment"] .concept-arcana .progression::before,
+:root[data-theme="parchment"] .concept-arcana .progression::after {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  left: 0;
+  height: clamp(160px, 34vh, 340px);
+  pointer-events: none;
+  content: '';
+}
+
+:root[data-theme="parchment"] .concept-arcana .progression::before {
+  top: 0;
+  background: linear-gradient(180deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
+}
+
+:root[data-theme="parchment"] .concept-arcana .progression::after {
+  bottom: 0;
+  background: linear-gradient(0deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
+}
+
+/* the stacked story (ProgressionStory's fallback): the fades mostly stay inside its padding */
+@media (max-width: 900px), (max-height: 590px), (prefers-reduced-motion: reduce) {
+  :root[data-theme="parchment"] .concept-arcana .progression::before,
+  :root[data-theme="parchment"] .concept-arcana .progression::after {
+    height: calc(clamp(64px, 12vw, 96px) + 40px);
+  }
+}
+
 body:has(.concept-arcana) {
-  background-color: #0b0b0e;
+  background-color: var(--arc-bg);
 }
 
 .concept-arcana {
@@ -175,13 +324,22 @@ body:has(.concept-arcana) {
 }
 
 .concept-arcana ::selection {
-  background: var(--acc);
+  background: var(--acc-solid);
   color: var(--arc-on-acc);
 }
 
 /* header details that upstream hard-codes in gold */
-.concept-arcana .header-stack .brand-mark {
+.concept-arcana .header-stack .brand-mark,
+.concept-arcana .footer-brand img,
+body:has(.concept-arcana) .mobile-nav .brand-mark {
   filter: grayscale(1) brightness(1.35) drop-shadow(0 0 8px color-mix(in srgb, var(--acc) 55%, transparent));
+}
+
+/* on paper the mark is inked, like the name beside it */
+:root[data-theme="parchment"] .concept-arcana .header-stack .brand-mark,
+:root[data-theme="parchment"] .concept-arcana .footer-brand img,
+:root[data-theme="parchment"] body:has(.concept-arcana) .mobile-nav .brand-mark {
+  filter: grayscale(1) brightness(.4) contrast(1.3) drop-shadow(0 0 6px color-mix(in srgb, var(--acc) 40%, transparent));
 }
 
 .concept-arcana .header-stack .season-bar {
@@ -222,6 +380,11 @@ body:has(.concept-arcana) {
   margin-top: -39vmax;
   opacity: .055;
   filter: saturate(.6);
+}
+
+/* on paper the sigil's dark strokes read much louder than on the night page */
+:root[data-theme="parchment"] .arc-ambient__sigil {
+  opacity: .035;
 }
 
 .arc-ambient__wash {
@@ -270,10 +433,10 @@ body:has(.concept-arcana) {
   z-index: 1;
 }
 
-/* A chapter far from the viewport (set by ArcanaHome's observer): its loops hold still. */
-.concept-arcana [data-offscreen] *,
-.concept-arcana [data-offscreen] *::before,
-.concept-arcana [data-offscreen] *::after {
+/* A loop in a chapter far from the viewport (set by ArcanaHome's observer) holds still. */
+.concept-arcana .arc-held,
+.concept-arcana .arc-held::before,
+.concept-arcana .arc-held::after {
   animation-play-state: paused !important;
 }
 
@@ -312,7 +475,7 @@ body:has(.concept-arcana) {
   font-weight: 500;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--acc);
+  color: var(--acc-ink);
   transition: color .6s ease;
 }
 
@@ -359,9 +522,9 @@ body:has(.concept-arcana) {
 }
 
 .concept-arcana .arc-btn--solid {
-  background: var(--acc);
+  background: var(--acc-solid);
   color: var(--arc-on-acc);
-  box-shadow: 0 10px 30px color-mix(in oklab, var(--acc) 30%, transparent);
+  box-shadow: 0 10px 30px color-mix(in oklab, var(--acc-solid) 30%, transparent);
 }
 
 .concept-arcana .arc-btn--solid:hover {
@@ -371,9 +534,9 @@ body:has(.concept-arcana) {
 }
 
 .concept-arcana .arc-btn--ghost {
-  background: rgba(255, 255, 255, .04);
+  background: var(--arc-glass);
   color: var(--arc-ink);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 45%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 45%, transparent);
 }
 
 .concept-arcana .arc-btn--ghost:hover {
@@ -407,7 +570,7 @@ body:has(.concept-arcana) {
   padding: 8px 8px 8px 14px;
   border: 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, .04);
+  background: var(--arc-glass);
   box-shadow: inset 0 0 0 1px var(--arc-line);
   color: var(--arc-ink);
   font: inherit;
@@ -416,7 +579,7 @@ body:has(.concept-arcana) {
 }
 
 .concept-arcana .arc-ip:hover {
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 60%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 60%, transparent);
 }
 
 .concept-arcana .arc-ip__label {

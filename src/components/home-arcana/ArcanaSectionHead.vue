@@ -74,7 +74,7 @@ const {card} = useArcana();
   font-size: 11.5px;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--acc);
+  color: var(--acc-ink);
   transition: color .6s ease;
 }
 
@@ -86,9 +86,9 @@ const {card} = useArcana();
   flex: none;
   width: 28px;
   height: 44px;
-  border: 1.5px solid var(--acc);
+  border: 1.5px solid var(--acc-ink);
   border-radius: 4px;
-  background: color-mix(in oklab, var(--acc) 12%, #0e0e12);
+  background: color-mix(in oklab, var(--acc) 12%, var(--arc-chip-bg));
   transform: rotate(-8deg);
   transition: border-color .6s ease, background-color .6s ease;
 }
@@ -136,7 +136,7 @@ const {card} = useArcana();
 
 .arc-head__title :deep(em) {
   font-style: normal;
-  color: var(--acc);
+  color: var(--acc-ink);
   transition: color .6s ease;
 }
 

@@ -123,7 +123,7 @@ const platforms = [
 .sec-companion__ring {
   position: absolute;
   inset: 0;
-  background: var(--acc);
+  background: var(--acc-solid);
   -webkit-mask: var(--circle) center / contain no-repeat;
   mask: var(--circle) center / contain no-repeat;
   image-rendering: pixelated;
@@ -185,7 +185,7 @@ const platforms = [
 }
 
 .sec-companion__features i {
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .sec-companion__features strong {
@@ -215,7 +215,7 @@ const platforms = [
 }
 
 .sec-companion__link:hover {
-  box-shadow: inset 0 0 0 1px var(--acc);
+  box-shadow: inset 0 0 0 1px var(--acc-ink);
   transform: translateY(-2px);
   color: var(--arc-ink);
 }
@@ -234,7 +234,7 @@ const platforms = [
   flex: none;
   width: 20px;
   height: 20px;
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .sec-companion__note {

@@ -16,6 +16,18 @@
     />
     <link rel="canonical" href="https://mysterria.net/"/>
     <meta name="theme-color" content="#05070a"/>
+    <!-- Saved light/dark choice (src/composables/useTheme.ts), applied before the first
+         paint so a light-mode visitor never sees the dark page flash first. Dark by default. -->
+    <script>
+        (function () {
+            var theme = "dark";
+            try {
+                if (localStorage.getItem("myst-theme") === "parchment") theme = "parchment";
+            } catch (e) {}
+            document.documentElement.dataset.theme = theme;
+            if (theme === "parchment") document.querySelector('meta[name="theme-color"]').setAttribute("content", "#efede8");
+        })();
+    </script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website"/>

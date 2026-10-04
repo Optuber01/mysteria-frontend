@@ -267,8 +267,8 @@ onUnmounted(() => {
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: var(--acc);
-  box-shadow: 0 0 0 2px #0b0b0e;
+  background: var(--acc-solid);
+  box-shadow: 0 0 0 2px var(--arc-bg);
   transition: transform .4s cubic-bezier(.2, .9, .25, 1);
 }
 
@@ -298,8 +298,8 @@ onUnmounted(() => {
   max-width: 220px;
   padding: 9px 12px 10px;
   border-radius: 10px;
-  background: rgba(15, 15, 19, .96);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 35%, transparent), 0 14px 30px rgba(0, 0, 0, .5);
+  background: var(--arc-pop);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc-ink) 35%, transparent), 0 14px 30px var(--arc-shadow);
   text-align: left;
   pointer-events: none;
   opacity: 0;
@@ -333,7 +333,7 @@ onUnmounted(() => {
   margin-top: 4px;
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 /* ---- the spread: four small cards in the right gutter ---- */
@@ -377,7 +377,7 @@ onUnmounted(() => {
 }
 
 .arc-dock__spot.is-active {
-  color: var(--acc);
+  color: var(--acc-ink);
 }
 
 .arc-dock__spot-card {
@@ -387,7 +387,7 @@ onUnmounted(() => {
   height: 32px;
   border: 1.5px solid currentColor;
   border-radius: 3px;
-  background: rgba(11, 11, 14, .7);
+  background: color-mix(in srgb, var(--arc-bg) 70%, transparent);
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-size: 8.5px;
@@ -396,8 +396,8 @@ onUnmounted(() => {
 }
 
 .arc-dock__spot.is-active .arc-dock__spot-card {
-  background: var(--acc);
-  border-color: var(--acc);
+  background: var(--acc-solid);
+  border-color: var(--acc-solid);
   color: var(--arc-on-acc);
   transform: rotate(-8deg) scale(1.15);
 }
@@ -408,7 +408,7 @@ onUnmounted(() => {
   right: calc(100% + 8px);
   padding: 5px 9px;
   border-radius: 99px;
-  background: rgba(11, 11, 14, .92);
+  background: color-mix(in srgb, var(--arc-bg) 92%, transparent);
   white-space: nowrap;
   opacity: 0;
   translate: 6px 0;

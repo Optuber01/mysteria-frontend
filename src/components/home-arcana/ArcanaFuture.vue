@@ -251,13 +251,13 @@ const newsDate = computed(() => newsDateValue.value
   width: 40px;
   height: 58px;
   border-radius: 5px;
-  border: 1.5px solid var(--acc);
-  background: color-mix(in oklab, var(--acc) 14%, #0e0e12);
+  border: 1.5px solid var(--acc-ink);
+  background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 700;
   font-size: 19px;
-  color: var(--acc);
+  color: var(--acc-ink);
   transform: rotate(-6deg);
   transition: border-color .6s ease, background-color .6s ease, color .6s ease;
 }
@@ -292,11 +292,11 @@ const newsDate = computed(() => newsDateValue.value
 }
 
 .arc-step p.arc-step__note.is-copied {
-  color: #86efac;
+  color: var(--arc-ok);
 }
 
 .arc-step p.arc-step__note.is-failed {
-  color: #ffb3a8;
+  color: var(--arc-bad);
 }
 
 .arc-future__actions {
@@ -402,7 +402,7 @@ const newsDate = computed(() => newsDateValue.value
   font-weight: 600;
   font-size: 26px;
   line-height: 1;
-  color: var(--acc);
+  color: var(--acc-ink);
   transition: color .6s ease;
 }
 
@@ -422,7 +422,7 @@ const newsDate = computed(() => newsDateValue.value
 .arc-news:hover {
   color: inherit;
   transform: translateY(-3px);
-  box-shadow: inset 0 0 0 1px var(--acc);
+  box-shadow: inset 0 0 0 1px var(--acc-ink);
 }
 
 .arc-news__date {
@@ -466,7 +466,7 @@ const newsDate = computed(() => newsDateValue.value
 
 .arc-news__read i {
   font-size: 12px;
-  color: var(--acc);
+  color: var(--acc-ink);
   transition: transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 

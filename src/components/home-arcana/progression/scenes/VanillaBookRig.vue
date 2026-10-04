@@ -11,6 +11,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type * as THREE from 'three';
 import bookAtlasUrl from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_1.21.8.png';
 import { hexToRgb, loadImage, mixRgb, rgbCss } from '../art';
+import { isNearby, whenSettled } from '../prewarm';
 import type { Rgb } from '../art';
 
 export type BookEntry = { key: string; name: string; role: string; icon: string | null };
@@ -839,7 +840,23 @@ async function initialize() {
   resizeObserver.observe(hostRef.value);
   resize();
   await rebuildBook();
+  primeGpu();
 }
+
+/*
+ * Before the story starts the book is hidden, so nothing has been drawn yet: draw it
+ * once out of sight (then clear) so its shaders, geometry and textures are on the GPU
+ * before the first scroll into the chapter needs them.
+ */
+function primeGpu() {
+  if (disposed || !renderer || !scene || !camera || !bookRoot || bookRoot.visible) return;
+  bookRoot.visible = true;
+  renderer.render(scene, camera);
+  bookRoot.visible = false;
+  renderer.render(scene, camera);
+}
+
+let cancelPrewarm: (() => void) | null = null;
 
 onMounted(() => {
   if (!canvasRef.value || !hostRef.value) return;
@@ -852,6 +869,10 @@ onMounted(() => {
   );
   intersectionObserver.observe(hostRef.value);
   if (props.warm) void loadAssets().catch(() => undefined);
+  // Built ahead of the first scroll into the story (see prewarm.ts).
+  cancelPrewarm = whenSettled(() => {
+    if (isNearby(hostRef.value)) void initialize();
+  });
 });
 
 watch(() => props.warm, (warm) => {
@@ -869,6 +890,7 @@ watch(() => props.hidden.join('|'), () => {
 
 onBeforeUnmount(() => {
   disposed = true;
+  cancelPrewarm?.();
   resizeObserver?.disconnect();
   intersectionObserver?.disconnect();
   intersectionObserver = null;

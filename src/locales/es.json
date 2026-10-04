@@ -12,6 +12,8 @@
     "navLabel": "Principal",
     "toggleNav": "Mostrar u ocultar navegación",
     "closeNav": "Cerrar navegación",
+    "themeLight": "Cambiar al modo claro",
+    "themeDark": "Cambiar al modo oscuro",
     "seasonHeadline": "¡La temporada II acaba de comenzar!",
     "seasonLink": "Leer el anuncio"
   },

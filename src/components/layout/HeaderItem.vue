@@ -40,6 +40,22 @@
 
         <!-- Always in the bar: compact (language code only) and the one way to switch at every width. -->
         <LanguageSelector class="header-lang"/>
+        <button
+            :aria-label="isLight ? t('header.themeDark') : t('header.themeLight')"
+            :title="isLight ? t('header.themeDark') : t('header.themeLight')"
+            class="theme-toggle"
+            type="button"
+            @click="toggleTheme"
+        >
+          <!-- The icon names the mode a click switches to, like the label. -->
+          <svg v-if="isLight" aria-hidden="true" class="theme-toggle__icon" viewBox="0 0 24 24">
+            <path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1Z"/>
+          </svg>
+          <svg v-else aria-hidden="true" class="theme-toggle__icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.55 1.55M17.15 17.15l1.55 1.55M5.3 18.7l1.55-1.55M17.15 6.85l1.55-1.55"/>
+          </svg>
+        </button>
         <NotificationBell v-if="isAuthenticated" class="desktop-only"/>
         <AuthButton class="desktop-only"/>
 
@@ -129,6 +145,7 @@ import {useI18n} from "@/composables/useI18n";
 import {useLocalePath} from "@/composables/useLocalePath";
 import {SEASON_ANNOUNCEMENT_SLUG} from "@/constants/season";
 import {useAuthStore} from "@/stores/auth";
+import {useTheme} from "@/composables/useTheme";
 import logo from "@/assets/icons/sources/IconLogo.webp";
 
 interface NavLink {
@@ -148,6 +165,7 @@ const route = useRoute();
 const {t} = useI18n();
 const {unprefixedPath} = useLocalePath();
 const authStore = useAuthStore();
+const {isLight, toggleTheme} = useTheme();
 const isMobileNavOpen = ref(false);
 const navigationRef = ref<HTMLElement | null>(null);
 
@@ -293,27 +311,49 @@ onUnmounted(() => {
   display: block;
 }
 
+/*
+ * Overlay mode turns solid once the page scrolls. Transitioning the header's own
+ * background and backdrop blur re-rastered the bar every frame of the change (on the
+ * first scroll, when the page is busiest), so the solid look lives on pre-rendered
+ * ::before backings instead and only their opacity crossfades (composited).
+ */
 .header-stack.is-overlay .site-header {
   position: relative;
-  transition: background-color .35s ease, border-color .35s ease, backdrop-filter .35s ease;
-}
-
-.header-stack.is-overlay .season-bar {
-  /* Upstream's bar scrolls away with the page; fixed here, it needs a backing
-     so content doesn't show through it. */
-  background-color: color-mix(in srgb, var(--myst-bg) 94%, transparent);
-  transition: background-color .35s ease;
-}
-
-.header-stack.is-overlay.is-at-top .season-bar {
-  background-color: transparent;
-}
-
-.header-stack.is-overlay.is-at-top .site-header {
   background: transparent;
   border-bottom-color: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+.header-stack.is-overlay .site-header::before,
+.header-stack.is-overlay .season-bar::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  transition: opacity .35s ease;
+}
+
+.header-stack.is-overlay .site-header::before {
+  /* covers the header's (transparent) bottom border too */
+  bottom: -1px;
+  background: color-mix(in srgb, var(--myst-bg) 78%, transparent);
+  border-bottom: 1px solid var(--myst-line-14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Upstream's bar scrolls away with the page; fixed here, it needs a backing so content
+   doesn't show through it. The backing repeats the bar's own tint on top of the fill. */
+.header-stack.is-overlay .season-bar::before {
+  background-image: inherit;
+  background-color: color-mix(in srgb, var(--myst-bg) 94%, transparent);
+}
+
+.header-stack.is-overlay.is-at-top .site-header::before,
+.header-stack.is-overlay.is-at-top .season-bar::before {
+  opacity: 0;
 }
 
 /* ---- Season announcement ---- */
@@ -526,10 +566,51 @@ onUnmounted(() => {
   background: var(--myst-wash-strong);
 }
 
+/* the icon's own stroke is a fixed near-white; follow the theme's ink instead */
+.mobile-nav-toggle :deep(path) {
+  stroke: var(--myst-ink);
+}
+
 /* The language code sits at the same height as the chip and the sign-in button beside it. */
 .header-lang :deep(.lang-ritual-trigger) {
   min-height: 34px;
   padding: 0 10px;
+}
+
+/* ---- Light/dark switch: a square the height of the language control beside it ---- */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: color-mix(in srgb, var(--myst-ink) 3%, transparent);
+  border: 1px solid var(--myst-line-14);
+  border-radius: 4px;
+  color: var(--myst-ink-muted);
+  cursor: pointer;
+  transition: color .25s ease, border-color .25s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--myst-gold);
+  border-color: var(--myst-line-40);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--myst-ink);
+  outline-offset: 2px;
+}
+
+.theme-toggle__icon {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* ---- Responsive ladder: the server chip goes first (the page repeats the address),

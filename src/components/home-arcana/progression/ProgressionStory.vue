@@ -3,17 +3,16 @@
     id="progression"
     ref="sectionRef"
     class="progression"
-    :style="sectionVars"
     aria-labelledby="progression-title"
   >
     <div class="progression__sticky">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
-      <div class="progression__backdrop" aria-hidden="true" data-sweep-ignore>
-        <img :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
+      <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
+        <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
-      <div class="progression__hearth" aria-hidden="true" />
+      <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
       <!-- Decorative: the moon rises behind the player in the Pathway's colour. -->
-      <div class="progression__moon" aria-hidden="true" data-sweep-ignore>
+      <div class="progression__moon" :class="{ 'is-lit': moonLit }" :style="dress.moon" aria-hidden="true" data-sweep-ignore>
         <i class="progression__moon-halo" />
         <i class="progression__moon-disc" :style="{ backgroundImage: `url(${crimsonMoon})` }" />
         <i class="progression__moon-tint" />
@@ -21,22 +20,22 @@
         <i class="progression__moon-band progression__moon-band--2" />
         <i class="progression__moon-band progression__moon-band--3" />
       </div>
-      <div class="progression__fogbank" aria-hidden="true">
+      <div class="progression__fogbank" :style="dress.fogbank" aria-hidden="true">
         <i class="progression__fog progression__fog--far" />
         <i class="progression__fog progression__fog--near" />
       </div>
       <div class="progression__vignette" aria-hidden="true" />
       <!-- the dark closing in on the drink, with the heart's beat in it -->
-      <div class="progression__dread" aria-hidden="true" data-sweep-ignore />
-      <div class="progression__burst" aria-hidden="true" />
-      <div class="progression__threshold" aria-hidden="true" />
+      <div class="progression__dread" :class="{ 'is-lit': dreadLit }" :style="dress.dread" aria-hidden="true" data-sweep-ignore />
+      <div class="progression__burst" :style="dress.burst" aria-hidden="true" />
+      <div class="progression__threshold" :style="dress.threshold" aria-hidden="true" />
 
-      <header class="progression__heading">
+      <header class="progression__heading" :style="dress.heading">
         <h2 id="progression-title">{{ tp('title') }}</h2>
         <p class="progression__tagline">{{ tp('tagline') }}</p>
       </header>
 
-      <div class="progression__layout">
+      <div class="progression__layout" :style="layoutStyle">
         <!-- Outgoing and incoming copy share one grid cell and cross over. -->
         <div class="chapter-copy-slot">
           <Transition name="chapter-copy">
@@ -182,6 +181,7 @@ import { preloadPathwayNames, useProgressionCopy } from './scenes/useProgression
 import { CHAPTERS, T, awakenAt, blackoutAt, clamp01, dropStarts, ease, flashAt, gulpPulse, lerp, riskAt, span } from './timeline';
 import type { ChapterId } from './timeline';
 import { stageLayout } from './layout';
+import { isNearby, whenSettled } from './prewarm';
 import type { StageLayout } from './layout';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import crimsonMoon from '@/assets/images/home/progression/crimson-moon.webp';
@@ -228,6 +228,7 @@ function resolveDetail(id: string): Detail | null {
 
 const sectionRef = ref<HTMLElement | null>(null);
 const stageRef = ref<HTMLElement | null>(null);
+const backdropRef = ref<HTMLImageElement | null>(null);
 const progress = ref(0);
 const entryProgress = ref(0);
 const visible = ref(false);
@@ -239,6 +240,7 @@ const inspectorAnchor = ref<HTMLElement | null>(null);
 const inspectorScene = ref<DetailScene | null>(null);
 let observer: IntersectionObserver | null = null;
 let nearObserver: IntersectionObserver | null = null;
+let cancelPrewarm: (() => void) | null = null;
 let stageObserver: ResizeObserver | null = null;
 let frame = 0;
 
@@ -323,6 +325,36 @@ const sectionVars = computed(() => {
     '--floor-y': `${(s.top + (l ? l.cauldron.floorY : s.h * 0.85)).toFixed(1)}px`,
   };
 });
+/*
+ * Each layer gets only the variables it reads. Set on the section, every scroll frame
+ * restyled all ~260 elements under it (the scenes too); this way a frame restyles the
+ * handful of layers whose own inputs moved, and a layer whose inputs are steady
+ * (the hearth outside the brew, say) is not touched at all.
+ */
+const DRESS_VARS = {
+  backdrop: ['--entry', '--journey', '--awaken', '--risk', '--blackout'],
+  hearth: ['--brew', '--stand-x', '--floor-y'],
+  moon: ['--moon', '--awaken', '--blackout', '--stand-x', '--stand-y', '--moon-size'],
+  fogbank: ['--awaken', '--risk'],
+  dread: ['--risk', '--thump', '--blackout', '--stand-x', '--stand-y'],
+  burst: ['--flash', '--stand-x', '--stand-y'],
+  threshold: ['--journey'],
+  heading: ['--entry', '--journey'],
+} as const;
+type DressLayer = keyof typeof DRESS_VARS;
+const dress = computed(() => {
+  const vars = sectionVars.value as Record<string, string>;
+  const out = {} as Record<DressLayer, Record<string, string>>;
+  for (const layer of Object.keys(DRESS_VARS) as DressLayer[]) {
+    out[layer] = Object.fromEntries(DRESS_VARS[layer].map((name) => [name, vars[name]]));
+  }
+  return out;
+});
+/* The moon's drifting bands and the dread's heartbeat only run while their layer can be seen. */
+const moonLit = computed(() => Number(sectionVars.value['--moon']) > 0 || Number(sectionVars.value['--awaken']) > 0);
+const dreadLit = computed(() => Number(sectionVars.value['--risk']) > 0 || Number(sectionVars.value['--blackout']) > 0);
+/* The stage fades in over the first steps; as an opacity, not a variable, so the scenes under it are not restyled. */
+const layoutStyle = computed(() => ({ opacity: clamp01((progress.value - 0.006) * 40).toFixed(4) }));
 
 /* ---------------- inspector plumbing ---------------- */
 watch(activeChapterIndex, () => clearDetail());
@@ -435,6 +467,14 @@ onMounted(() => {
     pageObserver.observe(sectionRef.value);
     if (sectionRef.value.parentElement) pageObserver.observe(sectionRef.value.parentElement);
   }
+  // The backdrop photo (a ~50 ms decode) is decoded ahead, not on the first frame it shows.
+  cancelPrewarm = whenSettled(() => {
+    const img = backdropRef.value;
+    if (img && isNearby(img)) {
+      img.loading = 'eager';
+      void img.decode().catch(() => undefined);
+    }
+  });
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', onResize, { passive: true });
   addEventListener('keydown', onKeydown);
@@ -442,6 +482,7 @@ onMounted(() => {
   measureStage();
 });
 onUnmounted(() => {
+  cancelPrewarm?.();
   observer?.disconnect();
   nearObserver?.disconnect();
   stageObserver?.disconnect();
@@ -458,9 +499,6 @@ onUnmounted(() => {
   --journey: 0;
   --entry: 0;
   --awaken: 0;
-  --title-in: clamp(0, calc((var(--entry) - 0.35) * 2.5), 1);
-  --title-out: clamp(0, calc(1 - var(--journey) * 55), 1);
-  --stage-in: clamp(0, calc((var(--journey) - 0.006) * 40), 1);
   --brew: 0;
   --risk: 0;
   --thump: 0;
@@ -590,6 +628,11 @@ onUnmounted(() => {
   background: linear-gradient(90deg, transparent, rgba(160, 158, 170, 0.45) 18%, rgba(120, 118, 130, 0.2) 46%, rgba(160, 158, 170, 0.42) 74%, transparent);
   mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
   animation: moon-band 46s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+.progression__moon.is-lit .progression__moon-band {
+  animation-play-state: running;
 }
 
 .progression__moon-band--1 { top: 40%; height: 9%; opacity: 0.7; }
@@ -673,6 +716,11 @@ onUnmounted(() => {
   content: '';
   opacity: 0;
   animation: heartbeat 1.15s ease-out infinite;
+  animation-play-state: paused;
+}
+
+.progression__dread.is-lit::after {
+  animation-play-state: running;
 }
 
 @keyframes heartbeat {
@@ -702,6 +750,8 @@ onUnmounted(() => {
 
 /* ---- title card: the entrance only ---- */
 .progression__heading {
+  --title-in: clamp(0, calc((var(--entry) - 0.35) * 2.5), 1);
+  --title-out: clamp(0, calc(1 - var(--journey) * 55), 1);
   position: absolute;
   z-index: 8;
   top: 50%;
@@ -746,7 +796,6 @@ onUnmounted(() => {
   grid-template-columns: var(--copy-w) minmax(0, 1fr);
   align-items: center;
   gap: clamp(24px, 3.5vw, 64px);
-  opacity: var(--stage-in);
 }
 
 .chapter-copy-slot {

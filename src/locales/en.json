@@ -12,6 +12,8 @@
     "navLabel": "Primary",
     "toggleNav": "Toggle navigation",
     "closeNav": "Close navigation",
+    "themeLight": "Switch to light mode",
+    "themeDark": "Switch to dark mode",
     "seasonHeadline": "Season II has just begun!",
     "seasonLink": "Read the announcement"
   },
