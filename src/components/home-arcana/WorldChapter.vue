@@ -6,100 +6,135 @@
         {{ t('home.world.lede') }}
       </ArcanaSectionHead>
 
-      <!-- the house rules, before anything else -->
-      <ul class="world-rules" :aria-label="t('home.world.rulesLabel')">
-        <li v-for="rule in rules" :key="rule.key">
-          <i :class="rule.icon" aria-hidden="true"></i>
-          <strong>{{ rule.value }}</strong>
-          <span>{{ rule.note }}</span>
-        </li>
-      </ul>
+      <!-- the flagship: the Pantheon, its hall of thrones and the road up to it -->
+      <article class="pantheon" aria-labelledby="pantheon-title">
+        <div class="pantheon__hall">
+          <ul class="thrones" :aria-label="t('home.world.pantheon.boardLabel')">
+            <li
+                v-for="throne in thrones"
+                :key="throne.id"
+                class="throne"
+                :class="{'is-held': throne.held, 'is-yours': throne.yours}"
+                :style="{'--seat': throne.accent, '--lift': `${throne.lift}px`}"
+                :title="throne.label"
+            >
+              <img :src="sigilThumb(throne.id)" alt="" width="64" height="64" loading="lazy" decoding="async" draggable="false">
+              <span class="arc-sr">{{ throne.label }}</span>
+              <span v-if="throne.yours" class="throne__name" aria-hidden="true">{{ throne.name }}</span>
+            </li>
+          </ul>
+        </div>
 
-      <!-- out there: what to fight -->
-      <div class="world-group">
-        <article class="world-feature">
+        <div class="pantheon__intro">
+          <h3 id="pantheon-title" class="pantheon__title">{{ t('home.world.pantheon.title') }}</h3>
+          <p class="pantheon__body">{{ t('home.world.pantheon.body') }}</p>
+          <p class="pantheon__body">{{ t('home.world.pantheon.rule') }}</p>
+          <div class="pantheon__foot">
+            <RouterLink :to="$lp('/ascension')" class="arc-btn arc-btn--ghost">{{ t('home.world.pantheon.cta') }}</RouterLink>
+            <p v-if="hasSeatData" class="arc-status is-online">
+              <span class="arc-status__dot" aria-hidden="true"></span>{{ heldText }}
+            </p>
+          </div>
+        </div>
+
+        <ol class="pantheon__road" :aria-label="t('home.world.pantheon.roadLabel')">
+          <li v-for="(step, index) in road" :key="step.key">
+            <span class="road-token" aria-hidden="true">{{ index + 1 }}</span>
+            <span class="road-text">
+              <strong>{{ step.title }}</strong>
+              <span>{{ step.body }}</span>
+            </span>
+          </li>
+        </ol>
+      </article>
+
+      <!-- the second feature: PvP, where the zone's colour is the price -->
+      <article class="incursion" aria-labelledby="incursions-title">
+        <div class="incursion__copy">
+          <h3 id="incursions-title" class="incursion__title">{{ t('home.world.incursions.title') }}</h3>
+          <p>{{ t('home.world.incursions.body') }}</p>
+        </div>
+        <ul class="world-notes incursion__notes">
+          <li><i class="fa-solid fa-box-open" aria-hidden="true"></i>{{ t('home.world.incursions.permanent') }}</li>
+          <li><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>{{ t('home.world.incursions.logout') }}</li>
+        </ul>
+        <ol class="tiers" :aria-label="t('home.world.incursions.tiersLabel')">
+          <li v-for="tier in tiers" :key="tier.key" class="tier" :class="`tier--${tier.key}`">
+            <strong>{{ tier.name }}</strong>
+            <span>{{ tier.stake }}</span>
+          </li>
+        </ol>
+      </article>
+
+      <!-- the rest of the native systems: two rows, the wide half swapping sides -->
+      <div class="world-bento">
+        <article class="sys sys--rifts" aria-labelledby="rifts-title">
           <WorldPhoto
-              class="world-feature__photo"
+              class="sys__photo"
               :shot="shots.rifts"
               :alt="t('home.world.rifts.alt')"
-              sizes="(max-width: 900px) 100vw, 58vw"
+              sizes="(max-width: 900px) 100vw, 56vw"
           />
-          <div class="world-feature__copy">
-            <h4 class="world-feature__title">{{ t('home.world.rifts.title') }}</h4>
-            <p class="world-feature__body">{{ t('home.world.rifts.body') }}</p>
-            <ol class="world-steps">
-              <li v-for="(step, index) in riftSteps" :key="step.key">
-                <span class="world-steps__num" aria-hidden="true">{{ index + 1 }}</span>
-                <span><strong>{{ step.title }}</strong> {{ step.body }}</span>
+          <div class="sys__copy">
+            <h3 id="rifts-title" class="sys__title">{{ t('home.world.rifts.title') }}</h3>
+            <p class="sys__body">{{ t('home.world.rifts.body') }}</p>
+            <ul class="classes" :aria-label="t('home.world.rifts.classesLabel')">
+              <li v-for="item in classes" :key="item.key">
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.body }}</span>
               </li>
-            </ol>
-            <ul class="world-facts">
-              <li><i class="fa-solid fa-gem" aria-hidden="true"></i>{{ t('home.world.rifts.factLoot') }}</li>
             </ul>
+            <p class="sys__fact"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>{{ t('home.world.rifts.guardians') }}</p>
           </div>
         </article>
 
-        <ul class="world-cards">
-          <li class="world-card">
-            <WorldPhoto class="world-card__photo" :shot="shots.guardians" :alt="t('home.world.guardians.alt')" sizes="(max-width: 900px) 100vw, 34vw"/>
-            <div class="world-card__copy">
-              <h4>{{ t('home.world.guardians.title') }}</h4>
-              <p>{{ t('home.world.guardians.body') }}</p>
+        <article class="sys sys--arena" aria-labelledby="arena-title">
+          <div class="fan" aria-hidden="true">
+            <div
+                v-for="(id, index) in fanCards"
+                :key="id"
+                class="fan__card"
+                :style="{'--i': index - 2}"
+            >
+              <ArcanaFace :id="id" :name="nameOf(id)"/>
             </div>
-          </li>
-
-          <li class="world-card world-card--moon">
-            <div class="world-moon" aria-hidden="true">
-              <img class="world-moon__disc" :src="moon" alt="" width="640" height="640" loading="lazy" decoding="async">
-            </div>
-            <div class="world-card__copy">
-              <h4>{{ t('home.world.moon.title') }}</h4>
-              <p>{{ t('home.world.moon.body') }}</p>
-            </div>
-          </li>
-
-          <li class="world-card">
-            <WorldPhoto class="world-card__photo" :shot="shots.incursions" :alt="t('home.world.incursions.alt')" sizes="(max-width: 900px) 100vw, 34vw"/>
-            <div class="world-card__copy">
-              <h4>{{ t('home.world.incursions.title') }}</h4>
-              <p>{{ t('home.world.incursions.body') }}</p>
-              <p class="world-card__fact"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i>{{ t('home.world.incursions.fact') }}</p>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- among players: what to build -->
-      <div class="world-group">
-        <article class="world-feature is-reversed">
-          <div class="world-mosaic">
-            <WorldPhoto class="world-mosaic__main" :shot="shots.townMain" :alt="t('home.world.towns.altMain')" sizes="(max-width: 900px) 100vw, 58vw"/>
-            <WorldPhoto class="world-mosaic__side" :shot="shots.townA" :alt="t('home.world.towns.altA')" sizes="(max-width: 900px) 50vw, 29vw"/>
-            <WorldPhoto class="world-mosaic__side" :shot="shots.townB" :alt="t('home.world.towns.altB')" sizes="(max-width: 900px) 50vw, 29vw"/>
           </div>
-          <div class="world-feature__copy">
-            <h4 class="world-feature__title">{{ t('home.world.towns.title') }}</h4>
-            <p class="world-feature__body">{{ t('home.world.towns.body') }}</p>
-            <ol class="world-ladder">
-              <li v-for="(rung, index) in ladder" :key="rung.key">
-                <span class="world-ladder__card" aria-hidden="true">{{ ['I', 'II', 'III'][index] }}</span>
-                <strong>{{ rung.title }}</strong>
-                <span>{{ rung.body }}</span>
-              </li>
-            </ol>
+          <div class="sys__copy">
+            <h3 id="arena-title" class="sys__title">{{ t('home.world.arena.title') }}</h3>
+            <p class="sys__body">{{ t('home.world.arena.body') }}</p>
+            <p class="sys__fact"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>{{ t('home.world.arena.safe') }}</p>
           </div>
         </article>
 
-        <ul class="world-cards">
-          <li v-for="item in societyCards" :key="item.key" class="world-card">
-            <WorldPhoto class="world-card__photo" :shot="item.shot" :alt="item.alt" sizes="(max-width: 900px) 100vw, 34vw"/>
-            <div class="world-card__copy">
-              <h4>{{ item.title }}</h4>
-              <p>{{ item.body }}</p>
-              <p class="world-card__fact"><i :class="item.icon" aria-hidden="true"></i>{{ item.fact }}</p>
+        <article class="sys sys--churches" aria-labelledby="churches-title">
+          <WorldPhoto
+              class="sys__photo"
+              :shot="shots.churches"
+              :alt="t('home.world.churches.alt')"
+              sizes="(max-width: 900px) 100vw, 40vw"
+          />
+          <div class="sys__copy">
+            <h3 id="churches-title" class="sys__title">{{ t('home.world.churches.title') }}</h3>
+            <p class="sys__body">{{ t('home.world.churches.body') }}</p>
+            <p class="sys__fact"><i class="fa-solid fa-scroll" aria-hidden="true"></i>{{ t('home.world.churches.honorific') }}</p>
+          </div>
+        </article>
+
+        <article class="sys sys--anchors" aria-labelledby="anchors-title">
+          <!-- the Anchor's boss bar: the server wears it down, and under 10% its heart opens -->
+          <div class="seed" aria-hidden="true">
+            <div class="seed__bar">
+              <span class="seed__name">{{ t('home.world.anchors.bar') }}</span>
+              <span class="seed__track"><span class="seed__fill"></span><span class="seed__mark"></span></span>
+              <span class="seed__raid">{{ t('home.world.anchors.raid') }}</span>
             </div>
-          </li>
-        </ul>
+          </div>
+          <div class="sys__copy">
+            <h3 id="anchors-title" class="sys__title">{{ t('home.world.anchors.title') }}</h3>
+            <p class="sys__body">{{ t('home.world.anchors.body') }}</p>
+            <p class="sys__fact"><i class="fa-solid fa-gem" aria-hidden="true"></i>{{ t('home.world.anchors.boons') }}</p>
+          </div>
+        </article>
       </div>
 
       <!-- the gallery: everything the players made -->
@@ -147,54 +182,77 @@
 <script setup lang="ts">
 import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useI18n} from '@/composables/useI18n';
+import {useBeyonderStats} from '@/composables/useBeyonderStats';
 import IconDiscord from '@/assets/icons/IconDiscord.vue';
+import ArcanaFace from './ArcanaFace.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import WorldPhoto from './WorldPhoto.vue';
 import {GALLERY_SHOTS, TOPIC_SHOTS} from './WorldShots';
-import moon from '@/assets/images/home-library/crimson-moon.webp';
+import {CORE_CARDS, sigilThumb} from './arcana-data';
+import {useArcana} from './useArcana';
 
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
 
 const {t} = useI18n();
+const {currentId, hasDrawn, nameOf} = useArcana();
+const {highSeats} = useBeyonderStats();
 const shots = TOPIC_SHOTS;
 
-const rules = computed(() => [
-  {key: 'distance', icon: 'fa-solid fa-route'},
-  {key: 'safe', icon: 'fa-solid fa-shield-halved'},
-  {key: 'chests', icon: 'fa-solid fa-box-open'},
-  {key: 'season', icon: 'fa-solid fa-rotate'},
-].map(rule => ({
-  ...rule,
-  value: t(`home.world.rules.${rule.key}.value`),
-  note: t(`home.world.rules.${rule.key}.note`),
+/* ---- the Pantheon: one throne per Pathway, lit where a god sits (live from the Ascension registry) ---- */
+const hasSeatData = computed(() => highSeats.value.length > 0);
+const heldIds = computed(() => new Set(highSeats.value
+    .filter(entry => (entry.counts[0] ?? 0) > 0)
+    .map(entry => entry.pathway.toLowerCase())));
+const heldText = computed(() => t('home.world.pantheon.held').replace('{count}', String(heldIds.value.size)));
+
+/* The row bows up toward its middle; `lift` is how far each throne sits below the crown. */
+const MID = (CORE_CARDS.length - 1) / 2;
+const thrones = computed(() => CORE_CARDS.map((card, index) => {
+  const held = heldIds.value.has(card.id);
+  const name = nameOf(card.id);
+  const label = hasSeatData.value
+      ? t(held ? 'home.world.pantheon.throneHeld' : 'home.world.pantheon.throneEmpty').replace('{pathway}', name)
+      : name;
+  return {
+    id: card.id,
+    accent: card.accent,
+    held,
+    yours: hasDrawn.value && currentId.value === card.id,
+    name,
+    label,
+    lift: Math.round(((index - MID) / MID) ** 2 * 26),
+  };
+}));
+
+const road = computed(() => ['climb', 'prove', 'brew', 'vigil', 'rite'].map(key => ({
+  key,
+  title: t(`home.world.pantheon.road.${key}.title`),
+  body: t(`home.world.pantheon.road.${key}.body`),
 })));
 
-const riftSteps = computed(() => ['find', 'weaken', 'enter'].map(key => ({
+/* ---- Incursions: the four zone colours, cheapest death first ---- */
+const tiers = computed(() => ['green', 'yellow', 'red', 'black'].map(key => ({
   key,
-  title: t(`home.world.rifts.steps.${key}.title`),
-  body: t(`home.world.rifts.steps.${key}.body`),
+  name: t(`home.world.incursions.tiers.${key}.name`),
+  stake: t(`home.world.incursions.tiers.${key}.stake`),
 })));
 
-const ladder = computed(() => ['town', 'domain', 'nation'].map(key => ({
+const classes = computed(() => ['tank', 'warrior', 'archer', 'mage'].map(key => ({
   key,
-  title: t(`home.world.towns.ladder.${key}.title`),
-  body: t(`home.world.towns.ladder.${key}.body`),
+  name: t(`home.world.rifts.classes.${key}.name`),
+  body: t(`home.world.rifts.classes.${key}.body`),
 })));
 
-const SOCIETY_FACTS = {
-  churches: {icon: 'fa-solid fa-scroll', key: 'home.world.churches.fact'},
-  economy: {icon: 'fa-solid fa-coins', key: 'home.world.economy.income'},
-  orders: {icon: 'fa-solid fa-lock', key: 'home.world.orders.fact'},
-};
-const societyCards = computed(() => (['churches', 'economy', 'orders'] as const).map(key => ({
-  key,
-  icon: SOCIETY_FACTS[key].icon,
-  fact: t(SOCIETY_FACTS[key].key),
-  shot: shots[key],
-  title: t(`home.world.${key}.title`),
-  body: t(`home.world.${key}.body`),
-  alt: t(`home.world.${key}.alt`),
-})));
+/* ---- Bedwars: a fan of Pathways, dealt at random on every visit like the match's loadout ---- */
+const fanCards = ref<string[]>(['sun', 'door', 'tyrant', 'error', 'demoness']);
+function dealFan() {
+  const pool = CORE_CARDS.map(card => card.id);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  fanCards.value = pool.slice(0, 5);
+}
 
 /* ---- the strip: one pass, then the same pass again so the loop is seamless ---- */
 const reducedMotion = ref(false);
@@ -216,6 +274,7 @@ let motionQuery: MediaQueryList | null = null;
 const syncMotion = () => (reducedMotion.value = !!motionQuery?.matches);
 
 onMounted(() => {
+  dealFan();
   motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
   syncMotion();
   motionQuery.addEventListener('change', syncMotion);
@@ -230,145 +289,204 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* ---------- house rules ---------- */
-.world-rules {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-block: var(--arc-bw) solid var(--arc-line);
-}
-
-.world-rules li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-content: start;
-  gap: 6px 12px;
-  padding: clamp(18px, 2vw, 26px) clamp(14px, 1.6vw, 24px);
-}
-
-/* the strip's outer items sit on the page's edges, like every other block */
-.world-rules li:first-child {
-  padding-left: 0;
-}
-
-.world-rules li:last-child {
-  padding-right: 0;
-}
-
-.world-rules li + li {
-  border-left: var(--arc-bw) solid var(--arc-line);
-}
-
-.world-rules i {
-  grid-row: span 2;
-  margin-top: 3px;
-  font-size: 15px;
-  color: var(--acc-ink);
-}
-
-.world-rules strong {
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: var(--arc-fs-h4);
-  line-height: 1.22;
-  color: var(--arc-ink);
-}
-
-.world-rules span {
-  font-size: var(--arc-fs-small);
-  line-height: 1.5;
-  color: var(--arc-muted);
-  text-wrap: pretty;
-}
-
-/* ---------- groups ---------- */
-.world-group {
-  margin-top: var(--arc-block-gap);
-}
-
+/* ---------- shared: titles, body copy and the one-line facts under a system ---------- */
+.pantheon__title,
+.incursion__title,
+.sys__title,
 .world-gallery__head h3 {
   margin: 0;
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  font-size: var(--arc-fs-h2);
-  line-height: 1.08;
-  letter-spacing: -.02em;
   color: var(--arc-ink);
   text-wrap: balance;
 }
 
-/* ---------- feature: a wide shot and its story ---------- */
-.world-feature {
-  display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  align-items: center;
-  gap: clamp(28px, 4vw, 64px);
-}
-
-.world-feature.is-reversed {
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-}
-
-.world-feature.is-reversed .world-mosaic {
-  order: 2;
-}
-
-.world-feature__photo {
-  aspect-ratio: 16 / 10;
-  border-radius: var(--arc-r-lg);
-}
-
-.world-feature__title {
-  margin: 0 0 12px;
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: var(--arc-fs-h3);
-  line-height: 1.12;
-  letter-spacing: -.015em;
-  color: var(--arc-ink);
-}
-
-.world-feature__body {
-  text-wrap: pretty;
-  margin: 0 0 22px;
+.pantheon__body,
+.incursion__copy p,
+.sys__body {
+  margin: 0;
   font-size: var(--arc-fs-body);
   line-height: 1.65;
   color: var(--arc-muted);
+  text-wrap: pretty;
 }
 
-.world-steps {
+.world-notes {
   list-style: none;
-  margin: 0 0 20px;
+  margin: 0;
   padding: 0;
   display: grid;
-  gap: 2px;
+  gap: 12px;
 }
 
-.world-steps li {
+.world-notes li,
+.sys__fact {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
+  color: var(--arc-ink);
   text-wrap: pretty;
+}
+
+.world-notes i,
+.sys__fact i {
+  flex: none;
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--acc-ink);
+  transition: color .6s ease;
+}
+
+/* ---------- the Pantheon: one surface, the hall of thrones across its top ---------- */
+.pantheon {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(28px, 3vw, 44px) clamp(32px, 5vw, 80px);
+  padding: clamp(28px, 3.2vw, 48px);
+  border-radius: var(--arc-r-lg);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(62% 46% at 50% 0%, color-mix(in oklab, var(--acc) 16%, transparent), transparent 72%),
+    var(--arc-raised);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+  transition: background-color .6s ease;
+}
+
+.pantheon__hall {
+  grid-column: 1 / -1;
+  padding: 6px 0 calc(var(--arc-fs-caption) + 14px);
+}
+
+.thrones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(22, minmax(0, 1fr));
+  gap: clamp(5px, .62vw, 10px);
+  align-items: start;
+}
+
+/* an arched niche; empty ones hold their sigil faintly, a seated god's glows in its Pathway's colour */
+.throne {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 5 / 8;
+  translate: 0 var(--lift);
+  border-radius: 50% 50% var(--arc-r-sm) var(--arc-r-sm) / 32% 32% var(--arc-r-sm) var(--arc-r-sm);
+  background: linear-gradient(180deg, color-mix(in oklab, var(--arc-ink) 7%, transparent), color-mix(in oklab, var(--arc-ink) 2%, transparent));
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.throne img {
+  width: 74%;
+  height: auto;
+  opacity: .34;
+  filter: grayscale(1);
+  user-select: none;
+}
+
+.throne.is-held {
+  background:
+    radial-gradient(70% 50% at 50% 46%, color-mix(in oklab, var(--seat) 42%, transparent), transparent 75%),
+    linear-gradient(180deg, color-mix(in oklab, var(--seat) 14%, transparent), transparent);
+  box-shadow:
+    inset 0 0 0 var(--arc-bw) color-mix(in oklab, var(--seat) 62%, transparent),
+    0 0 26px color-mix(in oklab, var(--seat) 30%, transparent);
+}
+
+.throne.is-held img {
+  opacity: 1;
+  filter: none;
+}
+
+/* the drawn Pathway's throne: the page's selected language (accent at the accent width) */
+.throne.is-yours {
+  box-shadow: inset 0 0 0 var(--arc-bw-accent) var(--acc-ink);
+}
+
+.throne.is-yours img {
+  opacity: .8;
+  filter: none;
+}
+
+.throne.is-yours.is-held {
+  box-shadow:
+    inset 0 0 0 var(--arc-bw-accent) var(--acc-ink),
+    0 0 26px color-mix(in oklab, var(--seat) 30%, transparent);
+}
+
+.throne__name {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  font-size: var(--arc-fs-caption);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--acc-ink);
+  transition: color .6s ease;
+}
+
+.pantheon__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pantheon__title {
+  margin-bottom: 4px;
+  font-size: var(--arc-fs-h2);
+  line-height: 1.08;
+  letter-spacing: -.02em;
+}
+
+.pantheon__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+/* the road: five steps on one thread, the last one the rite */
+.pantheon__road {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.pantheon__road li {
   position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
-  align-items: center;
-  gap: 14px;
-  padding: 6px 0;
-  font-size: var(--arc-fs-body);
-  line-height: 1.5;
-  color: var(--arc-muted);
+  gap: 16px;
+  padding-bottom: 14px;
 }
 
-.world-steps strong {
-  color: var(--arc-ink);
-  font-weight: 600;
+.pantheon__road li:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 50px;
+  bottom: -2px;
+  left: 17px;
+  width: var(--arc-bw);
+  background: var(--arc-line);
 }
 
-.world-steps__num,
-.world-ladder__card {
+.road-token {
   display: grid;
   place-items: center;
   width: 32px;
@@ -385,116 +503,126 @@ onUnmounted(() => {
   transition: border-color .6s ease, background-color .6s ease;
 }
 
-.world-facts {
-  list-style: none;
-  margin: 0;
-  padding: 16px 0 0;
+.road-text {
   display: grid;
-  gap: 8px;
-  border-top: var(--arc-bw) solid var(--arc-line);
+  gap: 3px;
+  padding-top: 2px;
 }
 
-.world-facts li {
-  text-wrap: pretty;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-size: var(--arc-fs-small);
-  line-height: 1.5;
-  color: var(--arc-ink);
-}
-
-.world-facts i,
-.world-card__fact i {
-  flex: none;
-  width: 14px;
-  text-align: center;
-  color: var(--acc-ink);
-  font-size: 12px;
-}
-
-/* ---------- towns: three shots, one ladder ---------- */
-.world-mosaic {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: var(--arc-grid-gap);
-  aspect-ratio: 16 / 10;
-}
-
-.world-mosaic__main {
-  grid-row: 1 / -1;
-  border-radius: var(--arc-r-lg);
-}
-
-.world-mosaic__side {
-  border-radius: var(--arc-r-lg);
-}
-
-.world-ladder {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.world-ladder li {
-  position: relative;
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  padding: 16px 14px 16px;
-  border-radius: var(--arc-r-md);
-  background: var(--arc-glass);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-}
-
-/* the arrow from one rung to the next */
-.world-ladder li:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  top: 35px;
-  right: -9px;
-  width: 8px;
-  height: 8px;
-  border-top: var(--arc-bw-accent) solid var(--acc-ink);
-  border-right: var(--arc-bw-accent) solid var(--acc-ink);
-  transform: rotate(45deg);
-}
-
-.world-ladder__card {
-  margin-bottom: 6px;
-}
-
-.world-ladder strong {
+.road-text strong {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
   font-size: var(--arc-fs-h4);
+  line-height: 1.22;
   color: var(--arc-ink);
 }
 
-.world-ladder span:last-child {
-  text-wrap: pretty;
+.road-text span {
   font-size: var(--arc-fs-small);
-  line-height: 1.45;
+  line-height: 1.55;
   color: var(--arc-muted);
+  text-wrap: pretty;
 }
 
-/* ---------- cards: a shot on top, its caption rising out of it ---------- */
-.world-cards {
+/* ---------- Incursions: open page, the price scale under it ---------- */
+.incursion {
+  margin-top: var(--arc-block-gap);
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: end;
+  gap: 24px clamp(32px, 5vw, 80px);
+}
+
+.incursion__copy {
+  display: grid;
+  gap: 14px;
+}
+
+.incursion__title {
+  font-size: var(--arc-fs-h3);
+  line-height: 1.12;
+  letter-spacing: -.015em;
+}
+
+.incursion__notes {
+  padding-left: clamp(20px, 2vw, 28px);
+  border-left: var(--arc-bw) solid var(--arc-line);
+}
+
+.tiers {
+  grid-column: 1 / -1;
   list-style: none;
-  margin: var(--arc-group-gap) 0 0;
+  margin: calc(var(--arc-group-gap) - 24px) 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--arc-grid-gap);
 }
 
-.world-card {
+/* each colour is a bar; the price rises left to right */
+.tier {
+  --tier: #3fbf6e;
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding-top: 26px;
+}
+
+.tier::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--tier);
+  box-shadow: 0 0 22px color-mix(in oklab, var(--tier) 34%, transparent);
+}
+
+.tier--yellow {
+  --tier: #e6c24a;
+}
+
+.tier--red {
+  --tier: #e5484d;
+}
+
+.tier--black {
+  --tier: #040405;
+}
+
+.tier--black::before {
+  box-shadow: inset 0 0 0 var(--arc-bw) rgba(255, 255, 255, .26), 0 0 0 transparent;
+}
+
+.tier strong {
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-weight: 600;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
+  color: var(--arc-ink);
+}
+
+.tier span {
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
+  color: var(--arc-muted);
+  text-wrap: pretty;
+}
+
+/* ---------- the rest: a twelve-column bento, wide and narrow halves swapping sides ---------- */
+.world-bento {
+  margin-top: var(--arc-block-gap);
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--arc-grid-gap);
+}
+
+.sys {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -504,137 +632,219 @@ onUnmounted(() => {
   isolation: isolate;
 }
 
-.world-card__photo,
-.world-moon {
-  flex: none;
-  aspect-ratio: 16 / 10.5;
-}
-
-/* the photo melts into the card */
-.world-card__photo::before {
-  content: '';
-  position: absolute;
-  inset: 40% 0 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, var(--arc-card) 78%);
-}
-
-.world-card::after {
+.sys::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   pointer-events: none;
   border-radius: inherit;
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
-.world-card__copy {
+.sys--rifts {
+  grid-column: span 7;
+}
+
+.sys--arena {
+  grid-column: span 5;
+}
+
+.sys--churches {
+  grid-column: span 5;
+}
+
+.sys--anchors {
+  grid-column: span 7;
+}
+
+/* where a system is drawn rather than photographed, the drawing takes the card's spare height */
+.sys--arena .sys__copy,
+.sys--anchors .sys__copy {
+  flex: none;
+}
+
+.sys__photo {
+  flex: none;
+  aspect-ratio: 2 / 1;
+}
+
+.sys--churches .sys__photo {
+  aspect-ratio: 16 / 9;
+}
+
+/* the photo melts into the card */
+.sys__photo::before {
+  content: '';
+  position: absolute;
+  inset: 45% 0 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--arc-card) 82%);
+}
+
+.sys__copy {
   position: relative;
-  z-index: 3;
+  z-index: 2;
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  margin-top: -30px;
-  padding: 0 clamp(20px, 2vw, 26px) clamp(20px, 2vw, 26px);
+  gap: 12px;
+  margin-top: -26px;
+  padding: 0 clamp(22px, 2.2vw, 32px) clamp(22px, 2.2vw, 32px);
 }
 
-.world-card h4 {
-  margin: 0 0 8px;
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
+.sys__title {
   font-size: var(--arc-fs-h4);
   line-height: 1.22;
-  color: var(--arc-ink);
 }
 
-.world-card__copy > p {
-  text-wrap: pretty;
-  margin: 0;
-  font-size: var(--arc-fs-body);
-  line-height: 1.6;
-  color: var(--arc-muted);
-}
-
-.world-card__copy > p.world-card__fact {
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  width: 100%;
-  margin-top: auto;
+.sys__fact {
+  margin: auto 0 0;
   padding-top: 14px;
-  font-size: var(--arc-fs-small);
-  line-height: 1.5;
-  color: var(--arc-ink);
-}
-
-.world-card__copy > p:not(.world-card__fact) {
-  margin-bottom: 16px;
-}
-
-.world-card__copy > p.world-card__fact {
   border-top: var(--arc-bw) solid var(--arc-line);
 }
 
-/*
- * Cards in a row share their rows (photo / title / text / note), so every title, text block and
- * note rule lands on the same line whatever the copy length; below 900px they are separate
- * swipeable cards and keep the plain flex stack.
- */
-@media (min-width: 901px) {
-  .world-cards {
-    row-gap: 0;
-  }
-
-  .world-card {
-    display: grid;
-    grid-row: span 4;
-    grid-template-rows: subgrid;
-  }
-
-  /* the caption's overlap with the photo moves to the photo's foot, so it can't skew the shared rows */
-  .world-card__photo,
-  .world-moon {
-    margin-bottom: -30px;
-  }
-
-  .world-card__copy {
-    display: grid;
-    margin-top: 0;
-    grid-row: 2 / span 3;
-    grid-template-rows: subgrid;
-    align-items: start;
-    justify-items: stretch;
-  }
-
-  .world-card__copy > p.world-card__fact {
-    margin-top: 0;
-    align-self: stretch;
-  }
+/* dungeon classes: four small tiles, two by two */
+.classes {
+  list-style: none;
+  margin: 4px 0 6px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
-/* the Crimson Moon is a moon, not a photo: give it its own sky */
-.world-moon {
+.classes li {
+  display: grid;
+  gap: 2px;
+  padding: 11px 14px 12px;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.classes strong {
+  font-size: var(--arc-fs-small);
+  font-weight: 650;
+  color: var(--arc-ink);
+}
+
+.classes span {
+  font-size: var(--arc-fs-caption);
+  line-height: 1.45;
+  color: var(--arc-muted);
+}
+
+/* Bedwars: five Pathways fanned like a dealt hand, a different hand every visit */
+.fan {
   position: relative;
+  flex: 1 1 auto;
+  min-height: 240px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 96%);
+  mask-image: linear-gradient(180deg, #000 62%, transparent 96%);
+  background:
+    radial-gradient(56% 62% at 50% 62%, color-mix(in oklab, var(--acc) 20%, transparent), transparent 72%),
+    linear-gradient(180deg, color-mix(in oklab, var(--arc-ink) 4%, transparent), transparent 80%);
+  transition: background-color .6s ease;
+}
+
+.fan__card {
+  position: absolute;
+  container-type: inline-size;
+  left: 50%;
+  bottom: 18%;
+  width: clamp(76px, 8.4vw, 124px);
+  aspect-ratio: 1 / 1.62;
+  transform-origin: 50% 160%;
+  transform: translateX(-50%) rotate(calc(var(--i) * 12deg));
+  z-index: calc(3 - max(var(--i), -1 * var(--i)));
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, .45));
+}
+
+/*
+ * Outer Gods Anchors: a night over corrupted ground and the Anchor's boss bar, worn down to
+ * just above the Heart Raid mark. A scene, so it stays dark (with light ink) in either theme.
+ */
+.seed {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 220px;
   display: grid;
   place-items: center;
+  padding: 28px clamp(22px, 2.2vw, 32px) 54px;
+  overflow: hidden;
   background:
-    radial-gradient(46% 60% at 50% 46%, rgba(150, 22, 30, .5), transparent 72%),
-    linear-gradient(180deg, #1a0709, #131318 68%, var(--arc-card));
+    radial-gradient(46% 70% at 50% 108%, rgba(146, 84, 255, .5), transparent 70%),
+    radial-gradient(30% 40% at 18% 100%, rgba(52, 211, 180, .22), transparent 70%),
+    radial-gradient(34% 44% at 84% 104%, rgba(232, 72, 140, .24), transparent 70%),
+    linear-gradient(180deg, #0c0b12, #171126 70%, #221437);
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
 }
 
-.world-moon__disc {
+.seed__bar {
+  width: min(100%, 440px);
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 9px;
+  color: #f1f0f5;
+}
+
+.seed__name {
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-weight: 600;
+  font-size: var(--arc-fs-small);
+  letter-spacing: .02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+}
+
+/* a boss bar: notched track, violet fill, a tick at 10% */
+.seed__track {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), 0 0 18px rgba(146, 84, 255, .35);
+}
+
+.seed__track::after {
+  content: '';
   position: absolute;
-  top: 10%;
-  left: 50%;
-  width: auto;
-  height: 64%;
-  aspect-ratio: 1;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(0, 0, 0, .55) calc(10% - 1px) 10%);
+}
+
+.seed__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 17%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #c4a2ff, #8b5cf6 55%, #6d3fd8);
+}
+
+.seed__mark {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  z-index: 1;
+  left: 10%;
+  width: 2px;
+  background: #f1f0f5;
+}
+
+.seed__raid {
+  justify-self: start;
+  margin-left: 10%;
   translate: -50% 0;
-  filter: drop-shadow(0 0 40px rgba(255, 40, 50, .5));
+  font-size: var(--arc-fs-caption);
+  font-weight: 600;
+  color: #e4e3ea;
 }
 
 /* ---------- gallery ---------- */
@@ -645,6 +855,12 @@ onUnmounted(() => {
   gap: 20px clamp(32px, 5vw, 72px);
   margin-top: var(--arc-block-gap);
   margin-bottom: var(--arc-group-gap);
+}
+
+.world-gallery__head h3 {
+  font-size: var(--arc-fs-h2);
+  line-height: 1.08;
+  letter-spacing: -.02em;
 }
 
 .world-gallery__aside {
@@ -738,57 +954,42 @@ onUnmounted(() => {
 
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
-  .world-rules {
+  .tiers {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .world-rules li:nth-child(3) {
-    border-left: 0;
-  }
-
-  .world-rules li:nth-child(n + 3) {
-    border-top: var(--arc-bw) solid var(--arc-line);
-  }
-
-  .world-rules li:nth-child(odd) {
-    padding-left: 0;
-  }
-
-  .world-rules li:nth-child(even) {
-    padding-right: 0;
+    row-gap: 26px;
   }
 }
 
 @media (max-width: 900px) {
-  .world-feature,
-  .world-feature.is-reversed {
+  .pantheon,
+  .incursion {
     grid-template-columns: 1fr;
   }
 
-  .world-feature.is-reversed .world-mosaic {
-    order: 0;
+  /* two rows of eleven, flat */
+  .thrones {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    row-gap: 12px;
   }
 
-  /* tablets and phones: the three cards become a swipeable row, the next one peeking in */
-  .world-cards {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: min(84%, 360px);
-    margin-inline: calc(var(--arc-gutter) * -1);
-    padding: 4px var(--arc-gutter) 14px;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--arc-gutter);
-    scrollbar-width: none;
+  .throne {
+    translate: none;
   }
 
-  .world-cards::-webkit-scrollbar {
-    display: none;
+  .incursion__notes {
+    padding-left: 0;
+    border-left: 0;
   }
 
-  .world-card {
-    scroll-snap-align: start;
+  .tiers {
+    margin-top: 8px;
+  }
+
+  .sys--rifts,
+  .sys--arena,
+  .sys--churches,
+  .sys--anchors {
+    grid-column: 1 / -1;
   }
 
   .world-gallery__head {
@@ -801,33 +1002,12 @@ onUnmounted(() => {
 }
 
 @media (max-width: 600px) {
-  .world-rules {
+  .tiers {
     grid-template-columns: 1fr;
   }
 
-  .world-rules li + li {
-    border-left: 0;
-    border-top: 1px solid var(--arc-line);
-  }
-
-  .world-rules li {
-    padding-inline: 4px;
-  }
-
-  .world-mosaic {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto;
-    aspect-ratio: auto;
-  }
-
-  .world-mosaic__main {
-    grid-row: auto;
-    grid-column: 1 / -1;
-    aspect-ratio: 16 / 10;
-  }
-
-  .world-mosaic__side {
-    aspect-ratio: 4 / 3;
+  .classes {
+    grid-template-columns: 1fr;
   }
 
   .world-gallery__actions {
@@ -839,32 +1019,4 @@ onUnmounted(() => {
     width: auto;
   }
 }
-
-/* the ladder stands upright wherever its column is narrow */
-@media (max-width: 600px), (min-width: 901px) and (max-width: 1279px) {
-  .world-ladder {
-    grid-template-columns: 1fr;
-  }
-
-  .world-ladder li {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    column-gap: 14px;
-  }
-
-  .world-ladder__card {
-    grid-row: span 2;
-    margin: 0;
-  }
-
-  .world-ladder li:not(:last-child)::after {
-    top: auto;
-    right: auto;
-    bottom: -8px;
-    left: 26px;
-    transform: rotate(135deg);
-  }
-}
-
-
 </style>

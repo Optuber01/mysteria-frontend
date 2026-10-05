@@ -61,6 +61,12 @@ const props = withDefaults(
     glow?: number;
     /** 0..1: how far the figure is in silhouette (low front light). */
     shade?: number;
+    /** 0..1: how far the potion's colour has run through him, out from his heart. */
+    veins?: number;
+    /** 0..~1.6: how brightly it burns in him. */
+    veinGlow?: number;
+    /** 0..1: his eyes, lit with it. */
+    eyes?: number;
     /** The bottle is in his hand (before that it is a DOM sprite floating to it). */
     holding?: boolean;
     /** 0..1 potion left in the bottle. */
@@ -85,6 +91,9 @@ const props = withDefaults(
     awaken: 0,
     glow: 0,
     shade: 0,
+    veins: 0,
+    veinGlow: 0,
+    eyes: 0,
     holding: false,
     level: 1,
     accent: '#a78bfa',
@@ -230,6 +239,111 @@ function poseNow(): Pose {
   return pose;
 }
 
+/*
+ * The potion in him: an emissive term added to the skin's own materials. Texel by
+ * texel (the skin's 64 x 64 grid, so it reads as Minecraft pixels, never a smooth
+ * gradient) its colour runs out from his heart: a bright ragged front, and behind
+ * it a scatter of lit texels like veins. His eyes (the face's pupil texels) light
+ * up on their own. All of it is uniforms: no texture is repainted, no shader
+ * recompiled while it plays.
+ */
+type VeinUniforms = {
+  uVeinSpread: { value: number };
+  uVeinGlow: { value: number };
+  uVeinEyes: { value: number };
+  uVeinColor: { value: THREE.Color };
+  uVeinHeart: { value: THREE.Vector3 };
+};
+let veinUniforms: VeinUniforms | null = null;
+/** His heart, in the body's frame (the body box spans y -12..0): left of the breastbone. */
+const HEART: [number, number, number] = [1.2, -3.2, 1];
+const VEIN_VERTEX_HEAD = 'varying vec3 vVeinPos;\nvarying vec2 vVeinUv;\n';
+const VEIN_VERTEX = `
+  vVeinPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+  vVeinUv = uv;`;
+const VEIN_FRAGMENT_HEAD = `varying vec3 vVeinPos;
+varying vec2 vVeinUv;
+uniform float uVeinSpread;
+uniform float uVeinGlow;
+uniform float uVeinEyes;
+uniform vec3 uVeinColor;
+uniform vec3 uVeinHeart;
+float veinHash(vec2 p) {
+  p = mod(p, 289.0);
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+float veinNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(veinHash(i), veinHash(i + vec2(1.0, 0.0)), f.x), mix(veinHash(i + vec2(0.0, 1.0)), veinHash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+`;
+/*
+ * Veins: one contour of a smooth noise over the skin's texel grid, one texel wide
+ * wherever it runs (the distance to the contour, in texels, from the noise's own
+ * slope), so they read as thin winding pixel lines rather than a speckle.
+ */
+const VEIN_FRAGMENT = `
+  {
+    vec2 texel = floor(vec2(vVeinUv.x, 1.0 - vVeinUv.y) * 64.0);
+    vec2 q = (texel + 0.5) / 5.0;
+    float v = veinNoise(q);
+    float slope = max(1e-4, length(vec2(veinNoise(q + vec2(0.2, 0.0)) - v, veinNoise(q + vec2(0.0, 0.2)) - v)));
+    float vein = step(abs(v - 0.5) / slope, 0.5);
+    float n = veinHash(texel + 7.0);
+    // the figure is ~32 units tall; the heart is ~10 from his crown and ~22 from his feet
+    float reach = uVeinSpread * 30.0 - distance(vVeinPos, uVeinHeart) - n * 3.0;
+    float inside = clamp(reach / 2.0, 0.0, 1.0);
+    float front = inside * (1.0 - clamp((reach - 1.5) / 3.0, 0.0, 1.0));
+    float lit = inside * (0.05 + 0.95 * vein) + front * (0.2 + 0.8 * vein);
+    float eye = (texel.y > 10.5 && texel.y < 12.5 && (abs(texel.x - 9.0) < 0.5 || abs(texel.x - 14.0) < 0.5)) ? 1.0 : 0.0;
+    totalEmissiveRadiance += uVeinColor * lit * uVeinGlow + mix(uVeinColor, vec3(1.0), 0.45) * eye * uVeinEyes * 1.6;
+  }`;
+function addVeins(instance: SkinViewer): void {
+  if (!three) return;
+  const [r, g, b] = hexToRgb(props.accent);
+  const uniforms: VeinUniforms = {
+    uVeinSpread: { value: 0 },
+    uVeinGlow: { value: 0 },
+    uVeinEyes: { value: 0 },
+    uVeinColor: { value: new three.Color(r / 255, g / 255, b / 255) },
+    uVeinHeart: { value: new three.Vector3() },
+  };
+  veinUniforms = uniforms;
+  const skin = instance.playerObject.skin;
+  const materials = new Set<THREE.Material>();
+  skin.traverse((object) => {
+    const material = (object as THREE.Mesh).material;
+    if (material && !Array.isArray(material)) materials.add(material);
+  });
+  materials.forEach((material) => {
+    material.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, uniforms);
+      shader.vertexShader = VEIN_VERTEX_HEAD + shader.vertexShader.replace('#include <worldpos_vertex>', `#include <worldpos_vertex>${VEIN_VERTEX}`);
+      shader.fragmentShader = VEIN_FRAGMENT_HEAD + shader.fragmentShader.replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>${VEIN_FRAGMENT}`);
+    };
+    material.customProgramCacheKey = () => 'mysterria-veins';
+    material.needsUpdate = true;
+  });
+}
+let vHeart: THREE.Vector3 | null = null;
+/** The uniforms for this frame (after the pose is set: the heart moves with him). */
+function applyVeins(): void {
+  if (!viewer || !three || !veinUniforms) return;
+  veinUniforms.uVeinSpread.value = clamp01(props.veins);
+  veinUniforms.uVeinGlow.value = Math.max(0, props.veinGlow);
+  veinUniforms.uVeinEyes.value = clamp01(props.eyes);
+  vHeart ??= new three.Vector3();
+  viewer.playerObject.skin.body.localToWorld(vHeart.set(...HEART));
+  veinUniforms.uVeinHeart.value.copy(vHeart);
+}
+function setVeinColor(): void {
+  if (!veinUniforms) return;
+  const [r, g, b] = hexToRgb(props.accent);
+  veinUniforms.uVeinColor.value.setRGB(r / 255, g / 255, b / 255);
+}
+
 let qParent: THREE.Quaternion | null = null;
 let qTip: THREE.Quaternion | null = null;
 let zAxis: THREE.Vector3 | null = null;
@@ -264,6 +378,10 @@ function orientBottle(tip: number, armOnly = false) {
 function applyPose(pose: Pose) {
   if (!viewer || !three) return;
   setBody(pose);
+  if (veinUniforms) {
+    viewer.playerWrapper.updateMatrixWorld(true);
+    applyVeins();
+  }
   if (!holder || !bottle) return;
   holder.visible = props.holding;
   orientBottle(pose.tip);
@@ -543,6 +661,7 @@ async function createViewer() {
     if (disposed || !viewer) return;
     if (props.costume) dress(instance);
     makeBottle(instance);
+    addVeins(instance);
 
     ready.value = true;
     sizeViewer();
@@ -583,6 +702,7 @@ watch(() => [props.glow, props.shade] as const, () => {
 });
 watch(() => props.accent, () => {
   setBand();
+  setVeinColor();
   applyLighting();
   paintBottle();
   syncPlayback();
@@ -594,7 +714,7 @@ watch(() => props.level, () => {
 });
 watch(() => props.holding, applyLighting);
 watch(
-  () => [props.progress, props.step, props.reach, props.regard, props.lift, props.sip, props.swallow, props.lower, props.hit, props.awaken, props.holding] as const,
+  () => [props.progress, props.step, props.reach, props.regard, props.lift, props.sip, props.swallow, props.lower, props.hit, props.awaken, props.holding, props.veins, props.veinGlow, props.eyes] as const,
   () => syncPlayback(),
 );
 
@@ -611,6 +731,7 @@ onUnmounted(() => {
   viewer?.dispose();
   viewer = null;
   rimLights = [];
+  veinUniforms = null;
   three = null;
 });
 </script>

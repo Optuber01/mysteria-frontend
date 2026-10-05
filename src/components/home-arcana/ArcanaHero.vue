@@ -403,6 +403,8 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const EASE_LAND = 'cubic-bezier(.2, .9, .25, 1)';
 const EASE_SWING = 'cubic-bezier(.6, 0, .3, 1)';
 const EASE_LIFT = 'cubic-bezier(.3, 0, .2, 1)';
+/** A card turning over: an even turn, so the edge-on moment spans frames rather than one. */
+const EASE_TURN = 'cubic-bezier(.42, 0, .38, 1)';
 
 const running = new Set<Animation>();
 function play(el: Element | undefined, keyframes: Keyframe[], options: KeyframeAnimationOptions): Animation | null {
@@ -421,7 +423,7 @@ const settled = (list: (Animation | null)[]) => Promise.all(
 function flip(id: string, from: number, to: number, options: KeyframeAnimationOptions, start = 0, end = 1) {
   return play(flipEls.get(id), [
     {transform: `rotateY(${from}deg)`, offset: 0},
-    {transform: `rotateY(${from}deg)`, offset: start, easing: EASE_SWING},
+    {transform: `rotateY(${from}deg)`, offset: start, easing: EASE_TURN},
     {transform: `rotateY(${to}deg)`, offset: end},
     {transform: `rotateY(${to}deg)`, offset: 1},
   ], options);
@@ -444,12 +446,15 @@ function announce(id: string) {
   announcement.value = t('home.arcana.hero.announce').replace('{name}', r.name).replace('{role}', r.seq9 || '-');
 }
 
-/** Re-theme the page the moment the face turns toward the viewer. */
-function revealAt(id: string, ms: number) {
-  return sleep(ms).then(() => {
-    reveal(id);
-    announce(id);
-  });
+/*
+ * Wear the drawn card once it has landed and nothing on the table is moving: the re-theme
+ * restyles the whole page in one long task, which mid-flip froze the card edge-on and then
+ * showed it face up. The page then crossfades into the card's colour (useArcana). The move
+ * holds the table until the crossfade is done, so a queued draw never runs under it.
+ */
+function wear(id: string) {
+  announce(id);
+  return reveal(id, {crossfade: true});
 }
 
 function resetTilt() {
@@ -571,9 +576,10 @@ async function drawFromFan(id: string) {
     });
   }
 
-  await Promise.all([settled(moves), revealAt(id, D * 0.46)]);
+  await settled(moves);
   incoming.value = null;
   if (old) fronts.delete(old);
+  await wear(id);
 }
 
 /* ---------------- shuffle the whole deck, then deal one ---------------- */
@@ -669,9 +675,10 @@ async function shuffleAndDraw(targetId?: string) {
   // The deal holds its first frames, so the pile can be released now.
   [...gather, ...riffle, flipDown].forEach(a => a?.cancel());
 
-  await Promise.all([settled(deal), revealAt(target, 140 + DEAL * 0.52)]);
+  await settled(deal);
   incoming.value = null;
   if (old && old !== target) fronts.delete(old);
+  await wear(target);
 }
 
 /* ---------------- intro: the moon rises and the deal comes out of it ---------------- */
@@ -1255,6 +1262,12 @@ onUnmounted(() => {
     0 5cqw 16cqw var(--arc-shadow-strong),
     0 0 0 1px color-mix(in oklab, var(--acc) 40%, transparent),
     0 0 20cqw color-mix(in oklab, var(--acc) 22%, transparent);
+}
+
+/* Each side is its own plane in the card's 3D space, so every engine culls the face
+   turned away (WebKit misses it on an untransformed side with composited content). */
+.arc-card__side--front {
+  transform: rotateY(0deg);
 }
 
 .arc-card__side--back {

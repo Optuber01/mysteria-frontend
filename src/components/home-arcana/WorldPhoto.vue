@@ -12,7 +12,7 @@
         :loading="eager ? 'eager' : 'lazy'"
         decoding="async"
     >
-    <figcaption class="world-photo__credit">
+    <figcaption v-if="shot.author" class="world-photo__credit">
       <span>{{ creditText }}</span>
     </figcaption>
   </figure>
@@ -40,9 +40,7 @@ const srcset = computed(() => {
 });
 
 /* Credit only: the place is the card's title or the photo's alt, never repeated here. */
-const creditText = computed(() => (props.shot.author
-    ? t('home.world.credit').replace('{author}', props.shot.author)
-    : t('home.world.creditWiki')));
+const creditText = computed(() => t('home.world.credit').replace('{author}', props.shot.author));
 </script>
 
 <style scoped>

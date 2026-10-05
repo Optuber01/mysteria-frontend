@@ -954,101 +954,109 @@
     },
     "skipToContent": "Skip to content",
     "world": {
-      "titleA": "The",
-      "titleB": "wider world",
-      "lede": "Hunt Beyonder Creatures, enter Rifts and settle in towns built by players.",
-      "rulesLabel": "World rules",
-      "rules": {
-        "distance": {
-          "value": "Travel",
-          "note": "No /home, /spawn or /tpa. Choose your settlement carefully."
-        },
-        "safe": {
-          "value": "PvP zones",
-          "note": "Combat is limited to announced zones, Cosmos Incursions and enabled town claims."
-        },
-        "chests": {
-          "value": "Refilling chests",
-          "note": "Generated chests provide renewable Beyonder loot."
-        },
-        "season": {
-          "value": "Seasonal",
-          "note": "The world and Beyonder progress reset roughly every six months."
-        }
-      },
-      "rifts": {
-        "title": "Rifts & dungeons",
-        "body": "Dungeons lie behind Rifts. /subspace lists locations, relative power and cooldowns.",
-        "steps": {
-          "find": {
-            "title": "Find:",
-            "body": "Walk to the Rift listed in /subspace."
+      "titleA": "Only on",
+      "titleB": "Mysterria",
+      "lede": "Our team wrote every system below for this server. This is what waits once your first potion settles.",
+      "pantheon": {
+        "title": "Twenty-two thrones",
+        "body": "Every Pathway has one throne. Whoever takes it becomes that Pathway's god: Sequence 0, a title above their head and a spell no other player has.",
+        "rule": "No one can take an occupied throne by force. It changes hands only when its god stops showing up, and every throne empties when the epoch ends.",
+        "roadLabel": "The road to Sequence 0",
+        "road": {
+          "climb": {
+            "title": "Climb to Sequence 1",
+            "body": "Seats above Sequence 4 are limited. When a rung is full, you win your seat in a seat war."
           },
-          "weaken": {
-            "title": "Weaken:",
-            "body": "Contribute Energy Shards to open the Rift."
+          "prove": {
+            "title": "Prove yourself",
+            "body": "Hold your Pathway's Uniqueness, lead a congregation and earn legendary deeds. One of them is a public event that plays out your Pathway's role from the novel."
           },
-          "enter": {
-            "title": "Enter:",
-            "body": "Form a /party. Smaller groups can enter if not overpowered."
+          "brew": {
+            "title": "Brew the last potion",
+            "body": "Three Sequence 1 Characteristics of your Pathway, and nothing else. It can't be drunk: only the rite consumes it."
+          },
+          "vigil": {
+            "title": "Declare and keep the vigil",
+            "body": "The whole server is told. For 72 hours, any rival at Sequence 1 may contest your claim."
+          },
+          "rite": {
+            "title": "The rite",
+            "body": "Everyone gets ten minutes' warning and the coordinates. Witnesses earn acting, and the site stays marked on the map for good."
           }
         },
-        "factLoot": "Loot once per dungeon every three days",
-        "alt": "Orange Rift and floating runestones beneath a ruined tower"
-      },
-      "guardians": {
-        "title": "Guardians",
-        "body": "Guardians protect important objectives and are designed for groups.",
-        "alt": "Player between fire and ice dragons on a snowy ridge"
-      },
-      "moon": {
-        "title": "Crimson Moon",
-        "body": "During the roughly weekly Crimson Moon, fishing becomes valuable but more dangerous."
+        "boardLabel": "The twenty-two thrones",
+        "throneHeld": "{pathway}: a god sits here",
+        "throneEmpty": "{pathway}: empty",
+        "held": "{count} of 22 thrones held right now",
+        "cta": "See who holds them"
       },
       "incursions": {
         "title": "Cosmos Incursions",
-        "body": "Announced PvP objectives: Green and Yellow risk carried items; Black risks Sequence regression.",
-        "fact": "Read the zone colour and rules before entering.",
-        "alt": "Stone arena with a glowing floor sigil"
-      },
-      "towns": {
-        "title": "Towns & nations",
-        "body": "Join a town for shared resources and groups. Towns grow into Domains and form Nations. Wars are structured and opt-in.",
-        "ladder": {
-          "town": {
-            "title": "Town",
-            "body": "Protected claims, shared infrastructure, group access"
+        "body": "When 30 or more players are online, zones 300 to 500 blocks wide open in random places and show on the live map. Outside them, the wilderness has no PvP. Inside, the zone's colour tells you what a death costs.",
+        "tiersLabel": "Zone colours and what dying costs",
+        "tiers": {
+          "green": {
+            "name": "Green",
+            "stake": "Lose one or two items. Damage is scaled between Sequences, so a new Beyonder gets a real fight."
           },
-          "domain": {
-            "title": "Domain",
-            "body": "Higher town level: more residents, perks, treasury"
+          "yellow": {
+            "name": "Yellow",
+            "stake": "Lose more items. Damage is scaled halfway."
           },
-          "nation": {
-            "title": "Nation",
-            "body": "Domain-level towns may form a Nation"
+          "red": {
+            "name": "Red",
+            "stake": "Lose everything you carry. Raw power, no scaling."
+          },
+          "black": {
+            "name": "Black",
+            "stake": "Killed by a player, you can lose a Sequence or half your acting."
           }
         },
-        "altMain": "Harbour town and lantern-lit ships at dusk",
-        "altA": "Red and teal pagodas around a stone plaza",
-        "altB": "Blossom trees and towers above sunset clouds"
+        "permanent": "Some regions stay open for good: gather at points of interest, then hold an extraction point long enough to get the loot out.",
+        "logout": "Log out mid-fight and your body stays behind. If it dies, you pay the price."
+      },
+      "arena": {
+        "title": "Mythic Bedwars, Duels and FFA",
+        "body": "A match is announced in chat. Click to join, keep playing, and you're moved over when it starts. Everyone gets a random Pathway at Sequence 9 and climbs by buying Arcane Elixirs mid-match.",
+        "safe": "Your real character is never at risk, and what you win lands on it: acting progress, shorter cooldowns, bottles and tokens."
+      },
+      "rifts": {
+        "title": "Rifts and dungeons",
+        "body": "Rifts stand in the open world as pillars of shifting light. The whole server pours Energy Fragments into one to weaken it, and then it opens onto a dungeon. You get one life per run.",
+        "classesLabel": "Dungeon classes",
+        "classes": {
+          "tank": {
+            "name": "Tank",
+            "body": "Takes the hits and draws aggro. Can't cast."
+          },
+          "warrior": {
+            "name": "Warrior",
+            "body": "Hits hardest, falls fastest."
+          },
+          "archer": {
+            "name": "Archer",
+            "body": "Far stronger arrows, weaker up close."
+          },
+          "mage": {
+            "name": "Mage",
+            "body": "Spells only, no physical damage."
+          }
+        },
+        "guardians": "Guardians roam the open world. Below 30% health they enrage, below 20% only magic hurts them, and the kill drops a token you spin for ingredients, recipes or Characteristics.",
+        "alt": "A swirling Rift between floating runestones in a ruined tower"
       },
       "churches": {
         "title": "Churches",
-        "body": "Churches are late-game institutions built around faith, anchors, prayer and land, with perks that vary by church.",
-        "alt": "Black and crimson cathedral beneath the stars",
-        "fact": "Honorific Names enable ritual communication"
+        "body": "From Sequence 4 you can found a church by placing its core in the world. Branches and regional headquarters spread it, and its perks grow with its members' prayer. Churches ally, feud and go to war over cores and vaults, with terms of surrender.",
+        "honorific": "Your Honorific Name is a five-line invocation of who you are. When someone chants it, the server checks it against the real you.",
+        "alt": "A black and crimson cathedral under the stars"
       },
-      "economy": {
-        "title": "Trade",
-        "body": "Keep Coppets, Licks and Verl d'or in /wallet. Exchange surplus ingredients for Energy Shards. Voting and login streaks earn separate points for rotating goods in /emporium.",
-        "alt": "Brilliant Emporium beside a lake",
-        "income": "Main income: evaluating non-renewable ores mined with Silk Touch"
-      },
-      "orders": {
-        "title": "Secret Orders",
-        "body": "Private groups with officers, upgrades and emergency tools. Unlock Instant Summon and a Secret Lair as your Order grows.",
-        "alt": "Vaulted hall beneath a circular world map",
-        "fact": "Private Order chat: /oc"
+      "anchors": {
+        "title": "Outer Gods Anchors",
+        "body": "An Outer God's seed is planted somewhere in the world, and for 24 hours it only drops hints in chat. Then it blooms: alien terrain spreads and defenders spawn. Every defender the server kills wears the seed down, and below 10% its heart can be broken.",
+        "bar": "Seed Integrity",
+        "raid": "Heart Raid",
+        "boons": "What you contribute buys rewards, including shards of rare Boons: a second Sequence borrowed from an Outer God and raised by sacrifice at an altar."
       },
       "gallery": {
         "title": "Player screenshots",
@@ -1058,7 +1066,6 @@
         "play": "Play gallery"
       },
       "credit": "By {author}",
-      "creditWiki": "Mysterria wiki",
       "join": {
         "titleA": "Join in",
         "titleB": "three steps",
@@ -1098,8 +1105,7 @@
         },
         "linksLabel": "Download COI Client",
         "visualLabel": "Ritual circle with the {pathway} sigil"
-      },
-      "solo": "Solo players can join temporary groups without giving up independence."
+      }
     }
   },
   "$comment": [

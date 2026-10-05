@@ -109,16 +109,24 @@ onUnmounted(() => {
 <style>
 /*
  * Registered as a colour so color-mix() and transitions on the properties that read it
- * interpolate. The accent itself is NOT transitioned page-wide (that repainted every
- * element each frame for over a second): it switches at once, the ambient wash
- * crossfades, and a few key elements (labels, solid buttons, head cards) ease their own
- * colour properties.
+ * interpolate. The accent itself is NOT transitioned page-wide (that restyles and repaints
+ * every element each frame for over a second). A draw switches it once, after the card has
+ * landed, under a View Transition: the old and new pages crossfade as two composited
+ * snapshots (useArcana). Without View Transitions it switches at once while the ambient
+ * wash crossfades and a few key elements (labels, solid buttons) ease their own colours.
  */
 @property --acc {
   syntax: '<color>';
   inherits: true;
   /* NEUTRAL_ACCENT in arcana-data.ts: the page before the visitor draws */
   initial-value: #e45a64;
+}
+
+/* The accent crossfade: slower and softer than the theme switch's (main.css). */
+:root.arc-recolour::view-transition-old(root),
+:root.arc-recolour::view-transition-new(root) {
+  animation-duration: .65s;
+  animation-timing-function: cubic-bezier(.4, 0, .2, 1);
 }
 
 .concept-arcana,

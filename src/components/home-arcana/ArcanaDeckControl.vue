@@ -12,16 +12,19 @@
           class="arc-dock__orb"
           :aria-label="orbLabel"
           :aria-describedby="tipId"
-          @click="draw()"
+          @click="draw(undefined, {crossfade: true})"
       >
-        <span :key="drawCount" class="arc-dock__face" aria-hidden="true">
-          <img v-if="hasDrawn" :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async">
-          <svg v-else class="arc-dock__back" viewBox="0 0 20 30">
-            <rect x="1" y="1" width="18" height="28" rx="2.5"/>
-            <circle cx="10" cy="15" r="4.2"/>
-            <circle cx="10" cy="15" r="1.3" class="arc-dock__back-pupil"/>
-          </svg>
-        </span>
+        <!-- A redraw turns the old card away edge-on, then the new one in: never a mirrored face. -->
+        <Transition name="arc-dock-turn" mode="out-in">
+          <span :key="drawCount" class="arc-dock__face" aria-hidden="true">
+            <img v-if="hasDrawn" :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async">
+            <svg v-else class="arc-dock__back" viewBox="0 0 20 30">
+              <rect x="1" y="1" width="18" height="28" rx="2.5"/>
+              <circle cx="10" cy="15" r="4.2"/>
+              <circle cx="10" cy="15" r="1.3" class="arc-dock__back-pupil"/>
+            </svg>
+          </span>
+        </Transition>
         <span class="arc-dock__badge" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
         </span>
@@ -199,7 +202,25 @@ onUnmounted(() => {
 .arc-dock__face {
   display: grid;
   place-items: center;
-  animation: arc-dock-flip .7s cubic-bezier(.2, .8, .2, 1);
+}
+
+/* The turn: out to edge-on (ease in), then the new face from edge-on (ease out). */
+.arc-dock-turn-leave-active {
+  transition: transform .16s cubic-bezier(.5, 0, .9, .5), opacity .16s ease-in;
+}
+
+.arc-dock-turn-enter-active {
+  transition: transform .34s cubic-bezier(.15, .7, .3, 1), opacity .2s ease-out;
+}
+
+.arc-dock-turn-leave-to {
+  transform: rotateY(-90deg) scale(.86);
+  opacity: .4;
+}
+
+.arc-dock-turn-enter-from {
+  transform: rotateY(90deg) scale(.86);
+  opacity: .4;
 }
 
 .arc-dock__face img {
@@ -219,11 +240,6 @@ onUnmounted(() => {
 .arc-dock__back-pupil {
   fill: var(--acc-ink);
   stroke: none;
-}
-
-@keyframes arc-dock-flip {
-  from { transform: rotateY(180deg) scale(.7); opacity: .2; }
-  to { transform: none; opacity: 1; }
 }
 
 /* A small redraw mark, so the sigil reads as an action. */
@@ -307,10 +323,28 @@ onUnmounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .arc-dock__seat,
-  .arc-dock__face,
+  .arc-dock-turn-enter-active,
+  .arc-dock-turn-leave-active,
   .arc-dock__badge {
     transition: none;
     animation: none;
   }
+}
+
+/* While the page crossfades into a new accent (useArcana), the deck keeps its own live
+   layer, so its turn plays crisply instead of under the fading snapshot. */
+:root.arc-recolour .arc-dock__seat {
+  view-transition-name: arc-dock;
+}
+</style>
+
+<style>
+::view-transition-group(arc-dock),
+::view-transition-new(arc-dock) {
+  animation: none;
+}
+
+::view-transition-old(arc-dock) {
+  display: none;
 }
 </style>

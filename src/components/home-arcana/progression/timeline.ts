@@ -130,6 +130,48 @@ export function flashAt(g: number): number {
   const decay = 1 - smooth((g - (T.flash + 0.002)) / 0.034);
   return spike * decay;
 }
+/*
+ * What the potion does to him, between the first swallow and the awakening:
+ *   veins   the potion's colour runs out from his heart, a little further at each
+ *           swallow, then over all of him while it takes hold; it burns brightest
+ *           at the flash and drains away as he rises (only his eyes keep it)
+ *   spirit  the spirit world bleeding into the room: gray fog wells up, the light
+ *           dies and the shadows stretch; the flash blows it all away
+ *   shock   the flash itself, as a ring that runs out from him (0 → 1, then gone)
+ */
+/** 0..1: how far the potion's colour has run through him (the front, from his heart). */
+export function veinSpreadAt(g: number): number {
+  const swallowed = 0.34 * clamp01(gulpsTaken(g) / 3);
+  const hold = smooth((g - T.lower[0]) / (T.hit[1] - T.lower[0]));
+  return hold > 0 ? lerp(0.34, 1, hold) : swallowed;
+}
+/** 0..~1.6: how brightly it burns in him (overloads at the flash, gone by the awakening's end). */
+export function veinGlowAt(g: number): number {
+  if (g < T.gulps[0] - T.gulpWidth) return 0;
+  const drinking = 0.55 + 0.25 * gulpPulse(g);
+  const taking = smooth((g - T.lower[1]) / (T.blackout[0] - T.lower[1]));
+  const peak = smooth((g - (T.flash - 0.004)) / 0.006);
+  const drain = smooth((g - (T.flash + 0.01)) / (T.awaken[1] * 0.55));
+  return (lerp(drinking, 1, taking) + 0.6 * peak) * (1 - drain);
+}
+/** 0..1: his eyes, lit with it from the moment it takes hold; they keep a little of it once he has risen. */
+export function eyesAt(g: number): number {
+  const lit = smooth((g - T.hit[0]) / (T.hit[1] - T.hit[0]));
+  const flare = smooth((g - (T.flash - 0.004)) / 0.006) * (1 - smooth((g - T.flash) / 0.05));
+  const settle = smooth((g - T.flash) / 0.05);
+  return Math.min(1, lit * 0.7 * (1 - settle) + flare * 0.3 + settle * 0.55 * lit);
+}
+/** 0..1: the spirit world in the room (fog, dying light, long shadows), blown away by the flash. */
+export function spiritAt(g: number): number {
+  const rise = smooth((g - T.lower[0]) / (T.blackout[0] + T.blackout[1] - T.lower[0]));
+  const gone = smooth((g - (T.flash - 0.002)) / 0.022);
+  return rise * (1 - gone);
+}
+/** 0..1: the flash's ring running out from him; 0 outside it. */
+export function shockAt(g: number): number {
+  const t = (g - (T.flash - 0.003)) / 0.06;
+  return t <= 0 || t >= 1 ? 0 : t;
+}
 /** 0..1 awakening: eased in and out, so nothing arrives all at once. */
 export function awakenAt(g: number): number {
   const t = clamp01((g - T.awaken[0]) / T.awaken[1]);

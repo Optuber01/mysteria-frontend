@@ -39,6 +39,9 @@
         :awaken="opening"
         :glow="rim"
         :shade="shade"
+        :veins="veins"
+        :vein-glow="veinGlow"
+        :eyes="eyes"
         :holding="holding"
         :level="level"
         :accent="card.accent"
@@ -79,8 +82,9 @@
 
     <!-- the moment of awakening: a flash of spirit vision -->
     <div class="drink-scene__flash" aria-hidden="true" />
-    <div class="drink-scene__flash-fx" :style="flashBoxStyle" aria-hidden="true">
-      <SceneParticles mode="burst" :active="burstActive" :intensity="1" :accent="card.accent" />
+    <!-- the spirit world in the room (gray fog, spirit lights), his spirituality gathering, the flash's ring -->
+    <div class="drink-scene__spirit" aria-hidden="true">
+      <SceneParticles mode="spirit" :active="spiritActive" :intensity="1" :accent="card.accent" :phase="spiritPhase" :anchor="spiritAnchor" />
     </div>
   </div>
 </template>
@@ -97,7 +101,7 @@ import ArcanaFace from '../../ArcanaFace.vue';
 import { useArcana } from '../../useArcana';
 import { useProgressionCopy } from './useProgressionCopy';
 import type { StageLayout } from '../layout';
-import { T, awakenAt, blackoutAt, clamp01, ease, flashAt, gulpPulse, gulpsTaken, lerp, riskAt, smooth, span } from '../timeline';
+import { T, awakenAt, blackoutAt, clamp01, ease, eyesAt, flashAt, gulpPulse, gulpsTaken, lerp, riskAt, shockAt, smooth, span, spiritAt, veinGlowAt, veinSpreadAt } from '../timeline';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import magicCircle from '@/assets/images/home/progression/real/magic-circle.png';
 
@@ -136,6 +140,13 @@ const blackout = computed(() => (final.value ? 0 : blackoutAt(g.value)));
 const flash = computed(() => (final.value ? 0 : flashAt(g.value)));
 const pulse = computed(() => (final.value ? 0 : gulpPulse(g.value)));
 const gulps = computed(() => (final.value ? 3 : gulpsTaken(g.value)));
+/* what the potion does to him (see timeline.ts): rounded, so a still scroll is a still frame */
+const r3 = (value: number) => Math.round(value * 1000) / 1000;
+const veins = computed(() => (final.value ? 0 : r3(veinSpreadAt(g.value))));
+const veinGlow = computed(() => (final.value ? 0 : r3(veinGlowAt(g.value))));
+const eyes = computed(() => (final.value ? 0.55 : r3(eyesAt(g.value))));
+const spirit = computed(() => (final.value ? 0 : spiritAt(g.value)));
+const shock = computed(() => (final.value ? 0 : shockAt(g.value)));
 
 /* ---------------- player ---------------- */
 const playerMode = computed<'drink' | 'advance'>(() => (final.value || g.value >= T.flash ? 'advance' : 'drink'));
@@ -316,12 +327,31 @@ const whispers = computed(() => {
 const wake = computed(() => at([T.cauldronOut[0], T.playerIn[1]]));
 const auraActive = computed(() => props.active && (final.value || g.value >= T.playerIn[0]));
 // the circle wakes under him as the potion takes hold, then fully at the awakening
-const auraIntensity = computed(() => Math.round((0.3 + 0.35 * hit.value + 0.35 * awaken.value) * 20) / 20);
+// its colour drains out of the circle into him while the spirit world is in, and comes back with the flash
+const auraIntensity = computed(() => Math.round((0.15 + 0.15 * (1 - spirit.value) + 0.7 * awaken.value) * 20) / 20);
 const circleStyle = computed(() => ({
   '--circle-mask': `url(${magicCircle})`,
   '--circle-spin': `${(final.value ? 96 : g.value * 900 + hit.value * 140).toFixed(2)}deg`,
-  transform: `scale(${(0.9 + 0.1 * wake.value + 0.04 * hit.value + 0.08 * flash.value).toFixed(4)})`,
+  transform: `scale(${(0.9 + 0.1 * wake.value + 0.04 * hit.value + 0.1 * flash.value).toFixed(4)})`,
 }));
+
+/* ---------------- the spirit world ---------------- */
+const spiritPhase = computed(() => ({
+  fog: spirit.value,
+  // the spirituality streams in while it takes hold and is spent at the flash
+  gather: hit.value * (1 - smooth((g.value - (T.flash - 0.004)) / 0.004)),
+  shock: shock.value,
+}));
+/* the canvas runs only while there is something of the spirit world to draw */
+const spiritActive = computed(() => {
+  const phase = spiritPhase.value;
+  return props.active && !final.value && (phase.fog > 0.001 || phase.gather > 0.001 || phase.shock > 0);
+});
+const spiritAnchor = computed(() => {
+  const l = props.layout;
+  if (!l) return undefined;
+  return { x: l.cx, y: l.player.y + l.player.h * 0.36 - rise.value, floor: l.cauldron.floorY, reach: l.player.h * 0.3 };
+});
 
 type CardSpec = { id: string; face: boolean; at: number; side: -1 | 1; dy: number; tilt: number };
 const CARDS: CardSpec[] = [
@@ -371,6 +401,7 @@ const sceneVars = computed(() => {
     '--blackout': blackout.value.toFixed(4),
     '--flash': flash.value.toFixed(4),
     '--hit': hit.value.toFixed(4),
+    '--spirit': spirit.value.toFixed(4),
     ...(l
       ? {
         '--stand-x': `${l.cx.toFixed(1)}px`,
@@ -382,13 +413,6 @@ const sceneVars = computed(() => {
   } as CSSProperties;
 });
 
-const burstActive = computed(() => props.active && !final.value && g.value >= T.flash - 0.002 && g.value < T.awaken[0] + T.awaken[1]);
-const flashBoxStyle = computed<CSSProperties>(() => {
-  const l = props.layout;
-  if (!l) return { opacity: 0 };
-  const w = Math.min(l.w, l.player.w * 1.6);
-  return { left: `${(l.cx - w / 2).toFixed(1)}px`, top: '0px', width: `${w.toFixed(1)}px`, height: `${l.cauldron.floorY.toFixed(1)}px` };
-});
 </script>
 
 <style scoped>
@@ -404,6 +428,7 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   --blackout: 0;
   --flash: 0;
   --hit: 0;
+  --spirit: 0;
   --stand-x: 50%;
   --floor-top: 80%;
   --circle-size: min(460px, 46%);
@@ -452,7 +477,7 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   aspect-ratio: 2.4;
   border-radius: 50%;
   background: radial-gradient(ellipse, color-mix(in oklab, var(--acc) 50%, transparent), color-mix(in oklab, var(--acc) 14%, transparent) 50%, transparent 72%);
-  opacity: calc(var(--wake) * (0.25 + var(--hit) * 0.3 + var(--awaken) * 0.5 + var(--flash) * 0.4));
+  opacity: calc(var(--wake) * ((0.25 + var(--hit) * 0.3) * (1 - var(--spirit) * 0.85) + var(--awaken) * 0.5 + var(--flash) * 0.6));
   transform: translate(-50%, -50%);
 }
 
@@ -460,24 +485,33 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   width: var(--circle-size);
   aspect-ratio: 1;
   margin: calc(var(--circle-size) / -2) 0 0 calc(var(--circle-size) / -2);
-  /* the one thing still lit in the blackout: it wakes under him as the potion takes hold */
-  opacity: min(1, calc(var(--wake) * (0.4 + var(--risk) * 0.15 + var(--hit) * 0.45 + var(--awaken) * 0.6)));
+  /* it wakes under him as the potion takes hold; the spirit world drains it gray (::after) until the flash */
+  opacity: min(1, calc(var(--wake) * (0.4 + var(--risk) * 0.15 + var(--hit) * 0.45 + var(--awaken) * 0.6 + var(--flash) * 0.6)));
   scale: 1 0.5;
   filter: drop-shadow(0 0 calc(6px + var(--hit) * 8px + var(--awaken) * 10px) color-mix(in oklab, var(--acc) 75%, transparent));
   will-change: transform, opacity;
 }
 
-.drink-scene__circle::before {
+.drink-scene__circle::before,
+.drink-scene__circle::after {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, color-mix(in oklab, var(--acc) 70%, white), var(--acc) 45%, color-mix(in oklab, var(--acc) 60%, black));
   content: '';
+  opacity: calc(1 - var(--spirit) * 0.9);
   transform: rotate(var(--circle-spin, 0deg));
   mask: var(--circle-mask) center / contain no-repeat;
   -webkit-mask: var(--circle-mask) center / contain no-repeat;
   /* scroll turns it every frame: rotate the composited ring rather than repaint it */
-  will-change: transform;
+  will-change: transform, opacity;
 }
+
+/* the same ring in the spirit world's gray, crossfaded (never repainted) */
+.drink-scene__circle::after {
+  background: linear-gradient(135deg, #c9ccd6, #8d909c 50%, #4c4e57);
+  opacity: calc(var(--spirit) * 0.75);
+}
+
 
 .drink-scene__fx {
   width: calc(var(--circle-size) * 0.8);
@@ -642,8 +676,8 @@ const flashBoxStyle = computed<CSSProperties>(() => {
     radial-gradient(ellipse 30% 50% at 26% 70%, rgba(200, 204, 214, 0.2), transparent 72%),
     radial-gradient(ellipse 34% 46% at 56% 80%, rgba(200, 204, 214, 0.15), transparent 72%),
     radial-gradient(ellipse 24% 40% at 82% 70%, rgba(200, 204, 214, 0.13), transparent 72%);
-  opacity: calc(var(--wake) * (1 - var(--awaken) * 0.85));
-  transform: translateY(calc(var(--awaken) * 30% - var(--risk) * 8%));
+  opacity: calc(var(--wake) * min(1, 1 - var(--awaken) * 0.85 + var(--spirit) * 0.6));
+  transform: translateY(calc(var(--awaken) * 30% - var(--risk) * 8% - var(--spirit) * 10%));
   pointer-events: none;
 }
 
@@ -658,13 +692,15 @@ const flashBoxStyle = computed<CSSProperties>(() => {
   inset: 0;
   z-index: 4;
   pointer-events: none;
-  background: radial-gradient(ellipse 30% 42% at var(--stand-x) var(--chest-y), rgba(255, 255, 255, 0.62), color-mix(in oklab, var(--acc) 48%, transparent) 26%, color-mix(in oklab, var(--acc) 14%, transparent) 62%, transparent 100%);
-  opacity: calc(var(--flash) * 0.9);
+  background: radial-gradient(ellipse 20% 30% at var(--stand-x) var(--chest-y), rgba(255, 255, 255, 0.5), color-mix(in oklab, var(--acc) 40%, transparent) 30%, color-mix(in oklab, var(--acc) 10%, transparent) 64%, transparent 100%);
+  opacity: calc(var(--flash) * 0.75);
 }
 
-.drink-scene__flash-fx {
+/* over him, under the potion and the voices: the fog closes round him, the motes reach his chest */
+.drink-scene__spirit {
   position: absolute;
-  z-index: 4;
+  inset: 0;
+  z-index: 6;
   pointer-events: none;
 }
 

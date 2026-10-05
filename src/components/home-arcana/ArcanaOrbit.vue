@@ -46,50 +46,57 @@
             @pointerleave="onPointerLeave"
             @click.capture="swallowDragClick"
         >
-          <div :key="`glow-${card.id}`" class="arc-orbit__glow" aria-hidden="true"></div>
+          <Transition :css="false" @enter="onGlowEnter" @leave="onGlowLeave">
+            <div :key="`glow-${card.id}`" class="arc-orbit__glow" :style="{'--orb-acc': card.accent}" aria-hidden="true"></div>
+          </Transition>
           <div class="arc-orbit__track" aria-hidden="true"></div>
           <div class="arc-orbit__track arc-orbit__track--inner" aria-hidden="true"></div>
 
-          <!-- The drawn seal, risen out of the ring -->
-          <div :key="card.id" class="arc-orbit__centre">
-            <span ref="centreSealRef" class="arc-orbit__drawn" :data-motif="motifOf(card.id)" aria-hidden="true">
-              <i class="arc-orbit__halo"></i>
-              <img :src="sigilNative(card.id)" alt="" width="512" height="512" decoding="async" draggable="false">
-            </span>
-            <h3 id="arc-orbit-name" class="arc-orbit__name">{{ nameOf(card.id) }}</h3>
-          </div>
-
-          <div
-              ref="ringRef"
-              class="arc-orbit__ring"
-              role="radiogroup"
-              :aria-label="kind === 'boon' ? t('home.arcana.deck.ringBoons') : t('home.arcana.deck.ringPathways')"
-              @keydown="onRingKeydown"
-              @focusin="focusInside = true"
-              @focusout="focusInside = false"
-          >
-            <button
-                v-for="(item, index) in catalog"
-                :key="item.id"
-                type="button"
-                role="radio"
-                class="arc-seal"
-                :class="{'is-drawn': index === selectedIndex}"
-                :style="{'--tok': item.accent}"
-                :data-index="index"
-                :tabindex="index === selectedIndex ? 0 : -1"
-                :aria-checked="index === selectedIndex"
-                :aria-label="`${numeralLabel(item)}. ${nameOf(item.id)}, ${roleLine(item.id)}`"
-                @click="onSealClick(index)"
-                @pointerenter="warm(item.id)"
-                @focus="warm(item.id)"
-            >
-              <span class="arc-seal__orb">
-                <img :src="sigilThumb(item.id)" alt="" width="128" height="128" decoding="async" draggable="false" :loading="index < 8 ? 'eager' : 'lazy'">
+          <!-- The drawn seal: a change dissolves the old one into the new, in place -->
+          <Transition :css="false" @before-leave="onCentreBeforeLeave" @enter="onCentreEnter" @leave="onCentreLeave">
+            <div :key="card.id" class="arc-orbit__centre" :style="{'--orb-acc': card.accent}">
+              <span ref="centreSealRef" class="arc-orbit__drawn" :data-motif="motifOf(card.id)" aria-hidden="true">
+                <i class="arc-orbit__halo"></i>
+                <img :src="sigilNative(card.id)" alt="" width="512" height="512" decoding="async" draggable="false">
               </span>
-              <span class="arc-seal__label" aria-hidden="true">{{ nameOf(item.id) }}</span>
-            </button>
-          </div>
+              <h3 id="arc-orbit-name" class="arc-orbit__name">{{ nameOf(card.id) }}</h3>
+            </div>
+          </Transition>
+
+          <Transition :css="false" @before-leave="onRingBeforeLeave" @enter="onRingEnter" @leave="onRingLeave">
+            <div
+                ref="ringRef"
+                :key="kind"
+                class="arc-orbit__ring"
+                role="radiogroup"
+                :aria-label="kind === 'boon' ? t('home.arcana.deck.ringBoons') : t('home.arcana.deck.ringPathways')"
+                @keydown="onRingKeydown"
+                @focusin="focusInside = true"
+                @focusout="focusInside = false"
+            >
+              <button
+                  v-for="(item, index) in catalog"
+                  :key="item.id"
+                  type="button"
+                  role="radio"
+                  class="arc-seal"
+                  :class="{'is-drawn': index === selectedIndex}"
+                  :style="{'--tok': item.accent}"
+                  :data-index="index"
+                  :tabindex="index === selectedIndex ? 0 : -1"
+                  :aria-checked="index === selectedIndex"
+                  :aria-label="`${numeralLabel(item)}. ${nameOf(item.id)}, ${roleLine(item.id)}`"
+                  @click="onSealClick(index)"
+                  @pointerenter="warm(item.id)"
+                  @focus="warm(item.id)"
+              >
+                <span class="arc-seal__orb">
+                  <img :src="sigilThumb(item.id)" alt="" width="128" height="128" decoding="async" draggable="false" :loading="index < 8 ? 'eager' : 'lazy'">
+                </span>
+                <span class="arc-seal__label" aria-hidden="true">{{ nameOf(item.id) }}</span>
+              </button>
+            </div>
+          </Transition>
         </div>
 
         <div class="arc-orbit__controls">
@@ -104,34 +111,38 @@
 
         <!-- The dossier: the drawn card's reading -->
         <div class="arc-orbit__dossier" aria-labelledby="arc-orbit-name" role="group">
-          <div :key="`lead-${card.id}`" class="arc-orbit__lead">
-            <p class="arc-orbit__begins">{{ beginsLine }}</p>
-            <dl class="arc-orbit__stats">
-              <div>
-                <dt>{{ t('home.arcana.deck.statAbilities') }}</dt>
-                <dd>{{ reading.abilityCount || '–' }}</dd>
+          <Transition mode="out-in" :css="false" @before-leave="onReadingBeforeLeave" @enter="onReadingEnter" @leave="onReadingLeave">
+            <div :key="card.id" class="arc-orbit__reading">
+              <div class="arc-orbit__lead">
+                <p class="arc-orbit__begins">{{ beginsLine }}</p>
+                <dl class="arc-orbit__stats">
+                  <div>
+                    <dt>{{ t('home.arcana.deck.statAbilities') }}</dt>
+                    <dd>{{ reading.abilityCount || '–' }}</dd>
+                  </div>
+                </dl>
               </div>
-            </dl>
-          </div>
 
-          <div class="arc-orbit__abilities">
-            <ul v-if="early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
-              <li v-for="(ability, index) in early" :key="ability.key" :style="{'--i': index}">
-                <strong>{{ ability.name }}<small v-if="ability.rung">{{ ability.rung }}</small></strong>
-                <span>{{ abilitySummary(ability.description) }}</span>
-              </li>
-            </ul>
-            <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
-            <p v-if="card.boon" class="arc-orbit__note">{{ t('home.arcana.deck.boonNote') }}</p>
-          </div>
+              <div class="arc-orbit__abilities">
+                <ul v-if="early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
+                  <li v-for="ability in early" :key="ability.key">
+                    <strong>{{ ability.name }}<small v-if="ability.rung">{{ ability.rung }}</small></strong>
+                    <span>{{ abilitySummary(ability.description) }}</span>
+                  </li>
+                </ul>
+                <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
+                <p v-if="card.boon" class="arc-orbit__note">{{ t('home.arcana.deck.boonNote') }}</p>
+              </div>
 
-          <div class="arc-orbit__actions">
-            <RouterLink :to="$lp(`/pathways/${card.id}`)" class="arc-btn arc-btn--solid">
-              {{ t(card.boon ? 'home.arcana.deck.openBoon' : 'home.arcana.deck.open').replace('{name}', reading.name) }}
-              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </RouterLink>
-            <RouterLink :to="$lp('/pathways')" class="arc-btn arc-btn--ghost">{{ t('home.arcana.deck.archive') }}</RouterLink>
-          </div>
+              <div class="arc-orbit__actions">
+                <RouterLink :to="$lp(`/pathways/${card.id}`)" class="arc-btn arc-btn--solid">
+                  {{ t(card.boon ? 'home.arcana.deck.openBoon' : 'home.arcana.deck.open').replace('{name}', reading.name) }}
+                  <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </RouterLink>
+                <RouterLink :to="$lp('/pathways')" class="arc-btn arc-btn--ghost">{{ t('home.arcana.deck.archive') }}</RouterLink>
+              </div>
+            </div>
+          </Transition>
         </div>
       </div>
     </div>
@@ -333,11 +344,17 @@ let lastTime = 0;
 let inView = false;
 let lowPower = false;
 let originY = 0;
+/** Set by a drag's release: the ring is already where the card is, so it coasts instead of snapping. */
+let releasedByDrag = false;
 
 const still = () => reducedMotion.value;
+/** Spring stiffness (rad/s) of the ring's turn, and how far it may turn before it dissolves into place instead. */
+const SPRING = 22;
+const TURN_LIMIT = 2.5;
 
 function collectSeals() {
-  seals = [...(ringRef.value?.querySelectorAll<HTMLElement>('.arc-seal') ?? [])];
+  // the ring being dissolved away (a tab switch) is marked, so only the live one is collected
+  seals = [...(stageRef.value?.querySelectorAll<HTMLElement>('.arc-orbit__ring:not([data-leaving]) .arc-seal') ?? [])];
   orbs = seals.map(seal => seal.querySelector<HTMLElement>('.arc-seal__orb') ?? seal);
 }
 
@@ -402,13 +419,14 @@ function tick(now: number) {
   lastTime = now;
   let moving = dragging.value;
   if (!dragging.value) {
-    // The original orbit's spring: a short, soft overshoot as the ring settles.
-    const steps = clamp(Math.round(dt / 16.7), 1, 4);
+    // A critically damped spring (no overshoot): the ring settles in about 300 ms and never swings back.
+    const steps = Math.max(1, Math.ceil(dt / 8));
+    const h = dt / 1000 / steps;
     for (let i = 0; i < steps; i++) {
-      velocity = velocity * .7 + (target - spin) * .05;
-      spin += velocity;
+      velocity += (SPRING * SPRING * (target - spin) - 2 * SPRING * velocity) * h;
+      spin += velocity * h;
     }
-    if (Math.abs(target - spin) < .001 && Math.abs(velocity) < .001) {
+    if (Math.abs(target - spin) < .001 && Math.abs(velocity) < .02) {
       spin = target;
       velocity = 0;
     } else {
@@ -518,51 +536,134 @@ function warm(id: string) {
   image.src = sigilNative(id);
 }
 
-/* The drawn card changed (here, in the hero, or from the dock): turn the ring and lift the seal. */
+/*
+ * The drawn card changed (here, in the hero, or from the dock). The centre dissolves from one card to the
+ * next where it stands (the hooks below); the ring only turns to put the new seal at the front. A turn of
+ * more than a couple of places is not swept: the ring snaps and dissolves into its new place instead.
+ */
 watch(currentId, (id, previous) => {
   const count = catalog.value.length;
   const index = selectedIndex.value;
   const swapped = cardById(id).boon !== cardById(previous ?? id).boon;
-  const from = swapped ? null : seals[index];
-  const fromRect = from && inView && !still() ? from.getBoundingClientRect() : null;
+  const byDrag = releasedByDrag;
+  releasedByDrag = false;
   if (swapped) {
+    // the other ring dissolves in over this one (onRingEnter), already in place
     collectSeals();
     velocity = 0;
-    target = index;
-    // the new ring swings in from a quarter turn away
-    spin = inView && !still() ? index - count / 4 : index;
+    spin = target = index;
     render();
   } else {
-    target = spin + signedWrap(index - spin, count);
+    const delta = signedWrap(index - spin, count);
+    target = spin + delta;
+    if (inView && !still() && !byDrag && Math.abs(delta) > TURN_LIMIT) {
+      spin = target;
+      velocity = 0;
+      render();
+      dissolveIn(ringRef.value, 280, 0, .3);
+    }
   }
   if (!inView) {
     spin = target;
     velocity = 0;
     render();
   }
-  lift(fromRect);
   schedule();
   if (id !== announcedId) announcement.value = '';
   for (const offset of [-1, 1, 2, -2]) warm(catalog.value[normalize(index + offset, count)].id);
 }, {flush: 'post'});
 
-/** FLIP the centre seal out of the ring seal it came from. */
-function lift(fromRect: DOMRect | null) {
-  const seal = centreSealRef.value;
-  if (!seal || !inView || still()) return;
-  const easing = 'cubic-bezier(.2, .8, .2, 1)';
-  if (!fromRect) {
-    seal.animate([{opacity: 0, transform: 'scale(.86)'}, {opacity: 1, transform: 'none'}], {duration: 600, easing});
-    return;
-  }
-  const to = seal.getBoundingClientRect();
-  const dx = fromRect.left + fromRect.width / 2 - (to.left + to.width / 2);
-  const dy = fromRect.top + fromRect.height / 2 - (to.top + to.height / 2);
-  const scale = fromRect.width / to.width;
-  seal.animate(
-      [{transform: `translate(${dx}px, ${dy}px) scale(${scale})`, opacity: .5}, {transform: 'none', opacity: 1}],
-      {duration: 760, easing},
-  );
+/* ---------- The change itself: one card dissolves into the next, in place ---------- */
+
+const SETTLE = 'cubic-bezier(.2, .8, .2, 1)';
+/** Per thing that changes: what is still dissolving away. A quicker change hurries it, so ghosts never pile up. */
+const leavingOf = {glow: new Set<Animation>(), centre: new Set<Animation>(), ring: new Set<Animation>(), reading: new Set<Animation>()};
+const canSwap = () => inView && !still();
+
+function dissolveIn(el: Element | null, duration: number, delay = 0, from = 0, done?: () => void) {
+  if (!el) return done?.();
+  const fade = el.animate({opacity: [from, 1]}, {duration, delay, easing: 'ease-out', fill: 'backwards'});
+  if (done) fade.onfinish = done;
+}
+
+/** Opacity only; the element takes its fade from wherever an unfinished entrance had got to. */
+function dissolveOut(el: Element, leaving: Set<Animation>, duration: number, done: () => void) {
+  for (const older of leaving) older.updatePlaybackRate(3);
+  const fade = el.animate({opacity: 0}, {duration, easing: 'ease-in', fill: 'forwards'});
+  leaving.add(fade);
+  const end = () => {
+    leaving.delete(fade);
+    done();
+  };
+  fade.onfinish = end;
+  fade.oncancel = end;
+}
+
+function onGlowEnter(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  dissolveIn(el, 300, 0, 0, done);
+}
+
+function onGlowLeave(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  dissolveOut(el, leavingOf.glow, 300, done);
+}
+
+/** The outgoing name must not stay the dossier's label, nor be read out twice. */
+function onCentreBeforeLeave(el: Element) {
+  el.querySelector('#arc-orbit-name')?.removeAttribute('id');
+  el.setAttribute('aria-hidden', 'true');
+}
+
+function onCentreEnter(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  const root = el as HTMLElement;
+  // the seal settles in from a touch smaller, its sigil turning in as it is drawn again; the name follows
+  root.querySelector('.arc-orbit__drawn')?.animate(
+      {transform: ['scale(.9)', 'none']}, {duration: 300, easing: SETTLE, fill: 'backwards'});
+  root.querySelector('.arc-orbit__drawn img')?.animate(
+      {transform: ['scale(.74) rotate(-16deg)', 'none'], opacity: [0, 1]}, {duration: 300, delay: 40, easing: SETTLE, fill: 'backwards'});
+  root.querySelector('.arc-orbit__name')?.animate(
+      {transform: ['translateY(6px)', 'none'], opacity: [0, 1]}, {duration: 210, delay: 90, easing: SETTLE, fill: 'backwards'});
+  dissolveIn(root, 260, 40, 0, done);
+}
+
+function onCentreLeave(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  el.querySelector('.arc-orbit__drawn')?.animate({transform: 'scale(1.06)'}, {duration: 220, easing: 'ease-in', fill: 'forwards'});
+  dissolveOut(el, leavingOf.centre, 220, done);
+}
+
+function onRingBeforeLeave(el: Element) {
+  el.setAttribute('data-leaving', '');
+  el.setAttribute('inert', '');
+}
+
+function onRingEnter(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  dissolveIn(el, 280, 0, 0, done);
+}
+
+function onRingLeave(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  dissolveOut(el, leavingOf.ring, 220, done);
+}
+
+/* The dossier's text swaps out and in (out first: it reflows, and that happens while it is clear). */
+function onReadingBeforeLeave(el: Element) {
+  el.setAttribute('aria-hidden', 'true');
+}
+
+function onReadingLeave(el: Element, done: () => void) {
+  // out-in must not be finished synchronously from inside its own leave hook
+  if (!canSwap()) return queueMicrotask(done);
+  dissolveOut(el, leavingOf.reading, 90, done);
+}
+
+function onReadingEnter(el: Element, done: () => void) {
+  if (!canSwap()) return done();
+  el.animate({transform: ['translateY(6px)', 'none']}, {duration: 180, easing: SETTLE, fill: 'backwards'});
+  dissolveIn(el, 180, 0, 0, done);
 }
 
 /* ---------- Drag, flick, lean and sideways wheel ---------- */
@@ -622,9 +723,14 @@ function onPointerUp(event: PointerEvent) {
   const fling = clamp(-pointerVelocity * 220 / spacing, -5, 5);
   const landing = Math.round(spin + fling);
   // hand the flick's speed to the spring, so the ring coasts into place
-  velocity = clamp(-pointerVelocity * 16.7 / spacing, -.6, .6);
+  velocity = clamp(-pointerVelocity * 1000 / spacing, -8, 8);
   target = landing;
+  releasedByDrag = true;
   choose(landing, true);
+  // a release that lands on the same card draws nothing: the flag must not outlive it
+  void nextTick(() => {
+    releasedByDrag = false;
+  });
   if (ringRef.value?.contains(document.activeElement)) focusSeal(normalize(landing, catalog.value.length));
   schedule();
 }
@@ -910,13 +1016,6 @@ onUnmounted(() => {
 /* the floor the ring turns over: a soft pool of the drawn card's colour */
 .arc-orbit__glow {
   background: radial-gradient(closest-side, color-mix(in oklab, var(--orb-acc) 15%, transparent), color-mix(in oklab, var(--orb-acc) 5%, transparent) 62%, transparent);
-  animation: arc-orbit-fade 1.1s ease both;
-}
-
-@keyframes arc-orbit-fade {
-  from {
-    opacity: 0;
-  }
 }
 
 .arc-orbit__track {
@@ -943,7 +1042,8 @@ onUnmounted(() => {
   display: grid;
   justify-items: center;
   text-align: center;
-  transform: translateX(-50%);
+  /* `translate`, not `transform`: the dissolve between two cards animates transform */
+  translate: -50% 0;
   pointer-events: none;
 }
 
@@ -1037,7 +1137,6 @@ onUnmounted(() => {
   color: var(--arc-ink);
   text-wrap: balance;
   overflow-wrap: anywhere;
-  animation: arc-rise .6s .12s cubic-bezier(.2, .8, .2, 1) both;
 }
 
 /* ---------- seals on the ring ---------- */
@@ -1201,18 +1300,17 @@ onUnmounted(() => {
 
 /* ---------- dossier ---------- */
 .arc-orbit__dossier {
-  display: grid;
-  /* fixed tracks: the columns and buttons stay put from one card to the next */
-  grid-template-columns: minmax(0, .9fr) minmax(0, 1.45fr) var(--dossier-actions, 264px);
-  align-items: start;
-  gap: 24px clamp(28px, 4vw, 56px);
   margin-top: clamp(22px, 3vh, 32px);
   padding-top: clamp(22px, 3vh, 30px);
   border-top: var(--arc-bw) solid var(--arc-line);
 }
 
-.arc-orbit__lead {
-  animation: arc-rise .6s cubic-bezier(.2, .8, .2, 1) both;
+.arc-orbit__reading {
+  display: grid;
+  /* fixed tracks: the columns and buttons stay put from one card to the next */
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.45fr) var(--dossier-actions, 264px);
+  align-items: start;
+  gap: 24px clamp(28px, 4vw, 56px);
 }
 
 .arc-orbit__begins {
@@ -1272,8 +1370,6 @@ onUnmounted(() => {
   padding: 10px 14px;
   border-left: var(--arc-bw-accent) solid var(--acc-ink);
   background: linear-gradient(90deg, color-mix(in oklab, var(--acc) 9%, transparent), transparent 85%);
-  animation: arc-rise .55s cubic-bezier(.2, .8, .2, 1) both;
-  animation-delay: calc(var(--i) * 70ms + 80ms);
 }
 
 .arc-orbit__abilities strong {
@@ -1317,7 +1413,7 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1180px) {
-  .arc-orbit__dossier {
+  .arc-orbit__reading {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   }
 
@@ -1362,7 +1458,7 @@ onUnmounted(() => {
   margin-top: 26px;
 }
 
-.arc-orbit.is-dial .arc-orbit__dossier {
+.arc-orbit.is-dial .arc-orbit__reading {
   grid-template-columns: 1fr;
 }
 
@@ -1378,7 +1474,6 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arc-orbit__glow,
   .arc-orbit__halo {
     animation: none;
   }

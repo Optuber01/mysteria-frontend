@@ -11,14 +11,18 @@
         <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
       <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
-      <!-- Decorative: the moon rises behind the player in the Pathway's colour. -->
-      <div class="progression__moon" :class="{ 'is-lit': moonLit }" :style="dress.moon" aria-hidden="true" data-sweep-ignore>
-        <i class="progression__moon-halo" />
-        <i class="progression__moon-disc" :style="{ backgroundImage: `url(${crimsonMoon})` }" />
-        <i class="progression__moon-tint" />
-        <i class="progression__moon-band progression__moon-band--1" />
-        <i class="progression__moon-band progression__moon-band--2" />
-        <i class="progression__moon-band progression__moon-band--3" />
+      <!--
+        Decorative: the Pathway's sigil, drawn in behind him at the awakening like a ritual
+        circle (two rings traced round, then the sigil kindles inside them and slowly turns).
+        Before a draw, and for a Boon, it is the Fool's, in the page's accent (the example).
+      -->
+      <div class="progression__sigil" :class="{ 'is-lit': sigilLit, 'is-example': sigilExample }" :style="dress.sigil" aria-hidden="true" data-sweep-ignore>
+        <i class="progression__sigil-halo" />
+        <svg class="progression__sigil-rings" viewBox="0 0 100 100" focusable="false">
+          <circle cx="50" cy="50" r="49.2" pathLength="100" />
+          <circle cx="50" cy="50" r="46.6" pathLength="100" />
+        </svg>
+        <i class="progression__sigil-turn"><i class="progression__sigil-art" :style="{ '--sigil': `url(${sigilSrc})` }" /></i>
       </div>
       <div class="progression__fogbank" :style="dress.fogbank" aria-hidden="true">
         <i class="progression__fog progression__fog--far" />
@@ -191,9 +195,14 @@ import { stageLayout } from './layout';
 import { isNearby, whenSettled } from './prewarm';
 import type { StageLayout } from './layout';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
-import crimsonMoon from '@/assets/images/home/progression/crimson-moon.webp';
+import { sigilNative } from '../arcana-data';
+import { useArcana } from '../useArcana';
 
-const { tp, names, ingredients, card, currentId, isBoon } = useProgressionCopy();
+const { tp, names, ingredients, card, currentId, isBoon, pathwayId } = useProgressionCopy();
+const { hasDrawn } = useArcana();
+/* The awakening's sigil: the Pathway the story follows (a Boon, or no draw yet, sees the Fool's as the example). */
+const sigilExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
+const sigilSrc = computed(() => sigilNative(pathwayId.value));
 
 function chapterText(id: ChapterId, field: 'short' | 'title' | 'copy' | 'hint'): string {
   return tp(`chapters.${id}.${field}`);
@@ -338,12 +347,15 @@ const sectionVars = computed(() => {
     '--thump': (motion ? gulpPulse(g) : 0).toFixed(4),
     '--blackout': (motion ? blackoutAt(g) : 0).toFixed(4),
     '--flash': (motion ? flashAt(g) : 0).toFixed(4),
-    '--moon': span(g, [T.lower[0], T.awaken[0] + T.awaken[1]]).toFixed(4),
+    // the sigil: its rings traced round out of the flash, then the sigil kindles inside them
+    '--sigil-ring': (motion ? ease(g, [T.flash, T.flash + 0.045]) : 1).toFixed(4),
+    '--sigil-in': (motion ? ease(g, [T.flash + 0.012, T.flash + 0.075]) : 1).toFixed(4),
+    '--sigil-turn': `${(g * 160).toFixed(2)}deg`,
     '--awaken': (motion ? awakenAt(g) : 0).toFixed(4),
     '--stand-x': `${(s.left + (l ? l.cx : s.w / 2)).toFixed(1)}px`,
     '--stand-y': `${(s.top + (l ? l.player.y + l.player.h * 0.3 : s.h * 0.4)).toFixed(1)}px`,
-    // the moon fits between the stage's top and his chest, inside the stage's width
-    '--moon-size': `${Math.max(160, l ? Math.min(560, 2 * (l.player.y + l.player.h * 0.3) - 12, l.w * 0.86) : 420).toFixed(1)}px`,
+    // the sigil fits between the stage's top and his chest, inside the stage's width
+    '--sigil-size': `${Math.max(160, l ? Math.min(600, 2 * (l.player.y + l.player.h * 0.3) - 12, l.w * 0.86) : 420).toFixed(1)}px`,
     '--floor-y': `${(s.top + (l ? l.cauldron.floorY : s.h * 0.85)).toFixed(1)}px`,
   };
 });
@@ -356,7 +368,7 @@ const sectionVars = computed(() => {
 const DRESS_VARS = {
   backdrop: ['--entry', '--journey', '--awaken', '--risk', '--blackout'],
   hearth: ['--brew', '--stand-x', '--floor-y'],
-  moon: ['--moon', '--awaken', '--blackout', '--stand-x', '--stand-y', '--moon-size'],
+  sigil: ['--sigil-ring', '--sigil-in', '--sigil-turn', '--awaken', '--stand-x', '--stand-y', '--sigil-size'],
   fogbank: ['--awaken', '--risk'],
   dread: ['--risk', '--thump', '--blackout', '--stand-x', '--stand-y'],
   burst: ['--flash', '--stand-x', '--stand-y'],
@@ -371,8 +383,8 @@ const dress = computed(() => {
   }
   return out;
 });
-/* The moon's drifting bands and the dread's heartbeat only run while their layer can be seen. */
-const moonLit = computed(() => Number(sectionVars.value['--moon']) > 0 || Number(sectionVars.value['--awaken']) > 0);
+/* The sigil's slow turn and the dread's heartbeat only run while their layer can be seen. */
+const sigilLit = computed(() => Number(sectionVars.value['--sigil-ring']) > 0);
 const dreadLit = computed(() => Number(sectionVars.value['--risk']) > 0 || Number(sectionVars.value['--blackout']) > 0);
 /* The stage fades in over the first steps; as an opacity, not a variable, so the scenes under it are not restyled. */
 const layoutStyle = computed(() => ({ opacity: clamp01((progress.value - 0.006) * 40).toFixed(4) }));
@@ -557,7 +569,6 @@ onUnmounted(() => {
   --thump: 0;
   --blackout: 0;
   --flash: 0;
-  --moon: 0;
   /* the page's content edge (ArcanaHome --arc-edge): copy, rail and stage line up with every section */
   --rail: var(--arc-edge, clamp(20px, 4vw, 64px));
   --copy-w: clamp(272px, 27vw, 400px);
@@ -684,76 +695,108 @@ onUnmounted(() => {
     radial-gradient(ellipse 34% 46% at var(--stand-x, 60%) calc(var(--floor-y, 80%) - 14%), color-mix(in oklab, var(--acc) 16%, transparent), transparent 72%);
 }
 
-/* ---- the moon, in the drawn Pathway's colour ---- */
-.progression__moon {
+/* ---- the Pathway's sigil, drawn in behind him at the awakening ---- */
+.progression__sigil {
+  --sigil-ring: 0;
+  --sigil-in: 0;
+  --sigil-turn: 0deg;
   position: absolute;
   top: var(--stand-y, 40%);
   left: var(--stand-x, 60%);
-  width: var(--moon-size, 420px);
+  width: var(--sigil-size, 420px);
   aspect-ratio: 1;
-  opacity: calc(min(1, var(--moon) * 0.3 + var(--awaken)) * (1 - var(--blackout) * 0.7));
-  transform: translate3d(-50%, calc(-50% + (1 - var(--moon)) * 24%), 0);
+  opacity: min(1, calc(var(--sigil-ring) * 2));
+  transform: translate3d(-50%, -50%, 0);
   pointer-events: none;
 }
 
-.progression__moon > i {
+.progression__sigil > * {
   position: absolute;
 }
 
-.progression__moon {
-  isolation: isolate;
-}
-
-.progression__moon-halo,
-.progression__moon-disc,
-.progression__moon-tint {
-  mask-image: linear-gradient(180deg, #000 50%, transparent 88%);
-}
-
-.progression__moon-halo {
-  inset: -30%;
+/* a quiet pool of the accent behind it, so the sigil glows rather than sits on black */
+.progression__sigil-halo {
+  inset: -22%;
   border-radius: 50%;
-  background: radial-gradient(circle, color-mix(in oklab, var(--acc) 30%, transparent) 30%, color-mix(in oklab, var(--acc) 10%, transparent) 46%, transparent 68%);
+  background: radial-gradient(circle, color-mix(in oklab, var(--acc) 26%, transparent) 22%, color-mix(in oklab, var(--acc) 8%, transparent) 46%, transparent 68%);
+  opacity: calc(var(--sigil-in) * 0.9 + var(--sigil-ring) * 0.1);
+  transform: scale(calc(0.7 + var(--sigil-in) * 0.3));
+  will-change: transform, opacity;
 }
 
-.progression__moon-disc {
+/* the ritual circle's two rings, traced round in opposite directions out of the flash */
+.progression__sigil-rings {
+  inset: -4%;
+  width: 108%;
+  height: 108%;
+  overflow: visible;
+  fill: none;
+  stroke: color-mix(in oklab, var(--acc) 72%, white);
+  stroke-dasharray: 100 100;
+  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--acc) 80%, transparent));
+}
+
+.progression__sigil-rings circle:first-child {
+  stroke-width: 0.45;
+  stroke-dashoffset: calc(100 - var(--sigil-ring) * 100);
+  transform: rotate(calc(-90deg + var(--sigil-turn) * -0.4));
+  transform-origin: 50% 50%;
+}
+
+.progression__sigil-rings circle:last-child {
+  stroke-width: 0.25;
+  stroke-dashoffset: calc(var(--sigil-ring) * 100 - 100);
+  opacity: 0.7;
+  transform: rotate(calc(90deg + var(--sigil-turn) * 0.4));
+  transform-origin: 50% 50%;
+}
+
+/* scroll turns it a little; once lit it keeps turning, very slowly, on the compositor */
+.progression__sigil-turn {
+  inset: 4%;
+  transform: rotate(var(--sigil-turn));
+  will-change: transform;
+}
+
+/*
+ * The sigil, kindling from its middle outward. The art is painted on black: as its own
+ * luminance mask the black falls away and only its light is left, so it glows on the
+ * room like the circle on the floor. The example (no draw yet, or a Boon) is the Fool's
+ * in the page's accent: the same mask over the accent.
+ */
+.progression__sigil-art {
+  position: absolute;
   inset: 0;
-  border-radius: 50%;
-  background-color: #2a2a30;
-  background-position: center;
-  background-size: cover;
-  box-shadow: 0 0 70px 6px color-mix(in oklab, var(--acc) 32%, transparent);
-  filter: grayscale(1) brightness(1.5) contrast(1.05);
-}
-
-/* the disc's craters, washed in the accent */
-.progression__moon-tint {
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 34%, color-mix(in oklab, var(--acc) 80%, white), var(--acc) 60%);
-  mix-blend-mode: color;
-}
-
-.progression__moon-band {
-  left: -45%;
-  width: 190%;
-  background: linear-gradient(90deg, transparent, rgba(160, 158, 170, 0.45) 18%, rgba(120, 118, 130, 0.2) 46%, rgba(160, 158, 170, 0.42) 74%, transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 50%, transparent);
-  animation: moon-band 46s ease-in-out infinite alternate;
+  display: none;
+  background: var(--sigil) center / contain no-repeat;
+  mask: var(--sigil) center / contain no-repeat luminance;
+  /* the painted art is mostly mid-tones: lifted, so what the mask keeps reads as light */
+  filter: brightness(1.6) saturate(1.1);
+  opacity: var(--sigil-in);
+  transform: scale(calc(0.82 + var(--sigil-in) * 0.18));
+  animation: sigil-turn 160s linear infinite;
   animation-play-state: paused;
+  will-change: transform, opacity;
 }
 
-.progression__moon.is-lit .progression__moon-band {
+.progression__sigil.is-lit .progression__sigil-art {
   animation-play-state: running;
 }
 
-.progression__moon-band--1 { top: 40%; height: 9%; opacity: 0.7; }
-.progression__moon-band--2 { top: 56%; height: 14%; animation-duration: 60s; animation-direction: alternate-reverse; }
-.progression__moon-band--3 { top: 70%; height: 22%; opacity: 0.9; animation-duration: 38s; }
+.progression__sigil.is-example .progression__sigil-art {
+  filter: none;
+  background: radial-gradient(circle, color-mix(in oklab, var(--acc) 45%, white) 10%, var(--acc) 42%, color-mix(in oklab, var(--acc) 75%, black) 72%);
+}
 
-@keyframes moon-band {
-  from { transform: translate3d(-6%, 0, 0); }
-  to { transform: translate3d(6%, 0, 0); }
+/* (without luminance masks the art's black square would show: only the rings are drawn there) */
+@supports (mask-mode: luminance) {
+  .progression__sigil-art {
+    display: block;
+  }
+}
+
+@keyframes sigil-turn {
+  to { rotate: 360deg; }
 }
 
 /* ---- fog: two slow banks; they close in on the drink and part at the climax ---- */
@@ -1276,7 +1319,7 @@ onUnmounted(() => {
   }
 
   .progression__hearth,
-  .progression__moon,
+  .progression__sigil,
   .progression__dread,
   .progression__burst,
   .progression__fogbank,
@@ -1459,7 +1502,7 @@ onUnmounted(() => {
   }
 
   .progression__fog,
-  .progression__moon-band,
+  .progression__sigil-art,
   .progression__dread::after {
     animation: none;
   }
