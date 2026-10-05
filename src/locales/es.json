@@ -588,14 +588,13 @@
         "lede": "Pick one of the 22 Pathways and drink your way up its potions, from a Sequence 9 Beyonder to a god's throne at Sequence 0. Free to play, no mods needed.",
         "join": "How to join",
         "changelog": "Latest update",
-        "shuffle": "Draw a card",
+        "shuffle": "Draw a random Pathway",
         "drawAgain": "Draw again",
         "fanLabel": "22 Pathways. Choose a face-down card.",
         "cardLabel": "Draw card {n} of {total}",
         "beginsAs": "Sequence 9: {role}",
         "readCard": "View Sequences",
-        "announce": "Card drawn: {name}. Sequence 9: {role}.",
-        "drawHint": "Not sure where to start? Let the deck pick your Pathway."
+        "announce": "Card drawn: {name}. Sequence 9: {role}."
       },
       "dock": {
         "label": "Pathway card",
@@ -883,13 +882,13 @@
     },
     "skipToContent": "Skip to content",
     "world": {
-      "titleA": "Only on",
-      "titleB": "Mysterria",
-      "lede": "Every system below was written by our team for this one server. You won't have played them anywhere else.",
+      "titleA": "More than",
+      "titleB": "a Pathway",
+      "lede": "Your Pathway is only the start. We built these systems for Mysterria ourselves, so you won't find them on any other server.",
       "pantheon": {
-        "title": "Twenty-two thrones",
-        "body": "Every Pathway has one throne. Whoever takes it becomes that Pathway's god at Sequence 0, with a spell no other player has.",
-        "rule": "A god can't be dethroned by force. The throne only passes on when its god stops showing up, and every throne empties when the epoch ends.",
+        "title": "Become a god",
+        "body": "Each of the 22 Pathways has one throne at Sequence 0. Reach it and you become that Pathway's god, with a title above your head and a spell no other player has.",
+        "rule": "No one can take a throne by force. It only passes on when its god stops playing, and every throne opens again when the season ends.",
         "roadLabel": "The road to Sequence 0",
         "road": {
           "climb": {
@@ -920,29 +919,29 @@
         "cta": "See who holds them"
       },
       "incursions": {
-        "title": "Cosmos Incursions",
-        "body": "When 30 or more players are online, PvP zones open in random places and appear on the live map. The rest of the world stays peaceful; inside a zone, its colour tells you what a death will cost.",
+        "title": "PvP with real stakes",
+        "body": "The open world is safe. When 30 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
         "tiersLabel": "Zone colours and what dying costs",
         "tiers": {
           "green": {
             "name": "Green",
-            "stake": "Lose one or two items. Damage is scaled between Sequences, so a new Beyonder gets a real fight."
+            "stake": "Drop an item or two. Damage is evened out, so a new Beyonder can still win."
           },
           "yellow": {
             "name": "Yellow",
-            "stake": "Lose more items. Damage is scaled halfway."
+            "stake": "Drop more items. Damage is only partly evened out."
           },
           "red": {
             "name": "Red",
-            "stake": "Lose everything you carry. Raw power, no scaling."
+            "stake": "Drop everything you carry. Raw power decides."
           },
           "black": {
             "name": "Black",
-            "stake": "Killed by a player, you can lose a Sequence or half your acting."
+            "stake": "Lose to a player and you can lose a Sequence or half your acting."
           }
         },
-        "permanent": "Some zones never close. Gather at their points of interest, then hold an extraction point long enough to carry the loot out.",
-        "logout": "Log out mid-fight and your body stays behind, defenceless."
+        "permanent": "Some zones never close. Loot their points of interest, then hold an extraction point long enough to escape with it.",
+        "logout": "Logging out won't save you. Your body stays behind, defenceless."
       },
       "arena": {
         "title": "Mythic Bedwars, Duels and FFA",
@@ -988,11 +987,16 @@
         "boons": "Your contribution buys rewards, including shards of rare Boons: a second Sequence borrowed from an Outer God and raised by sacrifice."
       },
       "gallery": {
-        "title": "Player screenshots",
+        "title": "Captured by our players",
         "cta": "Browse on Discord",
         "label": "Player screenshots",
         "pause": "Pause gallery",
-        "play": "Play gallery"
+        "play": "Play gallery",
+        "open": "Open {place}, by {author}",
+        "source": "View the original post",
+        "prev": "Previous screenshot",
+        "next": "Next screenshot",
+        "close": "Close"
       },
       "credit": "By {author}",
       "join": {

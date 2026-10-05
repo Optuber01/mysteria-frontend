@@ -165,17 +165,27 @@
     <div
         ref="stripRef"
         class="world-strip"
-        :class="{'is-paused': paused || !inView, 'is-still': reducedMotion}"
+        :class="{'is-paused': paused || !inView || openIndex !== null, 'is-still': reducedMotion}"
         role="region"
         :aria-label="t('home.world.gallery.label')"
         :tabindex="reducedMotion ? 0 : undefined"
     >
       <ul class="world-strip__track">
         <li v-for="item in gallery" :key="item.id" class="world-strip__item" :aria-hidden="item.copy || undefined">
-          <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm"/>
+          <!-- opens the shot full size, with a link to the post it came from -->
+          <button
+              type="button"
+              class="world-strip__open"
+              :tabindex="item.copy ? -1 : undefined"
+              :aria-label="t('home.world.gallery.open').replace('{place}', item.shot.place).replace('{author}', item.shot.author)"
+              @click="openShot(item.index)"
+          >
+            <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm"/>
+          </button>
         </li>
       </ul>
     </div>
+    <WorldLightbox :shots="GALLERY_SHOTS" :index="openIndex" @update:index="openIndex = $event" @close="openIndex = null"/>
   </section>
 </template>
 
@@ -187,6 +197,7 @@ import IconDiscord from '@/assets/icons/IconDiscord.vue';
 import ArcanaFace from './ArcanaFace.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import WorldPhoto from './WorldPhoto.vue';
+import WorldLightbox from './WorldLightbox.vue';
 import {GALLERY_SHOTS, TOPIC_SHOTS} from './WorldShots';
 import {CORE_CARDS, sigilThumb} from './arcana-data';
 import {useArcana} from './useArcana';
@@ -260,13 +271,19 @@ const paused = ref(false);
 const inView = ref(false);
 /* Once the strip is on screen, load every tile: lazy ones clipped by the strip would pop in blank. */
 const stripWarm = ref(false);
+
+/* the shot open in the lightbox (null: closed); the strip holds still while one is open */
+const openIndex = ref<number | null>(null);
+function openShot(index: number) {
+  openIndex.value = index;
+}
 watch(inView, visible => visible && (stripWarm.value = true));
 const stripRef = ref<HTMLElement | null>(null);
 
 const gallery = computed(() => {
-  const once = GALLERY_SHOTS.map(shot => ({id: shot.key, shot, copy: false}));
+  const once = GALLERY_SHOTS.map((shot, index) => ({id: shot.key, shot, index, copy: false}));
   if (reducedMotion.value) return once;
-  return [...once, ...GALLERY_SHOTS.map(shot => ({id: `${shot.key}-again`, shot, copy: true}))];
+  return [...once, ...GALLERY_SHOTS.map((shot, index) => ({id: `${shot.key}-again`, shot, index, copy: true}))];
 });
 
 let observer: IntersectionObserver | null = null;
@@ -935,6 +952,28 @@ onUnmounted(() => {
 .world-strip__item :deep(.world-photo) {
   aspect-ratio: 16 / 10;
   border-radius: var(--arc-r-lg);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* each tile opens its shot: a lift on hover, the page's ring on focus */
+.world-strip__open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--arc-r-lg);
+  background: none;
+  cursor: zoom-in;
+}
+
+.world-strip__open:hover :deep(.world-photo) {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px var(--arc-shadow);
+}
+
+.world-strip__open:focus-visible {
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
 }
 
 .world-strip.is-still {

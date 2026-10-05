@@ -50,13 +50,11 @@
             <div :key="`glow-${card.id}`" class="arc-orbit__glow" :style="{'--orb-acc': card.accent}" aria-hidden="true"></div>
           </Transition>
           <div class="arc-orbit__track" aria-hidden="true"></div>
-          <div class="arc-orbit__track arc-orbit__track--inner" aria-hidden="true"></div>
 
           <!-- The drawn seal: a change dissolves the old one into the new, in place -->
           <Transition :css="false" @before-leave="onCentreBeforeLeave" @enter="onCentreEnter" @leave="onCentreLeave">
             <div :key="card.id" class="arc-orbit__centre" :style="{'--orb-acc': card.accent}">
-              <span ref="centreSealRef" class="arc-orbit__drawn" :data-motif="motifOf(card.id)" aria-hidden="true">
-                <i class="arc-orbit__halo"></i>
+              <span ref="centreSealRef" class="arc-orbit__drawn" aria-hidden="true">
                 <img :src="sigilNative(card.id)" alt="" width="512" height="512" decoding="async" draggable="false">
               </span>
               <h3 id="arc-orbit-name" class="arc-orbit__name">{{ nameOf(card.id) }}</h3>
@@ -246,16 +244,6 @@ const early = computed(() => {
 const abilitiesLabel = computed(() =>
   t('home.arcana.deck.firstAbilities').replace('{role}', reading.value.seq9 || reading.value.name));
 
-/** The original orbit's motif grammar: a second shape behind each sigil. */
-const MOTIFS: Record<string, string> = {
-  abyss: 'flame', chained: 'chain', darkness: 'eclipse', death: 'bone', demoness: 'blade', door: 'door',
-  emperor: 'crown', error: 'glitch', fool: 'cards', fortune: 'wheel', giant: 'sword', hanged: 'cross',
-  hermit: 'runes', justiciar: 'scales', moon: 'moon', mother: 'vine', paragon: 'gear', priest: 'flame',
-  sun: 'sun', tower: 'pages', tyrant: 'storm', visionary: 'eye', aeon: 'clock', chaos: 'fracture',
-  chaosmist: 'mist', condenser: 'star', devouring: 'maw', edict: 'sigil', everlasting: 'ring',
-  patriarch: 'coin', secondlaw: 'plague', sublunary: 'canvas',
-};
-const motifOf = (id: string) => MOTIFS[id] ?? 'ring';
 
 /* ---------- Geometry: a ring seen from slightly above; the near arc of a dial on phones ---------- */
 
@@ -1022,16 +1010,6 @@ onUnmounted(() => {
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--orb-acc) 22%, var(--arc-line));
 }
 
-/* a fainter orbit inside the first: the ring has depth */
-.arc-orbit__track--inner {
-  left: calc(var(--cx) - var(--rx) * .72);
-  top: calc(var(--cy) - var(--ry) * .72);
-  width: calc(var(--rx) * 1.44);
-  height: calc(var(--ry) * 1.44);
-  box-shadow: none;
-  border: 1px dashed var(--arc-line);
-}
-
 /* ---------- the drawn seal ---------- */
 .arc-orbit__centre {
   position: absolute;
@@ -1072,57 +1050,7 @@ onUnmounted(() => {
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .45));
 }
 
-/* slow dashed halo outside the seal */
-.arc-orbit__halo {
-  position: absolute;
-  inset: -22px;
-  border: 1px dashed color-mix(in oklab, var(--orb-acc) 40%, transparent);
-  border-radius: 50%;
-  animation: arc-spin 80s linear infinite;
-}
 
-/* the motif: one shape per pathway behind its sigil */
-.arc-orbit__drawn::after {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  inset: 12%;
-  border: 1px solid color-mix(in oklab, var(--orb-acc) 45%, transparent);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.arc-orbit__drawn[data-motif='chain']::after { border-radius: 999px; transform: rotate(38deg) scale(.66, 1.2); }
-.arc-orbit__drawn[data-motif='eclipse']::after,
-.arc-orbit__drawn[data-motif='moon']::after { inset: 12% 26% 12% 8%; box-shadow: 14px 0 0 -2px color-mix(in oklab, var(--orb-acc) 18%, transparent); }
-.arc-orbit__drawn[data-motif='bone']::after,
-.arc-orbit__drawn[data-motif='sword']::after,
-.arc-orbit__drawn[data-motif='blade']::after { inset: 6% 47%; border-radius: 999px; transform: rotate(42deg); }
-.arc-orbit__drawn[data-motif='door']::after,
-.arc-orbit__drawn[data-motif='pages']::after,
-.arc-orbit__drawn[data-motif='canvas']::after { inset: 10% 25%; border-radius: 50% 50% 4% 4%; }
-.arc-orbit__drawn[data-motif='crown']::after,
-.arc-orbit__drawn[data-motif='sun']::after,
-.arc-orbit__drawn[data-motif='star']::after { inset: 6%; border-radius: 4%; transform: rotate(45deg) scale(.66); }
-.arc-orbit__drawn[data-motif='glitch']::after,
-.arc-orbit__drawn[data-motif='fracture']::after { inset: 16% 8%; border-radius: 0; transform: skew(-22deg) rotate(-12deg); }
-.arc-orbit__drawn[data-motif='cards']::after,
-.arc-orbit__drawn[data-motif='runes']::after,
-.arc-orbit__drawn[data-motif='sigil']::after { inset: 10% 28%; border-radius: 8px; transform: rotate(27deg); }
-.arc-orbit__drawn[data-motif='wheel']::after,
-.arc-orbit__drawn[data-motif='gear']::after,
-.arc-orbit__drawn[data-motif='clock']::after,
-.arc-orbit__drawn[data-motif='ring']::after { inset: 9%; border: 5px double color-mix(in oklab, var(--orb-acc) 35%, transparent); }
-.arc-orbit__drawn[data-motif='cross']::after,
-.arc-orbit__drawn[data-motif='scales']::after { inset: 10% 48%; border-radius: 0; }
-.arc-orbit__drawn[data-motif='vine']::after,
-.arc-orbit__drawn[data-motif='plague']::after { inset: 6% 34% 6% 16%; border-radius: 60% 10% 60% 10%; transform: rotate(32deg); }
-.arc-orbit__drawn[data-motif='flame']::after,
-.arc-orbit__drawn[data-motif='maw']::after { inset: 10% 28% 14%; border-radius: 70% 25% 65% 35%; transform: rotate(45deg); }
-.arc-orbit__drawn[data-motif='storm']::after,
-.arc-orbit__drawn[data-motif='mist']::after { inset: 34% 2%; transform: skew(-18deg); }
-.arc-orbit__drawn[data-motif='eye']::after { inset: 26% 6%; border-radius: 70% 10% 70% 10%; transform: rotate(45deg); }
-.arc-orbit__drawn[data-motif='coin']::after { inset: 13%; transform: rotate(28deg); border: 4px double color-mix(in oklab, var(--orb-acc) 38%, transparent); }
 
 .arc-orbit__name {
   margin: 24px 0 0;
@@ -1445,10 +1373,6 @@ onUnmounted(() => {
   overflow-x: clip;
 }
 
-.arc-orbit.is-dial .arc-orbit__track--inner {
-  display: none;
-}
-
 .arc-orbit.is-dial .arc-orbit__centre {
   width: calc(100% - 36px);
 }
@@ -1474,10 +1398,6 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arc-orbit__halo {
-    animation: none;
-  }
-
   .arc-seal__orb,
   .arc-seal__orb img,
   .arc-orbit__step {

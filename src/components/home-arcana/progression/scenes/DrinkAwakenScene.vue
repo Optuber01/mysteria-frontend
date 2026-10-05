@@ -214,7 +214,7 @@ const potionPoint = computed(() => {
   // as he steps in under it, it drifts aside to wait by his right hand, not in front of his chest
   const aside = final.value ? 1 : ease(g.value, [T.cauldronOut[0], T.playerIn[1]]);
   let x = l.potion.x - l.player.w * 0.19 * aside;
-  let y = lerp(c.liquidY, l.potion.y, up) + bob + l.player.h * 0.02 * aside;
+  let y = lerp(c.mouthY, l.potion.y, up) + bob + l.player.h * 0.02 * aside;
   let size = l.potion.size * (0.4 + 0.6 * up);
   // ...then drifts across into his hand, on a short arc
   const hand = handPoint.value;
@@ -514,10 +514,13 @@ const sceneVars = computed(() => {
 
 
 .drink-scene__fx {
-  width: calc(var(--circle-size) * 0.8);
-  height: calc(var(--circle-size) * 0.8);
+  width: calc(var(--circle-size) * 1.1);
+  height: calc(var(--circle-size) * 1.1);
   opacity: var(--wake);
-  transform: translate(-50%, -66%);
+  transform: translate(-50%, -70%);
+  /* soft edges: the aura fades out before its box ends */
+  -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent);
+  mask-image: radial-gradient(closest-side, #000 62%, transparent);
 }
 
 /* ---------- the reading ---------- */
@@ -702,9 +705,13 @@ const sceneVars = computed(() => {
 /* over him, under the potion and the voices: the fog closes round him, the motes reach his chest */
 .drink-scene__spirit {
   position: absolute;
-  inset: 0;
+  /* reaches past the stage's foot (over the rail's band) and fades out there, so the
+     drifting specks never stop at a hard line */
+  inset: 0 0 -140px; /* top-left kept: the specks are placed in stage coordinates */
   z-index: 6;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent);
+  mask-image: linear-gradient(180deg, #000 72%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

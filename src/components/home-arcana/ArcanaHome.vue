@@ -43,7 +43,7 @@ import {ensurePathwayData, useArcana} from './useArcana';
 import {fillAccent, inkAccent} from './accentInk';
 import grain from './assets/grain.png';
 
-useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&family=Golos+Text:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Tenor+Sans&display=swap');
+useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&display=swap');
 
 const {card, hasDrawn} = useArcana();
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
@@ -156,11 +156,11 @@ body:has(.concept-arcana) {
   --arc-pop: rgba(15, 15, 19, .96);
   --arc-ok: #86efac;
   --arc-bad: #ffb3a8;
-  /* flared grotesk display, wide inscriptional caps for card labels, plain mono for the address */
+  /* one family across the page: Commissioner, flared for headings (FLAR 100), plain for the rest */
   --arc-display: 'Commissioner', 'Segoe UI', system-ui, sans-serif;
-  --arc-body: 'Golos Text', 'Segoe UI', system-ui, sans-serif;
-  --arc-caps: 'Tenor Sans', 'Segoe UI', system-ui, sans-serif;
-  --arc-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --arc-body: var(--arc-display);
+  --arc-caps: var(--arc-display);
+  --arc-mono: var(--arc-display);
 
   /*
    * One system for every chapter (the spec: /tmp/arcana-design-spec.md).
@@ -375,18 +375,20 @@ body:has(.concept-arcana) {
   color: var(--arc-on-acc);
 }
 
-/* header details that upstream hard-codes in gold */
+/* the brand mark in its own colours, crisp: no gold glow, no greyscale wash */
 .concept-arcana .header-stack .brand-mark,
 .concept-arcana .footer-brand img,
 body:has(.concept-arcana) .mobile-nav .brand-mark {
-  filter: grayscale(1) brightness(1.35) drop-shadow(0 0 8px color-mix(in srgb, var(--acc) 55%, transparent));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45));
 }
 
-/* on paper the mark is inked, like the name beside it */
-:root[data-theme="parchment"] .concept-arcana .header-stack .brand-mark,
-:root[data-theme="parchment"] .concept-arcana .footer-brand img,
-:root[data-theme="parchment"] body:has(.concept-arcana) .mobile-nav .brand-mark {
-  filter: grayscale(1) brightness(.4) contrast(1.3) drop-shadow(0 0 6px color-mix(in srgb, var(--acc) 40%, transparent));
+.concept-arcana .header-stack .brand-tagline {
+  margin-top: 5px;
+  font-family: var(--arc-body);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .26em;
+  color: var(--arc-muted);
 }
 
 .concept-arcana .header-stack .season-bar {

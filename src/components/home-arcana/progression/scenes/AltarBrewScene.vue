@@ -149,15 +149,15 @@ const liquidBase = computed<Rgb>(() => {
 type Point = { x: number; y: number };
 const liquid = computed<Point | null>(() => {
   const l = props.layout;
-  return l ? { x: l.cauldron.x, y: l.cauldron.liquidY } : null;
+  return l ? { x: l.cauldron.x, y: l.cauldron.mouthY } : null;
 });
 /** Where each one lands on the surface (spread a little across it). */
 function landing(index: number, n: number): Point | null {
   const l = props.layout;
   const c = liquid.value;
   if (!l || !c) return null;
-  const spread = n > 1 ? (index / (n - 1) - 0.5) * 0.28 : 0;
-  return { x: c.x + spread * l.cauldron.w, y: c.y + (index % 2 ? -0.02 : 0.02) * l.cauldron.w };
+  const spread = n > 1 ? (index / (n - 1) - 0.5) * 0.16 : 0;
+  return { x: c.x + spread * l.cauldron.w, y: c.y + (index % 2 ? -0.015 : 0.015) * l.cauldron.w };
 }
 
 const flights = computed(() => {
@@ -238,12 +238,12 @@ const ripples = computed(() => {
   const n = drops.value.length;
   return drops.value.map((d) => {
     const s = clamp01((g.value - impactAt(d.start)) / 0.05);
-    const spread = n > 1 ? (d.index / (n - 1) - 0.5) * 0.28 : 0;
+    const spread = n > 1 ? (d.index / (n - 1) - 0.5) * 0.16 : 0;
     return {
       id: d.key,
       style: {
         left: `${(50 + spread * 100).toFixed(2)}%`,
-        top: `${(CAULDRON_ART.liquidY * 100).toFixed(2)}%`,
+        top: `${(CAULDRON_ART.mouthY * 100).toFixed(2)}%`,
         opacity: (s > 0 && s < 1 ? (1 - s) * 0.9 : 0).toFixed(3),
         transform: `translate(-50%, -50%) scale(${(0.15 + s * 1.1).toFixed(3)}, ${((0.15 + s * 1.1) * 0.5).toFixed(3)})`,
       } as CSSProperties,
@@ -320,22 +320,23 @@ const steamBoxStyle = computed<CSSProperties>(() => {
   const l = props.layout;
   if (!l) return { opacity: 0 };
   const c = l.cauldron;
-  const height = Math.min(c.liquidY, c.w * 1.6);
-  return { ...box(c.x - c.w * 0.75, c.liquidY - height, c.w * 1.5, height), opacity: (rise.value * (1 - 0.5 * settle.value) * (1 - exit.value)).toFixed(4) };
+  const height = Math.min(c.mouthY, c.w * 1.6);
+  return { ...box(c.x - c.w * 0.75, c.mouthY - height, c.w * 1.5, height), opacity: (rise.value * (1 - 0.5 * settle.value) * (1 - exit.value)).toFixed(4) };
 });
 const bubbleBoxStyle = computed<CSSProperties>(() => {
   const l = props.layout;
   if (!l) return { opacity: 0 };
   const c = l.cauldron;
   const height = c.w * 0.5;
-  return { ...box(c.x - c.w * 0.4, c.liquidY + c.h * 0.12 - height, c.w * 0.8, height), opacity: (1 - exit.value).toFixed(4) };
+  // pops only on the liquid you can see through the rim, never on the walls
+  return { ...box(c.x - c.w * 0.21, c.mouthY + c.h * 0.03 - height, c.w * 0.42, height), opacity: (1 - exit.value).toFixed(4) };
 });
 const burstBoxStyle = computed<CSSProperties>(() => {
   const l = props.layout;
   if (!l) return { opacity: 0 };
   const c = l.cauldron;
-  const size = Math.min(c.w * 1.5, c.liquidY * 1.6);
-  return box(c.x - size / 2, c.liquidY - size * 0.62, size, size);
+  const size = Math.min(c.w * 1.5, c.mouthY * 1.6);
+  return box(c.x - size / 2, c.mouthY - size * 0.62, size, size);
 });
 
 const bubbleTint = computed<Rgb>(() => mixRgb(liquidBase.value, LIGHT, 0.45));
@@ -350,12 +351,12 @@ const beamStyle = computed<CSSProperties>(() => {
   if (!l) return { opacity: 0 };
   const c = l.cauldron;
   const on = final.value ? 0 : clamp01(flash.value * 1.2 + 0.45 * span(g.value, T.potionUp) * (1 - settle.value)) * (1 - exit.value);
-  const top = Math.max(0, c.liquidY - c.w * 2.2);
+  const top = Math.max(0, c.mouthY - c.w * 2.2);
   return {
     left: `${c.x.toFixed(1)}px`,
     top: `${top.toFixed(1)}px`,
     width: `${(c.w * 0.62).toFixed(1)}px`,
-    height: `${Math.max(0, c.liquidY - top).toFixed(1)}px`,
+    height: `${Math.max(0, c.mouthY - top).toFixed(1)}px`,
     opacity: on.toFixed(4),
     transform: `translateX(-50%) scaleY(${(0.25 + 0.75 * clamp01(on * 1.4)).toFixed(4)})`,
   };

@@ -137,8 +137,6 @@
                 <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
               </a>
             </p>
-            <!-- before the first draw: what the button is for -->
-            <p v-else class="arc-hero__hint arc-hero__hint--first">{{ t('home.arcana.hero.drawHint') }}</p>
           </div>
         </div>
       </div>
@@ -1315,7 +1313,7 @@ onUnmounted(() => {
   font-size: var(--arc-btn-fs);
 }
 
-/* Both labels share one cell, so the button keeps its width when it changes. */
+/* The label for the current state (before or after a draw). */
 .arc-hero__shuffle-label {
   display: inline-grid;
 }
@@ -1325,7 +1323,8 @@ onUnmounted(() => {
 }
 
 .arc-hero__shuffle-label > .is-off {
-  visibility: hidden;
+  /* only the current label takes room: the button fits its own words */
+  display: none;
 }
 
 .arc-hero__hint {

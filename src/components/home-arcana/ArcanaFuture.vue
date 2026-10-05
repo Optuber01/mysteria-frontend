@@ -54,37 +54,30 @@
           </ol>
         </div>
 
-        <div class="arc-future__actions">
-          <RouterLink :to="$lp('/guide/connect')" class="arc-btn arc-btn--solid">
-            {{ t('home.world.join.guide') }}
-            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-          </RouterLink>
-          <a :href="DISCORD" class="arc-btn arc-btn--ghost" target="_blank" rel="noopener noreferrer">
-            <IconDiscord class="arc-btn__icon" aria-hidden="true"/>
-            {{ t('home.world.join.discord') }}
-          </a>
-        </div>
-
-        <!-- live status -->
-        <div class="arc-live" :class="statusClass">
-          <div class="arc-live__row">
-            <span class="arc-live__dot" aria-hidden="true"></span>
-            <span v-if="isOnline && checkedAt" class="arc-live__count">{{ playerCount ?? 0 }}</span>
-            <span class="arc-live__unit">{{ liveUnit }}</span>
+        <!-- one panel beside the steps: who's on right now, and the two ways in -->
+        <div class="arc-join">
+          <div class="arc-live" :class="statusClass">
+            <div class="arc-live__row">
+              <span class="arc-live__dot" aria-hidden="true"></span>
+              <span v-if="isOnline && checkedAt" class="arc-live__count">{{ playerCount ?? 0 }}</span>
+              <span class="arc-live__unit">{{ liveUnit }}</span>
+            </div>
+            <div v-if="seasonCount" class="arc-live__season">
+              <strong>{{ seasonCount }}</strong>
+              <span>{{ t('home.world.join.seasonLabel') }}</span>
+            </div>
           </div>
-          <div v-if="seasonCount" class="arc-live__season">
-            <strong>{{ seasonCount }}</strong>
-            <span>{{ t('home.world.join.seasonLabel') }}</span>
+          <div class="arc-future__actions">
+            <RouterLink :to="$lp('/guide/connect')" class="arc-btn arc-btn--solid">
+              {{ t('home.world.join.guide') }}
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </RouterLink>
+            <a :href="DISCORD" class="arc-btn arc-btn--ghost" target="_blank" rel="noopener noreferrer">
+              <IconDiscord class="arc-btn__icon" aria-hidden="true"/>
+              {{ t('home.world.join.discord') }}
+            </a>
           </div>
         </div>
-
-        <!-- latest update -->
-        <RouterLink :to="$lp(newsLink)" class="arc-news">
-          <time v-if="newsDate" class="arc-news__date" :datetime="newsDateIso">{{ newsDate }}</time>
-          <h3>{{ newsTitle }}</h3>
-          <p v-if="newsBody" class="arc-news__body">{{ newsBody }}</p>
-          <span class="arc-news__read">{{ t('home.world.join.newsRead') }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
-        </RouterLink>
       </div>
     </div>
   </section>
@@ -95,12 +88,10 @@ import {computed, ref} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {useServerStatus} from '@/composables/useServer';
 import {useBeyonderStats} from '@/composables/useBeyonderStats';
-import {SEASON_ANNOUNCEMENT_SLUG} from '@/constants/season';
 import IconDiscord from '@/assets/icons/IconDiscord.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import {useArcana} from './useArcana';
 import {useCopyAddress} from './useCopyAddress';
-import {useLatestNews} from './useLatestNews';
 import sky from '@/assets/images/home-library/captures/hero-aurora-cliffside.webp';
 
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
@@ -149,22 +140,6 @@ const liveUnit = computed(() => {
 /* No number until the real one arrives: a made-up fallback could be wrong. */
 const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.toLocaleString(intlLocale.value) : ''));
 
-/* ---- latest update ---- */
-// Shared with the hero's changelog button: one request for both.
-const {latest} = useLatestNews();
-
-const fallbackLink = SEASON_ANNOUNCEMENT_SLUG ? `/news/${SEASON_ANNOUNCEMENT_SLUG}` : '/news';
-const newsLink = computed(() => (latest.value ? `/news/${latest.value.slug}` : fallbackLink));
-const newsTitle = computed(() => latest.value?.title ?? t('home.world.join.newsFallbackTitle'));
-const newsBody = computed(() => latest.value?.shortDescription ?? t('home.world.join.newsFallbackBody'));
-const newsDateValue = computed(() => {
-  const raw = latest.value?.publishedAt ?? latest.value?.createdAt;
-  const date = raw ? new Date(raw) : null;
-  return date && !Number.isNaN(date.getTime()) ? date : null;
-});
-const newsDateIso = computed(() => newsDateValue.value?.toISOString());
-const newsDate = computed(() => newsDateValue.value
-    ?.toLocaleDateString(intlLocale.value, {day: 'numeric', month: 'long', year: 'numeric'}) ?? '');
 </script>
 
 <style scoped>
@@ -226,13 +201,9 @@ const newsDate = computed(() => newsDateValue.value
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   /* the steps run down the left; the live count, the news card and the buttons stack on the right
      at their own height (whatever the data brings, no card is stretched to fill) */
-  grid-template-rows: auto auto minmax(0, 1fr);
-  grid-template-areas:
-    'steps live'
-    'steps news'
-    'steps actions';
+  grid-template-areas: 'steps join';
   gap: var(--arc-grid-gap);
-  align-items: stretch;
+  align-items: start;
 }
 
 .arc-future__steps {
@@ -316,31 +287,29 @@ const newsDate = computed(() => newsDateValue.value
   color: var(--arc-bad);
 }
 
-.arc-future__actions {
-  grid-area: actions;
-  align-self: start;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-/* ---- live + news ---- */
-.arc-live {
-  grid-area: live;
-}
-
-.arc-news {
-  grid-area: news;
-  align-self: start;
-}
-
-.arc-live,
-.arc-news {
-  display: block;
-  padding: clamp(20px, 2vw, 26px);
+/* the panel: the live count on top, the two ways in under it, full width */
+.arc-join {
+  grid-area: join;
+  display: grid;
+  gap: 18px;
+  padding: clamp(22px, 2.2vw, 30px);
   border-radius: var(--arc-r-lg);
   background: var(--arc-raised);
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.arc-future__actions {
+  display: grid;
+  gap: 10px;
+}
+
+.arc-future__actions .arc-btn {
+  justify-content: center;
+}
+
+/* ---- live ---- */
+.arc-live {
+  display: block;
 }
 
 .arc-live__row {
@@ -424,73 +393,13 @@ const newsDate = computed(() => newsDateValue.value
   color: var(--arc-muted);
 }
 
-.arc-news {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  color: inherit;
-  transition: box-shadow .25s, transform .3s cubic-bezier(.2, .8, .2, 1);
-}
 
-/* a link card: the family's hover (2px lift, accent edge) and press */
-.arc-news:hover {
-  color: inherit;
-  transform: translateY(-2px);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
-}
 
-.arc-news:active {
-  transform: scale(.98);
-  transition-duration: .08s;
-}
 
-.arc-news__date {
-  margin-bottom: 8px;
-  font-size: var(--arc-fs-caption);
-  line-height: 1.4;
-  color: var(--arc-muted);
-}
 
-.arc-news h3 {
-  margin: 0 0 8px;
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: var(--arc-fs-h4);
-  line-height: 1.22;
-  color: var(--arc-ink);
-}
 
-.arc-news__body {
-  margin: 0 0 14px;
-  font-size: var(--arc-fs-body);
-  line-height: 1.55;
-  color: var(--arc-muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 
-.arc-news__read {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--arc-fs-small);
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--arc-ink);
-}
 
-.arc-news__read i {
-  font-size: 12px;
-  color: var(--acc-ink);
-  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
-}
-
-.arc-news:hover .arc-news__read i {
-  transform: translateX(3px);
-}
 
 @media (max-width: 960px) {
   .arc-future__grid {
@@ -498,9 +407,7 @@ const newsDate = computed(() => newsDateValue.value
     grid-template-rows: none;
     grid-template-areas:
       'steps'
-      'actions'
-      'live'
-      'news';
+      'join';
   }
 }
 

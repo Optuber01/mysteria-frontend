@@ -18,10 +18,6 @@
       -->
       <div class="progression__sigil" :class="{ 'is-lit': sigilLit, 'is-example': sigilExample }" :style="dress.sigil" aria-hidden="true" data-sweep-ignore>
         <i class="progression__sigil-halo" />
-        <svg class="progression__sigil-rings" viewBox="0 0 100 100" focusable="false">
-          <circle cx="50" cy="50" r="49.2" pathLength="100" />
-          <circle cx="50" cy="50" r="46.6" pathLength="100" />
-        </svg>
         <i class="progression__sigil-turn"><i class="progression__sigil-art" :style="{ '--sigil': `url(${sigilSrc})` }" /></i>
       </div>
       <div class="progression__fogbank" :style="dress.fogbank" aria-hidden="true">
@@ -35,7 +31,8 @@
 
       <!-- The title card: it rides in with the room and hands over to the first chapter in the same column. -->
       <header class="progression__heading" :style="dress.heading">
-        <h2 id="progression-title">{{ tp('title') }}</h2>
+        <!-- named for screen readers; on screen the chapters speak for themselves -->
+        <h2 id="progression-title" class="arc-sr">{{ tp('title') }}</h2>
       </header>
 
       <div class="progression__layout" :style="layoutStyle">
@@ -46,7 +43,6 @@
               <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
               <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
               <p v-if="isBoon && activeChapter.id === 'discover'" class="chapter-copy__body chapter-copy__boon">{{ tp('boonNote') }}</p>
-              <p class="chapter-copy__hint"><i aria-hidden="true" />{{ chapterText(activeChapter.id, 'hint') }}</p>
             </article>
             <article v-else key="awaken" class="chapter-copy chapter-copy--awaken">
               <h3 class="chapter-copy__name" :style="{ '--name-em': nameEm }">
@@ -154,13 +150,7 @@
               </span>
             </li>
           </ul>
-          <p v-else-if="chapter.id === 'brew' || chapter.id === 'drink'" class="progression-static__note">
-            <span class="progression-static__vial" aria-hidden="true">
-              <PotionVial :accent="card.accent" :level="chapter.id === 'brew' ? 0.5 : 1" />
-            </span>
-            {{ chapterText(chapter.id, 'hint') }}
-          </p>
-          <template v-else>
+          <template v-else-if="chapter.id === 'awaken'">
             <ul v-if="firstAbilities.length" class="chapter-copy__abilities" :aria-label="tp('drink.abilitiesHeading')">
               <li v-for="ability in firstAbilities" :key="ability.id">
                 <strong>{{ ability.name }}</strong>
@@ -186,7 +176,6 @@ import FormulaBookScene from './scenes/FormulaBookScene.vue';
 import AltarBrewScene from './scenes/AltarBrewScene.vue';
 import DrinkAwakenScene from './scenes/DrinkAwakenScene.vue';
 import SceneInspectorPopover from './SceneInspectorPopover.vue';
-import PotionVial from './PotionVial.vue';
 import { preloadPathwayNames, useProgressionCopy } from './scenes/useProgressionCopy';
 import { abilitySummary } from '../abilitySummary';
 import { CHAPTERS, T, awakenAt, blackoutAt, clamp01, dropStarts, ease, flashAt, gulpPulse, lerp, riskAt, scrollAt, span, storyAt } from './timeline';
@@ -198,7 +187,7 @@ import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import { sigilNative } from '../arcana-data';
 import { useArcana } from '../useArcana';
 
-const { tp, names, ingredients, card, currentId, isBoon, pathwayId } = useProgressionCopy();
+const { tp, names, ingredients, currentId, isBoon, pathwayId } = useProgressionCopy();
 const { hasDrawn } = useArcana();
 /* The awakening's sigil: the Pathway the story follows (a Boon, or no draw yet, sees the Fool's as the example). */
 const sigilExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
@@ -350,7 +339,6 @@ const sectionVars = computed(() => {
     // the sigil: its rings traced round out of the flash, then the sigil kindles inside them
     '--sigil-ring': (motion ? ease(g, [T.flash, T.flash + 0.045]) : 1).toFixed(4),
     '--sigil-in': (motion ? ease(g, [T.flash + 0.012, T.flash + 0.075]) : 1).toFixed(4),
-    '--sigil-turn': `${(g * 160).toFixed(2)}deg`,
     '--awaken': (motion ? awakenAt(g) : 0).toFixed(4),
     '--stand-x': `${(s.left + (l ? l.cx : s.w / 2)).toFixed(1)}px`,
     '--stand-y': `${(s.top + (l ? l.player.y + l.player.h * 0.3 : s.h * 0.4)).toFixed(1)}px`,
@@ -368,7 +356,7 @@ const sectionVars = computed(() => {
 const DRESS_VARS = {
   backdrop: ['--entry', '--journey', '--awaken', '--risk', '--blackout'],
   hearth: ['--brew', '--stand-x', '--floor-y'],
-  sigil: ['--sigil-ring', '--sigil-in', '--sigil-turn', '--awaken', '--stand-x', '--stand-y', '--sigil-size'],
+  sigil: ['--sigil-ring', '--sigil-in', '--awaken', '--stand-x', '--stand-y', '--sigil-size'],
   fogbank: ['--awaken', '--risk'],
   dread: ['--risk', '--thump', '--blackout', '--stand-x', '--stand-y'],
   burst: ['--flash', '--stand-x', '--stand-y'],
@@ -707,13 +695,12 @@ onUnmounted(() => {
 .progression__sigil {
   --sigil-ring: 0;
   --sigil-in: 0;
-  --sigil-turn: 0deg;
   position: absolute;
   top: var(--stand-y, 40%);
   left: var(--stand-x, 60%);
   width: var(--sigil-size, 420px);
   aspect-ratio: 1;
-  opacity: min(1, calc(var(--sigil-ring) * 2));
+  opacity: var(--sigil-in);
   transform: translate3d(-50%, -50%, 0);
   pointer-events: none;
 }
@@ -732,37 +719,11 @@ onUnmounted(() => {
   will-change: transform, opacity;
 }
 
-/* the ritual circle's two rings, traced round in opposite directions out of the flash */
-.progression__sigil-rings {
-  inset: -4%;
-  width: 108%;
-  height: 108%;
-  overflow: visible;
-  fill: none;
-  stroke: color-mix(in oklab, var(--acc) 72%, white);
-  stroke-dasharray: 100 100;
-  filter: drop-shadow(0 0 3px color-mix(in oklab, var(--acc) 80%, transparent));
-}
-
-.progression__sigil-rings circle:first-child {
-  stroke-width: 0.45;
-  stroke-dashoffset: calc(100 - var(--sigil-ring) * 100);
-  transform: rotate(calc(-90deg + var(--sigil-turn) * -0.4));
-  transform-origin: 50% 50%;
-}
-
-.progression__sigil-rings circle:last-child {
-  stroke-width: 0.25;
-  stroke-dashoffset: calc(var(--sigil-ring) * 100 - 100);
-  opacity: 0.7;
-  transform: rotate(calc(90deg + var(--sigil-turn) * 0.4));
-  transform-origin: 50% 50%;
-}
-
 /* scroll turns it a little; once lit it keeps turning, very slowly, on the compositor */
 .progression__sigil-turn {
   inset: 4%;
-  transform: rotate(var(--sigil-turn));
+  /* it rises into place and stays still: no turning */
+  transform: scale(calc(0.86 + var(--sigil-in) * 0.14));
   will-change: transform;
 }
 
@@ -782,13 +743,7 @@ onUnmounted(() => {
   filter: brightness(1.6) saturate(1.1);
   opacity: var(--sigil-in);
   transform: scale(calc(0.82 + var(--sigil-in) * 0.18));
-  animation: sigil-turn 160s linear infinite;
-  animation-play-state: paused;
   will-change: transform, opacity;
-}
-
-.progression__sigil.is-lit .progression__sigil-art {
-  animation-play-state: running;
 }
 
 .progression__sigil.is-example .progression__sigil-art {
@@ -796,15 +751,11 @@ onUnmounted(() => {
   background: radial-gradient(circle, color-mix(in oklab, var(--acc) 45%, white) 10%, var(--acc) 42%, color-mix(in oklab, var(--acc) 75%, black) 72%);
 }
 
-/* (without luminance masks the art's black square would show: only the rings are drawn there) */
+/* (without luminance masks the art's black square would show: the halo alone stands in) */
 @supports (mask-mode: luminance) {
   .progression__sigil-art {
     display: block;
   }
-}
-
-@keyframes sigil-turn {
-  to { rotate: 360deg; }
 }
 
 /* ---- fog: two slow banks; they close in on the drink and part at the climax ---- */

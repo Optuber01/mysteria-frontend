@@ -4,7 +4,11 @@
  * Only shots with a credit entry are used. Each has a 960px copy for cards where one
  * exists, the original for wide slots, and the crop focus for object-fit: cover.
  */
+import credits from '@/assets/images/home/community/credits.json';
+
 const files = import.meta.glob<string>('@/assets/images/home/community/*.webp', {eager: true, import: 'default'});
+/** The Discord message each shot was posted in (credits.json), so a viewer can open the original. */
+const sourceOf = (key: string) => credits.images.find(image => image.file === `${key}.webp`)?.source ?? '';
 const url = (name: string) => Object.entries(files).find(([path]) => path.endsWith(`/${name}.webp`))?.[1] ?? '';
 
 export type WorldShot = Readonly<{
@@ -19,10 +23,12 @@ export type WorldShot = Readonly<{
   place: string;
   /** object-position for cover crops. */
   focus: string;
+  /** Link to the Discord message it was posted in. */
+  source: string;
 }>;
 
 const shot = (key: string, w: number, h: number, author: string, place: string, focus = '50% 50%'): WorldShot =>
-  ({key, src: url(key), small: url(`${key}-960`), w, h, author, place, focus});
+  ({key, src: url(key), small: url(`${key}-960`), w, h, author, place, focus, source: sourceOf(key)});
 
 /** The shots the chapter's systems are illustrated with. */
 export const TOPIC_SHOTS = {

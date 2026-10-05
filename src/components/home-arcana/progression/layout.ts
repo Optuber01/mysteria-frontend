@@ -9,7 +9,8 @@
 export const BOOK_FILL = { w: 12 / (11.4 * 1.24), h: 10 / 11.4 } as const;
 export const BOOK_RATIO = 1.24;
 /** Cauldron art (cauldron/*.png, 320 x 336): liquid plane and footing, as fractions of the image. */
-export const CAULDRON_ART = { ratio: 336 / 320, liquidY: 0.369, footY: 0.7619 } as const;
+/* mouthY: the middle of the liquid you can actually see through the rim (the plane's own centre, liquidY, sits behind the front lip). */
+export const CAULDRON_ART = { ratio: 336 / 320, liquidY: 0.369, mouthY: 0.298, footY: 0.7619 } as const;
 
 /** Where the figure stands in MinecraftPlayer's frame (zoom 0.66, fov 40): feet and hat top, as fractions of its height. */
 export const PLAYER_FRAME = { feet: 0.8, top: 0.06 } as const;
@@ -23,7 +24,7 @@ export type StageLayout = {
   book: Box;
   /** The book while it pours its ingredients (Brew): scale and offset of the whole book window. */
   bookBrew: { s: number; tx: number; ty: number };
-  cauldron: { x: number; top: number; w: number; h: number; liquidY: number; floorY: number; circleW: number };
+  cauldron: { x: number; top: number; w: number; h: number; liquidY: number; mouthY: number; floorY: number; circleW: number };
   /** Where the finished potion floats, waiting to be taken. */
   potion: { x: number; y: number; size: number };
   /** The player's box: feet on the cauldron's spot. */
@@ -49,7 +50,8 @@ export function stageLayout(w: number, h: number): StageLayout | null {
   const floorY = h - circleW * 0.25 - 4;
   const top = floorY - CAULDRON_ART.footY * ch;
   const liquidY = top + CAULDRON_ART.liquidY * ch;
-  const cauldron = { x: cx, top, w: cw, h: ch, liquidY, floorY, circleW };
+  const mouthY = top + CAULDRON_ART.mouthY * ch;
+  const cauldron = { x: cx, top, w: cw, h: ch, liquidY, mouthY, floorY, circleW };
 
   // ...and the book hangs over it, small enough to leave the drops room to fall.
   const gap = clamp(h * 0.06, 26, 54);
