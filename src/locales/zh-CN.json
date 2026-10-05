@@ -585,9 +585,9 @@
       "hero": {
         "titleA": "Draw your",
         "titleB": "first card",
-        "drawnTitleA": "Read your",
+        "drawnTitleA": "You drew",
         "drawnTitleB": "{pathway}",
-        "lede": "A Minecraft MMORPG set in Lord of the Mysteries. Choose one of 22 Pathways. Brew potions and act out their roles to ascend from Sequence 9 toward godhood.",
+        "lede": "Lord of the Mysteries, built into a Minecraft MMORPG. Every one of the 22 Pathways is written spell by spell, from your first Sequence 9 potion to a god's throne at Sequence 0.",
         "join": "How to join",
         "changelog": "Latest update",
         "shuffle": "Draw a card",
@@ -610,7 +610,7 @@
       "deck": {
         "titleA": "22 Pathways,",
         "titleB": "10 Boons",
-        "lede": "Choose a seal; drag the ring or use arrow keys to turn it.",
+        "lede": "Each one climbs from Sequence 9 to a god's throne, with its own spells and its own madness. Pick a seal, or drag the ring.",
         "tabsLabel": "Pathways or Boons",
         "tabPathways": "Pathways",
         "tabBoons": "Boons",
@@ -627,7 +627,7 @@
         "next": "Next seal",
         "announce": "{name}, {current} of {total}.",
         "beginsAs": "Sequence 9: {role}",
-        "boonNote": "Boons progress separately from your Pathway, from Sequence 9 to 5.",
+        "boonNote": "Boons are raised beside your Pathway by sacrifice at an altar, never ahead of it.",
         "statAbilities": "Abilities",
         "firstAbilities": "{role} abilities",
         "loading": "Loading abilities…",
@@ -645,25 +645,25 @@
         "discover": {
           "short": "Discover",
           "title": "Find the formula",
-          "copy": "Each Pathway begins with a written formula found in the world.",
-          "hint": "Select an ingredient to find its source."
+          "copy": "Every Pathway starts from a written formula, and its ingredients are scattered across the world.",
+          "hint": "Select an ingredient to see where it's found."
         },
         "brew": {
           "short": "Brew",
           "title": "Brew the potion",
-          "copy": "Build a Magic Cauldron. Add ingredients in the formula’s order or the brew fails.",
-          "hint": "Failed brews keep your ingredients."
+          "copy": "Build a Magic Cauldron and add the ingredients in the formula's order. Get the order wrong and the brew fails.",
+          "hint": "A failed brew keeps your ingredients."
         },
         "drink": {
           "short": "Drink",
           "title": "Drink the potion",
-          "copy": "Enter the {pathway} Pathway. Your first potion needs no ritual and costs no Madness.",
-          "hint": "Potions expire after two real-time days."
+          "copy": "One swallow and you're a Beyonder of the {pathway} Pathway. The first potion asks for no ritual and costs no Madness.",
+          "hint": "Drink it within two real-time days, before it spoils."
         },
         "awaken": {
           "short": "Awaken",
           "title": "Become the {sequence}",
-          "copy": "Act out your role to digest the potion."
+          "copy": "Now act the part: only playing your role digests the potion."
         }
       },
       "ingredients": {
@@ -691,7 +691,7 @@
         },
         "drinkPotion": {
           "label": "First potion",
-          "detail": "No ritual or Madness cost for your first potion."
+          "detail": "Your first potion needs no ritual and costs no Madness."
         }
       },
       "book": {
@@ -724,231 +724,161 @@
         "drink": "Player drinking a Sequence potion",
         "advance": "Player becoming a Beyonder"
       },
-      "boonNote": "The Fool shows how a Pathway begins; Boons advance through Sacrificial Altars instead.",
+      "boonNote": "Boons are raised by sacrifice at an altar, not by potions. The Fool shows how a Pathway begins.",
       "ravings": {
         "fool": {
-          "r1": "The pendulum knows the hour.",
-          "r2": "Look above the gray fog.",
-          "r3": "The gray fog reveals spirits.",
-          "r4": "Ask what stands behind the veil.",
-          "r5": "The cards remember the draw."
+          "r1": "Hornacis… Flegrea… Hornacis…",
+          "r2": "Above the gray fog, someone listens.",
+          "r3": "Do not trust your own divination.",
+          "r4": "Hahaha… woowoowoo… hahaha…",
+          "r5": "Everyone will die, including me."
         },
         "door": {
-          "r1": "Someone is knocking inside.",
-          "r2": "There was no wall here.",
-          "r3": "Which side are you on?",
-          "r4": "The stars are too close.",
-          "r5": "The threshold leads to silence."
-        },
-        "visionary": {
-          "r1": "Hands betray the watcher.",
-          "r2": "We saw that little hesitation.",
-          "r3": "The reflection moved before you.",
-          "r4": "Who watches through the glass?",
-          "r5": "The audience sits inside your mind."
-        },
-        "mother": {
-          "r1": "Roots under the skin.",
-          "r2": "Something stirs below the ribs.",
-          "r3": "Bury it a little deeper.",
-          "r4": "Green shoots split the grave.",
-          "r5": "Come back to the soil."
-        },
-        "emperor": {
-          "r1": "Read the clause again.",
-          "r2": "The margin hides a clause.",
-          "r3": "The decree changes meaning.",
-          "r4": "The law leaves room for us.",
-          "r5": "Say the verdict aloud."
-        },
-        "priest": {
-          "r1": "Smoke carries that scent.",
-          "r2": "Those tracks circle the fire.",
-          "r3": "Wait for the next footstep.",
-          "r4": "Follow the trap back home.",
-          "r5": "Follow the blood into the fire."
-        },
-        "demoness": {
-          "r1": "No footstep. No warning.",
-          "r2": "Stay where the shadow thickens.",
-          "r3": "The throat is still warm.",
-          "r4": "The mirror struck first.",
-          "r5": "Let them come a little closer."
-        },
-        "tyrant": {
-          "r1": "Salt lies beneath the skin.",
-          "r2": "Come down beneath the waves.",
-          "r3": "Let the anger fill the lungs.",
-          "r4": "Thunder knows the old voice.",
-          "r5": "Salt marks the shore."
-        },
-        "giant": {
-          "r1": "Steel rings against stone.",
-          "r2": "Stand where the mountains break.",
-          "r3": "Who holds the line alone?",
-          "r4": "Set down the heavy blade.",
-          "r5": "Thunder sleeps inside the shield."
-        },
-        "hermit": {
-          "r1": "Close neither eye.",
-          "r2": "The Sage whispers a secret theorem.",
-          "r3": "The knowledge found a vessel.",
-          "r4": "The hidden watcher blinked.",
-          "r5": "The Sage is still speaking."
-        },
-        "fortune": {
-          "r1": "Tomorrow screams nearby.",
-          "r2": "Do not take that step.",
-          "r3": "The wheel turned backward.",
-          "r4": "Count the heartbeats still remaining.",
-          "r5": "The next misfortune knows the road."
-        },
-        "justiciar": {
-          "r1": "Jurisdiction ends here.",
-          "r2": "Silence enters evidence.",
-          "r3": "Doubt is forbidden here.",
-          "r4": "Kneel before the verdict.",
-          "r5": "Obey the verdict."
-        },
-        "hanged": {
-          "r1": "We hear the unspoken prayer.",
-          "r2": "Bring flesh to the altar.",
-          "r3": "The fallen one is listening.",
-          "r4": "The shadow kneels first.",
-          "r5": "Whose name crossed the altar?"
-        },
-        "death": {
-          "r1": "We kept a place below.",
-          "r2": "Do not close my eyes.",
-          "r3": "Cold hands under shroud.",
-          "r4": "There is breathing beneath the shroud.",
-          "r5": "The river carries every name."
-        },
-        "paragon": {
-          "r1": "Count the teeth again.",
-          "r2": "The blueprint moves by itself.",
-          "r3": "The engine remembers its inventor.",
-          "r4": "Gears bite through skin.",
-          "r5": "Remember how it came apart."
-        },
-        "abyss": {
-          "r1": "A blade rests in your palm.",
-          "r2": "Anything in hand will do.",
-          "r3": "Let that last restraint go.",
-          "r4": "Their fear tastes familiar.",
-          "r5": "Conscience sinks below."
-        },
-        "tower": {
-          "r1": "Read the next line.",
-          "r2": "Unread lessons climb the tower.",
-          "r3": "There is another meaning underneath.",
-          "r4": "Sleep after the last page.",
-          "r5": "What did the page reveal?"
-        },
-        "darkness": {
-          "r1": "Stay awake a little longer.",
-          "r2": "The dark knows this room.",
-          "r3": "Let the night cover the face.",
-          "r4": "We heard footsteps in the dream.",
-          "r5": "Walk where the lamplight ends."
-        },
-        "moon": {
-          "r1": "The moon enters the veins.",
-          "r2": "Crush the bleeding herbs.",
-          "r3": "Let crimson powder stain the cup.",
-          "r4": "The crimson light is watching.",
-          "r5": "What went into the cup?"
-        },
-        "sun": {
-          "r1": "The hymn knows the voice.",
-          "r2": "Sing until the doubt is gone.",
-          "r3": "The light sees through the veil.",
-          "r4": "Which part remains impure?",
-          "r5": "There is no shadow to hide."
-        },
-        "chained": {
-          "r1": "Skin tightens around iron.",
-          "r2": "We move when stillness holds.",
-          "r3": "The lock is on the inside.",
-          "r4": "How long will the chains hold?",
-          "r5": "The moon will loosen these chains."
+          "r1": "Every wall is a door.",
+          "r2": "The full moon is rising again.",
+          "r3": "Abraham blood remembers the curse.",
+          "r4": "Help me… open the door…",
+          "r5": "Set up the ritual. Free me."
         },
         "error": {
-          "r1": "The fingers moved alone.",
-          "r2": "The stolen name stutters in fate.",
-          "r3": "That thought was mine first.",
-          "r4": "Count the missing seconds.",
-          "r5": "Another voice answered the name."
+          "r1": "What a coincidence.",
+          "r2": "Steal it. It was never theirs.",
+          "r3": "Who stole that minute just now?",
+          "r4": "Every rule has a loophole.",
+          "r5": "Only I steal from others."
         },
-        "aeon": {
-          "r1": "Footfalls trace the circle.",
-          "r2": "Something follows each turn.",
-          "r3": "The circle refuses to end.",
-          "r4": "The ending becomes a beginning.",
-          "r5": "Every return leaves me older."
+        "visionary": {
+          "r1": "Watch. Never step onto the stage.",
+          "r2": "Their thoughts are so loud.",
+          "r3": "Every face is a confession.",
+          "r4": "Sink into the collective sea.",
+          "r5": "Can you accept such an outcome?"
         },
-        "chaos": {
-          "r1": "Make them afraid to look.",
-          "r2": "Their trembling pleases the dark.",
-          "r3": "Sin wears a borrowed face.",
-          "r4": "Something waits inside the blood.",
-          "r5": "The Mother knows the sin."
+        "sun": {
+          "r1": "Sing, and the fear burns away.",
+          "r2": "Burn away what is impure.",
+          "r3": "No shadow may remain.",
+          "r4": "Dispel the darkness. Praise the sun.",
+          "r5": "Let there be light!"
         },
-        "chaosmist": {
-          "r1": "Name what they need.",
-          "r2": "We never named the price.",
-          "r3": "There is another party listening.",
-          "r4": "Someone else waits to speak.",
-          "r5": "Nothing stays certain in the mist."
+        "tyrant": {
+          "r1": "May the Storm be with you.",
+          "r2": "Scales stir beneath your skin.",
+          "r3": "Vent the anger. Right now.",
+          "r4": "Thunder answers to you now.",
+          "r5": "Kneel. Fear makes faith."
         },
-        "condenser": {
-          "r1": "One star has changed its place.",
-          "r2": "Keep watching the empty sky.",
-          "r3": "Starlight bends the scale.",
-          "r4": "The figures draw nearer.",
-          "r5": "That light is still falling."
+        "tower": {
+          "r1": "One more page. Just one more.",
+          "r2": "Deduce it. The truth is there.",
+          "r3": "An eye opens on the page.",
+          "r4": "Brass eyes blink between the books.",
+          "r5": "The higher you climb, the darker."
         },
-        "devouring": {
-          "r1": "Hunger gnaws through bone.",
-          "r2": "The bones will soften inside.",
-          "r3": "Swallow what remains of it.",
-          "r4": "There is room for more.",
-          "r5": "What else remains to swallow?"
+        "hanged": {
+          "r1": "Pray, and secrets will answer.",
+          "r2": "Beyond the veil, eyes are watching.",
+          "r3": "Black worms. White moths. Eyes.",
+          "r4": "The Hanged Giant is listening.",
+          "r5": "Praise you for creating all."
         },
-        "edict": {
-          "r1": "No dreams find this room.",
-          "r2": "Sleep brings no answer now.",
-          "r3": "The current changed direction.",
-          "r4": "Fate slipped its anchor.",
-          "r5": "Something waits beyond waking."
+        "darkness": {
+          "r1": "Stay awake. The night is long.",
+          "r2": "Whose dream are you in?",
+          "r3": "What was I just saying?",
+          "r4": "Sleep. The dark river carries you.",
+          "r5": "Praise the Lady."
         },
-        "everlasting": {
-          "r1": "The Formless Door is open.",
-          "r2": "Our voice crossed the door.",
-          "r3": "Repeat what crossed beyond it.",
-          "r4": "Whose thoughts are moving now?",
-          "r5": "We continue when silence falls."
+        "death": {
+          "r1": "Your hands are growing cold.",
+          "r2": "Speak, and the dead will answer.",
+          "r3": "The sunlight burns. Stay in shade.",
+          "r4": "The ferryman waits at the river.",
+          "r5": "The Underworld is calling you down."
         },
-        "patriarch": {
-          "r1": "The purse will not open.",
-          "r2": "Every coin is still yours.",
-          "r3": "Their hunger belongs to the ledger.",
-          "r4": "Who holds the ledger?",
-          "r5": "Do not open your hand."
+        "giant": {
+          "r1": "Pick up any weapon. It obeys.",
+          "r2": "Stand guard. Take the blow.",
+          "r3": "I want to see the sunlight.",
+          "r4": "Everything decays at dusk.",
+          "r5": "Twilight of all things."
         },
-        "secondlaw": {
-          "r1": "The wound carries us.",
-          "r2": "Let the wound stay open.",
-          "r3": "Everyone touched will know.",
-          "r4": "The rot has time to wait.",
-          "r5": "Nothing returns to what it was."
+        "demoness": {
+          "r1": "Shadows are your friends now.",
+          "r2": "Whisper one word. Watch them fight.",
+          "r3": "The mirror keeps a spare you.",
+          "r4": "Black flame, cold as frost.",
+          "r5": "She wants you as Her own."
         },
-        "sublunary": {
-          "r1": "We noticed the soul reaching out.",
-          "r2": "The totem marks the threshold.",
-          "r3": "The boundary runs through the body.",
-          "r4": "Who occupies the sanctuary now?",
-          "r5": "Stay close to the marked ground."
+        "priest": {
+          "r1": "Prey or hunter? Choose.",
+          "r2": "Smell the blood. Follow it.",
+          "r3": "Swallow the fire. Don't faint.",
+          "r4": "Say it. Make them lose control.",
+          "r5": "War is the Lord's rage."
+        },
+        "hermit": {
+          "r1": "Your ears are ringing again.",
+          "r2": "Some things should stay unseen.",
+          "r3": "The words are chasing you.",
+          "r4": "Eyes without lashes, watching.",
+          "r5": "Knowledge is pursuing you."
+        },
+        "paragon": {
+          "r1": "Quiet. No voices. Only reason.",
+          "r2": "You remember everything. Everything.",
+          "r3": "Take it apart. Understand it.",
+          "r4": "Every page you ever read returns.",
+          "r5": "Knowledge is power."
+        },
+        "fortune": {
+          "r1": "Lucky now. Misfortune next.",
+          "r2": "Ninety percent. Recalculate.",
+          "r3": "I smell death on you.",
+          "r4": "The river of fate is rising.",
+          "r5": "Fate always exacts a price."
+        },
+        "mother": {
+          "r1": "Smell the rain before it comes.",
+          "r2": "Seeds are waiting in your palms.",
+          "r3": "Every grave becomes a garden.",
+          "r4": "The soul returns to the land.",
+          "r5": "Praise the Earth, Mother of All."
+        },
+        "moon": {
+          "r1": "Grind the herbs. Mix the blood.",
+          "r2": "Your eyes are turning red.",
+          "r3": "Thirst. Just one sip.",
+          "r4": "The crimson moon is full.",
+          "r5": "The Ancestor is summoning you."
+        },
+        "abyss": {
+          "r1": "Don't hold back. Never again.",
+          "r2": "Your conscience isn't dead. Yet.",
+          "r3": "Smell the sulfur? That's you.",
+          "r4": "Your desires are singing together.",
+          "r5": "The Abyss is in your heart."
+        },
+        "chained": {
+          "r1": "Restrain it. Restrain it.",
+          "r2": "Calm face. Screaming heart.",
+          "r3": "Black fur under your skin.",
+          "r4": "The full moon loosens everything.",
+          "r5": "The body is the mind's prison."
+        },
+        "emperor": {
+          "r1": "Agree. You already agreed.",
+          "r2": "Everyone has a price.",
+          "r3": "Find the loophole. Then rule.",
+          "r4": "Every order casts a shadow.",
+          "r5": "Kneel before the black throne."
+        },
+        "justiciar": {
+          "r1": "Keep the order. Keep it.",
+          "r2": "Fleeing is prohibited here.",
+          "r3": "Give up. You've already lost.",
+          "r4": "Imprison. Release. Imprison.",
+          "r5": "All are equal before the law."
         }
       }
     },
@@ -956,11 +886,11 @@
     "world": {
       "titleA": "Only on",
       "titleB": "Mysterria",
-      "lede": "Our team wrote every system below for this server. This is what waits once your first potion settles.",
+      "lede": "Every system below was written by our team for this one server. You won't have played them anywhere else.",
       "pantheon": {
         "title": "Twenty-two thrones",
-        "body": "Every Pathway has one throne. Whoever takes it becomes that Pathway's god: Sequence 0, a title above their head and a spell no other player has.",
-        "rule": "No one can take an occupied throne by force. It changes hands only when its god stops showing up, and every throne empties when the epoch ends.",
+        "body": "Every Pathway has one throne. Whoever takes it becomes that Pathway's god at Sequence 0, with a spell no other player has.",
+        "rule": "A god can't be dethroned by force. The throne only passes on when its god stops showing up, and every throne empties when the epoch ends.",
         "roadLabel": "The road to Sequence 0",
         "road": {
           "climb": {
@@ -992,7 +922,7 @@
       },
       "incursions": {
         "title": "Cosmos Incursions",
-        "body": "When 30 or more players are online, zones 300 to 500 blocks wide open in random places and show on the live map. Outside them, the wilderness has no PvP. Inside, the zone's colour tells you what a death costs.",
+        "body": "When 30 or more players are online, PvP zones open in random places and appear on the live map. The rest of the world stays peaceful; inside a zone, its colour tells you what a death will cost.",
         "tiersLabel": "Zone colours and what dying costs",
         "tiers": {
           "green": {
@@ -1012,17 +942,17 @@
             "stake": "Killed by a player, you can lose a Sequence or half your acting."
           }
         },
-        "permanent": "Some regions stay open for good: gather at points of interest, then hold an extraction point long enough to get the loot out.",
-        "logout": "Log out mid-fight and your body stays behind. If it dies, you pay the price."
+        "permanent": "Some zones never close. Gather at their points of interest, then hold an extraction point long enough to carry the loot out.",
+        "logout": "Log out mid-fight and your body stays behind, defenceless."
       },
       "arena": {
         "title": "Mythic Bedwars, Duels and FFA",
-        "body": "A match is announced in chat. Click to join, keep playing, and you're moved over when it starts. Everyone gets a random Pathway at Sequence 9 and climbs by buying Arcane Elixirs mid-match.",
-        "safe": "Your real character is never at risk, and what you win lands on it: acting progress, shorter cooldowns, bottles and tokens."
+        "body": "Matches are announced in chat: click to join and keep playing until you're pulled in. Everyone starts as a random Pathway at Sequence 9 and climbs by buying Arcane Elixirs mid-match.",
+        "safe": "Your real character is never at risk, and what you win carries over to it: acting progress, shorter cooldowns, bottles and tokens."
       },
       "rifts": {
         "title": "Rifts and dungeons",
-        "body": "Rifts stand in the open world as pillars of shifting light. The whole server pours Energy Fragments into one to weaken it, and then it opens onto a dungeon. You get one life per run.",
+        "body": "Rifts stand in the open world as pillars of shifting light. The whole server pours Energy Fragments into one until it gives way to a dungeon, and inside you get one life.",
         "classesLabel": "Dungeon classes",
         "classes": {
           "tank": {
@@ -1042,21 +972,21 @@
             "body": "Spells only, no physical damage."
           }
         },
-        "guardians": "Guardians roam the open world. Below 30% health they enrage, below 20% only magic hurts them, and the kill drops a token you spin for ingredients, recipes or Characteristics.",
+        "guardians": "Guardians roam the open world and enrage below 30% health. Bring magic for the end, because below 20% nothing else hurts them. Each kill drops a token you spin for rare loot, Characteristics included.",
         "alt": "A swirling Rift between floating runestones in a ruined tower"
       },
       "churches": {
         "title": "Churches",
-        "body": "From Sequence 4 you can found a church by placing its core in the world. Branches and regional headquarters spread it, and its perks grow with its members' prayer. Churches ally, feud and go to war over cores and vaults, with terms of surrender.",
-        "honorific": "Your Honorific Name is a five-line invocation of who you are. When someone chants it, the server checks it against the real you.",
+        "body": "At Sequence 4 you can found a church by placing its core in the world. Branches carry it across the map and its members' prayer strengthens its perks. Rival churches go to war over each other's cores and vaults.",
+        "honorific": "Write your Honorific Name, a five-line invocation of who you are, and other players can chant it to reach you through a ritual.",
         "alt": "A black and crimson cathedral under the stars"
       },
       "anchors": {
         "title": "Outer Gods Anchors",
-        "body": "An Outer God's seed is planted somewhere in the world, and for 24 hours it only drops hints in chat. Then it blooms: alien terrain spreads and defenders spawn. Every defender the server kills wears the seed down, and below 10% its heart can be broken.",
+        "body": "An Outer God's seed takes root somewhere in the world, dropping only hints in chat for a day. Then it blooms into alien terrain guarded by its defenders. Wear it down together, then break its heart.",
         "bar": "Seed Integrity",
         "raid": "Heart Raid",
-        "boons": "What you contribute buys rewards, including shards of rare Boons: a second Sequence borrowed from an Outer God and raised by sacrifice at an altar."
+        "boons": "Your contribution buys rewards, including shards of rare Boons: a second Sequence borrowed from an Outer God and raised by sacrifice."
       },
       "gallery": {
         "title": "Player screenshots",
@@ -1067,17 +997,17 @@
       },
       "credit": "By {author}",
       "join": {
-        "titleA": "Join in",
-        "titleB": "three steps",
-        "lede": "Free to play. No mods required.",
-        "ledeRole": "Free to play, with no mods required. Begin working toward your {role} potion.",
+        "titleA": "Start at",
+        "titleB": "Sequence 9",
+        "lede": "Free to play, no mods needed. New players choose their own way into their first Pathway.",
+        "ledeRole": "Free to play, no mods needed. The {role} formula is already out there.",
         "step1Title": "Add the server",
-        "step1Body": "Copy the address into Minecraft’s Multiplayer → Add Server.",
+        "step1Body": "Copy the address, then in Minecraft open Multiplayer and choose Add Server.",
         "copiedHelp": "Copied. Paste into Multiplayer → Add Server.",
         "step2Title": "Accept the resource pack",
-        "step2Body": "Join with Java Edition 26.1.2 or newer and accept the pack. Bedrock works through Geyser, with some custom interface limitations.",
+        "step2Body": "Join on Java Edition 26.1.2 or newer and accept the resource pack. Bedrock players can join through Geyser, with a few interface limits.",
         "step3Title": "Verify your account",
-        "step3Body": "Select Mysteries in the lobby. Generate a code in your website profile and enter it in-game. Ask in chat or Discord for a town accepting newcomers.",
+        "step3Body": "Pick Mysteries in the lobby, then link your account with the code from your website profile.",
         "guide": "Joining guide",
         "discord": "Join Discord",
         "liveUnit": "players online",
@@ -1088,19 +1018,23 @@
       },
       "companion": {
         "title": "COI Client",
-        "lede": "The optional Circle of Imagination mod. Every Beyonder mechanic works without it.",
+        "lede": "Our own optional mod gives Minecraft a full Beyonder interface. Every mechanic still works without it.",
         "features": {
           "hotkeys": {
-            "title": "Hotkeys:",
-            "body": "Cast abilities without opening a menu."
+            "title": "Cast at speed:",
+            "body": "Bind abilities to hotkeys or a 16-slot wheel."
           },
           "visuals": {
-            "title": "Ritual visuals:",
-            "body": "See circles, sigils and casting effects."
+            "title": "See the magic:",
+            "body": "Ritual circles and casting effects, drawn in full."
           },
-          "presence": {
-            "title": "Sound & presence:",
-            "body": "Server audio and your Sequence in Discord rich presence."
+          "madness": {
+            "title": "Feel the madness:",
+            "body": "Whispers and hallucinations creep in as your sanity slips."
+          },
+          "perks": {
+            "title": "Act faster:",
+            "body": "2% more acting from every source and 5% shorter acting cooldowns."
           }
         },
         "linksLabel": "Download COI Client",

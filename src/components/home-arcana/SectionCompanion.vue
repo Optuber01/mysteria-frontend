@@ -63,7 +63,8 @@ const visualLabel = computed(() => t('home.world.companion.visualLabel').replace
 const features = computed(() => [
   {key: 'hotkeys', icon: 'fa-solid fa-keyboard'},
   {key: 'visuals', icon: 'fa-solid fa-wand-magic-sparkles'},
-  {key: 'presence', icon: 'fa-solid fa-volume-high'},
+  {key: 'madness', icon: 'fa-solid fa-eye'},
+  {key: 'perks', icon: 'fa-solid fa-bolt'},
 ].map(feature => ({
   ...feature,
   title: t(`home.world.companion.features.${feature.key}.title`),

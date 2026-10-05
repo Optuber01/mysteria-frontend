@@ -9,7 +9,7 @@
       <span class="arc-ambient__grain" :style="{backgroundImage: `url(${grain})`}"></span>
     </div>
 
-    <HeaderItem overlay show-announcement/>
+    <HeaderItem overlay/>
 
     <main id="main-content" class="arc-main">
       <ArcanaHero/>
