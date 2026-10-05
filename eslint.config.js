@@ -18,6 +18,13 @@ export default [
     ...vueTsEslintConfig(),
 
     {
+        // one file per Pathway, named by its id (sun.vue, tyrant.vue), loaded by SceneSignature
+        name: 'app/pathway-signatures',
+        files: ['src/components/home-arcana/signatures/*.vue'],
+        rules: {'vue/multi-word-component-names': 'off'},
+    },
+
+    {
         ...pluginVitest.configs.recommended,
         files: ['src/**/__tests__/*'],
     },

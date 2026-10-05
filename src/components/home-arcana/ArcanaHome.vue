@@ -6,11 +6,12 @@
       <Transition name="arc-wash">
         <span :key="themeKey" class="arc-ambient__wash" :style="{'--wash': card.accent}"></span>
       </Transition>
+      <!-- the drawn Pathway's air over the whole page (pathwayScenes.ts: wash) -->
+      <Transition name="arc-wash">
+        <span v-if="sceneWash" :key="themeKey" class="arc-ambient__scene" :style="{background: sceneWash}"></span>
+      </Transition>
       <span class="arc-ambient__grain" :style="{backgroundImage: `url(${grain})`}"></span>
     </div>
-
-    <!-- mock-up: the drawn Pathway in the page's corners (?motifs=1) -->
-    <PathwayMotif v-if="motifsOn"/>
 
     <HeaderItem overlay/>
 
@@ -32,7 +33,8 @@
 <script setup lang="ts">
 import {computed, onMounted, onUnmounted, watch} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
-import PathwayMotif from './PathwayMotif.vue';
+import {sceneFor} from './pathwayScenes';
+import {isCardId} from './arcana-data';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import {useConceptFonts} from './useConceptFonts';
@@ -49,20 +51,10 @@ import grain from './assets/grain.png';
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&display=swap');
 
-const {card, hasDrawn} = useArcana();
+const {card, hasDrawn, reveal} = useArcana();
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
-/* The corner motifs are a mock-up for now: ?motifs=1 turns them on for the visit, ?motifs=0 off. */
-const MOTIFS_KEY = 'mysterria-motifs';
-function readMotifs(): boolean {
-  try {
-    const asked = new URLSearchParams(location.search).get('motifs');
-    if (asked === '1' || asked === '0') sessionStorage.setItem(MOTIFS_KEY, asked);
-    return sessionStorage.getItem(MOTIFS_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-const motifsOn = readMotifs();
+
+const sceneWash = computed(() => (hasDrawn.value ? sceneFor(card.value.id).wash ?? '' : ''));
 
 const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
@@ -106,6 +98,9 @@ function holdLoops(section: Element, offscreen: boolean) {
 }
 
 onMounted(() => {
+  // A shared link can open the page with a card already drawn: /en?card=sun
+  const asked = new URLSearchParams(location.search).get('card');
+  if (asked && isCardId(asked)) void reveal(asked);
   // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
   const idle = (window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number}).requestIdleCallback;
   if (idle) idle(() => void ensurePathwayData(), {timeout: 1500});
@@ -522,6 +517,16 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
      into it (only a crossfade lifts a piece onto its own layer, while it runs). */
   contain: strict;
   transform: translateZ(0);
+}
+
+.arc-ambient__scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* on paper the Pathway's air is a tint, never a dark band */
+:root[data-theme="parchment"] .arc-ambient__scene {
+  opacity: .3;
 }
 
 .arc-ambient__wash {

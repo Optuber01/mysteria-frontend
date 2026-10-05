@@ -6,11 +6,15 @@
     :class="{ 'is-lite': lite }"
     aria-labelledby="progression-title"
   >
-    <div ref="stickyRef" class="progression__sticky">
+    <div ref="stickyRef" class="progression__sticky" :style="{'--room-fog': roomScene.fog}">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
         <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
+      <!-- the drawn Pathway's air in the room: its sky's colour over the brewery (pathwayScenes.ts) -->
+      <Transition name="room-grade">
+        <i v-if="roomScene.sky !== 'transparent'" :key="roomKey" class="progression__grade" :style="{background: roomScene.sky}" aria-hidden="true" />
+      </Transition>
       <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
       <!--
         Decorative: the Pathway's sigil, drawn in behind him at the awakening like a ritual
@@ -25,6 +29,8 @@
         <i class="progression__fog progression__fog--far" />
         <i class="progression__fog progression__fog--near" />
       </div>
+      <!-- ...and its weather, lighter than in the hero (none in light mode) -->
+      <SceneWeather v-if="roomScene.weather && !lite" class="progression__weather" :kind="roomScene.weather" :color="roomScene.weatherColor" :density="(roomScene.weatherDensity ?? 1) * .55" :active="visible" />
       <div class="progression__vignette" aria-hidden="true" />
       <!-- the dark closing in on the drink, with the heart's beat in it -->
       <div class="progression__dread" :class="{ 'is-lit': dreadLit }" :style="dress.dread" aria-hidden="true" data-sweep-ignore />
@@ -172,6 +178,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
+import SceneWeather from '../SceneWeather.vue';
+import { sceneFor } from '../pathwayScenes';
 import FormulaBookScene from './scenes/FormulaBookScene.vue';
 import AltarBrewScene from './scenes/AltarBrewScene.vue';
 import DrinkAwakenScene from './scenes/DrinkAwakenScene.vue';
@@ -189,6 +197,9 @@ import { useArcana } from '../useArcana';
 
 const { tp, names, ingredients, currentId, isBoon, pathwayId } = useProgressionCopy();
 const { hasDrawn } = useArcana();
+/* the drawn Pathway's scene, carried into the room (its sky, fog colour and weather) */
+const roomKey = computed(() => (hasDrawn.value ? currentId.value : 'undrawn'));
+const roomScene = computed(() => sceneFor(hasDrawn.value ? currentId.value : null));
 /* The awakening's sigil: the Pathway the story follows (a Boon, or no draw yet, sees the Fool's as the example). */
 const sigilExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
 const sigilSrc = computed(() => sigilNative(pathwayId.value));
@@ -918,6 +929,28 @@ onUnmounted(() => {
 .progression.is-lite :deep(.drink-scene__whispers) {
   -webkit-mask-image: none;
   mask-image: none;
+}
+
+/* the Pathway's sky over the brewery: a static layer, faded with the room as it changes */
+.progression__grade {
+  position: absolute;
+  inset: 0;
+  opacity: .55;
+  pointer-events: none;
+}
+
+.room-grade-enter-active,
+.room-grade-leave-active {
+  transition: opacity 1.6s ease;
+}
+
+.room-grade-enter-from,
+.room-grade-leave-to {
+  opacity: 0;
+}
+
+.progression__weather {
+  opacity: .8;
 }
 
 /* the copy side and the rail stay on near-black */

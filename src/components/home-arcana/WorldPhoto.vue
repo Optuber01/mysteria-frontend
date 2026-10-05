@@ -14,6 +14,8 @@
     >
     <figcaption v-if="shot.author" class="world-photo__credit">
       <span>{{ creditText }}</span>
+      <!-- the season it was taken in (gallery tiles only; the topic photos are current) -->
+      <span v-if="epochLabel" class="world-photo__epoch">{{ epochLabel }}</span>
     </figcaption>
   </figure>
 </template>
@@ -29,7 +31,9 @@ const props = withDefaults(defineProps<{
   sizes?: string;
   /** Load now instead of lazily (the drifting strip clips its tiles, which keeps lazy ones from loading early). */
   eager?: boolean;
-}>(), {sizes: '(max-width: 900px) 100vw, 50vw', eager: false});
+  /** Show the season it was taken in. */
+  epoch?: boolean;
+}>(), {sizes: '(max-width: 900px) 100vw, 50vw', eager: false, epoch: false});
 
 const {t} = useI18n();
 
@@ -41,6 +45,7 @@ const srcset = computed(() => {
 
 /* Credit only: the place is the card's title or the photo's alt, never repeated here. */
 const creditText = computed(() => t('home.world.credit').replace('{author}', props.shot.author));
+const epochLabel = computed(() => (props.epoch ? t('home.world.gallery.epoch').replace('{n}', props.shot.epoch === 1 ? 'I' : 'II') : ''));
 </script>
 
 <style scoped>
@@ -97,6 +102,15 @@ const creditText = computed(() => t('home.world.credit').replace('{author}', pro
   min-width: 0;
   text-align: inherit;
   text-wrap: balance;
+}
+
+/* the season, after the credit: quieter, the same line */
+.world-photo__epoch {
+  flex: none;
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(228, 227, 234, .4);
+  color: rgba(228, 227, 234, .78);
 }
 
 @media (prefers-reduced-motion: reduce) {
