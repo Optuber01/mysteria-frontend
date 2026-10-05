@@ -3,6 +3,7 @@
     id="progression"
     ref="sectionRef"
     class="progression"
+    :class="{ 'is-lite': lite }"
     aria-labelledby="progression-title"
   >
     <div class="progression__sticky">
@@ -254,6 +255,74 @@ const visible = ref(false);
 // True once the chapter is within about a viewport: starts lazy downloads.
 const near = ref(false);
 const reducedMotion = useReducedMotion();
+
+/*
+ * Light mode, for machines that can't keep the room smooth: no fog, no particle fields,
+ * no backdrop zoom, no faded ends on the voices (see .is-lite). The story, the player and
+ * the copy are untouched. It comes on when the browser draws 3D in software (GPU
+ * acceleration off, or a VM), or when the pinned room averages under ~22 fps while it is
+ * being scrolled; it stays on for the rest of the visit.
+ */
+const LITE_KEY = 'mysterria-story-lite';
+/** Mean frame time that turns it on (~22 fps): the long frames are the lag people feel, so not the median. */
+const LITE_MEAN_MS = 45;
+const LITE_SAMPLES = 24;
+function softwareRendered(): boolean {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl');
+    if (!gl) return true;
+    const info = gl.getExtension('WEBGL_debug_renderer_info');
+    const renderer = String(info ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER));
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(renderer);
+  } catch {
+    return false;
+  }
+}
+function storedLite(): boolean {
+  try {
+    return sessionStorage.getItem(LITE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+const lite = ref(storedLite());
+function goLite() {
+  if (lite.value) return;
+  lite.value = true;
+  try {
+    sessionStorage.setItem(LITE_KEY, '1');
+  } catch {
+    // storage blocked: light for this page view only
+  }
+}
+/*
+ * The room's real frame rate while it is being scrolled: a scroll inside the pin keeps a
+ * small rAF loop going for 200 ms, and the gaps between its frames are the frame times
+ * (timing the scroll handler alone would count the pauses between wheel ticks as frames).
+ */
+const frameSamples: number[] = [];
+let timing = 0;
+let timedUntil = 0;
+let lastFrameAt = 0;
+function timeFrames() {
+  if (lite.value) return;
+  timedUntil = performance.now() + 200;
+  if (timing) return;
+  lastFrameAt = 0;
+  const step = (now: number) => {
+    // one hitch (a decode, a tab switch) counts as a slow frame, not as seconds of them
+    if (lastFrameAt) frameSamples.push(Math.min(250, now - lastFrameAt));
+    lastFrameAt = now;
+    if (frameSamples.length >= LITE_SAMPLES) {
+      const mean = frameSamples.reduce((sum, gap) => sum + gap, 0) / frameSamples.length;
+      frameSamples.length = 0;
+      if (mean > LITE_MEAN_MS) goLite();
+    }
+    timing = !lite.value && now < timedUntil ? requestAnimationFrame(step) : 0;
+  };
+  timing = requestAnimationFrame(step);
+}
 const activeDetailId = ref<string | null>(null);
 const inspectorAnchor = ref<HTMLElement | null>(null);
 const inspectorScene = ref<DetailScene | null>(null);
@@ -356,7 +425,7 @@ const DRESS_VARS = {
   backdrop: ['--entry', '--journey', '--awaken', '--risk', '--blackout'],
   hearth: ['--brew', '--stand-x', '--floor-y'],
   sigil: ['--sigil-ring', '--sigil-in', '--awaken', '--stand-x', '--stand-y', '--sigil-size'],
-  fogbank: ['--awaken', '--risk'],
+  fogbank: ['--awaken', '--risk', '--journey'],
   dread: ['--risk', '--thump', '--blackout', '--stand-x', '--stand-y'],
   burst: ['--flash', '--stand-x', '--stand-y'],
   heading: ['--entry', '--journey'],
@@ -472,6 +541,8 @@ function update() {
     entryProgress.value = clamp01(1 - Math.max(0, top) / innerHeight);
     if (reducedMotion.value) return;
     const pace = scrollRange();
+    // only the pinned room is timed: that is where the cost is
+    if (top <= 0 && -top < pace.pin) timeFrames();
     const next = storyAt(pace.lead - top, pace);
     progress.value = next;
     clearExpiredInspector(next);
@@ -521,6 +592,7 @@ onMounted(() => {
     stageObserver = new ResizeObserver(measureStage);
     stageObserver.observe(stageRef.value);
   }
+  if (!lite.value && softwareRendered()) goLite();
   // the section's own height, or anything above it growing or shrinking, moves it on the page
   pageObserver = new ResizeObserver(onResize);
   if (sectionRef.value) {
@@ -551,6 +623,7 @@ onUnmounted(() => {
   removeEventListener('resize', onResize);
   removeEventListener('keydown', onKeydown);
   if (frame) cancelAnimationFrame(frame);
+  if (timing) cancelAnimationFrame(timing);
 });
 </script>
 
@@ -656,6 +729,7 @@ onUnmounted(() => {
    the backdrop photo) across the whole sticky screen. */
 .progression__backdrop,
 .progression__hearth,
+.progression__fogbank,
 .progression__burst,
 .progression__dread,
 .progression-nav__line b {
@@ -763,37 +837,57 @@ onUnmounted(() => {
   transform: translate3d(0, calc(var(--awaken) * 14% - var(--risk) * 10%), 0);
 }
 
+/*
+ * The two banks drift with the story, not on a timer: an endless animation kept the
+ * GPU compositing two over-wide layers every frame, and the banks' parent repainted
+ * them whenever it moved. Now the whole bank is one layer, rastered once, and scroll
+ * only moves it (transform and opacity, composited).
+ */
 .progression__fog {
   position: absolute;
-  left: -50%;
-  width: 200%;
-  background-repeat: repeat-x;
-  background-size: 50% 100%;
+  left: -15%;
+  width: 130%;
+  transform: translate3d(calc(var(--journey) * var(--drift)), 0, 0);
+  will-change: transform;
 }
 
 .progression__fog--far {
+  --drift: -9%;
   top: 6%;
   height: 64%;
   background-image:
-    radial-gradient(ellipse 18% 30% at 14% 58%, rgba(176, 180, 196, 0.12), transparent 70%),
-    radial-gradient(ellipse 22% 26% at 42% 38%, rgba(176, 180, 196, 0.08), transparent 70%),
-    radial-gradient(ellipse 18% 30% at 70% 64%, rgba(176, 180, 196, 0.11), transparent 70%),
-    radial-gradient(ellipse 22% 32% at 92% 44%, rgba(176, 180, 196, 0.08), transparent 70%);
-  animation: progression-fog 95s linear infinite;
+    radial-gradient(ellipse 14% 30% at 12% 58%, rgba(176, 180, 196, 0.12), transparent 70%),
+    radial-gradient(ellipse 17% 26% at 34% 38%, rgba(176, 180, 196, 0.08), transparent 70%),
+    radial-gradient(ellipse 14% 30% at 56% 64%, rgba(176, 180, 196, 0.11), transparent 70%),
+    radial-gradient(ellipse 17% 32% at 76% 44%, rgba(176, 180, 196, 0.08), transparent 70%),
+    radial-gradient(ellipse 14% 30% at 94% 58%, rgba(176, 180, 196, 0.12), transparent 70%);
 }
 
 .progression__fog--near {
+  --drift: 7%;
   bottom: -10%;
   height: 52%;
   background-image:
-    radial-gradient(ellipse 26% 38% at 18% 72%, rgba(200, 202, 214, 0.17), transparent 72%),
-    radial-gradient(ellipse 20% 34% at 50% 84%, rgba(200, 202, 214, 0.13), transparent 72%),
-    radial-gradient(ellipse 28% 42% at 84% 76%, rgba(200, 202, 214, 0.17), transparent 72%);
-  animation: progression-fog 60s linear infinite reverse;
+    radial-gradient(ellipse 20% 38% at 10% 72%, rgba(200, 202, 214, 0.17), transparent 72%),
+    radial-gradient(ellipse 16% 34% at 36% 84%, rgba(200, 202, 214, 0.13), transparent 72%),
+    radial-gradient(ellipse 22% 42% at 64% 76%, rgba(200, 202, 214, 0.17), transparent 72%),
+    radial-gradient(ellipse 16% 34% at 90% 84%, rgba(200, 202, 214, 0.13), transparent 72%);
 }
 
-@keyframes progression-fog {
-  to { transform: translate3d(-25%, 0, 0); }
+/* light mode (see goLite): the costliest layers go; what tells the story stays */
+.progression.is-lite .progression__fogbank,
+.progression.is-lite :deep(.scene-particles),
+.progression.is-lite :deep(.drink-scene__mist) {
+  display: none;
+}
+
+.progression.is-lite .progression__backdrop {
+  transform: none;
+}
+
+.progression.is-lite :deep(.drink-scene__whispers) {
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 
 /* the copy side and the rail stay on near-black */

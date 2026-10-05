@@ -526,6 +526,58 @@ function renderSteam(t: number, dt: number, alphaMul: number, speedMul: number):
   }
 }
 
+/*
+ * Nothing ends at the box's edge: every field fades out over its outer band, so a speck
+ * drifting out of it (or a ring running past it) dissolves instead of being cut. Done in
+ * the canvas (one destination-in draw of a small gradient texture per frame): as a CSS
+ * mask it cost a compositor render pass every frame on top of the canvas's own.
+ * Fractions of the box: sides, top, bottom.
+ */
+type EdgeFade = { x: number; top: number; bottom: number };
+const EDGE_FADES: Partial<Record<ParticleMode, EdgeFade>> = {
+  // steam leaves the brew and bubbles pop on it: their foot is the liquid, not an edge
+  steam: { x: 0.14, top: 0.14, bottom: 0 },
+  brew: { x: 0.14, top: 0.14, bottom: 0 },
+  // the spirit world fills the stage and reaches past its foot: wider bands
+  spirit: { x: 0.22, top: 0.1, bottom: 0.26 },
+};
+const DEFAULT_FADE: EdgeFade = { x: 0.14, top: 0.14, bottom: 0.14 };
+let fadeTexture: HTMLCanvasElement | null = null;
+
+function buildFade(): HTMLCanvasElement | null {
+  const fade = EDGE_FADES[props.mode] ?? DEFAULT_FADE;
+  const texture = document.createElement('canvas');
+  texture.width = 128;
+  texture.height = 128;
+  const f = texture.getContext('2d');
+  if (!f) return null;
+  const across = f.createLinearGradient(0, 0, 128, 0);
+  across.addColorStop(0, 'rgba(0,0,0,0)');
+  across.addColorStop(fade.x, '#000');
+  across.addColorStop(1 - fade.x, '#000');
+  across.addColorStop(1, 'rgba(0,0,0,0)');
+  f.fillStyle = across;
+  f.fillRect(0, 0, 128, 128);
+  const down = f.createLinearGradient(0, 0, 0, 128);
+  down.addColorStop(0, fade.top ? 'rgba(0,0,0,0)' : '#000');
+  down.addColorStop(fade.top, '#000');
+  down.addColorStop(1 - fade.bottom, '#000');
+  down.addColorStop(1, fade.bottom ? 'rgba(0,0,0,0)' : '#000');
+  f.globalCompositeOperation = 'destination-in';
+  f.fillStyle = down;
+  f.fillRect(0, 0, 128, 128);
+  return texture;
+}
+
+function applyEdgeFade(): void {
+  if (!ctx) return;
+  fadeTexture ??= buildFade();
+  if (!fadeTexture) return;
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.drawImage(fadeTexture, 0, 0, width, height);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
 function render(t: number, dt: number): void {
   if (!ctx) return;
   ctx.clearRect(0, 0, width, height);
@@ -551,6 +603,7 @@ function render(t: number, dt: number): void {
       renderSpirit(t);
       break;
   }
+  applyEdgeFade();
 }
 
 function start(): void {
@@ -634,7 +687,9 @@ function resize(): void {
   if (nextWidth < 1 || nextHeight < 1) return;
   width = nextWidth;
   height = nextHeight;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // one canvas pixel per CSS pixel, even on a 2x screen: the texels are blocky squares
+  // (shown pixelated) and the glows are soft, so the extra pixels only cost fill
+  const dpr = 1;
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
   ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -659,6 +714,7 @@ function onReducedMotionChange(event: MediaQueryListEvent): void {
 watch(
   () => props.mode,
   () => {
+    fadeTexture = null;
     if (props.mode === 'burst') {
       burstTriggered = false;
       maybeTriggerBurst();
@@ -734,40 +790,19 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/*
- * Nothing ends at the box's edge: every field fades out over its outer band, so a
- * speck drifting out of it (or a ring running past it) dissolves instead of being cut.
- */
+/* (the edges fade inside the canvas: see applyEdgeFade) */
 .scene-particles {
-  --fade-x: 14%;
-  --fade-top: 14%;
-  --fade-bottom: 14%;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  -webkit-mask-image:
-    linear-gradient(90deg, transparent, #000 var(--fade-x), #000 calc(100% - var(--fade-x)), transparent),
-    linear-gradient(180deg, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(90deg, transparent, #000 var(--fade-x), #000 calc(100% - var(--fade-x)), transparent),
-    linear-gradient(180deg, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
-  mask-composite: intersect;
 }
 
-/* steam leaves the brew and bubbles pop on it: their foot is the liquid, not an edge */
-.scene-particles--steam,
-.scene-particles--brew {
-  --fade-bottom: 0%;
-}
-
-/* the spirit world fills the stage: a wider band, so the fog thins out well before its sides */
-.scene-particles--spirit {
-  --fade-x: 22%;
-  --fade-top: 10%;
-  /* its box reaches past the stage's foot: the specks fade out over the rail's band */
-  --fade-bottom: 26%;
+/* the texel fields keep hard square edges when a 2x screen scales the 1x canvas up */
+.scene-particles--brew .scene-particles__canvas,
+.scene-particles--steam .scene-particles__canvas,
+.scene-particles--spirit .scene-particles__canvas {
+  image-rendering: pixelated;
 }
 
 .scene-particles__canvas {

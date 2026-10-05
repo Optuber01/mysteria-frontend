@@ -258,7 +258,9 @@ const potionStyle = computed<CSSProperties>(() => {
 const potionSpriteStyle = computed<CSSProperties>(() => {
   const point = potionPoint.value;
   const size = point ? point.size : 64;
-  return { width: `${size.toFixed(1)}px`, height: `${size.toFixed(1)}px`, filter: `brightness(${(1 + 0.8 * clamp01(1 - (g.value - T.brewFlash) / 0.02)).toFixed(3)})` };
+  // bright as it leaves the brew, then no filter at all (a brightness(1) would still cost a pass)
+  const flare = 0.8 * clamp01(1 - (g.value - T.brewFlash) / 0.02);
+  return { width: `${size.toFixed(1)}px`, height: `${size.toFixed(1)}px`, filter: flare > 0.001 ? `brightness(${(1 + flare).toFixed(3)})` : 'none' };
 });
 const potionLightStyle = computed<CSSProperties>(() => {
   const point = holding.value ? handPoint.value : potionPoint.value;
@@ -517,7 +519,7 @@ const sceneVars = computed(() => {
   /* it wakes under him as the potion takes hold; the spirit world drains it gray (::after) until the flash */
   opacity: min(1, calc(var(--wake) * (0.4 + var(--risk) * 0.15 + var(--hit) * 0.45 + var(--awaken) * 0.6 + var(--flash) * 0.6)));
   scale: 1 0.5;
-  filter: drop-shadow(0 0 calc(6px + var(--hit) * 8px + var(--awaken) * 10px) color-mix(in oklab, var(--acc) 75%, transparent));
+  /* no glow filter: the ring turns every frame and a drop-shadow re-blurred it each time; the pool under it is the glow */
   will-change: transform, opacity;
 }
 
@@ -729,14 +731,15 @@ const sceneVars = computed(() => {
   bottom: 0;
   left: 0;
   height: 34%;
-  mask-image: radial-gradient(ellipse 50% 50% at 50% 55%, #000 40%, transparent 100%);
+  /* each bank fades out inside the box (no mask: that cost a render pass every frame) */
   background:
-    radial-gradient(ellipse 30% 50% at 26% 70%, rgba(200, 204, 214, 0.2), transparent 72%),
-    radial-gradient(ellipse 34% 46% at 56% 80%, rgba(200, 204, 214, 0.15), transparent 72%),
-    radial-gradient(ellipse 24% 40% at 82% 70%, rgba(200, 204, 214, 0.13), transparent 72%);
+    radial-gradient(ellipse 22% 46% at 28% 68%, rgba(200, 204, 214, 0.2), transparent 72%),
+    radial-gradient(ellipse 26% 42% at 54% 74%, rgba(200, 204, 214, 0.15), transparent 72%),
+    radial-gradient(ellipse 18% 38% at 78% 68%, rgba(200, 204, 214, 0.13), transparent 72%);
   opacity: calc(var(--wake) * min(1, 1 - var(--awaken) * 0.85 + var(--spirit) * 0.6));
   transform: translateY(calc(var(--awaken) * 30% - var(--risk) * 8% - var(--spirit) * 10%));
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 /* ---------- flash ---------- */

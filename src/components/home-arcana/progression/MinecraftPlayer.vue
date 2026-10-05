@@ -410,13 +410,13 @@ function lipError(tip: number, ax: number, az: number): [number, number] {
   vMouth ??= new three.Vector3();
   bottle.localToWorld(vLip.set(0, LIP_Y, 0)).project(viewer.camera);
   viewer.playerObject.skin.head.localToWorld(vMouth.set(...MOUTH)).project(viewer.camera);
-  const w = host.value.clientWidth / 2;
-  const h = host.value.clientHeight / 2;
+  const w = hostW / 2;
+  const h = hostH / 2;
   return [(vLip.x - vMouth.x) * w, (vLip.y - vMouth.y) * h];
 }
 function solveDrinkArm(pose: Pose): Pose {
   if (!viewer || !three || !holder || !bottle || !ready.value || !host.value) return pose;
-  const key = `${pose.headX.toFixed(4)}|${pose.tip.toFixed(4)}|${host.value.clientWidth}x${host.value.clientHeight}`;
+  const key = `${pose.headX.toFixed(4)}|${pose.tip.toFixed(4)}|${hostW}x${hostH}`;
   if (solved && key === solvedFor) return { ...pose, rArmX: solved[0], rArmZ: solved[1] };
   setBody(pose);
   viewer.playerWrapper.updateMatrixWorld(true);
@@ -566,10 +566,19 @@ function applyLighting() {
   }
 }
 
+/*
+ * The figure's box, measured on resize only. The arm solver and the bottle projection
+ * run on every scroll frame, right after the page has written new styles: reading
+ * clientWidth there forced a full layout each time.
+ */
+let hostW = 1;
+let hostH = 1;
 function sizeViewer() {
   if (!viewer || !host.value) return;
   const bounds = host.value.getBoundingClientRect();
-  viewer.setSize(Math.max(1, Math.round(host.value.clientWidth || bounds.width)), Math.max(1, Math.round(host.value.clientHeight || bounds.height)));
+  hostW = Math.max(1, Math.round(host.value.clientWidth || bounds.width));
+  hostH = Math.max(1, Math.round(host.value.clientHeight || bounds.height));
+  viewer.setSize(hostW, hostH);
   viewer.render();
   emitBottle();
 }
@@ -582,8 +591,8 @@ function emitBottle(): void {
   viewer.playerWrapper.updateMatrixWorld(true);
   projector ??= new three.Vector3();
   edge ??= new three.Vector3();
-  const w = host.value.clientWidth;
-  const h = host.value.clientHeight;
+  const w = hostW;
+  const h = hostH;
   projector.set(0, 0, 0);
   bottle.localToWorld(projector);
   projector.project(viewer.camera);
@@ -771,16 +780,33 @@ onUnmounted(() => {
   transform: translate(-50%, -50%) scale(1);
 }
 
+/* the potion's light round him, behind the figure: a soft halo in the accent, faded by --glow */
+.minecraft-player::after {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 44%;
+  width: 62%;
+  height: 78%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--acc) 42%, transparent), color-mix(in oklab, var(--acc) 14%, transparent) 55%, transparent);
+  content: '';
+  opacity: var(--glow);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
 .minecraft-player__canvas {
   display: block;
   width: 100%;
   height: 100%;
   opacity: 0;
-  /* In shadow while drinking; the awakening lifts the figure and haloes it. */
-  filter:
-    brightness(calc(0.8 + var(--glow) * 0.25 - var(--shade) * 0.3))
-    drop-shadow(0 0 calc(var(--glow) * 22px) color-mix(in oklab, var(--acc) calc(var(--glow) * 65%), transparent))
-    drop-shadow(0 24px 22px rgba(0, 0, 0, 0.5));
+  /*
+   * In shadow while drinking; the awakening lifts the figure (its halo is ::after).
+   * Only a colour filter here: the canvas redraws every frame, and a blurred
+   * drop-shadow on it made the GPU blur his whole box again on every one.
+   */
+  filter: brightness(calc(0.8 + var(--glow) * 0.25 - var(--shade) * 0.3));
   transition: opacity 0.14s ease;
 }
 
