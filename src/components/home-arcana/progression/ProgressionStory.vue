@@ -279,16 +279,25 @@ function softwareRendered(): boolean {
     return false;
   }
 }
-function storedLite(): boolean {
+/*
+ * A preview switch: ?lite=1 forces light mode, ?lite=0 forces the full room (no automatic
+ * switch either); both last for the visit. Without it the stored choice, or the automatic one.
+ */
+function storedLite(): string | null {
   try {
-    return sessionStorage.getItem(LITE_KEY) === '1';
+    const forced = new URLSearchParams(location.search).get('lite');
+    if (forced === '1' || forced === '0') sessionStorage.setItem(LITE_KEY, forced);
+    return sessionStorage.getItem(LITE_KEY);
   } catch {
-    return false;
+    return null;
   }
 }
-const lite = ref(storedLite());
+const liteChoice = storedLite();
+const lite = ref(liteChoice === '1');
+/** ?lite=0 was asked for: never switch on its own. */
+const fullForced = liteChoice === '0';
 function goLite() {
-  if (lite.value) return;
+  if (lite.value || fullForced) return;
   lite.value = true;
   try {
     sessionStorage.setItem(LITE_KEY, '1');
