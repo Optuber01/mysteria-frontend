@@ -624,24 +624,27 @@ onUnmounted(() => {
   gap: var(--arc-grid-gap);
 }
 
-/* each colour is a bar; the price rises left to right */
+/* each colour is a tile topped by its bar, the same tile as the dungeon classes; the price rises left to right */
 .tier {
   --tier: #3fbf6e;
   position: relative;
   display: grid;
   align-content: start;
   gap: 6px;
-  padding-top: 26px;
+  padding: 34px 18px 18px;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 .tier::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 8px;
-  border-radius: 4px;
+  top: 16px;
+  left: 18px;
+  right: 18px;
+  height: 6px;
+  border-radius: 3px;
   background: var(--tier);
   box-shadow: 0 0 22px color-mix(in oklab, var(--tier) 34%, transparent);
 }
@@ -741,21 +744,23 @@ onUnmounted(() => {
   gap: 12px;
 }
 
+/* the three Ordeals: the same rounded tiles as the dungeon classes */
 .ordeals__list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   align-content: start;
-  border-top: var(--arc-bw) solid var(--arc-line);
+  gap: 8px;
 }
 
 .ordeals__list li {
   display: grid;
   gap: 3px;
-  padding: 14px 0 14px 16px;
-  border-bottom: var(--arc-bw) solid var(--arc-line);
-  box-shadow: inset var(--arc-bw-accent) 0 0 var(--acc-ink);
+  padding: 13px 16px 14px;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 .ordeals__list strong {

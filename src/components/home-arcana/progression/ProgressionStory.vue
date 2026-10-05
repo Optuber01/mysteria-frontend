@@ -6,7 +6,7 @@
     :class="{ 'is-lite': lite }"
     aria-labelledby="progression-title"
   >
-    <div class="progression__sticky">
+    <div ref="stickyRef" class="progression__sticky">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
         <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
@@ -377,7 +377,11 @@ const departed = computed(() => {
   return ingredients.value.filter((_, index) => progress.value >= starts[index]).map((item) => item.key);
 });
 
-const bookOpacity = computed(() => (reducedMotion.value ? 1 : 1 - span(progress.value, [T.bookOut[0] + 0.02, T.bookOut[1]])));
+/*
+ * Before the story starts the book stands edge-on, a bare spine: it fades in as it starts
+ * to fall, so a phone (whose story starts later, see LEAD_NARROW) never shows it parked.
+ */
+const bookOpacity = computed(() => (reducedMotion.value ? 1 : span(progress.value, [0, 0.025]) * (1 - span(progress.value, [T.bookOut[0] + 0.02, T.bookOut[1]]))));
 const altarOpacity = computed(() => (reducedMotion.value ? 1 : progress.value >= T.brewIn[0] - 0.005 && progress.value < T.cauldronOut[1] ? 1 : 0));
 const drinkOpacity = computed(() => (reducedMotion.value ? 1 : progress.value >= T.brewFlash - 0.006 ? 1 : 0));
 
@@ -508,6 +512,14 @@ let sectionTop = 0;
 let sectionHeight = 0;
 /** The section's bottom padding: the room's foot, where it fades into the page (never pinned). */
 let sectionFoot = 0;
+/*
+ * The pinned room's height (100svh: the screen with the browser's bars shown). The
+ * scroll maths use it instead of innerHeight, which on a phone grows and shrinks as the
+ * bars slide away and back, and made the story jump while it was being scrolled.
+ */
+let viewH = 0;
+let narrow = false;
+const stickyRef = ref<HTMLElement | null>(null);
 let pageObserver: ResizeObserver | null = null;
 function measureSection() {
   const section = sectionRef.value;
@@ -516,6 +528,8 @@ function measureSection() {
   sectionTop = rect.top + scrollY;
   sectionHeight = rect.height;
   sectionFoot = parseFloat(getComputedStyle(section).paddingBottom) || 0;
+  viewH = stickyRef.value?.clientHeight || innerHeight;
+  narrow = innerWidth <= 900;
 }
 function onResize() {
   measureSection();
@@ -532,13 +546,20 @@ function onResize() {
  * fades into the page the next section opens on (no dissolve, no empty screen).
  */
 const LEAD = 0.85;
+/*
+ * On a phone or an upright tablet the hero is taller than the screen, so its last buttons
+ * are still up when the room comes in: the story only starts once the room is halfway up,
+ * and the book never falls in under them.
+ */
+const LEAD_NARROW = 0.45;
 const LEAD_TO = 0.16;
 const TAIL = 0.42;
 function scrollRange(height = sectionHeight, foot = sectionFoot) {
-  const pin = Math.max(1, height - foot - innerHeight);
-  const dwell = Math.max(0, Math.min(pin - 1, pin - innerHeight * 2.8));
-  const lead = innerHeight * LEAD;
-  const tail = Math.min(innerHeight * TAIL, pin * 0.2);
+  const vh = viewH || innerHeight;
+  const pin = Math.max(1, height - foot - vh);
+  const dwell = Math.max(0, Math.min(pin - 1, pin - vh * 2.8));
+  const lead = vh * (narrow ? LEAD_NARROW : LEAD);
+  const tail = Math.min(vh * TAIL, pin * 0.2);
   return { range: Math.max(1, pin + lead - tail), dwell, lead, leadTo: LEAD_TO, tail, pin };
 }
 function update() {
@@ -547,7 +568,7 @@ function update() {
     frame = 0;
     if (!sectionRef.value) return;
     const top = sectionTop - scrollY;
-    entryProgress.value = clamp01(1 - Math.max(0, top) / innerHeight);
+    entryProgress.value = clamp01(1 - Math.max(0, top) / (viewH || innerHeight));
     if (reducedMotion.value) return;
     const pace = scrollRange();
     // only the pinned room is timed: that is where the cost is
@@ -557,7 +578,7 @@ function update() {
     clearExpiredInspector(next);
     // Once the pin lets go the room scrolls away: the rail and the copy fade out first, so
     // neither rides up over the paper the room's foot fades into.
-    const leave = clamp01((-top - pace.pin) / (innerHeight * 0.3));
+    const leave = clamp01((-top - pace.pin) / ((viewH || innerHeight) * 0.3));
     const fade = leave > 0 ? (1 - leave).toFixed(3) : '';
     for (const el of leavingEls) el.style.opacity = fade;
   });

@@ -626,8 +626,6 @@
         "beginsAs": "Sequence 9: {role}",
         "boonNote": "Boons are raised beside your Pathway by sacrifice at an altar, never ahead of it.",
         "loading": "Loading abilities…",
-        "open": "{name} Pathway",
-        "archive": "All Pathways",
         "openBoon": "{name} Boon",
         "ladderLabel": "The {name} Pathway, from Sequence 9 to the top",
         "rung": {
@@ -637,8 +635,9 @@
           "demigod": "The last Sequence open to everyone. Every seat above it is limited.",
           "seats": "Only {count} Beyonders of this Pathway can hold it at once. When it’s full, a seat war decides who does.",
           "throne": "The Pathway’s god: one throne, held by one player until they stop playing or the season ends.",
-          "more": "{count} more on the {pathway} Pathway page."
-        }
+          "full": "Every ability of this Sequence, in full"
+        },
+        "seats": "Who holds its seats"
       }
     },
     "progression": {
@@ -720,7 +719,7 @@
         "whisper5": "Resist.",
         "cardLink": "Open the {pathway} Pathway",
         "panelSubNext": "{pathway}: Sequence 9, then {nextSequence} at Sequence 8",
-        "about": "Every Pathway climbs ten Sequences, from 9 up to its god at 0. Each potion you digest takes you one step higher."
+        "about": "Every Pathway climbs ten Sequences, from 9 up to its god at 0. Each potion you digest takes you a step higher, and the higher ones also demand rituals."
       },
       "player": {
         "drink": "Player drinking a Sequence potion",

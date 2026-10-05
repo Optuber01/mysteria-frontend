@@ -150,6 +150,7 @@
 import {computed, nextTick, onMounted, onUnmounted, ref, shallowReactive, watch, type ComponentPublicInstance} from 'vue';
 import ArcanaFace from './ArcanaFace.vue';
 import ArcanaBack from './ArcanaBack.vue';
+import {stableViewportHeight} from './stableViewport';
 import HeroNightScene from './HeroNightScene.vue';
 import {CORE_CARDS, cardById, sigilNative} from './arcana-data';
 import {ensurePathwayData, randomCard, useArcana} from './useArcana';
@@ -844,7 +845,8 @@ function measure() {
   const table = tableRef.value;
   if (!hero || !table) return;
   const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  // never the bars sliding away mid-scroll (see stableViewport)
+  const vh = stableViewportHeight();
   const isStacked = vw <= 900;
   const shape = shapeOf(isStacked ? STACKED : WIDE);
   const style = getComputedStyle(hero);

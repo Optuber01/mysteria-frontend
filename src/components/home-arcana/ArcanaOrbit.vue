@@ -138,18 +138,25 @@
                         <span>{{ ability.summary }}</span>
                       </li>
                     </ul>
-                    <p v-if="rungDetail.more" class="arc-rung__more">{{ rungDetail.more }}</p>
+                    <RouterLink v-if="rungDetail.abilities.length" :to="$lp(`/pathways/${card.id}`)" class="arc-rung__full">
+                      {{ rungDetail.full }}
+                      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </RouterLink>
                   </template>
                 </div>
                 <p v-if="card.boon" class="arc-orbit__note">{{ t('home.arcana.deck.boonNote') }}</p>
               </div>
 
+              <!-- the ladder already shows what the Pathway page would; what it can't show is who sits on it -->
               <div class="arc-orbit__actions">
-                <RouterLink :to="$lp(`/pathways/${card.id}`)" class="arc-btn arc-btn--solid">
-                  {{ t(card.boon ? 'home.arcana.deck.openBoon' : 'home.arcana.deck.open').replace('{name}', reading.name) }}
+                <RouterLink v-if="!card.boon" :to="$lp('/ascension')" class="arc-btn arc-btn--solid">
+                  {{ t('home.arcana.deck.seats') }}
                   <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </RouterLink>
-                <RouterLink :to="$lp('/pathways')" class="arc-btn arc-btn--ghost">{{ t('home.arcana.deck.archive') }}</RouterLink>
+                <RouterLink v-else :to="$lp(`/pathways/${card.id}`)" class="arc-btn arc-btn--solid">
+                  {{ t('home.arcana.deck.openBoon').replace('{name}', reading.name) }}
+                  <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </RouterLink>
               </div>
             </div>
           </Transition>
@@ -167,6 +174,7 @@ import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import {type ArcanaCard, BOON_CARDS, cardById, CORE_CARDS, sigilNative, sigilThumb} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
 import {abilitySummary} from './abilitySummary';
+import {stableViewportHeight} from './stableViewport';
 
 type Kind = 'pathway' | 'boon';
 
@@ -246,12 +254,12 @@ const rungDetail = computed(() => {
     name: module!.pick(ability.name, language),
     summary: abilitySummary(module!.pick(ability.description, language)),
   }));
-  const extra = all.length - RUNG_ABILITIES;
   return {
     title,
     about,
     abilities: all.slice(0, RUNG_ABILITIES),
-    more: extra > 0 ? deck('more').replace('{count}', String(extra)).replace('{pathway}', reading.value.name) : '',
+    // the descriptions here are cut to three lines, and some rungs have more abilities than shown
+    full: deck('full'),
   };
 });
 
@@ -804,9 +812,10 @@ function measure() {
   const width = stage.clientWidth;
   const dial = dialQuery?.matches ?? false;
   const g = geo.value;
-  if (width && (width !== g.width || dial !== g.dial || Math.abs(window.innerHeight - lastViewportHeight) > 1)) {
-    lastViewportHeight = window.innerHeight;
-    geo.value = geometryFor(width, window.innerHeight, dial);
+  const viewportHeight = stableViewportHeight();
+  if (width && (width !== g.width || dial !== g.dial || Math.abs(viewportHeight - lastViewportHeight) > 1)) {
+    lastViewportHeight = viewportHeight;
+    geo.value = geometryFor(width, viewportHeight, dial);
   }
   void nextTick(() => {
     // where the dealt seals fly out from: the drawn seal's centre
@@ -1252,19 +1261,16 @@ onUnmounted(() => {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0;
+  gap: 8px;
   margin: 0;
   padding: 0;
-  border-top: var(--arc-bw) solid var(--arc-line);
-  border-left: var(--arc-bw) solid var(--arc-line);
 }
 
 .arc-ladder li {
   min-width: 0;
-  border-right: var(--arc-bw) solid var(--arc-line);
-  border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 
+/* each rung a rounded tile, like the dungeon classes and the Ordeals */
 .arc-ladder__rung {
   position: relative;
   display: grid;
@@ -1274,7 +1280,9 @@ onUnmounted(() => {
   height: 100%;
   padding: 12px 34px 14px 14px;
   border: 0;
-  background: transparent;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -1283,12 +1291,12 @@ onUnmounted(() => {
 }
 
 .arc-ladder__rung:hover {
-  background: color-mix(in oklab, var(--acc) 7%, transparent);
+  background: color-mix(in oklab, var(--acc) 8%, var(--arc-glass));
 }
 
 .arc-ladder__rung:focus-visible {
   outline: 2px solid var(--acc-ink);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 .arc-ladder__rung > i {
@@ -1301,8 +1309,8 @@ onUnmounted(() => {
 }
 
 .arc-ladder li.is-open .arc-ladder__rung {
-  background: color-mix(in oklab, var(--acc) 12%, transparent);
-  box-shadow: inset 0 -2px 0 var(--acc-ink);
+  background: color-mix(in oklab, var(--acc) 12%, var(--arc-glass));
+  box-shadow: inset 0 0 0 var(--arc-bw-accent) var(--acc-ink);
 }
 
 .arc-ladder li.is-open .arc-ladder__rung > i {
@@ -1312,10 +1320,11 @@ onUnmounted(() => {
 
 /* the open rung: under the ladder, across its width */
 .arc-rung {
+  margin-top: 8px;
   padding: 18px 20px 20px;
-  border: var(--arc-bw) solid var(--arc-line);
-  border-top: 0;
+  border-radius: var(--arc-r-lg);
   background: color-mix(in oklab, var(--acc) 5%, var(--arc-raised));
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
   animation: arc-rung-in .22s ease both;
 }
 
@@ -1380,10 +1389,28 @@ onUnmounted(() => {
   color: var(--arc-muted);
 }
 
-.arc-rung__more {
-  margin: 14px 0 0;
+/* the Pathway page, for what the panel cuts short */
+.arc-rung__full {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
   font-size: var(--arc-fs-small);
-  color: var(--arc-muted);
+  font-weight: 600;
+  color: var(--acc-ink);
+  text-decoration: none;
+  transition: color .6s ease;
+}
+
+.arc-rung__full:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.arc-rung__full:focus-visible {
+  outline: 2px solid var(--acc-ink);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .arc-ladder__rung b {
@@ -1401,8 +1428,8 @@ onUnmounted(() => {
   overflow-wrap: anywhere;
 }
 
-.arc-ladder li.is-top {
-  background: linear-gradient(180deg, color-mix(in oklab, var(--acc) 12%, transparent), transparent);
+.arc-ladder li.is-top .arc-ladder__rung {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--acc) 14%, var(--arc-glass)), var(--arc-glass));
 }
 
 .arc-ladder li.is-top b,

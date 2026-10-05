@@ -346,7 +346,8 @@ onUnmounted(() => {
 .header-stack.is-overlay .site-header::before {
   /* covers the header's (transparent) bottom border too */
   bottom: -1px;
-  background: color-mix(in srgb, var(--myst-bg) 78%, transparent);
+  /* near solid: at 78% the headings scrolling under it stayed readable through it */
+  background: color-mix(in srgb, var(--myst-bg) 93%, transparent);
   border-bottom: 1px solid var(--myst-line-14);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
