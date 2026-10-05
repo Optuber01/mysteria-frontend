@@ -34,7 +34,8 @@ const shot = (key: string, w: number, h: number, author: string, place: string, 
 export const TOPIC_SHOTS = {
   rifts: shot('rift-portal', 1327, 832, 'ikeepca1m', 'Rift', '46% 58%'),
   churches: shot('cathedral-night', 1230, 730, 'RiceMuncher', 'Pyaari', '50% 34%'),
-  altars: shot('sacrificial-altars', 1418, 856, 'ikeepca1m', 'Sacrificial altars', '50% 30%'),
+  // the Outer Gods Anchors announcement's own image: an Outer God's eye torn open over the world
+  pact: shot('outer-god-eye', 1920, 1047, 'ikeepca1m', 'Outer Gods Anchors', '50% 34%'),
 } as const;
 
 /** The gallery strip, in viewing order (alternating warm, dark and bright). */

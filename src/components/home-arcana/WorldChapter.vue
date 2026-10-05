@@ -10,7 +10,7 @@
       <article v-if="isBoon" class="pantheon pact" aria-labelledby="pact-title">
         <WorldPhoto
             class="pact__photo"
-            :shot="shots.altars"
+            :shot="shots.pact"
             :alt="t('home.world.pact.alt')"
             sizes="(max-width: 900px) 100vw, 1200px"
         />
@@ -462,13 +462,14 @@ onUnmounted(() => {
 }
 
 /*
- * The pact (a Boon drawn): the Pantheon's frame, its hall of thrones replaced by the altars
- * the Boons are fed at, sunk in the dark at the edges; the price, the last step, in the accent.
+ * The pact (a Boon drawn): the Pantheon's frame, its hall of thrones replaced by an Outer
+ * God's eye opening over the world, sunk in the dark at the edges; the price, the last step,
+ * in the accent.
  */
 .pact__photo {
   grid-column: 1 / -1;
   margin: calc(clamp(28px, 3.2vw, 48px) * -1) calc(clamp(28px, 3.2vw, 48px) * -1) 0;
-  aspect-ratio: 16 / 5;
+  aspect-ratio: 16 / 6;
 }
 
 .pact__photo::before {
@@ -480,10 +481,6 @@ onUnmounted(() => {
   background:
     radial-gradient(90% 120% at 50% 20%, transparent 40%, color-mix(in oklab, var(--arc-raised) 85%, transparent) 100%),
     linear-gradient(180deg, transparent 45%, var(--arc-raised));
-}
-
-.pact__photo :deep(img) {
-  filter: saturate(.7) brightness(.8);
 }
 
 .pact .pantheon__road li.is-price .road-token {
@@ -1212,7 +1209,7 @@ onUnmounted(() => {
   }
 }
 
-/* on a narrow screen the altars need more height than a banner strip */
+/* on a narrow screen the eye needs more height than a banner strip */
 @media (max-width: 900px) {
   .pact__photo {
     aspect-ratio: 16 / 8;
