@@ -110,15 +110,37 @@
         <div class="arc-orbit__dossier" aria-labelledby="arc-orbit-name" role="group">
           <Transition mode="out-in" :css="false" @before-leave="onReadingBeforeLeave" @enter="onReadingEnter" @leave="onReadingLeave">
             <div :key="card.id" class="arc-orbit__reading">
-              <!-- the whole climb, Sequence 9 to the throne: what the page hasn't shown yet -->
+              <!-- the whole climb, Sequence 9 to the throne; a rung opens to what it is and what it gives -->
               <div class="arc-orbit__climb">
                 <ol v-if="rungs.length" class="arc-ladder" :aria-label="ladderLabel">
-                  <li v-for="rung in rungs" :key="rung.sequence" :class="{'is-top': rung.sequence === topRung}">
-                    <b>{{ rung.sequence }}</b>
-                    <span>{{ rung.name }}</span>
+                  <li v-for="rung in rungs" :key="rung.sequence" :class="{'is-top': rung.sequence === topRung, 'is-open': rung.sequence === openRung}">
+                    <button
+                        type="button"
+                        class="arc-ladder__rung"
+                        :aria-expanded="rung.sequence === openRung"
+                        aria-controls="arc-rung-detail"
+                        @click="toggleRung(rung.sequence)"
+                    >
+                      <b>{{ rung.sequence }}</b>
+                      <span>{{ rung.name }}</span>
+                      <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </button>
                   </li>
                 </ol>
                 <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
+                <div id="arc-rung-detail" class="arc-rung" :class="{'is-open': rungDetail}" role="region" :aria-label="rungDetail?.title" :hidden="!rungDetail">
+                  <template v-if="rungDetail">
+                    <h4 class="arc-rung__title">{{ rungDetail.title }}</h4>
+                    <p v-if="rungDetail.about" class="arc-rung__about">{{ rungDetail.about }}</p>
+                    <ul v-if="rungDetail.abilities.length" class="arc-rung__abilities">
+                      <li v-for="ability in rungDetail.abilities" :key="ability.id">
+                        <strong>{{ ability.name }}</strong>
+                        <span>{{ ability.summary }}</span>
+                      </li>
+                    </ul>
+                    <p v-if="rungDetail.more" class="arc-rung__more">{{ rungDetail.more }}</p>
+                  </template>
+                </div>
                 <p v-if="card.boon" class="arc-orbit__note">{{ t('home.arcana.deck.boonNote') }}</p>
               </div>
 
@@ -144,10 +166,11 @@ import {useReducedMotion} from '@/composables/useReducedMotion';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import {type ArcanaCard, BOON_CARDS, cardById, CORE_CARDS, sigilNative, sigilThumb} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
+import {abilitySummary} from './abilitySummary';
 
 type Kind = 'pathway' | 'boon';
 
-const {t, plural} = useI18n();
+const {t, plural, currentLanguage} = useI18n();
 const {currentId, card, reading, readingFor, nameOf, seq9Of, data, draw} = useArcana();
 const reducedMotion = useReducedMotion();
 
@@ -188,6 +211,49 @@ const roleLine = (id: string) => {
 const rungs = computed(() => [...reading.value.ladder].sort((a, b) => b.sequence - a.sequence));
 const topRung = computed(() => rungs.value[rungs.value.length - 1]?.sequence ?? 0);
 const ladderLabel = computed(() => t('home.arcana.deck.ladderLabel').replace('{name}', reading.value.name));
+
+/* One rung open at a time; a different card closes it. */
+const openRung = ref<number | null>(null);
+watch(currentId, () => (openRung.value = null));
+function toggleRung(sequence: number) {
+  openRung.value = openRung.value === sequence ? null : sequence;
+}
+/** Shown at most, so an open rung stays a glance; the rest are on the Pathway's page. */
+const RUNG_ABILITIES = 4;
+/** What the open rung is: its place on the climb (seats, rank) and the abilities it brings. */
+const rungDetail = computed(() => {
+  const n = openRung.value;
+  const module = data.value;
+  if (n === null) return null;
+  const rung = rungs.value.find(entry => entry.sequence === n);
+  if (!rung) return null;
+  const language = currentLanguage.value;
+  const deck = (key: string) => t(`home.arcana.deck.rung.${key}`);
+  const rank = module && !card.value.boon ? module.sequenceRank(n, language) : '';
+  const title = deck('title').replace('{n}', String(n)).replace('{name}', rung.name) + (rank ? ` · ${rank}` : '');
+  let about = '';
+  if (!card.value.boon) {
+    const seats = module?.HIGH_SEAT_LIMITS[n];
+    if (n === 9) about = deck('start');
+    else if (n === 0) about = deck('throne');
+    else if (seats) about = deck('seats').replace('{count}', String(seats));
+    else if (n === 4) about = deck('demigod');
+    else about = deck('digest');
+  }
+  const sequence = module?.pathwayById(currentId.value)?.sequences.find(entry => entry.sequence === n);
+  const all = (sequence?.abilities ?? []).map(ability => ({
+    id: ability.id,
+    name: module!.pick(ability.name, language),
+    summary: abilitySummary(module!.pick(ability.description, language)),
+  }));
+  const extra = all.length - RUNG_ABILITIES;
+  return {
+    title,
+    about,
+    abilities: all.slice(0, RUNG_ABILITIES),
+    more: extra > 0 ? deck('more').replace('{count}', String(extra)).replace('{pathway}', reading.value.name) : '',
+  };
+});
 
 
 /* ---------- Geometry: a ring seen from slightly above; the near arc of a dial on phones ---------- */
@@ -1194,16 +1260,133 @@ onUnmounted(() => {
 }
 
 .arc-ladder li {
-  display: grid;
-  align-content: start;
-  gap: 4px;
   min-width: 0;
-  padding: 12px 14px 14px;
   border-right: var(--arc-bw) solid var(--arc-line);
   border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 
-.arc-ladder b {
+.arc-ladder__rung {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 12px 34px 14px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .2s ease;
+}
+
+.arc-ladder__rung:hover {
+  background: color-mix(in oklab, var(--acc) 7%, transparent);
+}
+
+.arc-ladder__rung:focus-visible {
+  outline: 2px solid var(--acc-ink);
+  outline-offset: -2px;
+}
+
+.arc-ladder__rung > i {
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--arc-muted);
+  transition: transform .25s ease, color .2s ease;
+}
+
+.arc-ladder li.is-open .arc-ladder__rung {
+  background: color-mix(in oklab, var(--acc) 12%, transparent);
+  box-shadow: inset 0 -2px 0 var(--acc-ink);
+}
+
+.arc-ladder li.is-open .arc-ladder__rung > i {
+  color: var(--acc-ink);
+  transform: rotate(180deg);
+}
+
+/* the open rung: under the ladder, across its width */
+.arc-rung {
+  padding: 18px 20px 20px;
+  border: var(--arc-bw) solid var(--arc-line);
+  border-top: 0;
+  background: color-mix(in oklab, var(--acc) 5%, var(--arc-raised));
+  animation: arc-rung-in .22s ease both;
+}
+
+.arc-rung[hidden] {
+  display: none;
+}
+
+@keyframes arc-rung-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+.arc-rung__title {
+  margin: 0;
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-weight: 600;
+  font-size: var(--arc-fs-h4);
+  line-height: 1.22;
+  color: var(--arc-ink);
+}
+
+.arc-rung__about {
+  margin: 6px 0 0;
+  font-size: var(--arc-fs-small);
+  line-height: 1.55;
+  color: var(--arc-muted);
+  text-wrap: pretty;
+}
+
+.arc-rung__abilities {
+  list-style: none;
+  display: grid;
+  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  margin: 16px 0 0;
+  padding: 0;
+}
+
+.arc-rung__abilities li {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: var(--arc-bw-accent) solid var(--acc-ink);
+}
+
+.arc-rung__abilities strong {
+  font-weight: 600;
+  color: var(--arc-ink);
+}
+
+/* a glance, not the archive: some entries are whole manuals, so each keeps to three lines */
+.arc-rung__abilities span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
+  color: var(--arc-muted);
+}
+
+.arc-rung__more {
+  margin: 14px 0 0;
+  font-size: var(--arc-fs-small);
+  color: var(--arc-muted);
+}
+
+.arc-ladder__rung b {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
@@ -1211,7 +1394,7 @@ onUnmounted(() => {
   color: var(--arc-muted);
 }
 
-.arc-ladder span {
+.arc-ladder__rung span {
   font-weight: 600;
   line-height: 1.3;
   color: var(--arc-ink);
@@ -1294,12 +1477,20 @@ onUnmounted(() => {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .arc-rung__abilities {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .arc-orbit__actions {
     display: grid;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .arc-rung {
+    animation: none;
+  }
+
   .arc-seal__orb,
   .arc-seal__orb img,
   .arc-orbit__step {

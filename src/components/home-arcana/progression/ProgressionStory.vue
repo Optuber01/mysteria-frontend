@@ -48,7 +48,8 @@
               <h3 class="chapter-copy__name" :style="{ '--name-em': nameEm }">
                 <template v-for="(part, index) in awakenTitle" :key="index"><em v-if="part.name">{{ part.text }}</em><template v-else>{{ part.text }}</template></template>
               </h3>
-              <p class="chapter-copy__sub">{{ tp('drink.panelSub') }}</p>
+              <p class="chapter-copy__sub">{{ tp(names.nextSequence ? 'drink.panelSubNext' : 'drink.panelSub') }}</p>
+              <p class="chapter-copy__about">{{ tp('drink.about') }}</p>
               <ul v-if="firstAbilities.length" class="chapter-copy__abilities" :aria-label="tp('drink.abilitiesHeading')">
                 <li v-for="ability in firstAbilities" :key="ability.id">
                   <strong>{{ ability.name }}</strong>
@@ -56,7 +57,6 @@
                 </li>
               </ul>
               <div class="chapter-copy__onward">
-                <p v-if="names.nextSequence" class="chapter-copy__next">{{ tp('drink.teaser') }}</p>
                 <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/game')">
                   {{ tp('drink.cta') }}
                   <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -150,13 +150,13 @@
             </li>
           </ul>
           <template v-else-if="chapter.id === 'awaken'">
+            <p class="progression-static__copy">{{ tp(names.nextSequence ? 'drink.panelSubNext' : 'drink.panelSub') }}. {{ tp('drink.about') }}</p>
             <ul v-if="firstAbilities.length" class="chapter-copy__abilities" :aria-label="tp('drink.abilitiesHeading')">
               <li v-for="ability in firstAbilities" :key="ability.id">
                 <strong>{{ ability.name }}</strong>
                 <span>{{ ability.description }}</span>
               </li>
             </ul>
-            <p v-if="names.nextSequence" class="chapter-copy__next">{{ tp('drink.teaser') }}</p>
             <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/game')">
               {{ tp('drink.cta') }}
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -942,13 +942,23 @@ onUnmounted(() => {
 }
 
 .chapter-copy__sub {
-  margin: -6px 0 18px;
+  margin: -6px 0 8px;
   color: var(--arc-muted);
   font-size: 15px;
 }
 
 .chapter-copy__boon {
   margin-top: 12px;
+}
+
+/* what a Sequence is, for a visitor who has never read the novel */
+.chapter-copy__about {
+  max-width: 34em;
+  margin: 0 0 16px;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .chapter-copy__abilities {
@@ -981,21 +991,13 @@ onUnmounted(() => {
   text-wrap: pretty;
 }
 
-/* what comes next and the way to it, on one row when they fit */
+/* the way on from here */
 .chapter-copy__onward {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 12px 20px;
   margin-top: 18px;
-}
-
-.chapter-copy__next {
-  margin: 0;
-  color: var(--arc-muted);
-  font-size: 14px;
-  line-height: 1.5;
 }
 
 .chapter-copy__cta {
@@ -1171,8 +1173,12 @@ onUnmounted(() => {
   }
 
   .chapter-copy__sub {
-    margin: -2px 0 12px;
+    margin: -2px 0 6px;
     font-size: 14px;
+  }
+
+  .chapter-copy__about {
+    margin-bottom: 12px;
   }
 
   .chapter-copy__abilities li {
@@ -1196,7 +1202,11 @@ onUnmounted(() => {
   }
 
   .chapter-copy__sub {
-    margin-bottom: 10px;
+    margin-bottom: 4px;
+  }
+
+  .chapter-copy__about {
+    margin-bottom: 8px;
   }
 
   .chapter-copy__abilities li {
@@ -1270,8 +1280,12 @@ onUnmounted(() => {
   }
 
   .chapter-copy__sub {
-    margin: -2px 0 10px;
+    margin: -2px 0 6px;
     font-size: 14px;
+  }
+
+  .chapter-copy__about {
+    margin-bottom: 10px;
   }
 
   .chapter-copy__abilities li {
@@ -1293,7 +1307,7 @@ onUnmounted(() => {
    what's next), so the scene keeps its room and long ability texts never reach the rail */
 @media (max-width: 599px) and (min-height: 591px) and (prefers-reduced-motion: no-preference),
        (max-width: 900px) and (min-height: 591px) and (max-height: 760px) and (prefers-reduced-motion: no-preference) {
-  .chapter-copy__sub,
+  .chapter-copy__about,
   .chapter-copy__abilities span {
     display: none;
   }
@@ -1473,10 +1487,6 @@ onUnmounted(() => {
 
   .progression-static .chapter-copy__abilities li {
     padding-block: 11px;
-  }
-
-  .progression-static .chapter-copy__next {
-    margin-top: 14px;
   }
 
   .progression-static .chapter-copy__cta {

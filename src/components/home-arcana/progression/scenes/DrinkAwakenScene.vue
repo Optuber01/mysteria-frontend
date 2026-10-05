@@ -604,6 +604,12 @@ const sceneVars = computed(() => {
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 26px color-mix(in oklab, var(--acc) 30%, transparent);
 }
 
+/* on a phone the card is small (about 70px): its name may go under the face's 13px floor rather than run off the card */
+.reading-card__front :deep(.arc-face__name) {
+  font-size: max(9px, 9.4cqw);
+  letter-spacing: .02em;
+}
+
 /* Before a draw the Fool is only the example: its card wears the page's neutral accent, not its own purple. */
 .reading-card__front.is-example :deep(.arc-face) {
   --card-acc: var(--acc) !important;

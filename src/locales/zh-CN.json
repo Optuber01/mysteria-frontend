@@ -606,7 +606,7 @@
         "drawFirstHint": "Random Pathway"
       },
       "deck": {
-        "titleA": "Choose your",
+        "titleA": "Explore every",
         "titleB": "Pathway",
         "tabsLabel": "Pathways or Boons",
         "tabPathways": "Pathways",
@@ -629,7 +629,16 @@
         "open": "{name} Pathway",
         "archive": "All Pathways",
         "openBoon": "{name} Boon",
-        "ladderLabel": "The {name} Pathway, from Sequence 9 to the top"
+        "ladderLabel": "The {name} Pathway, from Sequence 9 to the top",
+        "rung": {
+          "title": "Sequence {n}: {name}",
+          "start": "Where every Beyonder begins. The first potion needs no ritual and costs no Madness.",
+          "digest": "You reach it by acting out your current role until its potion is digested, then brewing the next one. Rituals matter more with every step.",
+          "demigod": "The last Sequence open to everyone. Every seat above it is limited.",
+          "seats": "Only {count} Beyonders of this Pathway can hold it at once. When it’s full, a seat war decides who does.",
+          "throne": "The Pathway’s god: one throne, held by one player until they stop playing or the season ends.",
+          "more": "{count} more on the {pathway} Pathway page."
+        }
       }
     },
     "progression": {
@@ -703,14 +712,15 @@
         "sceneLabel": "Becoming a Beyonder",
         "panelSub": "{pathway}: Sequence 9",
         "abilitiesHeading": "First abilities",
-        "teaser": "Next: Sequence 8, {nextSequence}",
         "cta": "Game guide",
         "whisper1": "Listen.",
         "whisper2": "Remember.",
         "whisper3": "Silence.",
         "whisper4": "Gray fog…",
         "whisper5": "Resist.",
-        "cardLink": "Open the {pathway} Pathway"
+        "cardLink": "Open the {pathway} Pathway",
+        "panelSubNext": "{pathway}: Sequence 9, then {nextSequence} at Sequence 8",
+        "about": "Every Pathway climbs ten Sequences, from 9 up to its god at 0. Each potion you digest takes you one step higher."
       },
       "player": {
         "drink": "Player drinking a Sequence potion",
