@@ -855,9 +855,12 @@ function measure() {
   const padX = px(style.paddingLeft);
   // Phones may let the outermost fan cards use part of the page gutter, never the screen edge.
   const width = table.clientWidth + (isStacked ? Math.max(0, padX - 10) * 2 : 0);
+  const fullScreen = vh - padTop - (introRef.value?.offsetHeight ?? 160) - CAPTION_ROOM.stacked - 30;
   const height = isStacked
-      // Title, deck and caption together fill the first screen; the pitch follows.
-      ? vh - padTop - (introRef.value?.offsetHeight ?? 160) - CAPTION_ROOM.stacked - 30
+      // Title, deck and caption together fill at most about two thirds of the first screen, so
+      // the pitch and its buttons start on it too; on a tall tablet the deck would otherwise
+      // grow to fill the screen and push them a whole screen down.
+      ? Math.min(fullScreen, vh * 0.62 - padTop - (introRef.value?.offsetHeight ?? 160) * 0.5)
       : Math.max(vh, 600) - padTop - padBottom - CAPTION_ROOM.wide;
   const next = Math.round(Math.max(70, Math.min(width / (shape.halfW * 2), height / (shape.top + shape.bottom), 260)) * 2) / 2;
   if (isStacked === stacked.value && Math.abs(next - u.value) < 1) return;

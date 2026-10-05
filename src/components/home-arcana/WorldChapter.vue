@@ -1015,9 +1015,10 @@ onUnmounted(() => {
     width: 100%;
   }
 
-  .world-gallery__actions .arc-btn {
+  .world-gallery__actions .arc-btn:not(.world-gallery__toggle) {
     flex: 1;
     width: auto;
+    white-space: nowrap;
   }
 }
 </style>

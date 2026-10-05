@@ -1352,6 +1352,36 @@ onUnmounted(() => {
     bottom: 14px;
     width: auto;
   }
+
+  /* the copy takes the column's full width (the desktop awakening widens past it) */
+  .chapter-copy,
+  .chapter-copy--awaken {
+    width: auto;
+    min-width: 0;
+  }
+
+  .chapter-copy__sub {
+    margin: -2px 0 10px;
+    font-size: 14px;
+  }
+
+  .chapter-copy__digest {
+    margin-bottom: 10px;
+  }
+
+  .chapter-copy__abilities li {
+    padding-block: 7px;
+  }
+
+  .chapter-copy__onward {
+    margin-top: 12px;
+  }
+
+  /* one button across the column: easy to hit, never pushed off the edge */
+  .chapter-copy__cta {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 }
 
 /*
