@@ -1042,6 +1042,29 @@
         },
         "linksLabel": "Download COI Client",
         "visualLabel": "Ritual circle with the {pathway} sigil"
+      },
+      "links": {
+        "news": "Read the announcement",
+        "wiki": "Read the wiki"
+      },
+      "ordeals": {
+        "title": "Losing control isn’t the end",
+        "body": "From Sequence 6 up, a Beyonder who loses control is no longer deleted. You’re thrown into an Ordeal instead, and how you play it decides how much of your progress you keep.",
+        "limit": "Lose control a third time within 14 days and the character is gone for good. Below Sequence 6 it still is.",
+        "list": {
+          "bloodlust": {
+            "name": "Bloodlust",
+            "body": "Ninety seconds as a mutated Warden. A higher kill score means a smaller fall."
+          },
+          "hollowing": {
+            "name": "Hollowing",
+            "body": "Hours as a wandering spirit, looking for a Wild Beyonder body to take."
+          },
+          "sealing": {
+            "name": "Sealing",
+            "body": "Locked away for days. Hunting monsters under a rising moon shortens the sentence."
+          }
+        }
       }
     }
   },

@@ -31,6 +31,7 @@
           <p class="pantheon__body">{{ t('home.world.pantheon.rule') }}</p>
           <div class="pantheon__foot">
             <RouterLink :to="$lp('/ascension')" class="arc-btn arc-btn--ghost">{{ t('home.world.pantheon.cta') }}</RouterLink>
+            <p class="sys__links"><template v-for="link in linksOf('pantheon')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
             <p v-if="hasSeatData" class="arc-status is-online">
               <span class="arc-status__dot" aria-hidden="true"></span>{{ heldText }}
             </p>
@@ -53,6 +54,7 @@
         <div class="incursion__copy">
           <h3 id="incursions-title" class="incursion__title">{{ t('home.world.incursions.title') }}</h3>
           <p>{{ t('home.world.incursions.body') }}</p>
+          <p class="sys__links"><template v-for="link in linksOf('incursions')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
         </div>
         <ul class="world-notes incursion__notes">
           <li><i class="fa-solid fa-box-open" aria-hidden="true"></i>{{ t('home.world.incursions.permanent') }}</li>
@@ -85,6 +87,7 @@
               </li>
             </ul>
             <p class="sys__fact"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>{{ t('home.world.rifts.guardians') }}</p>
+            <p class="sys__links"><template v-for="link in linksOf('rifts')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
           </div>
         </article>
 
@@ -103,6 +106,7 @@
             <h3 id="arena-title" class="sys__title">{{ t('home.world.arena.title') }}</h3>
             <p class="sys__body">{{ t('home.world.arena.body') }}</p>
             <p class="sys__fact"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>{{ t('home.world.arena.safe') }}</p>
+            <p class="sys__links"><template v-for="link in linksOf('arena')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
           </div>
         </article>
 
@@ -117,6 +121,7 @@
             <h3 id="churches-title" class="sys__title">{{ t('home.world.churches.title') }}</h3>
             <p class="sys__body">{{ t('home.world.churches.body') }}</p>
             <p class="sys__fact"><i class="fa-solid fa-scroll" aria-hidden="true"></i>{{ t('home.world.churches.honorific') }}</p>
+            <p class="sys__links"><template v-for="link in linksOf('churches')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
           </div>
         </article>
 
@@ -133,6 +138,25 @@
             <h3 id="anchors-title" class="sys__title">{{ t('home.world.anchors.title') }}</h3>
             <p class="sys__body">{{ t('home.world.anchors.body') }}</p>
             <p class="sys__fact"><i class="fa-solid fa-gem" aria-hidden="true"></i>{{ t('home.world.anchors.boons') }}</p>
+            <p class="sys__links"><template v-for="link in linksOf('anchors')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
+          </div>
+        </article>
+
+        <!-- losing control: an Ordeal to play through instead of a deleted character -->
+        <article class="sys sys--ordeals" aria-labelledby="ordeals-title">
+          <div class="sys__copy ordeals">
+            <div class="ordeals__intro">
+              <h3 id="ordeals-title" class="sys__title">{{ t('home.world.ordeals.title') }}</h3>
+              <p class="sys__body">{{ t('home.world.ordeals.body') }}</p>
+              <p class="sys__fact"><i class="fa-solid fa-skull" aria-hidden="true"></i>{{ t('home.world.ordeals.limit') }}</p>
+              <p class="sys__links"><template v-for="link in linksOf('ordeals')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
+            </div>
+            <ul class="ordeals__list">
+              <li v-for="ordeal in ordeals" :key="ordeal.key">
+                <strong>{{ ordeal.name }}</strong>
+                <span>{{ ordeal.body }}</span>
+              </li>
+            </ul>
           </div>
         </article>
       </div>
@@ -270,6 +294,31 @@ const reducedMotion = ref(false);
 const paused = ref(false);
 const inView = ref(false);
 /* Once the strip is on screen, load every tile: lazy ones clipped by the strip would pop in blank. */
+/* where each system is explained in full: its announcement on this site, and the wiki */
+const WIKI = 'https://wiki.mysterria.net';
+const SYSTEM_LINKS: Record<string, {news?: string; wiki?: string}> = {
+  pantheon: {news: 'the-pantheon-opens'},
+  incursions: {news: 'mythical-creature-forms-cosmos-incursions-and-dungeons', wiki: 'guides/cosmos-incursions'},
+  rifts: {wiki: 'guides/dungeons'},
+  arena: {news: 'more-bedwars-duels-ffa-with-rewards'},
+  churches: {news: 'churches-reborn', wiki: 'magic/churches'},
+  anchors: {news: 'outer-gods-anchors', wiki: 'magic/boons'},
+  ordeals: {news: 'the-ordeals-and-global-amnesty'},
+};
+const linksOf = (key: string) => {
+  const entry = SYSTEM_LINKS[key] ?? {};
+  return [
+    ...(entry.news ? [{href: `/news/${entry.news}`, internal: true, label: t('home.world.links.news')}] : []),
+    ...(entry.wiki ? [{href: `${WIKI}/${entry.wiki}`, internal: false, label: t('home.world.links.wiki')}] : []),
+  ];
+};
+
+const ordeals = computed(() => (['bloodlust', 'hollowing', 'sealing'] as const).map(key => ({
+  key,
+  name: t(`home.world.ordeals.list.${key}.name`),
+  body: t(`home.world.ordeals.list.${key}.body`),
+})));
+
 const stripWarm = ref(false);
 
 /* the shot open in the lightbox (null: closed); the strip holds still while one is open */
@@ -674,6 +723,93 @@ onUnmounted(() => {
   grid-column: span 7;
 }
 
+/* the whole row: what it is on the left, the three Ordeals on the right */
+.sys--ordeals {
+  grid-column: 1 / -1;
+}
+
+.sys__copy.ordeals {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px clamp(28px, 4vw, 64px);
+  margin-top: 0;
+  padding-top: clamp(22px, 2.2vw, 32px);
+}
+
+.ordeals__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ordeals__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  align-content: start;
+  border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.ordeals__list li {
+  display: grid;
+  gap: 3px;
+  padding: 14px 0 14px 16px;
+  border-bottom: var(--arc-bw) solid var(--arc-line);
+  box-shadow: inset var(--arc-bw-accent) 0 0 var(--acc-ink);
+}
+
+.ordeals__list strong {
+  font-size: var(--arc-fs-body);
+  font-weight: 600;
+  color: var(--arc-ink);
+}
+
+.ordeals__list span {
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
+  color: var(--arc-muted);
+}
+
+/* where to read more: the announcement, the wiki */
+.sys__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin: 2px 0 0;
+}
+
+.sys__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
+  color: var(--arc-ink);
+  text-decoration: none;
+}
+
+.sys__link i {
+  font-size: 11px;
+  color: var(--acc-ink);
+  transition: transform .2s ease;
+}
+
+.sys__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.sys__link:hover i {
+  transform: translateX(2px);
+}
+
+.sys__link:focus-visible {
+  border-radius: var(--arc-r-sm);
+  outline: var(--arc-focus-w) solid var(--arc-ink);
+  outline-offset: var(--arc-focus-off);
+}
+
 /* where a system is drawn rather than photographed, the drawing takes the card's spare height */
 .sys--arena .sys__copy,
 .sys--anchors .sys__copy {
@@ -1038,6 +1174,12 @@ onUnmounted(() => {
 
   .world-gallery__aside {
     justify-items: start;
+  }
+}
+
+@media (max-width: 900px) {
+  .sys__copy.ordeals {
+    grid-template-columns: 1fr;
   }
 }
 
