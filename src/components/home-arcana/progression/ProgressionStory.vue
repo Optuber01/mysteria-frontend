@@ -437,6 +437,8 @@ function clearExpiredInspector(next: number) {
  * page above it changes height, and when it comes into view), so a scroll frame
  * does no layout read: it only reads scrollY.
  */
+/** The rail and the chapter copy, faded out as the pinned room scrolls away (update). */
+let leavingEls: HTMLElement[] = [];
 let sectionTop = 0;
 let sectionHeight = 0;
 /** The section's bottom padding: the room's foot, where it fades into the page (never pinned). */
@@ -486,6 +488,11 @@ function update() {
     const next = storyAt(pace.lead - top, pace);
     progress.value = next;
     clearExpiredInspector(next);
+    // Once the pin lets go the room scrolls away: the rail and the copy fade out first, so
+    // neither rides up over the paper the room's foot fades into.
+    const leave = clamp01((-top - pace.pin) / (innerHeight * 0.3));
+    const fade = leave > 0 ? (1 - leave).toFixed(3) : '';
+    for (const el of leavingEls) el.style.opacity = fade;
   });
 }
 function goToChapter(index: number) {
@@ -503,6 +510,7 @@ function goToChapter(index: number) {
 }
 
 onMounted(() => {
+  leavingEls = [...(sectionRef.value?.querySelectorAll<HTMLElement>('.progression-nav, .chapter-copy-slot') ?? [])];
   observer = new IntersectionObserver(([entry]) => {
     visible.value = entry.isIntersecting;
     if (visible.value) {
@@ -592,7 +600,7 @@ onUnmounted(() => {
  * other way, into the page the next section opens on. Eased stops (smoothstep), so neither
  * reads as a band. Static gradients: they scroll with the page and cost nothing per frame.
  */
-@media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+@media (min-height: 591px) and (prefers-reduced-motion: no-preference) {
   .progression {
     --room-in: clamp(300px, 46vh, 520px);
     --room-photo-in: calc(var(--room-in) * .5);
@@ -1288,10 +1296,69 @@ onUnmounted(() => {
 }
 
 /*
- * Sticky storytelling needs room for its copy, controls and stage to coexist.
- * Narrow and short viewports, and reduced motion, get one document-flow list.
+ * Portrait (phones, tablets held upright): the same pinned story, the stage on top and the
+ * chapter's copy under it, the rail across the foot. The scenes lay themselves out from the
+ * stage's measured size (layout.ts), so they fit whatever band they get.
  */
-@media (max-width: 900px), (max-height: 590px), (prefers-reduced-motion: reduce) {
+@media (max-width: 900px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+  .progression {
+    --rail: clamp(18px, 4.5vw, 40px);
+    --top: calc(var(--site-header-stack, 64px) + 12px);
+    --h3-size: clamp(24px, 6.4vw, 32px);
+  }
+
+  .progression__sticky {
+    min-height: 0;
+  }
+
+  .progression__heading {
+    right: var(--rail);
+    width: auto;
+  }
+
+  .progression__layout {
+    inset: var(--top) var(--rail) 86px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: clamp(10px, 2vh, 20px);
+  }
+
+  .progression__stage {
+    grid-row: 1;
+    min-height: 0;
+  }
+
+  .chapter-copy-slot {
+    grid-row: 2;
+    align-items: end;
+  }
+
+  .chapter-copy__body,
+  .chapter-copy__hint {
+    font-size: 14.5px;
+  }
+
+  .chapter-copy__hint {
+    margin-top: 10px;
+  }
+
+  .chapter-copy__abilities span {
+    font-size: 13px;
+  }
+
+  .progression-nav {
+    right: var(--rail);
+    bottom: 14px;
+    width: auto;
+  }
+}
+
+/*
+ * Sticky storytelling needs room for its copy, controls and stage to coexist.
+ * Short viewports (phones held sideways) and reduced motion get one document-flow list.
+ */
+@media (max-height: 590px), (prefers-reduced-motion: reduce) {
   .progression {
     min-height: auto;
     padding: clamp(64px, 12vw, 96px) clamp(18px, 4vw, 64px);

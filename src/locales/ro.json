@@ -583,11 +583,9 @@
         "offline": "Server offline"
       },
       "hero": {
-        "titleA": "Draw your",
-        "titleB": "first card",
-        "drawnTitleA": "You drew",
-        "drawnTitleB": "{pathway}",
-        "lede": "Lord of the Mysteries, built into a Minecraft MMORPG. Every one of the 22 Pathways is written spell by spell, from your first Sequence 9 potion to a god's throne at Sequence 0.",
+        "titleA": "Minecraft meets",
+        "titleB": "Lord of the Mysteries",
+        "lede": "Pick one of the 22 Pathways and drink your way up its potions, from a Sequence 9 Beyonder to a god's throne at Sequence 0. Free to play, no mods needed.",
         "join": "How to join",
         "changelog": "Latest update",
         "shuffle": "Draw a card",
@@ -596,7 +594,8 @@
         "cardLabel": "Draw card {n} of {total}",
         "beginsAs": "Sequence 9: {role}",
         "readCard": "View Sequences",
-        "announce": "Card drawn: {name}. Sequence 9: {role}."
+        "announce": "Card drawn: {name}. Sequence 9: {role}.",
+        "drawHint": "Not sure where to start? Let the deck pick your Pathway."
       },
       "dock": {
         "label": "Pathway card",
@@ -608,9 +607,9 @@
         "drawFirstHint": "Random Pathway"
       },
       "deck": {
-        "titleA": "22 Pathways,",
-        "titleB": "10 Boons",
-        "lede": "Each one climbs from Sequence 9 to a god's throne, with its own spells and its own madness. Pick a seal, or drag the ring.",
+        "titleA": "Choose your",
+        "titleB": "Pathway",
+        "lede": "A Pathway is the line of powers you follow. Each climbs from Sequence 9 to a god's throne, with its own spells and its own madness. Pick a seal, or drag the ring.",
         "tabsLabel": "Pathways or Boons",
         "tabPathways": "Pathways",
         "tabBoons": "Boons",
@@ -638,7 +637,7 @@
       }
     },
     "progression": {
-      "title": "Your first potion",
+      "title": "From potion to power",
       "navLabel": "Potion stages",
       "navCompleted": "(completed)",
       "chapters": {
@@ -997,8 +996,8 @@
       },
       "credit": "By {author}",
       "join": {
-        "titleA": "Start at",
-        "titleB": "Sequence 9",
+        "titleA": "Join in",
+        "titleB": "minutes",
         "lede": "Free to play, no mods needed. New players choose their own way into their first Pathway.",
         "ledeRole": "Free to play, no mods needed. The {role} formula is already out there.",
         "step1Title": "Add the server",

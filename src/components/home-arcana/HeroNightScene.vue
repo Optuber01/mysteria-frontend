@@ -31,6 +31,8 @@
         <img class="night__city" :src="city" alt="" decoding="async" width="1920" height="1080">
       </picture>
       <i class="night__moonlight" :style="{'--city-mask': `url(${city})`}"></i>
+      <!-- light theme: mist laid over the buildings themselves, so they stay solid in front of the moon -->
+      <i class="night__haze" :style="{'--city-mask': `url(${city})`}"></i>
       <div class="night__fog night__fog--streets"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
     </div>
     <i ref="duskRef" class="night__dusk"></i>
@@ -408,9 +410,26 @@ onUnmounted(() => {
       transparent 60%);
 }
 
-/* the castle sits back in the haze: a grey-blue silhouette rather than a black one */
-:root[data-theme="parchment"] .night__city {
-  opacity: .5;
+/*
+ * The castle sits back in the haze, but stays solid: the moon is behind it, so the
+ * buildings must hide it, not let it show through. The mist is a paper-coloured layer cut
+ * to the buildings' own shape (.night__haze), not transparency on the buildings.
+ */
+.night__haze {
+  display: none;
+}
+
+:root[data-theme="parchment"] .night__haze {
+  display: block;
+  position: absolute;
+  left: var(--city-left, 0);
+  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px));
+  height: var(--city-h, 600px);
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--arc-bg) 46%, transparent) 0%, color-mix(in srgb, var(--arc-bg) 62%, transparent) 60%, var(--arc-bg) 100%);
+  -webkit-mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
+  mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
+  pointer-events: none;
 }
 
 :root[data-theme="parchment"] .night__moonlight {

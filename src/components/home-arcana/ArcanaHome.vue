@@ -328,7 +328,7 @@ body:has(.concept-arcana) {
 }
 
 /* the stacked story (ProgressionStory's fallback, no dissolve): its foot fades into the paper inside its padding */
-@media (max-width: 900px), (max-height: 590px), (prefers-reduced-motion: reduce) {
+@media (max-height: 590px), (prefers-reduced-motion: reduce) {
   :root[data-theme="parchment"] .concept-arcana .progression::after {
     position: absolute;
     z-index: 30;
@@ -556,7 +556,7 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
  * its heading comes up right behind the room, on the plain page; the seam above starts
  * where the foot ends.
  */
-@media (min-width: 901px) and (min-height: 591px) and (prefers-reduced-motion: no-preference) {
+@media (min-height: 591px) and (prefers-reduced-motion: no-preference) {
   .concept-arcana .progression + .arc-section {
     --story-overlap: calc(var(--room-foot) * .4);
     margin-top: calc(-1 * var(--story-overlap));

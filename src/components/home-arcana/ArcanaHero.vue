@@ -5,10 +5,10 @@
     <div class="arc-hero__grid">
       <!-- Copy: what this is, how to get in. Shown once the fonts are in, so nothing jumps. -->
       <div ref="introRef" class="arc-hero__intro" :class="{'is-ready': fontsReady}">
-        <h1 id="arc-hero-title" class="arc-hero__title">
-          <span>{{ titleA }}</span>
-          <!-- one line in both states: a long name shrinks to the column (fitTitle), so the hero never changes height -->
-          <span class="arc-hero__title-accent"><span ref="accentRef" class="arc-hero__title-fit" :style="{'--fit': titleFit}">{{ titleB }}</span></span>
+        <!-- two lines, each kept on one line: the whole title scales down to fit the column (fitTitle) -->
+        <h1 id="arc-hero-title" class="arc-hero__title" :style="{'--fit': titleFit}">
+          <span><span ref="leadRef" class="arc-hero__title-line">{{ titleA }}</span></span>
+          <span class="arc-hero__title-accent"><span ref="accentRef" class="arc-hero__title-line">{{ titleB }}</span></span>
         </h1>
       </div>
 
@@ -137,6 +137,8 @@
                 <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
               </a>
             </p>
+            <!-- before the first draw: what the button is for -->
+            <p v-else class="arc-hero__hint arc-hero__hint--first">{{ t('home.arcana.hero.drawHint') }}</p>
           </div>
         </div>
       </div>
@@ -160,20 +162,19 @@ import {useI18n} from '@/composables/useI18n';
 const {t, intlLocale} = useI18n();
 const {currentId, hasDrawn, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
 
-/* ---------------- headline: "Draw your first card", then "Read your {pathway}" ---------------- */
-const titleA = computed(() => t(hasDrawn.value ? 'home.arcana.hero.drawnTitleA' : 'home.arcana.hero.titleA'));
-const titleB = computed(() => (hasDrawn.value
-    ? t('home.arcana.hero.drawnTitleB').replace('{pathway}', nameOf(currentId.value))
-    : t('home.arcana.hero.titleB')));
+/* ---------------- headline: what this is, the same before and after a draw ---------------- */
+const titleA = computed(() => t('home.arcana.hero.titleA'));
+const titleB = computed(() => t('home.arcana.hero.titleB'));
+const leadRef = ref<HTMLElement | null>(null);
 const accentRef = ref<HTMLElement | null>(null);
-/** Scale of the accent line: 1, or less when the name is wider than the copy column. */
+/** Scale of the whole title: 1, or less when its wider line is wider than the copy column. */
 const titleFit = ref(1);
 function fitTitle() {
-  const line = accentRef.value;
-  // a couple of pixels spare for rounding, so the name never pokes past the column
+  const lines = [leadRef.value, accentRef.value];
+  // a couple of pixels spare for rounding, so no line ever pokes past the column
   const room = (introRef.value?.clientWidth ?? 0) - 2;
-  if (!line || room <= 0) return;
-  const natural = line.getBoundingClientRect().width / titleFit.value;
+  if (lines.some(line => !line) || room <= 0) return;
+  const natural = Math.max(...lines.map(line => line!.getBoundingClientRect().width)) / titleFit.value;
   const next = natural > room ? Math.max(.4, Math.floor((room / natural) * 1000) / 1000) : 1;
   if (Math.abs(next - titleFit.value) > .002) titleFit.value = next;
 }
@@ -991,9 +992,9 @@ onUnmounted(() => {
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  /* "Draw your" is ~4.9em wide: in English the title never wraps inside its own column */
-  font-size: clamp(44px, min(19.5cqi, 12.5vh), 112px);
-  line-height: .92;
+  --title-size: clamp(44px, min(19.5cqi, 12.5vh), 112px);
+  font-size: calc(var(--title-size) * var(--fit, 1));
+  line-height: .98;
   letter-spacing: -.03em;
   color: var(--arc-ink);
   text-shadow: 0 2px 30px color-mix(in srgb, var(--arc-bg) 60%, transparent);
@@ -1008,12 +1009,9 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-/* scaled by --fit with the line box kept at the title's own height (top-aligned, line-height compensated) */
-.arc-hero__title-fit {
+.arc-hero__title-line {
   display: inline-block;
-  vertical-align: top;
-  font-size: calc(1em * var(--fit, 1));
-  line-height: calc(.92 / var(--fit, 1));
+  white-space: nowrap;
 }
 
 .arc-hero__lede {
@@ -1404,7 +1402,7 @@ onUnmounted(() => {
 
   .arc-hero__title {
     margin-bottom: 0;
-    font-size: clamp(42px, 10vw, 84px);
+    --title-size: clamp(42px, 10vw, 84px);
   }
 
   .arc-hero__body {
@@ -1427,7 +1425,7 @@ onUnmounted(() => {
 
 @media (max-width: 520px) {
   .arc-hero__title {
-    font-size: clamp(42px, 13.5vw, 60px);
+    --title-size: clamp(42px, 13.5vw, 60px);
   }
 
   .arc-hero__lede {

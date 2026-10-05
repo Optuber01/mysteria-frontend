@@ -291,7 +291,8 @@ const lines = computed(() => {
     const text = tp(key);
     return text && text !== `home.progression.${key}` ? text : '';
   };
-  const ravings = hasDrawn.value ? [1, 2, 3, 4, 5].map(own) : [];
+  // the Pathway the story follows: the drawn one, or the Fool as the example (no draw yet, or a Boon)
+  const ravings = [1, 2, 3, 4, 5].map(own);
   // a card's set is used whole, never mixed with the general lines
   return ravings.length && ravings.every(Boolean) ? ravings : [1, 2, 3, 4, 5].map((n) => tp(`drink.whisper${n}`));
 });
@@ -303,20 +304,26 @@ const whispers = computed(() => {
     const t = (g.value - whisper.at) / WHISPER_LIFE;
     const on = t > 0 && t < 1 ? smooth(t / WHISPER_FADE) * (1 - smooth((t - 1 + WHISPER_FADE) / WHISPER_FADE)) : 0;
     const drift = clamp01(t) * 10;
+    // A narrow stage (phones, tablets held upright) has no room beside him: the voices
+    // speak over the scene instead, centred like subtitles, one at a time.
+    const narrow = l.w < 600;
     // clear of his head on the right; on the left, of the raised bottle too
     const gap = whisper.side === 'right' ? p.w * 0.27 + 8 : p.w * 0.36 + 8;
-    const anchorX = whisper.side === 'right' ? l.cx + gap : l.cx - gap;
-    const room = (whisper.side === 'right' ? l.w - anchorX : anchorX) - drift - 12;
+    const anchorX = narrow ? l.cx : whisper.side === 'right' ? l.cx + gap : l.cx - gap;
+    const room = narrow ? l.w - 24 : (whisper.side === 'right' ? l.w - anchorX : anchorX) - drift - 12;
     return {
       id: whisper.id,
-      side: whisper.side,
+      side: narrow ? 'center' : whisper.side,
       text: lines.value[index] ?? '',
       style: {
         left: `${anchorX.toFixed(1)}px`,
         top: `${(p.y + whisper.dy * p.h).toFixed(1)}px`,
-        maxWidth: `${Math.max(140, Math.min(320, room)).toFixed(0)}px`,
+        maxWidth: `${(narrow ? room : Math.max(140, Math.min(320, room))).toFixed(0)}px`,
         opacity: (on * (1 - flash.value) * (1 - blackout.value)).toFixed(4),
-        transform: `translate3d(${whisper.side === 'right' ? drift : -drift}px, -50%, 0)`,
+        // beside him the voice drifts outward; over the scene it rises a little
+        transform: narrow
+          ? `translate3d(0, calc(-50% - ${drift.toFixed(1)}px), 0)`
+          : `translate3d(${whisper.side === 'right' ? drift : -drift}px, -50%, 0)`,
         visibility: on > 0.01 ? 'visible' : 'hidden',
       } as CSSProperties,
     };
@@ -648,6 +655,18 @@ const sceneVars = computed(() => {
   text-align: right;
   translate: -100% 0;
   animation-name: whisper-shiver-left;
+}
+
+.whisper--center {
+  text-align: center;
+  translate: -50% 0;
+  animation-name: whisper-shiver-center;
+}
+
+@keyframes whisper-shiver-center {
+  0%, 100% { translate: -50% 0; }
+  33% { translate: calc(-50% + 1px) 0; }
+  66% { translate: calc(-50% - 1px) 0; }
 }
 
 /* the shiver moves the composited text (translate), never its layout box */
