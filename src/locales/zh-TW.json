@@ -726,158 +726,158 @@
       "boonNote": "Boons are raised by sacrifice at an altar, not by potions. The Fool shows how a Pathway begins.",
       "ravings": {
         "fool": {
-          "r1": "Hornacis… Flegrea… Hornacis…",
-          "r2": "Above the gray fog, someone listens.",
-          "r3": "Do not trust your own divination.",
-          "r4": "Hahaha… woowoowoo… hahaha…",
-          "r5": "Everyone will die, including me."
+          "r1": "Hornacis… Flegrea…",
+          "r2": "Above the gray fog…",
+          "r3": "Don't trust divination",
+          "r4": "Hahaha… woowoowoo…",
+          "r5": "Everyone will die…"
         },
         "door": {
-          "r1": "Every wall is a door.",
-          "r2": "The full moon is rising again.",
-          "r3": "Abraham blood remembers the curse.",
-          "r4": "Help me… open the door…",
-          "r5": "Set up the ritual. Free me."
+          "r1": "Every wall… a door",
+          "r2": "The full moon…",
+          "r3": "Abraham blood…",
+          "r4": "Help me… open…",
+          "r5": "Free me."
         },
         "error": {
           "r1": "What a coincidence.",
-          "r2": "Steal it. It was never theirs.",
-          "r3": "Who stole that minute just now?",
-          "r4": "Every rule has a loophole.",
-          "r5": "Only I steal from others."
+          "r2": "Steal it.",
+          "r3": "Who stole that minute?",
+          "r4": "Every rule… a loophole",
+          "r5": "Only I steal."
         },
         "visionary": {
-          "r1": "Watch. Never step onto the stage.",
-          "r2": "Their thoughts are so loud.",
-          "r3": "Every face is a confession.",
-          "r4": "Sink into the collective sea.",
-          "r5": "Can you accept such an outcome?"
+          "r1": "Never step onstage",
+          "r2": "Their thoughts… so loud",
+          "r3": "Every face confesses",
+          "r4": "The collective sea…",
+          "r5": "Can you accept it?"
         },
         "sun": {
-          "r1": "Sing, and the fear burns away.",
-          "r2": "Burn away what is impure.",
-          "r3": "No shadow may remain.",
-          "r4": "Dispel the darkness. Praise the sun.",
+          "r1": "Sing… the fear burns",
+          "r2": "Burn the impure",
+          "r3": "No shadow remains",
+          "r4": "Praise the sun.",
           "r5": "Let there be light!"
         },
         "tyrant": {
-          "r1": "May the Storm be with you.",
-          "r2": "Scales stir beneath your skin.",
-          "r3": "Vent the anger. Right now.",
-          "r4": "Thunder answers to you now.",
-          "r5": "Kneel. Fear makes faith."
+          "r1": "May the Storm…",
+          "r2": "Scales… under skin",
+          "r3": "Vent the anger.",
+          "r4": "Thunder answers",
+          "r5": "Kneel."
         },
         "tower": {
-          "r1": "One more page. Just one more.",
-          "r2": "Deduce it. The truth is there.",
-          "r3": "An eye opens on the page.",
-          "r4": "Brass eyes blink between the books.",
-          "r5": "The higher you climb, the darker."
+          "r1": "One more page…",
+          "r2": "Deduce it.",
+          "r3": "An eye on the page",
+          "r4": "Brass eyes blink…",
+          "r5": "Higher… darker…"
         },
         "hanged": {
-          "r1": "Pray, and secrets will answer.",
-          "r2": "Beyond the veil, eyes are watching.",
-          "r3": "Black worms. White moths. Eyes.",
-          "r4": "The Hanged Giant is listening.",
-          "r5": "Praise you for creating all."
+          "r1": "Pray… secrets answer",
+          "r2": "Beyond the veil…",
+          "r3": "Black worms. Moths.",
+          "r4": "The Hanged Giant…",
+          "r5": "Praise you, Creator"
         },
         "darkness": {
-          "r1": "Stay awake. The night is long.",
-          "r2": "Whose dream are you in?",
-          "r3": "What was I just saying?",
-          "r4": "Sleep. The dark river carries you.",
+          "r1": "Stay awake…",
+          "r2": "Whose dream is this?",
+          "r3": "What was I saying?",
+          "r4": "The dark river…",
           "r5": "Praise the Lady."
         },
         "death": {
-          "r1": "Your hands are growing cold.",
-          "r2": "Speak, and the dead will answer.",
-          "r3": "The sunlight burns. Stay in shade.",
-          "r4": "The ferryman waits at the river.",
-          "r5": "The Underworld is calling you down."
+          "r1": "Your hands… cold",
+          "r2": "The dead answer",
+          "r3": "The sunlight burns",
+          "r4": "The ferryman waits",
+          "r5": "The Underworld calls…"
         },
         "giant": {
-          "r1": "Pick up any weapon. It obeys.",
-          "r2": "Stand guard. Take the blow.",
-          "r3": "I want to see the sunlight.",
-          "r4": "Everything decays at dusk.",
-          "r5": "Twilight of all things."
+          "r1": "Any weapon obeys",
+          "r2": "Take the blow.",
+          "r3": "I want sunlight…",
+          "r4": "Decay at dusk…",
+          "r5": "Twilight of all…"
         },
         "demoness": {
-          "r1": "Shadows are your friends now.",
-          "r2": "Whisper one word. Watch them fight.",
-          "r3": "The mirror keeps a spare you.",
-          "r4": "Black flame, cold as frost.",
-          "r5": "She wants you as Her own."
+          "r1": "Shadows… friends now",
+          "r2": "One word. They fight.",
+          "r3": "A spare you…",
+          "r4": "Black flame, cold…",
+          "r5": "She wants you…"
         },
         "priest": {
-          "r1": "Prey or hunter? Choose.",
-          "r2": "Smell the blood. Follow it.",
-          "r3": "Swallow the fire. Don't faint.",
-          "r4": "Say it. Make them lose control.",
-          "r5": "War is the Lord's rage."
+          "r1": "Prey or hunter?",
+          "r2": "Smell the blood.",
+          "r3": "Swallow the fire.",
+          "r4": "Make them lose control",
+          "r5": "War is His rage."
         },
         "hermit": {
-          "r1": "Your ears are ringing again.",
-          "r2": "Some things should stay unseen.",
-          "r3": "The words are chasing you.",
-          "r4": "Eyes without lashes, watching.",
-          "r5": "Knowledge is pursuing you."
+          "r1": "Your ears… ringing",
+          "r2": "Stay unseen…",
+          "r3": "The words chase you",
+          "r4": "Lashless eyes…",
+          "r5": "Knowledge pursues…"
         },
         "paragon": {
-          "r1": "Quiet. No voices. Only reason.",
-          "r2": "You remember everything. Everything.",
-          "r3": "Take it apart. Understand it.",
-          "r4": "Every page you ever read returns.",
+          "r1": "Quiet. Only reason.",
+          "r2": "You remember all.",
+          "r3": "Take it apart.",
+          "r4": "Every page returns",
           "r5": "Knowledge is power."
         },
         "fortune": {
-          "r1": "Lucky now. Misfortune next.",
-          "r2": "Ninety percent. Recalculate.",
-          "r3": "I smell death on you.",
-          "r4": "The river of fate is rising.",
-          "r5": "Fate always exacts a price."
+          "r1": "Lucky… then not",
+          "r2": "Ninety percent…",
+          "r3": "I smell death…",
+          "r4": "The river of fate…",
+          "r5": "Fate takes a price."
         },
         "mother": {
-          "r1": "Smell the rain before it comes.",
-          "r2": "Seeds are waiting in your palms.",
-          "r3": "Every grave becomes a garden.",
-          "r4": "The soul returns to the land.",
-          "r5": "Praise the Earth, Mother of All."
+          "r1": "Rain is coming…",
+          "r2": "Seeds in your palms",
+          "r3": "Graves… gardens",
+          "r4": "Return to the land…",
+          "r5": "Praise the Earth."
         },
         "moon": {
-          "r1": "Grind the herbs. Mix the blood.",
-          "r2": "Your eyes are turning red.",
-          "r3": "Thirst. Just one sip.",
-          "r4": "The crimson moon is full.",
-          "r5": "The Ancestor is summoning you."
+          "r1": "Grind… mix the blood",
+          "r2": "Your eyes… red",
+          "r3": "Just one sip…",
+          "r4": "The crimson moon…",
+          "r5": "The Ancestor calls…"
         },
         "abyss": {
-          "r1": "Don't hold back. Never again.",
-          "r2": "Your conscience isn't dead. Yet.",
-          "r3": "Smell the sulfur? That's you.",
-          "r4": "Your desires are singing together.",
-          "r5": "The Abyss is in your heart."
+          "r1": "Don't hold back.",
+          "r2": "Your conscience… yet",
+          "r3": "Sulfur. That's you.",
+          "r4": "Your desires sing…",
+          "r5": "The Abyss… within"
         },
         "chained": {
-          "r1": "Restrain it. Restrain it.",
-          "r2": "Calm face. Screaming heart.",
-          "r3": "Black fur under your skin.",
-          "r4": "The full moon loosens everything.",
-          "r5": "The body is the mind's prison."
+          "r1": "Restrain it.",
+          "r2": "Calm face. Screaming…",
+          "r3": "Black fur…",
+          "r4": "The full moon…",
+          "r5": "The body… a prison"
         },
         "emperor": {
-          "r1": "Agree. You already agreed.",
-          "r2": "Everyone has a price.",
-          "r3": "Find the loophole. Then rule.",
-          "r4": "Every order casts a shadow.",
-          "r5": "Kneel before the black throne."
+          "r1": "You already agreed.",
+          "r2": "Everyone has a price",
+          "r3": "Find the loophole.",
+          "r4": "Order casts shadow",
+          "r5": "Kneel… black throne"
         },
         "justiciar": {
-          "r1": "Keep the order. Keep it.",
-          "r2": "Fleeing is prohibited here.",
-          "r3": "Give up. You've already lost.",
-          "r4": "Imprison. Release. Imprison.",
-          "r5": "All are equal before the law."
+          "r1": "Keep the order.",
+          "r2": "Fleeing is prohibited.",
+          "r3": "Give up.",
+          "r4": "Imprison. Release.",
+          "r5": "All are equal…"
         }
       }
     },

@@ -454,8 +454,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 14px 22px;
-  margin-top: auto;
-  padding-top: 14px;
+  padding-top: 10px;
 }
 
 /* the road: five steps on one thread, the last one the rite */
@@ -753,9 +752,11 @@ onUnmounted(() => {
 .fan__card {
   position: absolute;
   container-type: inline-size;
+  --fw: clamp(76px, 8.4vw, 124px);
   left: 50%;
-  bottom: 18%;
-  width: clamp(76px, 8.4vw, 124px);
+  /* the fan sits in the middle of whatever height the card gives it, never in its foot */
+  bottom: max(18%, calc(50% - var(--fw) * .62));
+  width: var(--fw);
   aspect-ratio: 1 / 1.62;
   transform-origin: 50% 160%;
   transform: translateX(-50%) rotate(calc(var(--i) * 12deg));

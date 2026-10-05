@@ -268,18 +268,18 @@ const potionLightStyle = computed<CSSProperties>(() => {
  * where a Pathway has none yet, the general whispers stand in. A missing key
  * comes back from t() as the key itself.
  */
-type Whisper = { id: string; at: number; side: 'left' | 'right'; dy: number };
+type Whisper = { id: string; at: number; dx: number; dy: number };
 /** Share of the voices' stretch each crossfade takes; the five lines fill it end to end. */
 const VOICE_FADE = 0.025;
 const VOICE_STEP = (1 - VOICE_FADE) / 5;
 const VOICE_SPAN = T.voices[1] - T.voices[0];
 const VOICE_AT = [0, 1, 2, 3, 4].map((n) => T.voices[0] + n * VOICE_STEP * VOICE_SPAN);
 const WHISPERS: Whisper[] = [
-  { id: 'w1', at: VOICE_AT[0], side: 'right', dy: 0.14 },
-  { id: 'w2', at: VOICE_AT[1], side: 'left', dy: 0.3 },
-  { id: 'w3', at: VOICE_AT[2], side: 'right', dy: 0.36 },
-  { id: 'w4', at: VOICE_AT[3], side: 'left', dy: 0.12 },
-  { id: 'w5', at: VOICE_AT[4], side: 'right', dy: 0.2 },
+  { id: 'w1', at: VOICE_AT[0], dx: 0.2, dy: 0.3 },
+  { id: 'w2', at: VOICE_AT[1], dx: -0.24, dy: 0.44 },
+  { id: 'w3', at: VOICE_AT[2], dx: 0.14, dy: 0.56 },
+  { id: 'w4', at: VOICE_AT[3], dx: -0.18, dy: 0.22 },
+  { id: 'w5', at: VOICE_AT[4], dx: 0.08, dy: 0.36 },
 ];
 /** How long each voice is heard (timeline fraction): its step plus the crossfade into the next. */
 const WHISPER_LIFE = (VOICE_STEP + VOICE_FADE) * VOICE_SPAN;
@@ -303,27 +303,20 @@ const whispers = computed(() => {
   return WHISPERS.map((whisper, index) => {
     const t = (g.value - whisper.at) / WHISPER_LIFE;
     const on = t > 0 && t < 1 ? smooth(t / WHISPER_FADE) * (1 - smooth((t - 1 + WHISPER_FADE) / WHISPER_FADE)) : 0;
-    const drift = clamp01(t) * 10;
-    // A narrow stage (phones, tablets held upright) has no room beside him: the voices
-    // speak over the scene instead, centred like subtitles, one at a time.
-    const narrow = l.w < 600;
-    // clear of his head on the right; on the left, of the raised bottle too
-    const gap = whisper.side === 'right' ? p.w * 0.27 + 8 : p.w * 0.36 + 8;
-    const anchorX = narrow ? l.cx : whisper.side === 'right' ? l.cx + gap : l.cx - gap;
-    const room = narrow ? l.w - 24 : (whisper.side === 'right' ? l.w - anchorX : anchorX) - drift - 12;
+    const drift = clamp01(t) * 14;
+    // Behind him: each voice is a big, faint line centred a little off his axis, so his
+    // body hides part of it and the stage's edges cut off its ends. It drifts sideways.
+    const anchorX = l.cx + whisper.dx * p.w;
+    const dir = whisper.dx < 0 ? -1 : 1;
     return {
       id: whisper.id,
-      side: narrow ? 'center' : whisper.side,
+      side: 'center',
       text: lines.value[index] ?? '',
       style: {
         left: `${anchorX.toFixed(1)}px`,
         top: `${(p.y + whisper.dy * p.h).toFixed(1)}px`,
-        maxWidth: `${(narrow ? room : Math.max(140, Math.min(320, room))).toFixed(0)}px`,
-        opacity: (on * (1 - flash.value) * (1 - blackout.value)).toFixed(4),
-        // beside him the voice drifts outward; over the scene it rises a little
-        transform: narrow
-          ? `translate3d(0, calc(-50% - ${drift.toFixed(1)}px), 0)`
-          : `translate3d(${whisper.side === 'right' ? drift : -drift}px, -50%, 0)`,
+        opacity: (on * 0.62 * (1 - flash.value) * (1 - blackout.value)).toFixed(4),
+        transform: `translate3d(${(dir * drift).toFixed(1)}px, -50%, 0)`,
         visibility: on > 0.01 ? 'visible' : 'hidden',
       } as CSSProperties,
     };
@@ -631,31 +624,27 @@ const sceneVars = computed(() => {
 .drink-scene__whispers {
   position: absolute;
   inset: 0;
-  z-index: 8;
+  /* behind the player (5): his body covers part of each line; the stage's edges cut the rest */
+  z-index: 4;
+  overflow: hidden;
   pointer-events: none;
 }
 
 .whisper {
   position: absolute;
   width: max-content;
+  white-space: nowrap;
   /* the potion story is a dark room in either theme */
-  color: #efeef3;
-  font: 400 clamp(16px, 1.2vw, 18px)/1.4 var(--arc-caps);
-  letter-spacing: 0.1em;
+  color: color-mix(in oklab, var(--acc) 30%, #efeef3);
+  font: 400 clamp(26px, 3.4vw, 54px)/1 var(--arc-caps);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-wrap: balance;
-  overflow-wrap: break-word;
-  /* a faint split image, as if heard twice, over a dark halo that keeps it legible */
-  text-shadow: -1px 0 color-mix(in oklab, var(--acc) 55%, transparent), 1px 0 rgba(169, 198, 214, 0.35), 0 0 3px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.9);
+  /* a faint split image, as if heard twice */
+  text-shadow: -2px 0 color-mix(in oklab, var(--acc) 60%, transparent), 2px 0 rgba(169, 198, 214, 0.3), 0 0 18px rgba(0, 0, 0, 0.8);
   animation: whisper-shiver 0.9s steps(3) infinite;
   will-change: transform, opacity;
 }
 
-.whisper--left {
-  text-align: right;
-  translate: -100% 0;
-  animation-name: whisper-shiver-left;
-}
 
 .whisper--center {
   text-align: center;
@@ -676,11 +665,6 @@ const sceneVars = computed(() => {
   66% { translate: -1px 0; }
 }
 
-@keyframes whisper-shiver-left {
-  0%, 100% { translate: -100% 0; }
-  33% { translate: calc(-100% + 1px) 0; }
-  66% { translate: calc(-100% - 1px) 0; }
-}
 
 /* ---------- floor mist, burnt off by the awakening ---------- */
 .drink-scene__mist {

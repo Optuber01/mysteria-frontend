@@ -171,9 +171,9 @@ type Pose = {
  */
 const REST: Pose = { rArmX: -0.08, rArmZ: 0.05, lArmX: -0.12, lArmZ: -0.05, headX: 0.06, headY: -0.04, turn: 0.04, legR: 0, legL: 0, rise: 0, roll: 0, tip: 0.06 };
 // hand out to his side, palm up, eyes on the potion settling into it
-const REACH: Pose = { ...REST, rArmX: -1.12, rArmZ: -0.34, lArmX: -0.16, headX: 0.36, headY: -0.42, turn: 0.2, tip: 0 };
+const REACH: Pose = { ...REST, rArmX: -1.12, rArmZ: -0.34, lArmX: -0.16, headX: 0.3, headY: -0.26, turn: 0.1, tip: 0 };
 // brought up to his eye, out in front of him, and looked at
-const REGARD: Pose = { ...REST, rArmX: -1.42, rArmZ: 0.02, lArmX: -0.16, headX: 0.2, headY: -0.34, turn: 0.28, tip: -0.06 };
+const REGARD: Pose = { ...REST, rArmX: -1.42, rArmZ: 0.02, lArmX: -0.16, headX: 0.18, headY: -0.2, turn: 0.12, tip: -0.06 };
 // the empty bottle lowered to his side, the head still level
 const LOWER: Pose = { ...REST, rArmX: -0.3, rArmZ: 0.04, headX: 0.12, headY: 0, turn: 0.12, tip: 0.14 };
 // the potion takes hold: head bowed into his left hand, shoulders down
@@ -202,10 +202,11 @@ function drinkPose(sip: number, swallow: number): Pose {
     // the free hand hangs a little out, for balance, as the head goes back
     lArmX: -0.12 - sip * 0.1,
     lArmZ: 0.04 + sip * 0.08,
-    headX: lerp(-0.08, -0.44, sip) - swallow * 0.06,
-    headY: -0.06,
-    turn: 0.42,
-    tip: lerp(1.05, 2.25, sip) + swallow * 0.08,
+    // he faces us: a slight turn so the bottle is in profile, the head only tipped back
+    headX: lerp(-0.04, -0.26, sip) - swallow * 0.04,
+    headY: -0.04,
+    turn: 0.14,
+    tip: lerp(1.0, 1.75, sip) + swallow * 0.06,
   };
 }
 
