@@ -3,13 +3,13 @@
   <div class="app">
     <!-- The homepage paints its own light canvas; the shared dark one would only
          sit hidden underneath it. -->
-    <MysticBackground v-if="!isHome"/>
+    <MysticBackground v-if="showSiteChrome"/>
     <NotificationContainer/>
 
     <!-- Main Content -->
     <RouterView/>
   </div>
-  <div v-if="!isHome" ref="cursor" class="cursor-background"></div>
+  <div v-if="showSiteChrome" ref="cursor" class="cursor-background"></div>
 </template>
 
 <script lang="ts" setup>
@@ -33,6 +33,13 @@ useAccountNotificationsWatcher();
 
 const route = useRoute();
 const isHome = computed(() => route.name === "home");
+/*
+ * On a fresh load the first paint comes before the router has resolved the URL
+ * (no match, no name yet), which read as "not home" and flashed the shared
+ * background and the gold cursor glow over the homepage. Neither shows until
+ * the route is known.
+ */
+const showSiteChrome = computed(() => route.matched.length > 0 && !isHome.value);
 
 // Force scroll to top on every route change.
 // `behavior: "instant"` overrides the global `scroll-behavior: smooth`, which
