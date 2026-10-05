@@ -1,9 +1,8 @@
 <template>
   <section id="world" class="arc-section world" aria-labelledby="world-title">
     <div class="arc-shell">
-      <ArcanaSectionHead split title-id="world-title">
+      <ArcanaSectionHead title-id="world-title">
         <template #title>{{ t('home.world.titleA') }} <em>{{ t('home.world.titleB') }}</em></template>
-        {{ t('home.world.lede') }}
       </ArcanaSectionHead>
 
       <!-- the flagship: the Pantheon, its hall of thrones and the road up to it -->

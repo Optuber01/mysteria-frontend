@@ -8,7 +8,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 // 'brew', 'steam' and 'spirit' draw square texels, like Minecraft's own particles.
-type ParticleMode = 'sparkles' | 'bubbles' | 'aura' | 'burst' | 'brew' | 'steam' | 'spirit';
+type ParticleMode = 'sparkles' | 'bubbles' | 'burst' | 'brew' | 'steam' | 'spirit';
 /**
  * 'spirit' is posed by the story, not by a clock: how much of the spirit world is in
  * the room (fog, wandering spirit lights), how much spirituality is streaming into him,
@@ -78,13 +78,9 @@ interface Particle {
   baseX: number;
   wobble: number;
   wobbleFreq: number;
-  // aura
+  // spirit
   angle: number;
-  orbitA: number;
-  orbitB: number;
   dirSpeed: number;
-  tailLen: number;
-  lineWidth: number;
   // burst
   life: number;
   maxLife: number;
@@ -147,11 +143,7 @@ function newParticle(): Particle {
     wobble: 0,
     wobbleFreq: 0,
     angle: 0,
-    orbitA: 0,
-    orbitB: 0,
     dirSpeed: 0,
-    tailLen: 0,
-    lineWidth: 1,
     life: 0,
     maxLife: 1,
     drag: 1,
@@ -161,7 +153,6 @@ function newParticle(): Particle {
 function targetCount(): number {
   if (props.mode === 'sparkles') return Math.round(34 * intensity.value);
   if (props.mode === 'bubbles') return Math.round(22 * intensity.value);
-  if (props.mode === 'aura') return Math.round(26 * intensity.value);
   if (props.mode === 'brew') return Math.round(34 * intensity.value);
   if (props.mode === 'steam') return Math.round(34 * intensity.value);
   if (props.mode === 'spirit') return SPIRIT_FOG + SPIRIT_MOTES + SPIRIT_GATHER;
@@ -196,20 +187,6 @@ function createParticle(rng: () => number): Particle {
       p.phase = rng() * TAU;
       p.wobble = 6 + rng() * 12;
       p.wobbleFreq = 0.8 + rng() * 1.4;
-      return p;
-    }
-    case 'aura': {
-      const p = newParticle();
-      p.orbitA = Math.min(width, height) * (0.16 + rng() * 0.1);
-      p.orbitB = p.orbitA * (0.5 + rng() * 0.2);
-      p.angle = rng() * TAU;
-      p.dirSpeed = (rng() < 0.5 ? -1 : 1) * (0.22 + rng() * 0.4);
-      p.baseAlpha = 0.26 + rng() * 0.34;
-      p.color = rng() < 0.6 ? CRIMSON : BONE;
-      p.phase = rng() * TAU;
-      p.twinkle = 0.5 + rng() * 1.2;
-      p.tailLen = 14 + rng() * 20;
-      p.lineWidth = 1.4 + rng() * 1.2;
       return p;
     }
     case 'brew': {
@@ -488,48 +465,6 @@ function renderBubbles(t: number, dt: number, alphaMul: number, speedMul: number
   }
 }
 
-function renderAura(t: number, dt: number, alphaMul: number, speedMul: number): void {
-  if (!ctx) return;
-  const c = ctx;
-  const cx = width / 2;
-  const cy = height / 2;
-  for (const p of particles) {
-    const angle = p.angle + t * p.dirSpeed * speedMul;
-    const ripple = 1 + 0.06 * Math.sin(p.phase + t * 1.3);
-    const x = cx + Math.cos(angle) * p.orbitA * ripple;
-    const y = cy + Math.sin(angle) * p.orbitB * ripple;
-    const tx = -Math.sin(angle) * p.orbitA;
-    const ty = Math.cos(angle) * p.orbitB;
-    const magnitude = Math.max(0.0001, Math.hypot(tx, ty));
-    const ux = tx / magnitude;
-    const uy = ty / magnitude;
-    const fromX = x - ux * p.tailLen;
-    const fromY = y - uy * p.tailLen;
-    const twinkle = 0.5 + 0.5 * Math.sin(p.phase * 2 + t * 1.1);
-    const alpha = p.baseAlpha * twinkle * alphaMul;
-    // soft halo streak
-    c.strokeStyle = rgba(p.color, alpha * 0.14);
-    c.lineWidth = p.lineWidth * 3;
-    c.lineCap = 'round';
-    c.beginPath();
-    c.moveTo(fromX, fromY);
-    c.lineTo(x, y);
-    c.stroke();
-    // bright core streak
-    c.strokeStyle = rgba(p.color, alpha);
-    c.lineWidth = p.lineWidth;
-    c.beginPath();
-    c.moveTo(fromX, fromY);
-    c.lineTo(x, y);
-    c.stroke();
-    // head dot
-    c.fillStyle = rgba(p.color, alpha);
-    c.beginPath();
-    c.arc(x, y, p.lineWidth * 0.9, 0, TAU);
-    c.fill();
-  }
-}
-
 function renderBurst(t: number, dt: number, alphaMul: number): void {
   if (!ctx) return;
   for (let i = particles.length - 1; i >= 0; i--) {
@@ -602,9 +537,6 @@ function render(t: number, dt: number): void {
       break;
     case 'bubbles':
       renderBubbles(t, dt, alphaMul, speedMul);
-      break;
-    case 'aura':
-      renderAura(t, dt, alphaMul, speedMul);
       break;
     case 'burst':
       renderBurst(t, dt, alphaMul);

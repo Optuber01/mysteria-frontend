@@ -49,7 +49,6 @@
                 <template v-for="(part, index) in awakenTitle" :key="index"><em v-if="part.name">{{ part.text }}</em><template v-else>{{ part.text }}</template></template>
               </h3>
               <p class="chapter-copy__sub">{{ tp('drink.panelSub') }}</p>
-              <p class="chapter-copy__digest">{{ chapterText('awaken', 'copy') }}</p>
               <ul v-if="firstAbilities.length" class="chapter-copy__abilities" :aria-label="tp('drink.abilitiesHeading')">
                 <li v-for="ability in firstAbilities" :key="ability.id">
                   <strong>{{ ability.name }}</strong>
@@ -138,7 +137,7 @@
             <template v-for="(part, index) in awakenTitle" :key="index"><em v-if="part.name">{{ part.text }}</em><template v-else>{{ part.text }}</template></template>
           </h3>
           <h3 v-else>{{ chapterText(chapter.id, 'title') }}</h3>
-          <p class="progression-static__copy">{{ chapterText(chapter.id, 'copy') }}</p>
+          <p v-if="chapter.id !== 'awaken'" class="progression-static__copy">{{ chapterText(chapter.id, 'copy') }}</p>
           <p v-if="isBoon && chapter.id === 'discover'" class="progression-static__copy">{{ tp('boonNote') }}</p>
           <ul v-if="chapter.id === 'discover'" class="progression-static__ingredients">
             <li v-for="item in ingredients" :key="item.key">
@@ -952,14 +951,6 @@ onUnmounted(() => {
   margin-top: 12px;
 }
 
-.chapter-copy__digest {
-  margin: 0 0 16px;
-  color: var(--arc-muted);
-  font-size: var(--arc-fs-small, 14px);
-  line-height: 1.5;
-  text-wrap: pretty;
-}
-
 .chapter-copy__abilities {
   display: grid;
   gap: 0;
@@ -1184,10 +1175,6 @@ onUnmounted(() => {
     font-size: 14px;
   }
 
-  .chapter-copy__digest {
-    margin-bottom: 12px;
-  }
-
   .chapter-copy__abilities li {
     padding-block: 7px;
   }
@@ -1210,10 +1197,6 @@ onUnmounted(() => {
 
   .chapter-copy__sub {
     margin-bottom: 10px;
-  }
-
-  .chapter-copy__digest {
-    margin-bottom: 8px;
   }
 
   .chapter-copy__abilities li {
@@ -1291,10 +1274,6 @@ onUnmounted(() => {
     font-size: 14px;
   }
 
-  .chapter-copy__digest {
-    margin-bottom: 10px;
-  }
-
   .chapter-copy__abilities li {
     padding-block: 7px;
   }
@@ -1321,10 +1300,6 @@ onUnmounted(() => {
 
   .chapter-copy__abilities li {
     padding-block: 5px;
-  }
-
-  .chapter-copy__digest {
-    margin-bottom: 8px;
   }
 
   .chapter-copy__onward {

@@ -6,55 +6,44 @@
 
     <div class="arc-shell">
       <span id="join" class="arc-future__anchor" aria-hidden="true"></span>
-      <ArcanaSectionHead split title-id="arc-future-title">
+      <ArcanaSectionHead title-id="arc-future-title">
         <template #title>{{ t('home.world.join.titleA') }} <em>{{ t('home.world.join.titleB') }}</em></template>
-        {{ lede }}
       </ArcanaSectionHead>
 
       <div class="arc-future__grid">
-        <!-- three steps to the table -->
-        <div class="arc-future__steps">
-          <ol class="arc-steps">
-            <li class="arc-step">
-              <span class="arc-step__num" aria-hidden="true">1</span>
-              <div class="arc-step__body">
-                <h3>{{ t('home.world.join.step1Title') }}</h3>
-                <button
-                    type="button"
-                    class="arc-ip"
-                    :class="`is-${copyState}`"
-                    :aria-describedby="'arc-future-copy-note'"
-                    @click="copy"
-                >
-                  <span ref="addressRef" class="arc-ip__address">{{ address }}</span>
-                  <span class="arc-ip__hint">
-                    <i :class="copyIcon" aria-hidden="true"></i>
-                    {{ copyLabel }}
-                  </span>
-                </button>
-                <p id="arc-future-copy-note" class="arc-step__note" :class="`is-${copyState}`" aria-live="polite">
-                  {{ copyNote }}
-                </p>
+        <!-- one address for both editions, then what each needs -->
+        <div class="arc-connect">
+          <button
+              type="button"
+              class="arc-ip"
+              :class="`is-${copyState}`"
+              :aria-describedby="'arc-future-copy-note'"
+              @click="copy"
+          >
+            <span ref="addressRef" class="arc-ip__address">{{ address }}</span>
+            <span class="arc-ip__hint">
+              <i :class="copyIcon" aria-hidden="true"></i>
+              {{ copyLabel }}
+            </span>
+          </button>
+          <p id="arc-future-copy-note" class="arc-connect__note" :class="`is-${copyState}`" aria-live="polite">
+            {{ copyNote }}
+          </p>
+
+          <ul class="arc-editions">
+            <li v-for="edition in EDITIONS" :key="edition.key" class="arc-edition">
+              <i :class="edition.icon" aria-hidden="true"></i>
+              <div>
+                <h3>{{ t(`home.world.join.${edition.key}.name`) }}</h3>
+                <p>{{ t(`home.world.join.${edition.key}.body`) }}</p>
               </div>
             </li>
-            <li class="arc-step">
-              <span class="arc-step__num" aria-hidden="true">2</span>
-              <div class="arc-step__body">
-                <h3>{{ t('home.world.join.step2Title') }}</h3>
-                <p>{{ t('home.world.join.step2Body') }}</p>
-              </div>
-            </li>
-            <li class="arc-step">
-              <span class="arc-step__num" aria-hidden="true">3</span>
-              <div class="arc-step__body">
-                <h3>{{ t('home.world.join.step3Title') }}</h3>
-                <p><template v-for="(part, i) in step3Parts" :key="i"><span v-if="part.glue" class="arc-nowrap">{{ part.text }}</span><template v-else>{{ part.text }}</template></template></p>
-              </div>
-            </li>
-          </ol>
+          </ul>
+
+          <p class="arc-connect__verify">{{ t('home.world.join.verify') }}</p>
         </div>
 
-        <!-- one panel beside the steps: who's on right now, and the two ways in -->
+        <!-- beside it: who's on right now, and the two ways to get help -->
         <div class="arc-join">
           <div class="arc-live" :class="statusClass">
             <div class="arc-live__row">
@@ -90,23 +79,20 @@ import {useServerStatus} from '@/composables/useServer';
 import {useBeyonderStats} from '@/composables/useBeyonderStats';
 import IconDiscord from '@/assets/icons/IconDiscord.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
-import {useArcana} from './useArcana';
 import {useCopyAddress} from './useCopyAddress';
 import sky from '@/assets/images/home-library/captures/hero-aurora-cliffside.webp';
 
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
+const EDITIONS = [
+  {key: 'java', icon: 'fa-solid fa-desktop'},
+  {key: 'bedrock', icon: 'fa-solid fa-mobile-screen'},
+] as const;
 
 const {t, intlLocale} = useI18n();
-const {reading, hasDrawn, card} = useArcana();
 const addressRef = ref<HTMLElement | null>(null);
 const {state: copyState, copy, address} = useCopyAddress(addressRef);
 const {isOnline, playerCount, checkedAt} = useServerStatus();
 const {totalBeyonders} = useBeyonderStats();
-
-/* Before a draw (or for a Boon, which has no potion) the lede stays general; after a Pathway draw it names its first potion. */
-const lede = computed(() => (hasDrawn.value && !card.value.boon
-    ? t('home.world.join.ledeRole').replace('{role}', reading.value.seq9 || reading.value.name)
-    : t('home.world.join.lede')));
 
 const copyLabel = computed(() => ({
   idle: t('home.arcana.ip.copy'),
@@ -120,16 +106,10 @@ const copyIcon = computed(() => ({
 }[copyState.value]));
 /* The line under the address always holds text, so the copy feedback never shifts the layout. */
 const copyNote = computed(() => ({
-  idle: t('home.world.join.step1Body'),
+  idle: t('home.world.join.copyHint'),
   copied: t('home.world.join.copiedHelp'),
   failed: t('home.arcana.ip.failedHelp'),
 }[copyState.value]));
-
-/* Hyphenated words ("in-game") stay on one line. */
-const step3Parts = computed(() => t('home.world.join.step3Body')
-    .split(/(\S*\p{L}-\p{L}\S*)/u)
-    .filter(Boolean)
-    .map(text => ({text, glue: /\p{L}-\p{L}/u.test(text)})));
 
 /* ---- live status ---- */
 const statusClass = computed(() => (!checkedAt.value ? 'is-checking' : isOnline.value ? 'is-online' : 'is-offline'));
@@ -147,7 +127,7 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
   overflow: clip;
 }
 
-/* a dawn sky behind the steps, faded in and out so the section has no edges */
+/* a dawn sky behind the section, faded in and out so the section has no edges */
 .arc-future__sky {
   position: absolute;
   inset: 0 0 auto;
@@ -181,15 +161,6 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
   z-index: 1;
 }
 
-/* the lede sits over the sky photo: ink, not muted, to stay readable in both themes */
-.arc-future :deep(.arc-head__lede) {
-  color: var(--arc-ink);
-}
-
-.arc-nowrap {
-  white-space: nowrap;
-}
-
 .arc-future__anchor {
   position: absolute;
   top: calc(var(--arc-section-pad) * -1);
@@ -199,56 +170,70 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
 .arc-future__grid {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  /* the steps run down the left; the live count, the news card and the buttons stack on the right
-     at their own height (whatever the data brings, no card is stretched to fill) */
-  grid-template-areas: 'steps join';
+  /* each card at its own height: whatever the data brings, neither is stretched to fill */
+  grid-template-areas: 'connect join';
   gap: var(--arc-grid-gap);
   align-items: start;
 }
 
-.arc-future__steps {
-  grid-area: steps;
-}
-
-/* ---- steps ---- */
-.arc-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--arc-grid-gap);
-}
-
-.arc-step {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 20px;
-  padding: clamp(20px, 2vw, 26px);
+/* ---- the address and the two editions ---- */
+.arc-connect {
+  grid-area: connect;
+  padding: clamp(22px, 2.2vw, 30px);
   border-radius: var(--arc-r-lg);
   background: var(--arc-raised);
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
-/* the step token: the same card as the rift steps and the town ladder (WorldChapter) */
-.arc-step__num {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 46px;
-  border-radius: var(--arc-r-sm);
-  border: var(--arc-bw-accent) solid var(--acc-ink);
-  background: color-mix(in oklab, var(--acc) 14%, var(--arc-chip-bg));
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 700;
-  font-size: var(--arc-fs-body);
-  color: var(--arc-ink);
-  transform: rotate(-6deg);
-  transition: border-color .6s ease, background-color .6s ease;
+/* the hero's copy field (global .arc-ip), full width */
+.arc-connect .arc-ip {
+  width: 100%;
+  justify-content: space-between;
 }
 
-.arc-step h3 {
-  margin: 2px 0 8px;
+.arc-connect__note {
+  min-height: 1.6em;
+  margin: 10px 0 0;
+  font-size: var(--arc-fs-small);
+  line-height: 1.6;
+  color: var(--arc-muted);
+  transition: color .2s;
+}
+
+.arc-connect__note.is-copied {
+  color: var(--arc-ok);
+}
+
+.arc-connect__note.is-failed {
+  color: var(--arc-bad);
+}
+
+.arc-editions {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--arc-grid-gap);
+  margin: 22px 0 0;
+  padding: 22px 0 0;
+  border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.arc-edition {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 14px;
+}
+
+.arc-edition > i {
+  margin-top: 4px;
+  font-size: 18px;
+  color: var(--acc-ink);
+  text-align: center;
+  transition: color .6s ease;
+}
+
+.arc-edition h3 {
+  margin: 0 0 6px;
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
   font-weight: 600;
@@ -257,34 +242,19 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
   color: var(--arc-ink);
 }
 
-.arc-step p {
-  text-wrap: pretty;
+.arc-edition p,
+.arc-connect__verify {
   margin: 0;
   font-size: var(--arc-fs-body);
   line-height: 1.6;
   color: var(--arc-muted);
+  text-wrap: pretty;
 }
 
-/* the hero's copy field (global .arc-ip), full width */
-.arc-step .arc-ip {
-  width: 100%;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.arc-step p.arc-step__note {
-  min-height: 1.6em;
-  margin-top: 10px;
-  font-size: var(--arc-fs-small);
-  transition: color .2s;
-}
-
-.arc-step p.arc-step__note.is-copied {
-  color: var(--arc-ok);
-}
-
-.arc-step p.arc-step__note.is-failed {
-  color: var(--arc-bad);
+.arc-connect__verify {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
 /* the panel: the live count on top, the two ways in under it, full width */
@@ -406,15 +376,14 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
     grid-template-columns: 1fr;
     grid-template-rows: none;
     grid-template-areas:
-      'steps'
+      'connect'
       'join';
   }
 }
 
-@media (max-width: 520px) {
-  .arc-step {
+@media (max-width: 600px) {
+  .arc-editions {
     grid-template-columns: 1fr;
-    gap: 14px;
   }
 }
 

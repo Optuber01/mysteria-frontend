@@ -7,20 +7,30 @@
     <div class="drink-scene__floor" aria-hidden="true">
       <div class="drink-scene__pool" />
       <div class="drink-scene__circle" :style="circleStyle" />
-      <div class="drink-scene__fx">
-        <SceneParticles mode="aura" :active="auraActive" :intensity="auraIntensity" :accent="card.accent" />
-      </div>
     </div>
 
-    <!-- The reading turns up: the card he drew. -->
-    <div class="drink-scene__cards" aria-hidden="true">
-      <div v-for="c in cards" :key="c.id" class="reading-card" :style="c.style">
-        <!-- turned over in the picture plane: the back narrows away, the face opens -->
-        <span v-if="!c.showFace" class="reading-card__back" :style="c.sideStyle"><i /></span>
-        <span v-else class="reading-card__front" :class="{ 'is-example': isExample }" :style="c.sideStyle">
-          <ArcanaFace :id="pathwayId" :name="faceReading.name" :role="faceReading.seq9" eager />
+    <!-- The reading turns up: the card he drew. Once it has settled it opens its Pathway. -->
+    <div class="drink-scene__cards">
+      <component
+        :is="c.open ? RouterLink : 'div'"
+        v-for="c in cards"
+        :key="c.id"
+        class="reading-card"
+        :class="{ 'is-open': c.open }"
+        :style="c.style"
+        v-bind="c.open ? { to: $lp(`/pathways/${pathwayId}`), 'aria-label': tp('drink.cardLink') } : { 'aria-hidden': 'true' }"
+        @pointermove="onCardPointer"
+        @pointerleave="onCardLeave"
+      >
+        <span class="reading-card__tilt">
+          <!-- turned over in the picture plane: the back narrows away, the face opens -->
+          <span v-if="!c.showFace" class="reading-card__back" :style="c.sideStyle"><i /></span>
+          <span v-else class="reading-card__front" :class="{ 'is-example': isExample }" :style="c.sideStyle">
+            <ArcanaFace :id="pathwayId" :name="faceReading.name" :role="faceReading.seq9" eager />
+            <span class="reading-card__sheen" aria-hidden="true" />
+          </span>
         </span>
-      </div>
+      </component>
     </div>
 
     <!-- the player: steps out of the fog, takes the potion, drinks, rises -->
@@ -91,6 +101,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { RouterLink } from 'vue-router';
 import type { CSSProperties } from 'vue';
 
 import MinecraftPlayer from '../MinecraftPlayer.vue';
@@ -325,10 +336,6 @@ const whispers = computed(() => {
 
 /* ---------------- circle and cards ---------------- */
 const wake = computed(() => at([T.cauldronOut[0], T.playerIn[1]]));
-const auraActive = computed(() => props.active && (final.value || g.value >= T.playerIn[0]));
-// the circle wakes under him as the potion takes hold, then fully at the awakening
-// its colour drains out of the circle into him while the spirit world is in, and comes back with the flash
-const auraIntensity = computed(() => Math.round((0.15 + 0.15 * (1 - spirit.value) + 0.7 * awaken.value) * 20) / 20);
 const circleStyle = computed(() => ({
   '--circle-mask': `url(${magicCircle})`,
   '--circle-spin': `${(final.value ? 96 : g.value * 900 + hit.value * 140).toFixed(2)}deg`,
@@ -379,6 +386,8 @@ const cards = computed(() => {
     return {
       id: card.id,
       showFace,
+      // settled face up, in a scene the reader is on: a link to its Pathway
+      open: props.active && card.face && (final.value || g.value >= card.at + 0.06),
       sideStyle: { transform: `scaleX(${(card.face ? Math.max(0.02, narrow) : 1).toFixed(4)})` } as CSSProperties,
       style: {
         left: `${x.toFixed(1)}px`,
@@ -391,6 +400,24 @@ const cards = computed(() => {
     };
   });
 });
+
+/* the settled card leans toward the pointer and catches the light, like the hero's drawn card */
+function onCardPointer(event: PointerEvent): void {
+  const el = event.currentTarget;
+  if (!(el instanceof HTMLElement) || !el.classList.contains('is-open') || event.pointerType !== 'mouse' || reduced.value) return;
+  const rect = el.getBoundingClientRect();
+  const px = clamp01((event.clientX - rect.left) / rect.width);
+  const py = clamp01((event.clientY - rect.top) / rect.height);
+  el.style.setProperty('--rx', `${((0.5 - py) * 16).toFixed(2)}deg`);
+  el.style.setProperty('--ry', `${((px - 0.5) * 18).toFixed(2)}deg`);
+  el.style.setProperty('--mx', `${(px * 100).toFixed(1)}%`);
+  el.style.setProperty('--my', `${(py * 100).toFixed(1)}%`);
+}
+function onCardLeave(event: PointerEvent): void {
+  const el = event.currentTarget;
+  if (!(el instanceof HTMLElement)) return;
+  for (const name of ['--rx', '--ry', '--mx', '--my']) el.style.removeProperty(name);
+}
 
 const sceneVars = computed(() => {
   const l = props.layout;
@@ -513,16 +540,6 @@ const sceneVars = computed(() => {
 }
 
 
-.drink-scene__fx {
-  width: calc(var(--circle-size) * 1.1);
-  height: calc(var(--circle-size) * 1.1);
-  opacity: var(--wake);
-  transform: translate(-50%, -70%);
-  /* soft edges: the aura fades out before its box ends */
-  -webkit-mask-image: radial-gradient(closest-side, #000 62%, transparent);
-  mask-image: radial-gradient(closest-side, #000 62%, transparent);
-}
-
 /* ---------- the reading ---------- */
 .drink-scene__cards {
   position: absolute;
@@ -533,7 +550,47 @@ const sceneVars = computed(() => {
 
 .reading-card {
   position: absolute;
+  display: block;
+  border-radius: 7px;
+  perspective: 700px;
   will-change: transform, opacity;
+}
+
+.reading-card.is-open {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.reading-card:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--acc) 70%, #efeef3);
+  outline-offset: 5px;
+}
+
+.reading-card__tilt {
+  position: absolute;
+  inset: 0;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), translate 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.reading-card.is-open:hover .reading-card__tilt,
+.reading-card.is-open:focus-visible .reading-card__tilt {
+  translate: 0 -6px;
+}
+
+/* light across the face, toward the pointer */
+.reading-card__sheen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 30%), rgba(255, 255, 255, 0.22), transparent 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.reading-card.is-open:hover .reading-card__sheen {
+  opacity: 1;
 }
 
 .reading-card__back,
@@ -717,6 +774,10 @@ const sceneVars = computed(() => {
 @media (prefers-reduced-motion: reduce) {
   .whisper {
     animation: none;
+  }
+
+  .reading-card__tilt {
+    transition: none;
   }
 }
 </style>

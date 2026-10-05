@@ -657,8 +657,7 @@
         },
         "awaken": {
           "short": "Awaken",
-          "title": "Become the {sequence}",
-          "copy": "Now act the part: only playing your role digests the potion."
+          "title": "Become the {sequence}"
         }
       },
       "ingredients": {
@@ -713,7 +712,8 @@
         "whisper2": "Remember.",
         "whisper3": "Silence.",
         "whisper4": "Gray fog…",
-        "whisper5": "Resist."
+        "whisper5": "Resist.",
+        "cardLink": "Open the {pathway} Pathway"
       },
       "player": {
         "drink": "Player drinking a Sequence potion",
@@ -879,9 +879,8 @@
     },
     "skipToContent": "Skip to content",
     "world": {
-      "titleA": "More than",
-      "titleB": "a Pathway",
-      "lede": "Your Pathway is only the start. We built these systems for Mysterria ourselves, so you won't find them on any other server.",
+      "titleA": "Fight your way",
+      "titleB": "to a throne",
       "pantheon": {
         "title": "Become a god",
         "body": "Each of the 22 Pathways has one throne at Sequence 0. Reach it and you become that Pathway's god, with a title above your head and a spell no other player has.",
@@ -984,7 +983,7 @@
         "boons": "Your contribution buys rewards, including shards of rare Boons: a second Sequence borrowed from an Outer God and raised by sacrifice."
       },
       "gallery": {
-        "title": "Captured by our players",
+        "title": "Built by our community",
         "cta": "Browse on Discord",
         "label": "Player screenshots",
         "pause": "Pause gallery",
@@ -997,21 +996,23 @@
       },
       "credit": "By {author}",
       "join": {
-        "titleA": "Join in",
-        "titleB": "minutes",
-        "lede": "Free to play, no mods needed. New players choose their own way into their first Pathway.",
-        "ledeRole": "Free to play, no mods needed. The {role} formula is already out there.",
-        "step1Title": "Add the server",
-        "step1Body": "Copy the address, then in Minecraft open Multiplayer and choose Add Server.",
+        "titleA": "Join on Java",
+        "titleB": "or Bedrock",
         "copiedHelp": "Copied. Paste into Multiplayer → Add Server.",
-        "step2Title": "Accept the resource pack",
-        "step2Body": "Join on Java Edition 26.1.2 or newer and accept the resource pack. Bedrock players can join through Geyser, with a few interface limits.",
-        "step3Title": "Verify your account",
-        "step3Body": "Pick Mysteries in the lobby, then link your account with the code from your website profile.",
         "guide": "Joining guide",
         "discord": "Join Discord",
         "liveUnit": "players online",
-        "seasonLabel": "Beyonders this season"
+        "seasonLabel": "Beyonders this season",
+        "copyHint": "Multiplayer → Add Server. No mods needed.",
+        "java": {
+          "name": "Java Edition",
+          "body": "Version 26.1.2 or newer. Accept the resource pack when you join."
+        },
+        "bedrock": {
+          "name": "Bedrock Edition",
+          "body": "Same address, port 19132, on phone or PC. A few custom menus look simpler."
+        },
+        "verify": "In the lobby, pick Mysteries and link your account with the code on your website profile."
       },
       "companion": {
         "title": "COI Client",
