@@ -420,9 +420,10 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   padding-inline: var(--arc-gutter);
 }
 
-.concept-arcana .header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip) {
+/* every control in the bar, the menu button included, at the page's card radius (as in the drawer) */
+.concept-arcana .header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip, .mobile-nav-toggle) {
   min-height: 36px;
-  border-radius: var(--arc-r-sm);
+  border-radius: 10px;
 }
 
 .concept-arcana .header-stack .header-actions .ip-chip {
@@ -446,7 +447,7 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 
 .concept-arcana .header-stack :is(a, button):focus-visible,
 .concept-arcana > .site-footer a:focus-visible {
-  border-radius: var(--arc-r-sm);
+  border-radius: 10px;
   outline: var(--arc-focus-w) solid var(--arc-ink);
   outline-offset: var(--arc-focus-off);
 }

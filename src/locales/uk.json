@@ -725,7 +725,7 @@
         "drink": "Player drinking a Sequence potion",
         "advance": "Player becoming a Beyonder"
       },
-      "boonNote": "Boons are raised by sacrifice at an altar, not by potions. The Fool shows how a Pathway begins.",
+      "boonNote": "A Boon rides beside a Pathway and never ahead of it, so every Boon-bearer starts here, with a potion of their own. The Fool shows how.",
       "ravings": {
         "fool": {
           "r1": "Hornacis… Flegrea…",
@@ -1064,6 +1064,33 @@
           "sealing": {
             "name": "Sealing",
             "body": "Locked away for days. Hunting monsters under a rising moon shortens the sentence."
+          }
+        }
+      },
+      "boonTitleA": "Power that",
+      "boonTitleB": "isn't yours",
+      "pact": {
+        "title": "A Sequence on loan",
+        "body": "A Boon is a Sequence an Outer God lends you. It sits beside your own Pathway with its own spells and its own acting, and it raises your Spirituality. The wiki won't even name who grants it.",
+        "rule": "You can hold one Boon at a time, and it climbs only as far as your own Pathway has.",
+        "alt": "Sacrificial altars between black pillars, an Outer God's sigil hanging over each",
+        "roadLabel": "How a Boon grows",
+        "steps": {
+          "earned": {
+            "title": "Be of use to it",
+            "body": "Your first Boon is a reward: for events, the Battle Pass, testing or spreading the word. Aeon, Sublunary and Edict come only as shards from the Outer Gods Anchors."
+          },
+          "altar": {
+            "title": "Raise an altar",
+            "body": "Build a Sacrificial Altar. Any tier works, and a higher one gives better results."
+          },
+          "offering": {
+            "title": "Make your offering",
+            "body": "Sacrifice Beyonder ingredients from the Sequence you're reaching for, or lower. Weak offerings won't buy a strong rung."
+          },
+          "refused": {
+            "title": "Never outgrow your Pathway",
+            "body": "If an offering would lift your Boon above your own Sequence, it's refused, and everything you've offered toward it is lost."
           }
         }
       }

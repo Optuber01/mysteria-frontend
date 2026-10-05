@@ -793,50 +793,41 @@ function stepTilt() {
 }
 
 /*
- * The fan answers the hand: each face-down card lifts (and catches the accent) by how near
- * the pointer is, so a mouse running along the fan, or a finger swiped across it, sends a
- * ripple through the deck, the way the orbit leans toward the cursor. The card centres are
- * read once per gesture (they only move during a shuffle, when the ripple is off) and the
- * lift is one custom property per card, eased in CSS.
+ * The fan answers the hand: the face-down card under the pointer pops out of the deck
+ * (lifted, a touch larger, lit in the accent) and settles back as the pointer moves on, so
+ * a mouse run along the fan, or a finger slid across it, picks out one card after another.
+ * A touch is captured by the card it started on, so the card is found by hit-testing the
+ * finger's point, which also picks the topmost of the overlapping cards.
  */
-type FanPoint = {el: HTMLElement; x: number; y: number; reach: number; near: number};
-let fanPoints: FanPoint[] | null = null;
-let ripplePoint: {x: number; y: number} | null = null;
-let rippleFrame = 0;
+let popped: HTMLElement | null = null;
+let popPoint: {x: number; y: number} | null = null;
+let popFrame = 0;
 
-function readFan(): FanPoint[] {
-  const points: FanPoint[] = [];
-  for (const [id, el] of cardEls) {
-    if (id === drawn.value) continue;
-    const rect = el.getBoundingClientRect();
-    points.push({el, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, reach: Math.max(rect.width, rect.height) * 1.5, near: 0});
-  }
-  return points;
+function setPopped(el: HTMLElement | null) {
+  if (el === popped) return;
+  popped?.classList.remove('is-popped');
+  el?.classList.add('is-popped');
+  popped = el;
 }
 
-function paintRipple() {
-  rippleFrame = 0;
-  const at = ripplePoint;
-  fanPoints ??= readFan();
-  for (const point of fanPoints) {
-    const near = at ? Math.max(0, 1 - Math.hypot(at.x - point.x, at.y - point.y) / point.reach) ** 1.6 : 0;
-    if (Math.abs(near - point.near) < 0.01 && !(near === 0 && point.near > 0)) continue;
-    point.near = near;
-    if (near > 0) point.el.style.setProperty('--near', near.toFixed(3));
-    else point.el.style.removeProperty('--near');
-  }
-  if (!at) fanPoints = null;
+function paintPop() {
+  popFrame = 0;
+  const at = popPoint;
+  const hit = at ? document.elementFromPoint(at.x, at.y)?.closest<HTMLElement>('.arc-card.is-fan') ?? null : null;
+  setPopped(hit);
 }
 
 function ripple(event: PointerEvent) {
   if (busy.value || reducedMotion()) return;
-  ripplePoint = {x: event.clientX, y: event.clientY};
-  if (!rippleFrame) rippleFrame = requestAnimationFrame(paintRipple);
+  popPoint = {x: event.clientX, y: event.clientY};
+  if (!popFrame) popFrame = requestAnimationFrame(paintPop);
 }
 
 function settleRipple() {
-  ripplePoint = null;
-  if (!rippleFrame && fanPoints) rippleFrame = requestAnimationFrame(paintRipple);
+  popPoint = null;
+  if (popFrame) cancelAnimationFrame(popFrame);
+  popFrame = 0;
+  setPopped(null);
 }
 
 /* a finger lifted: the fan settles back (a mouse keeps rippling until it leaves) */
@@ -978,7 +969,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (rippleFrame) cancelAnimationFrame(rippleFrame);
+  if (popFrame) cancelAnimationFrame(popFrame);
   resizeObserver?.disconnect();
   heroObserver?.disconnect();
   window.removeEventListener('resize', measure);
@@ -1290,27 +1281,36 @@ onUnmounted(() => {
   transition: transform .45s cubic-bezier(.2, .8, .2, 1);
 }
 
-/* lifted out of the fan by the pointer's nearness (--near, set by ripple), the nearest most */
+/* the card under the hand pops out of the deck (see setPopped): lifted, a little larger, in front */
 .arc-card.is-fan .arc-card__lift {
-  transform: translateY(calc(var(--near, 0) * -18%)) scale(calc(1 + var(--near, 0) * .06));
-  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1);
 }
 
-/* the accent's light round a lifted card: a pre-drawn glow whose opacity alone follows the hand */
+.arc-card.is-fan.is-popped {
+  z-index: 3;
+}
+
+.arc-card.is-fan.is-popped .arc-card__lift,
+.arc-card.is-fan:focus-visible .arc-card__lift {
+  transform: translateY(-20%) scale(1.08);
+}
+
+/* the accent's light round the popped card: a pre-drawn glow, only its opacity changes */
 .arc-card.is-fan::before {
   position: absolute;
   inset: 3%;
   border-radius: inherit;
-  box-shadow: 0 0 calc(var(--card-w) * .28) calc(var(--card-w) * .04) color-mix(in oklab, var(--acc) 75%, transparent);
+  box-shadow: 0 0 calc(var(--card-w) * .3) calc(var(--card-w) * .04) color-mix(in oklab, var(--acc) 75%, transparent);
   content: '';
-  opacity: var(--near, 0);
-  transform: translateY(calc(var(--near, 0) * -18%)) scale(calc(1 + var(--near, 0) * .06));
-  transition: opacity .3s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+  opacity: 0;
+  transform: translateY(-20%) scale(1.08);
+  transition: opacity .28s ease;
   pointer-events: none;
 }
 
-.arc-card.is-fan:focus-visible {
-  --near: 1;
+.arc-card.is-fan.is-popped::before,
+.arc-card.is-fan:focus-visible::before {
+  opacity: 1;
 }
 
 .arc-card.is-drawn .arc-card__lift {

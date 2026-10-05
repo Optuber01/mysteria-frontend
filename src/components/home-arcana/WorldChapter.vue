@@ -1,12 +1,42 @@
 <template>
   <section id="world" class="arc-section world" aria-labelledby="world-title">
     <div class="arc-shell">
+      <!-- a Boon is power lent by an Outer God, not a road to a throne: with one drawn, the chapter says so -->
       <ArcanaSectionHead title-id="world-title">
-        <template #title>{{ t('home.world.titleA') }} <em>{{ t('home.world.titleB') }}</em></template>
+        <template #title>{{ t(isBoon ? 'home.world.boonTitleA' : 'home.world.titleA') }} <em>{{ t(isBoon ? 'home.world.boonTitleB' : 'home.world.titleB') }}</em></template>
       </ArcanaSectionHead>
 
+      <!-- with a Boon drawn, the flagship is the pact: what it is, how it grows, and its price -->
+      <article v-if="isBoon" class="pantheon pact" aria-labelledby="pact-title">
+        <WorldPhoto
+            class="pact__photo"
+            :shot="shots.altars"
+            :alt="t('home.world.pact.alt')"
+            sizes="(max-width: 900px) 100vw, 1200px"
+        />
+
+        <div class="pantheon__intro">
+          <h3 id="pact-title" class="pantheon__title">{{ t('home.world.pact.title') }}</h3>
+          <p class="pantheon__body">{{ t('home.world.pact.body') }}</p>
+          <p class="pantheon__body">{{ t('home.world.pact.rule') }}</p>
+          <div class="pantheon__foot">
+            <p class="sys__links"><template v-for="link in linksOf('pact')" :key="link.href"><RouterLink v-if="link.internal" :to="$lp(link.href)" class="sys__link">{{ link.label }}<i class="fa-solid fa-arrow-right" aria-hidden="true"></i></RouterLink><a v-else :href="link.href" class="sys__link" target="_blank" rel="noopener noreferrer">{{ link.label }}<i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a></template></p>
+          </div>
+        </div>
+
+        <ol class="pantheon__road" :aria-label="t('home.world.pact.roadLabel')">
+          <li v-for="(step, index) in pactSteps" :key="step.key" :class="{'is-price': step.key === 'refused'}">
+            <span class="road-token" aria-hidden="true">{{ index + 1 }}</span>
+            <span class="road-text">
+              <strong>{{ step.title }}</strong>
+              <span>{{ step.body }}</span>
+            </span>
+          </li>
+        </ol>
+      </article>
+
       <!-- the flagship: the Pantheon, its hall of thrones and the road up to it -->
-      <article class="pantheon" aria-labelledby="pantheon-title">
+      <article v-else class="pantheon" aria-labelledby="pantheon-title">
         <div class="pantheon__hall">
           <ul class="thrones" :aria-label="t('home.world.pantheon.boardLabel')">
             <li
@@ -222,7 +252,7 @@ import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import WorldPhoto from './WorldPhoto.vue';
 import WorldLightbox from './WorldLightbox.vue';
 import {GALLERY_SHOTS, TOPIC_SHOTS} from './WorldShots';
-import {CORE_CARDS, sigilThumb} from './arcana-data';
+import {CORE_CARDS, cardById, sigilThumb} from './arcana-data';
 import {useArcana} from './useArcana';
 
 const DISCORD = 'https://discord.com/invite/jc7GSxBWgb';
@@ -231,6 +261,13 @@ const {t} = useI18n();
 const {currentId, hasDrawn, nameOf} = useArcana();
 const {highSeats} = useBeyonderStats();
 const shots = TOPIC_SHOTS;
+/** A Boon is drawn: the chapter leads with the pact instead of the Pantheon. */
+const isBoon = computed(() => hasDrawn.value && cardById(currentId.value).boon);
+const pactSteps = computed(() => (['earned', 'altar', 'offering', 'refused'] as const).map(key => ({
+  key,
+  title: t(`home.world.pact.steps.${key}.title`),
+  body: t(`home.world.pact.steps.${key}.body`),
+})));
 
 /* ---- the Pantheon: one throne per Pathway, lit where a god sits (live from the Ascension registry) ---- */
 const hasSeatData = computed(() => highSeats.value.length > 0);
@@ -302,6 +339,7 @@ const SYSTEM_LINKS: Record<string, {news?: string; wiki?: string}> = {
   arena: {news: 'more-bedwars-duels-ffa-with-rewards'},
   churches: {news: 'churches-reborn', wiki: 'magic/churches'},
   anchors: {news: 'outer-gods-anchors', wiki: 'magic/boons'},
+  pact: {news: 'outer-gods-anchors', wiki: 'magic/boons'},
   ordeals: {news: 'the-ordeals-and-global-amnesty'},
 };
 const linksOf = (key: string) => {
@@ -421,6 +459,40 @@ onUnmounted(() => {
     var(--arc-raised);
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
   transition: background-color .6s ease;
+}
+
+/*
+ * The pact (a Boon drawn): the Pantheon's frame, its hall of thrones replaced by the altars
+ * the Boons are fed at, sunk in the dark at the edges; the price, the last step, in the accent.
+ */
+.pact__photo {
+  grid-column: 1 / -1;
+  margin: calc(clamp(28px, 3.2vw, 48px) * -1) calc(clamp(28px, 3.2vw, 48px) * -1) 0;
+  aspect-ratio: 16 / 5;
+}
+
+.pact__photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 120% at 50% 20%, transparent 40%, color-mix(in oklab, var(--arc-raised) 85%, transparent) 100%),
+    linear-gradient(180deg, transparent 45%, var(--arc-raised));
+}
+
+.pact__photo :deep(img) {
+  filter: saturate(.7) brightness(.8);
+}
+
+.pact .pantheon__road li.is-price .road-token {
+  background: var(--acc-fill, var(--acc));
+  color: var(--arc-on-acc, #0b0b0f);
+}
+
+.pact .pantheon__road li.is-price strong {
+  color: var(--acc-ink);
 }
 
 .pantheon__hall {
@@ -1137,6 +1209,13 @@ onUnmounted(() => {
   .tiers {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     row-gap: 26px;
+  }
+}
+
+/* on a narrow screen the altars need more height than a banner strip */
+@media (max-width: 900px) {
+  .pact__photo {
+    aspect-ratio: 16 / 8;
   }
 }
 
