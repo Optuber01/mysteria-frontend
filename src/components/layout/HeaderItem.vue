@@ -714,6 +714,13 @@ onUnmounted(() => {
    buttons: below 1025px the full nav no longer fits beside them (it ran into the
    brand and the actions), so the bar switches to the drawer earlier. The drawer
    already holds the bell and the account controls. */
+/* the narrowest phones (320-359px): the mark alone, so the wordmark never runs into the controls */
+@media (max-width: 359px) {
+  .header-grid .brand:not(.compact) .brand-words {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .site-header.is-authed .primary-nav,
   .site-header.is-authed .desktop-only {

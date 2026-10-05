@@ -1319,7 +1319,8 @@ onUnmounted(() => {
   .progression__layout {
     inset: var(--top) var(--rail) 86px;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
+    /* the scene keeps at least ~45% of the screen; the copy below adapts to the rest */
+    grid-template-rows: minmax(44%, 1fr) auto;
     align-items: stretch;
     gap: clamp(10px, 2vh, 20px);
   }
@@ -1381,6 +1382,28 @@ onUnmounted(() => {
   .chapter-copy__cta {
     flex: 1 1 auto;
     justify-content: center;
+  }
+}
+
+/* phones (and short tablets): the awakening keeps its essentials (ability names, the rule,
+   what's next), so the scene keeps its room and long ability texts never reach the rail */
+@media (max-width: 599px) and (min-height: 591px) and (prefers-reduced-motion: no-preference),
+       (max-width: 900px) and (min-height: 591px) and (max-height: 760px) and (prefers-reduced-motion: no-preference) {
+  .chapter-copy__sub,
+  .chapter-copy__abilities span {
+    display: none;
+  }
+
+  .chapter-copy__abilities li {
+    padding-block: 5px;
+  }
+
+  .chapter-copy__digest {
+    margin-bottom: 8px;
+  }
+
+  .chapter-copy__onward {
+    margin-top: 8px;
   }
 }
 
