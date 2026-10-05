@@ -9,6 +9,9 @@
       <span class="arc-ambient__grain" :style="{backgroundImage: `url(${grain})`}"></span>
     </div>
 
+    <!-- mock-up: the drawn Pathway in the page's corners (?motifs=1) -->
+    <PathwayMotif v-if="motifsOn"/>
+
     <HeaderItem overlay/>
 
     <main id="main-content" class="arc-main">
@@ -29,6 +32,7 @@
 <script setup lang="ts">
 import {computed, onMounted, onUnmounted, watch} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
+import PathwayMotif from './PathwayMotif.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import {useConceptFonts} from './useConceptFonts';
@@ -47,6 +51,19 @@ useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR
 
 const {card, hasDrawn} = useArcana();
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
+/* The corner motifs are a mock-up for now: ?motifs=1 turns them on for the visit, ?motifs=0 off. */
+const MOTIFS_KEY = 'mysterria-motifs';
+function readMotifs(): boolean {
+  try {
+    const asked = new URLSearchParams(location.search).get('motifs');
+    if (asked === '1' || asked === '0') sessionStorage.setItem(MOTIFS_KEY, asked);
+    return sessionStorage.getItem(MOTIFS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+const motifsOn = readMotifs();
+
 const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
 /* --acc-deep: the accent deepened to read as text on the light theme's paper; --acc-fill: the
