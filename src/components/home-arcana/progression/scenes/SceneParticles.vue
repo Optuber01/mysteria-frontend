@@ -1,5 +1,5 @@
 <template>
-  <div ref="host" class="scene-particles" aria-hidden="true">
+  <div ref="host" class="scene-particles" :class="`scene-particles--${mode}`" aria-hidden="true">
     <canvas ref="canvasEl" class="scene-particles__canvas"></canvas>
   </div>
 </template>
@@ -734,11 +734,40 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/*
+ * Nothing ends at the box's edge: every field fades out over its outer band, so a
+ * speck drifting out of it (or a ring running past it) dissolves instead of being cut.
+ */
 .scene-particles {
+  --fade-x: 14%;
+  --fade-top: 14%;
+  --fade-bottom: 14%;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 var(--fade-x), #000 calc(100% - var(--fade-x)), transparent),
+    linear-gradient(180deg, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 var(--fade-x), #000 calc(100% - var(--fade-x)), transparent),
+    linear-gradient(180deg, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
+  mask-composite: intersect;
+}
+
+/* steam leaves the brew and bubbles pop on it: their foot is the liquid, not an edge */
+.scene-particles--steam,
+.scene-particles--brew {
+  --fade-bottom: 0%;
+}
+
+/* the spirit world fills the stage: a wider band, so the fog thins out well before its sides */
+.scene-particles--spirit {
+  --fade-x: 22%;
+  --fade-top: 10%;
+  /* its box reaches past the stage's foot: the specks fade out over the rail's band */
+  --fade-bottom: 26%;
 }
 
 .scene-particles__canvas {

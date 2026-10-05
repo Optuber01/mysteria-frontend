@@ -15,7 +15,6 @@
           <template #title>{{ t('home.arcana.deck.titleA') }} <em>{{ t('home.arcana.deck.titleB') }}</em></template>
         </ArcanaSectionHead>
         <div class="arc-orbit__aside">
-          <p class="arc-orbit__lede">{{ t('home.arcana.deck.lede') }}</p>
           <div class="arc-orbit__tabs" role="tablist" :aria-label="t('home.arcana.deck.tabsLabel')" @keydown="onTabKeydown">
             <button
                 v-for="option in kinds"
@@ -111,23 +110,14 @@
         <div class="arc-orbit__dossier" aria-labelledby="arc-orbit-name" role="group">
           <Transition mode="out-in" :css="false" @before-leave="onReadingBeforeLeave" @enter="onReadingEnter" @leave="onReadingLeave">
             <div :key="card.id" class="arc-orbit__reading">
-              <div class="arc-orbit__lead">
-                <p class="arc-orbit__begins">{{ beginsLine }}</p>
-                <dl class="arc-orbit__stats">
-                  <div>
-                    <dt>{{ t('home.arcana.deck.statAbilities') }}</dt>
-                    <dd>{{ reading.abilityCount || '–' }}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div class="arc-orbit__abilities">
-                <ul v-if="early.length" :key="`ab-${card.id}`" :aria-label="abilitiesLabel">
-                  <li v-for="ability in early" :key="ability.key">
-                    <strong>{{ ability.name }}<small v-if="ability.rung">{{ ability.rung }}</small></strong>
-                    <span>{{ abilitySummary(ability.description) }}</span>
+              <!-- the whole climb, Sequence 9 to the throne: what the page hasn't shown yet -->
+              <div class="arc-orbit__climb">
+                <ol v-if="rungs.length" class="arc-ladder" :aria-label="ladderLabel">
+                  <li v-for="rung in rungs" :key="rung.sequence" :class="{'is-top': rung.sequence === topRung}">
+                    <b>{{ rung.sequence }}</b>
+                    <span>{{ rung.name }}</span>
                   </li>
-                </ul>
+                </ol>
                 <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
                 <p v-if="card.boon" class="arc-orbit__note">{{ t('home.arcana.deck.boonNote') }}</p>
               </div>
@@ -152,13 +142,12 @@ import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {useReducedMotion} from '@/composables/useReducedMotion';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
-import {abilitySummary} from './abilitySummary';
 import {type ArcanaCard, BOON_CARDS, cardById, CORE_CARDS, sigilNative, sigilThumb} from './arcana-data';
 import {ensurePathwayData, useArcana} from './useArcana';
 
 type Kind = 'pathway' | 'boon';
 
-const {t, plural, currentLanguage} = useI18n();
+const {t, plural} = useI18n();
 const {currentId, card, reading, readingFor, nameOf, seq9Of, data, draw} = useArcana();
 const reducedMotion = useReducedMotion();
 
@@ -195,54 +184,10 @@ const roleLine = (id: string) => {
   const role = seq9Of(id);
   return role ? t('home.arcana.deck.beginsAs').replace('{role}', role) : countLabel(sequenceCounts.value[id] ?? 10);
 };
-/** "From Seer at Sequence 9 to Fool at Sequence 0": the whole climb in one line. */
-const beginsLine = computed(() => {
-  const {ladder, seq9, sequenceCount} = reading.value;
-  const byRank = [...ladder].sort((a, b) => b.sequence - a.sequence);
-  const first = byRank[0];
-  const last = byRank[byRank.length - 1];
-  if (first && last && first.sequence === 9 && byRank.length > 1) {
-    return t('home.arcana.deck.climb')
-        .replace('{first}', first.name)
-        .replace('{last}', last.name)
-        .replace('{top}', String(last.sequence))
-        // the arrow stays at the end of the first line, never at the start of the second
-        .replace(/\s+→/gu, '\u00a0→');
-  }
-  return seq9 ? t('home.arcana.deck.beginsAs').replace('{role}', seq9) : countLabel(sequenceCount);
-});
-/**
- * Archive entries listed among a Sequence's abilities that are a state, a pact or a
- * drawback rather than something the player does. The data doesn't mark them.
- */
-const NOT_ABILITIES = new Set(['hanged/knowledge', 'chained/binding', 'chained/enhanced-binding', 'edict/dreamless-state', 'devouring/hunger']);
-/** Two or three real Sequence 9 abilities; a Pathway with fewer is topped up from Sequence 8 (named on the row). */
-const early = computed(() => {
-  const module = data.value;
-  const id = currentId.value;
-  const pathway = module?.pathwayById(id);
-  if (!module || !pathway) return reading.value.early.map(ability => ({...ability, key: ability.name, rung: ''}));
-  const language = currentLanguage.value;
-  const rows = (n: number) => {
-    const rung = pathway.sequences.find(sequence => sequence.sequence === n);
-    if (!rung) return [];
-    // "Sequence 9: {role}" cut to "Sequence 8" (every locale writes the number as a digit)
-    const label = n === 9 ? '' : t('home.arcana.deck.beginsAs').replace(/[:：]?\s*\{role\}/u, '').replace('9', String(n)).trim();
-    return rung.abilities
-        .filter(ability => !NOT_ABILITIES.has(`${id}/${ability.id}`))
-        .map(ability => ({
-          key: `${n}-${ability.id}`,
-          name: module.pick(ability.name, language),
-          description: module.pick(ability.description, language),
-          rung: label,
-        }));
-  };
-  const list = rows(9).slice(0, 3);
-  if (list.length < 2) list.push(...rows(8).slice(0, 2 - list.length));
-  return list;
-});
-const abilitiesLabel = computed(() =>
-  t('home.arcana.deck.firstAbilities').replace('{role}', reading.value.seq9 || reading.value.name));
+/** The drawn card's ladder, from Sequence 9 (where everyone starts) up to its top. */
+const rungs = computed(() => [...reading.value.ladder].sort((a, b) => b.sequence - a.sequence));
+const topRung = computed(() => rungs.value[rungs.value.length - 1]?.sequence ?? 0);
+const ladderLabel = computed(() => t('home.arcana.deck.ladderLabel').replace('{name}', reading.value.name));
 
 
 /* ---------- Geometry: a ring seen from slightly above; the near arc of a dial on phones ---------- */
@@ -897,16 +842,6 @@ onUnmounted(() => {
   gap: 18px;
 }
 
-.arc-orbit__lede {
-  max-width: 34em;
-  margin: 0;
-  font-size: var(--arc-fs-lede);
-  line-height: 1.65;
-  color: var(--arc-muted);
-  text-align: right;
-  text-wrap: balance;
-}
-
 /* a plain two-way switch: the chosen ring is underlined in the accent */
 .arc-orbit__tabs {
   display: flex;
@@ -1238,89 +1173,59 @@ onUnmounted(() => {
 .arc-orbit__reading {
   display: grid;
   /* fixed tracks: the columns and buttons stay put from one card to the next */
-  grid-template-columns: minmax(0, .9fr) minmax(0, 1.45fr) var(--dossier-actions, 264px);
+  grid-template-columns: minmax(0, 1fr) var(--dossier-actions, 264px);
   align-items: start;
   gap: 24px clamp(28px, 4vw, 56px);
 }
 
-.arc-orbit__begins {
-  margin: 0;
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: var(--arc-fs-h4);
-  line-height: 1.22;
-  letter-spacing: -.01em;
-  color: var(--arc-ink);
-  text-wrap: balance;
-}
-
-.arc-orbit__stats {
-  display: flex;
-  gap: 28px;
-  margin: 16px 0 0;
-}
-
-.arc-orbit__stats div {
-  display: grid;
-  gap: 2px;
-}
-
-.arc-orbit__stats dt {
-  font-size: var(--arc-fs-caption);
-  color: var(--arc-muted);
-}
-
-.arc-orbit__stats dd {
-  margin: 0;
-  font-family: var(--arc-display);
-  font-variation-settings: 'FLAR' 100;
-  font-weight: 600;
-  font-size: var(--arc-fs-h3);
-  line-height: 1.1;
-  color: var(--acc-ink);
-}
-
-/* one column of names and one of descriptions, shared by every row */
-.arc-orbit__abilities ul {
+/*
+ * The climb as a ladder of names: ten rungs in two rows of five (a boon's five in one),
+ * each numbered, the throne at the top in the accent.
+ */
+.arc-ladder {
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: 10em minmax(0, 1fr);
-  gap: 8px 18px;
+  border-top: var(--arc-bw) solid var(--arc-line);
+  border-left: var(--arc-bw) solid var(--arc-line);
 }
 
-.arc-orbit__abilities li {
-  grid-column: 1 / -1;
+.arc-ladder li {
   display: grid;
-  grid-template-columns: subgrid;
-  align-items: baseline;
-  row-gap: 2px;
-  padding: 10px 14px;
-  border-left: var(--arc-bw-accent) solid var(--acc-ink);
-  background: linear-gradient(90deg, color-mix(in oklab, var(--acc) 9%, transparent), transparent 85%);
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px 14px;
+  border-right: var(--arc-bw) solid var(--arc-line);
+  border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 
-.arc-orbit__abilities strong {
+.arc-ladder b {
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
   font-weight: 600;
-  color: var(--arc-ink);
-}
-
-/* a row topped up from Sequence 8 names its rung under the ability */
-.arc-orbit__abilities strong small {
-  display: block;
-  margin-top: 2px;
   font-size: var(--arc-fs-caption);
-  font-weight: 400;
-  line-height: 1.45;
   color: var(--arc-muted);
 }
 
-.arc-orbit__abilities li span {
-  font-size: var(--arc-fs-small);
-  line-height: 1.5;
-  color: var(--arc-muted);
+.arc-ladder span {
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--arc-ink);
+  overflow-wrap: anywhere;
+}
+
+.arc-ladder li.is-top {
+  background: linear-gradient(180deg, color-mix(in oklab, var(--acc) 12%, transparent), transparent);
+}
+
+.arc-ladder li.is-top b,
+.arc-ladder li.is-top span {
+  color: var(--acc-ink);
+  transition: color .6s ease;
 }
 
 .arc-orbit__loading {
@@ -1344,7 +1249,7 @@ onUnmounted(() => {
 
 @media (max-width: 1180px) {
   .arc-orbit__reading {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .arc-orbit__actions {
@@ -1362,10 +1267,6 @@ onUnmounted(() => {
 
   .arc-orbit__aside {
     justify-items: start;
-  }
-
-  .arc-orbit__lede {
-    text-align: left;
   }
 }
 
@@ -1389,9 +1290,8 @@ onUnmounted(() => {
 }
 
 @media (max-width: 520px) {
-  .arc-orbit__abilities ul,
-  .arc-orbit__abilities li {
-    grid-template-columns: minmax(0, 1fr);
+  .arc-ladder {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .arc-orbit__actions {

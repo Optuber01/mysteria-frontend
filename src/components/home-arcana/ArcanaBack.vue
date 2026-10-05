@@ -1,5 +1,5 @@
 <template>
-  <!-- Card back: one design for the whole deck, drawn in the page accent. -->
+  <!-- Card back: one design for every card on the page, drawn in the page accent, with the Mysterria M at its heart. -->
   <div class="arc-back" aria-hidden="true">
     <svg viewBox="0 0 100 162" preserveAspectRatio="none">
       <defs>
@@ -16,15 +16,13 @@
       </g>
       <g stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round">
         <path d="M50 41v-14M50 121v14M18 81H10M82 81h8"/>
-        <path d="M30 81c6-10 14-14 20-14s14 4 20 14c-6 10-14 14-20 14s-14-4-20-14z" stroke-width="1.3"/>
       </g>
-      <circle cx="50" cy="81" r="6.5" fill="currentColor"/>
-      <circle cx="50" cy="81" r="2.4" fill="#111116"/>
       <g fill="currentColor">
         <path d="M50 18l3 5-3 5-3-5zM50 134l3 5-3 5-3-5z"/>
         <path d="M16 16l2.5 2.5L16 21l-2.5-2.5zM84 16l2.5 2.5L84 21l-2.5-2.5zM16 141l2.5 2.5L16 146l-2.5-2.5zM84 141l2.5 2.5L84 146l-2.5-2.5z"/>
       </g>
     </svg>
+    <i class="arc-back__mark" :style="{'--mark': `url(${mark})`}"></i>
   </div>
 </template>
 
@@ -33,6 +31,8 @@ let instances = 0;
 </script>
 
 <script setup lang="ts">
+import mark from './assets/brand-mark-mask.png';
+
 const patternId = `arc-lattice-${++instances}`;
 </script>
 
@@ -47,6 +47,20 @@ const patternId = `arc-lattice-${++instances}`;
     radial-gradient(90% 60% at 50% 50%, color-mix(in oklab, var(--acc) 16%, transparent), transparent 70%),
     linear-gradient(165deg, #1a1a21, #0d0d11);
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 40%, transparent);
+}
+
+/* the brand mark, cut from the logo's silhouette and lit in the accent, quiet as the rest of the back */
+.arc-back__mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32%;
+  aspect-ratio: 160 / 119;
+  background: currentColor;
+  opacity: .8;
+  transform: translate(-50%, -50%);
+  -webkit-mask: var(--mark) center / contain no-repeat;
+  mask: var(--mark) center / contain no-repeat;
 }
 
 svg {

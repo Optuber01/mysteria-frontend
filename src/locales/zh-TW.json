@@ -608,7 +608,6 @@
       "deck": {
         "titleA": "Choose your",
         "titleB": "Pathway",
-        "lede": "A Pathway is the line of powers you follow. Each climbs from Sequence 9 to a god's throne, with its own spells and its own madness. Pick a seal, or drag the ring.",
         "tabsLabel": "Pathways or Boons",
         "tabPathways": "Pathways",
         "tabBoons": "Boons",
@@ -626,13 +625,11 @@
         "announce": "{name}, {current} of {total}.",
         "beginsAs": "Sequence 9: {role}",
         "boonNote": "Boons are raised beside your Pathway by sacrifice at an altar, never ahead of it.",
-        "statAbilities": "Abilities",
-        "firstAbilities": "{role} abilities",
         "loading": "Loading abilities…",
         "open": "{name} Pathway",
         "archive": "All Pathways",
-        "climb": "Sequence 9: {first} → Sequence {top}: {last}",
-        "openBoon": "{name} Boon"
+        "openBoon": "{name} Boon",
+        "ladderLabel": "The {name} Pathway, from Sequence 9 to the top"
       }
     },
     "progression": {

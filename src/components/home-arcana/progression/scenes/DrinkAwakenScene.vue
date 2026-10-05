@@ -24,7 +24,7 @@
       >
         <span class="reading-card__tilt">
           <!-- turned over in the picture plane: the back narrows away, the face opens -->
-          <span v-if="!c.showFace" class="reading-card__back" :style="c.sideStyle"><i /></span>
+          <span v-if="!c.showFace" class="reading-card__back" :style="c.sideStyle"><ArcanaBack /></span>
           <span v-else class="reading-card__front" :class="{ 'is-example': isExample }" :style="c.sideStyle">
             <ArcanaFace :id="pathwayId" :name="faceReading.name" :role="faceReading.seq9" eager />
             <span class="reading-card__sheen" aria-hidden="true" />
@@ -108,6 +108,7 @@ import MinecraftPlayer from '../MinecraftPlayer.vue';
 import type { BottlePosition } from '../MinecraftPlayer.vue';
 import PotionVial from '../PotionVial.vue';
 import SceneParticles from './SceneParticles.vue';
+import ArcanaBack from '../../ArcanaBack.vue';
 import ArcanaFace from '../../ArcanaFace.vue';
 import { useArcana } from '../../useArcana';
 import { useProgressionCopy } from './useProgressionCopy';
@@ -443,7 +444,8 @@ const sceneVars = computed(() => {
 </script>
 
 <style scoped>
-/* ArcanaFace sizes its type and corners in cqw: give it a container. */
+/* ArcanaFace and ArcanaBack size their type and corners in cqw: give them a container. */
+.reading-card__back,
 .reading-card__front {
   container-type: size;
 }
@@ -607,21 +609,6 @@ const sceneVars = computed(() => {
   --card-acc: var(--acc) !important;
 }
 
-.reading-card__back {
-  background:
-    repeating-linear-gradient(45deg, color-mix(in oklab, var(--acc) 10%, transparent) 0 2px, transparent 2px 9px),
-    linear-gradient(170deg, #1b1b22, #0e0e12);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--acc) 45%, transparent), 0 14px 30px rgba(0, 0, 0, 0.55);
-}
-
-.reading-card__back i {
-  position: absolute;
-  inset: 30% 22%;
-  border: 1.5px solid color-mix(in oklab, var(--acc) 70%, transparent);
-  transform: rotate(45deg);
-}
-
-
 /* ---------- player (feet on the circle) ---------- */
 .drink-scene__player {
   position: absolute;
@@ -684,10 +671,12 @@ const sceneVars = computed(() => {
 .drink-scene__whispers {
   position: absolute;
   inset: 0;
-  /* behind the player (5): his body covers part of each line; the stage's edges cut the rest */
+  /* behind the player (5): his body covers part of each line, and its ends fade into the dark */
   z-index: 4;
   overflow: hidden;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 24%, #000 76%, transparent);
 }
 
 .whisper {
@@ -767,8 +756,6 @@ const sceneVars = computed(() => {
   inset: 0 0 -140px; /* top-left kept: the specks are placed in stage coordinates */
   z-index: 6;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent);
-  mask-image: linear-gradient(180deg, #000 72%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
