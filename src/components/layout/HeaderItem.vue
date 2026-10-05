@@ -98,8 +98,7 @@
               {{ link.title }}
             </RouterLink>
 
-            <div class="mobile-services">
-              <p class="mobile-section-label">{{ t('navServices') }}</p>
+            <div class="mobile-services" :aria-label="t('navServices')" role="group">
               <a
                   v-for="service in servicesLinks"
                   :key="service.url"
@@ -749,112 +748,123 @@ onUnmounted(() => {
   }
 }
 
-/* ---- Mobile drawer ---- */
+/* ---- Mobile drawer: a panel from the right, in the page's font and accent ---- */
 .mobile-nav-overlay {
   position: fixed;
   inset: 0;
   z-index: 1200;
   display: flex;
+  justify-content: flex-end;
+  /* the homepage hands its one font to <body> (the drawer is teleported there) */
+  font-family: var(--drawer-font, var(--myst-font-body));
 }
 
 .mobile-nav-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
 }
 
 .mobile-nav {
+  --drawer-acc: var(--acc, var(--myst-gold));
   position: relative;
-  width: 100%;
-  max-width: 330px;
+  width: min(86vw, 340px);
   height: 100dvh;
-  background: var(--myst-bg-deep);
-  border-right: 1px solid var(--myst-line-16);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  border-left: 1px solid var(--myst-line-16);
+  border-radius: 20px 0 0 20px;
+  background:
+    radial-gradient(120% 50% at 100% 0%, color-mix(in oklab, var(--drawer-acc) 12%, transparent), transparent 70%),
+    var(--myst-bg-deep);
+  box-shadow: -24px 0 60px rgba(0, 0, 0, 0.45);
 }
 
 .mobile-nav-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--myst-line-14);
+  padding: 16px 16px 16px 20px;
 }
 
 .mobile-nav-close {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  background: transparent;
-  border: 1px solid var(--myst-line-20);
-  border-radius: 2px;
-  color: var(--myst-gold);
+  background: color-mix(in oklab, var(--myst-offwhite) 6%, transparent);
+  border: 1px solid var(--myst-line-16);
+  border-radius: 12px;
+  color: var(--myst-offwhite);
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-nav-close:hover {
+  background: color-mix(in oklab, var(--myst-offwhite) 12%, transparent);
 }
 
 .mobile-nav-content {
   flex: 1;
-  padding: 20px 0 32px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 12px 24px;
 }
 
 .mobile-nav-link {
   display: flex;
   align-items: center;
-  padding: 15px 24px;
-  border-left: 2px solid transparent;
-  font-family: var(--myst-font-mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 600;
   color: var(--myst-ink-muted);
-  transition: all 0.25s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.mobile-nav-link:hover,
+.mobile-nav-link:hover {
+  color: var(--myst-offwhite);
+  background: color-mix(in oklab, var(--myst-offwhite) 6%, transparent);
+}
+
 .mobile-nav-link.active {
-  color: var(--myst-gold);
-  border-left-color: var(--myst-gold);
-  background: rgba(200, 178, 115, 0.06);
+  color: var(--myst-offwhite);
+  background: color-mix(in oklab, var(--drawer-acc) 16%, transparent);
+  box-shadow: inset 3px 0 0 var(--drawer-acc);
 }
 
 .mobile-services {
-  margin-top: 20px;
-  padding-top: 18px;
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--myst-line-12);
-}
-
-.mobile-section-label {
-  margin: 0 0 8px;
-  padding: 0 24px;
-  font-family: var(--myst-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--myst-gold);
 }
 
 .mobile-service-link {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 24px;
+  padding: 11px 14px;
+  border-radius: 12px;
   color: inherit;
+  transition: background-color 0.2s ease;
 }
 
 .mobile-service-link:hover {
-  background: rgba(200, 178, 115, 0.05);
+  background: color-mix(in oklab, var(--myst-offwhite) 6%, transparent);
   color: inherit;
 }
 
 .mobile-service-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-  color: var(--myst-gold);
+  color: var(--drawer-acc);
 }
 
 .mobile-service-link span {
@@ -865,28 +875,39 @@ onUnmounted(() => {
 
 .mobile-service-link strong {
   color: var(--myst-offwhite);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .mobile-service-link small {
   color: var(--myst-ink-muted);
-  font-size: 11px;
+  font-size: 12.5px;
 }
 
 .mobile-nav-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-top: 24px;
-  padding: 20px 24px 0;
-  border-top: 1px solid var(--myst-line-12);
+  gap: 10px;
+  margin-top: auto;
+  padding: 18px 2px 0;
 }
 
 .mobile-ip {
   width: 100%;
+  min-height: 42px;
   justify-content: center;
+  border-radius: 12px;
+}
+
+/* the login button and the profile chip: rounded like the rest of the drawer */
+.mobile-nav-footer :deep(.auth-cluster.mobile) {
+  width: 100%;
+}
+
+.mobile-nav-footer :deep(.auth-cluster.mobile a),
+.mobile-nav-footer :deep(.auth-cluster.mobile button) {
+  border-radius: 12px;
 }
 
 .mobile-nav-enter-active,
@@ -896,7 +917,7 @@ onUnmounted(() => {
 
 .mobile-nav-enter-active .mobile-nav,
 .mobile-nav-leave-active .mobile-nav {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-nav-enter-from,
@@ -906,7 +927,14 @@ onUnmounted(() => {
 
 .mobile-nav-enter-from .mobile-nav,
 .mobile-nav-leave-to .mobile-nav {
-  transform: translateX(-100%);
+  transform: translateX(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav-enter-active .mobile-nav,
+  .mobile-nav-leave-active .mobile-nav {
+    transition: none;
+  }
 }
 
 /* ---- Light theme (pages other than the homepage, which re-points these itself) ---- */

@@ -10,7 +10,7 @@
           <p class="footer-disclaimer">{{ t('footer.disclaimer') }}</p>
         </div>
 
-        <div class="footer-column">
+        <div class="footer-column footer-column--play">
           <p class="footer-heading">{{ t('footer.playHeading') }}</p>
           <RouterLink :to="$lp('/guide')">{{ t('footer.linkGuide') }}</RouterLink>
           <RouterLink :to="$lp('/pathways')">{{ t('footer.linkArchive') }}</RouterLink>
@@ -19,14 +19,14 @@
           <RouterLink :to="$lp('/#companion')">{{ t('footer.linkCompanion') }}</RouterLink>
         </div>
 
-        <div class="footer-column">
+        <div class="footer-column footer-column--account">
           <p class="footer-heading">{{ t('footer.accountHeading') }}</p>
           <RouterLink :to="$lp('/profile')">{{ t('footer.linkDossier') }}</RouterLink>
           <RouterLink :to="$lp('/store')">{{ t('footer.linkShop') }}</RouterLink>
           <RouterLink :to="$lp('/news')">{{ t('footer.linkNews') }}</RouterLink>
         </div>
 
-        <div class="footer-column">
+        <div class="footer-column footer-column--community">
           <p class="footer-heading">{{ t('footer.communityHeading') }}</p>
           <a href="https://discord.com/invite/jc7GSxBWgb" rel="noopener noreferrer" target="_blank">
             {{ t('servicesDiscord') }}
@@ -191,25 +191,75 @@ const year = new Date().getFullYear();
   filter: grayscale(1) brightness(.4) contrast(1.3);
 }
 
+/*
+ * Phones and tablets: compact. The brand and its line on top, then two columns: Play down
+ * the left, Account and Community stacked on the right (about half the old height).
+ */
 @media (max-width: 900px) {
+  .site-footer.full {
+    padding: 40px 20px 28px;
+  }
+
   .footer-columns {
-    grid-template-columns: 1fr 1fr;
-    gap: 36px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'identity identity'
+      'play account'
+      'play community';
+    gap: 22px 24px;
+    padding-bottom: 28px;
   }
 
   .footer-identity {
-    grid-column: 1 / -1;
+    grid-area: identity;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+  }
+
+  .footer-brand {
+    margin-bottom: 0;
+  }
+
+  .footer-disclaimer {
+    flex: 1 1 260px;
+    max-width: none;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .footer-column--play { grid-area: play; }
+  .footer-column--account { grid-area: account; }
+  .footer-column--community { grid-area: community; }
+
+  .footer-column {
+    gap: 9px;
+  }
+
+  .footer-column a {
+    font-size: 13.5px;
+  }
+
+  .site-footer.full .footer-baseline {
+    padding-top: 18px;
+  }
+}
+
+/* a tablet has room for the three groups side by side */
+@media (min-width: 601px) and (max-width: 900px) {
+  .footer-columns {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      'identity identity identity'
+      'play account community';
   }
 }
 
 @media (max-width: 560px) {
-  .footer-columns {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
-
   .footer-baseline {
     justify-content: center;
+    gap: 10px 20px;
     text-align: center;
   }
 }

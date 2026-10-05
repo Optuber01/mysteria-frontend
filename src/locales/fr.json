@@ -1002,8 +1002,8 @@
       },
       "credit": "By {author}",
       "join": {
-        "titleA": "Join on Java",
-        "titleB": "or Bedrock",
+        "titleA": "Become a",
+        "titleB": "Beyonder",
         "copiedHelp": "Copied. Paste into Multiplayer → Add Server.",
         "guide": "Joining guide",
         "discord": "Join Discord",

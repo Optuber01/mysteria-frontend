@@ -57,7 +57,9 @@ const themeStyle = computed(() => ({
   '--acc-fill': fillAccent(card.value.accent),
 }));
 
-/* The header's mobile drawer is teleported to <body>, so the accent rides there too. */
+/* The header's mobile drawer is teleported to <body>, so the accent and the page's one font ride there too. */
+const DRAWER_FONT = "'Commissioner', 'Segoe UI', system-ui, sans-serif";
+document.body.style.setProperty('--drawer-font', DRAWER_FONT);
 watch(() => card.value.accent, accent => {
   document.body.style.setProperty('--acc', accent);
   document.body.style.setProperty('--acc-deep', inkAccent(accent));
@@ -103,6 +105,7 @@ onUnmounted(() => {
   document.body.style.removeProperty('--acc');
   document.body.style.removeProperty('--acc-deep');
   document.body.style.removeProperty('--acc-fill');
+  document.body.style.removeProperty('--drawer-font');
 });
 </script>
 

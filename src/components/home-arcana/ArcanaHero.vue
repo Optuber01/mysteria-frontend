@@ -56,6 +56,8 @@
             :style="stageStyle"
             @pointermove="onStagePointer"
             @pointerleave="onStageLeave"
+            @pointerup="onStageRelease"
+            @pointercancel="onStageRelease"
         >
           <i class="arc-stage__backlight" aria-hidden="true"></i>
           <svg class="arc-stage__orbit" :viewBox="`0 0 200 200`" aria-hidden="true">
@@ -790,7 +792,64 @@ function stepTilt() {
   tiltFrame = done ? null : requestAnimationFrame(stepTilt);
 }
 
+/*
+ * The fan answers the hand: each face-down card lifts (and catches the accent) by how near
+ * the pointer is, so a mouse running along the fan, or a finger swiped across it, sends a
+ * ripple through the deck, the way the orbit leans toward the cursor. The card centres are
+ * read once per gesture (they only move during a shuffle, when the ripple is off) and the
+ * lift is one custom property per card, eased in CSS.
+ */
+type FanPoint = {el: HTMLElement; x: number; y: number; reach: number; near: number};
+let fanPoints: FanPoint[] | null = null;
+let ripplePoint: {x: number; y: number} | null = null;
+let rippleFrame = 0;
+
+function readFan(): FanPoint[] {
+  const points: FanPoint[] = [];
+  for (const [id, el] of cardEls) {
+    if (id === drawn.value) continue;
+    const rect = el.getBoundingClientRect();
+    points.push({el, x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, reach: Math.max(rect.width, rect.height) * 1.5, near: 0});
+  }
+  return points;
+}
+
+function paintRipple() {
+  rippleFrame = 0;
+  const at = ripplePoint;
+  fanPoints ??= readFan();
+  for (const point of fanPoints) {
+    const near = at ? Math.max(0, 1 - Math.hypot(at.x - point.x, at.y - point.y) / point.reach) ** 1.6 : 0;
+    if (Math.abs(near - point.near) < 0.01 && !(near === 0 && point.near > 0)) continue;
+    point.near = near;
+    if (near > 0) point.el.style.setProperty('--near', near.toFixed(3));
+    else point.el.style.removeProperty('--near');
+  }
+  if (!at) fanPoints = null;
+}
+
+function ripple(event: PointerEvent) {
+  if (busy.value || reducedMotion()) return;
+  ripplePoint = {x: event.clientX, y: event.clientY};
+  if (!rippleFrame) rippleFrame = requestAnimationFrame(paintRipple);
+}
+
+function settleRipple() {
+  ripplePoint = null;
+  if (!rippleFrame && fanPoints) rippleFrame = requestAnimationFrame(paintRipple);
+}
+
+/* a finger lifted: the fan settles back (a mouse keeps rippling until it leaves) */
+function onStageRelease(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') settleRipple();
+}
+
+watch(busy, value => {
+  if (value) settleRipple();
+});
+
 function onStagePointer(event: PointerEvent) {
+  ripple(event);
   if (event.pointerType !== 'mouse' || busy.value || !drawn.value || reducedMotion()) return;
   const el = cardEls.get(drawn.value);
   if (!el) return;
@@ -807,6 +866,7 @@ function onStagePointer(event: PointerEvent) {
 }
 
 function onStageLeave() {
+  settleRipple();
   tiltTarget = {rx: 0, ry: 0, mx: 50, my: 30, on: 0};
   if (tiltFrame === null) tiltFrame = requestAnimationFrame(stepTilt);
 }
@@ -918,6 +978,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (rippleFrame) cancelAnimationFrame(rippleFrame);
   resizeObserver?.disconnect();
   heroObserver?.disconnect();
   window.removeEventListener('resize', measure);
@@ -1114,7 +1175,8 @@ onUnmounted(() => {
 .arc-stage {
   position: relative;
   flex: none;
-  touch-action: manipulation;
+  /* a sideways swipe across the deck ripples the fan (see ripple); an upward one still scrolls the page */
+  touch-action: pan-y;
 }
 
 /* The moon behind the drawn card spills a little of the card's light. */
@@ -1228,14 +1290,27 @@ onUnmounted(() => {
   transition: transform .45s cubic-bezier(.2, .8, .2, 1);
 }
 
-@media (hover: hover) {
-  .arc-card.is-fan:hover .arc-card__lift {
-    transform: translateY(-12%);
-  }
+/* lifted out of the fan by the pointer's nearness (--near, set by ripple), the nearest most */
+.arc-card.is-fan .arc-card__lift {
+  transform: translateY(calc(var(--near, 0) * -18%)) scale(calc(1 + var(--near, 0) * .06));
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
-.arc-card.is-fan:focus-visible .arc-card__lift {
-  transform: translateY(-12%);
+/* the accent's light round a lifted card: a pre-drawn glow whose opacity alone follows the hand */
+.arc-card.is-fan::before {
+  position: absolute;
+  inset: 3%;
+  border-radius: inherit;
+  box-shadow: 0 0 calc(var(--card-w) * .28) calc(var(--card-w) * .04) color-mix(in oklab, var(--acc) 75%, transparent);
+  content: '';
+  opacity: var(--near, 0);
+  transform: translateY(calc(var(--near, 0) * -18%)) scale(calc(1 + var(--near, 0) * .06));
+  transition: opacity .3s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+  pointer-events: none;
+}
+
+.arc-card.is-fan:focus-visible {
+  --near: 1;
 }
 
 .arc-card.is-drawn .arc-card__lift {
@@ -1451,7 +1526,8 @@ onUnmounted(() => {
   /* Cards swap instantly: no app-wide micro-transition on the card or its flip. */
   .arc-card,
   .arc-card__lift,
-  .arc-card__flip {
+  .arc-card__flip,
+  .arc-card::before {
     transition: none !important;
   }
 }
