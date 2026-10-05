@@ -67,13 +67,21 @@ watch(() => props.index, async (index, before) => {
     await nextTick();
     dialog.showModal();
     window.addEventListener('keydown', onKey);
+    // the page behind holds still while a shot is open
+    document.documentElement.style.overflow = 'hidden';
   } else if (index === null && dialog.open) {
     dialog.close();
   }
-  if (index === null) window.removeEventListener('keydown', onKey);
+  if (index === null) {
+    window.removeEventListener('keydown', onKey);
+    document.documentElement.style.overflow = '';
+  }
 });
 
-onUnmounted(() => window.removeEventListener('keydown', onKey));
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKey);
+  document.documentElement.style.overflow = '';
+});
 </script>
 
 <style scoped>

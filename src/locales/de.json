@@ -643,20 +643,17 @@
         "discover": {
           "short": "Discover",
           "title": "Find the formula",
-          "copy": "Every Pathway starts from a written formula, and its ingredients are scattered across the world.",
-          "hint": "Select an ingredient to see where it's found."
+          "copy": "Every Pathway starts from a written formula, and its ingredients are scattered across the world."
         },
         "brew": {
           "short": "Brew",
           "title": "Brew the potion",
-          "copy": "Build a Magic Cauldron and add the ingredients in the formula's order. Get the order wrong and the brew fails.",
-          "hint": "A failed brew keeps your ingredients."
+          "copy": "Build a Magic Cauldron and add the ingredients in the formula's order. Get the order wrong and the brew fails."
         },
         "drink": {
           "short": "Drink",
           "title": "Drink the potion",
-          "copy": "One swallow and you're a Beyonder of the {pathway} Pathway. The first potion asks for no ritual and costs no Madness.",
-          "hint": "Drink it within two real-time days, before it spoils."
+          "copy": "One swallow and you're a Beyonder of the {pathway} Pathway. The first potion asks for no ritual and costs no Madness."
         },
         "awaken": {
           "short": "Awaken",
@@ -1014,10 +1011,7 @@
         "guide": "Joining guide",
         "discord": "Join Discord",
         "liveUnit": "players online",
-        "seasonLabel": "Beyonders this season",
-        "newsRead": "Read update",
-        "newsFallbackTitle": "Season II",
-        "newsFallbackBody": "A new world. Beyonder progress resets to Sequence 9."
+        "seasonLabel": "Beyonders this season"
       },
       "companion": {
         "title": "COI Client",

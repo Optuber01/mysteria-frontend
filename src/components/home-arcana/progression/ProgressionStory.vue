@@ -193,7 +193,7 @@ const { hasDrawn } = useArcana();
 const sigilExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
 const sigilSrc = computed(() => sigilNative(pathwayId.value));
 
-function chapterText(id: ChapterId, field: 'short' | 'title' | 'copy' | 'hint'): string {
+function chapterText(id: ChapterId, field: 'short' | 'title' | 'copy'): string {
   return tp(`chapters.${id}.${field}`);
 }
 
@@ -931,29 +931,8 @@ onUnmounted(() => {
   text-wrap: pretty;
 }
 
-.chapter-copy__hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin: 22px 0 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--arc-line);
-  color: var(--arc-muted);
-  font-size: 14px;
-  line-height: 1.5;
-  text-wrap: pretty;
-}
 
 /* the dot sits on the first line, however many lines the hint takes */
-.chapter-copy__hint i {
-  flex: 0 0 auto;
-  margin-top: 7px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--acc);
-  box-shadow: 0 0 10px var(--acc);
-}
 
 /*
  * The awakening's copy takes some of the empty floor to its right (the drawn card stands on
@@ -1286,13 +1265,8 @@ onUnmounted(() => {
     align-items: end;
   }
 
-  .chapter-copy__body,
-  .chapter-copy__hint {
+  .chapter-copy__body {
     font-size: 14.5px;
-  }
-
-  .chapter-copy__hint {
-    margin-top: 10px;
   }
 
   .chapter-copy__abilities span {
@@ -1516,27 +1490,6 @@ onUnmounted(() => {
     line-height: 1.35;
   }
 
-  /* the chapter's practical note, the potion as its marker */
-  .progression-static__note {
-    max-width: 620px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 20px 0 0;
-    padding-top: 16px;
-    border-top: 1px solid var(--arc-line);
-    color: var(--arc-muted);
-    font-size: 15px;
-    line-height: 1.5;
-    text-wrap: pretty;
-  }
-
-  .progression-static__vial {
-    flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
-    filter: drop-shadow(0 0 12px color-mix(in oklab, var(--acc) 45%, transparent));
-  }
 
   .progression-static .chapter-copy__abilities {
     max-width: 620px;

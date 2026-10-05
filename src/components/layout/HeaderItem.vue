@@ -246,8 +246,15 @@ const isActive = (link: NavLink) => {
 const toggleMobileNav = () => (isMobileNavOpen.value = !isMobileNavOpen.value);
 const closeMobileNav = () => (isMobileNavOpen.value = false);
 
+/* Escape closes the drawer, like any other dialog */
+const onDrawerKey = (event: KeyboardEvent) => {
+  if (event.key === "Escape") closeMobileNav();
+};
+
 watch(isMobileNavOpen, isOpen => {
   document.body.style.overflow = isOpen ? "hidden" : "";
+  if (isOpen) window.addEventListener("keydown", onDrawerKey);
+  else window.removeEventListener("keydown", onDrawerKey);
 });
 
 watch(() => route.path, closeMobileNav);
@@ -291,6 +298,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.body.style.overflow = "";
   window.removeEventListener("scroll", onScroll);
+  window.removeEventListener("keydown", onDrawerKey);
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
   stackObserver?.disconnect();
   document.documentElement.style.removeProperty("--site-header-stack");

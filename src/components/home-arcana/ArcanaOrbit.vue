@@ -397,6 +397,8 @@ function render() {
     element.style.setProperty('--lab', String(label));
     // the page disc under the seal deals in with it (it would cover the drawn seal mid-flight)
     element.style.setProperty('--enter', enter < 1 ? enter.toFixed(3) : '1');
+    // a seal faded out entirely (the dial's far side) takes its page disc with it
+    element.style.setProperty('--shown', opacity < .02 ? '0' : '1');
     element.style.setProperty('--inv', (1 / scale).toFixed(3));
   }
 }
@@ -1099,7 +1101,7 @@ onUnmounted(() => {
   border-radius: 50%;
   background: var(--arc-bg);
   content: '';
-  opacity: var(--enter, 1);
+  opacity: calc(var(--enter, 1) * var(--shown, 1));
 }
 
 .arc-seal__orb {
