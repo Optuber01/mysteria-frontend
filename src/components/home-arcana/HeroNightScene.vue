@@ -10,10 +10,11 @@
       class="night"
       :class="{
         'is-risen': risen && moonReady,
-        'is-moon-set': scene.celestial === 'sun' || scene.celestial === 'dusk',
-        'is-moon-hidden': scene.celestial === 'hidden',
-        'is-sun-up': scene.celestial === 'sun' || scene.celestial === 'dusk',
-        'is-dusk': scene.celestial === 'dusk',
+        'is-moon-set': body === 'sun' || body === 'dusk',
+        'is-moon-hidden': body === 'hidden',
+        'is-sun-up': body === 'sun' || body === 'dusk',
+        'is-dusk': body === 'dusk',
+        'is-sun-kept': scene.celestial === 'keep' && (body === 'sun' || body === 'dusk'),
         'is-stolen': stolen,
         'is-calm': fxCalm,
       }"
@@ -28,8 +29,10 @@
         <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="async" width="1920" height="1080">
       </picture>
       <i class="night__tint"></i>
+      <!-- daylight, whenever a sun is up (the Sun's own, or one a later card kept): the Pathway's sky tints it -->
+      <i class="night__daylight"></i>
       <!-- the drawn Pathway's sky, crossfaded over the night -->
-      <Transition name="night-grade">
+      <Transition v-bind="SKY_FADE">
         <i :key="sceneKey" class="night__grade" :style="{background: scene.sky}"></i>
       </Transition>
       <!-- a sun, for the Pathways that bring one: it rises where the moon sets -->
@@ -39,7 +42,7 @@
           <i class="night__sun-disc"></i>
         </div>
       </div>
-      <Transition name="night-weather">
+      <Transition v-bind="SKY_FADE">
         <SceneWeather v-if="!scene.weatherFront && scene.weather && !lite && !fxCalm" :key="`${scene.weather}-${scene.weatherColor}`" class="night__weather" :kind="scene.weather" :color="scene.weatherColor" :density="scene.weatherDensity" :lightning="scene.lightning" @strike="strike"/>
       </Transition>
 
@@ -70,7 +73,7 @@
       <!-- light theme: mist laid over the buildings themselves, so they stay solid in front of the moon -->
       <i class="night__haze" :style="{'--city-mask': `url(${city})`}"></i>
       <div class="night__fog night__fog--streets"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
-      <Transition name="night-weather">
+      <Transition v-bind="SKY_FADE">
         <SceneWeather v-if="scene.weatherFront && scene.weather && !lite && !fxCalm" :key="`${scene.weather}-${scene.weatherColor}`" class="night__weather" :kind="scene.weather" :color="scene.weatherColor" :density="scene.weatherDensity" :lightning="scene.lightning" @strike="strike"/>
       </Transition>
       <!-- ...and what plays in front of it -->
@@ -89,6 +92,7 @@ import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useEffects} from './useEffects';
 import SceneSignature from './SceneSignature.vue';
 import SceneWeather from './SceneWeather.vue';
+import {fade} from './fade';
 import {sceneFor} from './pathwayScenes';
 import {useArcana} from './useArcana';
 import sky from './assets/moon/backlund-sky.webp';
@@ -96,6 +100,9 @@ import skySmall from './assets/moon/backlund-sky-960.webp';
 import city from './assets/moon/backlund-skyline.webp';
 import citySmall from './assets/moon/backlund-skyline-960.webp';
 import moon from './assets/moon/crimson-moon.webp';
+
+/* the sky's grade and weather crossfade on the compositor (fade.ts) */
+const SKY_FADE = fade({duration: 900});
 
 defineProps<{risen: boolean}>();
 
@@ -132,17 +139,23 @@ const sceneVars = computed(() => ({
  * the Emperor eclipses whatever is there, Tyrant's clouds swallow it. Error's theft is
  * done here, on the real moon and sun: both vanish at once and the new body comes back.
  */
-const fromCelestial = ref<string>(scene.value.celestial);
+type Body = 'moon' | 'sun' | 'dusk' | 'hidden';
+/** 'keep' takes what is up (a sky lost in cloud gives the moon back). */
+const resolveBody = (wanted: string, current: Body): Body => (wanted === 'keep' ? (current === 'hidden' ? 'moon' : current) : wanted as Body);
+/** What actually hangs in the sky now. */
+const body = ref<Body>(resolveBody(scene.value.celestial, 'moon'));
+const fromCelestial = ref<string>(body.value);
 const stolen = ref(false);
 let stealTimer = 0;
-watch(scene, (next, prev) => {
-  fromCelestial.value = prev.celestial;
+watch(scene, (next) => {
+  fromCelestial.value = body.value;
+  body.value = resolveBody(next.celestial, body.value);
   if (sceneKey.value === 'error' && !fxCalm.value) {
     window.clearTimeout(stealTimer);
     stealTimer = window.setTimeout(() => {
       stolen.value = true;
-      stealTimer = window.setTimeout(() => (stolen.value = false), 1100);
-    }, 650);
+      stealTimer = window.setTimeout(() => (stolen.value = false), 900);
+    }, 350);
   }
 });
 
@@ -320,7 +333,7 @@ onUnmounted(() => {
   inset: 0;
   transform: translate3d(0, 34%, 0);
   opacity: .0;
-  transition: transform 2.6s cubic-bezier(.16, .84, .3, 1) .1s, opacity 1.2s ease .1s;
+  transition: transform 1.8s cubic-bezier(.16, .84, .3, 1) .1s, opacity .9s ease .1s;
 }
 
 .is-risen .night__moon-rise {
@@ -332,13 +345,13 @@ onUnmounted(() => {
 .is-risen.is-moon-set .night__moon-rise {
   transform: translate3d(0, 70%, 0);
   opacity: 0;
-  transition: transform 2.6s cubic-bezier(.5, 0, .7, .4), opacity 1.6s ease .9s;
+  transition: transform 1.3s cubic-bezier(.5, 0, .7, .4), opacity .8s ease .4s;
 }
 
 /* lost behind cloud: it stays where it is and fades */
 .is-risen.is-moon-hidden .night__moon-rise {
   opacity: 0;
-  transition: opacity 2.4s ease .4s;
+  transition: opacity 1s ease .15s;
 }
 
 /*
@@ -352,30 +365,22 @@ onUnmounted(() => {
   transition: none !important;
 }
 
-.night.is-stolen .night__moon {
+.night.is-stolen .night__moon,
+.night.is-stolen .night__sun {
   translate: calc(var(--moon-r, 200px) * .5) calc(var(--moon-r, 200px) * -.08);
 }
 
-.night__moon {
+.night__moon,
+.night__sun {
   transition: translate .5s steps(4, jump-end);
 }
 
 /* the scene's own changes to the disc (paler, darker, greyer) ease across with the rest */
 .night__moon-disc {
-  transition: filter 1.6s ease;
+  transition: filter .9s ease;
 }
 
 /* ---- the handover: the old weather and signature fade while the new ones come in ---- */
-.night-weather-enter-active,
-.night-weather-leave-active {
-  transition: opacity 1.6s ease;
-}
-
-.night-weather-enter-from,
-.night-weather-leave-to {
-  opacity: 0;
-}
-
 /* ---- the drawn Pathway's sky ---- */
 .night__grade {
   position: absolute;
@@ -383,14 +388,31 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.night-grade-enter-active,
-.night-grade-leave-active {
-  transition: opacity 1.6s ease;
+/* daylight under the Pathway's sky while a sun is up: a kept sun keeps its day */
+.night__daylight {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(143, 182, 224, .45) 0%, rgba(244, 198, 106, .45) 48%, rgba(255, 214, 150, .35) 100%);
+  opacity: 0;
+  transition: opacity .9s ease;
+  pointer-events: none;
 }
 
-.night-grade-enter-from,
-.night-grade-leave-to {
-  opacity: 0;
+.is-sun-kept .night__daylight {
+  opacity: 1;
+}
+
+.is-sun-kept.is-dusk .night__daylight {
+  background: linear-gradient(180deg, rgba(58, 35, 71, .7) 0%, rgba(200, 100, 70, .4) 48%, rgba(255, 130, 72, .4) 100%);
+}
+
+/* ...and the Pathway's own sky is only a tint over it */
+.is-sun-kept .night__grade {
+  opacity: .45;
+}
+
+:root[data-theme="parchment"] .night__daylight {
+  display: none;
 }
 
 /* ---- a sun where the moon was: rises from behind the castle (Sun), or sits on the horizon (twilight) ---- */
@@ -407,7 +429,7 @@ onUnmounted(() => {
   inset: 0;
   opacity: 0;
   transform: translate3d(0, 90%, 0);
-  transition: transform 3.2s cubic-bezier(.16, .84, .3, 1) .9s, opacity 1.6s ease .9s;
+  transition: transform 1.6s cubic-bezier(.16, .84, .3, 1) .3s, opacity .8s ease .3s;
 }
 
 .is-sun-up .night__sun-rise {
@@ -434,6 +456,9 @@ onUnmounted(() => {
 .night__sun-disc {
   position: absolute;
   inset: 0;
+  /* a kept sun takes the scene's treatment, as the moon does (pale, dark, sickly...) */
+  filter: var(--moon-filter, );
+  transition: filter .9s ease;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 50%, #fffbe6 0%, #ffeaa0 38%, #ffc95a 62%, #ff9f3a 100%);
   box-shadow: 0 0 calc(var(--moon-r, 200px) * .5) rgba(255, 200, 100, .7);
@@ -455,7 +480,7 @@ onUnmounted(() => {
   height: 70%;
   overflow: hidden;
   opacity: var(--clouds, 0);
-  transition: opacity 2s ease;
+  transition: opacity 1s ease;
   -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent);
   mask-image: linear-gradient(180deg, #000 40%, transparent);
 }
@@ -502,7 +527,7 @@ onUnmounted(() => {
   inset: 0;
   background: #04040a;
   opacity: var(--shade, 0);
-  transition: opacity 1.6s ease;
+  transition: opacity .9s ease;
   pointer-events: none;
 }
 
@@ -586,7 +611,7 @@ onUnmounted(() => {
   inset: 0;
   background-color: var(--fog-tone);
   mix-blend-mode: multiply;
-  transition: background-color 1.6s ease;
+  transition: background-color .9s ease;
 }
 
 /* Two bands cross the moon's face at different speeds. */
@@ -594,14 +619,14 @@ onUnmounted(() => {
   top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * .2);
   height: calc(var(--moon-r, 200px) * .62);
   opacity: calc(.42 * var(--fog-amount, 1));
-  transition: opacity 1.6s ease;
+  transition: opacity .9s ease;
 }
 
 .night__fog--b {
   top: calc(var(--moon-y, 48%) + var(--moon-r, 200px) * .34);
   height: calc(var(--moon-r, 200px) * .8);
   opacity: calc(.36 * var(--fog-amount, 1));
-  transition: opacity 1.6s ease;
+  transition: opacity .9s ease;
 }
 
 .night__fog--b .night__fog-drift {
@@ -613,7 +638,7 @@ onUnmounted(() => {
   top: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .3);
   height: calc(var(--city-h, 600px) * .3);
   opacity: calc(.34 * var(--fog-amount, 1));
-  transition: opacity 1.6s ease;
+  transition: opacity .9s ease;
 }
 
 .night__fog--streets .night__fog-drift {

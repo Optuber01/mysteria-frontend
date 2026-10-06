@@ -1,237 +1,238 @@
 <template>
   <!--
-    Demoness: the light goes cold and violet, and whatever hangs in the sky is doubled, as if
-    seen in a mirror: a faint second moon (or sun) slides out of the real one and stays a
-    little apart from it. Frost creeps in from the edges of the view, a soft frosted rim
-    on the glass, and the castle's edges catch a cold pink-white light. Catastrophe is
-    quiet here: no cracks, no flame.
+    Demoness: everything freezes. Frost grows in from the top and right edges of the sky in
+    hexagonal crystals; a cold mirror-double of whatever hangs in the sky slides out beside
+    it, where it can be seen past the deck; the castle's edges take a cold pink light; frost
+    glitter falls (the scene's snow). Catastrophe as stillness and cold, nothing drawn but
+    ice and light.
   -->
-  <div class="de" :class="`is-from-${from ?? 'moon'}`" aria-hidden="true" :style="{'--sig-city': `url(${city})`}">
+  <div class="dm" :class="`is-from-${body}`" aria-hidden="true" :style="{'--sig-city': `url(${city})`, '--frost': frostUrl ? `url(${frostUrl})` : 'none'}">
     <template v-if="layer === 'back'">
-      <i class="de__cold"></i>
-      <!-- the doubled sun: splits off the sun that was up, and sets with it -->
-      <div v-if="from === 'sun'" class="de__sun">
-        <div class="de__sun-set">
-          <i class="de__sun-double"></i>
-        </div>
+      <!-- the mirror-double: the real moon (or a sun) reflected wrong, up and to the right -->
+      <div class="dm__double">
+        <img v-if="body === 'moon'" class="dm__double-moon" :src="moon" alt="" width="640" height="640" decoding="async">
+        <i v-else class="dm__double-sun"></i>
       </div>
-      <!-- the doubled moon, kept on the moon (its rise, its sink on scroll) -->
-      <div ref="followRef" class="de__anchor">
-        <div ref="riseRef" class="de__rise">
-          <img class="de__moon-double" :src="moonImg" alt="" decoding="async">
-        </div>
-      </div>
+      <i class="dm__cold"></i>
     </template>
     <template v-else>
-      <i class="de__rim"></i>
-      <i class="de__frost" :style="{'--noise': NOISE}"></i>
+      <i class="dm__rim"></i>
+      <i class="dm__frost dm__frost--top"></i>
+      <i class="dm__frost dm__frost--side"></i>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import city from '../assets/moon/backlund-skyline.webp';
-import moonImg from '../assets/moon/crimson-moon.webp';
-import {useMoonAnchor} from './sigKit';
+import moon from '../assets/moon/crimson-moon.webp';
+import {seeded} from './sigKit';
 
-defineProps<{layer: 'back' | 'front'; from?: string}>();
+defineOptions({name: 'SignatureDemoness'});
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
 
-const followRef = ref<HTMLElement | null>(null);
-const riseRef = ref<HTMLElement | null>(null);
-useMoonAnchor(followRef, riseRef);
+/* the body the mirror doubles: a sun if a sun was up (it stays), else the moon */
+const body = computed(() => (props.from === 'sun' || props.from === 'dusk' ? 'sun' : 'moon'));
 
 /*
- * Hoarfrost, as noise rather than line art: fine grains (high-frequency turbulence, its
- * alpha pushed to a threshold so it reads as crystals) gathered in drifts (a low-frequency
- * turbulence modulating them). A static tile; the frost only ever moves as a whole.
+ * The frost: hexagonal dendrites (six arms, branches at 60 degrees), drawn once on a small
+ * canvas and kept as an image, so it costs nothing after the first frame. Shared by every
+ * mount of this file.
  */
-const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'>
-<filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/>
-<feColorMatrix values='0 0 0 0 .96  0 0 0 0 .92  0 0 0 0 1  0 0 0 3.2 -1.75'/></filter>
-<filter id='d'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3' seed='3' stitchTiles='stitch'/>
-<feColorMatrix values='0 0 0 0 .9  0 0 0 0 .86  0 0 0 0 .98  0 0 0 1.6 -.5'/></filter>
-<rect width='100%' height='100%' filter='url(#d)' opacity='.55'/><rect width='100%' height='100%' filter='url(#g)'/></svg>`;
-const NOISE = `url("data:image/svg+xml,${encodeURIComponent(svg.replace(/\n/g, ''))}")`;
+let frostCache = '';
+function frostTexture(): string {
+  if (frostCache) return frostCache;
+  const size = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const c = canvas.getContext('2d');
+  if (!c) return '';
+  const rand = seeded(61);
+  c.lineCap = 'round';
+  const arm = (x: number, y: number, angle: number, length: number, width: number, depth: number) => {
+    const ex = x + Math.cos(angle) * length;
+    const ey = y + Math.sin(angle) * length;
+    c.lineWidth = width;
+    c.beginPath();
+    c.moveTo(x, y);
+    c.lineTo(ex, ey);
+    c.stroke();
+    if (depth <= 0) return;
+    const branches = 2 + Math.floor(rand() * 3);
+    for (let i = 1; i <= branches; i++) {
+      const t = i / (branches + 1);
+      const bx = x + (ex - x) * t;
+      const by = y + (ey - y) * t;
+      const sub = length * (0.45 - t * 0.25);
+      arm(bx, by, angle + Math.PI / 3, sub, width * 0.6, depth - 1);
+      arm(bx, by, angle - Math.PI / 3, sub, width * 0.6, depth - 1);
+    }
+  };
+  for (let i = 0; i < 90; i++) {
+    const x = rand() * size;
+    const y = rand() * size;
+    const r = 6 + rand() * 20;
+    const turn = rand() * Math.PI;
+    c.strokeStyle = `rgba(250, 236, 252, ${(0.25 + rand() * 0.45).toFixed(2)})`;
+    for (let k = 0; k < 6; k++) arm(x, y, turn + (k * Math.PI) / 3, r, 1, 2);
+  }
+  // a fine rime between the crystals
+  for (let i = 0; i < 1400; i++) {
+    c.fillStyle = `rgba(245, 230, 250, ${(rand() * 0.35).toFixed(2)})`;
+    c.fillRect(rand() * size, rand() * size, 1, 1);
+  }
+  frostCache = canvas.toDataURL('image/png');
+  return frostCache;
+}
+
+const frostUrl = ref('');
+onMounted(() => {
+  if (props.layer === 'front') frostUrl.value = frostTexture();
+});
 </script>
 
 <style scoped>
-.de {
-  /* the doubled moon steps out once the moon is up: at once, or after it has risen or come out of cloud */
-  --moon-in: .8s;
+.dm {
+  --H: var(--city-h, 600px);
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.de:not(.is-from-moon) {
-  --moon-in: 2.4s;
-}
-
-/* ---- behind the castle ---- */
-/* cold violet light in the air round the moon */
-.de__cold {
+/* ---- behind ---- */
+/* the double: up and to the right of the body, out past the fan, cold and pale */
+.dm__double {
   position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * 3.6);
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * 3.6);
-  width: calc(var(--moon-r, 200px) * 7.2);
+  left: calc(var(--moon-x, 72%) + var(--moon-r, 200px) * .55);
+  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * 1.75);
+  width: calc(var(--moon-r, 200px) * 1.2);
   aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle closest-side, rgba(170, 140, 255, .2) 14%, rgba(140, 100, 220, .1) 40%, rgba(110, 70, 180, .04) 66%, transparent);
-  animation: de-fade 2.6s ease .3s both;
+  opacity: .5;
+  animation: dm-double 1.8s cubic-bezier(.2, .7, .2, 1) .5s both;
 }
 
-/* the moon's double: the real image, faint, cooled, a little up and to the right of the moon */
-.de__anchor {
-  position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
-  width: calc(var(--moon-r, 200px) * 2);
-  aspect-ratio: 1;
-}
-
-.de__rise {
-  position: absolute;
-  inset: 0;
-  transform: scale(var(--moon-scale, 1));
-}
-
-.de__moon-double {
+.dm__double-moon {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  max-width: none;
-  filter: saturate(.7) hue-rotate(-18deg) brightness(1.1) var(--moon-filter, );
-  opacity: .3;
-  transform: translate3d(42%, -30%, 0);
-  animation: de-split 2.6s cubic-bezier(.3, .1, .2, 1) var(--moon-in) both;
+  filter: hue-rotate(-40deg) saturate(.55) brightness(1.25);
+  transform: scaleX(-1);
 }
 
-/* the sun's double, where the sun hangs (HeroNightScene .night__sun), going down with it */
-.de__sun {
+.dm__double-sun {
   position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * .8);
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * .8);
-  width: calc(var(--moon-r, 200px) * 1.6);
-  aspect-ratio: 1;
-}
-
-/* the sun sets on the scene's own timing (.night__sun-rise: 3.2 s for the drop, 1.6 s fade, both after .9 s) */
-.de__sun-set {
-  position: absolute;
-  inset: 0;
-  animation:
-    de-sun-drop 3.2s cubic-bezier(.16, .84, .3, 1) .9s both,
-    de-sun-fade 1.6s ease .9s both;
-}
-
-.de__sun-double {
-  position: absolute;
-  inset: 0;
+  inset: 8%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 246, 240, .9) 0%, rgba(255, 220, 240, .7) 45%, rgba(230, 170, 230, .4) 80%, transparent 100%);
-  opacity: .32;
-  transform: translate3d(42%, -30%, 0);
-  animation: de-split 1.1s cubic-bezier(.3, .1, .2, 1) .1s both;
+  background: radial-gradient(circle, #fff4fb 0%, #f2c8e6 50%, #c890c8 100%);
+  box-shadow: 0 0 40px rgba(240, 190, 230, .6);
 }
 
-@keyframes de-split {
-  0% { opacity: 0; transform: none; }
-  25% { opacity: .5; }
-  100% { opacity: .3; transform: translate3d(42%, -30%, 0); }
+@keyframes dm-double {
+  from { opacity: 0; transform: translate3d(calc(var(--moon-r, 200px) * -.9), calc(var(--moon-r, 200px) * 1.2), 0) scale(.7); }
 }
 
-@keyframes de-sun-drop {
-  to { transform: translate3d(0, 90%, 0); }
-}
-
-@keyframes de-sun-fade {
-  to { opacity: 0; }
-}
-
-@keyframes de-fade {
-  from { opacity: 0; }
+/* the cold over the sky: pink-violet light pooling from the upper right */
+.dm__cold {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 60% at 85% 10%, rgba(230, 170, 230, .22), rgba(150, 90, 170, .1) 45%, transparent 75%);
+  animation: dm-fade 1.4s ease .2s both;
 }
 
 /* ---- in front ---- */
-/* a cold pink-white edge on the roofs nearest the moon, cut to the skyline */
-.de__rim {
-  --k: calc(var(--city-h, 600px) * .004);
+/* the castle's top edges in a cold pink light */
+.dm__rim {
+  --k: calc(var(--H) * .005);
   position: absolute;
   left: var(--city-left, 0);
-  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px));
-  height: var(--city-h, 600px);
+  top: calc(var(--city-bottom, 100%) - var(--H));
+  height: var(--H);
   aspect-ratio: 16 / 9;
-  background: radial-gradient(circle at calc(var(--moon-x, 72%) - var(--city-left, 0px)) calc(var(--moon-y, 48%) - var(--city-bottom, 100%) + var(--city-h, 600px)),
-      rgba(255, 230, 250, .9) 0, rgba(230, 160, 230, .55) calc(var(--moon-r, 200px) * 1.8), transparent calc(var(--moon-r, 200px) * 4));
+  background: linear-gradient(180deg, rgba(255, 220, 250, .95), rgba(230, 150, 220, .55) 50%, transparent 90%);
   -webkit-mask: var(--sig-city) 0 0 / 100% 100% no-repeat, var(--sig-city) 0 var(--k) / 100% 100% no-repeat;
   -webkit-mask-composite: source-out;
   mask: var(--sig-city) 0 0 / 100% 100% no-repeat, var(--sig-city) 0 var(--k) / 100% 100% no-repeat;
   mask-composite: subtract;
-  opacity: .5;
-  animation: de-fade 2s ease 1.6s both;
+  opacity: .7;
+  animation: dm-fade 1.4s ease .9s both;
 }
 
-/*
- * Frost on the glass: the grains and a pale violet-white bloom, thick at the edges and
- * corners, clear in the middle (a static mask). It creeps in by shrinking from beyond the
- * frame to its place: transform only.
- */
-.de__frost {
+/* frost: the crystal texture, thick at the edge, thinning inward; grows in from the edge */
+.dm__frost {
   position: absolute;
-  inset: 0;
-  background:
-    var(--noise) 0 0 / 280px 280px,
-    radial-gradient(130% 120% at 62% 46%, transparent 52%, rgba(236, 220, 255, .16) 78%, rgba(246, 236, 255, .3));
-  -webkit-mask-image: radial-gradient(120% 110% at 62% 46%, transparent 50%, rgba(0, 0, 0, .35) 66%, #000 92%);
-  mask-image: radial-gradient(120% 110% at 62% 46%, transparent 50%, rgba(0, 0, 0, .35) 66%, #000 92%);
-  opacity: .62;
-  animation: de-frost 2.8s cubic-bezier(.25, .55, .3, 1) .5s both;
+  background: var(--frost) repeat 0 0 / 220px 220px;
+  will-change: transform, opacity;
 }
 
-@keyframes de-frost {
-  from { opacity: 0; transform: scale(1.3); }
+.dm__frost--top {
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 34%;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .5) 35%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 40%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .5) 35%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 40%);
+  mask-composite: intersect;
+  transform-origin: 50% 0;
+  animation: dm-grow-down 1.8s cubic-bezier(.2, .7, .2, 1) .3s both;
 }
 
-/* stacked: the hero is a band; the frost stays to the corners */
+.dm__frost--side {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 26%;
+  -webkit-mask-image: linear-gradient(270deg, #000 0%, rgba(0, 0, 0, .45) 40%, transparent 100%);
+  mask-image: linear-gradient(270deg, #000 0%, rgba(0, 0, 0, .45) 40%, transparent 100%);
+  transform-origin: 100% 50%;
+  animation: dm-grow-in 1.8s cubic-bezier(.2, .7, .2, 1) .5s both;
+}
+
+@keyframes dm-grow-down {
+  from { opacity: 0; transform: scaleY(.2); }
+}
+
+@keyframes dm-grow-in {
+  from { opacity: 0; transform: scaleX(.2); }
+}
+
+@keyframes dm-fade {
+  from { opacity: 0; }
+}
+
 @media (max-width: 900px) {
-  .de__frost {
-    -webkit-mask-image: radial-gradient(130% 100% at 50% 50%, transparent 58%, rgba(0, 0, 0, .35) 72%, #000 96%);
-    mask-image: radial-gradient(130% 100% at 50% 50%, transparent 58%, rgba(0, 0, 0, .35) 72%, #000 96%);
+  .dm__double {
+    left: calc(var(--moon-x, 72%) + var(--moon-r, 200px) * .35);
+    top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * 1.55);
+  }
+
+  .dm__frost--side {
+    width: 18%;
   }
 }
 
-/* paper: rime as cool lilac-grey on the haze (multiplied), the doubles faint ink */
-:root[data-theme="parchment"] .de__cold,
-:root[data-theme="parchment"] .de__rim,
-:root[data-theme="parchment"] .de__moon-double,
-:root[data-theme="parchment"] .de__sun-double {
-  mix-blend-mode: multiply;
+/* paper: frost as a pale violet rime, the double faint */
+:root[data-theme="parchment"] .dm__frost {
+  filter: invert(.6) sepia(.2) hue-rotate(250deg);
+  opacity: .5;
 }
 
-:root[data-theme="parchment"] .de__rim {
-  background: radial-gradient(circle at calc(var(--moon-x, 72%) - var(--city-left, 0px)) calc(var(--moon-y, 48%) - var(--city-bottom, 100%) + var(--city-h, 600px)),
-      rgba(150, 90, 150, .7) 0, rgba(150, 90, 150, .3) calc(var(--moon-r, 200px) * 2), transparent calc(var(--moon-r, 200px) * 4));
-}
-
-:root[data-theme="parchment"] .de__frost {
-  background: radial-gradient(130% 120% at 62% 46%, transparent 50%, rgba(170, 160, 200, .22) 78%, rgba(150, 140, 190, .38));
+:root[data-theme="parchment"] .dm__rim,
+:root[data-theme="parchment"] .dm__cold {
   mix-blend-mode: multiply;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .de__cold,
-  .de__moon-double,
-  .de__sun-double,
-  .de__rim,
-  .de__frost {
+  .dm__double,
+  .dm__cold,
+  .dm__rim,
+  .dm__frost--top,
+  .dm__frost--side {
     animation: none;
-  }
-
-  .de__sun {
-    display: none;
   }
 }
 </style>

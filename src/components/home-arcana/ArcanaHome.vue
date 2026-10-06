@@ -1,13 +1,13 @@
 <template>
-  <div class="concept-arcana" :style="themeStyle">
+  <div class="concept-arcana" :style="initialAccent">
     <!-- The page's ambient layer: the accent wash and the grain -->
-    <div class="arc-ambient" aria-hidden="true">
+    <div class="arc-ambient arc-region" aria-hidden="true">
       <!-- The re-theme happens here: two fixed layers crossfade (opacity only), the rest of the page just switches colour. -->
-      <Transition name="arc-wash">
+      <Transition v-bind="WASH_FADE">
         <span :key="themeKey" class="arc-ambient__wash" :style="{'--wash': card.accent}"></span>
       </Transition>
       <!-- the drawn Pathway's air over the whole page (pathwayScenes.ts: wash) -->
-      <Transition name="arc-wash">
+      <Transition v-bind="WASH_FADE">
         <span v-if="sceneWash" :key="themeKey" class="arc-ambient__scene" :style="{background: sceneWash}"></span>
       </Transition>
       <span class="arc-ambient__grain" :style="{backgroundImage: `url(${grain})`}"></span>
@@ -15,17 +15,17 @@
 
     <HeaderItem overlay/>
 
-    <main id="main-content" class="arc-main">
-      <ArcanaHero/>
-      <ProgressionStory/>
-      <ArcanaOrbit/>
-      <WorldChapter/>
-      <ArcanaFuture/>
-      <SectionCompanion/>
+    <main id="main-content" class="arc-main arc-region">
+      <ArcanaHero class="arc-region"/>
+      <ProgressionStory class="arc-region"/>
+      <ArcanaOrbit class="arc-region"/>
+      <WorldChapter class="arc-region"/>
+      <ArcanaFuture class="arc-region"/>
+      <SectionCompanion class="arc-region"/>
     </main>
 
-    <FooterItem variant="full"/>
-    <ArcanaDeckControl/>
+    <FooterItem class="arc-region" variant="full"/>
+    <ArcanaDeckControl class="arc-region"/>
     <DailyBonusCat page="home"/>
   </div>
 </template>
@@ -34,7 +34,8 @@
 import {computed, onMounted, onUnmounted, watch} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import {sceneFor} from './pathwayScenes';
-import {isCardId} from './arcana-data';
+import {BOON_CARDS, CORE_CARDS, isCardId} from './arcana-data';
+import {prefetchAllSignatures} from './signatureLoader';
 import {openOnPlayerPathway} from './usePlayerPathway';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
@@ -49,6 +50,10 @@ import ArcanaDeckControl from './ArcanaDeckControl.vue';
 import {ensurePathwayData, useArcana} from './useArcana';
 import {fillAccent, inkAccent} from './accentInk';
 import grain from './assets/grain.png';
+import {fade} from './fade';
+
+/* the ambient wash crossfades on the compositor (fade.ts) */
+const WASH_FADE = fade({duration: 1100, easing: 'cubic-bezier(.4, 0, .2, 1)'});
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&display=swap');
 
@@ -61,11 +66,65 @@ const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
 /* --acc-deep: the accent deepened to read as text on the light theme's paper; --acc-fill: the
    light theme's solid-control fill (near-black where the deepened accent turns olive). See accentInk.ts. */
-const themeStyle = computed(() => ({
-  '--acc': card.value.accent,
-  '--acc-deep': inkAccent(card.value.accent),
-  '--acc-fill': fillAccent(card.value.accent),
-}));
+const accentVars = (accent: string) => ({
+  '--acc': accent,
+  '--acc-deep': inkAccent(accent),
+  '--acc-fill': fillAccent(accent),
+});
+/* the page's first paint wears the card it opens on; every later change goes region by region */
+const initialAccent = accentVars(card.value.accent);
+
+/*
+ * The recolour, region by region. Changing --acc at the top of the page restyled every
+ * element on it in one go: a ~340 ms style recalc inside the card switch's view
+ * transition, the freeze at every draw. Now each region (the header, the hero, each
+ * chapter, the footer) carries its own accent and resolves its own accent tokens
+ * (the region rule in the style block): the ones on screen switch at once, inside the transition, and the ones
+ * off screen follow one per idle slice, where nobody can see them change.
+ */
+let pendingRegions: HTMLElement[] = [];
+let regionTask = 0;
+const idleCallback = (cb: () => void) => {
+  const w = window as Window & {requestIdleCallback?: (cb: () => void, o?: {timeout: number}) => number};
+  return w.requestIdleCallback ? w.requestIdleCallback(cb, {timeout: 1200}) : window.setTimeout(cb, 50);
+};
+const cancelIdle = (id: number) => {
+  const w = window as Window & {cancelIdleCallback?: (id: number) => void};
+  if (w.cancelIdleCallback) w.cancelIdleCallback(id);
+  else window.clearTimeout(id);
+};
+function paintRegion(el: HTMLElement, vars: Record<string, string>) {
+  for (const [name, value] of Object.entries(vars)) el.style.setProperty(name, value);
+}
+let drawerAccent: HTMLStyleElement | null = null;
+/** The regions on screen, kept by an IntersectionObserver (see onMounted). */
+const visibleRegions = new Set<Element>();
+let regionObserver: IntersectionObserver | null = null;
+function applyAccent(accent: string) {
+  const vars = accentVars(accent);
+  if (regionTask) cancelIdle(regionTask);
+  const regions = [...document.querySelectorAll<HTMLElement>('.concept-arcana > :not(.arc-main), .concept-arcana > .arc-main > *')];
+  // what can be seen right now, as the observer last reported it: no layout read here (the
+  // card has just changed the DOM, so measuring would force a full style and layout pass)
+  const onScreen = regions.map(el => visibleRegions.has(el));
+  regions.forEach((el, i) => {
+    if (onScreen[i]) paintRegion(el, vars);
+  });
+  pendingRegions = regions.filter((_, i) => !onScreen[i]);
+  const next = () => {
+    regionTask = 0;
+    const el = pendingRegions.shift();
+    if (el) {
+      paintRegion(el, vars);
+      regionTask = idleCallback(next);
+      return;
+    }
+    // last: the drawer (teleported to <body>), through one rule that matches only it
+    drawerAccent ??= document.head.appendChild(document.createElement('style'));
+    drawerAccent.textContent = `.mobile-nav-overlay{${Object.entries(vars).map(([k, v]) => `${k}:${v}`).join(';')}}`;
+  };
+  regionTask = idleCallback(next);
+}
 
 /*
  * The page marks <body> itself (styles that reach outside it, like the page background and
@@ -74,14 +133,13 @@ const themeStyle = computed(() => ({
  */
 document.body.classList.add('is-arcana-home');
 
-/* The header's mobile drawer is teleported to <body>, so the accent and the page's one font ride there too. */
+/* The header's mobile drawer is teleported to <body>, so the page's one font rides there too (its accent: applyAccent). */
 const DRAWER_FONT = "'Commissioner', 'Segoe UI', system-ui, sans-serif";
 document.body.style.setProperty('--drawer-font', DRAWER_FONT);
-watch(() => card.value.accent, accent => {
-  document.body.style.setProperty('--acc', accent);
-  document.body.style.setProperty('--acc-deep', inkAccent(accent));
-  document.body.style.setProperty('--acc-fill', fillAccent(accent));
-}, {immediate: true});
+watch(() => card.value.accent, applyAccent, {flush: 'post'});
+// the drawer wears the opening card too (later changes come last in applyAccent)
+drawerAccent = document.head.appendChild(document.createElement('style'));
+drawerAccent.textContent = `.mobile-nav-overlay{${Object.entries(initialAccent).map(([k, v]) => `${k}:${v}`).join(';')}}`;
 
 /*
  * Chapters well outside the viewport hold their looping animations still: drifting fog,
@@ -109,14 +167,19 @@ function holdLoops(section: Element, offscreen: boolean) {
   held.set(section, [...loops]);
 }
 
+let cancelSignatures: (() => void) | null = null;
 onMounted(() => {
+  // every Pathway's moment, ahead of the draw (signatureLoader.ts); the Boons share one
+  cancelSignatures = prefetchAllSignatures([...CORE_CARDS.map(c => c.id), BOON_CARDS[0].id]);
   // A shared link can open the page with a card already drawn: /en?card=sun
   const asked = new URLSearchParams(location.search).get('card');
   if (asked && isCardId(asked)) void reveal(asked);
   // a signed-in player opens on their own Pathway (once per session)
   else void openOnPlayerPathway();
-  // dev only: the handover screenshot tool switches cards without a reload
-  if (import.meta.env.DEV) (window as Window & {__arcanaReveal?: (id: string) => void}).__arcanaReveal = (id: string) => void reveal(id, {crossfade: true});
+  // the handover and perf tools switch cards without a reload (dev, or any build opened with ?perf)
+  if (import.meta.env.DEV || new URLSearchParams(location.search).has('perf')) {
+    (window as Window & {__arcanaReveal?: (id: string) => void}).__arcanaReveal = (id: string) => void reveal(id, {crossfade: !new URLSearchParams(location.search).has('plain')});
+  }
   // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
   const idle = (window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number}).requestIdleCallback;
   if (idle) idle(() => void ensurePathwayData(), {timeout: 1500});
@@ -133,6 +196,13 @@ onMounted(() => {
    * the whole page through paint and layerizing every frame (about 440 ms a second idle).
    */
   document.addEventListener('animationstart', onLoopStart, true);
+  regionObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) visibleRegions.add(entry.target);
+      else visibleRegions.delete(entry.target);
+    }
+  });
+  document.querySelectorAll('.concept-arcana > :not(.arc-main), .concept-arcana > .arc-main > *').forEach(el => regionObserver?.observe(el));
 });
 
 function onLoopStart(event: AnimationEvent) {
@@ -147,11 +217,12 @@ function onLoopStart(event: AnimationEvent) {
 }
 
 onUnmounted(() => {
+  cancelSignatures?.();
   offscreenObserver?.disconnect();
   document.removeEventListener('animationstart', onLoopStart, true);
-  document.body.style.removeProperty('--acc');
-  document.body.style.removeProperty('--acc-deep');
-  document.body.style.removeProperty('--acc-fill');
+  regionObserver?.disconnect();
+  if (regionTask) cancelIdle(regionTask);
+  drawerAccent?.remove();
   document.body.style.removeProperty('--drawer-font');
   document.body.classList.remove('is-arcana-home');
 });
@@ -299,6 +370,47 @@ body.is-arcana-home {
  * the same hue deepened to >= 5.3:1 on the paper for every card (accentInk.ts). No gold:
  * upstream's parchment tokens are gold-tinted, so every one of them is re-pointed here.
  */
+/*
+ * The accent's tokens resolve inside each region (custom properties are computed where
+ * they are declared), so a region that carries its own --acc recolours alone: see
+ * applyAccent. The dark set here; the paper set below. The regions are marked with a
+ * class (the template; the header, a fragment, by its own): `.concept-arcana > *` has a universal subject, so the browser
+ * tried it against every element on the page in every style pass.
+ */
+.arc-region,
+.concept-arcana > .header-stack,
+.mobile-nav-overlay {
+  --acc-ink: var(--acc);
+  --acc-solid: var(--acc);
+  --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
+  --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
+  --myst-gold: var(--acc);
+  --myst-gold-soft: var(--acc);
+  --myst-line-28: color-mix(in srgb, var(--acc) 30%, transparent);
+  --myst-line-35: color-mix(in srgb, var(--acc) 38%, transparent);
+  --myst-line-40: color-mix(in srgb, var(--acc) 44%, transparent);
+  --myst-line-55: color-mix(in srgb, var(--acc) 58%, transparent);
+  --myst-wash: color-mix(in srgb, var(--acc) 8%, transparent);
+  --myst-wash-strong: color-mix(in srgb, var(--acc) 15%, transparent);
+}
+
+:root[data-theme="parchment"] .arc-region,
+:root[data-theme="parchment"] .concept-arcana > .header-stack,
+:root[data-theme="parchment"] .mobile-nav-overlay {
+  --acc-ink: var(--acc-deep, var(--acc));
+  --acc-solid: var(--acc-fill, var(--acc-deep, var(--acc)));
+  --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
+  --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
+  --myst-gold: var(--acc-ink);
+  --myst-gold-soft: var(--acc-ink);
+  --myst-line-28: color-mix(in srgb, var(--acc-ink) 30%, transparent);
+  --myst-line-35: color-mix(in srgb, var(--acc-ink) 38%, transparent);
+  --myst-line-40: color-mix(in srgb, var(--acc-ink) 44%, transparent);
+  --myst-line-55: color-mix(in srgb, var(--acc-ink) 58%, transparent);
+  --myst-wash: color-mix(in srgb, var(--acc) 12%, transparent);
+  --myst-wash-strong: color-mix(in srgb, var(--acc) 22%, transparent);
+}
+
 :root[data-theme="parchment"] .concept-arcana,
 :root[data-theme="parchment"] body.is-arcana-home {
   --arc-bg: #efede8;
@@ -421,7 +533,25 @@ body.is-arcana-home {
   }
 }
 
-.concept-arcana ::selection {
+/* by tag, not `.concept-arcana ::selection`: a bare ::selection (or one :is() list) is tried
+   against every element in every style pass; a tag puts each rule in that tag's bucket */
+.concept-arcana p::selection,
+.concept-arcana h1::selection,
+.concept-arcana h2::selection,
+.concept-arcana h3::selection,
+.concept-arcana h4::selection,
+.concept-arcana li::selection,
+.concept-arcana a::selection,
+.concept-arcana span::selection,
+.concept-arcana b::selection,
+.concept-arcana strong::selection,
+.concept-arcana em::selection,
+.concept-arcana small::selection,
+.concept-arcana label::selection,
+.concept-arcana button::selection,
+.concept-arcana figcaption::selection,
+.concept-arcana blockquote::selection,
+.concept-arcana div::selection {
   background: var(--acc-solid);
   color: var(--arc-on-acc);
 }
@@ -572,16 +702,6 @@ body.is-arcana-home .mobile-nav .brand-mark {
   background:
     radial-gradient(60vmax 50vmax at 100% 50%, color-mix(in oklab, var(--wash) 9%, transparent), transparent 70%),
     radial-gradient(50vmax 40vmax at 0% 100%, color-mix(in oklab, var(--wash) 6%, transparent), transparent 70%);
-}
-
-.arc-wash-enter-active,
-.arc-wash-leave-active {
-  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1);
-}
-
-.arc-wash-enter-from,
-.arc-wash-leave-to {
-  opacity: 0;
 }
 
 .arc-ambient__grain {
@@ -898,9 +1018,5 @@ body.is-arcana-home .mobile-nav .brand-mark {
     animation-iteration-count: 1 !important;
   }
 
-  .arc-wash-enter-active,
-  .arc-wash-leave-active {
-    transition: opacity .3s ease;
-  }
 }
 </style>

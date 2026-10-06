@@ -6,7 +6,7 @@
         <figure class="sec-companion__visual">
           <div class="sec-companion__circle" role="img" :aria-label="visualLabel">
             <span class="sec-companion__ring" :style="{'--circle': `url(${circle})`}"></span>
-            <Transition name="sec-companion-sigil">
+            <Transition v-bind="SIGIL_FADE">
               <img :key="card.id" :src="sigilNative(card.id)" alt="" class="sec-companion__sigil" width="512" height="512" loading="lazy" decoding="async">
             </Transition>
           </div>
@@ -53,7 +53,14 @@ import IconModrinth from '@/assets/icons/IconModrinth.vue';
 import ArcanaSectionHead from './ArcanaSectionHead.vue';
 import {sigilNative} from './arcana-data';
 import {useArcana} from './useArcana';
+import {fade} from './fade';
 import circle from '@/assets/images/home-library/items/magic-circle.png';
+
+/* the sigil turns out and the new one turns in (fade.ts) */
+const SIGIL_FADE = fade(
+  {frames: [{opacity: 0, transform: 'scale(.8) rotate(-20deg)'}, {opacity: 1, transform: 'none'}], duration: 800, easing: 'cubic-bezier(.2, .8, .2, 1)'},
+  {frames: [{opacity: 0, transform: 'scale(1.1) rotate(20deg)'}], duration: 800, easing: 'cubic-bezier(.2, .8, .2, 1)'},
+);
 
 const {t} = useI18n();
 const {card, reading} = useArcana();
@@ -128,21 +135,6 @@ const platforms = [
   height: 46%;
   object-fit: contain;
   filter: drop-shadow(0 0 24px color-mix(in oklab, var(--acc) 55%, transparent));
-}
-
-.sec-companion-sigil-enter-active,
-.sec-companion-sigil-leave-active {
-  transition: opacity .6s ease, transform .8s cubic-bezier(.2, .8, .2, 1);
-}
-
-.sec-companion-sigil-enter-from {
-  opacity: 0;
-  transform: scale(.8) rotate(-20deg);
-}
-
-.sec-companion-sigil-leave-to {
-  opacity: 0;
-  transform: scale(1.1) rotate(20deg);
 }
 
 /* ---- copy ---- */
@@ -238,16 +230,6 @@ const platforms = [
 @media (prefers-reduced-motion: reduce) {
   .sec-companion__ring {
     animation: none;
-  }
-
-  .sec-companion-sigil-enter-active,
-  .sec-companion-sigil-leave-active {
-    transition: opacity .2s ease;
-  }
-
-  .sec-companion-sigil-enter-from,
-  .sec-companion-sigil-leave-to {
-    transform: none;
   }
 }
 </style>

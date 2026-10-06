@@ -6,7 +6,7 @@
     needs. Keyed on the card, so a new draw plays its moment from the start.
   -->
   <!-- the old moment fades out under the new one, never cut -->
-  <Transition name="signature">
+  <Transition v-bind="SIGNATURE_FADE">
     <component :is="signature" v-if="signature" :key="id" :layer="layer" :boon="boonId" :from="from" class="signature" :class="`signature--${layer}`"/>
   </Transition>
 </template>
@@ -15,6 +15,9 @@
 import {computed} from 'vue';
 import {cardById} from './arcana-data';
 import {signatureFor} from './signatureLoader';
+import {fade} from './fade';
+
+const SIGNATURE_FADE = fade({duration: 600});
 
 const props = defineProps<{
   /** The drawn card ('undrawn' before a draw). */
@@ -31,19 +34,6 @@ const signature = computed(() => (props.id === 'undrawn' ? null : signatureFor(p
 </script>
 
 <style scoped>
-.signature-enter-active {
-  transition: opacity .6s ease;
-}
-
-.signature-leave-active {
-  transition: opacity 1.4s ease;
-}
-
-.signature-enter-from,
-.signature-leave-to {
-  opacity: 0;
-}
-
 .signature {
   position: absolute;
   inset: 0;

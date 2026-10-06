@@ -15,7 +15,7 @@
           @click="draw(undefined, {crossfade: true})"
       >
         <!-- A redraw turns the old card away edge-on, then the new one in: never a mirrored face. -->
-        <Transition name="arc-dock-turn" mode="out-in">
+        <Transition mode="out-in" v-bind="TURN">
           <span :key="drawCount" class="arc-dock__face" aria-hidden="true">
             <img v-if="hasDrawn" :src="sigilThumb(card.id)" alt="" width="64" height="64" decoding="async">
             <svg v-else class="arc-dock__back" viewBox="0 0 20 30">
@@ -50,6 +50,13 @@ import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {sigilThumb} from './arcana-data';
 import {useArcana} from './useArcana';
+import {fade} from './fade';
+
+/* A redraw turns the old card away edge-on, then the new one in (fade.ts) */
+const TURN = fade(
+  {frames: [{transform: 'rotateY(90deg) scale(.86)', opacity: .4}, {transform: 'none', opacity: 1}], duration: 340, easing: 'cubic-bezier(.15, .7, .3, 1)'},
+  {frames: [{transform: 'rotateY(-90deg) scale(.86)', opacity: .4}], duration: 160, easing: 'cubic-bezier(.5, 0, .9, .5)'},
+);
 
 const {t} = useI18n();
 const {card, hasDrawn, reading, drawCount, draw} = useArcana();
@@ -204,25 +211,6 @@ onUnmounted(() => {
   place-items: center;
 }
 
-/* The turn: out to edge-on (ease in), then the new face from edge-on (ease out). */
-.arc-dock-turn-leave-active {
-  transition: transform .16s cubic-bezier(.5, 0, .9, .5), opacity .16s ease-in;
-}
-
-.arc-dock-turn-enter-active {
-  transition: transform .34s cubic-bezier(.15, .7, .3, 1), opacity .2s ease-out;
-}
-
-.arc-dock-turn-leave-to {
-  transform: rotateY(-90deg) scale(.86);
-  opacity: .4;
-}
-
-.arc-dock-turn-enter-from {
-  transform: rotateY(90deg) scale(.86);
-  opacity: .4;
-}
-
 .arc-dock__face img {
   width: 26px;
   height: 26px;
@@ -323,8 +311,6 @@ onUnmounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .arc-dock__seat,
-  .arc-dock-turn-enter-active,
-  .arc-dock-turn-leave-active,
   .arc-dock__badge {
     transition: none;
     animation: none;
@@ -339,12 +325,12 @@ onUnmounted(() => {
 </style>
 
 <style>
-::view-transition-group(arc-dock),
-::view-transition-new(arc-dock) {
+html::view-transition-group(arc-dock),
+html::view-transition-new(arc-dock) {
   animation: none;
 }
 
-::view-transition-old(arc-dock) {
+html::view-transition-old(arc-dock) {
   display: none;
 }
 </style>

@@ -117,21 +117,22 @@ useMoonAnchor(followRef, riseRef);
 .mn__rim {
   --k: calc(var(--city-h, 600px) * .0045);
   background: radial-gradient(circle at var(--cx) var(--cy),
-      rgba(255, 160, 170, .95) 0,
-      rgba(255, 70, 92, .8) calc(var(--moon-r, 200px) * 1.6),
-      rgba(200, 30, 54, .35) calc(var(--moon-r, 200px) * 3.4),
-      transparent calc(var(--moon-r, 200px) * 5));
+      rgba(255, 170, 178, .7) 0,
+      rgba(250, 90, 108, .48) calc(var(--moon-r, 200px) * 1.4),
+      rgba(200, 40, 60, .16) calc(var(--moon-r, 200px) * 2.8),
+      transparent calc(var(--moon-r, 200px) * 4));
   -webkit-mask: var(--sig-city) 0 0 / 100% 100% no-repeat, var(--sig-city) 0 var(--k) / 100% 100% no-repeat;
   -webkit-mask-composite: source-out;
   mask: var(--sig-city) 0 0 / 100% 100% no-repeat, var(--sig-city) 0 var(--k) / 100% 100% no-repeat;
   mask-composite: subtract;
+  filter: blur(.6px);
   animation: mn-fade 1.8s ease calc(var(--in) + 1.1s) both;
 }
 
 /* a broader, fainter edge under it: the light wrapping over the stone */
 .mn__rim--soft {
   --k: calc(var(--city-h, 600px) * .016);
-  opacity: .42;
+  opacity: .3;
   animation-delay: calc(var(--in) + .9s);
 }
 

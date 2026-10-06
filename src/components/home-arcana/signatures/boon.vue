@@ -567,7 +567,7 @@ onUnmounted(() => {
  * blend has nothing to blend with and would lay plain grey over the scene, so the drain
  * simply lets go.
  */
-.boon.signature-leave-active .bo-drain {
+.boon.is-leaving .bo-drain {
   display: none;
 }
 

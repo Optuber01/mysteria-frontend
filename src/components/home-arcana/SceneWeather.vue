@@ -12,7 +12,7 @@
  */
 import {onMounted, onUnmounted, ref, watch} from 'vue';
 import type {WeatherKind} from './pathwayScenes';
-import {createWeather, type WeatherConfig} from './weatherPainter';
+import {createWeather, weatherCanvasSize, WEATHER_FPS, type WeatherConfig} from './weatherPainter';
 
 const props = withDefaults(defineProps<{
   kind: WeatherKind | null;
@@ -45,7 +45,11 @@ const shouldRun = () => props.active && onScreen && !!props.kind && document.vis
 function tick(now: number) {
   frame = 0;
   if (!local || !shouldRun()) return;
-  const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
+  if (last && now - last < 1000 / WEATHER_FPS - 2) {
+    frame = requestAnimationFrame(tick);
+    return;
+  }
+  const dt = Math.min(0.08, last ? (now - last) / 1000 : 0.033);
   last = now;
   local.frame(dt);
   frame = requestAnimationFrame(tick);
@@ -65,23 +69,22 @@ function sync() {
   else if (shouldRun()) frame = requestAnimationFrame(tick);
 }
 
-function measure(): boolean {
-  const el = canvasRef.value;
-  if (!el) return false;
-  const r = el.getBoundingClientRect();
-  const nw = Math.max(1, Math.round(r.width));
-  const nh = Math.max(1, Math.round(r.height));
+/* the canvas's size, from its ResizeObserver entry: never read back from layout mid-render */
+function measure(box: DOMRectReadOnly): boolean {
+  const nw = Math.max(1, Math.round(box.width));
+  const nh = Math.max(1, Math.round(box.height));
   const changed = nw !== w || nh !== h;
   w = nw;
   h = nh;
   return changed;
 }
 
+let started = false;
 function start() {
   const el = canvasRef.value;
   if (!el) return;
-  measure();
-  // one canvas pixel per CSS pixel: the texels are blocky squares, shown pixelated
+  started = true;
+  // one canvas pixel per texel, scaled up pixelated (weatherPainter: WEATHER_SCALE)
   if ('transferControlToOffscreen' in el && typeof Worker !== 'undefined') {
     try {
       const offscreen = el.transferControlToOffscreen();
@@ -95,8 +98,7 @@ function start() {
       worker = null;
     }
   }
-  el.width = w;
-  el.height = h;
+  [el.width, el.height] = weatherCanvasSize(w, h);
   const ctx = el.getContext('2d');
   if (!ctx) return;
   local = createWeather(() => emit('strike'));
@@ -116,13 +118,17 @@ let observer: ResizeObserver | null = null;
 let viewObserver: IntersectionObserver | null = null;
 const onVisible = () => sync();
 onMounted(() => {
-  start();
-  observer = new ResizeObserver(() => {
-    if (!measure()) return;
+  // the observer's first report (after the next layout) gives the size and starts the weather
+  observer = new ResizeObserver(([entry]) => {
+    const changed = measure(entry.contentRect);
+    if (!started) {
+      start();
+      return;
+    }
+    if (!changed) return;
     if (worker) worker.postMessage({type: 'size', width: w, height: h});
     else if (local && canvasRef.value) {
-      canvasRef.value.width = w;
-      canvasRef.value.height = h;
+      [canvasRef.value.width, canvasRef.value.height] = weatherCanvasSize(w, h);
       const ctx = canvasRef.value.getContext('2d');
       if (ctx) local.setContext(ctx, w, h);
     }

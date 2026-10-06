@@ -12,7 +12,7 @@
         <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
       <!-- the drawn Pathway's air in the room: its sky's colour over the brewery (pathwayScenes.ts) -->
-      <Transition name="room-grade">
+      <Transition v-bind="ROOM_FADE">
         <i v-if="roomScene.sky !== 'transparent'" :key="roomKey" class="progression__grade" :style="{background: roomScene.sky}" aria-hidden="true" />
       </Transition>
       <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
@@ -45,7 +45,7 @@
       <div class="progression__layout" :style="layoutStyle">
         <!-- Outgoing and incoming copy share one grid cell and cross over. -->
         <div class="chapter-copy-slot" :style="copyStyle">
-          <Transition name="chapter-copy">
+          <Transition v-bind="COPY_FADE">
             <article v-if="activeChapter.id !== 'awaken'" :key="activeChapter.id" class="chapter-copy">
               <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
               <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
@@ -195,6 +195,14 @@ import type { StageLayout } from './layout';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import { sigilNative } from '../arcana-data';
 import { useArcana } from '../useArcana';
+import { fade } from '../fade';
+
+/* the room's grade, and the chapter copy crossing over (fade.ts: nothing measured mid-render) */
+const ROOM_FADE = fade({ duration: 1600 });
+const COPY_FADE = fade(
+  { frames: [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], duration: 360, delay: 80, easing: 'cubic-bezier(.22, 1, .36, 1)' },
+  { frames: [{ opacity: 0, transform: 'translateY(-6px)' }], duration: 120 },
+);
 
 const { tp, names, ingredients, currentId, isBoon, pathwayId } = useProgressionCopy();
 const { hasDrawn } = useArcana();
@@ -948,16 +956,6 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.room-grade-enter-active,
-.room-grade-leave-active {
-  transition: opacity 1.6s ease;
-}
-
-.room-grade-enter-from,
-.room-grade-leave-to {
-  opacity: 0;
-}
-
 .progression__weather {
   opacity: .8;
 }
@@ -1295,24 +1293,9 @@ onUnmounted(() => {
   display: none;
 }
 
-/* the old copy is gone in 0.12s; the new one starts as it goes */
-.chapter-copy-enter-active {
-  transition: opacity 0.22s ease 0.08s, transform 0.36s cubic-bezier(.22, 1, .36, 1) 0.08s;
-}
-
-.chapter-copy-leave-active {
-  transition: opacity 0.12s ease, transform 0.12s ease;
+/* the old copy is gone in 0.12s and the new one starts as it goes (COPY_FADE) */
+.chapter-copy.is-leaving {
   pointer-events: none;
-}
-
-.chapter-copy-enter-from {
-  opacity: 0;
-  transform: translateY(12px);
-}
-
-.chapter-copy-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
 }
 
 @media (max-width: 1120px) {
@@ -1670,8 +1653,6 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chapter-copy-enter-active,
-  .chapter-copy-leave-active,
   .scene-window {
     transition: none;
   }

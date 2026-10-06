@@ -6,6 +6,16 @@
 import type {WeatherKind} from './pathwayScenes';
 
 export type WeatherConfig = {kind: WeatherKind | null; color: string; density: number; lightning: boolean};
+
+/*
+ * The canvas holds one pixel per texel (4 CSS px), shown scaled up and pixelated: the field
+ * is the same blocky picture for a sixteenth of the pixels to fill. Coordinates stay in CSS
+ * px; the context's transform does the scaling. Size the canvas with weatherCanvasSize.
+ */
+export const WEATHER_SCALE = 4;
+export const weatherCanvasSize = (w: number, h: number) => [Math.max(1, Math.ceil(w / WEATHER_SCALE)), Math.max(1, Math.ceil(h / WEATHER_SCALE))] as const;
+/** Frames drawn per second at most (texel weather reads fine at 30, at half the work). */
+export const WEATHER_FPS = 30;
 type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 type P = {x: number; y: number; vx: number; vy: number; age: number; life: number; size: number; seed: number};
 
@@ -97,7 +107,7 @@ export function createWeather(onStrike: () => void) {
     c.clearRect(0, 0, w, h);
     clock += dt;
     if (k === 'rain') {
-      c.lineWidth = 1.5;
+      c.lineWidth = 4;
       for (const p of parts) {
         p.x += p.vx * dt; p.y += p.vy * dt;
         if (p.y > h) Object.assign(p, spawn());
@@ -203,9 +213,9 @@ export function createWeather(onStrike: () => void) {
       }
       if (bolt && boltLife > 0) {
         c.strokeStyle = `rgba(235, 242, 255, ${boltLife.toFixed(3)})`;
-        c.lineWidth = 3;
+        c.lineWidth = 6;
         c.shadowColor = 'rgba(150, 195, 255, .9)';
-        c.shadowBlur = 16;
+        c.shadowBlur = 4;
         c.beginPath();
         bolt.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
         c.stroke();
@@ -218,6 +228,7 @@ export function createWeather(onStrike: () => void) {
   return {
     setContext(next: Ctx, width: number, height: number) {
       ctx = next;
+      ctx.setTransform(1 / WEATHER_SCALE, 0, 0, 1 / WEATHER_SCALE, 0, 0);
       w = width;
       h = height;
       seed();

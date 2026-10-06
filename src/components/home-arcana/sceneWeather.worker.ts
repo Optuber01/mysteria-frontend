@@ -5,7 +5,7 @@
  * page's scrolling or its other animations. A lightning strike is sent back so the page
  * can flash.
  */
-import {createWeather, type WeatherConfig} from './weatherPainter';
+import {createWeather, weatherCanvasSize, WEATHER_FPS, type WeatherConfig} from './weatherPainter';
 
 type Message =
   | {type: 'init'; canvas: OffscreenCanvas; width: number; height: number}
@@ -35,7 +35,12 @@ const cancelFrame = (id: number) => (scope.cancelAnimationFrame ? scope.cancelAn
 function tick(now: number) {
   handle = 0;
   if (!running) return;
-  const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
+  // at most WEATHER_FPS frames a second
+  if (last && now - last < 1000 / WEATHER_FPS - 2) {
+    handle = nextFrame(tick);
+    return;
+  }
+  const dt = Math.min(0.08, last ? (now - last) / 1000 : 0.033);
   last = now;
   weather.frame(dt);
   handle = nextFrame(tick);
@@ -53,13 +58,11 @@ scope.onmessage = (event: MessageEvent<Message>) => {
   const message = event.data;
   if (message.type === 'init') {
     canvas = message.canvas;
-    canvas.width = message.width;
-    canvas.height = message.height;
+    [canvas.width, canvas.height] = weatherCanvasSize(message.width, message.height);
     const ctx = canvas.getContext('2d');
     if (ctx) weather.setContext(ctx, message.width, message.height);
   } else if (message.type === 'size' && canvas) {
-    canvas.width = message.width;
-    canvas.height = message.height;
+    [canvas.width, canvas.height] = weatherCanvasSize(message.width, message.height);
     const ctx = canvas.getContext('2d');
     if (ctx) weather.setContext(ctx, message.width, message.height);
   } else if (message.type === 'config') {
