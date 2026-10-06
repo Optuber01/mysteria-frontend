@@ -7,12 +7,8 @@
 import credits from '@/assets/images/home/community/credits.json';
 
 const files = import.meta.glob<string>('@/assets/images/home/community/*.webp', {eager: true, import: 'default'});
-type Credit = (typeof credits.images)[number] & {epoch?: number; staff?: boolean; staffRoles?: string[]; reactions?: number; place?: string};
-const creditOf = (key: string): Credit | undefined => credits.images.find(image => image.file === `${key}.webp`);
 /** The Discord message each shot was posted in (credits.json), so a viewer can open the original. */
-const sourceOf = (key: string) => creditOf(key)?.source ?? '';
-/** The season it was taken in: epoch 1 ended with The Great Reset (2026-05-08). */
-const epochOf = (key: string) => creditOf(key)?.epoch ?? 1;
+const sourceOf = (key: string) => credits.images.find(image => image.file === `${key}.webp`)?.source ?? '';
 const url = (name: string) => Object.entries(files).find(([path]) => path.endsWith(`/${name}.webp`))?.[1] ?? '';
 
 export type WorldShot = Readonly<{
@@ -29,23 +25,10 @@ export type WorldShot = Readonly<{
   focus: string;
   /** Link to the Discord message it was posted in. */
   source: string;
-  /** The season it was taken in (1: before The Great Reset, 2: now). */
-  epoch: number;
-  /** Posted by a member of staff (their role, as shown), or ''. */
-  role: string;
 }>;
 
 const shot = (key: string, w: number, h: number, author: string, place: string, focus = '50% 50%'): WorldShot =>
-  ({key, src: url(key), small: url(`${key}-960`), w, h, author, place, focus, source: sourceOf(key), epoch: epochOf(key), role: creditOf(key)?.staffRoles?.[0] ?? ''});
-
-/*
- * Acting Echoes: what players posted while acting out their Pathway, from both seasons'
- * forums. credits.json keeps them in rank order: staff first, then by the reactions on
- * the thread. Each is labelled with the poster's Pathway.
- */
-const ECHOES: readonly WorldShot[] = (credits.images as Credit[])
-    .filter(image => image.channel === 'acting-echoes')
-    .map(image => shot(image.file.replace(/\.webp$/, ''), image.width, image.height, image.author, image.place ?? ''));
+  ({key, src: url(key), small: url(`${key}-960`), w, h, author, place, focus, source: sourceOf(key)});
 
 /** The shots the chapter's systems are illustrated with. */
 export const TOPIC_SHOTS = {
@@ -55,8 +38,8 @@ export const TOPIC_SHOTS = {
   pact: shot('outer-god-eye', 1920, 1047, 'ikeepca1m', 'Outer Gods Anchors', '50% 34%'),
 } as const;
 
-/** Towns and places from the showcase channels, after the echoes (alternating warm, dark and bright). */
-const TOWNS: readonly WorldShot[] = [
+/** The gallery strip, in viewing order (alternating warm, dark and bright). */
+export const GALLERY_SHOTS: readonly WorldShot[] = [
   shot('sunset-pagoda', 1920, 1080, 'Pianowire', 'Penglai'),
   shot('underground-hall', 1920, 1080, 'origin', 'The Land of Mysteries'),
   shot('ilsi-harbour', 1920, 1080, 'Sebus', 'Ilsi'),
@@ -77,6 +60,3 @@ const TOWNS: readonly WorldShot[] = [
   shot('underground-forge', 1920, 1080, 'origin', 'The Land of Mysteries'),
   shot('harbour-streets', 1920, 1080, '10otevap', 'Blindmorr'),
 ];
-
-/** The gallery strip: the Acting Echoes in rank order, then the towns. */
-export const GALLERY_SHOTS: readonly WorldShot[] = [...ECHOES, ...TOWNS];

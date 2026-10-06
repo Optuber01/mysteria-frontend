@@ -113,10 +113,16 @@
     --myst-overlay: rgba(23, 22, 28, 0.45);
 }
 
-/* Theme switch (useTheme.ts): the optional View Transition crossfade stays short (the
-   transitions are suspended for the switch by a sheet useTheme adds and removes). */
-html::view-transition-old(root),
-html::view-transition-new(root) {
+/* Theme switch (useTheme.ts): colours change in one frame instead of each element
+   easing its own, and the optional View Transition crossfade stays short. */
+:root.theme-switching *,
+:root.theme-switching *::before,
+:root.theme-switching *::after {
+    transition: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
     animation-duration: .22s;
 }
 
@@ -187,23 +193,21 @@ a:hover {
     color: var(--myst-gold);
 }
 
-/* The page's scrollbar where scrollbar-color is not supported (older Safari). Scoped to
-   html: a bare ::-webkit-scrollbar is tried against every element in every style pass. */
-html::-webkit-scrollbar {
+::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
-html::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     background: var(--myst-bg-2);
 }
 
-html::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background: var(--myst-ink-muted);
     border-radius: 4px;
 }
 
-html::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
     background: var(--myst-gold);
 }
 
@@ -889,24 +893,7 @@ html {
     background: linear-gradient(90deg, rgba(180, 44, 62, 0.5), var(--myst-gold));
 }
 
-/* by tag: a bare ::selection is tried against every element in every style pass */
-:root[data-theme="parchment"] p::selection,
-:root[data-theme="parchment"] h1::selection,
-:root[data-theme="parchment"] h2::selection,
-:root[data-theme="parchment"] h3::selection,
-:root[data-theme="parchment"] h4::selection,
-:root[data-theme="parchment"] li::selection,
-:root[data-theme="parchment"] a::selection,
-:root[data-theme="parchment"] span::selection,
-:root[data-theme="parchment"] b::selection,
-:root[data-theme="parchment"] strong::selection,
-:root[data-theme="parchment"] em::selection,
-:root[data-theme="parchment"] small::selection,
-:root[data-theme="parchment"] label::selection,
-:root[data-theme="parchment"] button::selection,
-:root[data-theme="parchment"] figcaption::selection,
-:root[data-theme="parchment"] blockquote::selection,
-:root[data-theme="parchment"] div::selection {
+:root[data-theme="parchment"] ::selection {
     background: var(--myst-gold);
     color: var(--myst-on-gold);
 }

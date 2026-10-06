@@ -5,23 +5,7 @@
     from the hero, which measures where the deck's pivot is and sets
     --moon-x/--moon-y/--moon-r and --city-* (all px, relative to the hero box).
   -->
-  <div
-      ref="rootRef"
-      class="night"
-      :class="{
-        'is-risen': risen && moonReady,
-        'is-moon-set': body === 'sun' || body === 'dusk',
-        'is-moon-hidden': body === 'hidden',
-        'is-sun-up': body === 'sun' || body === 'dusk',
-        'is-dusk': body === 'dusk',
-        'is-sun-kept': scene.celestial === 'keep' && (body === 'sun' || body === 'dusk'),
-        'is-stolen': stolen,
-        'is-calm': fxCalm,
-      }"
-      :data-from="fromCelestial"
-      :style="sceneVars"
-      aria-hidden="true"
-  >
+  <div ref="rootRef" class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true">
     <!-- Everything that is far away: on the way down to the brewery it falls behind the page. -->
     <div ref="viewRef" class="night__view">
       <picture>
@@ -29,22 +13,6 @@
         <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="async" width="1920" height="1080">
       </picture>
       <i class="night__tint"></i>
-      <!-- daylight, whenever a sun is up (the Sun's own, or one a later card kept): the Pathway's sky tints it -->
-      <i class="night__daylight"></i>
-      <!-- the drawn Pathway's sky, crossfaded over the night -->
-      <Transition v-bind="SKY_FADE">
-        <i :key="sceneKey" class="night__grade" :style="{background: scene.sky}"></i>
-      </Transition>
-      <!-- a sun, for the Pathways that bring one: it rises where the moon sets -->
-      <div class="night__sun">
-        <div class="night__sun-rise">
-          <i class="night__sun-glow"></i>
-          <i class="night__sun-disc"></i>
-        </div>
-      </div>
-      <Transition v-bind="SKY_FADE">
-        <SceneWeather v-if="!scene.weatherFront && scene.weather && !lite && !fxCalm" :key="`${scene.weather}-${scene.weatherColor}`" class="night__weather" :kind="scene.weather" :color="scene.weatherColor" :density="scene.weatherDensity" :lightning="scene.lightning" @strike="strike"/>
-      </Transition>
 
       <div ref="moonBoxRef" class="night__moon">
         <div class="night__moon-rise">
@@ -55,16 +23,9 @@
         </div>
       </div>
 
-      <!-- cloud banks rolling in over the sky, in front of the moon (the storm's, the smoke's) -->
-      <div class="night__clouds" :style="{'--cloud': scene.clouds?.color ?? '#1a1a22'}">
-        <i class="night__clouds-drift"></i>
-        <i class="night__clouds-drift night__clouds-drift--near"></i>
-      </div>
       <div class="night__fog night__fog--a"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
       <div class="night__fog night__fog--b"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
 
-      <!-- the Pathway's signature moment: what plays behind the castle... -->
-      <SceneSignature v-if="!fxCalm" :id="sceneKey" :from="fromCelestial" layer="back"/>
       <picture>
         <source media="(max-width: 720px)" :srcset="citySmall">
         <img class="night__city" :src="city" alt="" decoding="async" width="1920" height="1080">
@@ -73,14 +34,6 @@
       <!-- light theme: mist laid over the buildings themselves, so they stay solid in front of the moon -->
       <i class="night__haze" :style="{'--city-mask': `url(${city})`}"></i>
       <div class="night__fog night__fog--streets"><i class="night__fog-drift"></i><i class="night__fog-tint"></i></div>
-      <Transition v-bind="SKY_FADE">
-        <SceneWeather v-if="scene.weatherFront && scene.weather && !lite && !fxCalm" :key="`${scene.weather}-${scene.weatherColor}`" class="night__weather" :kind="scene.weather" :color="scene.weatherColor" :density="scene.weatherDensity" :lightning="scene.lightning" @strike="strike"/>
-      </Transition>
-      <!-- ...and what plays in front of it -->
-      <SceneSignature v-if="!fxCalm" :id="sceneKey" :from="fromCelestial" layer="front"/>
-      <!-- the Pathway's darkness over everything far away, and the flash when lightning splits the sky -->
-      <i class="night__shade"></i>
-      <i ref="flashRef" class="night__flash"></i>
     </div>
     <i ref="duskRef" class="night__dusk"></i>
     <i class="night__scrim"></i>
@@ -88,85 +41,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
-import {useEffects} from './useEffects';
-import SceneSignature from './SceneSignature.vue';
-import SceneWeather from './SceneWeather.vue';
-import {fade} from './fade';
-import {sceneFor} from './pathwayScenes';
-import {useArcana} from './useArcana';
+import {onMounted, onUnmounted, ref} from 'vue';
 import sky from './assets/moon/backlund-sky.webp';
 import skySmall from './assets/moon/backlund-sky-960.webp';
 import city from './assets/moon/backlund-skyline.webp';
 import citySmall from './assets/moon/backlund-skyline-960.webp';
 import moon from './assets/moon/crimson-moon.webp';
 
-/* the sky's grade and weather crossfade on the compositor (fade.ts) */
-const SKY_FADE = fade({duration: 900});
-
 defineProps<{risen: boolean}>();
-
-/* Light mode (the potion story decides it, see ProgressionStory): no weather over the hero either. */
-const lite = ref(false);
-onMounted(() => {
-  try {
-    lite.value = sessionStorage.getItem('mysterria-story-lite') === '1';
-  } catch {
-    // storage blocked: full scene
-  }
-});
-
-/* The drawn Pathway's world: its sky, its light, its weather (see pathwayScenes.ts). */
-const {currentId, hasDrawn} = useArcana();
-const sceneKey = computed(() => (hasDrawn.value ? currentId.value : 'undrawn'));
-const scene = computed(() => sceneFor(hasDrawn.value ? currentId.value : null));
-const sceneVars = computed(() => ({
-  '--city-light': scene.value.cityLight,
-  '--fog-base': scene.value.fog,
-  '--fog-amount': String(scene.value.fogAmount),
-  '--shade': String(scene.value.shade ?? 0),
-  // empty: the var falls back to nothing ("none" inside a filter list would void it)
-  '--moon-filter': scene.value.moonFilter ?? '',
-  '--moon-scale': String(scene.value.moonScale ?? 1),
-  '--clouds': String(scene.value.clouds?.amount ?? 0),
-}));
-
-/*
- * The handover. A new card acts on the world as it is, not on a fresh night: the scene's
- * colours, fog, clouds and shade ease across (CSS transitions), the old weather and
- * signature fade out while the new ones come in (Transitions), and the new signature is
- * told what hung in the sky before it (`from`), so Error steals the sun if the sun was up,
- * the Emperor eclipses whatever is there, Tyrant's clouds swallow it. Error's theft is
- * done here, on the real moon and sun: both vanish at once and the new body comes back.
- */
-type Body = 'moon' | 'sun' | 'dusk' | 'hidden';
-/** 'keep' takes what is up (a sky lost in cloud gives the moon back). */
-const resolveBody = (wanted: string, current: Body): Body => (wanted === 'keep' ? (current === 'hidden' ? 'moon' : current) : wanted as Body);
-/** What actually hangs in the sky now. */
-const body = ref<Body>(resolveBody(scene.value.celestial, 'moon'));
-const fromCelestial = ref<string>(body.value);
-const stolen = ref(false);
-let stealTimer = 0;
-watch(scene, (next) => {
-  fromCelestial.value = body.value;
-  body.value = resolveBody(next.celestial, body.value);
-  if (sceneKey.value === 'error' && !fxCalm.value) {
-    window.clearTimeout(stealTimer);
-    stealTimer = window.setTimeout(() => {
-      stolen.value = true;
-      stealTimer = window.setTimeout(() => (stolen.value = false), 900);
-    }, 350);
-  }
-});
-
-/* Calm: the effects toned down site-wide (useEffects): no weather, no signature moments. */
-const {calm: fxCalm} = useEffects();
-
-/* lightning: the whole far scene flashes white-blue for a moment (opacity only) */
-const flashRef = ref<HTMLElement | null>(null);
-function strike() {
-  flashRef.value?.animate([{opacity: 0}, {opacity: 0.55, offset: 0.08}, {opacity: 0.1, offset: 0.3}, {opacity: 0.4, offset: 0.4}, {opacity: 0}], {duration: 700, easing: 'ease-out'});
-}
 
 /* The moon only starts to rise once it is there to see. */
 const moonRef = ref<HTMLImageElement | null>(null);
@@ -256,7 +138,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   resizeObserver?.disconnect();
-  window.clearTimeout(stealTimer);
   window.removeEventListener('scroll', schedule);
   wide?.removeEventListener('change', measure);
   calm?.removeEventListener('change', measure);
@@ -268,8 +149,8 @@ onUnmounted(() => {
 .night {
   /* The moon itself stays crimson; the drawn card colours its corona, rim and the fog. */
   --crimson: #b3202b;
-  --moon-tone: color-mix(in oklab, var(--city-light, var(--crimson)) 72%, var(--acc));
-  --fog-tone: color-mix(in oklab, var(--acc) 26%, var(--fog-base, #d9d5de));
+  --moon-tone: color-mix(in oklab, var(--crimson) 72%, var(--acc));
+  --fog-tone: color-mix(in oklab, var(--acc) 26%, #d9d5de);
   position: absolute;
   inset: 0 0 auto;
   height: var(--scene-h, 100%);
@@ -333,211 +214,12 @@ onUnmounted(() => {
   inset: 0;
   transform: translate3d(0, 34%, 0);
   opacity: .0;
-  transition: transform 1.8s cubic-bezier(.16, .84, .3, 1) .1s, opacity .9s ease .1s;
+  transition: transform 2.6s cubic-bezier(.16, .84, .3, 1) .1s, opacity 1.2s ease .1s;
 }
 
 .is-risen .night__moon-rise {
-  transform: scale(var(--moon-scale, 1));
-  opacity: 1;
-}
-
-/* a Pathway with a sun of its own: the moon sets behind the castle */
-.is-risen.is-moon-set .night__moon-rise {
-  transform: translate3d(0, 70%, 0);
-  opacity: 0;
-  transition: transform 1.3s cubic-bezier(.5, 0, .7, .4), opacity .8s ease .4s;
-}
-
-/* lost behind cloud: it stays where it is and fades */
-.is-risen.is-moon-hidden .night__moon-rise {
-  opacity: 0;
-  transition: opacity 1s ease .15s;
-}
-
-/*
- * Error: stolen. Whatever hangs in the sky is gone between one frame and the next, and
- * the new one comes back a little out of place and settles (the transition out of this
- * state is the return).
- */
-.night.is-stolen .night__moon-rise,
-.night.is-stolen .night__sun-rise {
-  opacity: 0 !important;
-  transition: none !important;
-}
-
-.night.is-stolen .night__moon,
-.night.is-stolen .night__sun {
-  translate: calc(var(--moon-r, 200px) * .5) calc(var(--moon-r, 200px) * -.08);
-}
-
-.night__moon,
-.night__sun {
-  transition: translate .5s steps(4, jump-end);
-}
-
-/* the scene's own changes to the disc (paler, darker, greyer) ease across with the rest */
-.night__moon-disc {
-  transition: filter .9s ease;
-}
-
-/* ---- the handover: the old weather and signature fade while the new ones come in ---- */
-/* ---- the drawn Pathway's sky ---- */
-.night__grade {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-/* daylight under the Pathway's sky while a sun is up: a kept sun keeps its day */
-.night__daylight {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(143, 182, 224, .45) 0%, rgba(244, 198, 106, .45) 48%, rgba(255, 214, 150, .35) 100%);
-  opacity: 0;
-  transition: opacity .9s ease;
-  pointer-events: none;
-}
-
-.is-sun-kept .night__daylight {
-  opacity: 1;
-}
-
-.is-sun-kept.is-dusk .night__daylight {
-  background: linear-gradient(180deg, rgba(58, 35, 71, .7) 0%, rgba(200, 100, 70, .4) 48%, rgba(255, 130, 72, .4) 100%);
-}
-
-/* ...and the Pathway's own sky is only a tint over it */
-.is-sun-kept .night__grade {
-  opacity: .45;
-}
-
-:root[data-theme="parchment"] .night__daylight {
-  display: none;
-}
-
-/* ---- a sun where the moon was: rises from behind the castle (Sun), or sits on the horizon (twilight) ---- */
-.night__sun {
-  position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * .8);
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * .8);
-  width: calc(var(--moon-r, 200px) * 1.6);
-  aspect-ratio: 1;
-}
-
-.night__sun-rise {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transform: translate3d(0, 90%, 0);
-  transition: transform 1.6s cubic-bezier(.16, .84, .3, 1) .3s, opacity .8s ease .3s;
-}
-
-.is-sun-up .night__sun-rise {
-  opacity: 1;
   transform: none;
-}
-
-/* twilight: it never clears the rooftops */
-.is-sun-up.is-dusk .night__sun-rise {
-  transform: translate3d(0, 46%, 0);
-}
-
-.night__sun-glow {
-  position: absolute;
-  inset: -110%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 214, 120, .55) 0%, rgba(255, 170, 70, .22) 24%, rgba(255, 140, 60, .08) 44%, transparent 64%);
-}
-
-.is-dusk .night__sun-glow {
-  background: radial-gradient(circle, rgba(255, 150, 80, .6) 0%, rgba(230, 90, 60, .25) 26%, rgba(150, 60, 120, .1) 46%, transparent 66%);
-}
-
-.night__sun-disc {
-  position: absolute;
-  inset: 0;
-  /* a kept sun takes the scene's treatment, as the moon does (pale, dark, sickly...) */
-  filter: var(--moon-filter, );
-  transition: filter .9s ease;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, #fffbe6 0%, #ffeaa0 38%, #ffc95a 62%, #ff9f3a 100%);
-  box-shadow: 0 0 calc(var(--moon-r, 200px) * .5) rgba(255, 200, 100, .7);
-}
-
-.is-dusk .night__sun-disc {
-  background: radial-gradient(circle at 50% 50%, #ffe2a8 0%, #ffb065 45%, #f2703e 100%);
-}
-
-.night__weather {
-  z-index: 0;
-}
-
-/* ---- cloud banks: the fog texture, darkened to the scene's cloud colour, over the top of the sky ---- */
-.night__clouds {
-  position: absolute;
-  /* (opacity eases with the scene) */
-  inset: 0 0 auto;
-  height: 70%;
-  overflow: hidden;
-  opacity: var(--clouds, 0);
-  transition: opacity 1s ease;
-  -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent);
-  mask-image: linear-gradient(180deg, #000 40%, transparent);
-}
-
-.night__clouds-drift {
-  position: absolute;
-  inset: -10% auto 20% 0;
-  width: 200%;
-  background:
-    linear-gradient(var(--cloud), var(--cloud)),
-    url('./assets/moon/fog-bank.webp') repeat-x 0 0 / 50% 100%;
-  background-blend-mode: multiply;
-  -webkit-mask: url('./assets/moon/fog-bank.webp') repeat-x 0 0 / 50% 100%;
-  mask: url('./assets/moon/fog-bank.webp') repeat-x 0 0 / 50% 100%;
-  mask-mode: luminance;
-  -webkit-mask-mode: luminance;
-  animation: night-drift 60s linear infinite;
-  opacity: .95;
-}
-
-.night__clouds-drift--near {
-  inset: 10% auto 0 0;
-  animation-duration: 38s;
-  animation-direction: reverse;
-  opacity: .8;
-}
-
-/*
- * Paper: the Pathway's sky is a tint over the morning haze, never a dark sky; its shade
- * (Darkness, Death) a light dimming, not a dark grey half of the page.
- */
-:root[data-theme="parchment"] .night__grade {
-  opacity: .35;
-}
-
-:root[data-theme="parchment"] .night__shade {
-  background: #6a6672;
-  opacity: calc(var(--shade, 0) * .35);
-}
-
-/* ---- the Pathway's shade over the far scene, and lightning ---- */
-.night__shade {
-  position: absolute;
-  inset: 0;
-  background: #04040a;
-  opacity: var(--shade, 0);
-  transition: opacity .9s ease;
-  pointer-events: none;
-}
-
-.night__flash {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 90% at 70% 0%, rgba(210, 228, 255, .9), rgba(160, 190, 255, .35) 50%, transparent 80%);
-  opacity: 0;
-  mix-blend-mode: screen;
-  pointer-events: none;
+  opacity: 1;
 }
 
 .night__moon-glow {
@@ -567,7 +249,7 @@ onUnmounted(() => {
   inset: 0;
   width: 100%;
   height: 100%;
-  filter: saturate(1.08) brightness(.96) var(--moon-filter, );
+  filter: saturate(1.08) brightness(.96);
 }
 
 /* Rim light in the card's colour along the moon's upper limb, plus a thin halo. */
@@ -609,24 +291,21 @@ onUnmounted(() => {
 .night__fog-tint {
   position: absolute;
   inset: 0;
-  background-color: var(--fog-tone);
+  background: var(--fog-tone);
   mix-blend-mode: multiply;
-  transition: background-color .9s ease;
 }
 
 /* Two bands cross the moon's face at different speeds. */
 .night__fog--a {
   top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * .2);
   height: calc(var(--moon-r, 200px) * .62);
-  opacity: calc(.42 * var(--fog-amount, 1));
-  transition: opacity .9s ease;
+  opacity: .42;
 }
 
 .night__fog--b {
   top: calc(var(--moon-y, 48%) + var(--moon-r, 200px) * .34);
   height: calc(var(--moon-r, 200px) * .8);
-  opacity: calc(.36 * var(--fog-amount, 1));
-  transition: opacity .9s ease;
+  opacity: .36;
 }
 
 .night__fog--b .night__fog-drift {
@@ -637,8 +316,7 @@ onUnmounted(() => {
 .night__fog--streets {
   top: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .3);
   height: calc(var(--city-h, 600px) * .3);
-  opacity: calc(.34 * var(--fog-amount, 1));
-  transition: opacity .9s ease;
+  opacity: .34;
 }
 
 .night__fog--streets .night__fog-drift {
@@ -824,8 +502,7 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .night__fog-drift,
-  .night__clouds-drift {
+  .night__fog-drift {
     animation: none;
   }
 

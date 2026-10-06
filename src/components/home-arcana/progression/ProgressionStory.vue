@@ -3,18 +3,14 @@
     id="progression"
     ref="sectionRef"
     class="progression"
-    :class="{ 'is-lite': lite || calm }"
+    :class="{ 'is-lite': lite }"
     aria-labelledby="progression-title"
   >
-    <div ref="stickyRef" class="progression__sticky" :style="{'--room-fog': roomScene.fog}">
+    <div ref="stickyRef" class="progression__sticky">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
         <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
       </div>
-      <!-- the drawn Pathway's air in the room: its sky's colour over the brewery (pathwayScenes.ts) -->
-      <Transition v-bind="ROOM_FADE">
-        <i v-if="roomScene.sky !== 'transparent'" :key="roomKey" class="progression__grade" :style="{background: roomScene.sky}" aria-hidden="true" />
-      </Transition>
       <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
       <!--
         Decorative: the Pathway's sigil, drawn in behind him at the awakening like a ritual
@@ -29,8 +25,6 @@
         <i class="progression__fog progression__fog--far" />
         <i class="progression__fog progression__fog--near" />
       </div>
-      <!-- ...and its weather, lighter than in the hero (none in light mode) -->
-      <SceneWeather v-if="roomScene.weather && !lite && !calm" class="progression__weather" :kind="roomScene.weather" :color="roomScene.weatherColor" :density="(roomScene.weatherDensity ?? 1) * .55" :active="visible" />
       <div class="progression__vignette" aria-hidden="true" />
       <!-- the dark closing in on the drink, with the heart's beat in it -->
       <div class="progression__dread" :class="{ 'is-lit': dreadLit }" :style="dress.dread" aria-hidden="true" data-sweep-ignore />
@@ -45,7 +39,7 @@
       <div class="progression__layout" :style="layoutStyle">
         <!-- Outgoing and incoming copy share one grid cell and cross over. -->
         <div class="chapter-copy-slot" :style="copyStyle">
-          <Transition v-bind="COPY_FADE">
+          <Transition name="chapter-copy">
             <article v-if="activeChapter.id !== 'awaken'" :key="activeChapter.id" class="chapter-copy">
               <h3>{{ chapterText(activeChapter.id, 'title') }}</h3>
               <p class="chapter-copy__body">{{ chapterText(activeChapter.id, 'copy') }}</p>
@@ -178,9 +172,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
-import SceneWeather from '../SceneWeather.vue';
-import { sceneFor } from '../pathwayScenes';
-import { useEffects } from '../useEffects';
 import FormulaBookScene from './scenes/FormulaBookScene.vue';
 import AltarBrewScene from './scenes/AltarBrewScene.vue';
 import DrinkAwakenScene from './scenes/DrinkAwakenScene.vue';
@@ -195,20 +186,9 @@ import type { StageLayout } from './layout';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import { sigilNative } from '../arcana-data';
 import { useArcana } from '../useArcana';
-import { fade } from '../fade';
-
-/* the room's grade, and the chapter copy crossing over (fade.ts: nothing measured mid-render) */
-const ROOM_FADE = fade({ duration: 1600 });
-const COPY_FADE = fade(
-  { frames: [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], duration: 360, delay: 80, easing: 'cubic-bezier(.22, 1, .36, 1)' },
-  { frames: [{ opacity: 0, transform: 'translateY(-6px)' }], duration: 120 },
-);
 
 const { tp, names, ingredients, currentId, isBoon, pathwayId } = useProgressionCopy();
 const { hasDrawn } = useArcana();
-/* the drawn Pathway's scene, carried into the room (its sky, fog colour and weather) */
-const roomKey = computed(() => (hasDrawn.value ? currentId.value : 'undrawn'));
-const roomScene = computed(() => sceneFor(hasDrawn.value ? currentId.value : null));
 /* The awakening's sigil: the Pathway the story follows (a Boon, or no draw yet, sees the Fool's as the example). */
 const sigilExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
 const sigilSrc = computed(() => sigilNative(pathwayId.value));
@@ -314,8 +294,6 @@ function storedLite(): string | null {
 }
 const liteChoice = storedLite();
 const lite = ref(liteChoice === '1');
-/* the visitor's own "calm" switch (useEffects) gives the room the same quiet treatment */
-const { calm } = useEffects();
 /** ?lite=0 was asked for: never switch on its own. */
 const fullForced = liteChoice === '0';
 function goLite() {
@@ -359,7 +337,6 @@ const inspectorAnchor = ref<HTMLElement | null>(null);
 const inspectorScene = ref<DetailScene | null>(null);
 let observer: IntersectionObserver | null = null;
 let nearObserver: IntersectionObserver | null = null;
-let firstFrame = 0;
 let cancelPrewarm: (() => void) | null = null;
 let stageObserver: ResizeObserver | null = null;
 let frame = 0;
@@ -663,15 +640,10 @@ onMounted(() => {
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', onResize, { passive: true });
   addEventListener('keydown', onKeydown);
-  // measured in the first frame, not mid-mount: the room is below the fold (see ArcanaOrbit)
-  firstFrame = requestAnimationFrame(() => {
-    firstFrame = 0;
-    measureSection();
-    measureStage();
-  });
+  measureSection();
+  measureStage();
 });
 onUnmounted(() => {
-  if (firstFrame) cancelAnimationFrame(firstFrame);
   cancelPrewarm?.();
   observer?.disconnect();
   nearObserver?.disconnect();
@@ -946,18 +918,6 @@ onUnmounted(() => {
 .progression.is-lite :deep(.drink-scene__whispers) {
   -webkit-mask-image: none;
   mask-image: none;
-}
-
-/* the Pathway's sky over the brewery: a static layer, faded with the room as it changes */
-.progression__grade {
-  position: absolute;
-  inset: 0;
-  opacity: .55;
-  pointer-events: none;
-}
-
-.progression__weather {
-  opacity: .8;
 }
 
 /* the copy side and the rail stay on near-black */
@@ -1293,9 +1253,24 @@ onUnmounted(() => {
   display: none;
 }
 
-/* the old copy is gone in 0.12s and the new one starts as it goes (COPY_FADE) */
-.chapter-copy.is-leaving {
+/* the old copy is gone in 0.12s; the new one starts as it goes */
+.chapter-copy-enter-active {
+  transition: opacity 0.22s ease 0.08s, transform 0.36s cubic-bezier(.22, 1, .36, 1) 0.08s;
+}
+
+.chapter-copy-leave-active {
+  transition: opacity 0.12s ease, transform 0.12s ease;
   pointer-events: none;
+}
+
+.chapter-copy-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.chapter-copy-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 @media (max-width: 1120px) {
@@ -1653,6 +1628,8 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .chapter-copy-enter-active,
+  .chapter-copy-leave-active,
   .scene-window {
     transition: none;
   }

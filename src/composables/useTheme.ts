@@ -46,15 +46,12 @@ export function applyTheme(next: Theme) {
  * composited fade of the viewport, not a repaint per frame.
  */
 function switchTo(next: Theme) {
+    const root = document.documentElement;
     const commit = () => {
-        // A sheet that exists only for the switch: as a standing `:root.theme-switching *`
-        // rule its universal subject was tried against every element in every style pass.
-        const still = document.createElement("style");
-        still.textContent = "*, *::before, *::after { transition: none !important; }";
-        document.head.append(still);
+        root.classList.add("theme-switching");
         applyTheme(next);
         // Two frames: the new colours are styled and painted before transitions return.
-        requestAnimationFrame(() => requestAnimationFrame(() => still.remove()));
+        requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
     };
 
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;

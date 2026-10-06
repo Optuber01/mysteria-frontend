@@ -1,5 +1,5 @@
 <template>
-  <div class="altar-scene" :class="{ 'is-live': active }" :style="sceneVars" role="group" :aria-label="tp('altar.sceneLabel')">
+  <div class="altar-scene" :style="sceneVars" role="group" :aria-label="tp('altar.sceneLabel')">
     <!-- soul-fire light pooled on the floor, the Pathway's colour once the brew takes -->
     <div class="altar-scene__bloom" aria-hidden="true" />
 
@@ -496,10 +496,6 @@ const beamStyle = computed<CSSProperties>(() => {
 
 /* The two-frame sprite as a strip twice the box's height, flipped by moving it
    (composited) rather than by repainting its background-position. */
-.altar-scene.is-live .cauldron__fire::before {
-  animation-play-state: running;
-}
-
 .cauldron__fire::before {
   position: absolute;
   top: 0;
@@ -511,8 +507,7 @@ const beamStyle = computed<CSSProperties>(() => {
   background-repeat: no-repeat;
   image-rendering: pixelated;
   content: '';
-  /* flickers only while the brew is on screen (a hidden element's loop still ticks) */
-  animation: soul-fire 0.5s steps(1) infinite paused;
+  animation: soul-fire 0.5s steps(1) infinite;
 }
 
 @keyframes soul-fire {

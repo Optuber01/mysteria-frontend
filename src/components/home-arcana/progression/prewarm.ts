@@ -22,34 +22,18 @@ function pageSettled(): Promise<void> {
   return settled;
 }
 
-/** Waits for the browser's next idle slice (a frame later where there is no idle callback). */
-export function yieldToIdle(): Promise<void> {
-  return new Promise((resolve) => {
-    const idle = (window as IdleWindow).requestIdleCallback;
-    if (idle) idle(() => resolve(), { timeout: 600 });
-    else setTimeout(resolve, 16);
-  });
-}
-
-/*
- * Prewarm work runs one task at a time, each in its own idle slice: the book, the player
- * and the backdrop used to start in the same slice and land as one ~450 ms block (with
- * three more long tasks right behind it), about 1.2 s of blocked input on a laptop at
- * second three. A task that returns a promise holds the queue until it settles, and
- * yields between its own heavy steps (yieldToIdle).
- */
-let queue: Promise<void> = Promise.resolve();
-
-/** Runs `task` once, in an idle slice after the page has settled, after earlier prewarm tasks. Returns a cancel function. */
-export function whenSettled(task: () => void | Promise<unknown>): () => void {
+/** Runs `task` once, in an idle slice after the page has settled. Returns a cancel function. */
+export function whenSettled(task: () => void): () => void {
   let cancelled = false;
-  queue = queue
-    .then(() => pageSettled())
-    .then(() => yieldToIdle())
-    .then(async () => {
-      if (!cancelled) await task();
-    })
-    .catch(() => undefined);
+  void pageSettled().then(() => {
+    if (cancelled) return;
+    const run = () => {
+      if (!cancelled) task();
+    };
+    const idle = (window as IdleWindow).requestIdleCallback;
+    if (idle) idle(run, { timeout: 2500 });
+    else setTimeout(run, 0);
+  });
   return () => {
     cancelled = true;
   };

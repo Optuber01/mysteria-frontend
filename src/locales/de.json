@@ -594,11 +594,7 @@
         "cardLabel": "Draw card {n} of {total}",
         "beginsAs": "Sequence 9: {role}",
         "readCard": "View Sequences",
-        "announce": "Card drawn: {name}. Sequence 9: {role}.",
-        "viewScene": "View the landscape",
-        "viewBack": "Back to the page",
-        "effectsOff": "Calm the effects",
-        "effectsOn": "Bring the effects back"
+        "announce": "Card drawn: {name}. Sequence 9: {role}."
       },
       "dock": {
         "label": "Pathway card",
@@ -1002,9 +998,7 @@
         "source": "View the original post",
         "prev": "Previous screenshot",
         "next": "Next screenshot",
-        "close": "Close",
-        "epoch": "Epoch {n}",
-        "epochLong": "Taken in Epoch {n}"
+        "close": "Close"
       },
       "credit": "By {author}",
       "join": {
