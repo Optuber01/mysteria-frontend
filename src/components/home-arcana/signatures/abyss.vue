@@ -1,68 +1,29 @@
 <template>
   <!--
-    Abyss: the pit opens. The sulfur smoke in the streets splits, a fissure glows open
-    beneath the skyline and sulfurous fire breathes up out of it, lighting the castle from
-    below until the city stands black against it; then it sinks back to a smouldering
-    seam that stays. Fire from below only: no horizon blaze, no ravens, no goat heads.
+    Abyss: the pit opens. The sulfur smoke in the streets parts, a seam of light opens
+    beneath the skyline and breathes heat up out of it, lighting the castle from below until
+    the city stands black against the glow; then it sinks to a smouldering seam that stays.
+    Light from below only: no horizon blaze, no ravens, no drawn flames.
   -->
   <div class="abyss" aria-hidden="true">
     <!-- behind the castle: the pit's glow, rising, so the skyline stands black against it -->
-    <i v-if="layer === 'back'" class="abyss__glow"></i>
+    <div v-if="layer === 'back'" class="ab-glow"><div class="ab-glow__light"><i class="ab-glow__ember"></i></div></div>
 
     <template v-else>
       <!-- the castle's undersides catch the light from below -->
-      <div class="abyss__city">
-        <i class="abyss__underlight" :style="{'--city-mask': `url(${city})`}"></i>
+      <div class="ab-city">
+        <i class="ab-under" :style="{'--city-mask': `url(${city})`}"></i>
       </div>
 
-      <div class="abyss__pit">
-        <!-- the street's sulfur smoke, parting -->
-        <i class="abyss__smoke abyss__smoke--l"></i>
-        <i class="abyss__smoke abyss__smoke--r"></i>
+      <!-- the street's sulfur smoke, parting -->
+      <div class="ab-smoke ab-smoke--l"><i class="ab-smoke__fog"></i><i class="ab-smoke__tint"></i></div>
+      <div class="ab-smoke ab-smoke--r"><i class="ab-smoke__fog"></i><i class="ab-smoke__tint"></i></div>
 
-        <!-- the fissure -->
-        <div class="abyss__fissure">
-          <svg class="abyss__crack" viewBox="0 0 1000 60" preserveAspectRatio="none">
-            <defs>
-              <filter id="abyss-blur" x="-10%" y="-200%" width="120%" height="500%">
-                <feGaussianBlur stdDeviation="5 4"/>
-              </filter>
-              <linearGradient id="abyss-core" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#ff9a30"/>
-                <stop offset=".5" stop-color="#fff2b0"/>
-                <stop offset="1" stop-color="#ff7a26"/>
-              </linearGradient>
-            </defs>
-            <path :d="CRACK.outer" fill="#ff6a24" opacity=".75" filter="url(#abyss-blur)"/>
-            <path v-for="(b, i) in CRACK.branches" :key="i" :d="b" fill="none" stroke="#ff8a32" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
-            <path :d="CRACK.outer" fill="url(#abyss-core)"/>
-            <path :d="CRACK.inner" fill="#fffbe0" opacity=".85"/>
-          </svg>
-        </div>
-
-        <!-- the fire breathing up out of it: overlapping sheets of flame, each with its own tongues -->
-        <div
-            v-for="(f, i) in SHEETS"
-            :key="i"
-            class="abyss__flame"
-            :style="{left: `${f.x}%`, width: `${f.w}%`, '--h': f.h, '--i': i}"
-        >
-          <svg class="abyss__tongue" viewBox="0 0 200 100" preserveAspectRatio="none">
-            <defs>
-              <linearGradient :id="`abyss-flame-${i}`" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0" stop-color="#fff6c8"/>
-                <stop offset=".2" stop-color="#ffd860"/>
-                <stop offset=".48" stop-color="#ff8f2a" stop-opacity=".85"/>
-                <stop offset=".78" stop-color="#d8401c" stop-opacity=".4"/>
-                <stop offset="1" stop-color="#a02814" stop-opacity="0"/>
-              </linearGradient>
-              <filter :id="`abyss-soft-${i}`" x="-5%" y="-5%" width="110%" height="110%">
-                <feGaussianBlur stdDeviation="1.6 1"/>
-              </filter>
-            </defs>
-            <path :d="f.d" :fill="`url(#abyss-flame-${i})`" :filter="`url(#abyss-soft-${i})`"/>
-          </svg>
-        </div>
+      <!-- the seam, and the heat it breathes out -->
+      <div class="ab-pit">
+        <i class="ab-breath"></i>
+        <i class="ab-seam__glow"></i>
+        <i v-for="(s, i) in SEAM" :key="i" class="ab-seam" :style="s"></i>
       </div>
     </template>
   </div>
@@ -72,80 +33,14 @@
 import city from '../assets/moon/backlund-skyline.webp';
 
 defineOptions({name: 'SignatureAbyss'});
-defineProps<{layer: 'back' | 'front'}>();
+defineProps<{layer: 'back' | 'front'; from?: string}>();
 
-/* the same crack on every load */
-function rand(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 16807) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
-
-/** A jagged seam, thickest in the middle, with a few hairline forks. */
-function makeCrack() {
-  const r = rand(4021);
-  const top: string[] = [];
-  const bottom: string[] = [];
-  const innerTop: string[] = [];
-  const innerBottom: string[] = [];
-  const branches: string[] = [];
-  let mid = 30;
-  for (let i = 0; i <= 40; i++) {
-    const x = i * 25;
-    const t = Math.pow(Math.sin((Math.PI * x) / 1000), 0.7);
-    mid += (r() - 0.5) * 6;
-    mid = Math.max(24, Math.min(36, mid));
-    const up = t * (7 + r() * 9);
-    const down = t * (6 + r() * 9);
-    top.push(`${x} ${(mid - up).toFixed(1)}`);
-    bottom.unshift(`${x} ${(mid + down).toFixed(1)}`);
-    innerTop.push(`${x} ${(mid - up * 0.32).toFixed(1)}`);
-    innerBottom.unshift(`${x} ${(mid + down * 0.32).toFixed(1)}`);
-    if (i % 5 === 2 && i > 3 && i < 38) {
-      const dir = r() < 0.5 ? -1 : 1;
-      const len = 30 + r() * 40;
-      branches.push(`M${x} ${mid.toFixed(1)} L${(x + len * 0.5).toFixed(1)} ${(mid + dir * (10 + r() * 6)).toFixed(1)} L${(x + len).toFixed(1)} ${(mid + dir * (18 + r() * 8)).toFixed(1)}`);
-    }
-  }
-  return {
-    outer: `M${top.join(' L')} L${bottom.join(' L')} Z`,
-    inner: `M${innerTop.join(' L')} L${innerBottom.join(' L')} Z`,
-    branches,
-  };
-}
-const CRACK = makeCrack();
-
-/** A sheet of fire (viewBox 200 x 100, base at the bottom): tongues of uneven height, leaning with the draught. */
-function sheet(r: () => number) {
-  const n = 3 + Math.floor(r() * 3);
-  const step = 200 / n;
-  let d = 'M0 100 L0 86';
-  let x = 0;
-  for (let k = 0; k < n; k++) {
-    const tipX = x + step * (0.35 + r() * 0.3);
-    const tipY = r() * 45;
-    const next = x + step;
-    const valleyY = 62 + r() * 26;
-    const lean = (r() - 0.4) * step * 0.25;
-    d += ` C${(x + step * 0.25).toFixed(1)} 80 ${(tipX - step * 0.12).toFixed(1)} ${(tipY + 40).toFixed(1)} ${(tipX + lean).toFixed(1)} ${tipY.toFixed(1)}`;
-    d += ` C${(tipX + step * 0.08).toFixed(1)} ${(tipY + 42).toFixed(1)} ${(next - step * 0.25).toFixed(1)} ${(valleyY - 6).toFixed(1)} ${next.toFixed(1)} ${(k === n - 1 ? 86 : valleyY).toFixed(1)}`;
-    x = next;
-  }
-  return `${d} L200 100 Z`;
-}
-
-/** The sheets along the seam: where they start (% across), how wide, how tall at the breath's peak. */
-const SHEETS = (() => {
-  const r = rand(77);
-  return Array.from({length: 7}, (_, i) => {
-    const x = -2 + i * 14 + (r() - 0.5) * 4;
-    // low in the middle, under the deck and its buttons; tallest out at the ends
-    const side = Math.min(1, Math.abs(x + 11 - 50) / 40);
-    return {x: +x.toFixed(1), w: +(20 + r() * 8).toFixed(1), h: +(0.4 + side * 0.75 + r() * 0.15).toFixed(2), d: sheet(r)};
-  });
-})();
+/* the seam: a few overlapping runs at slightly different heights, so it is never a ruled line */
+const SEAM = [
+  {left: '4%', width: '40%', '--dy': '-1px', '--i': 1},
+  {left: '30%', width: '42%', '--dy': '1px', '--i': 0},
+  {left: '60%', width: '36%', '--dy': '0px', '--i': 2},
+];
 </script>
 
 <style scoped>
@@ -153,39 +48,52 @@ const SHEETS = (() => {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* the pit's line: just above the castle's foot */
+  --pit-y: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .075);
 }
 
 /* ---- back: the glow behind the city ---- */
-.abyss__glow {
+/* the blend sits on the box, the motion on the light inside it: an element that blends and animates its own opacity is not composited */
+.ab-glow {
   position: absolute;
   left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * 4);
   width: calc(var(--moon-r, 200px) * 8);
   top: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .3 - var(--moon-r, 200px) * 1.8);
   height: calc(var(--moon-r, 200px) * 3.6);
-  background: radial-gradient(closest-side at 50% 70%, rgba(255, 196, 90, .85), rgba(242, 96, 44, .5) 35%, rgba(150, 40, 15, .2) 66%, transparent);
   mix-blend-mode: screen;
-  transform-origin: 50% 100%;
-  opacity: .42;
-  will-change: transform, opacity;
-  animation:
-    abyss-breathe 3.8s ease-in-out 1.1s backwards,
-    abyss-smoulder 5s ease-in-out 4.9s infinite alternate;
 }
 
-@keyframes abyss-breathe {
+/* the breath (once) and the smoulder (looping) each on their own element: two animations on one element are not composited */
+.ab-glow__light {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 100%;
+  opacity: .42;
+  animation: ab-breathe 3.8s ease-in-out 1.1s backwards;
+}
+
+.ab-glow__ember {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(closest-side at 50% 70%, rgba(255, 196, 90, .85), rgba(242, 96, 44, .5) 35%, rgba(150, 40, 15, .2) 66%, transparent);
+  will-change: opacity;
+  animation: ab-smoulder 6s ease-in-out 4.9s infinite alternate;
+}
+
+@keyframes ab-breathe {
   0% { opacity: 0; transform: scaleY(.4); }
   35% { opacity: 1; transform: none; }
   55% { opacity: 1; }
   100% { opacity: .42; }
 }
 
-@keyframes abyss-smoulder {
-  from { opacity: .42; }
-  to { opacity: .3; }
+/* the one thing that keeps moving: the pit's glow, slowly brightening and sinking */
+@keyframes ab-smoulder {
+  to { opacity: .7; }
 }
 
 /* ---- front: under-light on the castle, cut to its shape ---- */
-.abyss__city {
+.ab-city {
   position: absolute;
   left: var(--city-left, 0);
   top: calc(var(--city-bottom, 100%) - var(--city-h, 600px));
@@ -193,7 +101,7 @@ const SHEETS = (() => {
   aspect-ratio: 16 / 9;
 }
 
-.abyss__underlight {
+.ab-under {
   position: absolute;
   inset: 0;
   background: linear-gradient(0deg, rgba(255, 130, 46, .5) 0%, rgba(242, 83, 61, .22) 30%, transparent 58%);
@@ -201,156 +109,171 @@ const SHEETS = (() => {
   mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
   mix-blend-mode: screen;
   opacity: .4;
-  animation: abyss-breathe 3.8s ease-in-out 1.1s backwards;
+  animation: ab-breathe 3.8s ease-in-out 1.1s backwards;
 }
 
-/* ---- front: the pit, at the castle's foot ---- */
-.abyss__pit {
+/* ---- front: sulfur smoke, the scene's fog bank tinted yellow-grey, parting at the pit ---- */
+.ab-smoke {
+  position: absolute;
+  top: calc(var(--pit-y) - var(--moon-r, 200px) * .55);
+  height: calc(var(--moon-r, 200px) * 1.05);
+  width: 60%;
+  overflow: hidden;
+  isolation: isolate;
+  mix-blend-mode: screen;
+  /* a soft bank, fading out all round */
+  -webkit-mask: radial-gradient(closest-side, #000 45%, transparent);
+  mask: radial-gradient(closest-side, #000 45%, transparent);
+  opacity: .42;
+  will-change: transform;
+}
+
+.ab-smoke--l {
+  left: 0;
+  transform: translate3d(-12%, 0, 0);
+  animation: ab-part-l 2.4s cubic-bezier(.4, 0, .2, 1) .7s backwards;
+}
+
+.ab-smoke--r {
+  right: 0;
+  transform: translate3d(14%, 0, 0);
+  animation: ab-part-r 2.4s cubic-bezier(.4, 0, .2, 1) .7s backwards;
+}
+
+@keyframes ab-part-l {
+  from { opacity: .6; transform: translate3d(14%, 0, 0); }
+}
+
+@keyframes ab-part-r {
+  from { opacity: .6; transform: translate3d(-14%, 0, 0); }
+}
+
+.ab-smoke__fog {
+  position: absolute;
+  inset: 0;
+  background: url('../assets/moon/fog-bank.webp') repeat-x 0 50% / 60% 100%;
+}
+
+.ab-smoke--r .ab-smoke__fog {
+  background-position-x: 45%;
+}
+
+.ab-smoke__tint {
+  position: absolute;
+  inset: 0;
+  background-color: #c8b86a;
+  mix-blend-mode: multiply;
+}
+
+/* ---- front: the seam of light at the castle's foot ---- */
+.ab-pit {
   position: absolute;
   left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * 2.6);
   right: 0;
-  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .075);
+  top: var(--pit-y);
   height: 0;
 }
 
-.abyss__smoke {
+/* the heat breathing up out of the seam: one soft rising light, never flames */
+.ab-breath {
   position: absolute;
-  top: calc(var(--moon-r, 200px) * -.5);
-  height: calc(var(--moon-r, 200px) * 1);
-  width: 62%;
-  background: url('../assets/moon/fog-bank.webp') repeat-x 0 50% / 70% 100%;
-  filter: sepia(1) saturate(1.6) hue-rotate(-8deg) brightness(.85);
-  mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent);
-  mask-image: radial-gradient(closest-side, #000 35%, transparent);
-  opacity: .32;
-  will-change: transform;
-}
-
-.abyss__smoke--l {
-  left: 0;
-  transform: translate3d(-30%, 0, 0);
-  animation: abyss-part-l 2.2s cubic-bezier(.4, 0, .2, 1) .7s backwards;
-}
-
-.abyss__smoke--r {
-  right: 0;
-  background-position-x: 40%;
-  transform: translate3d(30%, 0, 0);
-  animation: abyss-part-r 2.2s cubic-bezier(.4, 0, .2, 1) .7s backwards;
-}
-
-@keyframes abyss-part-l {
-  from { opacity: .7; transform: translate3d(16%, 0, 0); }
-}
-
-@keyframes abyss-part-r {
-  from { opacity: .7; transform: translate3d(-16%, 0, 0); }
-}
-
-.abyss__fissure {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(var(--moon-r, 200px) * -.11);
-  height: calc(var(--moon-r, 200px) * .22);
-  transform: scaleY(.6);
-  will-change: transform;
-  animation:
-    abyss-open 4s cubic-bezier(.3, 0, .2, 1) 1s backwards,
-    abyss-seam 3.6s ease-in-out 5s infinite alternate;
-}
-
-/* it tears open from the middle outward, gapes while the fire breathes, then narrows to a seam */
-@keyframes abyss-open {
-  0% { opacity: 0; transform: scale(.12, 0); }
-  8% { opacity: 1; }
-  28% { transform: scale(1, 1.2); }
-  55% { transform: scale(1, 1.1); }
-  100% { transform: scaleY(.6); }
-}
-
-@keyframes abyss-seam {
-  from { opacity: 1; }
-  to { opacity: .72; }
-}
-
-.abyss__crack {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-/* ---- the fire ---- */
-.abyss__flame {
-  position: absolute;
+  left: 8%;
+  right: 4%;
   bottom: 0;
-  height: calc(var(--moon-r, 200px) * .85 * var(--h));
-  transform-origin: 50% 100%;
+  height: calc(var(--moon-r, 200px) * 1.5);
+  background: radial-gradient(50% 100% at 50% 100%, rgba(255, 214, 120, .7), rgba(255, 140, 50, .34) 35%, rgba(200, 60, 20, .1) 70%, transparent);
   mix-blend-mode: screen;
-  /* small and low once the breath is spent */
-  transform: scaleY(.16);
-  will-change: transform;
-  animation: abyss-flare 3.2s cubic-bezier(.3, .1, .3, 1) calc(1.35s + var(--i) * .05s) backwards;
-}
-
-@keyframes abyss-flare {
-  0% { opacity: 0; transform: scaleY(0); }
-  10% { opacity: 1; }
-  30% { transform: none; }
-  45% { transform: scaleY(.82); }
-  58% { transform: scaleY(.92); }
-  100% { transform: scaleY(.16); }
-}
-
-.abyss__tongue {
-  display: block;
-  width: 100%;
-  height: 100%;
   transform-origin: 50% 100%;
-  animation: abyss-flicker calc(.9s + var(--i) * .11s) ease-in-out calc(var(--i) * -.37s) infinite alternate;
+  transform: scaleY(.22);
+  opacity: .6;
+  will-change: transform;
+  animation: ab-heave 3.6s cubic-bezier(.3, .1, .3, 1) 1.3s backwards;
 }
 
-@keyframes abyss-flicker {
-  from { transform: scaleY(.88) skewX(-3deg); }
-  to { transform: scaleY(1.1) skewX(2deg); }
+@keyframes ab-heave {
+  0% { opacity: 0; transform: scaleY(.05); }
+  30% { opacity: 1; transform: none; }
+  50% { transform: scaleY(.85); }
+  100% { opacity: .6; transform: scaleY(.22); }
 }
 
-/* light theme: no glow can lighten paper, so the fire is drawn in plain colour, fainter */
-:root[data-theme="parchment"] .abyss__glow,
-:root[data-theme="parchment"] .abyss__underlight,
-:root[data-theme="parchment"] .abyss__flame {
-  mix-blend-mode: normal;
+/* the light the seam throws on the smoke round it */
+.ab-seam__glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--moon-r, 200px) * -.12);
+  height: calc(var(--moon-r, 200px) * .24);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 170, 70, .55), rgba(255, 110, 40, .18) 55%, transparent);
+  mix-blend-mode: screen;
+  animation: ab-open 3s cubic-bezier(.3, 0, .2, 1) 1s backwards;
 }
 
-:root[data-theme="parchment"] .abyss__glow {
-  opacity: .22;
+/* the seam itself: hot white-yellow at its heart, cooling to orange, fading at its ends */
+.ab-seam {
+  position: absolute;
+  top: calc(-1.5px + var(--dy));
+  height: 3px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, transparent, rgba(255, 128, 40, .8) 12%, rgba(255, 214, 120, .95) 35%, #fff4c8 52%, rgba(255, 190, 90, .9) 70%, rgba(255, 120, 40, .7) 88%, transparent);
+  box-shadow: 0 0 6px rgba(255, 150, 60, .8);
+  filter: blur(.7px);
+  opacity: .9;
+  transform-origin: 50% 50%;
+  animation: ab-open 2.4s cubic-bezier(.3, 0, .2, 1) calc(1s + var(--i) * .15s) backwards;
+}
+
+/* it tears open from the middle outward */
+@keyframes ab-open {
+  0% { opacity: 0; transform: scaleX(.05); }
+  20% { opacity: 1; }
+}
+
+/* light theme: no glow can lighten paper, so the light is laid on as plain colour, fainter */
+:root[data-theme="parchment"] .ab-glow,
+:root[data-theme="parchment"] .ab-under,
+:root[data-theme="parchment"] .ab-breath,
+:root[data-theme="parchment"] .ab-seam__glow {
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="parchment"] .ab-glow {
+  opacity: .7;
+}
+
+:root[data-theme="parchment"] .ab-glow__light,
+:root[data-theme="parchment"] .ab-glow__ember {
   animation: none;
 }
 
-:root[data-theme="parchment"] .abyss__underlight {
+:root[data-theme="parchment"] .ab-under {
   opacity: .25;
 }
 
-:root[data-theme="parchment"] .abyss__smoke {
+:root[data-theme="parchment"] .ab-smoke {
   mix-blend-mode: multiply;
-  filter: invert(1) sepia(.6) brightness(.95);
-  opacity: .2;
+  opacity: .25;
 }
 
-:root[data-theme="parchment"] .abyss__pit {
-  opacity: .85;
+:root[data-theme="parchment"] .ab-smoke__fog {
+  filter: invert(1);
+}
+
+:root[data-theme="parchment"] .ab-smoke__tint {
+  background-color: #a89a50;
+  mix-blend-mode: screen;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .abyss__glow,
-  .abyss__underlight,
-  .abyss__smoke--l,
-  .abyss__smoke--r,
-  .abyss__fissure,
-  .abyss__flame,
-  .abyss__tongue {
+  .ab-glow__light,
+  .ab-glow__ember,
+  .ab-under,
+  .ab-smoke--l,
+  .ab-smoke--r,
+  .ab-breath,
+  .ab-seam__glow,
+  .ab-seam {
     animation: none;
   }
 }

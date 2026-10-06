@@ -2,17 +2,22 @@
   <!--
     Darkness: the stars go out one by one, then night pours in from the edges like ink:
     first over the sky, then the city, then the fog in the streets, until only the faint
-    crimson moon is left (she is the Lady of Crimson) in a silent black. No particles; the
-    stillness holds.
+    crimson moon is left (she is the Lady of Crimson) in a silent black. If a sun was up,
+    the ink drinks its light first, and her moon comes back into the dark after it. No
+    particles; the stillness holds.
   -->
-  <div ref="rootRef" class="dark" aria-hidden="true">
+  <div class="dark" :class="{'is-after-sun': afterSun}" aria-hidden="true">
     <template v-if="layer === 'back'">
       <i v-for="(s, i) in stars" :key="i" class="dark__star" :style="s"></i>
-      <i class="dark__crimson"></i>
-      <!-- on the moon disc itself (so it rises and sinks with it): her crimson, kept alight -->
-      <Teleport v-if="moonRise" :to="moonRise">
-        <i class="dark__moon"></i>
-      </Teleport>
+      <!-- the sun's light, drunk: ink pooling over where it hung, before her moon returns -->
+      <i v-if="afterSun" class="dark__drink"></i>
+      <i class="dark__crimson"><i class="dark__breath"></i></i>
+      <!-- on the moon disc itself (kept in step with it): her crimson, kept alight -->
+      <div ref="followRef" class="dark__anchor">
+        <div ref="riseRef" class="dark__rise">
+          <i class="dark__moon"></i>
+        </div>
+      </div>
     </template>
     <template v-else>
       <div class="dark__ink">
@@ -27,17 +32,18 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
+import {computed, ref} from 'vue';
 import city from '../assets/moon/backlund-skyline.webp';
+import {useMoonAnchor} from './sigKit';
 
-defineProps<{layer: 'back' | 'front'}>();
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
 
-/* the scene's moon box, so the kept moon moves with the real one (rise, scroll) */
-const rootRef = ref<HTMLElement | null>(null);
-const moonRise = ref<HTMLElement | null>(null);
-onMounted(() => {
-  moonRise.value = rootRef.value?.closest('.night')?.querySelector<HTMLElement>('.night__moon-rise') ?? null;
-});
+/* a sun (risen or on the horizon) was up: its light goes first */
+const afterSun = computed(() => props.from === 'sun' || props.from === 'dusk');
+
+const followRef = ref<HTMLElement | null>(null);
+const riseRef = ref<HTMLElement | null>(null);
+useMoonAnchor(followRef, riseRef);
 
 /* the last stars, put out one after another (positions in % of the hero, away from the copy) */
 const stars = [
@@ -66,10 +72,16 @@ const tongues = [
 <style scoped>
 .dark {
   --ink: rgb(3, 3, 9);
+  /* when her moon is lit again: later if the ink had a sun to drink first */
+  --moon-in: 2s;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.dark.is-after-sun {
+  --moon-in: 3s;
 }
 
 /* ---- behind the castle: the last stars going out, and the moon kept ---- */
@@ -84,6 +96,23 @@ const tongues = [
   animation: dark-out 1s ease var(--d) both;
 }
 
+/*
+ * The drink: a pool of ink over the sun's place (centred on the moon's, where the sun
+ * hangs), wide enough to take its glow. It closes over the light, holds while the sun
+ * goes down, then thins away so her faint moon can come back into the dark.
+ */
+.dark__drink {
+  position: absolute;
+  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * 3);
+  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * 3);
+  width: calc(var(--moon-r, 200px) * 6);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, var(--ink) 0, var(--ink) 34%, color-mix(in srgb, var(--ink) 80%, transparent) 52%, color-mix(in srgb, var(--ink) 35%, transparent) 76%, transparent);
+  opacity: 0;
+  animation: dark-drink 4.2s cubic-bezier(.4, 0, .3, 1) .25s both;
+}
+
 /* a breath of crimson round her moon, so it is plainly the last light left */
 .dark__crimson {
   position: absolute;
@@ -91,19 +120,41 @@ const tongues = [
   top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * 2);
   width: calc(var(--moon-r, 200px) * 4);
   aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle closest-side, rgba(150, 24, 36, .3) 40%, rgba(120, 16, 30, .12) 62%, transparent);
-  animation: dark-crimson 3s ease 2.2s both, dark-breathe 12s ease-in-out 5.2s infinite;
+  animation: dark-crimson 3s ease calc(var(--moon-in) + .2s) both;
 }
 
-/* screened onto the disc: the moon stays faint, but plainly crimson and plainly there */
+/* its slow breathing (the one loop), on its own element so it stays on the compositor */
+.dark__breath {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side, rgba(150, 24, 36, .3) 40%, rgba(120, 16, 30, .12) 62%, transparent);
+  will-change: opacity;
+  animation: dark-breathe 12s ease-in-out calc(var(--moon-in) + 3.2s) infinite;
+}
+
+/* a 2r box on the moon, following its rise and its sink on scroll (sigKit) */
+.dark__anchor {
+  position: absolute;
+  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
+  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
+  width: calc(var(--moon-r, 200px) * 2);
+  aspect-ratio: 1;
+}
+
+.dark__rise {
+  position: absolute;
+  inset: 0;
+  transform: scale(var(--moon-scale, 1));
+}
+
+/* laid on the disc: the moon stays faint, but plainly crimson and plainly there */
 .dark__moon {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: radial-gradient(circle closest-side, rgba(170, 30, 44, .5) 0, rgba(160, 26, 40, .42) 70%, rgba(140, 20, 34, .26) 96%, transparent);
-  mix-blend-mode: screen;
-  animation: dark-crimson 3s ease 2s both;
+  animation: dark-crimson 3s ease var(--moon-in) both;
 }
 
 /* ---- in front of everything: the ink, kept off the moon by a fixed hole ---- */
@@ -163,6 +214,13 @@ const tongues = [
   100% { opacity: 0; }
 }
 
+@keyframes dark-drink {
+  0% { opacity: 0; transform: scale(1.5); }
+  30% { opacity: .96; transform: none; }
+  62% { opacity: .96; }
+  100% { opacity: 0; }
+}
+
 @keyframes dark-pour {
   from { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(.55); }
   30% { opacity: .92; }
@@ -185,8 +243,24 @@ const tongues = [
   --ink: rgb(74, 70, 98);
 }
 
+/* (the base scene already lays a heavy shade here; the ink only deepens it a touch, so the deck's controls stay legible) */
 :root[data-theme="parchment"] .dark__ink {
-  opacity: .3;
+  opacity: .1;
+}
+
+:root[data-theme="parchment"] .dark__silhouette {
+  opacity: .16;
+}
+
+:root[data-theme="parchment"] .dark__drink {
+  animation-name: dark-drink-paper;
+}
+
+@keyframes dark-drink-paper {
+  0% { opacity: 0; transform: scale(1.5); }
+  30% { opacity: .4; transform: none; }
+  62% { opacity: .4; }
+  100% { opacity: 0; }
 }
 
 :root[data-theme="parchment"] .dark__star {
@@ -198,16 +272,18 @@ const tongues = [
   opacity: .5;
 }
 
-:root[data-theme="parchment"] .dark__crimson {
+:root[data-theme="parchment"] .dark__breath {
   background: radial-gradient(circle closest-side, rgba(179, 32, 43, .14) 40%, rgba(179, 32, 43, .05) 62%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dark__star {
+  .dark__star,
+  .dark__drink {
     display: none;
   }
 
   .dark__crimson,
+  .dark__breath,
   .dark__moon,
   .dark__silhouette,
   .dark__tongue,

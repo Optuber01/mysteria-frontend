@@ -1,83 +1,98 @@
 <template>
   <!--
-    Error: the moon is pickpocketed. A monocle's glint passes across it and the moon is
-    simply gone, leaving only its afterimage; a moment later it is back, a little to one
-    side, stuttering into place as if time had been wound back to cover the theft.
-    The hero's own moon cannot be moved from here, so the back layer covers it with a
-    patch of sky and hangs a copy of it in its new place.
+    Error: pickpocketed. The scene itself steals whatever hangs in the sky (HeroNightScene
+    `is-stolen`, 0.65 s after the draw, for 1.1 s): a glint like light off a monocle passes
+    over it as this arrives, its light lingers a moment where it was, and when it comes back
+    a little out of place, time skips: the fog jumps back a few beats, as if wound back to
+    cover the theft. Drawn on page load nothing is stolen, so only the glint passes.
   -->
-  <div class="error" aria-hidden="true">
-    <div ref="followRef" class="error__moon">
-      <div ref="riseRef" class="error__rise">
-        <template v-if="layer === 'back'">
-          <!-- where the moon was: sky, with a ghost of it fading out -->
-          <i class="error__patch"></i>
-          <i class="error__ghost"></i>
-          <!-- where it is now -->
-          <div class="error__stolen">
-            <div class="error__stolen-step">
-              <i class="error__glow"></i>
-              <i class="error__corona"></i>
-              <img class="error__disc" :src="moon" alt="" decoding="async" width="640" height="640">
-              <i class="error__rim"></i>
-            </div>
-          </div>
-        </template>
-        <template v-else>
-          <!-- the monocle's glint: a lens ring and its flare, passing across the moon like a hand -->
-          <div class="error__pass">
-            <div class="error__glint">
-              <i class="error__streak"></i>
-              <svg class="error__lens" viewBox="-60 -60 120 120">
-                <defs>
-                  <radialGradient id="error-flare">
-                    <stop offset="0" stop-color="#f4fdff" stop-opacity=".9"/>
-                    <stop offset=".25" stop-color="#bff1ff" stop-opacity=".35"/>
-                    <stop offset="1" stop-color="#6fd9f2" stop-opacity="0"/>
-                  </radialGradient>
-                  <linearGradient id="error-ring" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#f6fdff"/>
-                    <stop offset=".55" stop-color="#9fe6f7" stop-opacity=".55"/>
-                    <stop offset="1" stop-color="#e9fbff" stop-opacity=".9"/>
-                  </linearGradient>
-                </defs>
-                <circle r="58" fill="url(#error-flare)" opacity=".5"/>
-                <!-- the lens: a thin rim, a sheen across the glass -->
-                <circle r="22" fill="#cdf4ff" fill-opacity=".08" stroke="url(#error-ring)" stroke-width="3"/>
-                <circle r="19.6" fill="none" stroke="#e8fbff" stroke-opacity=".25" stroke-width=".8"/>
-                <path d="M-14 -9 A17 17 0 0 1 -2 -16.5" fill="none" stroke="#ffffff" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round"/>
-                <!-- its cord, falling away -->
-                <path d="M15.5 15.5 C24 30 22 44 34 60" fill="none" stroke="#bfe9f4" stroke-opacity=".4" stroke-width=".9"/>
-                <!-- the glint where the light catches the rim -->
-                <g class="error__star" transform="translate(-15.6 -15.6)">
-                  <path d="M0 -15 L1.3 -1.3 L15 0 L1.3 1.3 L0 15 L-1.3 1.3 L-15 0 L-1.3 -1.3 Z" fill="#ffffff" fill-opacity=".9"/>
-                  <circle r="2.6" fill="#ffffff"/>
-                </g>
-              </svg>
-            </div>
-          </div>
-          <!-- a breath of cold light each time the moment skips -->
-          <i class="error__skip"></i>
-          <!-- now and then, the monocle winks from the moon's edge -->
-          <i class="error__wink"></i>
-        </template>
+  <div ref="rootRef" class="error" :class="[`is-from-${body}`, {'is-late': late, 'is-theft': theft, 'is-back': back}]" aria-hidden="true">
+    <template v-if="layer === 'front'">
+      <!-- the glint: a lens flare that crosses the body like a hand -->
+      <div class="er-pass">
+        <i class="er-streak"></i>
+        <i class="er-flare"></i>
+        <i class="er-ghost"></i>
       </div>
-    </div>
+      <!-- where the body was: its light, staying a moment after it has gone -->
+      <div ref="followRef" class="er-body">
+        <i class="er-after"></i>
+      </div>
+      <!-- the skip: one cold breath of light as time is wound back -->
+      <i class="er-skip"></i>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
-import moon from '../assets/moon/crimson-moon.webp';
-import {useMoonAnchor} from './sigKit';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {reducedMotion, useMoonAnchor} from './sigKit';
 
 defineOptions({name: 'SignatureError'});
-defineProps<{layer: 'back' | 'front'}>();
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
 
-/* everything here sits on the moon, and follows it as it rises and as the page scrolls */
+/* what was up when the hand passed: the sun (high or low), the moon, or nothing to see */
+const body = computed(() => (props.from === 'sun' || props.from === 'dusk' || props.from === 'hidden' ? props.from : 'moon'));
+
+const rootRef = ref<HTMLElement | null>(null);
 const followRef = ref<HTMLElement | null>(null);
-const riseRef = ref<HTMLElement | null>(null);
-useMoonAnchor(followRef, riseRef);
+useMoonAnchor(followRef, ref(null));
+
+/*
+ * Keyed to the scene's own theft, not to this component's mount (it is loaded on demand,
+ * so it can arrive a moment before or after the theft starts): one short-lived observer on
+ * the scene's class, gone as soon as the body is back (or after a few seconds, on a page
+ * load where nothing is stolen). When the body vanishes its light lingers (is-theft); when
+ * it comes back, time skips (is-back): the scene's fog jumps back in three short jerks.
+ */
+const late = ref(false);
+const theft = ref(false);
+const back = ref(false);
+const timers: number[] = [];
+let watch: MutationObserver | null = null;
+
+function rewind(night: HTMLElement) {
+  const drifts = night.querySelectorAll<HTMLElement>('.night__fog-drift, .night__clouds-drift');
+  const anims = Array.from(drifts).flatMap(el => el.getAnimations());
+  // about 2.5 s of drift each time, a tenth of a second apart
+  [0, 110, 230].forEach(at =>
+    timers.push(window.setTimeout(() => {
+      for (const a of anims) {
+        if (a.playState === 'running' && typeof a.currentTime === 'number') a.currentTime = Math.max(0, a.currentTime - 2500);
+      }
+    }, at)),
+  );
+}
+
+function stop() {
+  watch?.disconnect();
+  watch = null;
+}
+
+onMounted(() => {
+  if (props.layer !== 'front' || reducedMotion()) return;
+  const night = rootRef.value?.closest<HTMLElement>('.night');
+  if (!night) return;
+  // arrived after the hand had already passed: the glint plays as the body is put back instead
+  late.value = night.classList.contains('is-stolen');
+  const check = () => {
+    const stolen = night.classList.contains('is-stolen');
+    if (stolen && !theft.value) theft.value = true;
+    if (!stolen && theft.value && !back.value) {
+      back.value = true;
+      rewind(night);
+      stop();
+    }
+  };
+  check();
+  watch = new MutationObserver(check);
+  watch.observe(night, {attributes: true, attributeFilter: ['class']});
+  timers.push(window.setTimeout(stop, 3000));
+});
+onUnmounted(() => {
+  stop();
+  timers.forEach(t => window.clearTimeout(t));
+});
 </script>
 
 <style scoped>
@@ -85,251 +100,161 @@ useMoonAnchor(followRef, riseRef);
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* where the moon goes: to the right, a little up (fractions of the moon's diameter) */
-  --dx: 13%;
-  --dy: -3%;
-  /* the sky behind the moon: the crimson night's glow, deepening outward */
-  --sky-in: rgb(62, 24, 30);
-  --sky-out: rgb(46, 21, 27);
+  /* the body's centre and size: the moon's box, or the sun's (high, or low on the horizon) */
+  --b-r: var(--moon-r, 200px);
+  --b-dy: 0px;
 }
 
-.error__moon {
+.error.is-from-sun,
+.error.is-from-dusk {
+  --b-r: calc(var(--moon-r, 200px) * .8);
+}
+
+.error.is-from-dusk {
+  --b-dy: calc(var(--moon-r, 200px) * .736);
+}
+
+/* ---- the glint: a bright point, its long thin streak and one faint lens ghost, crossing the body ---- */
+.er-pass {
+  position: absolute;
+  left: var(--moon-x, 72%);
+  top: calc(var(--moon-y, 48%) + var(--b-dy) - var(--b-r) * .55);
+  width: 0;
+  height: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: er-pass .95s cubic-bezier(.45, 0, .35, 1) .05s;
+}
+
+.is-late .er-pass {
+  animation: none;
+}
+
+.is-late.is-back .er-pass {
+  animation: er-pass .95s cubic-bezier(.45, 0, .35, 1);
+}
+
+@keyframes er-pass {
+  0% { opacity: 0; transform: translate3d(calc(var(--b-r) * -1.3), calc(var(--b-r) * .25), 0); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(calc(var(--b-r) * 1.3), calc(var(--b-r) * .3), 0); }
+}
+
+.er-flare {
+  position: absolute;
+  left: calc(var(--moon-r, 200px) * -.09);
+  top: calc(var(--moon-r, 200px) * -.09);
+  width: calc(var(--moon-r, 200px) * .18);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fff 0 12%, rgba(214, 246, 255, .7) 26%, rgba(111, 217, 242, .18) 60%, transparent);
+}
+
+/* the anamorphic streak a lens throws across a bright point */
+.er-streak {
+  position: absolute;
+  left: calc(var(--moon-r, 200px) * -.7);
+  width: calc(var(--moon-r, 200px) * 1.4);
+  top: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(170, 236, 252, .4) 30%, rgba(240, 252, 255, .9) 50%, rgba(170, 236, 252, .4) 70%, transparent);
+}
+
+/* a faint ghost of the lens, off along the line through the frame, as a camera sees it */
+.er-ghost {
+  position: absolute;
+  left: calc(var(--moon-r, 200px) * -.5);
+  top: calc(var(--moon-r, 200px) * .24);
+  width: calc(var(--moon-r, 200px) * .2);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, transparent 55%, rgba(150, 230, 250, .22) 80%, transparent);
+}
+
+/* ---- the afterimage: the body's light, left behind for a moment (only when it was stolen) ---- */
+.er-body {
   position: absolute;
   left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
   top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
   width: calc(var(--moon-r, 200px) * 2);
   aspect-ratio: 1;
+  will-change: transform;
 }
 
-.error__rise {
+.er-after {
   position: absolute;
-  inset: 0;
-  transform: scale(var(--moon-scale, 1));
-}
-
-/* ---- back: the patch of sky where the moon was ---- */
-.error__patch {
-  position: absolute;
-  inset: -16%;
+  left: calc(50% - var(--b-r) * 1.25);
+  top: calc(50% + var(--b-dy) - var(--b-r) * 1.25);
+  width: calc(var(--b-r) * 2.5);
+  aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle closest-side, var(--sky-in) 0, var(--sky-in) 70%, var(--sky-out) 80%, transparent 100%);
-  /* the moon is gone (its afterimage still faintly there), then the gap is simply sky */
-  animation: error-gone 2.2s linear 1.24s backwards;
-}
-
-@keyframes error-gone {
-  0% { opacity: 0; }
-  4% { opacity: .9; }
-  52% { opacity: .9; }
-  100% { opacity: 1; }
-}
-
-/* the afterimage: a cold ring where the limb was, fading */
-.error__ghost {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px rgba(160, 232, 250, .32), 0 0 calc(var(--moon-r, 200px) * .12) rgba(111, 217, 242, .14);
-  opacity: 0;
-  animation: error-ghost 2.4s ease-out 1.24s;
-}
-
-@keyframes error-ghost {
-  0% { opacity: 0; }
-  6% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* ---- back: the moon in its new place ---- */
-.error__stolen {
-  position: absolute;
-  inset: 0;
-  transform: translate(var(--dx), var(--dy));
-}
-
-/* it comes back a beat late and a step too far, then is wound back into place in jerks */
-.error__stolen-step {
-  position: absolute;
-  inset: 0;
-  animation: error-back 1s linear 2.3s backwards;
-}
-
-@keyframes error-back {
-  0% { opacity: 0; transform: translate(9%, -2%); }
-  1% { opacity: 1; transform: translate(9%, -2%); }
-  22% { transform: translate(9%, -2%); }
-  23% { transform: translate(5%, -1%); }
-  44% { transform: translate(5%, -1%); }
-  45% { transform: translate(7%, -1.6%); }
-  58% { transform: translate(7%, -1.6%); }
-  59% { transform: translate(2%, -.4%); }
-  78% { transform: translate(2%, -.4%); }
-  79% { transform: none; }
-  100% { transform: none; }
-}
-
-/* the hero's moon, layer for layer (HeroNightScene .night__moon-*) */
-.error__glow {
-  position: absolute;
-  inset: -75%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(179, 32, 43, .46) 0%, rgba(179, 32, 43, .16) 30%, transparent 60%);
-}
-
-.error__corona {
-  position: absolute;
-  inset: -50%;
-  border-radius: 50%;
-  background: radial-gradient(circle closest-side,
-      transparent 48%,
-      color-mix(in oklab, var(--acc) 30%, transparent) 51%,
-      color-mix(in oklab, var(--acc) 11%, transparent) 62%,
-      transparent 86%);
-}
-
-.error__disc {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  filter: saturate(1.08) brightness(.96) var(--moon-filter, );
-}
-
-.error__rim {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 62%, transparent 58%, color-mix(in oklab, var(--acc) 30%, transparent) 71%, transparent 72%),
-    radial-gradient(circle at 34% 28%, color-mix(in oklab, var(--acc) 14%, transparent), transparent 55%);
-  box-shadow:
-    0 0 0 1px color-mix(in oklab, var(--acc) 22%, transparent),
-    0 0 calc(var(--moon-r, 200px) * .35) color-mix(in oklab, var(--acc) 26%, transparent);
+  /* the moon's crimson, gone cold at the rim like an image burnt on the eye */
+  background: radial-gradient(closest-side, rgba(200, 60, 70, .26) 0, rgba(190, 70, 80, .2) 70%, rgba(130, 225, 245, .2) 78%, rgba(111, 217, 242, .06) 86%, transparent);
   mix-blend-mode: screen;
-}
-
-/* ---- front: the glint passing across the moon, through the band above the drawn card ---- */
-.error__pass {
-  position: absolute;
-  inset: 0;
   opacity: 0;
-  animation: error-pass .9s cubic-bezier(.45, 0, .35, 1) .85s;
 }
 
-@keyframes error-pass {
-  0% { opacity: 0; transform: translate(-48%, 6%); }
-  18% { opacity: 1; }
-  50% { transform: translate(0, -1%); }
-  78% { opacity: 1; }
-  100% { opacity: 0; transform: translate(50%, 7%); }
+.is-from-sun .er-after,
+.is-from-dusk .er-after {
+  background: radial-gradient(closest-side, rgba(255, 220, 150, .3) 0, rgba(255, 200, 120, .22) 70%, rgba(150, 230, 250, .2) 78%, rgba(111, 217, 242, .06) 86%, transparent);
 }
 
-.error__glint {
-  position: absolute;
-  left: 50%;
-  top: 13%;
-  width: 46%;
-  aspect-ratio: 1;
-  translate: -50% -50%;
+/* behind cloud there was nothing to see: only the faintest trace */
+.is-from-hidden .er-after {
+  background: radial-gradient(closest-side, rgba(130, 225, 245, .1) 70%, transparent);
 }
 
-/* the flare's long thin streak, as light catches a lens */
-.error__streak {
-  position: absolute;
-  left: -130%;
-  right: -130%;
-  top: calc(50% - 1px);
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(170, 236, 252, .35) 35%, rgba(240, 252, 255, .85) 50%, rgba(170, 236, 252, .35) 65%, transparent);
+.is-theft .er-after {
+  animation: er-after 2.4s ease-out;
 }
 
-.error__lens {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.error__star {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: error-star .9s ease-in-out .85s;
-}
-
-@keyframes error-star {
-  0%, 100% { transform: translate(-15.6px, -15.6px) scale(.5) rotate(0deg); }
-  45% { transform: translate(-15.6px, -15.6px) scale(1.25) rotate(40deg); }
-}
-
-.error__skip {
-  position: absolute;
-  inset: -110%;
-  background: radial-gradient(closest-side, rgba(150, 225, 245, .2), rgba(111, 217, 242, .06) 60%, transparent);
-  opacity: 0;
-  animation: error-skip 1s steps(1, end) 2.3s;
-}
-
-/* two short cold beats, where time is wound back */
-@keyframes error-skip {
-  0% { opacity: .6; }
-  12% { opacity: 0; }
-  45% { opacity: .35; }
-  52% { opacity: 0; }
+@keyframes er-after {
+  0% { opacity: 1; }
   100% { opacity: 0; }
 }
 
-.error__wink {
+/* ---- the skip: two short cold beats as time is wound back ---- */
+.er-skip {
   position: absolute;
-  left: calc(50% + var(--dx) - 30%);
-  top: calc(50% + var(--dy) - 41%);
-  width: 9%;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  background:
-    linear-gradient(90deg, transparent, rgba(240, 252, 255, .9) 50%, transparent) center / 100% 7% no-repeat,
-    linear-gradient(0deg, transparent, rgba(240, 252, 255, .9) 50%, transparent) center / 7% 100% no-repeat,
-    radial-gradient(circle, rgba(255, 255, 255, .95) 0 9%, rgba(160, 232, 250, .3) 22%, transparent 60%);
+  inset: 0 0 auto;
+  height: var(--scene-h, 100%);
+  background: radial-gradient(70% 70% at var(--moon-x, 72%) var(--moon-y, 48%), rgba(150, 225, 245, .16), rgba(111, 217, 242, .05) 60%, transparent);
+  mix-blend-mode: screen;
   opacity: 0;
-  animation: error-wink 13s ease-in-out 9s infinite;
 }
 
-@keyframes error-wink {
-  0%, 5%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); }
-  2.5% { opacity: .85; transform: scale(1) rotate(45deg); }
+.is-back .er-skip {
+  animation: er-skip .7s steps(1, end);
 }
 
-/* ---- light theme: the patch is the paper sky ---- */
-:root[data-theme="parchment"] .error {
-  --sky-in: rgb(228, 216, 216);
-  --sky-out: rgb(232, 224, 222);
+@keyframes er-skip {
+  0% { opacity: 1; }
+  18% { opacity: 0; }
+  34% { opacity: .6; }
+  48% { opacity: 0; }
+  100% { opacity: 0; }
 }
 
-:root[data-theme="parchment"] .error__glow {
-  background: radial-gradient(circle, rgba(179, 32, 43, .26) 0%, rgba(179, 32, 43, .08) 30%, transparent 60%);
-}
-
-:root[data-theme="parchment"] .error__ghost {
-  box-shadow: inset 0 0 0 1.5px rgba(40, 120, 140, .3);
-}
-
-:root[data-theme="parchment"] .error__lens,
-:root[data-theme="parchment"] .error__wink {
+/* light theme: the glint and the skip in a darker cyan, multiplied into the paper */
+:root[data-theme="parchment"] .er-pass {
   filter: drop-shadow(0 0 1px rgba(20, 90, 110, .6));
 }
 
-:root[data-theme="parchment"] .error__skip {
-  background: radial-gradient(closest-side, rgba(90, 170, 195, .14), transparent);
+:root[data-theme="parchment"] .er-after,
+:root[data-theme="parchment"] .er-skip {
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="parchment"] .er-skip {
+  background: radial-gradient(70% 70% at var(--moon-x, 72%) var(--moon-y, 48%), rgba(90, 170, 195, .14), transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .error__patch,
-  .error__ghost,
-  .error__stolen-step,
-  .error__pass,
-  .error__star,
-  .error__skip,
-  .error__wink {
-    animation: none;
+  .er-pass,
+  .er-after,
+  .er-skip {
+    animation: none !important;
   }
 }
 </style>

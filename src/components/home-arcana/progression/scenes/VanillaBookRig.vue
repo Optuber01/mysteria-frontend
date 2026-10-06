@@ -11,7 +11,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type * as THREE from 'three';
 import bookAtlasUrl from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_1.21.8.png';
 import { hexToRgb, loadImage, mixRgb, rgbCss } from '../art';
-import { isNearby, whenSettled } from '../prewarm';
+import { isNearby, whenSettled, yieldToIdle } from '../prewarm';
 import type { Rgb } from '../art';
 
 export type BookEntry = { key: string; name: string; role: string; icon: string | null };
@@ -823,6 +823,8 @@ async function initialize() {
     console.warn('The formula book could not be loaded.', error);
     return;
   }
+  // each heavy step in its own idle slice, never one long block (see prewarm.ts)
+  await yieldToIdle();
   if (disposed || !canvasRef.value || !hostRef.value) return;
   three = loaded.module;
 
@@ -845,7 +847,9 @@ async function initialize() {
   resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(hostRef.value);
   resize();
+  await yieldToIdle();
   await rebuildBook();
+  await yieldToIdle();
   primeGpu();
 }
 
@@ -876,9 +880,7 @@ onMounted(() => {
   intersectionObserver.observe(hostRef.value);
   if (props.warm) void loadAssets().catch(() => undefined);
   // Built ahead of the first scroll into the story (see prewarm.ts).
-  cancelPrewarm = whenSettled(() => {
-    if (isNearby(hostRef.value)) void initialize();
-  });
+  cancelPrewarm = whenSettled(() => (isNearby(hostRef.value) ? initialize() : undefined));
 });
 
 watch(() => props.warm, (warm) => {

@@ -1,5 +1,5 @@
 <template>
-  <section ref="heroRef" class="arc-hero" :style="sceneVars" aria-labelledby="arc-hero-title">
+  <section ref="heroRef" class="arc-hero" :class="{'is-viewing': viewing}" :style="sceneVars" aria-labelledby="arc-hero-title" @keydown.esc="viewing = false">
     <HeroNightScene :risen="risen"/>
 
     <div class="arc-hero__grid">
@@ -144,6 +144,36 @@
       </div>
     </div>
 
+    <!--
+      Two quiet controls over the scene: look at the landscape on its own (the copy and the
+      deck fade away until it is pressed again), and calm the page's effects (no weather,
+      no signature moments; remembered).
+    -->
+    <div class="arc-hero__view">
+      <button
+          type="button"
+          class="arc-hero__view-btn"
+          :aria-pressed="viewing"
+          :title="viewing ? t('home.arcana.hero.viewBack') : t('home.arcana.hero.viewScene')"
+          :aria-label="viewing ? t('home.arcana.hero.viewBack') : t('home.arcana.hero.viewScene')"
+          @click="viewing = !viewing"
+      >
+        <i :class="viewing ? 'fa-solid fa-xmark' : 'fa-solid fa-mountain-sun'" aria-hidden="true"></i>
+        <span class="arc-hero__view-label">{{ viewing ? t('home.arcana.hero.viewBack') : t('home.arcana.hero.viewScene') }}</span>
+      </button>
+      <button
+          type="button"
+          class="arc-hero__view-btn"
+          :aria-pressed="calm"
+          :title="calm ? t('home.arcana.hero.effectsOn') : t('home.arcana.hero.effectsOff')"
+          :aria-label="calm ? t('home.arcana.hero.effectsOn') : t('home.arcana.hero.effectsOff')"
+          @click="toggleEffects"
+      >
+        <i :class="calm ? 'fa-solid fa-play' : 'fa-solid fa-pause'" aria-hidden="true"></i>
+        <span class="arc-hero__view-label">{{ calm ? t('home.arcana.hero.effectsOn') : t('home.arcana.hero.effectsOff') }}</span>
+      </button>
+    </div>
+
     <p class="arc-sr" aria-live="polite">{{ announcement }}</p>
   </section>
 </template>
@@ -153,6 +183,8 @@ import {computed, nextTick, onMounted, onUnmounted, ref, shallowReactive, watch,
 import ArcanaFace from './ArcanaFace.vue';
 import ArcanaBack from './ArcanaBack.vue';
 import {stableViewportHeight} from './stableViewport';
+import {useEffects} from './useEffects';
+import {prefetchSignature} from './signatureLoader';
 import HeroNightScene from './HeroNightScene.vue';
 import {CORE_CARDS, cardById, sigilNative} from './arcana-data';
 import {ensurePathwayData, randomCard, useArcana} from './useArcana';
@@ -433,6 +465,7 @@ function flip(id: string, from: number, to: number, options: KeyframeAnimationOp
 
 const preloaded = new Map<string, Promise<void>>();
 function preload(id: string): Promise<void> {
+  prefetchSignature(id);
   let done = preloaded.get(id);
   if (!done) {
     const img = new Image();
@@ -885,6 +918,21 @@ function waitForFonts(): Promise<void> {
   return Promise.race([ready, cap]).then(() => undefined);
 }
 
+/* ---------------- the scene on its own, and the effects switch ---------------- */
+const viewing = ref(false);
+const {calm, toggle: toggleEffects} = useEffects();
+/* leaving the hero brings the page back */
+watch(viewing, on => {
+  if (!on) return;
+  const back = () => {
+    if (window.scrollY > (heroRef.value?.offsetHeight ?? 600) * 0.4) {
+      viewing.value = false;
+      window.removeEventListener('scroll', back);
+    }
+  };
+  window.addEventListener('scroll', back, {passive: true});
+});
+
 /* ---------------- sizing ---------------- */
 const px = (value: string) => parseFloat(value) || 0;
 
@@ -1001,6 +1049,86 @@ onUnmounted(() => {
   .arc-hero {
     overflow-x: clip;
     overflow-y: visible;
+  }
+}
+
+/* ---- the scene on its own: the copy and the deck fade, the scrim lifts ---- */
+.arc-hero__grid {
+  transition: opacity .7s ease;
+}
+
+.arc-hero.is-viewing .arc-hero__grid {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.arc-hero.is-viewing :deep(.night__scrim) {
+  opacity: 0;
+}
+
+:deep(.night__scrim) {
+  transition: opacity .7s ease;
+}
+
+.arc-hero__view {
+  position: absolute;
+  z-index: 3;
+  right: var(--arc-gutter);
+  top: calc(min(100%, max(600px, 100svh)) - 64px);
+  display: flex;
+  gap: 8px;
+}
+
+.arc-hero__view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border: var(--arc-bw) solid color-mix(in oklab, var(--arc-ink) 18%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--arc-bg) 55%, transparent);
+  color: var(--arc-ink);
+  font: inherit;
+  font-size: var(--arc-fs-caption);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+
+.arc-hero__view-btn:hover {
+  background: color-mix(in srgb, var(--arc-bg) 75%, transparent);
+  border-color: color-mix(in oklab, var(--acc-ink) 60%, transparent);
+}
+
+.arc-hero__view-btn:focus-visible {
+  outline: var(--arc-focus-w, 2px) solid var(--arc-ink);
+  outline-offset: 2px;
+}
+
+.arc-hero__view-btn[aria-pressed="true"] {
+  border-color: var(--acc-ink);
+}
+
+/* narrow screens: icons only (the label stays for screen readers and as a tooltip) */
+@media (max-width: 900px) {
+  .arc-hero__view {
+    top: auto;
+    bottom: 12px;
+  }
+
+  .arc-hero__view-btn {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .arc-hero__view-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 }
 

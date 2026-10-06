@@ -1,233 +1,256 @@
 <template>
   <!--
-    Black Emperor: the moon goes black and a crown of light settles on its rim, coming to
-    rest a few degrees askew and staying there, subtly wrong (order bent out of true).
-    Everything is behind the castle; there is nothing in front of it.
+    Black Emperor: whatever hangs in the sky is eclipsed. A black body slides across the sun
+    (if the sun was up) or the moon; at totality a bead of light flares on the limb and the
+    corona comes out round the black disc, its rays uneven, long and short, as a real corona
+    is; it stays there, the sky's light bent round a dark centre. A cold edge of that light
+    catches the castle. Light only: no crown is drawn.
   -->
-  <div aria-hidden="true">
+  <div class="em" :class="{'is-sun': sun}" aria-hidden="true" :style="{'--sig-city': `url(${city})`}">
     <template v-if="layer === 'back'">
-      <div ref="followRef" class="em-moon">
-        <div ref="riseRef" class="em-moon__rise">
-          <i class="em-umbra"></i>
-          <i class="em-corona"></i>
-          <div class="em-crown">
-            <svg class="em-crown__svg" viewBox="-100 -100 200 200">
-              <defs>
-                <linearGradient id="em-rim" x1="0" y1="-100" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-                  <stop offset="0" stop-color="#ffe6a6"/>
-                  <stop offset=".45" stop-color="#c9b6ff"/>
-                  <stop offset="1" stop-color="#6d74ff" stop-opacity=".25"/>
-                </linearGradient>
-                <radialGradient id="em-point" cx="0" cy="0" r="118" gradientUnits="userSpaceOnUse">
-                  <stop offset=".82" stop-color="#fff1c4"/>
-                  <stop offset=".93" stop-color="#e8c26a" stop-opacity=".85"/>
-                  <stop offset="1" stop-color="#8f86ff" stop-opacity="0"/>
-                </radialGradient>
-              </defs>
-              <!-- the rim, broken where the crown's points rise from it -->
-              <circle class="em-rim" r="100" pathLength="360" :stroke-dasharray="rimDash" stroke="url(#em-rim)"/>
-              <path v-for="p in points" :key="p.a" class="em-point" :d="p.d" fill="url(#em-point)"/>
-            </svg>
-            <span v-for="p in points" :key="p.a" class="em-glint" :style="{'--a': `${p.a}deg`, '--h': p.h, '--d': `${p.delay}s`}"><i></i></span>
-          </div>
+      <!-- on the body: a 2r box kept on the moon (it follows the moon's rise only if the moon was the one up) -->
+      <div ref="followRef" class="em__anchor">
+        <div ref="riseRef" class="em__rise">
+          <i class="em__rays em__rays--long"></i>
+          <i class="em__rays"></i>
+          <i class="em__corona"></i>
+          <i class="em__umbra"></i>
+          <i class="em__bead"></i>
         </div>
       </div>
     </template>
+    <i v-else class="em__rim"></i>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, ref} from 'vue';
+import city from '../assets/moon/backlund-skyline.webp';
 import {useMoonAnchor} from './sigKit';
 
-defineProps<{layer: 'back' | 'front'}>();
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
+
+/* the sun was up: eclipse it where it hangs (the moon comes up under the disc as the sun goes) */
+const sun = computed(() => props.from === 'sun');
 
 const followRef = ref<HTMLElement | null>(null);
 const riseRef = ref<HTMLElement | null>(null);
-useMoonAnchor(followRef, riseRef);
-
-/*
- * Nine points on the upper rim (degrees from the top, clockwise), tall and short in turn
- * like a crown's tines; heights in moon radii above the rim. The fan of cards hides
- * anything much beyond 1.12 r on top, so the points stay short and bright.
- */
-const R = 100;
-const TINES = [
-  {a: -96, h: .11}, {a: -72, h: .07}, {a: -48, h: .15}, {a: -24, h: .08}, {a: 0, h: .2},
-  {a: 24, h: .08}, {a: 48, h: .15}, {a: 72, h: .07}, {a: 96, h: .11},
-];
-const polar = (deg: number, r: number) => {
-  const t = (deg * Math.PI) / 180;
-  return `${(r * Math.sin(t)).toFixed(2)} ${(-r * Math.cos(t)).toFixed(2)}`;
-};
-const points = TINES.map(({a, h}, i) => {
-  const w = 1.3 + h * 8; // half-width of the base, in degrees
-  const tip = R * (1 + h);
-  const d = `M${polar(a - w, R - 1.5)} Q${polar(a - w * .12, R + h * 40)} ${polar(a, tip)} Q${polar(a + w * .12, R + h * 40)} ${polar(a + w, R - 1.5)} Z`;
-  return {a, h: 1 + h, d, delay: (i * 0.73) % 3};
-});
-/* the rim's dashes: gaps under each tine (pathLength 360 runs clockwise from 3 o'clock) */
-const rimDash = (() => {
-  const gaps = TINES.map(t => ((t.a - 90 + 360) % 360)).sort((x, y) => x - y);
-  const parts: number[] = [];
-  let at = 0;
-  for (const g of gaps) {
-    parts.push(Math.max(0, g - 2.5 - at), 5);
-    at = g + 2.5;
-  }
-  parts.push(360 - at, 0);
-  return parts.join(' ');
-})();
+/* a sun stays put while the moon rises behind it, so only the moon's own rise is followed */
+const noRise = ref<HTMLElement | null>(null);
+useMoonAnchor(followRef, sun.value ? noRise : riseRef);
 </script>
 
 <style scoped>
-/* ---- the moon box: 2r square on the moon, kept in step with it ---- */
-.em-moon {
+.em {
+  /* the corona's light: cold pearl and indigo round the moon, white-gold round the sun */
+  --c1: rgba(236, 232, 255, .9);
+  --c2: rgba(160, 160, 255, .42);
+  --c3: rgba(110, 110, 230, .14);
+  --ray: rgba(205, 205, 255, .62);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.em.is-sun {
+  --c1: rgba(255, 250, 230, .95);
+  --c2: rgba(255, 220, 150, .5);
+  --c3: rgba(255, 190, 110, .16);
+  --ray: rgba(255, 236, 190, .66);
+}
+
+.em__anchor {
   position: absolute;
   left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
   top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
   width: calc(var(--moon-r, 200px) * 2);
-  height: calc(var(--moon-r, 200px) * 2);
-  will-change: transform;
+  aspect-ratio: 1;
 }
 
-.em-moon__rise {
+.em__rise {
   position: absolute;
   inset: 0;
+  transform: scale(var(--moon-scale, 1));
 }
 
-/* The eclipse: a black body slides over the grey moon and covers it. */
-.em-umbra {
+/* the eclipsing body: a black disc sliding over from the upper left */
+.em__umbra {
   position: absolute;
-  inset: -.6%;
+  inset: -1.5%;
   border-radius: 50%;
-  background: radial-gradient(circle, #040308 0%, #060510 70%, #0a0820 92%, #16143c 100%);
-  opacity: .96;
-  animation: em-eclipse 1.8s cubic-bezier(.33, .08, .22, 1) .7s both;
+  background: radial-gradient(circle, #030208 0%, #05040c 72%, #0b0a1c 94%, #15153a 100%);
+  animation: em-eclipse 1.9s cubic-bezier(.33, .08, .22, 1) .5s both;
 }
 
-@keyframes em-eclipse {
-  from { transform: translate3d(-62%, -34%, 0); opacity: 0; }
-  30% { opacity: .9; }
-  to { transform: none; opacity: .96; }
+/* on the sun (which is smaller) it closes in to the sun's size and grows as the moon comes up under it */
+.em.is-sun .em__umbra {
+  animation: em-eclipse-sun 3.6s cubic-bezier(.33, .08, .22, 1) .3s both;
 }
 
-/* totality: a thin indigo-gold corona breathes round the black disc */
-.em-corona {
+/* the inner corona: a bright ring hugging the limb, fading out into the sky */
+.em__corona {
   position: absolute;
-  inset: -16%;
+  inset: -34%;
   border-radius: 50%;
   background: radial-gradient(circle closest-side,
-      transparent 83%,
-      rgba(255, 226, 150, .5) 85.6%,
-      rgba(150, 140, 255, .26) 88%,
-      rgba(110, 110, 255, .1) 93%,
+      transparent 70%,
+      var(--c1) 74.5%,
+      var(--c2) 78%,
+      var(--c3) 87%,
       transparent 100%);
-  animation: em-corona-in 1.4s ease 2.2s both, em-breathe 9s ease-in-out 3.6s infinite;
+  animation: em-corona 1.6s ease 2.1s both;
 }
 
-@keyframes em-corona-in {
-  from { opacity: 0; transform: scale(.96); }
-}
-
-@keyframes em-breathe {
-  50% { opacity: .72; }
-}
-
-/* the crown settles onto the rim from above, coming to rest a few degrees askew */
-.em-crown {
+/*
+ * The outer corona: streamers of light, uneven in angle, width and strength (one conic),
+ * cut off at two different lengths (two layers), so some reach far and most stay short.
+ */
+.em__rays {
   position: absolute;
-  inset: 0;
-  transform: rotate(6deg);
-  animation: em-crown 1.3s cubic-bezier(.2, .9, .3, 1.08) 2.3s both;
+  inset: -90%;
+  border-radius: 50%;
+  background: conic-gradient(from 8deg,
+      transparent 0deg, var(--ray) 6deg, transparent 13deg,
+      transparent 31deg, var(--ray) 35deg, transparent 38deg,
+      transparent 52deg, var(--ray) 61deg, transparent 72deg,
+      transparent 96deg, var(--ray) 100deg, transparent 103deg,
+      transparent 128deg, var(--ray) 137deg, transparent 141deg,
+      transparent 167deg, var(--ray) 176deg, transparent 189deg,
+      transparent 214deg, var(--ray) 218deg, transparent 222deg,
+      transparent 241deg, var(--ray) 250deg, transparent 263deg,
+      transparent 287deg, var(--ray) 291deg, transparent 295deg,
+      transparent 318deg, var(--ray) 327deg, transparent 338deg,
+      transparent 360deg);
+  -webkit-mask-image: radial-gradient(circle closest-side, transparent 30%, #000 34%, rgba(0, 0, 0, .45) 46%, transparent 62%);
+  mask-image: radial-gradient(circle closest-side, transparent 30%, #000 34%, rgba(0, 0, 0, .45) 46%, transparent 62%);
+  opacity: .95;
+  animation: em-rays 2.2s ease 2.3s both;
 }
 
-@keyframes em-crown {
-  from { opacity: 0; transform: translate3d(0, -10%, 0) scale(1.05) rotate(0deg); }
-  55% { opacity: 1; }
-  to { opacity: 1; transform: rotate(6deg); }
+/* the long streamers: fewer, fainter, reaching two radii out */
+.em__rays--long {
+  inset: -230%;
+  background: conic-gradient(from -14deg,
+      transparent 0deg, var(--ray) 5deg, transparent 10deg,
+      transparent 74deg, var(--ray) 80deg, transparent 88deg,
+      transparent 150deg, var(--ray) 154deg, transparent 158deg,
+      transparent 232deg, var(--ray) 238deg, transparent 247deg,
+      transparent 300deg, var(--ray) 304deg, transparent 309deg,
+      transparent 360deg);
+  -webkit-mask-image: radial-gradient(circle closest-side, transparent 17%, #000 18.5%, rgba(0, 0, 0, .5) 34%, transparent 64%);
+  mask-image: radial-gradient(circle closest-side, transparent 17%, #000 18.5%, rgba(0, 0, 0, .5) 34%, transparent 64%);
+  opacity: .8;
+  animation-delay: 2.6s;
 }
 
-.em-crown__svg {
+/* the diamond ring: the last bead of light on the limb flares as totality comes, then goes */
+.em__bead {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.em-rim {
-  fill: none;
-  stroke-width: 1.6;
-  vector-effect: non-scaling-stroke;
-}
-
-.em-point {
-  filter: drop-shadow(0 0 2px rgba(255, 214, 140, .8));
-}
-
-/* points of light at the tines' tips */
-.em-glint {
-  position: absolute;
-  inset: 0;
-  transform: rotate(var(--a));
-}
-
-.em-glint i {
-  position: absolute;
-  left: 50%;
-  top: calc(50% - var(--h) * 50%);
-  width: calc(var(--moon-r, 200px) * .1);
+  left: 82%;
+  top: 14%;
+  width: 36%;
   aspect-ratio: 1;
   translate: -50% -50%;
   border-radius: 50%;
-  background: radial-gradient(circle, #fffaf0 0 10%, rgba(255, 220, 150, .75) 22%, rgba(170, 160, 255, .2) 45%, transparent 68%);
-  animation: em-glint 5.5s ease-in-out calc(3.6s + var(--d)) infinite;
+  background: radial-gradient(circle, #fff 0 6%, var(--c1) 12%, var(--c2) 26%, transparent 62%);
+  opacity: 0;
+  animation: em-bead 1.4s ease-out 1.7s both;
 }
 
-@keyframes em-glint {
-  50% { opacity: .35; }
+@keyframes em-eclipse {
+  from { opacity: 0; transform: translate3d(-58%, -36%, 0); }
+  25% { opacity: .95; }
+  to { opacity: 1; transform: none; }
 }
 
-/* ---- light theme: an ink eclipse on paper, never a black hole ---- */
-:root[data-theme="parchment"] .em-umbra {
+@keyframes em-eclipse-sun {
+  0% { opacity: 0; transform: translate3d(-50%, -32%, 0) scale(.8); }
+  12% { opacity: .95; }
+  42% { opacity: 1; transform: scale(.8); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes em-corona {
+  from { opacity: 0; transform: scale(.94); }
+}
+
+@keyframes em-rays {
+  from { opacity: 0; transform: rotate(-4deg) scale(.9); }
+}
+
+@keyframes em-bead {
+  0% { opacity: 0; transform: scale(.4); }
+  25% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.7); }
+}
+
+/* ---- in front: a cold edge of the corona's light along the roofs, cut to the skyline ---- */
+.em__rim {
+  --k: calc(var(--city-h, 600px) * .004);
+  position: absolute;
+  left: var(--city-left, 0);
+  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px));
+  height: var(--city-h, 600px);
+  aspect-ratio: 16 / 9;
+  background: radial-gradient(circle at calc(var(--moon-x, 72%) - var(--city-left, 0px)) calc(var(--moon-y, 48%) - var(--city-bottom, 100%) + var(--city-h, 600px)),
+      var(--c1) 0, var(--c2) calc(var(--moon-r, 200px) * 1.8), transparent calc(var(--moon-r, 200px) * 4));
+  -webkit-mask: var(--sig-city) 0 0 / 100% 100% no-repeat, var(--sig-city) 0 var(--k) / 100% 100% no-repeat;
+  -webkit-mask-composite: source-out;
+  mask: var(--sig-city) 0 0 / 100% 100% no-repeat, var(--sig-city) 0 var(--k) / 100% 100% no-repeat;
+  mask-composite: subtract;
+  opacity: .55;
+  animation: em-fade 1.8s ease 2.4s both;
+}
+
+@keyframes em-fade {
+  from { opacity: 0; }
+}
+
+/* stacked: the deck covers the moon; the long streamers would only clutter the band */
+@media (max-width: 900px) {
+  .em__rays--long {
+    display: none;
+  }
+}
+
+/* ---- paper: an ink eclipse on the haze, its corona a warm brown-gold, never a black hole ---- */
+:root[data-theme="parchment"] .em {
+  --c1: rgba(150, 110, 40, .7);
+  --c2: rgba(110, 90, 160, .3);
+  --c3: rgba(110, 90, 160, .1);
+  --ray: rgba(130, 100, 60, .35);
+}
+
+:root[data-theme="parchment"] .em__umbra {
   background: radial-gradient(circle, #3b3352 0%, #4a4064 80%, #5d5378 100%);
-  opacity: .5;
+  opacity: .55;
+}
+
+:root[data-theme="parchment"] .em__umbra,
+:root[data-theme="parchment"] .em.is-sun .em__umbra {
   animation-name: em-eclipse-ink;
 }
 
 @keyframes em-eclipse-ink {
-  from { transform: translate3d(-62%, -34%, 0); opacity: 0; }
-  to { transform: none; opacity: .5; }
+  from { opacity: 0; transform: translate3d(-58%, -36%, 0); }
 }
 
-:root[data-theme="parchment"] .em-corona {
-  background: radial-gradient(circle closest-side,
-      transparent 83%,
-      rgba(170, 120, 40, .45) 85.6%,
-      rgba(90, 80, 170, .18) 89%,
-      transparent 96%);
-}
-
-:root[data-theme="parchment"] .em-point {
-  fill: #a87a22;
-  filter: none;
-}
-
-:root[data-theme="parchment"] .em-rim {
-  stroke: #8c6a2c;
-}
-
-:root[data-theme="parchment"] .em-glint i {
-  background: radial-gradient(circle, #fff5d6 0 12%, rgba(190, 140, 50, .55) 26%, transparent 62%);
+:root[data-theme="parchment"] .em__rim {
+  mix-blend-mode: multiply;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .em-umbra,
-  .em-corona,
-  .em-crown,
-  .em-glint i {
+  .em__umbra,
+  .em.is-sun .em__umbra,
+  .em__corona,
+  .em__rays,
+  .em__rim {
     animation: none;
+  }
+
+  .em__bead {
+    display: none;
   }
 }
 </style>

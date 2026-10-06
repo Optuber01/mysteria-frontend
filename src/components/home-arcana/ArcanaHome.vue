@@ -35,6 +35,7 @@ import {computed, onMounted, onUnmounted, watch} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import {sceneFor} from './pathwayScenes';
 import {isCardId} from './arcana-data';
+import {openOnPlayerPathway} from './usePlayerPathway';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import {useConceptFonts} from './useConceptFonts';
@@ -66,6 +67,13 @@ const themeStyle = computed(() => ({
   '--acc-fill': fillAccent(card.value.accent),
 }));
 
+/*
+ * The page marks <body> itself (styles that reach outside it, like the page background and
+ * the teleported drawer, key on the class). A body:has(.concept-arcana) selector did the
+ * same, but :has() on the root is re-checked on every DOM change anywhere on the page.
+ */
+document.body.classList.add('is-arcana-home');
+
 /* The header's mobile drawer is teleported to <body>, so the accent and the page's one font ride there too. */
 const DRAWER_FONT = "'Commissioner', 'Segoe UI', system-ui, sans-serif";
 document.body.style.setProperty('--drawer-font', DRAWER_FONT);
@@ -84,9 +92,13 @@ watch(() => card.value.accent, accent => {
  */
 let offscreenObserver: IntersectionObserver | null = null;
 const held = new WeakMap<Element, Element[]>();
+/** The chapters out of view right now (a loop that starts later in one is held as it starts). */
+const offscreenSections = new Set<Element>();
 function holdLoops(section: Element, offscreen: boolean) {
   held.get(section)?.forEach(el => el.classList.remove('arc-held'));
   held.delete(section);
+  if (offscreen) offscreenSections.add(section);
+  else offscreenSections.delete(section);
   if (!offscreen) return;
   const loops = new Set<Element>();
   for (const animation of section.getAnimations({subtree: true})) {
@@ -101,6 +113,10 @@ onMounted(() => {
   // A shared link can open the page with a card already drawn: /en?card=sun
   const asked = new URLSearchParams(location.search).get('card');
   if (asked && isCardId(asked)) void reveal(asked);
+  // a signed-in player opens on their own Pathway (once per session)
+  else void openOnPlayerPathway();
+  // dev only: the handover screenshot tool switches cards without a reload
+  if (import.meta.env.DEV) (window as Window & {__arcanaReveal?: (id: string) => void}).__arcanaReveal = (id: string) => void reveal(id, {crossfade: true});
   // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
   const idle = (window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number}).requestIdleCallback;
   if (idle) idle(() => void ensurePathwayData(), {timeout: 1500});
@@ -110,14 +126,34 @@ onMounted(() => {
     for (const entry of entries) holdLoops(entry.target, !entry.isIntersecting);
   }, {rootMargin: '200px 0px'});
   document.querySelectorAll('.concept-arcana > .arc-main > *').forEach(section => offscreenObserver?.observe(section));
+  /*
+   * A loop that starts after its chapter went out of view (the live count's pulse, once the
+   * server answers; a scene's weather after a draw) is held as it starts. Off screen
+   * Chrome cannot hand such a loop to the compositor: it ran on the main thread and took
+   * the whole page through paint and layerizing every frame (about 440 ms a second idle).
+   */
+  document.addEventListener('animationstart', onLoopStart, true);
 });
+
+function onLoopStart(event: AnimationEvent) {
+  const el = event.target;
+  if (!(el instanceof Element)) return;
+  const section = el.closest('.concept-arcana > .arc-main > *');
+  if (!section || !offscreenSections.has(section)) return;
+  el.classList.add('arc-held');
+  const list = held.get(section) ?? [];
+  list.push(el);
+  held.set(section, list);
+}
 
 onUnmounted(() => {
   offscreenObserver?.disconnect();
+  document.removeEventListener('animationstart', onLoopStart, true);
   document.body.style.removeProperty('--acc');
   document.body.style.removeProperty('--acc-deep');
   document.body.style.removeProperty('--acc-fill');
   document.body.style.removeProperty('--drawer-font');
+  document.body.classList.remove('is-arcana-home');
 });
 </script>
 
@@ -145,7 +181,7 @@ onUnmounted(() => {
 }
 
 .concept-arcana,
-body:has(.concept-arcana) {
+body.is-arcana-home {
   --arc-bg: #0b0b0e;
   --arc-surface: #15151b;
   --arc-line: rgba(255, 255, 255, .09);
@@ -264,7 +300,7 @@ body:has(.concept-arcana) {
  * upstream's parchment tokens are gold-tinted, so every one of them is re-pointed here.
  */
 :root[data-theme="parchment"] .concept-arcana,
-:root[data-theme="parchment"] body:has(.concept-arcana) {
+:root[data-theme="parchment"] body.is-arcana-home {
   --arc-bg: #efede8;
   --arc-surface: #f8f7f4;
   --arc-line: rgba(28, 24, 36, .13);
@@ -365,7 +401,7 @@ body:has(.concept-arcana) {
   background: color-mix(in srgb, var(--myst-bg) 95%, transparent);
 }
 
-body:has(.concept-arcana) {
+body.is-arcana-home {
   background-color: var(--arc-bg);
 }
 
@@ -393,7 +429,7 @@ body:has(.concept-arcana) {
 /* the brand mark in its own colours, crisp: no gold glow, no greyscale wash */
 .concept-arcana .header-stack .brand-mark,
 .concept-arcana .footer-brand img,
-body:has(.concept-arcana) .mobile-nav .brand-mark {
+body.is-arcana-home .mobile-nav .brand-mark {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45));
 }
 

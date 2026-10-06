@@ -3,7 +3,7 @@
     id="progression"
     ref="sectionRef"
     class="progression"
-    :class="{ 'is-lite': lite }"
+    :class="{ 'is-lite': lite || calm }"
     aria-labelledby="progression-title"
   >
     <div ref="stickyRef" class="progression__sticky" :style="{'--room-fog': roomScene.fog}">
@@ -30,7 +30,7 @@
         <i class="progression__fog progression__fog--near" />
       </div>
       <!-- ...and its weather, lighter than in the hero (none in light mode) -->
-      <SceneWeather v-if="roomScene.weather && !lite" class="progression__weather" :kind="roomScene.weather" :color="roomScene.weatherColor" :density="(roomScene.weatherDensity ?? 1) * .55" :active="visible" />
+      <SceneWeather v-if="roomScene.weather && !lite && !calm" class="progression__weather" :kind="roomScene.weather" :color="roomScene.weatherColor" :density="(roomScene.weatherDensity ?? 1) * .55" :active="visible" />
       <div class="progression__vignette" aria-hidden="true" />
       <!-- the dark closing in on the drink, with the heart's beat in it -->
       <div class="progression__dread" :class="{ 'is-lit': dreadLit }" :style="dress.dread" aria-hidden="true" data-sweep-ignore />
@@ -180,6 +180,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import SceneWeather from '../SceneWeather.vue';
 import { sceneFor } from '../pathwayScenes';
+import { useEffects } from '../useEffects';
 import FormulaBookScene from './scenes/FormulaBookScene.vue';
 import AltarBrewScene from './scenes/AltarBrewScene.vue';
 import DrinkAwakenScene from './scenes/DrinkAwakenScene.vue';
@@ -305,6 +306,8 @@ function storedLite(): string | null {
 }
 const liteChoice = storedLite();
 const lite = ref(liteChoice === '1');
+/* the visitor's own "calm" switch (useEffects) gives the room the same quiet treatment */
+const { calm } = useEffects();
 /** ?lite=0 was asked for: never switch on its own. */
 const fullForced = liteChoice === '0';
 function goLite() {
@@ -348,6 +351,7 @@ const inspectorAnchor = ref<HTMLElement | null>(null);
 const inspectorScene = ref<DetailScene | null>(null);
 let observer: IntersectionObserver | null = null;
 let nearObserver: IntersectionObserver | null = null;
+let firstFrame = 0;
 let cancelPrewarm: (() => void) | null = null;
 let stageObserver: ResizeObserver | null = null;
 let frame = 0;
@@ -651,10 +655,15 @@ onMounted(() => {
   addEventListener('scroll', update, { passive: true });
   addEventListener('resize', onResize, { passive: true });
   addEventListener('keydown', onKeydown);
-  measureSection();
-  measureStage();
+  // measured in the first frame, not mid-mount: the room is below the fold (see ArcanaOrbit)
+  firstFrame = requestAnimationFrame(() => {
+    firstFrame = 0;
+    measureSection();
+    measureStage();
+  });
 });
 onUnmounted(() => {
+  if (firstFrame) cancelAnimationFrame(firstFrame);
   cancelPrewarm?.();
   observer?.disconnect();
   nearObserver?.disconnect();

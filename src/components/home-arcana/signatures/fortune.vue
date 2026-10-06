@@ -1,340 +1,234 @@
 <template>
   <!--
-    Wheel of Fortune: a faint pearly aurora waves over the sky, and the liquid-silver ring
-    round the moon shows itself as the mercury serpent: its head closes on its own tail,
-    the ring turns once like a wheel, and the glints in the sky reshuffle on the same beat
-    (the cycle restarts). Then it turns on, very slowly.
+    Wheel of Fortune: a halo forms round whatever hangs in the sky, the real thing, a ring
+    of pale light at a fixed distance from the body with two faint mock-moons on it. It
+    brightens and its iridescent sheen turns once round the ring, like a wheel coming
+    round; then it settles under a soft aurora. No serpent, no dice, no rainbow.
   -->
-  <div aria-hidden="true">
+  <div class="fortune" :class="{'is-sun': from === 'sun'}" :style="{'--lag': lag}" aria-hidden="true">
     <template v-if="layer === 'back'">
-      <!-- the aurora: two blurred ribbons, mint through violet to silver -->
+      <!-- the aurora: two soft ribbons high over the city -->
       <div class="fo-aurora">
-        <svg class="fo-svg" viewBox="0 0 100 100">
-          <defs>
-            <linearGradient id="fo-pearl" x1="-340" y1="0" x2="300" y2="0" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#6ee7c0" stop-opacity="0"/>
-              <stop offset=".22" stop-color="#6ee7c0"/>
-              <stop offset=".48" stop-color="#a78bfa"/>
-              <stop offset=".7" stop-color="#e6ecf4"/>
-              <stop offset=".88" stop-color="#7fe8d0"/>
-              <stop offset="1" stop-color="#7fe8d0" stop-opacity="0"/>
-            </linearGradient>
-            <filter id="fo-soft" x="-20%" y="-200%" width="140%" height="500%">
-              <feGaussianBlur stdDeviation="9"/>
-            </filter>
-          </defs>
-          <path class="fo-ribbon" d="M-360 -150 C-250 -230 -150 -120 -40 -205 S170 -250 300 -160" stroke="url(#fo-pearl)" filter="url(#fo-soft)"/>
-          <path class="fo-ribbon fo-ribbon--thin" d="M-360 -140 C-250 -215 -150 -110 -40 -192 S170 -236 300 -148" stroke="url(#fo-pearl)"/>
-        </svg>
-      </div>
-
-      <!-- the serpent round the moon, kept on the moon -->
-      <div ref="followRef" class="fo-moon">
-        <div ref="riseRef" class="fo-moon__rise">
-          <svg class="fo-svg fo-ring" viewBox="-100 -100 200 200">
-            <defs>
-              <linearGradient id="fo-silver" x1="-110" y1="-110" x2="110" y2="110" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stop-color="#ffffff"/>
-                <stop offset=".3" stop-color="#b9c4d2"/>
-                <stop offset=".5" stop-color="#f4f8ff"/>
-                <stop offset=".72" stop-color="#8e9aac"/>
-                <stop offset="1" stop-color="#e8eef6"/>
-              </linearGradient>
-            </defs>
-            <circle class="fo-ring__plain" r="106"/>
-          </svg>
-          <div class="fo-wheel">
-            <svg class="fo-svg" viewBox="-100 -100 200 200">
-              <path class="fo-body" :d="BODY" fill="url(#fo-silver)"/>
-              <path class="fo-scales" :d="SPINE"/>
-              <g :transform="HEAD_AT">
-                <g class="fo-head">
-                  <path class="fo-jaw fo-jaw--low" d="M-2 1 C3 5.6 9 5.4 13.4 2.2 L3 .6 Z" fill="url(#fo-silver)"/>
-                  <path d="M-4 -4.8 C1 -7 9 -6.8 14.4 -2.6 C15.8 -1.4 16 -.2 15 .4 L2 .6 C-1 2.6 -4 3.6 -6 3.4 C-6.4 .4 -5.8 -3 -4 -4.8 Z" fill="url(#fo-silver)"/>
-                  <path class="fo-ridge" d="M-2 -3.6 C3 -5.2 8 -5 12 -2.6 M2 .6 L14 .3 M-1 -1.8 L4 -2.4"/>
-                </g>
-              </g>
-            </svg>
-          </div>
+        <div class="fo-aurora__drift">
+          <i class="fo-ribbon fo-ribbon--a"></i>
+          <i class="fo-ribbon fo-ribbon--b"></i>
         </div>
       </div>
 
-      <!-- glints of luck: one set gives way to another as the wheel completes its turn -->
-      <div class="fo-stage">
-        <i v-for="(g, i) in GLINTS" :key="i" class="fo-glint" :class="g.set" :style="{left: `${g.x}%`, top: `${g.y}%`}"></i>
+      <!-- the halo, centred on the body (it follows the moon as the page scrolls) -->
+      <div ref="followRef" class="fo-body">
+        <i class="fo-halo"></i>
+        <div class="fo-sheen">
+          <i class="fo-sheen__turn"></i>
+        </div>
+        <i class="fo-dog fo-dog--l"></i>
+        <i class="fo-dog fo-dog--r"></i>
       </div>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
-import {seeded, useMoonAnchor} from './sigKit';
+import {computed, ref} from 'vue';
+import {useMoonAnchor} from './sigKit';
 
-defineProps<{layer: 'back' | 'front'}>();
+defineOptions({name: 'SignatureFortune'});
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
+
+/* a halo forms on whatever is up: at once round the moon or the sun, later if it is behind cloud */
+const lag = computed(() => (props.from === 'hidden' ? '.9s' : '0s'));
 
 const followRef = ref<HTMLElement | null>(null);
-const riseRef = ref<HTMLElement | null>(null);
-useMoonAnchor(followRef, riseRef);
-
-/*
- * The serpent, in moon units (100 = r), on a ring just off the limb. Angles are clockwise
- * from the top. Its head sits at -48deg (upper left, where the fan leaves the limb clear) facing clockwise; the body runs back round the
- * moon, thinning, and the tail's tip ends in the jaws.
- */
-const RING = 106;
-const HEAD = -48;
-const f1 = (n: number) => n.toFixed(1);
-const at = (deg: number, r: number) => {
-  const t = (deg * Math.PI) / 180;
-  return [r * Math.sin(t), -r * Math.cos(t)];
-};
-const N = 160;
-const outer: string[] = [];
-const inner: string[] = [];
-const spine: string[] = [];
-for (let i = 0; i <= N; i++) {
-  const t = i / N;
-  const a = HEAD - 3 - t * 354;
-  const hw = 2.9 * Math.pow(1 - t, .65) + .35;
-  const [ox, oy] = at(a, RING + hw);
-  const [ix, iy] = at(a, RING - hw);
-  outer.push(`${f1(ox)} ${f1(oy)}`);
-  inner.unshift(`${f1(ix)} ${f1(iy)}`);
-  if (t < .9) spine.push(`${f1(at(a, RING)[0])} ${f1(at(a, RING)[1])}`);
-}
-const BODY = `M${outer.join(' L')} L${inner.join(' L')} Z`;
-const SPINE = `M${spine.join(' L')}`;
-const [hx, hy] = at(HEAD - 3, RING);
-/* the head drawn facing +x; turned to the ring's clockwise tangent at its angle */
-const HEAD_AT = `translate(${f1(hx)} ${f1(hy)}) rotate(${HEAD - 1}) scale(1.45)`;
-
-/* two sets of glints in open sky (moon units), swapped as the wheel completes its turn */
-const rnd = seeded(23);
-const spot = () => {
-  for (;;) {
-    const x = -320 + rnd() * 580;
-    const y = -210 + rnd() * 250;
-    if (Math.hypot(x, y) > 200 && !(x < -200 && y > -90)) return {x: Number(f1(x)), y: Number(f1(y))};
-  }
-};
-const GLINTS = [
-  ...Array.from({length: 9}, () => ({...spot(), set: 'fo-glint--a'})),
-  ...Array.from({length: 9}, () => ({...spot(), set: 'fo-glint--b'})),
-];
+useMoonAnchor(followRef, ref(null));
 </script>
 
 <style scoped>
-.fo-svg {
+.fortune {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  pointer-events: none;
 }
 
-/* ---- the aurora (moon units from the moon's centre) ---- */
+/* ---- the halo: a little over two radii out from the body, where a real halo sits ---- */
+.fo-body {
+  position: absolute;
+  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
+  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
+  width: calc(var(--moon-r, 200px) * 2);
+  aspect-ratio: 1;
+  will-change: transform;
+  --ring: 2.4;
+}
+
+/* the ring: a faint red inner edge, white-silver, bleeding out to blue; darker sky inside */
+.fo-halo {
+  position: absolute;
+  inset: calc(50% - var(--ring) * 50%);
+  border-radius: 50%;
+  background: radial-gradient(circle closest-side,
+      transparent 58%,
+      rgba(8, 10, 14, .14) 80%,
+      rgba(255, 150, 140, .16) 85.5%,
+      rgba(236, 246, 255, .34) 88%,
+      rgba(190, 220, 255, .18) 91.5%,
+      rgba(150, 190, 255, .06) 96%,
+      transparent 100%);
+  opacity: .7;
+  animation: fo-form 3.4s ease-out calc(.7s + var(--lag)) backwards;
+}
+
+/* it gathers, brightens once as the sheen comes round, then rests */
+@keyframes fo-form {
+  0% { opacity: 0; transform: scale(.96); }
+  45% { opacity: 1; transform: none; }
+  70% { opacity: 1; }
+}
+
+/* the sheen: mint, violet and silver running round the ring, cut to the ring's width */
+.fo-sheen {
+  position: absolute;
+  inset: calc(50% - var(--ring) * 50%);
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(circle closest-side, transparent 83%, #000 87%, #000 90%, transparent 95%);
+  mask: radial-gradient(circle closest-side, transparent 83%, #000 87%, #000 90%, transparent 95%);
+  mix-blend-mode: screen;
+  opacity: .38;
+  animation: fo-sheen-in 3.4s ease-out calc(.9s + var(--lag)) backwards;
+}
+
+@keyframes fo-sheen-in {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.fo-sheen__turn {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+      rgba(110, 231, 192, .55), rgba(167, 139, 250, .5) 60deg, rgba(230, 236, 245, .35) 120deg,
+      rgba(110, 231, 192, .1) 180deg, rgba(167, 139, 250, .45) 250deg, rgba(220, 230, 240, .2) 310deg, rgba(110, 231, 192, .55));
+  will-change: transform;
+  /* once round, like a wheel coming to rest */
+  animation: fo-turn 3.6s cubic-bezier(.5, 0, .2, 1) calc(1.1s + var(--lag)) backwards;
+}
+
+@keyframes fo-turn {
+  from { transform: rotate(-360deg); }
+}
+
+/* mock moons: two soft brightenings on the ring, level with the body, a little iridescent */
+.fo-dog {
+  position: absolute;
+  top: 50%;
+  width: 30%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(245, 250, 255, .5), rgba(170, 230, 210, .18) 45%, transparent);
+  mix-blend-mode: screen;
+  opacity: .7;
+  animation: fo-form 3.4s ease-out calc(1.6s + var(--lag)) backwards;
+}
+
+.fo-dog--l {
+  left: calc(50% - var(--ring) * 44%);
+}
+
+.fo-dog--r {
+  left: calc(50% + var(--ring) * 44%);
+}
+
+/* round the sun the halo is warmer at its inner edge and the mock suns brighter */
+.is-sun .fo-dog {
+  background: radial-gradient(closest-side, rgba(255, 246, 225, .6), rgba(255, 210, 160, .2) 45%, transparent);
+}
+
+/* ---- the aurora: soft curtains of light, rayed upward, high over the city ---- */
 .fo-aurora {
   position: absolute;
-  left: var(--moon-x, 72%);
-  top: var(--moon-y, 48%);
-  width: var(--moon-r, 200px);
-  height: var(--moon-r, 200px);
-  will-change: transform;
-  opacity: .34;
-  animation: fo-aurora-in 2.4s ease .2s both, fo-sway 18s ease-in-out 2.6s infinite alternate;
+  inset: 0 0 auto;
+  height: calc(var(--moon-y, 48%) + var(--moon-r, 200px) * .4);
+  overflow: hidden;
+  /* fades out downward and toward the copy column (one radial fade: no composited mask pairs here) */
+  -webkit-mask: radial-gradient(70% 100% at 85% 0%, #000 45%, transparent);
+  mask: radial-gradient(70% 100% at 85% 0%, #000 45%, transparent);
+  animation: fo-aurora-in 4s ease-out calc(.4s + var(--lag)) backwards;
 }
 
 @keyframes fo-aurora-in {
   from { opacity: 0; }
 }
 
+.fo-aurora__drift {
+  position: absolute;
+  inset: 0 -10%;
+  will-change: transform;
+  /* the only thing still moving: the curtains swaying, very slowly */
+  animation: fo-sway 24s ease-in-out 4s infinite alternate;
+}
+
 @keyframes fo-sway {
-  to { transform: translate3d(-6%, 4%, 0) scaleY(1.12); }
+  to { transform: translate3d(4%, 0, 0); }
 }
 
 .fo-ribbon {
-  fill: none;
-  stroke-width: 34;
-  stroke-linecap: round;
-}
-
-.fo-ribbon--thin {
-  stroke-width: 1.2;
-  opacity: .8;
-}
-
-/* ---- the serpent ring ---- */
-.fo-moon {
   position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
-  width: calc(var(--moon-r, 200px) * 2);
-  height: calc(var(--moon-r, 200px) * 2);
-  will-change: transform;
+  left: 30%;
+  width: 80%;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  /* the rays of the curtain: uneven vertical streaks, softened */
+  -webkit-mask: repeating-linear-gradient(90deg, #000 0 9px, rgba(0, 0, 0, .45) 13px, #000 17px, rgba(0, 0, 0, .7) 26px, #000 31px), radial-gradient(closest-side, #000 40%, transparent);
+  -webkit-mask-composite: source-in;
+  mask: repeating-linear-gradient(90deg, #000 0 9px, rgba(0, 0, 0, .45) 13px, #000 17px, rgba(0, 0, 0, .7) 26px, #000 31px), radial-gradient(closest-side, #000 40%, transparent);
+  mask-composite: intersect;
+  filter: blur(6px);
 }
 
-.fo-moon__rise {
-  position: absolute;
-  inset: 0;
+.fo-ribbon--a {
+  top: 6%;
+  height: 34%;
+  transform: rotate(-7deg);
+  background: linear-gradient(180deg, transparent, rgba(110, 231, 192, .44) 55%, rgba(110, 231, 192, .14) 80%, transparent);
 }
 
-/* the plain liquid-silver ring it first seems to be */
-.fo-ring__plain {
-  fill: none;
-  stroke: url(#fo-silver);
-  stroke-width: 3.6;
-  opacity: 0;
-  animation: fo-plain 2.2s ease .5s both;
+.fo-ribbon--b {
+  top: 16%;
+  left: 46%;
+  width: 70%;
+  height: 30%;
+  transform: rotate(5deg);
+  background: linear-gradient(180deg, transparent, rgba(167, 139, 250, .36) 50%, rgba(200, 210, 240, .12) 78%, transparent);
 }
 
-@keyframes fo-plain {
-  0% { opacity: 0; }
-  35% { opacity: .85; }
-  75% { opacity: .85; }
-  100% { opacity: 0; }
+/* light theme: the same light as faint ink washes on the paper sky */
+:root[data-theme="parchment"] .fo-halo {
+  background: radial-gradient(circle closest-side,
+      transparent 82%,
+      rgba(200, 110, 100, .14) 85.5%,
+      rgba(90, 110, 150, .2) 88.5%,
+      rgba(90, 130, 170, .08) 93%,
+      transparent 100%);
 }
 
-/* the wheel: it turns once when the jaws close, then on, very slowly */
-.fo-wheel {
-  position: absolute;
-  inset: 0;
-  filter: drop-shadow(0 0 2px rgba(220, 235, 255, .55));
-  animation: fo-reveal 1s ease 1.4s both, fo-turn 2.3s cubic-bezier(.55, 0, .35, 1) 2.7s both, fo-drift 150s linear 5s infinite;
+:root[data-theme="parchment"] .fo-sheen,
+:root[data-theme="parchment"] .fo-dog,
+:root[data-theme="parchment"] .fo-ribbon {
+  mix-blend-mode: multiply;
 }
 
-@keyframes fo-reveal {
-  from { opacity: 0; }
-}
-
-@keyframes fo-turn {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fo-drift {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.fo-body,
-.fo-head path:not(.fo-ridge) {
-  stroke: rgba(36, 46, 62, .75);
-  stroke-width: .5;
-  stroke-linejoin: round;
-}
-
-.fo-scales {
-  fill: none;
-  stroke: rgba(70, 84, 104, .55);
-  stroke-width: 1.4;
-  stroke-dasharray: .6 2.4;
-}
-
-.fo-ridge {
-  fill: none;
-  stroke: rgba(40, 52, 70, .8);
-  stroke-width: .5;
-  stroke-linecap: round;
-}
-
-/* the jaws close on the tail */
-.fo-jaw--low {
-  transform-origin: 2px 0;
-  animation: fo-bite .5s cubic-bezier(.5, 0, .2, 1.3) 2.15s both;
-}
-
-@keyframes fo-bite {
-  from { transform: rotate(26deg); }
-}
-
-.fo-head {
-  animation: fo-strike .6s cubic-bezier(.3, .6, .3, 1) 2s both;
-}
-
-@keyframes fo-strike {
-  from { transform: translate(-5px, 0); }
-}
-
-/* ---- glints of luck ---- */
-.fo-stage {
-  position: absolute;
-  left: var(--moon-x, 72%);
-  top: var(--moon-y, 48%);
-  width: var(--moon-r, 200px);
-  height: var(--moon-r, 200px);
-}
-
-.fo-glint {
-  position: absolute;
-  width: 7%;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  background:
-    linear-gradient(90deg, transparent 46%, rgba(244, 240, 210, .9) 50%, transparent 54%),
-    linear-gradient(0deg, transparent 46%, rgba(244, 240, 210, .9) 50%, transparent 54%),
-    radial-gradient(closest-side, rgba(250, 246, 220, .6), transparent 60%);
-}
-
-.fo-glint--a {
-  opacity: 0;
-  animation: fo-glints-a 4.6s ease .6s both;
-}
-
-@keyframes fo-glints-a {
-  0% { opacity: 0; transform: scale(.4); }
-  20%, 82% { opacity: .75; transform: scale(1); }
-  100% { opacity: 0; transform: scale(.2) rotate(90deg); }
-}
-
-.fo-glint--b {
-  opacity: .7;
-  animation: fo-glints-b .9s ease 5s both, fo-wink 6s ease-in-out 6s infinite;
-}
-
-.fo-glint--b:nth-child(3n) { animation-delay: 5s, 7.4s; }
-.fo-glint--b:nth-child(3n + 1) { animation-delay: 5s, 9.1s; }
-
-@keyframes fo-glints-b {
-  from { opacity: 0; transform: scale(.2) rotate(-90deg); }
-}
-
-@keyframes fo-wink {
-  50% { opacity: .2; }
-}
-
-/* ---- light theme: pewter on paper, a fainter aurora ---- */
 :root[data-theme="parchment"] .fo-aurora {
-  opacity: .22;
-}
-
-:root[data-theme="parchment"] .fo-wheel {
-  filter: none;
-}
-
-:root[data-theme="parchment"] .fo-body,
-:root[data-theme="parchment"] .fo-head path:not(.fo-ridge) {
-  fill: #7c8796;
-}
-
-:root[data-theme="parchment"] .fo-ring__plain {
-  stroke: #7c8796;
-}
-
-:root[data-theme="parchment"] .fo-glint {
-  background:
-    linear-gradient(90deg, transparent 46%, rgba(120, 110, 60, .7) 50%, transparent 54%),
-    linear-gradient(0deg, transparent 46%, rgba(120, 110, 60, .7) 50%, transparent 54%);
+  opacity: .6;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .fo-halo,
+  .fo-sheen,
+  .fo-sheen__turn,
+  .fo-dog,
   .fo-aurora,
-  .fo-ring__plain,
-  .fo-wheel,
-  .fo-jaw--low,
-  .fo-head,
-  .fo-glint--a,
-  .fo-glint--b {
+  .fo-aurora__drift {
     animation: none;
   }
 }

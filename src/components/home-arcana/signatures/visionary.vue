@@ -1,11 +1,11 @@
 <template>
   <!--
     Visionary: the lower part of the hero becomes a still mirror sea (the Sea of Collective
-    Subconscious), the city and the moon reflected upside down in it. The reflection ripples,
-    and something vast glides beneath the surface, seen only as a disturbance in the mirrored
-    city and a long shadow, a dragon of imagination. Then the water stills.
+    Subconscious), the city and the moon reflected upside down in it. One slow ripple runs
+    down the reflection, as if a thought had touched the surface, and the water stills.
+    The reflected moon waits for the real one if it is still rising or behind cloud.
   -->
-  <div class="vis" aria-hidden="true" :style="{'--sig-city': `url(${city})`}">
+  <div class="vis" :class="{'is-late': from && from !== 'moon'}" aria-hidden="true" :style="{'--sig-city': `url(${city})`}">
     <div v-if="layer === 'front'" class="vis__sea">
       <i class="vis__water"></i>
       <!-- the mirror, cut in strips so each can sway on its own -->
@@ -17,26 +17,8 @@
           </i>
         </i>
       </i>
-      <!-- the dragon: a lens of warped reflection and a long shadow, gliding under the surface -->
-      <i class="vis__dragon">
-        <i class="vis__lens">
-          <i class="vis__mirror vis__mirror--warp">
-            <i class="vis__city"></i>
-            <img class="vis__moon" :src="moonImg" alt="" decoding="async">
-          </i>
-        </i>
-        <svg class="vis__body" viewBox="0 0 400 60" preserveAspectRatio="none">
-          <path d="M0 34 C40 30 70 22 110 26 S180 44 220 38 S300 18 340 24 C364 27 384 22 400 28 C386 36 366 40 340 38 S292 34 252 44 S170 54 120 42 S48 36 0 34 Z"/>
-        </svg>
-      </i>
       <i class="vis__tint"></i>
       <i class="vis__horizon"></i>
-      <svg class="vis__defs" width="0" height="0">
-        <filter id="vis-warp" x="-5%" y="-20%" width="110%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency=".012 .05" numOctaves="2" seed="4"/>
-          <feDisplacementMap in="SourceGraphic" scale="52" xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-      </svg>
     </div>
   </div>
 </template>
@@ -45,7 +27,7 @@
 import city from '../assets/moon/backlund-skyline.webp';
 import moonImg from '../assets/moon/crimson-moon.webp';
 
-defineProps<{layer: 'back' | 'front'}>();
+defineProps<{layer: 'back' | 'front'; from?: string}>();
 
 const STRIPS = 12;
 </script>
@@ -58,6 +40,8 @@ const STRIPS = 12;
   --sh: calc(var(--city-h, 600px) * .036);
   --water-top: rgba(28, 40, 76, .9);
   --water-deep: rgba(12, 18, 38, .97);
+  /* the reflected moon shows once the real one is up */
+  --moon-in: .6s;
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -100,7 +84,7 @@ const STRIPS = 12;
   top: calc(var(--sh) * var(--k));
   height: calc(var(--sh) + 1px);
   overflow: hidden;
-  animation: vis-ripple 3.4s ease-out calc(1.1s + var(--k) * .07s) both;
+  animation: vis-ripple 4.2s ease-out calc(1s + var(--k) * .08s) both;
 }
 
 /* each strip sees the whole mirror, shifted up by its own place */
@@ -134,6 +118,7 @@ const STRIPS = 12;
   max-width: none;
   height: auto;
   filter: saturate(.9) brightness(.8) var(--moon-filter, );
+  animation: vis-flood 1.6s ease var(--moon-in) both;
 }
 
 /* a ripple runs down the reflection and dies away */
@@ -146,63 +131,6 @@ const STRIPS = 12;
   60% { transform: translateX(calc(var(--amp) * 1.6px)); }
   78% { transform: translateX(calc(var(--amp) * -.6px)); }
   100% { transform: translateX(0); }
-}
-
-/* ---- the dragon passing beneath ---- */
-.vis__dragon {
-  --len: calc(var(--city-h, 600px) * 1.1);
-  position: absolute;
-  left: 0;
-  top: calc(var(--city-h, 600px) * .07);
-  width: var(--len);
-  height: calc(var(--city-h, 600px) * .16);
-  transform: translateX(calc(100vw + 10%));
-  opacity: 0;
-  animation: vis-glide 5.2s cubic-bezier(.45, .1, .5, .95) 1.7s both;
-}
-
-/* the lens moves; the warped mirror inside it holds still against the world */
-.vis__lens {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  -webkit-mask-image: radial-gradient(50% 50% at 50% 50%, #000 40%, transparent 100%);
-  mask-image: radial-gradient(50% 50% at 50% 50%, #000 40%, transparent 100%);
-}
-
-.vis__mirror--warp {
-  top: calc(var(--wl) * -1 - var(--city-h, 600px) * .07);
-  opacity: .8;
-  filter: url(#vis-warp);
-  animation: vis-hold 5.2s cubic-bezier(.45, .1, .5, .95) 1.7s both;
-}
-
-/* a long dark shape under the water, its own outline lost in the deep */
-.vis__body {
-  position: absolute;
-  left: 0;
-  top: 30%;
-  width: 100%;
-  max-width: none;
-  height: 60%;
-  fill: rgba(4, 8, 22, .7);
-  filter: blur(7px);
-  animation: vis-undulate 2.6s ease-in-out infinite alternate;
-}
-
-@keyframes vis-glide {
-  0% { opacity: 0; transform: translateX(calc(var(--len) * -1)); }
-  18%, 78% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(100vw); }
-}
-
-@keyframes vis-hold {
-  0% { transform: translateX(var(--len)) scaleY(calc(var(--fold) * -1)); }
-  100% { transform: translateX(-100vw) scaleY(calc(var(--fold) * -1)); }
-}
-
-@keyframes vis-undulate {
-  to { transform: translateY(6px) scaleY(.85); }
 }
 
 /* the dream's colour over the whole sea, and a fine bright waterline */
@@ -221,8 +149,8 @@ const STRIPS = 12;
   background: linear-gradient(90deg, transparent, rgba(190, 220, 255, .4) 40%, rgba(220, 235, 255, .55) 70%, rgba(190, 220, 255, .3));
 }
 
-.vis__defs {
-  position: absolute;
+.vis.is-late {
+  --moon-in: 2.4s;
 }
 
 /* paper: a pale pearly mirror */
@@ -235,10 +163,6 @@ const STRIPS = 12;
   opacity: .3;
 }
 
-:root[data-theme="parchment"] .vis__body {
-  fill: rgba(70, 90, 140, .25);
-}
-
 :root[data-theme="parchment"] .vis__tint {
   background: linear-gradient(180deg, rgba(160, 180, 230, .12), transparent);
 }
@@ -249,8 +173,8 @@ const STRIPS = 12;
     animation: none;
   }
 
-  .vis__dragon {
-    display: none;
+  .vis__moon {
+    animation: none;
   }
 }
 </style>

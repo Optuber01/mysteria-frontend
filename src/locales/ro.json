@@ -594,7 +594,11 @@
         "cardLabel": "Draw card {n} of {total}",
         "beginsAs": "Sequence 9: {role}",
         "readCard": "View Sequences",
-        "announce": "Card drawn: {name}. Sequence 9: {role}."
+        "announce": "Card drawn: {name}. Sequence 9: {role}.",
+        "viewScene": "View the landscape",
+        "viewBack": "Back to the page",
+        "effectsOff": "Calm the effects",
+        "effectsOn": "Bring the effects back"
       },
       "dock": {
         "label": "Pathway card",

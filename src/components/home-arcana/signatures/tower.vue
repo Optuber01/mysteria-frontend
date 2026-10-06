@@ -1,92 +1,37 @@
 <template>
   <!--
-    White Tower: behind the castle an illusory tower grows, storey by storey, every
-    level made of thick books. As it rises, small brass eyes open on its books one by
-    one; the higher one looks, the darker it becomes, until its top is lost in the night.
+    White Tower: nothing is hidden. The air clears to a cold crystal stillness, a pale shaft
+    of light comes down from above onto the castle, and a clean white reading light passes
+    across the buildings, line by line, then stays on them. Torn pages already tumble in
+    the scene's own weather. No tower of books, no eyes, no gears.
   -->
-  <div class="tower" aria-hidden="true">
-    <div v-if="layer === 'back'" class="tower__stand">
-      <svg class="tower__svg" :viewBox="`0 0 100 ${H}`" preserveAspectRatio="xMidYMax meet">
-        <defs>
-          <linearGradient id="tower-dusk" x1="0" y1="0" x2="0" :y2="H" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#10131c" stop-opacity=".95"/>
-            <stop offset=".45" stop-color="#10131c" stop-opacity=".5"/>
-            <stop offset=".8" stop-color="#10131c" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <g v-for="(s, k) in STOREYS" :key="k" class="tower__storey" :style="{'--k': k}">
-          <g v-for="(b, i) in s.books" :key="i">
-            <rect :x="b.x" :y="b.y" :width="b.w" :height="b.h" rx=".8" :fill="b.fill" class="tower__book"/>
-            <path :d="`M${b.x + 3} ${b.y + .6} V${b.y + b.h - .6} M${b.x + 4.6} ${b.y + .6} V${b.y + b.h - .6} M${b.x + b.w - 3} ${b.y + .6} V${b.y + b.h - .6} M${b.x + b.w - 4.6} ${b.y + .6} V${b.y + b.h - .6}`" class="tower__band"/>
-            <rect v-if="b.label" :x="b.x + b.label" :y="b.y + b.h * .3" :width="b.w * .16" :height="b.h * .4" class="tower__label"/>
-          </g>
-          <!-- the shadow under the storey above -->
-          <path :d="`M${s.left} ${s.top} H${s.right}`" class="tower__ledge"/>
-        </g>
-        <!-- the higher, the darker -->
-        <rect x="-10" y="0" width="120" :height="H" fill="url(#tower-dusk)" class="tower__dusk"/>
-        <!-- brass eyes, opening one by one as the tower climbs -->
-        <g v-for="(e, i) in EYES" :key="`e${i}`" class="tower__eye" :style="{'--k': e.k, '--o': e.o}" :transform="`translate(${e.x} ${e.y}) scale(1.45)`">
-          <circle r="4.5" class="tower__shine"/>
-          <g class="tower__lid">
-            <path d="M-3.4 0 Q0 -2.5 3.4 0 Q0 2.5 -3.4 0 Z" class="tower__white"/>
-            <circle r="1.25" class="tower__iris"/>
-            <circle r=".5" class="tower__pupil"/>
-          </g>
-          <path d="M-3.4 0 Q0 -2.5 3.4 0 Q0 2.5 -3.4 0 Z" class="tower__rim"/>
-        </g>
-      </svg>
+  <div class="tower" :style="{'--lag': lag}" aria-hidden="true">
+    <template v-if="layer === 'back'">
+      <!-- the air going clear: a cold clarity settling down through the sky -->
+      <i class="to-clear"></i>
+      <!-- the shaft from above -->
+      <div class="to-shaft"><i class="to-shaft__beam"></i></div>
+    </template>
+
+    <div v-else class="to-city">
+      <!-- the reading light, passing across the castle once and staying -->
+      <div class="to-read" :style="{'--city-mask': `url(${city})`}">
+        <i class="to-read__wash"></i>
+        <i class="to-read__pass"></i>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import {computed} from 'vue';
+import city from '../assets/moon/backlund-skyline.webp';
+
 defineOptions({name: 'SignatureTower'});
-defineProps<{layer: 'back' | 'front'}>();
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
 
-/* the same tower on every load */
-function rand(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 16807) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
-
-type Book = {x: number; y: number; w: number; h: number; fill: string; label: number};
-type Storey = {books: Book[]; left: number; right: number; top: number};
-
-/** Height of the drawing in tower-widths x 100. */
-const H = 640;
-const PALE = ['#eef0f6', '#e3e7f0', '#d8dde8', '#f2f0e8', '#e8eaf2', '#cfd5e2'];
-
-/*
- * Storeys of books lying flat, spines toward us: each storey a little narrower than the
- * one below, its books of uneven length and thickness, some jutting out.
- */
-const STOREYS: Storey[] = [];
-const EYES: {x: number; y: number; k: number; o: number}[] = [];
-(() => {
-  const r = rand(1259);
-  let y = H;
-  for (let k = 0; y > 40; k++) {
-    // a tower, not a heap: it narrows as it climbs, and every fourth storey is a broad course of folios
-    const width = (96 - k * 2.6) * (k % 4 === 3 ? 1.07 : 1);
-    const books: Book[] = [];
-    const count = 3 + Math.floor(r() * 3);
-    for (let i = 0; i < count; i++) {
-      const h = 6.5 + r() * 5;
-      const w = width * (0.82 + r() * 0.2);
-      const x = 50 - w / 2 + (r() - 0.5) * 7;
-      y -= h + 0.4;
-      books.push({x: +x.toFixed(1), y: +y.toFixed(1), w: +w.toFixed(1), h: +h.toFixed(1), fill: PALE[Math.floor(r() * PALE.length)]!, label: r() < 0.5 ? +(w * (0.3 + r() * 0.3)).toFixed(1) : 0});
-      // one book in two or three carries an eye; never two on a book
-      if (r() < 0.3 && y > 120) EYES.push({x: +(x + w * (0.25 + r() * 0.5)).toFixed(1), y: +(y + h / 2).toFixed(1), k, o: r()});
-    }
-    STOREYS.push({books, left: 50 - width / 2, right: 50 + width / 2, top: y - 0.2});
-    y -= 1.2;
-  }
-})();
+/* out of a storm or a sunset, the light waits for the sky to change first */
+const lag = computed(() => (!props.from || props.from === 'moon' ? '0s' : '.7s'));
 </script>
 
 <style scoped>
@@ -94,158 +39,133 @@ const EYES: {x: number; y: number; k: number; o: number}[] = [];
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* where the shaft lands: broad over the castle keep */
+  --land-x: calc(var(--moon-x, 72%) + var(--moon-r, 200px) * .3);
+  --land-y: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * .2);
 }
 
-/* behind the castle, right of the deck; its foot stands behind the rooftops */
-.tower__stand {
-  --tw: calc(var(--moon-r, 200px) * .82);
+/* ---- back: the clearing ---- */
+.to-clear {
   position: absolute;
-  left: calc(min(var(--moon-x, 72%) + var(--moon-r, 200px) * 1.98, 100% - var(--moon-r, 200px) * .52) - var(--tw) / 2);
-  width: var(--tw);
-  bottom: calc(100% - var(--city-bottom, 100%) + var(--city-h, 600px) * .3);
-  height: calc(var(--tw) * 5.6);
-  /* the top is lost in the night */
-  -webkit-mask-image: linear-gradient(0deg, #000 40%, transparent 96%);
-  mask-image: linear-gradient(0deg, #000 40%, transparent 96%);
-  opacity: .74;
+  inset: 0 0 auto;
+  height: var(--scene-h, 100%);
+  background: linear-gradient(180deg, rgba(214, 226, 248, .12), rgba(214, 226, 248, .05) 50%, transparent 80%);
+  mix-blend-mode: screen;
+  transform-origin: 50% 0;
+  animation: to-clear 3s cubic-bezier(.3, .1, .3, 1) calc(.3s + var(--lag)) backwards;
 }
 
-@media (max-width: 900px) {
-  .tower__stand {
-    --tw: calc(var(--moon-r, 200px) * .7);
-    left: calc(var(--moon-x, 50%) + var(--moon-r, 200px) * 1.4 - var(--tw) / 2);
-  }
+@keyframes to-clear {
+  from { opacity: 0; transform: scaleY(.2); }
 }
 
-/* phones: the fan and the title fill the band where it would stand */
-@media (max-width: 599px) {
-  .tower__stand {
-    display: none;
-  }
+/* ---- back: the shaft, slanting down from above the frame onto the keep ---- */
+.to-shaft {
+  position: absolute;
+  left: var(--land-x);
+  top: var(--land-y);
+  width: 0;
+  height: 0;
+  /* a few degrees off the vertical, from the upper left */
+  rotate: -14deg;
+  filter: blur(calc(var(--moon-r, 200px) * .12));
 }
 
-.tower__svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.to-shaft__beam {
+  position: absolute;
+  left: calc(var(--moon-r, 200px) * -1.2);
+  bottom: 0;
+  width: calc(var(--moon-r, 200px) * 2.4);
+  height: calc(var(--land-y) + var(--moon-r, 200px) * 1.5);
+  /* narrower at the top, opening as it falls */
+  clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(236, 242, 255, 0), rgba(236, 242, 255, .16) 40%, rgba(240, 245, 255, .28) 85%, rgba(240, 245, 255, .08));
+  mix-blend-mode: screen;
+  transform-origin: 50% 0;
+  animation: to-fall 2.4s cubic-bezier(.3, .1, .2, 1) calc(.9s + var(--lag)) backwards;
 }
 
-.tower__book {
-  stroke: #7d869c;
-  stroke-opacity: .45;
-  stroke-width: .4;
+@keyframes to-fall {
+  from { opacity: 0; transform: scaleY(.3); }
 }
 
-.tower__band {
-  stroke: #8d96ac;
-  stroke-opacity: .5;
-  stroke-width: .7;
+/* ---- front: the reading light on the castle ---- */
+.to-city {
+  position: absolute;
+  left: var(--city-left, 0);
+  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px));
+  height: var(--city-h, 600px);
+  aspect-ratio: 16 / 9;
 }
 
-.tower__label {
-  fill: #9aa3b8;
-  fill-opacity: .45;
+.to-read {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
+  mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
+  mix-blend-mode: screen;
 }
 
-.tower__shine {
-  fill: #e0b85a;
-  fill-opacity: .16;
+/* what stays: cold white from above, strongest where the shaft lands */
+.to-read__wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(calc(var(--moon-r, 200px) * 1.6) calc(var(--moon-r, 200px) * 2.4) at calc(var(--land-x) - var(--city-left, 0px)) calc(var(--land-y) - var(--city-bottom, 100%) + var(--city-h, 600px)), rgba(236, 242, 255, .5), rgba(220, 230, 250, .12) 60%, transparent),
+    linear-gradient(180deg, rgba(225, 233, 250, .26), rgba(225, 233, 250, .06) 55%, transparent 80%);
+  opacity: .8;
+  animation: to-wash 2.6s ease-out calc(2.2s + var(--lag)) backwards;
 }
 
-.tower__ledge {
-  stroke: #0a0c12;
-  stroke-opacity: .5;
-  stroke-width: 1;
-}
-
-/* storey by storey, each rising up out of the one below */
-.tower__storey {
-  animation: tower-storey .5s cubic-bezier(.2, .7, .3, 1) calc(.9s + var(--k) * .12s) backwards;
-}
-
-@keyframes tower-storey {
-  from { opacity: 0; transform: translateY(6px); }
-}
-
-/* ---- the brass eyes ---- */
-.tower__white {
-  fill: #f6ecd2;
-}
-
-.tower__iris {
-  fill: #b8862e;
-}
-
-.tower__pupil {
-  fill: #1a1208;
-}
-
-.tower__rim {
-  fill: none;
-  stroke: #c9a24a;
-  stroke-width: .55;
-}
-
-.tower__lid {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation:
-    tower-open .35s ease-out calc(1.3s + var(--k) * .12s + var(--o) * .25s) backwards,
-    tower-blink 11s ease-in-out calc(6s + var(--o) * 9s) infinite;
-}
-
-.tower__eye {
-  animation: tower-rim .3s ease-out calc(1.2s + var(--k) * .12s + var(--o) * .25s) backwards;
-}
-
-@keyframes tower-open {
-  from { transform: scaleY(.06); }
-}
-
-@keyframes tower-rim {
+@keyframes to-wash {
   from { opacity: 0; }
 }
 
-@keyframes tower-blink {
-  0%, 96%, 100% { transform: none; }
-  98% { transform: scaleY(.08); }
+/* the pass: a band of clean light moving across the buildings, as an eye moves along a line */
+.to-read__pass {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30%;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(240, 245, 255, .45) 50%, transparent);
+  opacity: 0;
+  will-change: transform;
+  animation: to-pass 2.8s cubic-bezier(.45, .05, .55, .95) calc(1.3s + var(--lag)) backwards;
 }
 
-/* light theme: the tower in ink on the paper, its books outlined, the eyes still brass */
-:root[data-theme="parchment"] .tower__stand {
+@keyframes to-pass {
+  0% { opacity: 0; transform: none; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(433%, 0, 0); }
+}
+
+/* light theme: the same cold light as a blue-grey clarity on the paper */
+:root[data-theme="parchment"] .to-clear,
+:root[data-theme="parchment"] .to-shaft__beam,
+:root[data-theme="parchment"] .to-read {
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="parchment"] .to-clear {
+  background: linear-gradient(180deg, rgba(200, 212, 235, .25), transparent 70%);
+}
+
+:root[data-theme="parchment"] .to-shaft__beam {
+  background: linear-gradient(180deg, rgba(190, 205, 230, 0), rgba(190, 205, 230, .3) 50%, rgba(190, 205, 230, .1));
+}
+
+:root[data-theme="parchment"] .to-read {
   opacity: .5;
 }
 
-:root[data-theme="parchment"] .tower__book {
-  stroke: #4c5468;
-  stroke-opacity: .8;
-  stroke-width: .5;
-}
-
-:root[data-theme="parchment"] .tower__dusk {
-  display: none;
-}
-
-:root[data-theme="parchment"] .tower__label {
-  fill: #9aa3b8;
-  fill-opacity: .45;
-}
-
-.tower__shine {
-  fill: #e0b85a;
-  fill-opacity: .16;
-}
-
-.tower__ledge {
-  stroke: #4c5468;
-  stroke-opacity: .35;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .tower__storey,
-  .tower__lid,
-  .tower__eye {
+  .to-clear,
+  .to-shaft__beam,
+  .to-read__wash,
+  .to-read__pass {
     animation: none;
   }
 }

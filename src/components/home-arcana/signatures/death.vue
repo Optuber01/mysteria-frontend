@@ -1,69 +1,50 @@
 <template>
   <!--
-    Death: the colour drains out of the night. At the castle's foot a tall pale gate opens
-    in the fog, and the souls rising from the streets turn and drift into it, one after
-    another, in silence. Then the gate dims to an outline. No skulls, no scythes, no red.
+    Death: pallor. The colour drains out of everything, the sky, the castle, whatever hangs
+    over it; at the castle's foot a pale light pools in the fog like a threshold, and the
+    souls rising from the streets turn and drift into it, one by one. No gate, no skulls,
+    nothing red.
   -->
   <div class="death" aria-hidden="true">
     <template v-if="layer === 'front'">
-      <!-- pallor: the scene below loses its colour -->
-      <i class="death__drain"></i>
-      <i class="death__pallor"></i>
+      <!-- the colour going out of the world -->
+      <i class="de-drain"></i>
+      <i class="de-pall"></i>
 
-      <div class="death__gate">
-        <i class="death__halo"></i>
-        <svg class="death__arch" viewBox="0 0 100 282" preserveAspectRatio="none">
-          <defs>
-            <radialGradient id="death-light" cx="50%" cy="78%" r="70%">
-              <stop offset="0" stop-color="#f4faf0" stop-opacity=".95"/>
-              <stop offset=".45" stop-color="#d8e8d2" stop-opacity=".55"/>
-              <stop offset="1" stop-color="#b8ccb4" stop-opacity=".12"/>
-            </radialGradient>
-          </defs>
-          <!-- beyond the doors: cold light, and a further arch deeper in -->
-          <g class="death__beyond">
-            <path d="M18 282 L18 76 A32 32 0 0 1 82 76 L82 282 Z" fill="url(#death-light)"/>
-            <path d="M34 282 L34 104 A16 16 0 0 1 66 104 L66 282" class="death__line" stroke-opacity=".45"/>
-          </g>
-          <!-- the two leaves, swinging inward on their hinges -->
-          <g class="death__leaf death__leaf--l">
-            <path d="M18 282 L18 76 A32 32 0 0 1 50 44 L50 282 Z" class="death__door"/>
-            <path d="M24 270 L24 84 A26 26 0 0 1 44 58 L44 270 Z" class="death__line" stroke-opacity=".3"/>
-          </g>
-          <g class="death__leaf death__leaf--r">
-            <path d="M82 282 L82 76 A32 32 0 0 0 50 44 L50 282 Z" class="death__door"/>
-            <path d="M76 270 L76 84 A26 26 0 0 0 56 58 L56 270 Z" class="death__line" stroke-opacity=".3"/>
-          </g>
-          <!-- the frame: pillars, capitals, the round arch and its keystone -->
-          <g class="death__frame">
-            <path d="M5 282 L5 70 A45 45 0 0 1 95 70 L95 282" class="death__line"/>
-            <path d="M18 282 L18 76 A32 32 0 0 1 82 76 L82 282" class="death__line"/>
-            <path d="M1 64 H22 M78 64 H99 M1 72 H22 M78 72 H99" class="death__line"/>
-            <path d="M44 24 L56 24 L54 42 L46 42 Z" class="death__line"/>
-          </g>
-        </svg>
-
-        <!-- the souls, filing in -->
-        <div class="death__threshold">
-          <i
-              v-for="(w, i) in WISPS"
-              :key="i"
-              class="death__wisp"
-              :class="{'death__wisp--again': i < 2}"
-              :style="{'--x0': `${w[0]}em`, '--y0': `${w[1]}em`, '--d': `${1.7 + i * .26}s`}"
-          ></i>
-        </div>
+      <!-- the pool of pale light in the fog at the castle's foot -->
+      <div class="de-pool">
+        <i class="de-pool__haze"></i>
+        <i class="de-pool__fog"><i class="de-pool__tint"></i></i>
+        <i class="de-pool__light"></i>
+        <i class="de-pool__sill"></i>
+        <!-- the souls drifting in -->
+        <i v-for="(w, i) in WISPS" :key="i" class="de-wisp" :style="w"></i>
       </div>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-defineOptions({name: 'SignatureDeath'});
-defineProps<{layer: 'back' | 'front'}>();
+import {seeded} from './sigKit';
 
-/** Where each soul rises from, relative to the gate's threshold (em: a tenth of the gate's width). */
-const WISPS: [number, number][] = [[-22, 4], [16, 6], [-9, 2], [-27, 8], [24, 3], [-15, 7], [10, 9], [-4, 5], [30, 7], [-19, 3], [-12, 6], [20, 4], [-30, 5], [6, 8]];
+defineOptions({name: 'SignatureDeath'});
+defineProps<{layer: 'back' | 'front'; from?: string}>();
+
+const rnd = seeded(1313);
+const f2 = (n: number) => n.toFixed(2);
+
+/* each wisp: where it starts (moon radii from the pool's centre), how long it takes, when */
+const WISPS = Array.from({length: 11}, (_, i) => {
+  const side = i % 2 ? 1 : -1;
+  return {
+    '--x0': f2(side * (.9 + rnd() * 2.2)),
+    '--y0': f2(-.1 - rnd() * .7),
+    '--bend': f2((rnd() - .5) * .5),
+    '--d': `${f2(1.4 + i * .26 + rnd() * .3)}s`,
+    '--t': `${f2(2.4 + rnd() * 1)}s`,
+    '--s': f2(.7 + rnd() * .6),
+  };
+});
 </script>
 
 <style scoped>
@@ -73,192 +54,171 @@ const WISPS: [number, number][] = [[-22, 4], [16, 6], [-9, 2], [-27, 8], [24, 3]
   pointer-events: none;
 }
 
-/* ---- pallor ---- */
-.death__drain {
+/* ---- the drain: grey laid on as saturation, so every hue below fades toward pallor ---- */
+.de-drain {
   position: absolute;
   inset: 0;
-  background: #7d857c;
+  background: #808080;
   mix-blend-mode: saturation;
-  opacity: .86;
-  animation: death-drain 2.6s ease-in-out .2s backwards;
+  opacity: .62;
+  animation: de-drain 3.2s ease-in-out .4s backwards;
 }
 
-.death__pallor {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(214, 226, 208, .08), rgba(214, 226, 208, .02) 60%, transparent);
-  animation: death-drain 2.6s ease-in-out .2s backwards;
-}
-
-@keyframes death-drain {
+@keyframes de-drain {
   from { opacity: 0; }
 }
 
-/* ---- the gate: right of the drawn card, standing in the street fog at the castle's foot ---- */
-.death__gate {
-  /* 1em = a tenth of the gate's width */
-  font-size: calc(var(--moon-r, 200px) * .062);
-  position: absolute;
-  left: calc(var(--moon-x, 72%) + var(--moon-r, 200px) * 1.55 - 5em);
-  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .14 - 28.2em);
-  width: 10em;
-  height: 28.2em;
-}
-
-.death__halo {
-  position: absolute;
-  inset: -12% -60% 0;
-  background: radial-gradient(50% 55% at 50% 62%, rgba(220, 236, 214, .22), rgba(200, 220, 196, .06) 60%, transparent);
-  opacity: .25;
-  animation: death-bright 6.6s ease-in-out .4s backwards;
-}
-
-.death__arch {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  /* its foot is lost in the fog */
-  -webkit-mask-image: linear-gradient(0deg, transparent 0, #000 16%);
-  mask-image: linear-gradient(0deg, transparent 0, #000 16%);
-}
-
-.death__line {
-  fill: none;
-  stroke: #e8eee2;
-  stroke-width: 1.4;
-  vector-effect: non-scaling-stroke;
-}
-
-.death__door {
-  fill: rgba(206, 214, 200, .2);
-  stroke: #e8eee2;
-  stroke-opacity: .55;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-/* it comes up out of the fog, then, at the end, dims to an outline */
-.death__frame {
-  opacity: .42;
-  animation: death-frame 6.6s ease-in-out .4s backwards;
-}
-
-@keyframes death-frame {
-  0% { opacity: 0; transform: translateY(4%); }
-  16% { opacity: 1; transform: none; }
-  80% { opacity: 1; }
-  100% { opacity: .42; }
-}
-
-.death__beyond {
-  opacity: .1;
-  animation: death-bright 6.6s ease-in-out .4s backwards;
-}
-
-@keyframes death-bright {
-  0%, 18% { opacity: 0; }
-  34% { opacity: 1; }
-  80% { opacity: .85; }
-  100% { opacity: .1; }
-}
-
-.death__leaf {
-  transform-box: view-box;
-  opacity: 0;
-  transform: scaleX(.1);
-  animation: death-open 6.6s ease-in-out .4s backwards;
-}
-
-.death__leaf--l {
-  transform-origin: 18px 0;
-}
-
-.death__leaf--r {
-  transform-origin: 82px 0;
-}
-
-@keyframes death-open {
-  0% { opacity: 0; transform: none; }
-  14% { opacity: .9; transform: none; }
-  20% { opacity: .9; transform: none; }
-  36% { opacity: .9; transform: scaleX(.1); }
-  80% { opacity: .9; transform: scaleX(.1); }
-  100% { opacity: 0; transform: scaleX(.1); }
-}
-
-/* ---- the procession ---- */
-.death__threshold {
-  position: absolute;
-  left: 50%;
-  top: calc(100% - 3em);
-}
-
-.death__wisp {
-  position: absolute;
-  left: -.4em;
-  top: -.4em;
-  width: .8em;
-  height: .8em;
-  background: #e2f2da;
-  box-shadow: 0 0 .9em .25em rgba(207, 230, 200, .5);
-  opacity: 0;
-  animation: death-wisp 3.4s ease-in-out var(--d) backwards;
-}
-
-/* risen from the street, they turn toward the gate and are drawn in, growing small */
-@keyframes death-wisp {
-  0% { opacity: 0; transform: translate(var(--x0), var(--y0)); }
-  14% { opacity: .9; }
-  48% { transform: translate(calc(var(--x0) * .72), calc(var(--y0) - 9em)); }
-  80% { opacity: .85; transform: translate(calc(var(--x0) * .16), -9em) scale(.8); }
-  100% { opacity: 0; transform: translate(0, -7em) scale(.25); }
-}
-
-/* afterwards, now and then, one more */
-.death__wisp--again {
-  animation:
-    death-wisp 3.4s ease-in-out var(--d) backwards,
-    death-wisp-again 13s ease-in-out calc(var(--d) + 8s) infinite;
-}
-
-@keyframes death-wisp-again {
-  0% { opacity: 0; transform: translate(var(--x0), var(--y0)); }
-  4% { opacity: .7; }
-  14% { transform: translate(calc(var(--x0) * .72), calc(var(--y0) - 9em)); }
-  23% { opacity: .65; transform: translate(calc(var(--x0) * .16), -9em) scale(.8); }
-  29%, 100% { opacity: 0; transform: translate(0, -7em) scale(.25); }
-}
-
-/* light theme: a grey-green ink gate on the misty paper */
-:root[data-theme="parchment"] .death__line,
-:root[data-theme="parchment"] .death__door {
-  stroke: #5d6a5a;
-}
-
-:root[data-theme="parchment"] .death__door {
-  fill: rgba(120, 136, 116, .14);
-}
-
-:root[data-theme="parchment"] .death__wisp {
-  background: #8fa88a;
-  box-shadow: 0 0 .8em .2em rgba(120, 150, 114, .35);
-}
-
-:root[data-theme="parchment"] .death__halo {
+/*
+ * While the next card takes over, SceneSignature fades this layer out as a group; inside a
+ * group a blend has nothing to blend with and would lay plain grey over the scene, so the
+ * colour simply comes back as the new card's grade eases in.
+ */
+.death.signature-leave-active .de-drain,
+.death.signature-leave-active .de-pall {
   display: none;
 }
 
+/* ...and the cold grey-green that is left */
+.de-pall {
+  position: absolute;
+  inset: 0;
+  background: #b8cdb4;
+  mix-blend-mode: color;
+  opacity: .14;
+  animation: de-drain 3.2s ease-in-out .8s backwards;
+}
+
+/* ---- the pool: low at the castle's foot, under the drawn card ---- */
+.de-pool {
+  position: absolute;
+  left: calc(var(--moon-x, 72%) + var(--moon-r, 200px) * .35);
+  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .1);
+  width: var(--moon-r, 200px);
+  height: var(--moon-r, 200px);
+}
+
+.de-pool__haze {
+  position: absolute;
+  left: -350%;
+  top: -100%;
+  width: 700%;
+  height: 200%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(220, 236, 220, .3), rgba(200, 220, 205, .1) 50%, transparent);
+  mix-blend-mode: screen;
+  animation: de-pool 3.6s ease-out 1.2s backwards;
+}
+
+/* fog gathering into the light: the scene's fog bank, pale and pooled */
+.de-pool__fog {
+  position: absolute;
+  left: -300%;
+  top: -60%;
+  width: 600%;
+  height: 120%;
+  isolation: isolate;
+  background: url('../assets/moon/fog-bank.webp') repeat-x 30% 50% / 50% 100%;
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  opacity: .55;
+  animation: de-pool 3.6s ease-out 1s backwards;
+}
+
+.de-pool__tint {
+  position: absolute;
+  inset: 0;
+  background: #e4ece0;
+  mix-blend-mode: multiply;
+}
+
+/* the threshold: a low, flat brightness in the fog */
+.de-pool__light {
+  position: absolute;
+  left: -120%;
+  top: -55%;
+  width: 240%;
+  height: 90%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(245, 252, 242, .62), rgba(214, 234, 214, .24) 45%, transparent);
+  mix-blend-mode: screen;
+  animation: de-pool 3.2s ease-out 1.6s backwards;
+}
+
+/* its level edge, where the light lies on the ground */
+.de-pool__sill {
+  position: absolute;
+  left: -90%;
+  top: -3%;
+  width: 180%;
+  height: 6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(250, 255, 248, .7), rgba(220, 238, 220, .2) 60%, transparent);
+  mix-blend-mode: screen;
+  animation: de-pool 3s ease-out 2s backwards;
+}
+
+@keyframes de-pool {
+  from { opacity: 0; transform: scale(.7, .5); }
+}
+
+/* ---- the wisps: soft pale lights curving in from the streets and going into the light ---- */
+.de-wisp {
+  position: absolute;
+  left: calc(50% - var(--moon-r, 200px) * .05);
+  top: calc(-20% - var(--moon-r, 200px) * .05);
+  width: calc(var(--moon-r, 200px) * .1 * var(--s));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(240, 252, 236, .95), rgba(207, 230, 200, .4) 45%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: de-drift var(--t) cubic-bezier(.4, .1, .5, 1) var(--d) backwards;
+}
+
+/* from the street, bending, into the pool, and gone */
+@keyframes de-drift {
+  0% { opacity: 0; transform: translate3d(calc(var(--moon-r, 200px) * var(--x0)), calc(var(--moon-r, 200px) * var(--y0)), 0); }
+  15% { opacity: .9; }
+  55% { transform: translate3d(calc(var(--moon-r, 200px) * var(--x0) * .4), calc(var(--moon-r, 200px) * (var(--y0) * .4 + var(--bend))), 0) scale(.9); }
+  85% { opacity: .7; }
+  100% { opacity: 0; transform: scale(.4); }
+}
+
+/* light theme: the paper keeps its colour less; the pool reads as a pale clearing in grey haze */
+:root[data-theme="parchment"] .de-drain {
+  opacity: .45;
+}
+
+:root[data-theme="parchment"] .de-pall {
+  opacity: .1;
+}
+
+:root[data-theme="parchment"] .de-pool__fog {
+  filter: invert(1);
+  mix-blend-mode: multiply;
+  opacity: .3;
+}
+
+:root[data-theme="parchment"] .de-pool__tint {
+  background: #fff;
+  mix-blend-mode: normal;
+  opacity: 0;
+}
+
+:root[data-theme="parchment"] .de-wisp {
+  mix-blend-mode: multiply;
+  background: radial-gradient(closest-side, rgba(120, 150, 120, .6), rgba(150, 175, 150, .2) 45%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .death__drain,
-  .death__pallor,
-  .death__halo,
-  .death__frame,
-  .death__beyond,
-  .death__leaf,
-  .death__wisp,
-  .death__wisp--again {
+  .de-drain,
+  .de-pall,
+  .de-pool__haze,
+  .de-pool__fog,
+  .de-pool__light,
+  .de-pool__sill,
+  .de-wisp {
     animation: none;
   }
 }

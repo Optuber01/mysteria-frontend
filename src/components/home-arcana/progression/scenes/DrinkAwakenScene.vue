@@ -84,7 +84,7 @@
 
     <!-- whispers: what the potion says back while it is drunk -->
     <div class="drink-scene__whispers" aria-hidden="true">
-      <span v-for="whisper in whispers" :key="whisper.id" class="whisper" :class="`whisper--${whisper.side}`" :style="whisper.style">{{ whisper.text }}</span>
+      <span v-for="whisper in whispers" :key="whisper.id" class="whisper" :class="[`whisper--${whisper.side}`, { 'is-heard': whisper.heard }]" :style="whisper.style">{{ whisper.text }}</span>
     </div>
 
     <!-- low mist over the floor until the awakening burns it off -->
@@ -333,6 +333,8 @@ const whispers = computed(() => {
         transform: `translate3d(${(dir * drift).toFixed(1)}px, -50%, 0)`,
         visibility: on > 0.01 ? 'visible' : 'hidden',
       } as CSSProperties,
+      // the shiver runs only while the line can be heard (a hidden element's loop still ticks)
+      heard: on > 0.01,
     };
   });
 });
@@ -698,10 +700,14 @@ const sceneVars = computed(() => {
   text-transform: uppercase;
   /* a faint split image, as if heard twice */
   text-shadow: -2px 0 color-mix(in oklab, var(--acc) 60%, transparent), 2px 0 rgba(169, 198, 214, 0.3), 0 0 18px rgba(0, 0, 0, 0.8);
-  animation: whisper-shiver 0.9s steps(3) infinite;
+  animation: whisper-shiver 0.9s steps(3) infinite paused;
   will-change: transform, opacity;
 }
 
+
+.whisper.is-heard {
+  animation-play-state: running;
+}
 
 .whisper--center {
   text-align: center;

@@ -175,6 +175,7 @@ import {type ArcanaCard, BOON_CARDS, cardById, CORE_CARDS, sigilNative, sigilThu
 import {ensurePathwayData, useArcana} from './useArcana';
 import {abilitySummary} from './abilitySummary';
 import {stableViewportHeight} from './stableViewport';
+import {prefetchSignature} from './signatureLoader';
 
 type Kind = 'pathway' | 'boon';
 
@@ -538,6 +539,7 @@ function onTabKeydown(event: KeyboardEvent) {
 
 const warmed = new Set<string>();
 function warm(id: string) {
+  prefetchSignature(id);
   if (warmed.has(id)) return;
   warmed.add(id);
   const image = new Image();
@@ -830,6 +832,8 @@ function measure() {
   });
 }
 
+let firstFrame = 0;
+
 onMounted(() => {
   const hints = navigator as Navigator & {deviceMemory?: number; connection?: {saveData?: boolean}};
   lowPower = Boolean(hints.connection?.saveData || (hints.deviceMemory !== undefined && hints.deviceMemory <= 2));
@@ -846,18 +850,26 @@ onMounted(() => {
     assembled = true;
     assembly = 1;
   }
-  measure();
-  if (motion) {
-    measureAssembly();
-    // anything above the ring growing or shrinking moves it on the page
-    const main = stageRef.value?.closest('main');
-    if (main) {
-      pageObserver = new ResizeObserver(measureStageTop);
-      pageObserver.observe(main);
+  /*
+   * Measured in the first frame, not while the page mounts: the ring is screens below the
+   * fold, and reading its layout here forced the browser to lay out the whole page early
+   * (part of a ~420 ms block at load), only to lay it out again for the first paint.
+   */
+  firstFrame = requestAnimationFrame(() => {
+    firstFrame = 0;
+    measure();
+    if (motion) {
+      measureAssembly();
+      // anything above the ring growing or shrinking moves it on the page
+      const main = stageRef.value?.closest('main');
+      if (main) {
+        pageObserver = new ResizeObserver(measureStageTop);
+        pageObserver.observe(main);
+      }
     }
-  }
+    render();
+  });
   for (const offset of [-1, 1]) warm(catalog.value[normalize(selectedIndex.value + offset, catalog.value.length)].id);
-  render();
 
   resizeObserver = new ResizeObserver(() => measure());
   if (stageRef.value) resizeObserver.observe(stageRef.value);
@@ -886,6 +898,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (firstFrame) cancelAnimationFrame(firstFrame);
   resizeObserver?.disconnect();
   pageObserver?.disconnect();
   viewObserver?.disconnect();

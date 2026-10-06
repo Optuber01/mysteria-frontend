@@ -1,154 +1,69 @@
 <template>
   <!--
-    Justiciar: a thin brass band of inscription rings the moon (an unreadable ancient
-    script, never real letters). A verdict writes itself across the sky in the same script,
-    and on its last stroke everything stops: the fog freezes mid-drift, the brass motes
-    lock into a grid, and the frozen scene holds ("drifting is prohibited here"). Then only
-    the ring round the moon turns on, slowly.
+    Justiciar: the verdict is stillness. A single level line of light draws itself along
+    the horizon, outward from under the moon; as it reaches the edges everything stops.
+    Thin strata of fog level out and hold, the scene's own fog freezes mid-drift ("drifting
+    is prohibited here"), and a clear brass-cold light settles on the castle. No glyphs,
+    no scales, no gavel.
 
     The freeze reaches the base scene's fog: on the verdict this adds `sig-justiciar-still`
-    to the closest `.night`, which pauses its fog and cloud drift (see the :global rule
-    below), and removes it again on unmount.
+    to the closest `.night`, which pauses its fog and cloud drift (the :global rule below),
+    and removes it again on unmount.
   -->
-  <div ref="rootRef" aria-hidden="true" :class="{'is-held': held}">
+  <div ref="rootRef" class="justiciar" :style="{'--lag': lag}" aria-hidden="true">
     <template v-if="layer === 'back'">
-      <div ref="followRef" class="ju-moon">
-        <div ref="riseRef" class="ju-moon__rise">
-          <div class="ju-ring">
-            <svg class="ju-svg" viewBox="-100 -100 200 200">
-              <circle class="ju-ring__rule" r="102.6"/>
-              <circle class="ju-ring__rule" r="110"/>
-              <path class="ju-script" :d="RING_SCRIPT"/>
-            </svg>
-          </div>
-        </div>
+      <!-- strata of fog, levelling out and holding -->
+      <div v-for="(s, i) in STRATA" :key="i" class="ju-stratum" :style="s">
+        <i class="ju-stratum__fog"></i>
+        <i class="ju-stratum__tint"></i>
       </div>
-
-      <!-- the verdict, written left to right above the fan -->
-      <div class="ju-verdict">
-        <div class="ju-verdict__reveal">
-          <div class="ju-verdict__ink">
-            <svg class="ju-svg" :viewBox="`0 0 ${LINE_W} 16`" preserveAspectRatio="none">
-              <path class="ju-script ju-script--line" :d="LINE_SCRIPT"/>
-              <path class="ju-verdict__rule" :d="`M0 15 H${LINE_W}`"/>
-            </svg>
-          </div>
-        </div>
-        <i class="ju-verdict__nib"></i>
-        <i class="ju-verdict__seal"></i>
-      </div>
-
-      <!-- brass motes, slowing into a grid that holds -->
-      <div class="ju-stage">
-        <i v-for="(m, i) in MOTES" :key="i" class="ju-mote" :class="{'ju-mote--big': m.big}" :style="{left: `${m.x}%`, top: `${m.y}%`, '--dx': m.dx, '--dy': m.dy}"></i>
+      <!-- the line along the horizon -->
+      <div class="ju-horizon">
+        <i class="ju-horizon__glow"></i>
+        <i class="ju-horizon__line"></i>
       </div>
     </template>
+
+    <!-- clear, cold light on the castle, with a brass edge where the moon catches it -->
+    <div v-else class="ju-city">
+      <i class="ju-light" :style="{'--city-mask': `url(${city})`}"></i>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from 'vue';
-import {reducedMotion, seeded, useMoonAnchor} from './sigKit';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
+import city from '../assets/moon/backlund-skyline.webp';
+import {reducedMotion} from './sigKit';
 
-const props = defineProps<{layer: 'back' | 'front'}>();
+defineOptions({name: 'SignatureJusticiar'});
+const props = defineProps<{layer: 'back' | 'front'; from?: string}>();
 
+/* the moon rises first if it was not up */
+const lagS = computed(() => (!props.from || props.from === 'moon' ? 0 : .9));
+const lag = computed(() => `${lagS.value}s`);
+
+/* strata: height in the sky (moon radii from the moon's centre), thickness, opacity, which way they were leaning */
+const STRATA = [
+  {y: -1.05, h: .2, o: .5, tilt: -1.4, i: 0},
+  {y: .12, h: .26, o: .42, tilt: 1.1, i: 1},
+  {y: .78, h: .3, o: .55, tilt: -.8, i: 2},
+].map(s => ({'--y': s.y, '--h': s.h, '--o': s.o, '--tilt': `${s.tilt}deg`, '--i': s.i}));
+
+/* ---- the line's last stretch: everything stops ---- */
+const VERDICT_AT = 2.3;
 const rootRef = ref<HTMLElement | null>(null);
-const followRef = ref<HTMLElement | null>(null);
-const riseRef = ref<HTMLElement | null>(null);
-useMoonAnchor(followRef, riseRef);
-
-const rnd = seeded(41);
-const f1 = (n: number) => n.toFixed(2);
-type Seg = [number, number, number, number];
-
-/*
- * One glyph of the script, in a 6 x 10 cell: a stem or a slant, then one or two marks
- * from a small set (bars, hooks, ticks, a dot above). Angular, not Latin, not Hermes.
- */
-function glyph(): Seg[] {
-  const segs: Seg[] = [];
-  const base = rnd();
-  if (base < .5) segs.push([3, 0, 3, 10]);
-  else if (base < .7) segs.push([1, 0, 5, 10]);
-  else if (base < .85) segs.push([5, 0, 1, 10]);
-  else segs.push([1, 0, 1, 10], [5, 0, 5, 10]);
-  const marks: Seg[][] = [
-    [[0, 0, 6, 0]], [[0, 5, 6, 5]], [[0, 10, 6, 10]], [[3, 0, 6, 0]], [[0, 10, 3, 10]],
-    [[3, 4, 6, 1]], [[3, 6, 0, 9]], [[6, 0, 6, 4], [6, 4, 3, 4]], [[0, 6, 3, 6], [3, 6, 3, 10]],
-    [[2, 2, 4, 4], [4, 2, 2, 4]], [[3, -2.5, 3, -2.4]],
-  ];
-  const n = 1 + (rnd() < .55 ? 1 : 0);
-  for (let i = 0; i < n; i++) segs.push(...marks[Math.floor(rnd() * marks.length)]);
-  return segs;
-}
-
-/* the moon's band: glyphs standing outward between two rules just off the limb */
-const ringPath: string[] = [];
-{
-  const scale = .55;
-  let a = 0;
-  while (a < 357) {
-    const t = (a * Math.PI) / 180;
-    const rx = Math.sin(t);
-    const ry = -Math.cos(t);
-    for (const [x0, y0, x1, y1] of glyph()) {
-      const p = (gx: number, gy: number) => {
-        const rd = 109 - gy * scale - .6;
-        const tg = (gx - 3) * scale;
-        return `${f1(rx * rd - ry * tg)} ${f1(ry * rd + rx * tg)}`;
-      };
-      ringPath.push(`M${p(x0, y0)}L${p(x1, y1)}`);
-    }
-    a += 2.45 + (rnd() < .14 ? 2.2 : 0);
-  }
-}
-const RING_SCRIPT = ringPath.join('');
-
-/* the verdict: one line of the script with word breaks */
-const LINE_W = 760;
-const linePath: string[] = [];
-{
-  let x = 2;
-  while (x < LINE_W - 8) {
-    for (const [x0, y0, x1, y1] of glyph()) linePath.push(`M${f1(x + x0)} ${f1(y0 + 3)}L${f1(x + x1)} ${f1(y1 + 3)}`);
-    x += 9 + (rnd() < .18 ? 9 : 0);
-  }
-}
-const LINE_SCRIPT = linePath.join('');
-
-/* the motes' grid (moon units, 100 = r), in sky the fan leaves open; each starts off its point */
-const MOTES: {x: number; y: number; dx: number; dy: number; big: boolean}[] = [];
-for (let gx = -340; gx <= 260; gx += 40) {
-  for (let gy = -180; gy <= 40; gy += 40) {
-    const open = Math.hypot(gx, gy) > 200 && !(gx < -190 && gy > -100);
-    if (!open || rnd() < .45) continue;
-    MOTES.push({x: gx, y: gy, dx: Math.round((rnd() - .5) * 60) / 100, dy: Math.round((rnd() - .5) * 36) / 100, big: rnd() < .3});
-  }
-}
-
-/* ---- the verdict's last stroke: everything stops ---- */
-const VERDICT_AT = 2.75;
-const HOLD = 1.8;
-const held = ref(false);
 let night: HTMLElement | null = null;
-const timers: number[] = [];
+let timer = 0;
 onMounted(() => {
   if (props.layer !== 'back') return;
   night = rootRef.value?.closest<HTMLElement>('.night') ?? null;
-  const stop = () => {
-    held.value = true;
-    night?.classList.add('sig-justiciar-still');
-  };
-  if (reducedMotion()) {
-    stop();
-    held.value = false;
-    return;
-  }
-  timers.push(window.setTimeout(stop, VERDICT_AT * 1000));
-  timers.push(window.setTimeout(() => (held.value = false), (VERDICT_AT + HOLD) * 1000));
+  const stop = () => night?.classList.add('sig-justiciar-still');
+  if (reducedMotion()) stop();
+  else timer = window.setTimeout(stop, (VERDICT_AT + lagS.value) * 1000);
 });
 onUnmounted(() => {
-  timers.forEach(t => clearTimeout(t));
+  window.clearTimeout(timer);
   night?.classList.remove('sig-justiciar-still');
 });
 </script>
@@ -160,197 +75,160 @@ onUnmounted(() => {
   animation-play-state: paused;
 }
 
-.ju-svg {
+.justiciar {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  pointer-events: none;
+  /* the horizon behind the city: about half-way up the skyline */
+  --horizon: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .5);
 }
 
-.ju-script {
-  fill: none;
-  stroke: #e6b67a;
-  stroke-width: .5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ---- the ring round the moon ---- */
-.ju-moon {
+/* ---- the strata: the scene's fog texture, flattened into level bands ---- */
+.ju-stratum {
   position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px));
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px));
-  width: calc(var(--moon-r, 200px) * 2);
-  height: calc(var(--moon-r, 200px) * 2);
+  left: -4%;
+  right: -4%;
+  top: calc(var(--moon-y, 48%) + var(--moon-r, 200px) * (var(--y) - var(--h) / 2));
+  height: calc(var(--moon-r, 200px) * var(--h));
+  overflow: hidden;
+  isolation: isolate;
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 35%, #000 65%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 35%, #000 65%, transparent);
+  opacity: var(--o);
   will-change: transform;
+  /* leaning and drifting, slowing, level: and held */
+  animation: ju-level 2.6s cubic-bezier(.1, .5, .15, 1) calc(.2s + var(--lag) + var(--i) * .12s) backwards;
 }
 
-.ju-moon__rise {
+@keyframes ju-level {
+  0% { opacity: 0; transform: translate3d(-3%, 0, 0) rotate(var(--tilt)); }
+  30% { opacity: var(--o); }
+}
+
+.ju-stratum__fog {
   position: absolute;
   inset: 0;
+  background: url('../assets/moon/fog-bank.webp') repeat-x 0 50% / 38% 100%;
 }
 
-.ju-ring {
+.ju-stratum:nth-child(2) .ju-stratum__fog {
+  background-position-x: 30%;
+}
+
+.ju-stratum:nth-child(3) .ju-stratum__fog {
+  background-position-x: 70%;
+}
+
+.ju-stratum__tint {
   position: absolute;
   inset: 0;
-  filter: drop-shadow(0 0 1.5px rgba(255, 196, 120, .5));
-  animation: ju-ring-in 1.6s ease .3s both, ju-turn 140s linear .3s infinite;
+  background-color: var(--fog-tone, #d8cfc6);
+  mix-blend-mode: multiply;
 }
 
-/* stopped by the verdict, and held a beat; then it alone turns on */
-.is-held .ju-ring {
-  animation-play-state: running, paused;
+/* ---- the horizon line, drawn outward from under the moon ---- */
+.ju-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--horizon) - var(--moon-r, 200px) * .2);
+  height: calc(var(--moon-r, 200px) * .4);
+  /* clear of the copy column */
+  -webkit-mask-image: linear-gradient(90deg, transparent 42%, #000 56%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent 42%, #000 56%, #000 94%, transparent);
 }
 
-@keyframes ju-ring-in {
+.ju-horizon__glow,
+.ju-horizon__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transform-origin: var(--moon-x, 72%) 50%;
+  animation: ju-draw 1.9s cubic-bezier(.5, 0, .3, 1) calc(.4s + var(--lag)) backwards;
+}
+
+.ju-horizon__glow {
+  inset: 0 0;
+  background: linear-gradient(180deg, transparent, rgba(255, 214, 170, .1) 40%, rgba(255, 228, 196, .28) 50%, rgba(255, 214, 170, .1) 60%, transparent);
+  mix-blend-mode: screen;
+}
+
+.ju-horizon__line {
+  top: calc(50% - .75px);
+  height: 1.5px;
+  background: linear-gradient(90deg, rgba(240, 200, 150, .5), rgba(255, 244, 226, .95) 50%, rgba(240, 200, 150, .5));
+  box-shadow: 0 0 6px rgba(255, 210, 160, .5);
+  opacity: .85;
+}
+
+@keyframes ju-draw {
+  from { transform: scaleX(0); }
+}
+
+/* ---- front: the castle in clear, cold light, brass where the moon catches it ---- */
+.ju-city {
+  position: absolute;
+  left: var(--city-left, 0);
+  top: calc(var(--city-bottom, 100%) - var(--city-h, 600px));
+  height: var(--city-h, 600px);
+  aspect-ratio: 16 / 9;
+}
+
+.ju-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at calc(var(--moon-x, 72%) - var(--city-left, 0px)) calc(var(--moon-y, 48%) - var(--city-bottom, 100%) + var(--city-h, 600px)),
+      rgba(242, 171, 120, .5) 0, rgba(242, 171, 120, .12) calc(var(--moon-r, 200px) * 1.8), transparent calc(var(--moon-r, 200px) * 2.6)),
+    linear-gradient(180deg, rgba(210, 222, 240, .3), rgba(200, 212, 230, .08) 50%, transparent 75%);
+  -webkit-mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
+  mask: var(--city-mask) 0 0 / 100% 100% no-repeat;
+  mix-blend-mode: screen;
+  opacity: .55;
+  animation: ju-light 2s ease-out calc(1.9s + var(--lag)) backwards;
+}
+
+@keyframes ju-light {
   from { opacity: 0; }
 }
 
-@keyframes ju-turn {
-  to { transform: rotate(360deg); }
+/* light theme: a brass-grey ink line and cool grey strata on the paper */
+:root[data-theme="parchment"] .ju-stratum {
+  mix-blend-mode: multiply;
+  opacity: calc(var(--o) * .7);
 }
 
-.ju-ring__rule {
-  fill: none;
-  stroke: #d9a464;
-  stroke-width: .45;
-  opacity: .8;
+:root[data-theme="parchment"] .ju-stratum__fog {
+  filter: invert(1);
 }
 
-/* ---- the verdict line ---- */
-.ju-verdict {
-  position: absolute;
-  left: calc(var(--moon-x, 72%) - var(--moon-r, 200px) * 2.3);
-  top: calc(var(--moon-y, 48%) - var(--moon-r, 200px) * 2.02);
-  width: calc(var(--moon-r, 200px) * 4.7);
-  height: calc(var(--moon-r, 200px) * 4.7 * 16 / 760);
+/* inverted, the fog is grey on white; screening a warm grey over it colours the cloud and leaves the white */
+:root[data-theme="parchment"] .ju-stratum__tint {
+  background-color: #9a9286;
+  mix-blend-mode: screen;
 }
 
-/* written left to right: the window opens rightward while the ink stays put */
-.ju-verdict__reveal {
-  position: absolute;
-  inset: -40% 0;
-  overflow: hidden;
-  animation: ju-write 1.9s cubic-bezier(.4, .1, .6, 1) .85s both;
+:root[data-theme="parchment"] .ju-horizon__glow {
+  mix-blend-mode: multiply;
+  background: linear-gradient(180deg, transparent, rgba(160, 110, 60, .1) 45%, rgba(160, 110, 60, .18) 50%, rgba(160, 110, 60, .1) 55%, transparent);
 }
 
-.ju-verdict__ink {
-  position: absolute;
-  inset: 28.5% 0;
-  animation: ju-write-ink 1.9s cubic-bezier(.4, .1, .6, 1) .85s both;
-}
-
-@keyframes ju-write {
-  from { transform: translate3d(-100%, 0, 0); }
-}
-
-@keyframes ju-write-ink {
-  from { transform: translate3d(100%, 0, 0); }
-}
-
-.ju-script--line {
-  stroke: #f0c48a;
-  stroke-width: 1.1;
-}
-
-.ju-verdict__rule {
-  fill: none;
-  stroke: #d9a464;
-  stroke-width: .5;
-  opacity: .6;
-}
-
-/* the point of the pen, travelling with the writing */
-.ju-verdict__nib {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: calc(var(--moon-r, 200px) * .14);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(255, 236, 196, .9), rgba(240, 180, 110, .35) 40%, transparent);
-  --run: calc(var(--moon-r, 200px) * 4.7);
-  opacity: 0;
-  animation: ju-nib 1.9s cubic-bezier(.4, .1, .6, 1) .85s both;
-}
-
-@keyframes ju-nib {
-  0% { transform: translate3d(0, 0, 0); opacity: 0; }
-  6% { opacity: 1; }
-  94% { opacity: 1; }
-  100% { transform: translate3d(var(--run), 0, 0); opacity: 0; }
-}
-
-/* the verdict sealed: a brass light runs once along the whole line (no flash) */
-.ju-verdict__seal {
-  position: absolute;
-  inset: -60% -2%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(255, 214, 150, .32), rgba(255, 190, 120, .1) 60%, transparent);
-  opacity: 0;
-  animation: ju-seal 1.6s ease-out 2.75s both;
-}
-
-@keyframes ju-seal {
-  0% { opacity: 0; }
-  15% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* ---- the brass motes: drifting in, slowing, locked to the grid on the verdict ---- */
-.ju-stage {
-  position: absolute;
-  left: var(--moon-x, 72%);
-  top: var(--moon-y, 48%);
-  width: var(--moon-r, 200px);
-  height: var(--moon-r, 200px);
-}
-
-.ju-mote {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: #f0c48a;
-  box-shadow: 0 0 3px rgba(255, 200, 130, .6);
-  opacity: .75;
-  animation: ju-lock 2.75s cubic-bezier(.1, .4, .2, 1) both;
-}
-
-.ju-mote--big {
-  width: 4px;
-  height: 4px;
-}
-
-@keyframes ju-lock {
-  from { transform: translate3d(calc(var(--moon-r, 200px) * var(--dx)), calc(var(--moon-r, 200px) * var(--dy)), 0); opacity: 0; }
-  30% { opacity: .75; }
-}
-
-/* ---- light theme: brass ink on paper ---- */
-:root[data-theme="parchment"] .ju-script,
-:root[data-theme="parchment"] .ju-ring__rule,
-:root[data-theme="parchment"] .ju-verdict__rule {
-  stroke: #8a5a24;
-}
-
-:root[data-theme="parchment"] .ju-ring {
-  filter: none;
-}
-
-:root[data-theme="parchment"] .ju-mote {
-  background: #8a5a24;
+:root[data-theme="parchment"] .ju-horizon__line {
+  background: linear-gradient(90deg, rgba(138, 90, 36, .4), rgba(138, 90, 36, .8) 50%, rgba(138, 90, 36, .4));
   box-shadow: none;
 }
 
+:root[data-theme="parchment"] .ju-light {
+  mix-blend-mode: multiply;
+  opacity: .3;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .ju-ring,
-  .ju-verdict__reveal,
-  .ju-verdict__ink,
-  .ju-verdict__nib,
-  .ju-verdict__seal,
-  .ju-mote {
+  .ju-stratum,
+  .ju-horizon__glow,
+  .ju-horizon__line,
+  .ju-light {
     animation: none;
   }
 }

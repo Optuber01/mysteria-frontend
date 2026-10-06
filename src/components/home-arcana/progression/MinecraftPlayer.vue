@@ -23,7 +23,7 @@ import type { SkinViewer } from 'skinview3d';
 // Optuber's own skin (classic arms), from the Mojang session server.
 import playerSkinUrl from '@/assets/images/home/progression/player-skin.png';
 import { drawVial, hexToRgb, vialKey } from './art';
-import { isNearby, whenSettled } from './prewarm';
+import { isNearby, whenSettled, yieldToIdle } from './prewarm';
 
 /** The held bottle on screen: centre and height, px relative to this figure. */
 export type BottlePosition = { x: number; y: number; size: number };
@@ -639,6 +639,8 @@ async function createViewer() {
   try {
     const [skinview, threeModule] = await Promise.all([import('skinview3d'), import('three')]);
     three = threeModule;
+    // each heavy step in its own idle slice, never one long block (see prewarm.ts)
+    await yieldToIdle();
     if (disposed || !canvas.value || !host.value || viewer) return;
 
     const instance = new skinview.SkinViewer({
@@ -667,12 +669,17 @@ async function createViewer() {
     resizeObserver = new ResizeObserver(sizeViewer);
     resizeObserver.observe(host.value);
 
+    await yieldToIdle();
     await instance.loadSkin(playerSkinUrl, { model: 'default' });
+    if (disposed || !viewer) return;
+    await yieldToIdle();
     if (disposed || !viewer) return;
     if (props.costume) dress(instance);
     makeBottle(instance);
     addVeins(instance);
 
+    await yieldToIdle();
+    if (disposed || !viewer) return;
     ready.value = true;
     sizeViewer();
     syncPlayback();
@@ -700,9 +707,7 @@ onMounted(() => {
   );
   intersectionObserver.observe(host.value);
   // The context, shaders and skin are ready before the first scroll into the story (see prewarm.ts).
-  cancelPrewarm = whenSettled(() => {
-    if (isNearby(host.value)) void createViewer();
-  });
+  cancelPrewarm = whenSettled(() => (isNearby(host.value) ? createViewer() : undefined));
 });
 
 watch(() => props.armed, maybeCreateViewer);

@@ -1,288 +1,177 @@
 <template>
   <!--
-    Fool: the gray fog rises out of the streets and swallows Backlund whole, until only the
-    keep's two towers stand above a sea of fog, like the palace above the gray fog. Crimson
-    stars hang over it, pulsing slowly and out of step; one brightens as if someone just
-    prayed, then settles.
+    Fool: the gray fog rises out of the streets, bank over bank, until Backlund is gone under
+    it and only the castle's spires stand above, like the palace above the gray fog. A few
+    crimson stars hang in it, and one brightens as if someone had just prayed. The fog is
+    the scene's own fog-bank texture, in soft bands like .night__fog, tinted and cut like .night__clouds.
   -->
-  <div class="fool" aria-hidden="true">
+  <div class="fool" aria-hidden="true" :style="{'--fog': `url(${fog})`}">
     <template v-if="layer === 'back'">
-      <i v-for="(s, i) in stars" :key="i" class="fool__star" :class="{'fool__star--prayer': s.prayer}" :style="s.style">
-        <i class="fool__glint"></i>
-      </i>
+      <!-- far fog behind the castle, so the spires stand dark against grey -->
+      <div class="fool__bank fool__bank--far"><i class="fool__tex"></i></div>
     </template>
-    <div v-else class="fool__sea">
-      <div class="fool__rise">
-        <i class="fool__body"></i>
-        <!-- the surface: rows of moonlit billows, far to near -->
-        <svg v-for="row in rows" :key="row.k" class="fool__swell" :class="`fool__swell--${row.k}`" :viewBox="`0 0 ${W} ${H}`" preserveAspectRatio="xMidYMax meet">
-          <defs>
-            <linearGradient :id="`fool-lobe-${row.k}`" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" style="stop-color: rgb(var(--top))"/>
-              <stop :offset="row.k === 'near' ? .3 : .42" style="stop-color: rgb(var(--mid))"/>
-              <stop offset="1" style="stop-color: rgb(var(--mid))"/>
-            </linearGradient>
-          </defs>
-          <rect x="0" :y="row.base" :width="W" :height="H - row.base" style="fill: rgb(var(--mid))"/>
-          <ellipse v-for="(c, i) in row.lobes" :key="i" :cx="c[0]" :cy="c[1]" :rx="c[2] * 1.8" :ry="c[2] * .72" :fill="`url(#fool-lobe-${row.k})`"/>
-        </svg>
-        <i class="fool__wisps"></i>
+    <template v-else>
+      <!-- the banks drift together (one layer, one slow loop); each rises on its own -->
+      <div class="fool__drift">
+        <div v-for="(b, i) in BANDS" :key="i" class="fool__bank" :style="b"><i class="fool__tex"></i></div>
       </div>
-    </div>
+      <i v-for="(s, i) in STARS" :key="`s${i}`" class="fool__star" :class="{'fool__star--prayer': i === PRAYER}" :style="s"></i>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{layer: 'back' | 'front'}>();
+import fog from '../assets/moon/fog-bank.webp';
+
+defineProps<{layer: 'back' | 'front'; from?: string}>();
 
 /*
- * The fog's surface, drawn as overlapping lobes (one row per depth) in a wide strip that
- * sways slowly: wider than any screen, so it never shows an end. Seeded, so the same sea
- * rises on every draw.
+ * The banks, from the street up: bottom edge and height (city heights above the city's
+ * foot), strength, when it starts rising, and where in the texture it starts (so no two
+ * banks line up). The top one levels off at the castle's shoulders, under the spires.
  */
-const W = 3600;
-const H = 300;
-let seed = 7;
-const rnd = (a: number, b: number) => {
-  seed = (seed * 16807) % 2147483647;
-  return a + ((seed - 1) / 2147483646) * (b - a);
-};
-function lobes(surface: number, rMin: number, rMax: number) {
-  const out: [number, number, number][] = [];
-  for (let x = -60; x < W + 60;) {
-    const r = Math.round(rnd(rMin, rMax));
-    out.push([Math.round(x), Math.round(surface + r * rnd(0.35, 0.6)), r]);
-    x += r * rnd(1.5, 2.4);
-  }
-  return out;
-}
-const rows = [
-  {k: 'far', base: 150, lobes: lobes(118, 26, 62)},
-  {k: 'mid', base: 190, lobes: lobes(150, 34, 84)},
-  {k: 'near', base: 236, lobes: lobes(196, 40, 100)},
-];
+const BANDS = [
+  {b: -.06, h: .34, o: .5, d: .2, x: 0},
+  {b: .08, h: .3, o: .5, d: .5, x: 37},
+  {b: .2, h: .3, o: .52, d: .8, x: 71},
+  {b: .31, h: .28, o: .5, d: 1.1, x: 13},
+  {b: .4, h: .24, o: .42, d: 1.4, x: 88},
+].map(({b, h, o, d, x}) => ({'--b': b, '--h': h, '--o': o, '--d': `${d}s`, '--x': `${x}%`}));
 
-/* Where the stars hang, in moon radii from the moon: in the open sky round the deck, above the fog. */
-const stars = [
-  {x: 1.95, y: -0.72, s: 1.25, t: 5.2, d: 0.3, prayer: true},
-  {x: 2.2, y: -1.35, s: 0.9, t: 6.8, d: 1.9},
-  {x: 2.36, y: -0.55, s: 0.7, t: 4.6, d: 3.1},
-  {x: -2.25, y: -0.78, s: 0.85, t: 7.4, d: 2.4},
-  {x: -1.9, y: -1.56, s: 1, t: 5.8, d: 0.9},
-  {x: 0.55, y: -2.02, s: 0.75, t: 6.2, d: 3.6},
-  {x: -0.62, y: -2.06, s: 0.8, t: 7.9, d: 1.4},
-  {x: 1.5, y: -1.95, s: 0.95, t: 5.5, d: 2.8},
-  {x: 2.3, y: -1.98, s: 0.65, t: 6.6, d: 0.6},
-].map(s => ({
-  prayer: !!s.prayer,
-  style: {'--x': String(s.x), '--y': String(s.y), '--s': String(s.s), '--t': `${s.t}s`, '--d': `${s.d}s`},
-}));
+/* crimson stars in the fog round the spires (x across the city box, y above its foot), the
+   last one the prayer that flares */
+const STARS = [
+  {x: .37, y: .58, o: .45, d: 2.2}, {x: .47, y: .69, o: .3, d: 2.5}, {x: .61, y: .55, o: .5, d: 2.35},
+  {x: .7, y: .79, o: .35, d: 2.7}, {x: .79, y: .6, o: .42, d: 2.45}, {x: .88, y: .7, o: .32, d: 2.8},
+  {x: .95, y: .57, o: .38, d: 2.6}, {x: .83, y: .66, o: .55, d: 2.3},
+].map(({x, y, o, d}) => ({'--sx': x, '--sy': y, '--o': o, '--d': `${d}s`}));
+const PRAYER = STARS.length - 1;
 </script>
 
 <style scoped>
 .fool {
-  /* the fog sea's colours: a moonlit top, a deep grey body */
-  --top: 184, 182, 194;
-  --mid: 128, 126, 140;
-  --deep: 74, 72, 84;
-  /* sea level: where the keep's body ends and only its two towers rise above */
-  --sea: calc(var(--city-bottom, 100%) - var(--city-h, 600px) * .565);
+  --H: var(--city-h, 600px);
+  --tone: #cfccd8;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-/* ---- the crimson stars ---- */
+/* the drifting layer: twice the width, slid one width over three minutes (the one loop) */
+.fool__drift {
+  position: absolute;
+  left: 0;
+  top: calc(var(--city-bottom, 100%) - var(--H) * .7);
+  height: calc(var(--H) * .76);
+  width: 200%;
+  will-change: transform;
+  animation: fool-drift 180s linear infinite;
+}
+
+/*
+ * One bank of fog, soft at top and bottom. The fog is the scene's cloud technique: the
+ * texture multiplied by the fog's colour and cut by its own luminance, so where there is
+ * no fog there is nothing at all (it stays right even while the moment fades in or out).
+ */
+.fool__bank {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--H) * (var(--b) + .06));
+  height: calc(var(--H) * var(--h));
+  opacity: var(--o);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 32%, #000 68%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 32%, #000 68%, transparent);
+  animation: fool-rise 2.4s cubic-bezier(.25, .6, .3, 1) var(--d) both;
+}
+
+.fool__tex {
+  --tile: var(--fog) repeat-x var(--x, 0) 50% / 50% 100%;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--tone), var(--tone)), var(--tile);
+  background-blend-mode: multiply;
+  -webkit-mask: var(--tile);
+  mask: var(--tile);
+  -webkit-mask-mode: luminance;
+  mask-mode: luminance;
+}
+
+/* behind the castle: one wide bank at the spires' feet */
+.fool__bank--far {
+  --b: .44;
+  --h: .3;
+  --o: .4;
+  --d: 1s;
+  --x: 54%;
+  bottom: auto;
+  top: calc(var(--city-bottom, 100%) - var(--H) * .76);
+}
+
+.fool__bank--far .fool__tex {
+  --tile: var(--fog) repeat-x var(--x) 50% / 100% 100%;
+}
+
+/* a crimson star in the fog: a single texel of light */
 .fool__star {
   position: absolute;
-  left: calc(var(--moon-x, 72%) + var(--moon-r, 200px) * var(--x));
-  top: calc(var(--moon-y, 48%) + var(--moon-r, 200px) * var(--y));
+  left: calc(var(--city-left, 0px) + var(--H) * 16 / 9 * var(--sx));
+  top: calc(var(--city-bottom, 100%) - var(--H) * var(--sy));
   width: 4px;
   height: 4px;
   margin: -2px 0 0 -2px;
-  background: #ff5a64;
-  scale: var(--s);
-  animation:
-    fool-appear 1.6s ease calc(1.4s + var(--d) * .3) both,
-    fool-pulse var(--t) ease-in-out var(--d) infinite;
+  background: #e2404e;
+  box-shadow: 0 0 8px 2px rgba(200, 40, 56, .55);
+  opacity: var(--o);
+  animation: fool-star 1.6s ease var(--d) both;
 }
 
-/* the star's own soft light (static; the star's opacity carries it) */
-.fool__star::before {
-  content: '';
-  position: absolute;
-  inset: -9px;
-  border-radius: 50%;
-  background: radial-gradient(circle closest-side, rgba(220, 40, 56, .7), rgba(200, 40, 60, .22) 45%, transparent);
-}
-
-/* a prayer arriving: thin crossed rays, only on the star that flares */
-.fool__glint {
-  display: none;
-}
-
-.fool__star--prayer .fool__glint {
-  display: block;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 46px;
-  height: 46px;
-  margin: -23px 0 0 -23px;
-  background:
-    linear-gradient(90deg, transparent, rgba(255, 120, 128, .85) 50%, transparent) center / 100% 1px no-repeat,
-    linear-gradient(0deg, transparent, rgba(255, 120, 128, .85) 50%, transparent) center / 1px 100% no-repeat,
-    radial-gradient(circle closest-side, rgba(255, 90, 100, .55), transparent 70%);
-  opacity: 0;
-  animation: fool-prayer 2.6s ease-out 3.4s both;
-}
-
+/* someone prays: it brightens, swells a little, and settles back among the others */
 .fool__star--prayer {
-  animation:
-    fool-appear 1.6s ease 1.2s both,
-    fool-flare 2.6s ease-out 3.4s both,
-    fool-pulse var(--t) ease-in-out 6s infinite;
-}
-
-@keyframes fool-appear {
-  from { opacity: 0; }
-}
-
-@keyframes fool-pulse {
-  50% { opacity: .45; }
-}
-
-@keyframes fool-flare {
-  0% { scale: var(--s); }
-  18% { scale: calc(var(--s) * 2); }
-  100% { scale: var(--s); }
-}
-
-@keyframes fool-prayer {
-  0% { opacity: 0; transform: scale(.4) rotate(0deg); }
-  16% { opacity: 1; transform: scale(1.15) rotate(8deg); }
-  100% { opacity: 0; transform: scale(.8) rotate(16deg); }
-}
-
-/* ---- the sea of gray fog, in front of the city ---- */
-.fool__sea {
-  position: absolute;
-  inset: calc(var(--sea) - 130px) 0 0;
-  overflow: hidden;
-  /* thinner over the copy column, full over the castle */
-  -webkit-mask-image: linear-gradient(90deg, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .8) 30%, #000 50%);
-  mask-image: linear-gradient(90deg, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .8) 30%, #000 50%);
-}
-
-/* it climbs out of the streets */
-.fool__rise {
-  position: absolute;
-  inset: 0;
-  animation: fool-rise 3.2s cubic-bezier(.25, .6, .3, 1) .5s both;
-}
-
-@keyframes fool-rise {
-  from { opacity: 0; transform: translate3d(0, 62%, 0); }
-  30% { opacity: 1; }
-}
-
-/* the deep fog under the surface, hiding the streets */
-.fool__body {
-  position: absolute;
-  inset: 280px 0 0;
-  background: linear-gradient(180deg, rgba(var(--mid), .94), rgba(var(--deep), .97) 45%, rgba(var(--deep), .98));
-}
-
-/* the billows: each row a wide strip, swaying slowly against the others (softened once, never re-blurred) */
-.fool__swell {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  height: 300px;
-  width: auto;
-  max-width: none;
-  aspect-ratio: 3600 / 300;
-  translate: -50% 0;
-  filter: blur(3.5px);
-  animation: fool-sway 52s ease-in-out infinite alternate;
-  /* its own layer: rastered and blurred once, then only slid (otherwise the blur reruns every frame) */
-  will-change: transform;
-}
-
-.fool__swell--far {
-  opacity: .7;
-  animation-duration: 70s;
-}
-
-.fool__swell--mid {
-  opacity: .92;
-  animation-direction: alternate-reverse;
-}
-
-.fool__swell--near {
-  filter: blur(6px);
-  animation-duration: 40s;
-}
-
-@keyframes fool-sway {
-  from { transform: translate3d(-3%, 0, 0); }
-  to { transform: translate3d(3%, 0, 0); }
-}
-
-/* wisps moving through it (the scene's own fog texture, lightened) */
-.fool__wisps {
-  position: absolute;
-  top: 150px;
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%);
-  mask-image: linear-gradient(180deg, transparent, #000 40%);
-  left: 0;
-  width: 200%;
-  height: 260px;
-  background: url('../assets/moon/fog-bank.webp') repeat-x 0 0 / 50% 100%;
-  mix-blend-mode: screen;
-  opacity: .4;
-  animation: fool-drift 120s linear infinite;
-  will-change: transform;
+  animation: fool-prayer 3.4s ease var(--d) both;
 }
 
 @keyframes fool-drift {
   to { transform: translate3d(-50%, 0, 0); }
 }
 
-/* paper: a pale fog, the same sea */
+@keyframes fool-rise {
+  from { opacity: 0; transform: translate3d(0, calc(var(--H) * .2), 0); }
+}
+
+@keyframes fool-star {
+  from { opacity: 0; }
+}
+
+@keyframes fool-prayer {
+  0% { opacity: 0; transform: none; }
+  25% { opacity: var(--o); transform: none; }
+  45% { opacity: 1; transform: scale(2); }
+  100% { opacity: var(--o); transform: none; }
+}
+
+/* paper: a pewter fog laid over the haze (multiplied, darker), never white on white */
 :root[data-theme="parchment"] .fool {
-  --top: 246, 245, 248;
-  --mid: 226, 224, 230;
-  --deep: 216, 213, 220;
+  --tone: #8f8c99;
 }
 
-:root[data-theme="parchment"] .fool__wisps {
-  display: none;
+:root[data-theme="parchment"] .fool__drift,
+:root[data-theme="parchment"] .fool__bank--far {
+  mix-blend-mode: multiply;
 }
 
-:root[data-theme="parchment"] .fool__star::before {
-  background: radial-gradient(circle closest-side, rgba(200, 40, 56, .35), transparent);
-}
-
-@media (max-width: 900px) {
-  /* stacked: the sea stays, the stars round the deck would only sit under it */
-  .fool__star {
-    display: none;
-  }
+:root[data-theme="parchment"] .fool__star {
+  background: #b3202b;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fool__rise,
-  .fool__swell,
-  .fool__wisps,
+  .fool__drift,
+  .fool__bank,
   .fool__star,
   .fool__star--prayer {
     animation: none;
-  }
-
-  .fool__glint {
-    display: none !important;
   }
 }
 </style>
