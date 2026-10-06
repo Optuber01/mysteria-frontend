@@ -4,7 +4,7 @@
     <figure v-if="shot" class="lightbox__figure">
       <img :src="shot.src" :alt="shot.place" :width="shot.w" :height="shot.h" decoding="async">
       <figcaption class="lightbox__caption">
-        <span class="lightbox__credit"><strong>{{ shot.place }}</strong> · {{ creditText }}</span>
+        <span class="lightbox__credit"><strong>{{ shot.place }}</strong> · {{ creditText }}<template v-if="shot.role"> ({{ shot.role }})</template> · {{ epochText }}</span>
         <a v-if="shot.source" :href="shot.source" class="lightbox__source" target="_blank" rel="noopener noreferrer">
           <IconDiscord class="lightbox__icon" aria-hidden="true"/>
           {{ t('home.world.gallery.source') }}
@@ -39,6 +39,7 @@ const dialogRef = ref<HTMLDialogElement | null>(null);
 const shot = computed(() => (props.index === null ? null : props.shots[props.index] ?? null));
 const creditText = computed(() => (shot.value ? t('home.world.credit').replace('{author}', shot.value.author) : ''));
 const label = computed(() => t('home.world.gallery.label'));
+const epochText = computed(() => (shot.value ? t('home.world.gallery.epochLong').replace('{n}', shot.value.epoch === 1 ? 'I' : 'II') : ''));
 
 function step(by: number) {
   if (props.index === null) return;

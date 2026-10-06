@@ -233,7 +233,7 @@
               :aria-label="t('home.world.gallery.open').replace('{place}', item.shot.place).replace('{author}', item.shot.author)"
               @click="openShot(item.index)"
           >
-            <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm"/>
+            <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm" epoch/>
           </button>
         </li>
       </ul>

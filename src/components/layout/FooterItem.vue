@@ -63,7 +63,7 @@
 <script lang="ts" setup>
 import {useI18n} from "@/composables/useI18n";
 import {SERVER_IP} from "@/composables/useServer";
-import logo from "@/assets/icons/sources/IconLogo.webp";
+import logo from "@/assets/icons/sources/IconLogo-128.webp";
 
 withDefaults(defineProps<{ variant?: "full" | "slim" }>(), {variant: "slim"});
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="drink-scene" :style="sceneVars" role="group" :aria-label="tp('drink.sceneLabel')">
+  <div class="drink-scene" :class="{ 'is-idle': !active }" :style="sceneVars" role="group" :aria-label="tp('drink.sceneLabel')">
     <!-- Spirit-vision light: a column rising from the circle at the awakening. -->
     <div class="drink-scene__beam" aria-hidden="true" />
 
@@ -713,6 +713,11 @@ const sceneVars = computed(() => {
   0%, 100% { translate: -50% 0; }
   33% { translate: calc(-50% + 1px) 0; }
   66% { translate: calc(-50% - 1px) 0; }
+}
+
+/* hidden (any other chapter), the voices hold still: a running loop costs a frame every tick */
+.drink-scene.is-idle .whisper {
+  animation-play-state: paused;
 }
 
 /* the shiver moves the composited text (translate), never its layout box */

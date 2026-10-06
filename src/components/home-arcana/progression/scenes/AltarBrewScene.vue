@@ -1,5 +1,5 @@
 <template>
-  <div class="altar-scene" :style="sceneVars" role="group" :aria-label="tp('altar.sceneLabel')">
+  <div class="altar-scene" :class="{ 'is-idle': !active }" :style="sceneVars" role="group" :aria-label="tp('altar.sceneLabel')">
     <!-- soul-fire light pooled on the floor, the Pathway's colour once the brew takes -->
     <div class="altar-scene__bloom" aria-hidden="true" />
 
@@ -508,6 +508,11 @@ const beamStyle = computed<CSSProperties>(() => {
   image-rendering: pixelated;
   content: '';
   animation: soul-fire 0.5s steps(1) infinite;
+}
+
+/* hidden (any other chapter), the flame holds still: a running loop costs a frame every tick */
+.altar-scene.is-idle .cauldron__fire::before {
+  animation-play-state: paused;
 }
 
 @keyframes soul-fire {

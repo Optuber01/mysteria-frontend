@@ -40,10 +40,13 @@ const props = withDefaults(defineProps<{
   warm?: boolean;
   /** Ingredient keys that have left the page (their icons are hidden). */
   hidden?: string[];
+  /** The reader's hand on the cover (0 shut, 1 open flat), over what the scroll says; null to follow it. */
+  open?: number | null;
 }>(), {
   reducedMotion: false,
   warm: false,
   hidden: () => [],
+  open: null,
 });
 const emit = defineEmits<{ (e: 'anchors', value: BookAnchors): void }>();
 
@@ -643,9 +646,11 @@ function updatePose() {
   const p = props.reducedMotion ? 1 : clamp01(props.progress);
   const descend = phase(p, 0, 0.2);
   const faceCover = phase(p, 0.2, 0.43);
-  const opening = phase(p, 0.5, 0.88);
-  const pageOpening = phase(p, 0.55, 0.9);
-  const settle = phase(p, 0.88, 1);
+  const held = props.open === null ? null : clamp01(props.open);
+  // in the hand the cover follows the finger, the page a step behind it
+  const opening = held ?? phase(p, 0.5, 0.88);
+  const pageOpening = held === null ? phase(p, 0.55, 0.9) : clamp01((held - 0.1) / 0.9);
+  const settle = phase(p, 0.88, 1) * (held ?? 1);
 
   bookRoot.visible = props.reducedMotion || p > 0.004;
   // a short fall into place (the scene fades it in): never from beyond the canvas edge
@@ -884,7 +889,7 @@ onMounted(() => {
 watch(() => props.warm, (warm) => {
   if (warm) void loadAssets().catch(() => undefined);
 });
-watch(() => [props.progress, props.reducedMotion], () => {
+watch(() => [props.progress, props.reducedMotion, props.open], () => {
   if (!initialized && shouldInitialize()) void initialize();
   updatePose();
 });

@@ -3,7 +3,7 @@
     id="progression"
     ref="sectionRef"
     class="progression"
-    :class="{ 'is-lite': lite }"
+    :class="{ 'is-lite': lite, 'is-live': live }"
     aria-labelledby="progression-title"
   >
     <div ref="stickyRef" class="progression__sticky">
@@ -252,6 +252,8 @@ const backdropRef = ref<HTMLImageElement | null>(null);
 const progress = ref(0);
 const entryProgress = ref(0);
 const visible = ref(false);
+/** On or near the screen: its full-bleed layers are promoted (see .is-live). */
+const live = ref(false);
 // True once the chapter is within about a viewport: starts lazy downloads.
 const near = ref(false);
 const reducedMotion = useReducedMotion();
@@ -337,6 +339,7 @@ const inspectorAnchor = ref<HTMLElement | null>(null);
 const inspectorScene = ref<DetailScene | null>(null);
 let observer: IntersectionObserver | null = null;
 let nearObserver: IntersectionObserver | null = null;
+let liveObserver: IntersectionObserver | null = null;
 let cancelPrewarm: (() => void) | null = null;
 let stageObserver: ResizeObserver | null = null;
 let frame = 0;
@@ -614,9 +617,12 @@ onMounted(() => {
     nearObserver?.disconnect();
     nearObserver = null;
   }, { rootMargin: '100% 0px' });
+  // a screen ahead, so the layers are rastered before they scroll in
+  liveObserver = new IntersectionObserver(([entry]) => (live.value = entry.isIntersecting), { rootMargin: '100% 0px' });
   if (sectionRef.value) {
     observer.observe(sectionRef.value);
     nearObserver.observe(sectionRef.value);
+    liveObserver.observe(sectionRef.value);
   }
   if (stageRef.value) {
     stageObserver = new ResizeObserver(measureStage);
@@ -647,6 +653,7 @@ onUnmounted(() => {
   cancelPrewarm?.();
   observer?.disconnect();
   nearObserver?.disconnect();
+  liveObserver?.disconnect();
   stageObserver?.disconnect();
   pageObserver?.disconnect();
   removeEventListener('scroll', update);
@@ -756,14 +763,23 @@ onUnmounted(() => {
 
 /* Scroll drives these full-bleed layers' opacity and transform every frame: on their own
    compositor layers that is a cheap re-composite instead of repainting (and re-filtering
-   the backdrop photo) across the whole sticky screen. */
-.progression__backdrop,
-.progression__hearth,
-.progression__fogbank,
-.progression__burst,
-.progression__dread,
-.progression-nav__line b {
+   the backdrop photo) across the whole sticky screen. Only while the story is on or near
+   the screen: promoted everywhere, they were kept (and re-rastered after every return
+   to the tab) while the reader was in the hero or the gallery. */
+.progression.is-live .progression__backdrop,
+.progression.is-live .progression__hearth,
+.progression.is-live .progression__fogbank,
+.progression.is-live .progression__burst,
+.progression.is-live .progression__dread,
+.progression.is-live .progression-nav__line b,
+.progression.is-live .progression__sigil-halo,
+.progression.is-live .progression__sigil-art {
   will-change: transform, opacity;
+}
+
+.progression.is-live .progression__sigil-turn,
+.progression.is-live .progression__fog {
+  will-change: transform;
 }
 
 /*
@@ -819,7 +835,6 @@ onUnmounted(() => {
   background: radial-gradient(circle, color-mix(in oklab, var(--acc) 26%, transparent) 22%, color-mix(in oklab, var(--acc) 8%, transparent) 46%, transparent 68%);
   opacity: calc(var(--sigil-in) * 0.9 + var(--sigil-ring) * 0.1);
   transform: scale(calc(0.7 + var(--sigil-in) * 0.3));
-  will-change: transform, opacity;
 }
 
 /* scroll turns it a little; once lit it keeps turning, very slowly, on the compositor */
@@ -827,7 +842,6 @@ onUnmounted(() => {
   inset: 4%;
   /* it rises into place and stays still: no turning */
   transform: scale(calc(0.86 + var(--sigil-in) * 0.14));
-  will-change: transform;
 }
 
 /*
@@ -846,7 +860,6 @@ onUnmounted(() => {
   filter: brightness(1.6) saturate(1.1);
   opacity: var(--sigil-in);
   transform: scale(calc(0.82 + var(--sigil-in) * 0.18));
-  will-change: transform, opacity;
 }
 
 .progression__sigil.is-example .progression__sigil-art {
@@ -878,7 +891,6 @@ onUnmounted(() => {
   left: -15%;
   width: 130%;
   transform: translate3d(calc(var(--journey) * var(--drift)), 0, 0);
-  will-change: transform;
 }
 
 .progression__fog--far {

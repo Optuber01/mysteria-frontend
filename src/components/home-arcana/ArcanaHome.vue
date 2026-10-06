@@ -75,9 +75,13 @@ watch(() => card.value.accent, accent => {
  */
 let offscreenObserver: IntersectionObserver | null = null;
 const held = new WeakMap<Element, Element[]>();
+/** The chapters outside the viewport now. */
+const away = new Set<Element>();
 function holdLoops(section: Element, offscreen: boolean) {
   held.get(section)?.forEach(el => el.classList.remove('arc-held'));
   held.delete(section);
+  if (offscreen) away.add(section);
+  else away.delete(section);
   if (!offscreen) return;
   const loops = new Set<Element>();
   for (const animation of section.getAnimations({subtree: true})) {
@@ -98,10 +102,19 @@ onMounted(() => {
     for (const entry of entries) holdLoops(entry.target, !entry.isIntersecting);
   }, {rootMargin: '200px 0px'});
   document.querySelectorAll('.concept-arcana > .arc-main > *').forEach(section => offscreenObserver?.observe(section));
+  // A loop can start after its chapter left the viewport (the online pulse waits for the
+  // server's answer): held then too, or it ticked a frame on every refresh from far away.
+  document.querySelector('.concept-arcana > .arc-main')?.addEventListener('animationstart', onLoopStart);
 });
+
+function onLoopStart(event: Event) {
+  const section = event.target instanceof Element ? event.target.closest('.concept-arcana > .arc-main > *') : null;
+  if (section && away.has(section)) holdLoops(section, true);
+}
 
 onUnmounted(() => {
   offscreenObserver?.disconnect();
+  document.querySelector('.concept-arcana > .arc-main')?.removeEventListener('animationstart', onLoopStart);
   document.body.style.removeProperty('--acc');
   document.body.style.removeProperty('--acc-deep');
   document.body.style.removeProperty('--acc-fill');

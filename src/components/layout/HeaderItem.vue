@@ -145,7 +145,7 @@ import {useLocalePath} from "@/composables/useLocalePath";
 import {SEASON_ANNOUNCEMENT_SLUG} from "@/constants/season";
 import {useAuthStore} from "@/stores/auth";
 import {useTheme} from "@/composables/useTheme";
-import logo from "@/assets/icons/sources/IconLogo.webp";
+import logo from "@/assets/icons/sources/IconLogo-128.webp";
 
 interface NavLink {
   path: string;

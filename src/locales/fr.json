@@ -998,7 +998,9 @@
         "source": "View the original post",
         "prev": "Previous screenshot",
         "next": "Next screenshot",
-        "close": "Close"
+        "close": "Close",
+        "epoch": "Epoch {n}",
+        "epochLong": "Taken in Epoch {n}"
       },
       "credit": "By {author}",
       "join": {

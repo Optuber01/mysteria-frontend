@@ -1,5 +1,15 @@
 <template>
-  <div class="book-scene" :class="{ 'is-readable': readable }" role="group" :aria-label="tp('book.sceneLabel')">
+  <div
+    class="book-scene"
+    :class="{ 'is-readable': readable, 'is-grabbable': grabbable, 'is-held': dragging }"
+    role="group"
+    :aria-label="tp('book.sceneLabel')"
+    @pointerdown="grab"
+    @pointermove="drag"
+    @pointerup="letGo"
+    @pointercancel="letGo"
+    @click.capture="swallowClick"
+  >
     <div class="book-scene__box" :style="boxStyle">
       <div class="book-scene__glow" :style="{ opacity: glow.toFixed(4) }" aria-hidden="true" />
       <div class="book-scene__rig" :style="{ opacity: entrance.toFixed(4) }">
@@ -9,6 +19,7 @@
           :warm="warm"
           :labels="labels"
           :hidden="hidden"
+          :open="heldOpen"
           @anchors="onAnchors"
         />
       </div>
@@ -36,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import type { CSSProperties } from 'vue';
 import { useReducedMotion } from '@/composables/useReducedMotion';
 import VanillaBookRig from './VanillaBookRig.vue';
@@ -90,8 +101,115 @@ const closeT = computed(() => (reducedMotion.value ? 0 : ease(g.value, [T.bookOu
 const rigProgress = computed(() => (reducedMotion.value ? 1 : bookLocal.value * (1 - closeT.value * 0.56)));
 const entrance = computed(() => (reducedMotion.value ? 1 : smooth(bookLocal.value / 0.16)));
 const readT = computed(() => (reducedMotion.value ? 1 : smooth((bookLocal.value - 0.95) / 0.05)));
-const readable = computed(() => props.active && readT.value > 0.92 && g.value < T.readable[1]);
+const readable = computed(() => props.active && readT.value > 0.92 && g.value < T.readable[1] && (heldOpen.value ?? 1) > 0.97);
 const glow = computed(() => entrance.value * (0.55 + readT.value * 0.45));
+
+/*
+ * The reader's hand. Once the cover faces them, until the cauldron comes up under the book,
+ * they can drag the cover shut and open again (right to close, left to open, as on paper);
+ * a tap on the shut cover opens it. On release it falls open or shut. When the brew needs
+ * the open pages, or the scroll catches up with the hand, the scroll takes the book back.
+ */
+const scrollOpen = computed(() => (reducedMotion.value ? 1 : smooth((rigProgress.value - 0.5) / 0.38)));
+const grabbable = computed(() => props.active && rigProgress.value >= 0.45 && g.value < T.brewIn[0]);
+/** Where the hand holds the cover (0 shut .. 1 open), and how much it outweighs the scroll. */
+const hand = ref(1);
+const weight = ref(0);
+const dragging = ref(false);
+const heldOpen = computed(() => (weight.value > 0 ? scrollOpen.value + (hand.value - scrollOpen.value) * weight.value : null));
+
+let tween = 0;
+function animate(target: typeof hand, to: number, duration: number, then?: () => void) {
+  cancelAnimationFrame(tween);
+  const from = target.value;
+  if (reducedMotion.value || duration <= 0 || Math.abs(to - from) < 0.001) {
+    target.value = to;
+    then?.();
+    return;
+  }
+  const start = performance.now();
+  const step = (now: number) => {
+    const k = Math.min(1, (now - start) / duration);
+    target.value = from + (to - from) * (1 - (1 - k) ** 3);
+    if (k < 1) tween = requestAnimationFrame(step);
+    else then?.();
+  };
+  tween = requestAnimationFrame(step);
+}
+/** Gives the book back to the scroll. */
+function release(duration = 520) {
+  if (weight.value === 0) return;
+  animate(weight, 0, duration);
+}
+
+let press: { id: number; x: number; y: number; from: number; at: number; vx: number; t: number } | null = null;
+let dragged = false;
+/** The drag that shuts the book: about the cover's swing across the box (layout.ts BOOK_FILL). */
+const swing = () => (props.layout?.book.w ?? 600) * 0.7;
+
+function grab(event: PointerEvent) {
+  if (!grabbable.value || (event.pointerType === 'mouse' && event.button !== 0)) return;
+  if (!(event.target instanceof Element) || !event.target.closest('.book-scene__box, .book-hotspot')) return;
+  press = { id: event.pointerId, x: event.clientX, y: event.clientY, from: heldOpen.value ?? scrollOpen.value, at: event.clientX, vx: 0, t: event.timeStamp };
+  dragged = false;
+}
+function drag(event: PointerEvent) {
+  if (!press || event.pointerId !== press.id) return;
+  const dx = event.clientX - press.x;
+  if (!dragging.value) {
+    // a sideways pull takes the cover; anything else is a scroll or a tap
+    if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(event.clientY - press.y)) return;
+    dragging.value = true;
+    dragged = true;
+    cancelAnimationFrame(tween);
+    hand.value = press.from;
+    weight.value = 1;
+    (event.currentTarget as Element).setPointerCapture(event.pointerId);
+    emit('clear-inspect');
+  }
+  const dt = Math.max(1, event.timeStamp - press.t);
+  press.vx = press.vx * 0.6 + ((event.clientX - press.at) / dt) * 0.4;
+  press.at = event.clientX;
+  press.t = event.timeStamp;
+  hand.value = Math.min(1, Math.max(0, press.from - dx / swing()));
+}
+function letGo(event: PointerEvent) {
+  if (!press || event.pointerId !== press.id) return;
+  const flick = press.vx;
+  press = null;
+  if (!dragging.value) {
+    // a tap on the shut cover opens it
+    if (event.type === 'pointerup' && (heldOpen.value ?? 1) < 0.5) {
+      dragged = true;
+      animate(hand, 1, 620);
+    }
+    return;
+  }
+  dragging.value = false;
+  // a flick decides; otherwise it falls the way it leans
+  const to = Math.abs(flick) > 0.35 ? (flick < 0 ? 1 : 0) : hand.value > 0.5 ? 1 : 0;
+  animate(hand, to, 260 + Math.abs(to - hand.value) * 420);
+}
+/** The click that ends a drag (or the tap that opened the cover) is not a tap on an entry. */
+function swallowClick(event: MouseEvent) {
+  if (!dragged) return;
+  dragged = false;
+  event.stopPropagation();
+  event.preventDefault();
+}
+
+// the scroll caught up with the hand: it has the book again
+watch([hand, scrollOpen, dragging], () => {
+  if (!dragging.value && weight.value === 1 && Math.abs(hand.value - scrollOpen.value) < 0.004) weight.value = 0;
+});
+// the brew needs the open pages (and scrolling back past the cover gives the book back too)
+watch(grabbable, (can) => {
+  if (can) return;
+  press = null;
+  dragging.value = false;
+  release();
+});
+onBeforeUnmount(() => cancelAnimationFrame(tween));
 
 const boxStyle = computed<CSSProperties>(() => {
   const b = props.layout?.book;
@@ -143,6 +261,22 @@ function inspect(id: string, event: Event) {
 .book-scene {
   position: absolute;
   inset: 0;
+}
+
+/* sideways drags reach the cover; up and down still scroll the story */
+.book-scene.is-grabbable .book-scene__box {
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.book-scene.is-grabbable .book-hotspot {
+  touch-action: pan-y;
+}
+
+.book-scene.is-held,
+.book-scene.is-held * {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .book-scene__box {
