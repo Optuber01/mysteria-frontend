@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "Creează comandă",
       "resubmitCommission": "Retrimite comanda"
-    }
+    },
+    "unread": "Necitită"
   },
   "commissions": {
     "pageTitle": "Cereri de comandă",

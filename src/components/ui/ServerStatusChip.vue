@@ -1,9 +1,15 @@
 <template>
-  <button class="ip-chip" :title="t('homePage.copyHint')" @click="copyIp">
-    <span :class="['status-dot', isOnline ? 'online' : 'offline']" aria-hidden="true"></span>
+  <button :class="['ip-chip', {'is-copied': copied}]" :title="t('homePage.copyHint')" type="button" @click="copyIp">
+    <!-- the check takes the dot's place, so the chip keeps its width while it confirms -->
+    <span class="chip-status">
+      <span :class="['status-dot', isOnline ? 'online' : 'offline']" aria-hidden="true"></span>
+      <Transition name="arc-fade">
+        <i v-if="copied" aria-hidden="true" class="fa-solid fa-check chip-copied"></i>
+      </Transition>
+    </span>
     <span class="chip-ip">{{ SERVER_IP }}</span>
     <span v-if="isOnline && playerCount !== null" class="chip-players">· {{ playerCount }}</span>
-    <span v-if="copied" class="chip-copied">✓</span>
+    <span class="arc-sr" role="status">{{ copied ? t('copySuccess') : '' }}</span>
   </button>
 </template>
 
@@ -18,60 +24,70 @@ const {copied, copyIp} = useCopyIp();
 
 <style scoped>
 .ip-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 9px;
   padding: 8px 14px;
-  background: var(--myst-wash);
-  border: 1px solid var(--myst-line-28);
-  border-radius: 2px;
+  background: color-mix(in oklab, var(--acc) 8%, transparent);
+  border: var(--arc-bw) solid var(--arc-line-acc);
+  border-radius: 10px;
   cursor: pointer;
-  font-family: var(--myst-font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  color: var(--myst-ink);
+  font-family: var(--arc-body);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--arc-ink);
   white-space: nowrap;
-  transition: all 0.25s ease;
+  transition:
+    border-color var(--arc-dur-2) var(--arc-ease),
+    background-color var(--arc-dur-2) var(--arc-ease);
 }
 
 .ip-chip:hover {
-  border-color: var(--myst-gold);
-  background: var(--myst-wash-strong);
+  border-color: var(--arc-line-hot);
+  background: color-mix(in oklab, var(--acc) 14%, transparent);
+}
+
+.chip-status {
+  --arc-popover-y: 3px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+}
+
+.chip-status > * {
+  grid-area: 1 / 1;
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  flex-shrink: 0;
-  transition: background 0.4s ease;
+  transition: background-color var(--arc-dur-2) var(--arc-ease), opacity var(--arc-dur-1) var(--arc-ease);
 }
 
 .status-dot.online {
-  background: var(--myst-green);
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.7);
+  background: var(--arc-ok);
+  box-shadow: 0 0 6px color-mix(in oklab, var(--arc-ok) 70%, transparent);
 }
 
 .status-dot.offline {
-  background: #52525b;
+  background: var(--arc-muted);
+}
+
+.is-copied .status-dot {
+  opacity: 0;
 }
 
 .chip-players {
-  color: var(--myst-green);
-  font-size: 10px;
+  color: var(--arc-ok);
 }
 
 .chip-copied {
-  color: var(--myst-green);
+  color: var(--arc-ok);
   font-size: 11px;
-}
-
-/* Light theme */
-:root[data-theme="parchment"] .status-dot.online {
-  box-shadow: 0 0 5px rgba(23, 112, 58, 0.45);
-}
-
-:root[data-theme="parchment"] .status-dot.offline {
-  background: #8a8894;
 }
 </style>

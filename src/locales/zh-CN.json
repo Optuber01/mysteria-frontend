@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "创建委托",
       "resubmitCommission": "重新提交委托"
-    }
+    },
+    "unread": "未读"
   },
   "commissions": {
     "pageTitle": "委托申请",

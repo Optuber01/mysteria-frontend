@@ -1,68 +1,86 @@
 <template>
-  <div v-if="authStore.isAuthenticated" ref="dropdownRef" class="notif-ritual-wrapper">
+  <div v-if="authStore.isAuthenticated" ref="rootRef" class="notif-wrapper">
     <button
+        ref="triggerRef"
+        :aria-controls="menuId"
+        :aria-expanded="isOpen"
         :class="{ active: isOpen }"
         :title="t('notifications.title')"
-        class="notif-ritual-trigger"
+        aria-haspopup="dialog"
+        class="notif-trigger"
+        type="button"
         @click.stop="toggle"
     >
-      <i class="fa-solid fa-bell"></i>
+      <i aria-hidden="true" class="fa-solid fa-bell"></i>
+      <span class="arc-sr">{{ t('notifications.title') }}</span>
       <span v-if="unreadCount > 0" class="notif-badge">{{ badgeLabel }}</span>
     </button>
 
-    <Transition name="ritual-dropdown">
-      <div v-if="isOpen" class="notif-ritual-menu">
-        <div class="notif-menu-header">
-          <span class="notif-menu-title">{{ t('notifications.title') }}</span>
-          <button v-if="unreadCount > 0" class="notif-mark-all" @click="handleMarkAllRead">
-            {{ t('notifications.markAllRead') }}
-          </button>
+    <!-- kept in the page while shut (hidden from all), so it eases out as it eased in -->
+    <div
+        :id="menuId"
+        ref="menuRef"
+        :aria-labelledby="titleId"
+        :class="{ 'is-open': isOpen, 'arc-popover--up': opensUp }"
+        :style="fit"
+        class="notif-menu arc-popover"
+        role="dialog"
+    >
+      <div class="notif-menu-header">
+        <span :id="titleId" class="notif-menu-title">{{ t('notifications.title') }}</span>
+        <button v-if="unreadCount > 0" class="notif-mark-all" type="button" @click="handleMarkAllRead">
+          {{ t('notifications.markAllRead') }}
+        </button>
+      </div>
+
+      <ArcSwap class="notif-body">
+        <div v-if="(store.isLoading || !fetched) && items.length === 0" key="loading" class="notif-state" role="status">
+          <span aria-hidden="true" class="notif-spinner"></span>
+          <span class="arc-sr">{{ t('loading') }}</span>
         </div>
 
-        <div v-if="store.isLoading && items.length === 0" class="notif-loading">
-          <div class="notif-spinner"></div>
-        </div>
-
-        <div v-else-if="items.length === 0" class="notif-empty">
+        <div v-else-if="items.length === 0" key="empty" class="notif-state">
           {{ t('notifications.empty') }}
         </div>
 
-        <div v-else class="notif-list">
-          <div
+        <ul v-else key="list" class="notif-list arc-rows">
+          <li
               v-for="item in items"
               :key="item.id"
               :class="{ unread: !item.read }"
-              class="notif-item"
+              class="arc-row notif-item"
               @click="handleItemClick(item)"
           >
-            <i :class="notificationIcon(item.type)" class="notif-item-icon"></i>
+            <i :class="notificationIcon(item.type)" aria-hidden="true" class="notif-item-icon"></i>
             <div class="notif-item-body">
-              <p class="notif-item-text">{{ buildNotificationText(item, t) }}</p>
-              <span class="notif-item-date">{{ formatNotificationDate(item.createdAt, locale) }}</span>
-              <button v-if="item.actionable" class="notif-item-cta" @click.stop="handleAction(item)">
+              <p class="notif-item-text">
+                <span v-if="!item.read" class="arc-sr">{{ t('notifications.unread') }}: </span>{{ buildNotificationText(item, t) }}
+              </p>
+              <span class="notif-item-date">{{ formatDate(item.createdAt) }}</span>
+              <button v-if="item.actionable" class="arc-btn arc-btn--ghost arc-btn--sm notif-item-cta" type="button" @click.stop="handleAction(item)">
                 {{ notificationCtaLabel(item, t) }}
               </button>
             </div>
-          </div>
-        </div>
+          </li>
+        </ul>
+      </ArcSwap>
 
-        <RouterLink :to="$lp('/notifications')" class="notif-view-all" @click="isOpen = false">
-          {{ t('notifications.viewAll') }}
-        </RouterLink>
-      </div>
-    </Transition>
+      <RouterLink :to="$lp('/notifications')" class="notif-view-all" @click="close">
+        {{ t('notifications.viewAll') }}
+      </RouterLink>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {computed, nextTick, onMounted, onUnmounted, ref, useId} from 'vue';
 import {useRouter} from 'vue-router';
 import {useAuthStore} from '@/stores/auth';
 import {useAccountNotificationsStore} from '@/stores/notifications';
 import {useI18n} from '@/composables/useI18n';
+import ArcSwap from '@/components/arcana/ArcSwap.vue';
 import {
   buildNotificationText,
-  formatNotificationDate,
   notificationCtaLabel,
   notificationIcon,
   notificationTargetRoute,
@@ -74,22 +92,58 @@ const authStore = useAuthStore();
 const store = useAccountNotificationsStore();
 const {t, intlLocale} = useI18n();
 
+const uid = useId();
+const menuId = `notif-menu-${uid}`;
+const titleId = `notif-title-${uid}`;
+
 const isOpen = ref(false);
-const dropdownRef = ref<HTMLElement | null>(null);
+// until the first fetch has come back, an empty list means "not here yet", not "nothing"
+const fetched = ref(false);
+// in the drawer the bell sits at the bottom of the screen: its list opens upwards, and
+// stays inside the drawer (which clips what runs past its edge)
+const opensUp = ref(false);
+const fit = ref<Record<string, string> | undefined>();
+const rootRef = ref<HTMLElement | null>(null);
+const triggerRef = ref<HTMLButtonElement | null>(null);
+const menuRef = ref<HTMLElement | null>(null);
 
 const items = computed(() => store.items);
 const unreadCount = computed(() => store.unreadCount);
 const badgeLabel = computed(() => (unreadCount.value > 9 ? '9+' : String(unreadCount.value)));
-const locale = intlLocale;
+// date and minutes: the full stamp (with seconds) is too long for a row
+const formatDate = (iso: string) => new Date(iso).toLocaleString(intlLocale.value, {dateStyle: 'medium', timeStyle: 'short'});
+
+// the list takes the drawer footer's full width (as wide as the address chip above the bell)
+const fitToDrawer = () => {
+  const row = rootRef.value?.parentElement;
+  if (!row || !rootRef.value) return;
+  const edge = row.getBoundingClientRect().right - parseFloat(getComputedStyle(row).paddingRight);
+  fit.value = {maxWidth: `${Math.ceil(edge - rootRef.value.getBoundingClientRect().left) + 1}px`};
+};
 
 const toggle = () => {
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
-    store.fetchPage(0, 8);
+    if (opensUp.value) fitToDrawer();
+    void store.fetchPage(0, 8).finally(() => (fetched.value = true));
   }
 };
 
-const handleMarkAllRead = () => store.markAllRead();
+// Shutting from inside the list (Escape, a link, a button) hands focus back to the bell,
+// as the list is hidden from the tab order the moment it is shut.
+const close = () => {
+  if (!isOpen.value) return;
+  const focusInside = menuRef.value?.contains(document.activeElement);
+  isOpen.value = false;
+  if (focusInside) triggerRef.value?.focus();
+};
+
+const handleMarkAllRead = async () => {
+  await store.markAllRead();
+  // the button is gone once nothing is unread: focus goes to the bell, not to the page
+  await nextTick();
+  if (document.activeElement === document.body) triggerRef.value?.focus();
+};
 
 const handleItemClick = (item: NotificationDto) => {
   if (!item.read) store.markRead(item.id);
@@ -101,305 +155,274 @@ const handleAction = async (item: NotificationDto) => {
   if (target) {
     router.push(target);
   }
-  isOpen.value = false;
+  close();
 };
 
 const handleClickOutside = (event: MouseEvent) => {
-  if (isOpen.value && dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+  if (isOpen.value && rootRef.value && !rootRef.value.contains(event.target as Node)) {
     isOpen.value = false;
   }
 };
 
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') close();
+};
+
 onMounted(() => {
+  opensUp.value = !!rootRef.value?.closest('.mobile-nav');
   window.addEventListener('click', handleClickOutside);
+  document.addEventListener('keydown', onKeydown);
 });
 
 onUnmounted(() => {
   window.removeEventListener('click', handleClickOutside);
+  document.removeEventListener('keydown', onKeydown);
 });
 </script>
 
 <style scoped>
-.notif-ritual-wrapper {
+.notif-wrapper {
   position: relative;
 }
 
-.notif-ritual-trigger {
+/* a header control: the bar's 36px square at the 10px radius, one hover with the others */
+.notif-trigger {
   position: relative;
-  color: var(--myst-gold);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(200, 178, 115, 0.1);
-  border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all 0.3s;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: var(--arc-bw) solid var(--arc-line);
+  border-radius: 10px;
+  background: var(--arc-glass);
+  color: var(--arc-ink);
   font-size: 15px;
+  cursor: pointer;
+  transition:
+    color var(--arc-dur-2) var(--arc-ease),
+    background-color var(--arc-dur-2) var(--arc-ease),
+    border-color var(--arc-dur-2) var(--arc-ease),
+    transform var(--arc-dur-2) var(--arc-ease);
 }
 
-.notif-ritual-trigger:hover,
-.notif-ritual-trigger.active {
-  background: var(--myst-gold);
-  color: #05070a;
+.notif-trigger:hover,
+.notif-trigger.active {
+  border-color: var(--arc-line-hot);
+  background: color-mix(in oklab, var(--acc) 10%, transparent);
 }
 
+.notif-trigger:hover {
+  transform: translateY(-2px);
+}
+
+.notif-trigger:active {
+  transform: scale(.98);
+}
+
+.notif-trigger:focus-visible {
+  border-radius: 10px;
+}
+
+/* the count: a small square-cornered mark in the accent, never a pill */
 .notif-badge {
   position: absolute;
   top: -6px;
   right: -6px;
-  min-width: 16px;
-  height: 16px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
   padding: 0 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ff5252;
-  color: #fff;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  border-radius: var(--arc-r-sm);
+  background: var(--acc-solid);
+  box-shadow: 0 0 0 2px var(--arc-bg);
+  color: var(--arc-on-acc);
+  font-size: 11px;
   font-weight: 700;
-  border-radius: 8px;
-  border: 1px solid #080a14;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-/* Light theme: a deeper red so the white count reads at 4.5:1 */
-:root[data-theme="parchment"] .notif-badge {
-  background: #c62828;
-  border-color: var(--myst-bg);
-}
-
-:root[data-theme="parchment"] .notif-ritual-trigger {
-  background: var(--myst-wash);
-  border-color: var(--myst-line-28);
-}
-
-:root[data-theme="parchment"] .notif-ritual-trigger:hover,
-:root[data-theme="parchment"] .notif-ritual-trigger.active,
-:root[data-theme="parchment"] .notif-item-cta:hover {
-  background: var(--myst-gold);
-  color: var(--myst-on-gold);
-}
-
-/* the dropdown as a paper sheet */
-:root[data-theme="parchment"] .notif-ritual-menu {
-  background: var(--myst-pop);
-  border-color: var(--myst-line-20);
-  box-shadow: 0 10px 40px var(--myst-shadow);
-}
-
-:root[data-theme="parchment"] .notif-menu-header {
-  border-bottom-color: var(--myst-line-14);
-}
-
-:root[data-theme="parchment"] .notif-menu-title,
-:root[data-theme="parchment"] .notif-item-text {
-  color: var(--myst-ink);
-}
-
-:root[data-theme="parchment"] .notif-empty,
-:root[data-theme="parchment"] .notif-item-date,
-:root[data-theme="parchment"] .notif-view-all {
-  color: var(--myst-ink-muted);
-}
-
-:root[data-theme="parchment"] .notif-spinner {
-  border-color: var(--myst-line-20);
-  border-top-color: var(--myst-gold);
-}
-
-:root[data-theme="parchment"] .notif-item {
-  border-bottom-color: var(--myst-line-10);
-}
-
-:root[data-theme="parchment"] .notif-item:hover {
-  background: var(--myst-hover);
-}
-
-:root[data-theme="parchment"] .notif-item.unread,
-:root[data-theme="parchment"] .notif-item-cta {
-  background: var(--myst-wash);
-}
-
-:root[data-theme="parchment"] .notif-item-cta {
-  border-color: var(--myst-line-35);
-}
-
-.notif-ritual-menu {
+/* ---- the list ---- */
+.notif-menu {
   position: absolute;
-  top: calc(100% + 12px);
-  right: -12px;
-  width: 340px;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1200;
+  width: 360px;
   max-width: calc(100vw - 32px);
-  background: #080a14;
-  border: 1px solid rgba(200, 178, 115, 0.2);
-  border-radius: 4px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
+  --arc-popover-origin: top right;
+  border-radius: var(--arc-r-md);
+  /* opaque: the page behind must not show through the list */
+  background: var(--arc-surface);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 18px 48px var(--arc-shadow);
+  color: var(--arc-ink);
+  text-align: left;
+}
+
+.notif-menu.arc-popover--up {
+  --arc-popover-origin: bottom left;
+  top: auto;
+  right: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
 }
 
 .notif-menu-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 8px 8px 18px;
+  border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 
 .notif-menu-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .notif-mark-all {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--arc-r-md);
   background: none;
-  border: none;
-  color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--acc-ink);
+  font: inherit;
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
   cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.2s;
+  transition: background-color var(--arc-dur-2) var(--arc-ease);
 }
 
 .notif-mark-all:hover {
-  opacity: 1;
+  background: var(--arc-glass);
 }
 
-.notif-loading,
-.notif-empty {
-  padding: 32px 16px;
+.notif-state {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  padding: 28px 18px;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
   text-align: center;
-  color: #666;
-  font-size: 12px;
 }
 
 .notif-spinner {
   width: 20px;
   height: 20px;
-  margin: 0 auto;
-  border: 2px solid rgba(200, 178, 115, 0.2);
-  border-top-color: var(--myst-gold);
+  border: 2px solid var(--arc-line);
+  border-top-color: var(--acc-ink);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: notif-spin 1s linear infinite;
 }
 
 .notif-list {
-  max-height: 380px;
+  max-height: min(380px, 60vh);
+  padding: 0 18px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .notif-item {
-  display: flex;
+  align-items: flex-start;
   gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 14px 0;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.notif-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.notif-item.unread {
-  background: rgba(200, 178, 115, 0.04);
 }
 
 .notif-item-icon {
+  flex: none;
   width: 16px;
-  padding-top: 2px;
+  padding-top: 3px;
+  color: var(--arc-muted);
   font-size: 13px;
-  color: var(--myst-gold);
-  opacity: 0.8;
   text-align: center;
-  flex-shrink: 0;
+}
+
+.notif-item.unread .notif-item-icon {
+  color: var(--acc-ink);
 }
 
 .notif-item-body {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
   min-width: 0;
 }
 
 .notif-item-text {
   margin: 0;
-  font-size: 12.5px;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
   line-height: 1.5;
-  color: #ddd;
+  overflow-wrap: anywhere;
+}
+
+.notif-item.unread .notif-item-text {
+  color: var(--arc-ink);
+  font-weight: 600;
 }
 
 .notif-item-date {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--arc-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .notif-item-cta {
-  align-self: flex-start;
-  margin-top: 4px;
-  padding: 5px 12px;
-  background: rgba(200, 178, 115, 0.1);
-  border: 1px solid rgba(200, 178, 115, 0.3);
-  color: var(--myst-gold);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.notif-item-cta:hover {
-  background: var(--myst-gold);
-  color: #05070a;
+  min-height: 34px;
+  margin-top: 6px;
+  padding: 0 14px;
+  font-size: var(--arc-fs-small);
 }
 
 .notif-view-all {
-  display: block;
-  padding: 12px 16px;
-  text-align: center;
-  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-top: var(--arc-bw) solid var(--arc-line);
+  border-radius: 0 0 var(--arc-r-md) var(--arc-r-md);
+  color: var(--arc-ink);
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
   text-decoration: none;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  transition: color 0.2s;
+  transition: color var(--arc-dur-2) var(--arc-ease), background-color var(--arc-dur-2) var(--arc-ease);
 }
 
 .notif-view-all:hover {
-  color: var(--myst-gold);
+  background: var(--arc-glass);
+  color: var(--acc-ink);
 }
 
-.ritual-dropdown-enter-active,
-.ritual-dropdown-leave-active {
-  transition: all 0.3s ease;
+/* against the list's edge and the rounded foot a ring drawn outside would be cut off */
+.notif-menu :is(.notif-view-all, .notif-mark-all):focus-visible {
+  outline-offset: -2px;
 }
 
-.ritual-dropdown-enter-from,
-.ritual-dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-@keyframes spin {
+@keyframes notif-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-trigger:hover,
+  .notif-trigger:active {
+    transform: none;
+  }
+
+  /* a static ring: still reads as "loading", nothing turns */
+  .notif-spinner {
+    animation: none;
   }
 }
 </style>

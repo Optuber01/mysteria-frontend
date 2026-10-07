@@ -1,10 +1,12 @@
 <template>
   <div ref="rootRef" class="lang-ritual-selector">
     <button
+        ref="triggerRef"
         :aria-expanded="isOpen"
         :aria-label="`${LOCALES[currentLanguage].short}, ${t('header.languageLabel')}`"
         aria-haspopup="listbox"
         class="lang-ritual-trigger"
+        type="button"
         @click="isOpen = !isOpen"
     >
       <span class="lang-label">{{ LOCALES[currentLanguage].short }}</span>
@@ -19,6 +21,7 @@
             :class="{ active: code === currentLanguage }"
             class="lang-option"
             role="option"
+            type="button"
             @click="choose(code)"
         >
           <span class="lang-option-short">{{ LOCALES[code].short }}</span>
@@ -42,6 +45,15 @@ const route = useRoute();
 
 const isOpen = ref(false);
 const rootRef = ref<HTMLElement | null>(null);
+const triggerRef = ref<HTMLButtonElement | null>(null);
+
+// the list is hidden from the tab order once shut: focus goes back to its button
+const close = () => {
+  if (!isOpen.value) return;
+  const focusInside = rootRef.value?.contains(document.activeElement);
+  isOpen.value = false;
+  if (focusInside) triggerRef.value?.focus();
+};
 
 /*
  * Language lives in the URL, so switching is a navigation: swap the `lang`
@@ -50,7 +62,7 @@ const rootRef = ref<HTMLElement | null>(null);
  * back button doesn't walk through language changes.
  */
 const choose = (code: Language) => {
-  isOpen.value = false;
+  close();
   if (code === currentLanguage.value) return;
 
   void router.replace({
@@ -67,7 +79,7 @@ const onDocumentClick = (event: MouseEvent) => {
 };
 
 const onKeydown = (event: KeyboardEvent) => {
-  if (event.key === "Escape") isOpen.value = false;
+  if (event.key === "Escape") close();
 };
 
 onMounted(() => {
@@ -87,34 +99,38 @@ onBeforeUnmount(() => {
   display: inline-flex;
 }
 
+/* a header control (the bar restates the hairline and hover): 36px at the 10px radius */
 .lang-ritual-trigger {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: color-mix(in srgb, var(--myst-ink) 3%, transparent);
-  padding: 6px 10px;
-  border: 1px solid var(--myst-line-14, rgba(255, 255, 255, 0.05));
-  border-radius: 4px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: var(--arc-bw) solid var(--arc-line);
+  border-radius: 10px;
+  background: var(--arc-glass);
+  color: var(--arc-ink);
   cursor: pointer;
-  transition: border-color 0.3s ease, background 0.3s ease;
+  transition:
+    border-color var(--arc-dur-2) var(--arc-ease),
+    background-color var(--arc-dur-2) var(--arc-ease);
 }
 
 .lang-ritual-trigger:hover {
-  border-color: var(--myst-line-40, rgba(255, 255, 255, 0.18));
+  border-color: var(--arc-line-hot);
 }
 
+/* the code in the page's own type: plain Commissioner, no caps styling (the codes are already EN, UK, ...) */
 .lang-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  color: var(--myst-gold);
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-family: var(--arc-caps);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--arc-ink);
 }
 
 .lang-caret {
   font-size: 8px;
-  color: color-mix(in srgb, var(--myst-ink-muted) 75%, transparent);
+  color: var(--arc-muted);
   transition: transform var(--arc-dur-2) var(--arc-ease);
 }
 
@@ -128,19 +144,15 @@ onBeforeUnmount(() => {
   top: calc(100% + 6px);
   right: 0;
   z-index: 1200;
-  min-width: 168px;
+  min-width: 176px;
   --arc-popover-origin: top right;
   margin: 0;
   padding: 4px;
   list-style: none;
-  background: var(--myst-bg);
-  border: 1px solid var(--myst-line-18, rgba(255, 255, 255, 0.1));
-  border-radius: 6px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-}
-
-:root[data-theme="parchment"] .lang-menu {
-  box-shadow: 0 16px 36px rgba(24, 20, 30, 0.16);
+  border-radius: var(--arc-r-md);
+  /* opaque: the page behind must not show through the list */
+  background: var(--arc-surface);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 18px 40px var(--arc-shadow);
 }
 
 .lang-option {
@@ -148,50 +160,47 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px 10px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--arc-r-sm);
   background: transparent;
-  border: none;
-  border-radius: 4px;
+  color: var(--arc-ink);
+  font: inherit;
   cursor: pointer;
   text-align: left;
-  transition: background 0.2s ease;
+  transition: background-color var(--arc-dur-1) var(--arc-ease);
 }
 
 .lang-option:hover {
-  background: color-mix(in srgb, var(--myst-ink) 5%, transparent);
+  background: var(--arc-glass);
 }
 
 .lang-option.active {
-  background: rgba(200, 178, 115, 0.1);
+  background: color-mix(in oklab, var(--acc) 10%, transparent);
 }
 
 .lang-option-short {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--myst-ink-muted);
-  min-width: 22px;
+  min-width: 24px;
+  font-family: var(--arc-caps);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--arc-muted);
 }
 
 .lang-option-name {
   flex: 1;
-  font-size: 12.5px;
-  color: var(--myst-ink);
+  font-size: var(--arc-fs-small);
+  color: var(--arc-ink);
 }
 
 .lang-option.active .lang-option-short,
-.lang-option.active .lang-option-name {
-  color: var(--myst-gold);
+.lang-option.active .lang-option-name,
+.lang-check {
+  color: var(--acc-ink);
 }
 
 .lang-check {
-  font-size: 9px;
-  color: var(--myst-gold);
-}
-
-/* Light theme */
-:root[data-theme="parchment"] .lang-option.active {
-  background: var(--myst-wash);
+  font-size: 10px;
 }
 </style>

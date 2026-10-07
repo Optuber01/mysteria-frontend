@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "Auftrag erstellen",
       "resubmitCommission": "Auftrag erneut einreichen"
-    }
+    },
+    "unread": "Ungelesen"
   },
   "commissions": {
     "pageTitle": "Auftragsanfragen",

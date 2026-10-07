@@ -4,6 +4,9 @@
   <span class="balance-root">
   <button
       v-if="profile"
+      ref="chipRef"
+      :aria-expanded="usesRealCurrency ? showCurrencyModal : undefined"
+      :aria-haspopup="usesRealCurrency ? 'dialog' : undefined"
       :class="['balance-chip', { 'is-icon-only': iconMode }]"
       :title="t('topUpBalance')"
       type="button"
@@ -11,37 +14,41 @@
   >
     <IconMark class="chip-icon"/>
     <span v-if="!iconMode" class="chip-amount">{{ formattedBalance }}</span>
+    <span v-else class="arc-sr">{{ t('topUpBalance') }}</span>
   </button>
 
   <!-- Currency Conversion Modal -->
   <Teleport to="body">
-    <Transition name="ritual-fade">
-      <div v-if="showCurrencyModal" class="modal-ritual-overlay" @click="closeCurrencyModal">
+    <!-- the shared dialog motion (arcana.css): the backdrop fades, the panel rises in and sinks back -->
+    <Transition name="arc-dialog">
+      <div v-if="showCurrencyModal" class="balance-modal" @click="closeCurrencyModal">
         <div
-            aria-labelledby="balance-currency-title"
+            ref="dialogRef"
+            :aria-labelledby="titleId"
             aria-modal="true"
-            class="modal-ritual-content compact"
+            class="balance-dialog"
             role="dialog"
+            tabindex="-1"
             @click.stop
-            @keydown.esc="closeCurrencyModal"
+            @keydown="onDialogKeydown"
         >
-          <div class="modal-ritual-header">
-            <h2 id="balance-currency-title" class="ritual-title">{{ t('currencySettings') }}</h2>
-            <button :aria-label="t('close')" class="modal-ritual-close" type="button" @click="closeCurrencyModal">
+          <div class="balance-head">
+            <h2 :id="titleId" class="balance-title">{{ t('currencySettings') }}</h2>
+            <button :aria-label="t('close')" class="balance-close" type="button" @click="closeCurrencyModal">
               <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
           </div>
 
-          <div class="modal-ritual-body no-scrollbar">
-            <div class="ritual-section">
-              <h3 class="ritual-section-title">{{ t('displayCurrency') }}</h3>
-              <p class="ritual-section-desc">{{ t('displayCurrencyDesc') }}</p>
-              <div class="currency-ritual-grid">
+          <div class="balance-body">
+            <div class="balance-section">
+              <h3 class="balance-section-title">{{ t('displayCurrency') }}</h3>
+              <p class="balance-section-desc">{{ t('displayCurrencyDesc') }}</p>
+              <div class="currency-grid">
                 <button
                     v-for="curr in currencies"
                     :key="curr.code"
                     :aria-pressed="currentCurrency === curr.code"
-                    :class="['currency-ritual-option', { active: currentCurrency === curr.code }]"
+                    :class="['arc-tile', 'currency-option', { active: currentCurrency === curr.code }]"
                     type="button"
                     @click="selectCurrency(curr.code)"
                 >
@@ -53,9 +60,9 @@
               </div>
             </div>
 
-            <div class="ritual-section">
-              <h3 class="ritual-section-title">{{ t('paymentConversionRates') }}</h3>
-              <div class="conversion-ledger">
+            <div class="balance-section">
+              <h3 class="balance-section-title">{{ t('paymentConversionRates') }}</h3>
+              <div class="balance-ledger">
                 <div class="ledger-row">
                   <span class="ledger-label">USD</span>
                   <span class="ledger-val">1:40</span>
@@ -67,18 +74,15 @@
               </div>
             </div>
 
-            <div v-if="usesRealCurrency" class="ritual-warning-box">
-              <p class="warning-ritual-text">
-                {{ t('donationWarning') }}
-              </p>
-            </div>
+            <p v-if="usesRealCurrency" class="balance-note">
+              {{ t('donationWarning') }}
+            </p>
 
-            <div class="modal-ritual-actions">
-              <a :href="topUpUrl" class="arc-btn arc-btn--solid btn-ritual-primary" target="_blank" rel="noopener noreferrer">
-                {{ t('topUpBalance') }}
-                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-              </a>
-            </div>
+            <a :href="topUpUrl" class="arc-btn arc-btn--solid balance-topup" target="_blank" rel="noopener noreferrer">
+              {{ t('topUpBalance') }}
+              <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+              <span class="arc-sr">{{ t('header.newTab') }}</span>
+            </a>
           </div>
         </div>
       </div>
@@ -92,7 +96,7 @@ import {useBalanceStore} from "@/stores/balance";
 import {useUserStore} from "@/stores/user";
 import {useI18n} from "@/composables/useI18n";
 import {useCurrency} from "@/composables/useCurrency";
-import {computed, ref} from "vue";
+import {computed, nextTick, ref, useId, watch} from "vue";
 import IconMark from "@/assets/icons/IconMark.vue";
 
 defineProps<{
@@ -122,6 +126,44 @@ const topUpUrl = computed(() =>
         : donatelloUrl.value
 );
 const showCurrencyModal = ref(false);
+const titleId = `balance-currency-${useId()}`;
+const chipRef = ref<HTMLButtonElement | null>(null);
+const dialogRef = ref<HTMLElement | null>(null);
+
+/* the dialog takes focus when it opens, keeps Tab inside, closes on Escape, and hands
+   focus back to the chip (as ModalItem does) */
+watch(showCurrencyModal, async (open) => {
+  if (open) {
+    await nextTick();
+    dialogRef.value?.focus();
+  } else {
+    chipRef.value?.focus();
+  }
+});
+
+const focusables = () => [...(dialogRef.value?.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+) ?? [])];
+
+const onDialogKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    event.stopPropagation();
+    closeCurrencyModal();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  const items = focusables();
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.value)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+};
 
 const currencies = [
   {code: 'USD', symbol: '$'},
@@ -157,11 +199,13 @@ const handleTopUpClick = () => {
   display: contents;
 }
 
+/* a header control: 36px at the 10px radius, the bar's hover (accent hairline, wash, lift) */
 .balance-chip {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 0;
   border-radius: 10px;
   background: color-mix(in oklab, var(--acc) 8%, transparent);
@@ -173,12 +217,20 @@ const handleTopUpClick = () => {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  transition: box-shadow .2s ease, background-color .2s ease;
+  transition:
+    box-shadow var(--arc-dur-2) var(--arc-ease),
+    background-color var(--arc-dur-2) var(--arc-ease),
+    transform var(--arc-dur-2) var(--arc-ease);
 }
 
 .balance-chip:hover {
   background: color-mix(in oklab, var(--acc) 14%, transparent);
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+  transform: translateY(-2px);
+}
+
+.balance-chip:active {
+  transform: scale(.98);
 }
 
 .chip-icon {
@@ -195,7 +247,7 @@ const handleTopUpClick = () => {
 }
 
 /* the currency sheet: the same dialog look as ModalItem */
-.modal-ritual-overlay {
+.balance-modal {
   position: fixed;
   inset: 0;
   z-index: 2000;
@@ -207,19 +259,26 @@ const handleTopUpClick = () => {
   backdrop-filter: blur(8px);
 }
 
-.modal-ritual-content.compact {
+.balance-dialog {
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 440px;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   border-radius: var(--arc-r-lg);
   background: var(--arc-pop);
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 24px 70px var(--arc-shadow-strong);
   color: var(--arc-ink);
 }
 
-.modal-ritual-header {
+.balance-dialog:focus-visible {
+  outline: none;
+}
+
+.balance-head {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -227,7 +286,7 @@ const handleTopUpClick = () => {
   border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 
-.ritual-title {
+.balance-title {
   margin: 0;
   font-family: var(--arc-display);
   font-variation-settings: 'FLAR' 100;
@@ -235,8 +294,9 @@ const handleTopUpClick = () => {
   font-weight: 600;
 }
 
-.modal-ritual-close {
+.balance-close {
   display: grid;
+  flex: none;
   place-items: center;
   width: 40px;
   height: 40px;
@@ -246,72 +306,75 @@ const handleTopUpClick = () => {
   color: var(--arc-muted);
   font-size: 18px;
   cursor: pointer;
+  transition: color var(--arc-dur-1) var(--arc-ease), background-color var(--arc-dur-1) var(--arc-ease);
 }
 
-.modal-ritual-close:hover {
+.balance-close:hover {
   background: var(--arc-glass);
   color: var(--arc-ink);
 }
 
-.modal-ritual-body {
+.balance-body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 22px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.ritual-section {
+.balance-section {
   margin-bottom: 22px;
 }
 
-.ritual-section-title {
+.balance-section-title {
   margin: 0 0 6px;
   font-size: var(--arc-fs-body);
   font-weight: 600;
 }
 
-.ritual-section-desc {
+.balance-section-desc {
   margin: 0 0 12px;
   color: var(--arc-muted);
   font-size: var(--arc-fs-small);
 }
 
-.currency-ritual-grid {
+.currency-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.currency-ritual-option {
+/* a .arc-tile; selected is the one accent stroke */
+.currency-option {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
   padding: 12px 6px;
-  border: 0;
-  border-radius: var(--arc-r-md);
-  background: var(--arc-glass);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-  color: var(--arc-ink);
   font: inherit;
   cursor: pointer;
-  transition: box-shadow .2s ease, background-color .2s ease;
 }
 
-.currency-ritual-option:hover {
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
-}
-
-.currency-ritual-option.active {
+.currency-option.active {
   background: color-mix(in oklab, var(--acc) 10%, transparent);
   box-shadow: inset 0 0 0 var(--arc-bw-accent) var(--acc-ink);
+}
+
+.curr-symbol,
+.curr-icon {
+  display: grid;
+  place-items: center;
+  height: 24px;
 }
 
 .curr-symbol {
   font-size: 18px;
   font-weight: 600;
+  line-height: 1;
 }
 
 .curr-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
   color: var(--acc-ink);
 }
 
@@ -326,59 +389,37 @@ const handleTopUpClick = () => {
   text-align: center;
 }
 
-.conversion-ledger {
-  border-radius: var(--arc-r-md);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-}
-
+/* hairline rows, no box around them */
 .ledger-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 10px 0;
   border-top: var(--arc-bw) solid var(--arc-line);
   font-size: var(--arc-fs-small);
   font-variant-numeric: tabular-nums;
-}
-
-.ledger-row:first-child {
-  border-top: 0;
 }
 
 .ledger-label {
   color: var(--arc-muted);
 }
 
-.ritual-warning-box {
-  margin-bottom: 22px;
-  padding: 12px 14px;
+.balance-note {
+  margin: 0 0 22px;
+  padding: 4px 0 4px 14px;
   border-left: var(--arc-bw-accent) solid var(--arc-line-acc);
-}
-
-.warning-ritual-text {
-  margin: 0;
   color: var(--arc-muted);
   font-size: var(--arc-fs-small);
   line-height: 1.5;
 }
 
-.btn-ritual-primary {
+.balance-topup {
   width: 100%;
 }
 
-.ritual-fade-enter-active,
-.ritual-fade-leave-active {
-  transition: opacity .25s ease;
-}
-
-.ritual-fade-enter-from,
-.ritual-fade-leave-to {
-  opacity: 0;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .ritual-fade-enter-active,
-  .ritual-fade-leave-active {
-    transition: none;
+  .balance-chip:hover,
+  .balance-chip:active {
+    transform: none;
   }
 }
 </style>

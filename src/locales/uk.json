@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "Створити замовлення",
       "resubmitCommission": "Подати повторно"
-    }
+    },
+    "unread": "Непрочитане"
   },
   "commissions": {
     "pageTitle": "Заявки на замовлення",

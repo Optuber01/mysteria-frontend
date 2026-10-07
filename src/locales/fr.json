@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "Créer une commission",
       "resubmitCommission": "Soumettre à nouveau la commission"
-    }
+    },
+    "unread": "Non lu"
   },
   "commissions": {
     "pageTitle": "Demandes de commission",

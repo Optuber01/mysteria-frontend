@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "Create Commission",
       "resubmitCommission": "Resubmit Commission"
-    }
+    },
+    "unread": "Unread"
   },
   "commissions": {
     "pageTitle": "Commission Requests",

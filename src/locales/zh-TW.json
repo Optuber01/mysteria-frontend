@@ -479,7 +479,8 @@
     "actions": {
       "createCommission": "建立委託",
       "resubmitCommission": "重新提交委託"
-    }
+    },
+    "unread": "未讀"
   },
   "commissions": {
     "pageTitle": "委託申請",
