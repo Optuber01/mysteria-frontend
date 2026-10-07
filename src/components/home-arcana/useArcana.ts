@@ -103,7 +103,7 @@ export function schedulePathwayData() {
  * (the fixed header over the hero, the deck control): those stay live with it. The hero's large tints crossfade themselves too
  * (keyed copies, `arc-tint`), so whichever region is live, its sky does not snap.
  */
-type Recolour = {finished: Promise<void>; skipTransition?: () => void};
+type Recolour = {finished: Promise<void>; ready?: Promise<void>; skipTransition?: () => void};
 type TransitionDocument = Document & {startViewTransition?: (update: () => Promise<void>) => Recolour};
 let recolour: Recolour | null = null;
 
@@ -154,6 +154,8 @@ function crossfade(update: () => void): Promise<void> {
     return Promise.resolve();
   }
   recolour = transition;
+  // a draw that cuts in skips this one, which rejects `ready`: expected, not an error
+  transition.ready?.catch(() => undefined);
   return transition.finished.catch(() => undefined).then(() => {
     unname();
     if (recolour === transition) {

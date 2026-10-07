@@ -45,7 +45,7 @@
 
         <!-- beside it: who's on right now, and the two ways to get help -->
         <div class="arc-join">
-          <div class="arc-live" :class="statusClass">
+          <div ref="live" class="arc-live" :class="[statusClass, {'is-seen': seen}]">
             <div class="arc-live__row">
               <span class="arc-live__dot" aria-hidden="true"></span>
               <span v-if="isOnline && checkedAt" class="arc-live__count">{{ playerCount ?? 0 }}</span>
@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {useServerStatus} from '@/composables/useServer';
 import {useBeyonderStats} from '@/composables/useBeyonderStats';
@@ -112,6 +112,20 @@ const copyNote = computed(() => ({
 }[copyState.value]));
 
 /* ---- live status ---- */
+/*
+ * The online pulse runs only while the status is on screen. Running anywhere on the page,
+ * it kept the main thread drawing a frame for every tick, and each of those frames
+ * restyled the hero's sky effects (40-110 ms/s while the visitor read the hero).
+ */
+const live = ref<HTMLElement | null>(null);
+const seen = ref(false);
+let liveObserver: IntersectionObserver | null = null;
+onMounted(() => {
+  if (!live.value) return;
+  liveObserver = new IntersectionObserver(([entry]) => (seen.value = entry.isIntersecting));
+  liveObserver.observe(live.value);
+});
+onUnmounted(() => liveObserver?.disconnect());
 const statusClass = computed(() => (!checkedAt.value ? 'is-checking' : isOnline.value ? 'is-online' : 'is-offline'));
 const liveUnit = computed(() => {
   if (!checkedAt.value) return t('home.arcana.status.checking');
@@ -305,7 +319,7 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
 }
 
 /* the ring grows and fades (transform + opacity, composited) instead of animating a box-shadow */
-.is-online .arc-live__dot::after {
+.is-online.is-seen .arc-live__dot::after {
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -388,7 +402,7 @@ const seasonCount = computed(() => (totalBeyonders.value ? totalBeyonders.value.
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .is-online .arc-live__dot::after {
+  .is-online.is-seen .arc-live__dot::after {
     animation: none;
     opacity: 0;
   }
