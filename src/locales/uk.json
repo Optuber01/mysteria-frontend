@@ -20,17 +20,15 @@
   "footer": {
     "disclaimer": "Неофіційний фанатський проєкт, натхненний «Володарем Таємниць». Не пов'язаний з автором або Mojang.",
     "playHeading": "Гра",
-    "accountHeading": "Акаунт",
+    "serverHeading": "Сервер",
     "communityHeading": "Спільнота",
     "legalLabel": "Правові та швидкі посилання",
-    "linkGuide": "Довідник новачка",
-    "linkArchive": "Архів Потойбічного",
-    "linkRules": "Закони Містеррії",
-    "linkStaff": "Орден (персонал)",
-    "linkCompanion": "COI Client (опційний мод)",
-    "linkDossier": "Досьє Потойбічного",
-    "linkShop": "Товари Вічної Ночі",
-    "linkNews": "Новини та депеші"
+    "linkJoin": "Як приєднатися",
+    "linkGuide": "Довідник гравця",
+    "linkSeats": "Місця Послідовностей",
+    "linkCommands": "Команди",
+    "linkStaff": "Персонал",
+    "linkCompanion": "Мод COI Client"
   },
   "homePage": {
     "heroEyebrowBefore": "Minecraft-сервер за",

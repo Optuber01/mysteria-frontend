@@ -20,17 +20,15 @@
   "footer": {
     "disclaimer": "本站為受《詭秘之主》啟發的非官方同人專案，與原作者及 Mojang 均無關聯。",
     "playHeading": "遊玩",
-    "accountHeading": "帳戶",
+    "serverHeading": "伺服器",
     "communityHeading": "社群",
     "legalLabel": "條款與快速連結",
-    "linkGuide": "新人指南",
-    "linkArchive": "非凡者檔案",
-    "linkRules": "Mysterria 律法",
-    "linkStaff": "修會（管理團隊）",
-    "linkCompanion": "COI 客戶端（可選模組）",
-    "linkDossier": "非凡者卷宗",
-    "linkShop": "永夜珍品",
-    "linkNews": "新聞與訊報"
+    "linkJoin": "如何加入",
+    "linkGuide": "玩家指南",
+    "linkSeats": "序列席位",
+    "linkCommands": "指令",
+    "linkStaff": "管理團隊",
+    "linkCompanion": "COI Client 模組"
   },
   "homePage": {
     "heroEyebrowBefore": "一座",

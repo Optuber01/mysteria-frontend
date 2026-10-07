@@ -10,20 +10,22 @@
           <p class="footer-disclaimer">{{ t('footer.disclaimer') }}</p>
         </div>
 
+        <!-- getting in and getting on: the guide's own pages, the Pathways, the seats above Sequence 4 -->
         <div class="footer-column footer-column--play">
           <p class="footer-heading">{{ t('footer.playHeading') }}</p>
+          <RouterLink :to="$lp('/guide/connect')">{{ t('footer.linkJoin') }}</RouterLink>
           <RouterLink :to="$lp('/guide')">{{ t('footer.linkGuide') }}</RouterLink>
-          <RouterLink :to="$lp('/pathways')">{{ t('footer.linkArchive') }}</RouterLink>
-          <RouterLink :to="$lp('/rules')">{{ t('footer.linkRules') }}</RouterLink>
-          <RouterLink :to="$lp('/staff')">{{ t('footer.linkStaff') }}</RouterLink>
-          <RouterLink :to="$lp('/#companion')">{{ t('footer.linkCompanion') }}</RouterLink>
+          <RouterLink :to="$lp('/pathways')">{{ t('navPathways') }}</RouterLink>
+          <RouterLink :to="$lp('/ascension')">{{ t('footer.linkSeats') }}</RouterLink>
+          <RouterLink :to="$lp('/guide/commands')">{{ t('footer.linkCommands') }}</RouterLink>
         </div>
 
-        <div class="footer-column footer-column--account">
-          <p class="footer-heading">{{ t('footer.accountHeading') }}</p>
-          <RouterLink :to="$lp('/profile')">{{ t('footer.linkDossier') }}</RouterLink>
-          <RouterLink :to="$lp('/store')">{{ t('footer.linkShop') }}</RouterLink>
-          <RouterLink :to="$lp('/news')">{{ t('footer.linkNews') }}</RouterLink>
+        <div class="footer-column footer-column--server">
+          <p class="footer-heading">{{ t('footer.serverHeading') }}</p>
+          <RouterLink :to="$lp('/news')">{{ t('navNews') }}</RouterLink>
+          <RouterLink :to="$lp('/rules')">{{ t('navRules') }}</RouterLink>
+          <RouterLink :to="$lp('/staff')">{{ t('footer.linkStaff') }}</RouterLink>
+          <RouterLink :to="$lp('/store')">{{ t('navShop') }}</RouterLink>
         </div>
 
         <div class="footer-column footer-column--community">
@@ -36,6 +38,9 @@
           </a>
           <a href="https://map.mysterria.net/" rel="noopener noreferrer" target="_blank">
             {{ t('servicesMap') }}
+          </a>
+          <a href="https://modrinth.com/mod/coi-client" rel="noopener noreferrer" target="_blank">
+            {{ t('footer.linkCompanion') }}
           </a>
         </div>
       </div>
@@ -204,7 +209,7 @@ const year = new Date().getFullYear();
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
       'identity identity'
-      'play account'
+      'play server'
       'play community';
     gap: 22px 24px;
     padding-bottom: 28px;
@@ -230,7 +235,7 @@ const year = new Date().getFullYear();
   }
 
   .footer-column--play { grid-area: play; }
-  .footer-column--account { grid-area: account; }
+  .footer-column--server { grid-area: server; }
   .footer-column--community { grid-area: community; }
 
   .footer-column {
@@ -252,7 +257,7 @@ const year = new Date().getFullYear();
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas:
       'identity identity identity'
-      'play account community';
+      'play server community';
   }
 }
 

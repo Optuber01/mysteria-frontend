@@ -20,17 +20,15 @@
   "footer": {
     "disclaimer": "Projet de fans non officiel inspiré de Lord of the Mysteries. Non affilié à l’auteur ni à Mojang.",
     "playHeading": "Jouer",
-    "accountHeading": "Compte",
+    "serverHeading": "Serveur",
     "communityHeading": "Communauté",
     "legalLabel": "Liens légaux et rapides",
-    "linkGuide": "Guide du nouveau joueur",
-    "linkArchive": "Archives Beyonder",
-    "linkRules": "Lois de Mysterria",
-    "linkStaff": "L’Ordre (staff)",
-    "linkCompanion": "Client COI (mod facultatif)",
-    "linkDossier": "Dossier Beyonder",
-    "linkShop": "Marchandises de l’Éternelle Nuit",
-    "linkNews": "Actualités et dépêches"
+    "linkJoin": "Comment rejoindre",
+    "linkGuide": "Guide du joueur",
+    "linkSeats": "Places de Séquence",
+    "linkCommands": "Commandes",
+    "linkStaff": "Staff",
+    "linkCompanion": "Mod COI Client"
   },
   "homePage": {
     "heroEyebrowBefore": "Un",

@@ -20,17 +20,15 @@
   "footer": {
     "disclaimer": "Ein inoffizielles Fanprojekt, inspiriert von Lord of the Mysteries. Nicht mit dem Autor oder Mojang verbunden.",
     "playHeading": "Spielen",
-    "accountHeading": "Konto",
+    "serverHeading": "Server",
     "communityHeading": "Gemeinschaft",
     "legalLabel": "Rechtliches und Schnellzugriffe",
-    "linkGuide": "Leitfaden für neue Spieler",
-    "linkArchive": "Beyonder-Archiv",
-    "linkRules": "Gesetze von Mysterria",
-    "linkStaff": "Der Orden (Team)",
-    "linkCompanion": "COI-Client (optional mod)",
-    "linkDossier": "Beyonder-Dossier",
-    "linkShop": "Waren der Ewigen Nacht",
-    "linkNews": "Neuigkeiten & Depeschen"
+    "linkJoin": "So trittst du bei",
+    "linkGuide": "Spielerleitfaden",
+    "linkSeats": "Sequenz-Plätze",
+    "linkCommands": "Befehle",
+    "linkStaff": "Team",
+    "linkCompanion": "COI-Client-Mod"
   },
   "homePage": {
     "heroEyebrowBefore": "Ein",

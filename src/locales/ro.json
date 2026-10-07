@@ -20,17 +20,15 @@
   "footer": {
     "disclaimer": "Un proiect neoficial creat de fani, inspirat de Lord of the Mysteries. Nu este afiliat cu autorul sau Mojang.",
     "playHeading": "Joacă",
-    "accountHeading": "Cont",
+    "serverHeading": "Server",
     "communityHeading": "Comunitate",
     "legalLabel": "Linkuri legale și rapide",
-    "linkGuide": "Ghid pentru jucători noi",
-    "linkArchive": "Arhiva Beyonder",
-    "linkRules": "Legile Mysterriei",
-    "linkStaff": "Ordinul (echipa)",
-    "linkCompanion": "Clientul COI (mod opțional)",
-    "linkDossier": "Dosar Beyonder",
-    "linkShop": "Mărfurile Eternității Nopții",
-    "linkNews": "Noutăți și buletine"
+    "linkJoin": "Cum te alături",
+    "linkGuide": "Ghidul jucătorului",
+    "linkSeats": "Locuri pe Secvențe",
+    "linkCommands": "Comenzi",
+    "linkStaff": "Echipa",
+    "linkCompanion": "Modul COI Client"
   },
   "homePage": {
     "heroEyebrowBefore": "A",

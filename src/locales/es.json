@@ -20,17 +20,15 @@
   "footer": {
     "disclaimer": "Proyecto no oficial de fans inspirado en Lord of the Mysteries. No está afiliado al autor ni a Mojang.",
     "playHeading": "Jugar",
-    "accountHeading": "Cuenta",
+    "serverHeading": "Servidor",
     "communityHeading": "Comunidad",
     "legalLabel": "Enlaces legales y rápidos",
-    "linkGuide": "Guía para jugadores nuevos",
-    "linkArchive": "Archivo de Trascendentes",
-    "linkRules": "Leyes de Mysterria",
-    "linkStaff": "La Orden (equipo)",
-    "linkCompanion": "Cliente COI (mod opcional)",
-    "linkDossier": "Expediente de Trascendente",
-    "linkShop": "Mercancías de la Noche Eterna",
-    "linkNews": "Noticias y comunicados"
+    "linkJoin": "Cómo unirse",
+    "linkGuide": "Guía del jugador",
+    "linkSeats": "Plazas de Secuencia",
+    "linkCommands": "Comandos",
+    "linkStaff": "Equipo",
+    "linkCompanion": "Mod COI Client"
   },
   "homePage": {
     "heroEyebrowBefore": "Un servidor de Minecraft de",
