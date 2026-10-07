@@ -145,6 +145,11 @@ onUnmounted(() => {
   animation-timing-function: cubic-bezier(.4, 0, .2, 1);
 }
 
+/* clicks reach the page under the crossfade, so the next card can be drawn during it */
+:root.arc-recolour::view-transition {
+  pointer-events: none;
+}
+
 .concept-arcana,
 body:has(.concept-arcana) {
   --arc-bg: #0b0b0e;

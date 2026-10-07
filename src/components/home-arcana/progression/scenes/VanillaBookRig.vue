@@ -40,13 +40,16 @@ const props = withDefaults(defineProps<{
   warm?: boolean;
   /** Ingredient keys that have left the page (their icons are hidden). */
   hidden?: string[];
-  /** The reader's hand on the cover (0 shut, 1 open flat), over what the scroll says; null to follow it. */
-  open?: number | null;
+  /**
+   * The reader's hand, over what the scroll says (null to follow it): 0 open flat, 1 shut on
+   * its front cover (the left half folded over), -1 shut on its back (the right half over).
+   */
+  fold?: number | null;
 }>(), {
   reducedMotion: false,
   warm: false,
   hidden: () => [],
-  open: null,
+  fold: null,
 });
 const emit = defineEmits<{ (e: 'anchors', value: BookAnchors): void }>();
 
@@ -59,6 +62,8 @@ let scene: THREE.Scene | null = null;
 let bookRoot: THREE.Group | null = null;
 let frontCover: THREE.Group | null = null;
 let leftPages: THREE.Group | null = null;
+let backCover: THREE.Group | null = null;
+let rightPages: THREE.Group | null = null;
 let resizeObserver: ResizeObserver | null = null;
 let intersectionObserver: IntersectionObserver | null = null;
 let initialized = false;
@@ -558,13 +563,13 @@ function buildBook(labels: BookLabels, images: Map<string, CanvasImageSource>) {
   bookRoot = new three.Group();
   scene.add(bookRoot);
 
-  const backCover = new three.Group();
+  backCover = new three.Group();
   bookRoot.add(backCover);
   addTexturedLeaf(backCover, { width: 6, height: 10, depth: 0.24, z: -0.42, color: 0x15121a, front: [16, 0, 6, 10], back: [22, 0, 6, 10], coverPalette: accent });
 
-  const rightStack = new three.Group();
-  bookRoot.add(rightStack);
-  const right = addTexturedLeaf(rightStack, {
+  rightPages = new three.Group();
+  bookRoot.add(rightPages);
+  const right = addTexturedLeaf(rightPages, {
     width: PAGE.uw, height: PAGE.uh, depth: 0, z: -0.18, color: 0xe8ddb4,
     front: [13, 11, 5, 8], back: [19, 11, 5, 8],
     frontPainter: paintRightFormula(labels),
@@ -642,28 +647,34 @@ function buildBook(labels: BookLabels, images: Map<string, CanvasImageSource>) {
 }
 
 function updatePose() {
-  if (!bookRoot || !frontCover || !leftPages) return;
+  if (!bookRoot || !frontCover || !leftPages || !backCover || !rightPages) return;
   const p = props.reducedMotion ? 1 : clamp01(props.progress);
   const descend = phase(p, 0, 0.2);
   const faceCover = phase(p, 0.2, 0.43);
-  const held = props.open === null ? null : clamp01(props.open);
-  // in the hand the cover follows the finger, the page a step behind it
-  const opening = held ?? phase(p, 0.5, 0.88);
-  const pageOpening = held === null ? phase(p, 0.55, 0.9) : clamp01((held - 0.1) / 0.9);
-  const settle = phase(p, 0.88, 1) * (held ?? 1);
+  const held = props.fold === null ? null : Math.min(1, Math.max(-1, props.fold));
+  // in the hand a cover follows the finger, and its page lands a step ahead of it
+  const opening = held === null ? phase(p, 0.5, 0.88) : 1 - Math.max(0, held);
+  const pageOpening = held === null ? phase(p, 0.55, 0.9) : clamp01((opening - 0.1) / 0.9);
+  const backFold = held === null ? 0 : Math.max(0, -held);
+  const flat = held === null ? 1 : 1 - Math.abs(held);
+  const settle = phase(p, 0.88, 1) * flat;
 
   bookRoot.visible = props.reducedMotion || p > 0.004;
   // a short fall into place (the scene fades it in): never from beyond the canvas edge
   bookRoot.position.y = (1 - descend) * 1.6 - settle * 0.08;
   // centred edge-on, then on the cover (which spans x 0..6), then on the open spread
-  bookRoot.position.x = -3 * faceCover * (1 - opening);
+  // (shut on its back, the book lies on the left half, x -6..0)
+  bookRoot.position.x = -3 * faceCover * (1 - opening) + 3 * backFold;
   bookRoot.rotation.y = (Math.PI / 2) * (1 - faceCover);
-  bookRoot.rotation.x = -0.06 - opening * 0.035;
+  bookRoot.rotation.x = -0.06 - opening * (1 - backFold) * 0.035;
   bookRoot.rotation.z = -0.045 * (1 - faceCover) + Math.sin(settle * Math.PI) * 0.012;
   bookRoot.scale.setScalar(0.9 + descend * 0.1);
 
   frontCover.rotation.y = -Math.PI * 0.985 * opening;
   leftPages.rotation.y = -Math.PI * pageOpening;
+  // the other way: the right page folds over onto the left one, then the back cover over both
+  rightPages.rotation.y = Math.PI * clamp01(backFold / 0.9);
+  backCover.rotation.y = Math.PI * 0.985 * backFold;
   render();
 }
 
@@ -889,7 +900,7 @@ onMounted(() => {
 watch(() => props.warm, (warm) => {
   if (warm) void loadAssets().catch(() => undefined);
 });
-watch(() => [props.progress, props.reducedMotion, props.open], () => {
+watch(() => [props.progress, props.reducedMotion, props.fold], () => {
   if (!initialized && shouldInitialize()) void initialize();
   updatePose();
 });

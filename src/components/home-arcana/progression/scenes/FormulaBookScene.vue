@@ -19,7 +19,7 @@
           :warm="warm"
           :labels="labels"
           :hidden="hidden"
-          :open="heldOpen"
+          :fold="heldFold"
           @anchors="onAnchors"
         />
       </div>
@@ -101,22 +101,25 @@ const closeT = computed(() => (reducedMotion.value ? 0 : ease(g.value, [T.bookOu
 const rigProgress = computed(() => (reducedMotion.value ? 1 : bookLocal.value * (1 - closeT.value * 0.56)));
 const entrance = computed(() => (reducedMotion.value ? 1 : smooth(bookLocal.value / 0.16)));
 const readT = computed(() => (reducedMotion.value ? 1 : smooth((bookLocal.value - 0.95) / 0.05)));
-const readable = computed(() => props.active && readT.value > 0.92 && g.value < T.readable[1] && (heldOpen.value ?? 1) > 0.97);
+const readable = computed(() => props.active && readT.value > 0.92 && g.value < T.readable[1] && Math.abs(heldFold.value ?? 0) < 0.03);
 const glow = computed(() => entrance.value * (0.55 + readT.value * 0.45));
 
 /*
  * The reader's hand. Once the cover faces them, until the cauldron comes up under the book,
- * they can drag the cover shut and open again (right to close, left to open, as on paper);
- * a tap on the shut cover opens it. On release it falls open or shut. When the brew needs
- * the open pages, or the scroll catches up with the hand, the scroll takes the book back.
+ * they can fold it shut either way, as on paper: drag right and the left half closes over
+ * (the front cover shows), drag left and the right half closes over (the back shows); one
+ * drag runs front, open, back. A tap on either shut cover opens it, and on release it falls
+ * to the nearest rest. When the brew needs the open pages, or the scroll catches up with
+ * the hand, the scroll takes the book back.
  */
-const scrollOpen = computed(() => (reducedMotion.value ? 1 : smooth((rigProgress.value - 0.5) / 0.38)));
+/** How far the scroll has the book shut on its front cover (1) or open (0). */
+const scrollFold = computed(() => (reducedMotion.value ? 0 : 1 - smooth((rigProgress.value - 0.5) / 0.38)));
 const grabbable = computed(() => props.active && rigProgress.value >= 0.45 && g.value < T.brewIn[0]);
-/** Where the hand holds the cover (0 shut .. 1 open), and how much it outweighs the scroll. */
-const hand = ref(1);
+/** Where the hand holds the book (1 shut on the front, 0 open, -1 shut on the back), and how much it outweighs the scroll. */
+const hand = ref(0);
 const weight = ref(0);
 const dragging = ref(false);
-const heldOpen = computed(() => (weight.value > 0 ? scrollOpen.value + (hand.value - scrollOpen.value) * weight.value : null));
+const heldFold = computed(() => (weight.value > 0 ? scrollFold.value + (hand.value - scrollFold.value) * weight.value : null));
 
 let tween = 0;
 function animate(target: typeof hand, to: number, duration: number, then?: () => void) {
@@ -144,13 +147,13 @@ function release(duration = 520) {
 
 let press: { id: number; x: number; y: number; from: number; at: number; vx: number; t: number } | null = null;
 let dragged = false;
-/** The drag that shuts the book: about the cover's swing across the box (layout.ts BOOK_FILL). */
-const swing = () => (props.layout?.book.w ?? 600) * 0.7;
+/** The drag that shuts the book: one page width (layout.ts BOOK_FILL). */
+const swing = () => (props.layout?.book.w ?? 600) * 0.5;
 
 function grab(event: PointerEvent) {
   if (!grabbable.value || (event.pointerType === 'mouse' && event.button !== 0)) return;
   if (!(event.target instanceof Element) || !event.target.closest('.book-scene__box, .book-hotspot')) return;
-  press = { id: event.pointerId, x: event.clientX, y: event.clientY, from: heldOpen.value ?? scrollOpen.value, at: event.clientX, vx: 0, t: event.timeStamp };
+  press = { id: event.pointerId, x: event.clientX, y: event.clientY, from: heldFold.value ?? scrollFold.value, at: event.clientX, vx: 0, t: event.timeStamp };
   dragged = false;
 }
 function drag(event: PointerEvent) {
@@ -171,23 +174,25 @@ function drag(event: PointerEvent) {
   press.vx = press.vx * 0.6 + ((event.clientX - press.at) / dt) * 0.4;
   press.at = event.clientX;
   press.t = event.timeStamp;
-  hand.value = Math.min(1, Math.max(0, press.from - dx / swing()));
+  // right folds the left half over (the front cover), left folds the right half over (the back)
+  hand.value = Math.min(1, Math.max(-1, press.from + dx / swing()));
 }
 function letGo(event: PointerEvent) {
   if (!press || event.pointerId !== press.id) return;
   const flick = press.vx;
   press = null;
   if (!dragging.value) {
-    // a tap on the shut cover opens it
-    if (event.type === 'pointerup' && (heldOpen.value ?? 1) < 0.5) {
+    // a tap on either shut cover opens it
+    if (event.type === 'pointerup' && Math.abs(heldFold.value ?? 0) > 0.5) {
       dragged = true;
-      animate(hand, 1, 620);
+      animate(hand, 0, 620);
     }
     return;
   }
   dragging.value = false;
-  // a flick decides; otherwise it falls the way it leans
-  const to = Math.abs(flick) > 0.35 ? (flick < 0 ? 1 : 0) : hand.value > 0.5 ? 1 : 0;
+  // a flick carries it on to the next rest (front shut, open, back shut); otherwise it falls the way it leans
+  const h = hand.value;
+  const to = Math.abs(flick) > 0.35 ? (flick > 0 ? Math.min(1, Math.floor(h) + 1) : Math.max(-1, Math.ceil(h) - 1)) : Math.round(h);
   animate(hand, to, 260 + Math.abs(to - hand.value) * 420);
 }
 /** The click that ends a drag (or the tap that opened the cover) is not a tap on an entry. */
@@ -199,8 +204,8 @@ function swallowClick(event: MouseEvent) {
 }
 
 // the scroll caught up with the hand: it has the book again
-watch([hand, scrollOpen, dragging], () => {
-  if (!dragging.value && weight.value === 1 && Math.abs(hand.value - scrollOpen.value) < 0.004) weight.value = 0;
+watch([hand, scrollFold, dragging], () => {
+  if (!dragging.value && weight.value === 1 && Math.abs(hand.value - scrollFold.value) < 0.004) weight.value = 0;
 });
 // the brew needs the open pages (and scrolling back past the cover gives the book back too)
 watch(grabbable, (can) => {

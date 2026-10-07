@@ -155,7 +155,7 @@ import ArcanaBack from './ArcanaBack.vue';
 import {stableViewportHeight} from './stableViewport';
 import HeroNightScene from './HeroNightScene.vue';
 import {CORE_CARDS, cardById, sigilNative} from './arcana-data';
-import {ensurePathwayData, randomCard, useArcana} from './useArcana';
+import {ensurePathwayData, randomCard, settleRecolour, useArcana} from './useArcana';
 import {useCopyAddress} from './useCopyAddress';
 import {useLatestNews} from './useLatestNews';
 import {useI18n} from '@/composables/useI18n';
@@ -464,31 +464,81 @@ function resetTilt() {
   tilt.value = {...tiltTarget};
 }
 
-/* ---------------- one move at a time; the latest request waits its turn ---------------- */
-let pending: (() => Promise<void>) | null = null;
-async function run(job: () => Promise<void>) {
-  if (busy.value) {
-    pending = job;
-    return;
-  }
+/*
+ * ---------------- moves ----------------
+ * A card picked from the fan cuts into a draw from the fan that is still in the air: the
+ * new card leaves at once, from wherever everything is, and the one in flight turns back
+ * face down to the slot. Anything cuts into the page's closing crossfade (it is skipped to
+ * its end). A shuffle runs to the end once it has gathered the deck, and a request made
+ * meanwhile waits for it (the latest one only).
+ * Each move holds a ticket; a move whose ticket is no longer the latest stops at its next
+ * await and leaves the table to the newer one.
+ */
+type MoveKind = 'fan' | 'shuffle' | 'intro';
+let ticket = 0;
+let moving: MoveKind | null = null;
+/** The move has landed and only the page's crossfade is left. */
+let wearing = false;
+let pending: (() => void) | null = null;
+const stale = (my: number) => my !== ticket;
+
+function start(kind: MoveKind, job: (my: number) => Promise<void>): Promise<void> {
+  const my = ++ticket;
+  moving = kind;
+  wearing = false;
   busy.value = true;
-  try {
-    await job();
-  } finally {
+  return job(my).catch(() => undefined).finally(() => {
+    if (stale(my)) return;
+    moving = null;
+    wearing = false;
     busy.value = false;
-  }
-  syncWithPage();
-  const next = pending;
-  pending = null;
-  if (next) await run(next);
+    syncWithPage();
+    const next = pending;
+    pending = null;
+    next?.();
+  });
 }
 
-const requestDraw = (id: string) => run(() => drawFromFan(id));
-const requestShuffle = () => run(() => shuffleAndDraw());
+function request(kind: MoveKind, job: (my: number) => Promise<void>): Promise<void> {
+  if (!busy.value) return start(kind, job);
+  if (wearing || (moving === 'fan' && kind === 'fan')) {
+    settleRecolour();
+    return start(kind, job);
+  }
+  pending = () => void request(kind, job);
+  return Promise.resolve();
+}
+
+const requestDraw = (id: string) => request('fan', my => drawFromFan(id, my));
+const requestShuffle = () => request('shuffle', my => shuffleAndDraw(undefined, my));
+
+/** Where every moving card is now (read once), so a move that cuts in starts from there. */
+type Caught = {pose: Map<string, string>; turn: Map<string, number>; animations: Animation[]};
+function catchMoving(): Caught {
+  const animations = [...running];
+  const pose = new Map<string, string>();
+  const turn = new Map<string, number>();
+  if (!animations.length) return {pose, turn, animations};
+  const targets = new Set(animations.map(a => (a.effect as KeyframeEffect | null)?.target));
+  for (const [id, el] of cardEls) if (targets.has(el)) pose.set(id, getComputedStyle(el).transform);
+  for (const [id, el] of flipEls) {
+    if (!targets.has(el)) continue;
+    // rotateY(a) is matrix3d(cos a, 0, -sin a, ...): the turn, 0 (face up) to 180 (face down)
+    const m = new DOMMatrixReadOnly(getComputedStyle(el).transform);
+    turn.set(id, Math.abs(Math.atan2(-m.m13, m.m11)) * 180 / Math.PI);
+  }
+  return {pose, turn, animations};
+}
 
 /* ---------------- draw a specific fan card ---------------- */
-async function drawFromFan(id: string) {
+async function drawFromFan(id: string, my: number) {
   if (id === drawn.value || !order.value.includes(id)) return;
+  fronts.add(id);
+  void ensurePathwayData();
+  // Let the face decode, but never let the click feel dead.
+  await Promise.race([preload(id), sleep(140)]);
+  if (stale(my) || id === drawn.value || !order.value.includes(id)) return;
+  const caught = catchMoving();
   const old = drawn.value;
   const k = fanIndex(id);
   const count = order.value.length;
@@ -500,11 +550,6 @@ async function drawFromFan(id: string) {
   const fromNew = wasLifted ? outward(slot, g.cardH * g.p.fan * LIFT) : slot;
   // The first draw leaves a gap in the ring: the others close it up behind the card.
   const before = old ? null : new Map(order.value.map((fid, i) => [fid, slotPose(i, count)]));
-
-  fronts.add(id);
-  void ensurePathwayData();
-  // Let the face decode, but never let the click feel dead.
-  await Promise.race([preload(id), sleep(140)]);
 
   const hadFocus = document.activeElement === el;
   const nextOrder = order.value.slice();
@@ -530,6 +575,7 @@ async function drawFromFan(id: string) {
 
   incoming.value = id;
   await nextTick();
+  if (stale(my)) return;
   keepFocus();
 
   const D = 1080;
@@ -541,13 +587,13 @@ async function drawFromFan(id: string) {
   const landing: Pose = {x: 0, y: g.drawnY + u * 0.025, r: 0, s: 1.012};
   const moves = [
     play(cardEls.get(id), [
-      {transform: css(fromNew), offset: 0, easing: EASE_LIFT},
+      {transform: caught.pose.get(id) ?? css(fromNew), offset: 0, easing: EASE_LIFT},
       {transform: css(lifted), offset: 0.2, easing: EASE_SWING},
       {transform: css(above), offset: 0.64, easing: EASE_LAND},
       {transform: css(landing), offset: 0.86, easing: 'ease-in-out'},
       {transform: css(drawnPose()), offset: 1},
     ], {duration: D}),
-    flip(id, 180, 0, {duration: D}, 0.2, 0.7),
+    flip(id, caught.turn.get(id) ?? 180, 0, {duration: D}, caught.turn.has(id) ? 0.1 : 0.2, 0.7),
   ];
 
   if (old) {
@@ -555,16 +601,17 @@ async function drawFromFan(id: string) {
     // behind it and is tucked into the free slot.
     const back = slotPose(k, count);
     const D2 = D * 0.9;
-    const wait = D * 0.26;
+    // cut short in the air, it turns back at once rather than hang there
+    const wait = caught.pose.has(old) ? 0 : D * 0.26;
     const sink: Pose = {x: side * u * 0.2, y: g.drawnY + u * 0.28, r: side * 5, s: 0.62};
     moves.push(
         play(cardEls.get(old), [
-          {transform: css(drawnPose()), offset: 0, easing: EASE_SWING},
+          {transform: caught.pose.get(old) ?? css(drawnPose()), offset: 0, easing: EASE_SWING},
           {transform: css(sink), offset: 0.4, easing: EASE_SWING},
           {transform: css(outward(back, u * 0.16)), offset: 0.84, easing: EASE_LAND},
           {transform: css(back), offset: 1},
         ], {duration: D2, delay: wait, fill: 'backwards'}),
-        flip(old, 0, 180, {duration: D2, delay: wait, fill: 'backwards'}, 0.05, 0.45),
+        flip(old, caught.turn.get(old) ?? 0, 180, {duration: D2, delay: wait, fill: 'backwards'}, 0.05, 0.45),
     );
   } else if (before) {
     const next = nextOrder.length;
@@ -578,14 +625,26 @@ async function drawFromFan(id: string) {
     });
   }
 
+  // Cards a cut-short draw left on their way (the one it sent home): on to their slots, face down.
+  for (const [fid, from] of caught.pose) {
+    if (fid !== id && fid !== old) moves.push(play(cardEls.get(fid), [{transform: from}, {transform: css(poseOf(fid))}], {duration: 560, easing: EASE_LAND}));
+  }
+  for (const [fid, turned] of caught.turn) {
+    if (fid !== id && fid !== old && turned < 179.5) moves.push(flip(fid, turned, 180, {duration: 420}));
+  }
+  // the new moves hold the cards now: the cut-short ones can go
+  caught.animations.forEach(a => a.cancel());
+
   await settled(moves);
+  if (stale(my)) return;
   incoming.value = null;
-  if (old) fronts.delete(old);
+  for (const face of [...fronts]) if (face !== id) fronts.delete(face);
+  wearing = true;
   await wear(id);
 }
 
 /* ---------------- shuffle the whole deck, then deal one ---------------- */
-async function shuffleAndDraw(targetId?: string) {
+async function shuffleAndDraw(targetId: string | undefined, my: number) {
   const old = drawn.value;
   const target = targetId && targetId !== old ? targetId : randomCard(old ?? '');
   const ids = heroIds.value.includes(target) ? heroIds.value.slice() : heroIds.value.concat(target);
@@ -627,6 +686,7 @@ async function shuffleAndDraw(targetId?: string) {
   });
   const flipDown = old ? flip(old, 0, 180, {duration: 400, fill: 'forwards'}, 0, 1) : null;
   await settled([...gather, flipDown]);
+  if (stale(my)) return;
 
   /* 2 - one riffle: the pile splits in two, the halves tilt in and rain back together */
   const count0 = before.length;
@@ -647,6 +707,7 @@ async function shuffleAndDraw(targetId?: string) {
     ], {duration: 860, fill: 'forwards'});
   });
   await Promise.all([settled(riffle), Promise.race([ready, sleep(1500)])]);
+  if (stale(my)) return;
 
   /* 3 - new order: fan out from the pile and deal the drawn card to the front */
   heroIds.value = ids;
@@ -678,16 +739,21 @@ async function shuffleAndDraw(targetId?: string) {
   [...gather, ...riffle, flipDown].forEach(a => a?.cancel());
 
   await settled(deal);
+  if (stale(my)) return;
   incoming.value = null;
   if (old && old !== target) fronts.delete(old);
+  wearing = true;
   await wear(target);
 }
 
 /* ---------------- intro: the moon rises and the deal comes out of it ---------------- */
-async function introDeal() {
+function introDeal() {
   risen.value = true;
   if (reducedMotion()) return;
-  busy.value = true;
+  void start('intro', dealIntro);
+}
+
+async function dealIntro() {
   const g = geo.value;
   const u = g.u;
   const count = order.value.length;
@@ -718,11 +784,6 @@ async function introDeal() {
   }
   await settled(animations);
   incoming.value = null;
-  busy.value = false;
-  syncWithPage();
-  const next = pending;
-  pending = null;
-  if (next) void run(next);
 }
 
 /* ---------------- keep in sync with draws made elsewhere on the page ---------------- */
@@ -954,11 +1015,13 @@ onMounted(() => {
   if (stageRef.value) heroObserver.observe(stageRef.value);
   // A named card that is already in the fan flies straight out of it;
   // anything else (a random draw, a boon) goes through a full shuffle.
-  unregister = registerDealer(target => run(() => (
-    target && order.value.includes(target) ? drawFromFan(target) : shuffleAndDraw(target)
-  )), () => heroVisible);
+  unregister = registerDealer(target => (
+    target && order.value.includes(target)
+      ? request('fan', my => drawFromFan(target, my))
+      : request('shuffle', my => shuffleAndDraw(target, my))
+  ), () => heroVisible);
 
-  void introDeal();
+  introDeal();
   void ensurePathwayData();
   void waitForFonts().then(() => {
     fitTitle();

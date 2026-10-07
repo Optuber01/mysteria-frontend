@@ -66,7 +66,7 @@ export function ensurePathwayData() {
  * and the old and new pages crossfade on the compositor (no repaint per frame); elsewhere
  * the colours switch at once and the ambient wash crossfades (ArcanaHome).
  */
-type Recolour = {finished: Promise<void>};
+type Recolour = {finished: Promise<void>; skipTransition?: () => void};
 type TransitionDocument = Document & {startViewTransition?: (update: () => Promise<void>) => Recolour};
 let recolour: Recolour | null = null;
 
@@ -99,6 +99,11 @@ function crossfade(update: () => void): Promise<void> {
     }
   });
   return done;
+}
+
+/** A newer draw cuts in: the crossfade still running jumps to its end (the new colours). */
+export function settleRecolour() {
+  recolour?.skipTransition?.();
 }
 
 /** Pick a random card id other than `except`, from the 22 by default. */
