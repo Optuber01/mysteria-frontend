@@ -2,8 +2,9 @@
  * The story's WebGL scenes (the book, the player) used to create their contexts,
  * compile their shaders and upload their textures at the moment the visitor first
  * scrolled into them: a 100-300 ms stall mid-scroll on integrated GPUs. They now do
- * it ahead of time, once the page has settled (after the load event and the hero's
- * intro deal), in an idle slice.
+ * it ahead of time, in an idle slice once the page has settled (after the load event
+ * and the hero's intro deal) and the visitor has started down the page: three.js is
+ * ~620 KB, so a visitor who only reads the first screen never downloads it.
  */
 type IdleWindow = Window & {
   requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
@@ -36,6 +37,34 @@ export function whenSettled(task: () => void): () => void {
   });
   return () => {
     cancelled = true;
+  };
+}
+
+let moved: Promise<void> | null = null;
+/** Resolves once the visitor has scrolled (or the page opened scrolled, e.g. coming back to it). */
+export function visitorMoved(): Promise<void> {
+  moved ??= new Promise((resolve) => {
+    if (scrollY > 0) return resolve();
+    const onScroll = () => {
+      if (scrollY <= 0) return;
+      removeEventListener('scroll', onScroll);
+      resolve();
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+  });
+  return moved;
+}
+
+/** Like whenSettled, but only once the visitor has started down the page too. */
+export function whenApproached(task: () => void): () => void {
+  let cancelled = false;
+  let cancelSettled: (() => void) | null = null;
+  void visitorMoved().then(() => {
+    if (!cancelled) cancelSettled = whenSettled(task);
+  });
+  return () => {
+    cancelled = true;
+    cancelSettled?.();
   };
 }
 

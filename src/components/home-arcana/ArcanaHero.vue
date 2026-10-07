@@ -3,15 +3,15 @@
     <HeroNightScene :risen="risen"/>
 
     <div class="arc-hero__grid">
-      <!-- Copy: what this is, how to get in. Shown once the fonts are in, so nothing jumps. -->
-      <div ref="introRef" class="arc-hero__intro" :class="{'is-ready': fontsReady}">
+      <!-- Copy: what this is, how to get in. Painted at once in the fallback face; the title is fitted again when Commissioner swaps in. -->
+      <div ref="introRef" class="arc-hero__intro">
         <!-- two lines, each kept on one line: the whole title scales down to fit the column (fitTitle) -->
         <h1 id="arc-hero-title" class="arc-hero__title" :style="{'--fit': titleFit}">
           <span><span ref="leadRef" class="arc-hero__title-line">{{ titleA }}</span></span>{{ ' ' }}<span class="arc-hero__title-accent"><span ref="accentRef" class="arc-hero__title-line">{{ titleB }}</span></span>
         </h1>
       </div>
 
-      <div class="arc-hero__body" :class="{'is-ready': fontsReady}">
+      <div class="arc-hero__body">
         <p class="arc-hero__lede">{{ t('home.arcana.hero.lede') }}</p>
 
         <div class="arc-hero__actions">
@@ -237,7 +237,6 @@ const incoming = ref<string | null>(null);
 const busy = ref(false);
 /** The whole deck is moving (a shuffle or the opening deal): the fan does not answer the hand. */
 const stilled = ref(false);
-const fontsReady = ref(false);
 const risen = ref(false);
 const focusIndex = ref(0);
 const announcement = ref('');
@@ -926,29 +925,6 @@ function onStageLeave() {
   if (tiltFrame === null) tiltFrame = requestAnimationFrame(stepTilt);
 }
 
-/* ---------------- fonts: reveal the copy once its faces are in (capped) ---------------- */
-function waitForFonts(): Promise<void> {
-  const cap = sleep(1400);
-  const ready = (async () => {
-    await sleep(0); // the concept's <link> is injected by the parent's onMounted
-    const link = document.querySelector<HTMLLinkElement>('link[data-concept-font*="Commissioner"]');
-    if (link && !link.sheet) {
-      await new Promise(resolve => {
-        link.addEventListener('load', resolve, {once: true});
-        link.addEventListener('error', resolve, {once: true});
-      });
-    }
-    await Promise.all([
-      document.fonts.load('600 64px Commissioner'),
-      document.fonts.load('400 18px "Golos Text"'),
-      document.fonts.load('600 16px "Golos Text"'),
-      document.fonts.load('400 11px "Tenor Sans"'),
-      document.fonts.load('500 14px "IBM Plex Mono"'),
-    ]).catch(() => undefined);
-  })();
-  return Promise.race([ready, cap]).then(() => undefined);
-}
-
 /* ---------------- sizing ---------------- */
 const px = (value: string) => parseFloat(value) || 0;
 
@@ -1025,12 +1001,7 @@ onMounted(() => {
   ), () => heroVisible);
 
   introDeal();
-  void ensurePathwayData();
-  void waitForFonts().then(() => {
-    fitTitle();
-    fontsReady.value = true;
-  });
-  // the display face can land after the capped wait: fit the name again on its real metrics
+  // the display face swaps in after the first paint (font-display: swap): fit the name again on its real metrics
   document.fonts?.addEventListener('loadingdone', fitTitle);
 });
 
@@ -1090,21 +1061,6 @@ onUnmounted(() => {
 .arc-hero__intro,
 .arc-hero__body {
   position: relative;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(16px);
-}
-
-.arc-hero__intro.is-ready,
-.arc-hero__body.is-ready {
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-  transition: opacity .8s ease, transform 1s cubic-bezier(.2, .8, .2, 1);
-}
-
-.arc-hero__body.is-ready {
-  transition-delay: .15s;
 }
 
 /* ---- copy ---- */
@@ -1584,11 +1540,6 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arc-hero__intro.is-ready,
-  .arc-hero__body.is-ready {
-    transition: none;
-  }
-
   /* Cards swap instantly: no app-wide micro-transition on the card or its flip. */
   .arc-card,
   .arc-card__lift,

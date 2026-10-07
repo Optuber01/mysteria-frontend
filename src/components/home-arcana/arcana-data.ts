@@ -1,6 +1,6 @@
 /*
  * The deck: a tiny, always-available table of the 32 cards (ids, accents,
- * arcana numerals, English fallback names) plus an inline Fool reading for the
+ * arcana numerals, English fallback names and Sequence 9 roles) plus an inline Fool reading for the
  * first paint. Everything localized and data-heavy comes from @/data/pathways,
  * which is ~1.3 MB of JSON and so is only ever imported dynamically.
  */
@@ -15,12 +15,14 @@ export type ArcanaCard = Readonly<{
   boon: boolean;
   /** English label, used until the localized data has loaded. */
   en: string;
+  /** English Sequence 9 role, likewise. */
+  seq9: string;
 }>;
 
-const core = (id: string, numeral: string, accent: string, en: string): ArcanaCard =>
-  ({id, numeral, accent, en, boon: false});
-const boon = (id: string, accent: string, en: string): ArcanaCard =>
-  ({id, numeral: '', accent, en, boon: true});
+const core = (id: string, numeral: string, accent: string, en: string, seq9: string): ArcanaCard =>
+  ({id, numeral, accent, en, seq9, boon: false});
+const boon = (id: string, accent: string, en: string, seq9: string): ArcanaCard =>
+  ({id, numeral: '', accent, en, seq9, boon: true});
 
 /**
  * The page's accent before the visitor has drawn: a lighter cut of the crimson moon
@@ -30,41 +32,41 @@ export const NEUTRAL_ACCENT = '#e45a64';
 
 /** The 22, in arcana order. Tarot-named pathways keep their canonical numbers. */
 export const CORE_CARDS: readonly ArcanaCard[] = [
-  core('fool', '0', '#a78bfa', 'Fool'),
-  core('door', 'I', '#3edbd0', 'Door'),
-  core('visionary', 'II', '#8ec5ff', 'Visionary'),
-  core('mother', 'III', '#5fd38d', 'Mother'),
-  core('emperor', 'IV', '#7d88ff', 'Black Emperor'),
-  core('priest', 'V', '#ff5468', 'Red Priest'),
-  core('demoness', 'VI', '#ff62bd', 'Demoness'),
-  core('tyrant', 'VII', '#4d9eff', 'Tyrant'),
-  core('giant', 'VIII', '#ff8248', 'Twilight Giant'),
-  core('hermit', 'IX', '#c38dff', 'Hermit'),
-  core('fortune', 'X', '#6ee7c0', 'Wheel of Fortune'),
-  core('justiciar', 'XI', '#f2ab8c', 'Justiciar'),
-  core('hanged', 'XII', '#ff7d6b', 'Hanged Man'),
-  core('death', 'XIII', '#cfe69e', 'Death'),
-  core('paragon', 'XIV', '#ffa655', 'Paragon'),
-  core('abyss', 'XV', '#f2533d', 'Abyss'),
-  core('tower', 'XVI', '#93adff', 'White Tower'),
-  core('darkness', 'XVII', '#98a2ff', 'Darkness'),
-  core('moon', 'XVIII', '#ff8fae', 'Moon'),
-  core('sun', 'XIX', '#f4ea6a', 'Sun'),
-  core('chained', 'XX', '#b9aef0', 'Chained'),
-  core('error', 'XXI', '#6fd9f2', 'Error'),
+  core('fool', '0', '#a78bfa', 'Fool', 'Seer'),
+  core('door', 'I', '#3edbd0', 'Door', 'Apprentice'),
+  core('visionary', 'II', '#8ec5ff', 'Visionary', 'Spectator'),
+  core('mother', 'III', '#5fd38d', 'Mother', 'Planter'),
+  core('emperor', 'IV', '#7d88ff', 'Black Emperor', 'Lawyer'),
+  core('priest', 'V', '#ff5468', 'Red Priest', 'Hunter'),
+  core('demoness', 'VI', '#ff62bd', 'Demoness', 'Assassin'),
+  core('tyrant', 'VII', '#4d9eff', 'Tyrant', 'Sailor'),
+  core('giant', 'VIII', '#ff8248', 'Twilight Giant', 'Warrior'),
+  core('hermit', 'IX', '#c38dff', 'Hermit', 'Mystery Pryer'),
+  core('fortune', 'X', '#6ee7c0', 'Wheel of Fortune', 'Monster'),
+  core('justiciar', 'XI', '#f2ab8c', 'Justiciar', 'Arbiter'),
+  core('hanged', 'XII', '#ff7d6b', 'Hanged Man', 'Secrets Supplicant'),
+  core('death', 'XIII', '#cfe69e', 'Death', 'Corpse Collector'),
+  core('paragon', 'XIV', '#ffa655', 'Paragon', 'Savant'),
+  core('abyss', 'XV', '#f2533d', 'Abyss', 'Criminal'),
+  core('tower', 'XVI', '#93adff', 'White Tower', 'Reader'),
+  core('darkness', 'XVII', '#98a2ff', 'Darkness', 'Shadow Wanderer'),
+  core('moon', 'XVIII', '#ff8fae', 'Moon', 'Apothecary'),
+  core('sun', 'XIX', '#f4ea6a', 'Sun', 'Bard'),
+  core('chained', 'XX', '#b9aef0', 'Chained', 'Prisoner'),
+  core('error', 'XXI', '#6fd9f2', 'Error', 'Marauder'),
 ];
 
 export const BOON_CARDS: readonly ArcanaCard[] = [
-  boon('aeon', '#b8c8ee', 'Eternal Aeon'),
-  boon('chaos', '#e0956c', 'Chaos'),
-  boon('chaosmist', '#a9dde8', 'Chaos Mist'),
-  boon('condenser', '#6f9dff', 'Condenser'),
-  boon('devouring', '#ecc1ad', 'Devouring'),
-  boon('edict', '#4fc2a8', 'Edict'),
-  boon('everlasting', '#c4adf0', 'Everlasting'),
-  boon('patriarch', '#e77799', 'Patriarch'),
-  boon('secondlaw', '#d8d3a6', 'Second Law'),
-  boon('sublunary', '#d6b08a', 'Sublunary'),
+  boon('aeon', '#b8c8ee', 'Eternal Aeon', 'Dancer'),
+  boon('chaos', '#e0956c', 'Chaos', 'Villain'),
+  boon('chaosmist', '#a9dde8', 'Chaos Mist', 'Broker'),
+  boon('condenser', '#6f9dff', 'Condenser', 'Astronomy Aficionado'),
+  boon('devouring', '#ecc1ad', 'Devouring', 'Tramp'),
+  boon('edict', '#4fc2a8', 'Edict', 'Dreamless'),
+  boon('everlasting', '#c4adf0', 'Everlasting', 'Initiator'),
+  boon('patriarch', '#e77799', 'Patriarch', 'Scrooge'),
+  boon('secondlaw', '#d8d3a6', 'Second Law', 'Carrier'),
+  boon('sublunary', '#d6b08a', 'Sublunary', 'Shaman'),
 ];
 
 export const ALL_CARDS: readonly ArcanaCard[] = [...CORE_CARDS, ...BOON_CARDS];
@@ -126,7 +128,7 @@ export const FOOL_READING: Reading = {
 export function shellReading(id: string): Reading {
   if (id === 'fool') return FOOL_READING;
   const card = cardById(id);
-  return {id, name: card.en, seq9: '', ladder: [], sequenceCount: card.boon ? 5 : 10, abilityCount: 0, early: [], loaded: false};
+  return {id, name: card.en, seq9: card.seq9, ladder: [], sequenceCount: card.boon ? 5 : 10, abilityCount: 0, early: [], loaded: false};
 }
 
 export type PathwaysModule = typeof import('@/data/pathways');

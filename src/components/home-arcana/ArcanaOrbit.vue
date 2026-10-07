@@ -127,7 +127,15 @@
                     </button>
                   </li>
                 </ol>
-                <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
+                <!-- the ladder's own room while the archive is on its way: the rung numbers are known, the names follow -->
+                <template v-else>
+                  <ol class="arc-ladder is-pending" aria-hidden="true">
+                    <li v-for="n in pendingRungs" :key="n" :class="{'is-top': n === pendingRungs[pendingRungs.length - 1]}">
+                      <span class="arc-ladder__rung"><b>{{ n }}</b><span><i></i></span></span>
+                    </li>
+                  </ol>
+                  <p class="arc-sr">{{ t('home.arcana.deck.loading') }}</p>
+                </template>
                 <div ref="rungFrame" class="arc-rung-frame">
                   <div id="arc-rung-detail" class="arc-rung" role="region" :aria-label="rungDetail?.title" :hidden="!rungDetail">
                     <div v-if="rungDetail" class="arc-rung__inner">
@@ -139,7 +147,10 @@
                           <span>{{ ability.summary }}</span>
                         </li>
                       </ul>
-                      <RouterLink v-if="rungDetail.abilities.length" :to="$lp(`/pathways/${card.id}`)" class="arc-rung__full">
+                      <ul v-else-if="rungDetail.pending" class="arc-rung__abilities is-pending" aria-hidden="true">
+                        <li v-for="n in RUNG_ABILITIES" :key="n"><strong><i></i></strong><span><i></i><i></i></span></li>
+                      </ul>
+                      <RouterLink v-if="rungDetail.abilities.length || rungDetail.pending" :to="$lp(`/pathways/${card.id}`)" class="arc-rung__full">
                         {{ rungDetail.full }}
                         <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                       </RouterLink>
@@ -220,6 +231,8 @@ const roleLine = (id: string) => {
 /** The drawn card's ladder, from Sequence 9 (where everyone starts) up to its top. */
 const rungs = computed(() => [...reading.value.ladder].sort((a, b) => b.sequence - a.sequence));
 const topRung = computed(() => rungs.value[rungs.value.length - 1]?.sequence ?? 0);
+/** Until the archive is in: the rung numbers alone (9 to 0, or 9 to 5 for a Boon). */
+const pendingRungs = computed(() => Array.from({length: card.value.boon ? 5 : 10}, (_, k) => 9 - k));
 const ladderLabel = computed(() => t('home.arcana.deck.ladderLabel').replace('{name}', reading.value.name));
 
 /*
@@ -242,6 +255,7 @@ watch(currentId, () => {
   shownRung.value = null;
 });
 function toggleRung(sequence: number) {
+  void ensurePathwayData();
   openRung.value = openRung.value === sequence ? null : sequence;
   void showRung(openRung.value);
 }
@@ -339,6 +353,8 @@ const rungDetail = computed(() => {
     title,
     about,
     abilities: all.slice(0, RUNG_ABILITIES),
+    /** the archive is still on its way: placeholders hold the abilities' room */
+    pending: !module,
     // the descriptions here are cut to three lines, and some rungs have more abilities than shown
     full: deck('full'),
   };
@@ -1522,11 +1538,29 @@ onUnmounted(() => {
   transition: color .6s ease;
 }
 
-.arc-orbit__loading {
-  margin: 0;
-  font-size: var(--arc-fs-small);
-  line-height: 1.5;
-  color: var(--arc-muted);
+/* placeholder lines at the text's own height, until the archive arrives */
+.arc-ladder.is-pending .arc-ladder__rung {
+  cursor: default;
+  background: var(--arc-glass);
+}
+
+.arc-ladder.is-pending i,
+.arc-rung__abilities.is-pending i {
+  display: block;
+  width: 80%;
+  height: .62em;
+  margin-block: calc((1lh - .62em) / 2);
+  border-radius: 3px;
+  background: var(--arc-line);
+}
+
+.arc-rung__abilities.is-pending strong i {
+  width: 9em;
+  max-width: 100%;
+}
+
+.arc-rung__abilities.is-pending span i + i {
+  width: 62%;
 }
 
 .arc-orbit__note {

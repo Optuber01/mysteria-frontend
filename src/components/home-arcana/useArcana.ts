@@ -59,6 +59,34 @@ export function ensurePathwayData() {
   return loadPathways().then(module => (data.value = module));
 }
 
+type IdleWindow = Window & {requestIdleCallback?: (callback: () => void, options?: {timeout: number}) => number};
+const REACHING = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
+
+/**
+ * The localized names, ladders and abilities are ~1.3 MB, and the first screen needs none
+ * of them (the deck's own table and the Fool's inline reading paint it). They are fetched
+ * once the page has loaded and gone idle, or as soon as the visitor touches, types or
+ * scrolls, whichever comes first. A draw, the ring and the potion story still ask directly.
+ */
+export function schedulePathwayData() {
+  if (data.value || typeof window === 'undefined') return;
+  let started = false;
+  const start = () => {
+    if (started) return;
+    started = true;
+    REACHING.forEach(type => window.removeEventListener(type, start, true));
+    void ensurePathwayData().catch(() => undefined);
+  };
+  REACHING.forEach(type => window.addEventListener(type, start, {capture: true, passive: true, once: true}));
+  const whenIdle = () => {
+    const idle = (window as IdleWindow).requestIdleCallback;
+    if (idle) idle(start, {timeout: 4000});
+    else setTimeout(start, 1500);
+  };
+  if (document.readyState === 'complete') whenIdle();
+  else window.addEventListener('load', whenIdle, {once: true});
+}
+
 /*
  * The re-theme. A new accent restyles every element on the page in one go, so it must never
  * land mid-animation, and easing --acc itself would pay that every frame (80-270 ms a frame
@@ -163,7 +191,7 @@ export function useArcana() {
     return module ? buildReading(module, id, currentLanguage.value) : shellReading(id);
   };
   const nameOf = (id: string) => (data.value ? data.value.pathwayName(id, currentLanguage.value) : cardById(id).en);
-  const seq9Of = (id: string) => (data.value ? data.value.sequenceNineName(id, currentLanguage.value) : id === 'fool' ? 'Seer' : '');
+  const seq9Of = (id: string) => (data.value ? data.value.sequenceNineName(id, currentLanguage.value) : cardById(id).seq9);
 
   /**
    * Wear a card: re-theme the page and remember it. Only a real draw calls this, and

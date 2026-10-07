@@ -13,39 +13,75 @@
 
     <main id="main-content" class="arc-main">
       <ArcanaHero/>
-      <ProgressionStory/>
-      <ArcanaOrbit/>
-      <WorldChapter/>
-      <ArcanaFuture/>
-      <SectionCompanion/>
+      <!-- The chapters below the fold mount one by one after the hero has painted (see `shown`). -->
+      <ProgressionStory v-if="shown > 0"/>
+      <ArcanaOrbit v-if="shown > 1"/>
+      <WorldChapter v-if="shown > 2"/>
+      <ArcanaFuture v-if="shown > 3"/>
+      <SectionCompanion v-if="shown > 4"/>
+      <!-- the room they will take, so the page is about as tall from the first paint -->
+      <div v-if="shown <= LAST" class="arc-pending" aria-hidden="true"></div>
     </main>
 
-    <FooterItem variant="full"/>
-    <ArcanaDeckControl/>
-    <DailyBonusCat page="home"/>
+    <template v-if="shown > LAST">
+      <FooterItem variant="full"/>
+      <ArcanaDeckControl/>
+      <DailyBonusCat page="home"/>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, watch} from 'vue';
+import {computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import {useI18n} from '@/composables/useI18n';
 import {announceNight, lockNight, useTheme} from '@/composables/useTheme';
-import {useConceptFonts} from './useConceptFonts';
 import ArcanaHero from './ArcanaHero.vue';
-import ProgressionStory from './progression/ProgressionStory.vue';
-import ArcanaOrbit from './ArcanaOrbit.vue';
-import WorldChapter from './WorldChapter.vue';
-import ArcanaFuture from './ArcanaFuture.vue';
-import SectionCompanion from './SectionCompanion.vue';
-import ArcanaDeckControl from './ArcanaDeckControl.vue';
-import {ensurePathwayData, useArcana} from './useArcana';
+import {schedulePathwayData, useArcana} from './useArcana';
 import {fillAccent, inkAccent} from './accentInk';
 import grain from './assets/grain.png';
 
-useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&display=swap');
+/*
+ * First load: only the hero is in the page's first chunk and its first paint. The chapters
+ * below the fold are their own chunks, fetched together right after that paint and mounted
+ * one per task, in page order, so no single long task holds the main thread (the whole page
+ * at once was a 1-2 s task on a slow phone). Back/forward and #links mount everything at once,
+ * so the browser lands on the right spot.
+ */
+const loaders = [
+  () => import('./progression/ProgressionStory.vue'),
+  () => import('./ArcanaOrbit.vue'),
+  () => import('./WorldChapter.vue'),
+  () => import('./ArcanaFuture.vue'),
+  () => import('./SectionCompanion.vue'),
+  () => import('./ArcanaDeckControl.vue'),
+];
+const [ProgressionStory, ArcanaOrbit, WorldChapter, ArcanaFuture, SectionCompanion, ArcanaDeckControl] =
+    loaders.map(loader => defineAsyncComponent(loader));
+/** The five chapters; the footer and the deck control come after the last (the dock looks for the ring). */
+const LAST = 5;
+const landing = typeof window !== 'undefined' && (!!window.location.hash || (window.history.state?.scroll?.top ?? 0) > 0);
+const shown = ref(landing ? LAST + 1 : 0);
+let mounting = true;
+
+function mountChapters() {
+  const chunks = loaders.map(loader => loader());
+  const next = async () => {
+    if (!mounting || shown.value > LAST) return;
+    await chunks[Math.min(shown.value, chunks.length - 1)];
+    shown.value++;
+    await nextTick();
+    observeChapters();
+    // its own task: the browser can paint and answer input between two chapters
+    setTimeout(next, 0);
+  };
+  void next();
+}
+
+/* after the frame with the hero in it has painted */
+const afterPaint = (task: () => void) => requestAnimationFrame(() => setTimeout(task, 0));
 
 const {card, hasDrawn, draw} = useArcana();
 // development only: draw any card from a script (the sky's checker, tools/r43-check)
@@ -127,19 +163,23 @@ function revealFocus(event: FocusEvent) {
 
 onMounted(() => {
   document.addEventListener('focusin', revealFocus);
-  // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
-  const idle = (window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number}).requestIdleCallback;
-  if (idle) idle(() => void ensurePathwayData(), {timeout: 1500});
-  else setTimeout(() => void ensurePathwayData(), 600);
+  // The pathway data is ~1.3 MB: fetched once the page is idle after its first paint, or sooner when the visitor reaches for it.
+  schedulePathwayData();
+  if (shown.value <= LAST) afterPaint(mountChapters);
 
   offscreenObserver = new IntersectionObserver(entries => {
     for (const entry of entries) holdLoops(entry.target, !entry.isIntersecting);
   }, {rootMargin: '200px 0px'});
-  document.querySelectorAll('.concept-arcana > .arc-main > *').forEach(section => offscreenObserver?.observe(section));
+  observeChapters();
   // A loop can start after its chapter left the viewport (the online pulse waits for the
   // server's answer): held then too, or it ticked a frame on every refresh from far away.
   document.querySelector('.concept-arcana > .arc-main')?.addEventListener('animationstart', onLoopStart);
 });
+
+/** Watches every chapter mounted so far (observing one twice is a no-op). */
+function observeChapters() {
+  document.querySelectorAll('.concept-arcana > .arc-main > :not(.arc-pending)').forEach(section => offscreenObserver?.observe(section));
+}
 
 function onLoopStart(event: Event) {
   const section = event.target instanceof Element ? event.target.closest('.concept-arcana > .arc-main > *') : null;
@@ -147,6 +187,7 @@ function onLoopStart(event: Event) {
 }
 
 onUnmounted(() => {
+  mounting = false;
   document.removeEventListener('focusin', revealFocus);
   clearTimeout(nightFall);
   lockNight(null);
@@ -195,6 +236,11 @@ onUnmounted(() => {
   color: var(--arc-ink);
   font-family: var(--arc-body);
   font-synthesis: none;
+}
+
+/* the chapters still to mount (about their height together); gone a moment after the first paint */
+.arc-pending {
+  min-height: 1000svh;
 }
 
 /* ---------- ambient layer ---------- */

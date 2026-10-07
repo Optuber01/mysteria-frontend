@@ -52,7 +52,7 @@ export function useProgressionCopy() {
     const id = pathwayId.value;
     const module = data.value;
     const language = currentLanguage.value;
-    if (!module) return id === 'fool' ? FOOL : {...FOOL, pathway: cardById(id).en, sequence: '', nextSequence: ''};
+    if (!module) return id === 'fool' ? FOOL : {...FOOL, pathway: cardById(id).en, sequence: cardById(id).seq9, nextSequence: ''};
     const pathway = module.pathwayById(id);
     const rung = (n: number) => pathway?.sequences.find((entry) => entry.sequence === n);
     const abilities = (n: number): Ability[] =>
@@ -107,5 +107,8 @@ export function useProgressionCopy() {
     );
   }
 
-  return {tp, names, list, recipe, ingredients, pathwayId, card, currentId, isBoon};
+  /** The localized archive is in (until then the names are English stand-ins and the abilities empty). */
+  const loaded = computed(() => data.value !== null);
+
+  return {tp, names, list, recipe, ingredients, pathwayId, card, currentId, isBoon, loaded};
 }

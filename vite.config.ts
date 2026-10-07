@@ -154,7 +154,6 @@ function createViteConfig({mode}: ConfigEnv): UserConfig {
                 '@data': fileURLToPath(new URL('./src/data', import.meta.url)),
                 '@services': fileURLToPath(new URL('./src/services', import.meta.url)),
                 '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
-                vue: 'vue/dist/vue.esm-bundler.js',
             },
             extensions: ['.js', '.ts', '.jsx', '.tsx', '.json', '.vue', '.md', '.mdx'],
         },
@@ -200,7 +199,9 @@ function createViteConfig({mode}: ConfigEnv): UserConfig {
             allowedHosts: ['api.mysterria.net'],
         },
         build: {
-            sourcemap: true,
+            // No maps in the deployed build: nothing uploads them (no error tracker is wired
+            // up), and public ones only add megabytes to the output and hand out the source.
+            sourcemap: false,
             cssCodeSplit: true,
             rollupOptions: {
                 input: {

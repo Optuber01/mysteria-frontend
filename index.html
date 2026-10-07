@@ -63,42 +63,15 @@
     />
     <meta name="twitter:image" content="https://mysterria.net/banner.webp"/>
 
-    <!-- Icons: self-hosted FA subset, imported from main.ts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <!-- Inter (body), Playfair Display (headings), JetBrains Mono (labels), one
-         request so the Cyrillic subsets come along for the Ukrainian locale. -->
-    <!-- Not render-blocking: the page paints in the fallback faces and swaps them in
-         (media=print until loaded). Without scripts it loads as a normal stylesheet. -->
-    <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap"
-            rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript>
-        <link
-                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap"
-                rel="stylesheet">
-    </noscript>
+    <!-- Fonts: Commissioner and the icon subset are self-hosted (src/assets/arcana.css, main.ts).
+         Every locale sets Latin (digits, the brand, buttons), so that subset is fetched with the
+         page instead of after the app has rendered text: the copy swaps in before the first paint
+         or soon after it. -->
+    <link rel="preload" href="/src/assets/fonts/commissioner/commissioner-latin.woff2" as="font" type="font/woff2" crossorigin>
 
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://api.mysterria.net">
     <link rel="preconnect" href="https://catwalk.mysterria.net">
-
-    <!-- Critical CSS for font loading optimization -->
-    <style>
-        /* Use Inter font with system fallbacks */
-        :root {
-            --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            --font-display: "Playfair Display", Georgia, serif;
-        }
-
-        body {
-            font-family: var(--font-primary);
-            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-        }
-    </style>
-
-    <!-- No custom font loading script needed - Inter loads fast with display=swap -->
 
     <title>Mysterria - Lord of the Mysteries Minecraft Server</title>
 </head>

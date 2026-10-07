@@ -57,8 +57,12 @@
                   <span>{{ ability.description }}</span>
                 </li>
               </ul>
+              <!-- the abilities' room while the archive is still on its way -->
+              <ul v-else-if="!loaded" class="chapter-copy__abilities is-pending" aria-hidden="true">
+                <li v-for="n in 2" :key="n"><strong><i /></strong><span><i /><i /></span></li>
+              </ul>
               <div class="chapter-copy__onward">
-                <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/game')">
+                <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/guide/connect')">
                   {{ tp('drink.cta') }}
                   <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </RouterLink>
@@ -159,7 +163,10 @@
                 <span>{{ ability.description }}</span>
               </li>
             </ul>
-            <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/game')">
+            <ul v-else-if="!loaded" class="chapter-copy__abilities is-pending" aria-hidden="true">
+              <li v-for="n in 2" :key="n"><strong><i /></strong><span><i /><i /></span></li>
+            </ul>
+            <RouterLink class="arc-btn arc-btn--solid chapter-copy__cta" :to="$lp('/guide/connect')">
               {{ tp('drink.cta') }}
               <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </RouterLink>
@@ -182,13 +189,13 @@ import { abilitySummary } from '../abilitySummary';
 import { CHAPTERS, T, awakenAt, blackoutAt, clamp01, dropStarts, ease, flashAt, gulpPulse, lerp, riskAt, scrollAt, span, storyAt } from './timeline';
 import type { ChapterId } from './timeline';
 import { stageLayout } from './layout';
-import { isNearby, whenSettled } from './prewarm';
+import { isNearby, visitorMoved, whenSettled } from './prewarm';
 import type { StageLayout } from './layout';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import { sigilNative } from '../arcana-data';
 import { useArcana } from '../useArcana';
 
-const { tp, names, ingredients, currentId, isBoon, pathwayId } = useProgressionCopy();
+const { tp, names, ingredients, currentId, isBoon, pathwayId, loaded } = useProgressionCopy();
 const { hasDrawn } = useArcana();
 /* The awakening's sigil: the Pathway the story follows (a Boon, or no draw yet, sees the Fool's as the example). */
 const sigilExample = computed(() => !hasDrawn.value || pathwayId.value !== currentId.value);
@@ -627,12 +634,16 @@ onMounted(() => {
       update();
     }
   }, { rootMargin: '120px 0px' });
+  // The story starts right under the hero, so "a screen away" is true on arrival: it only
+  // counts once the visitor has started down the page (three.js and the data wait till then).
   nearObserver = new IntersectionObserver(([entry]) => {
     if (!entry.isIntersecting) return;
-    near.value = true;
-    void preloadPathwayNames();
     nearObserver?.disconnect();
     nearObserver = null;
+    void visitorMoved().then(() => {
+      near.value = true;
+      void preloadPathwayNames();
+    });
   }, { rootMargin: '100% 0px' });
   // a screen ahead, so the layers are rastered before they scroll in
   liveObserver = new IntersectionObserver(([entry]) => (live.value = entry.isIntersecting), { rootMargin: '100% 0px' });
@@ -1148,6 +1159,25 @@ onUnmounted(() => {
   font-size: 14px;
   line-height: 1.45;
   text-wrap: pretty;
+}
+
+/* placeholder lines at the text's own height, until the archive arrives */
+.chapter-copy__abilities.is-pending i {
+  display: block;
+  width: 9em;
+  max-width: 100%;
+  height: .62em;
+  margin-block: calc((1lh - .62em) / 2);
+  background: var(--arc-line);
+  border-radius: 3px;
+}
+
+.chapter-copy__abilities.is-pending span i {
+  width: 100%;
+}
+
+.chapter-copy__abilities.is-pending span i + i {
+  width: 62%;
 }
 
 /* the way on from here */
