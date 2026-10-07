@@ -239,6 +239,8 @@ const fronts = shallowReactive(new Set<string>(initial ? [initial] : []));
 /** The card travelling to the front: above everything until it lands. */
 const incoming = ref<string | null>(null);
 const busy = ref(false);
+/** The whole deck is moving (a shuffle or the opening deal): the fan does not answer the hand. */
+const stilled = ref(false);
 const fontsReady = ref(false);
 const risen = ref(false);
 const focusIndex = ref(0);
@@ -487,11 +489,13 @@ function start(kind: MoveKind, job: (my: number) => Promise<void>): Promise<void
   moving = kind;
   wearing = false;
   busy.value = true;
+  stilled.value = kind !== 'fan';
   return job(my).catch(() => undefined).finally(() => {
     if (stale(my)) return;
     moving = null;
     wearing = false;
     busy.value = false;
+    stilled.value = false;
     syncWithPage();
     const next = pending;
     pending = null;
@@ -743,6 +747,7 @@ async function shuffleAndDraw(targetId: string | undefined, my: number) {
   incoming.value = null;
   if (old && old !== target) fronts.delete(old);
   wearing = true;
+  stilled.value = false;
   await wear(target);
 }
 
@@ -875,11 +880,12 @@ function paintPop() {
   popFrame = 0;
   const at = popPoint;
   const hit = at ? document.elementFromPoint(at.x, at.y)?.closest<HTMLElement>('.arc-card.is-fan') ?? null : null;
-  setPopped(hit);
+  // a card still on its way home from a draw is not picked up mid-air
+  setPopped(hit && !hit.getAnimations().some(a => a.playState === 'running') ? hit : null);
 }
 
 function ripple(event: PointerEvent) {
-  if (busy.value || reducedMotion()) return;
+  if (stilled.value || reducedMotion()) return;
   popPoint = {x: event.clientX, y: event.clientY};
   if (!popFrame) popFrame = requestAnimationFrame(paintPop);
 }
@@ -896,13 +902,14 @@ function onStageRelease(event: PointerEvent) {
   if (event.pointerType !== 'mouse') settleRipple();
 }
 
-watch(busy, value => {
+watch(stilled, value => {
   if (value) settleRipple();
 });
 
 function onStagePointer(event: PointerEvent) {
   ripple(event);
-  if (event.pointerType !== 'mouse' || busy.value || !drawn.value || reducedMotion()) return;
+  // the drawn card leans to the hand once it has landed (also while the page recolours)
+  if (event.pointerType !== 'mouse' || stilled.value || incoming.value || !drawn.value || reducedMotion()) return;
   const el = cardEls.get(drawn.value);
   if (!el) return;
   const rect = el.getBoundingClientRect();
