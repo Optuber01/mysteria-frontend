@@ -59,6 +59,7 @@
         :slim="worn.slim"
         :label="tp(`player.${playerMode}`)"
         @bottle="onBottle"
+        @head="head = $event"
       />
       <!-- his name over his head, as in game: shown while the hand is on him (a tap on touch) -->
       <span
@@ -69,7 +70,16 @@
         @pointerleave="onPlayerLeave"
         @click="onPlayerTap"
       />
-      <span class="drink-scene__nametag" :class="{ 'is-shown': nameable && tagShown }" aria-hidden="true">{{ worn.name }}</span>
+      <img
+        v-if="tag"
+        class="drink-scene__nametag"
+        :class="{ 'is-shown': nameable && tagShown }"
+        :src="tag.src"
+        :style="tagStyle"
+        alt=""
+        aria-hidden="true"
+        draggable="false"
+      >
     </div>
 
     <!-- the potion's own light, on his face and hands -->
@@ -117,7 +127,8 @@ import { RouterLink } from 'vue-router';
 import type { CSSProperties } from 'vue';
 
 import MinecraftPlayer from '../MinecraftPlayer.vue';
-import type { BottlePosition } from '../MinecraftPlayer.vue';
+import type { BottlePosition, HeadPosition } from '../MinecraftPlayer.vue';
+import { drawNametag } from '../pixelFont';
 import PotionVial from '../PotionVial.vue';
 import SceneParticles from './SceneParticles.vue';
 import ArcanaBack from '../../ArcanaBack.vue';
@@ -189,7 +200,31 @@ watch([wanted, inSight], ([next, seen]) => {
   if (!seen) worn.value = next;
 }, { immediate: true });
 
-/* The name tag: while he stands there to be looked at (not in the fog, not at the flash). */
+/*
+ * The name tag, as the game shows it over a player: pixel text on a faint plate, just over
+ * the head and scaled with it (one font texel is 1/14 of the head's height on screen), so
+ * it follows him as he bows, drinks and rises.
+ */
+const head = ref<HeadPosition | null>(null);
+const tag = computed(() => {
+  if (typeof document === 'undefined') return null;
+  const canvas = drawNametag(worn.value.name);
+  return { src: canvas.toDataURL(), w: canvas.width, h: canvas.height };
+});
+const tagStyle = computed<CSSProperties>(() => {
+  const h = head.value;
+  const t = tag.value;
+  if (!h || !t) return { visibility: 'hidden' };
+  const unit = Math.max(2, Math.round(h.size / 14));
+  return {
+    left: `${(h.x - (t.w * unit) / 2).toFixed(1)}px`,
+    top: `${(h.y - h.size * 0.2 - t.h * unit).toFixed(1)}px`,
+    width: `${t.w * unit}px`,
+    height: `${t.h * unit}px`,
+  };
+});
+
+/* It shows while he stands there to be looked at (not in the fog, not at the flash). */
 const nameable = computed(() => props.active && emerge.value > 0.6);
 const hovering = ref(false);
 const tapped = ref(false);
@@ -691,22 +726,12 @@ const sceneVars = computed(() => {
   pointer-events: auto;
 }
 
-/*
- * The name over his head, as the game draws it: plain light text on a square, faintly dark
- * plate (no rounding, no border), fading in. The story is a dark room in either theme.
- */
+/* The name over his head, drawn texel by texel (pixelFont.ts), crisp at any size. */
 .drink-scene__nametag {
   position: absolute;
-  left: 50%;
-  top: 6%;
-  padding: 3px 8px 4px;
-  background: rgba(0, 0, 0, .42);
-  color: #f4f4f6;
-  font: 500 clamp(13px, 1.05vw, 16px)/1.2 var(--arc-body, system-ui, sans-serif);
-  letter-spacing: .01em;
-  white-space: nowrap;
+  max-width: none;
+  image-rendering: pixelated;
   opacity: 0;
-  transform: translate(-50%, calc(-100% - 10px));
   transition: opacity .32s ease;
   pointer-events: none;
 }

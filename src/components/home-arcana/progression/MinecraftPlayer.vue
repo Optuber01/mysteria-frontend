@@ -27,6 +27,8 @@ import { isNearby, whenSettled } from './prewarm';
 
 /** The held bottle on screen: centre and height, px relative to this figure. */
 export type BottlePosition = { x: number; y: number; size: number };
+/** His head on screen: the top of the hat layer (centre) and the head's height, px relative to this figure. */
+export type HeadPosition = { x: number; y: number; size: number };
 
 /*
  * The figure is posed straight from the story's beats (all 0..1, scrubbed by
@@ -108,7 +110,7 @@ const props = withDefaults(
   },
 );
 
-const emit = defineEmits<{ (e: 'bottle', pos: BottlePosition | null): void }>();
+const emit = defineEmits<{ (e: 'bottle', pos: BottlePosition | null): void; (e: 'head', pos: HeadPosition): void }>();
 
 const host = ref<HTMLElement | null>(null);
 const canvas = ref<HTMLCanvasElement | null>(null);
@@ -587,10 +589,31 @@ function sizeViewer() {
   viewer.setSize(hostW, hostH);
   viewer.render();
   emitBottle();
+  emitHead();
 }
 
 let projector: THREE.Vector3 | null = null;
 let edge: THREE.Vector3 | null = null;
+
+/* Where his head is (for the name tag over it): the hat layer's top, 8.5 texels above the neck. */
+let crown: THREE.Vector3 | null = null;
+let neck: THREE.Vector3 | null = null;
+let lastHead = '';
+function emitHead(): void {
+  if (!viewer || !three || !ready.value) return;
+  crown ??= new three.Vector3();
+  neck ??= new three.Vector3();
+  const head = viewer.playerObject.skin.head;
+  head.localToWorld(crown.set(0, 8.5, 0)).project(viewer.camera);
+  head.localToWorld(neck.set(0, 0, 0)).project(viewer.camera);
+  const x = (crown.x * 0.5 + 0.5) * hostW;
+  const y = (0.5 - crown.y * 0.5) * hostH;
+  const size = Math.hypot((crown.x - neck.x) * 0.5 * hostW, (crown.y - neck.y) * 0.5 * hostH);
+  const key = `${x.toFixed(1)},${y.toFixed(1)},${size.toFixed(1)}`;
+  if (key === lastHead) return;
+  lastHead = key;
+  emit('head', { x, y, size });
+}
 /** Projects the bottle to px relative to this figure, so the DOM sprite can meet it. */
 function emitBottle(): void {
   if (!viewer || !three || !bottle || !host.value || !ready.value) return;
@@ -626,6 +649,7 @@ function syncPlayback() {
   applyPose(poseNow());
   requestRender();
   emitBottle();
+  emitHead();
 }
 
 /* Pose, light and bottle changes from one scroll step share a single WebGL frame. */

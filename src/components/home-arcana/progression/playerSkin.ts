@@ -9,11 +9,14 @@
  *
  * playerdb.co answers with the current name and the profile's textures (the skin on
  * textures.minecraft.net and its arm model); both allow cross-origin reads, which a WebGL
- * texture needs. The answer is kept for the session.
+ * texture needs. The skin is then read texel by texel (skinCheck.ts): one that would look
+ * wrong in the dark room is not worn, and Optuber's stays on. The answer is kept for the
+ * session.
  */
 import {computed, ref, watch} from 'vue';
 import {useAuthStore} from '@/stores/auth';
 import playerSkinUrl from '@/assets/images/home/progression/player-skin.png';
+import {judgeSkin} from './skinCheck';
 
 export type PlayerSkin = Readonly<{url: string; name: string; slim: boolean}>;
 
@@ -44,12 +47,27 @@ function readTextures(properties: unknown): {url: string; slim: boolean} | null 
   }
 }
 
-/** The image must load cross-origin and decode before the player wears it. */
-function decodes(url: string): Promise<boolean> {
+/** The image must load cross-origin, decode, and pass the check before the player wears it. */
+async function suits(url: string, slim: boolean): Promise<boolean> {
   const image = new Image();
   image.crossOrigin = 'anonymous';
   image.src = url;
-  return image.decode().then(() => image.naturalWidth === 64, () => false);
+  try {
+    await image.decode();
+  } catch {
+    return false;
+  }
+  const {naturalWidth: width, naturalHeight: height} = image;
+  if (width !== 64 || (height !== 64 && height !== 32)) return false;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d', {willReadFrequently: true});
+  if (!context) return false;
+  context.drawImage(image, 0, 0);
+  const verdict = judgeSkin(context.getImageData(0, 0, width, height).data, width, height, slim);
+  if (import.meta.env.DEV) console.info('[player skin]', verdict.ok ? 'worn' : `not worn: ${verdict.reason}`, verdict.metrics);
+  return verdict.ok;
 }
 
 async function lookUp(uuid: string): Promise<PlayerSkin | null> {
@@ -65,7 +83,7 @@ async function lookUp(uuid: string): Promise<PlayerSkin | null> {
     const player = (await response.json())?.data?.player;
     const name = typeof player?.username === 'string' ? player.username : '';
     const textures = readTextures(player?.properties);
-    if (!name || !textures || !(await decodes(textures.url))) return null;
+    if (!name || !textures || !(await suits(textures.url, textures.slim))) return null;
     const skin: PlayerSkin = {url: textures.url, name, slim: textures.slim};
     try {
       sessionStorage.setItem(CACHE + uuid, JSON.stringify(skin));
