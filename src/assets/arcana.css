@@ -378,7 +378,8 @@ body {
     position: relative;
     z-index: 1;
     min-height: 60vh;
-    padding: calc(var(--site-header-stack, 106px) + clamp(28px, 4vw, 56px)) var(--arc-gutter) var(--arc-section-pad);
+    /* the header is in the flow above (sticky): no room to make for it here */
+    padding: clamp(28px, 4vw, 56px) var(--arc-gutter) var(--arc-section-pad);
 }
 
 .arc-page > .arc-shell > * + * {

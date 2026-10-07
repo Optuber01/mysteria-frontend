@@ -1,6 +1,6 @@
 <template>
   <div ref="stackRef" :class="['header-stack', {'is-overlay': overlay, 'is-at-top': overlay && isAtTop}]">
-  <header :class="['site-header', {'is-authed': isAuthenticated}]">
+  <header :class="['site-header', {'is-authed': isAuthenticated, 'is-crowded': crowded}]">
     <div class="header-grid">
       <RouterLink :to="$lp('/')" class="brand" @click="closeMobileNav">
         <!-- the name beside it names the link: the mark itself is decoration -->
@@ -91,15 +91,24 @@
           </div>
 
           <div class="mobile-nav-content">
-            <RouterLink
-                v-for="link in navigationLinks"
-                :key="link.path"
-                :class="['mobile-nav-link', { active: isActive(link) }]"
-                :to="$lp(link.path)"
-                @click="closeMobileNav"
-            >
-              {{ link.title }}
-            </RouterLink>
+            <template v-for="link in navigationLinks" :key="link.path">
+              <RouterLink
+                  :class="['mobile-nav-link', { active: isActive(link) }]"
+                  :to="$lp(link.path)"
+                  @click="closeMobileNav"
+              >
+                {{ link.title }}
+              </RouterLink>
+              <!-- the changelog archive is what many players come for: one tap from the menu, under News -->
+              <RouterLink
+                  v-if="link.path === '/news'"
+                  class="mobile-nav-link mobile-nav-link--sub"
+                  :to="$lp('/news?type=changelog')"
+                  @click="closeMobileNav"
+              >
+                {{ t('newsPage.changelog') }}
+              </RouterLink>
+            </template>
 
             <div class="mobile-services" :aria-label="t('navServices')" role="group">
               <a
@@ -132,7 +141,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import AuthButton from "@/components/ui/AuthButton.vue";
 import BalanceButton from "@/components/ui/BalanceButton.vue";
@@ -162,7 +171,7 @@ const props = withDefaults(defineProps<{
 }>(), {overlay: false});
 
 const route = useRoute();
-const {t} = useI18n();
+const {t, currentLanguage} = useI18n();
 const {unprefixedPath} = useLocalePath();
 const authStore = useAuthStore();
 const {isLight, toggleTheme, nightLock, refused, nightFalls} = useTheme();
@@ -217,7 +226,39 @@ watch(nightLock, lock => {
 const isMobileNavOpen = ref(false);
 const navigationRef = ref<HTMLElement | null>(null);
 
+/*
+ * Nav labels run longer in some languages (uk, de, fr...): where the nav doesn't fit beside
+ * the brand and the controls, the bar switches to the drawer, as on phones, instead of
+ * letting them overlap. What the bar holds changes at its breakpoints (the server chip, the
+ * tagline), so every check starts from the full bar; both steps land before the next paint.
+ */
+const crowded = ref(false);
+let fitObserver: ResizeObserver | null = null;
+function measureNav() {
+  const nav = navigationRef.value;
+  const grid = nav?.parentElement;
+  // hidden by the phone layout: nothing to fit
+  if (!nav || !grid || !nav.offsetWidth) return;
+  // the nav takes its full width and spills over its neighbours rather than shrinking,
+  // so add up what the bar holds: brand, nav and controls, the padding, and at least 10px
+  // either side of the nav (the grid gap gives way before anything touches)
+  const style = getComputedStyle(grid);
+  const brand = grid.firstElementChild as HTMLElement | null;
+  const actions = grid.lastElementChild as HTMLElement | null;
+  const needs = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + 2 * 10
+      + (brand?.offsetWidth ?? 0) + nav.scrollWidth + (actions?.offsetWidth ?? 0);
+  crowded.value = grid.clientWidth < needs;
+}
+function fitNav() {
+  if (!crowded.value) return measureNav();
+  crowded.value = false;
+  void nextTick(measureNav);
+}
+const refit = fitNav;
+
 const isAuthenticated = computed(() => authStore.isAuthenticated);
+// a language or sign-in change changes what the bar holds: fit the nav again (fitNav above)
+watch([currentLanguage, isAuthenticated], refit);
 
 /* (the brand mark is the way home, as on every page) */
 const navigationLinks = computed<NavLink[]>(() => [
@@ -299,16 +340,22 @@ const onScroll = () => {
 };
 
 onMounted(() => {
+  // Every page reads the header's live height (it changes with the viewport): pages under
+  // the overlay header pad their content by it, and on the others sticky columns and
+  // anchor targets stop below the sticky bar.
+  const setStack = (height: number) => document.documentElement.style.setProperty("--site-header-stack", `${Math.round(height)}px`);
+  // The overlay stack is a box of its own; elsewhere it is display: contents and the bar is the box.
+  const box = props.overlay ? stackRef.value : stackRef.value?.querySelector<HTMLElement>('.site-header');
+  // Measured once now, before the first paint, so the page never lays out under a guessed height.
+  if (box) setStack(box.getBoundingClientRect().height);
+  stackObserver = new ResizeObserver(([entry]) => setStack(entry.borderBoxSize[0].blockSize));
+  if (box) stackObserver.observe(box);
+  fitObserver = new ResizeObserver(() => fitNav());
+  if (navigationRef.value?.parentElement) fitObserver.observe(navigationRef.value.parentElement);
+  void document.fonts?.ready.then(refit);
   if (!props.overlay) return;
   readScroll();
   window.addEventListener("scroll", onScroll, {passive: true});
-  // Pages under an overlay header offset their content by its live height,
-  // which changes with the viewport.
-  const setStack = (height: number) => document.documentElement.style.setProperty("--site-header-stack", `${Math.round(height)}px`);
-  // Measured once now, before the first paint, so the page never lays out under a guessed height.
-  if (stackRef.value) setStack(stackRef.value.getBoundingClientRect().height);
-  stackObserver = new ResizeObserver(([entry]) => setStack(entry.borderBoxSize[0].blockSize));
-  if (stackRef.value) stackObserver.observe(stackRef.value);
 });
 
 onUnmounted(() => {
@@ -316,8 +363,9 @@ onUnmounted(() => {
   window.removeEventListener("scroll", onScroll);
   window.removeEventListener("keydown", onDrawerKey);
   if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+  fitObserver?.disconnect();
+  // the variable stays: the next page's header sets its own, and clearing it here could undo that
   stackObserver?.disconnect();
-  document.documentElement.style.removeProperty("--site-header-stack");
 });
 </script>
 
@@ -714,6 +762,16 @@ onUnmounted(() => {
    buttons: below 1025px the full nav no longer fits beside them (it ran into the
    brand and the actions), so the bar switches to the drawer earlier. The drawer
    already holds the bell and the account controls. */
+/* the nav didn't fit in this language (fitNav): the drawer, as on phones */
+.site-header.is-crowded .primary-nav,
+.site-header.is-crowded .desktop-only {
+  display: none;
+}
+
+.site-header.is-crowded .mobile-nav-toggle {
+  display: flex;
+}
+
 /* the narrowest phones (320-359px): the mark alone, so the wordmark never runs into the controls */
 @media (max-width: 359px) {
   .header-grid .brand:not(.compact) .brand-words {
@@ -821,6 +879,13 @@ onUnmounted(() => {
 .mobile-nav-link:hover {
   color: var(--myst-offwhite);
   background: color-mix(in oklab, var(--myst-offwhite) 6%, transparent);
+}
+
+/* a page inside the one above it (News > Changelog): indented, a step smaller */
+.mobile-nav-link--sub {
+  min-height: 44px;
+  padding-left: 30px;
+  font-size: 15px;
 }
 
 .mobile-nav-link.active {

@@ -24,6 +24,7 @@
         <div class="footer-column footer-column--server">
           <p class="footer-heading">{{ t('footer.serverHeading') }}</p>
           <RouterLink :to="$lp('/news')">{{ t('navNews') }}</RouterLink>
+          <RouterLink :to="$lp('/news?type=changelog')">{{ t('newsPage.changelog') }}</RouterLink>
           <RouterLink :to="$lp('/rules')">{{ t('navRules') }}</RouterLink>
           <RouterLink :to="$lp('/staff')">{{ t('footer.linkStaff') }}</RouterLink>
           <RouterLink :to="$lp('/store')">{{ t('navShop') }}</RouterLink>
