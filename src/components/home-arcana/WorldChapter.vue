@@ -557,6 +557,18 @@ onUnmounted(() => {
     0 0 26px color-mix(in oklab, var(--seat) 30%, transparent);
 }
 
+/* (the row's two ends keep it inside the panel: see the phone layout, and below) */
+.throne:first-child .throne__name {
+  left: 0;
+  translate: none;
+}
+
+.throne:last-child .throne__name {
+  left: auto;
+  right: 0;
+  translate: none;
+}
+
 .throne__name {
   position: absolute;
   top: calc(100% + 8px);
@@ -1224,10 +1236,23 @@ onUnmounted(() => {
     grid-template-columns: 1fr;
   }
 
-  /* two rows of eleven, flat */
+  /* two rows of eleven, flat, with room under each row for the drawn throne's name */
   .thrones {
     grid-template-columns: repeat(11, minmax(0, 1fr));
-    row-gap: 12px;
+    row-gap: calc(var(--arc-fs-caption) + 20px);
+    padding-bottom: calc(var(--arc-fs-caption) + 10px);
+  }
+
+  /* a name at a row's end lines up with its throne's outer edge, inside the panel */
+  .throne:nth-child(11n + 1) .throne__name {
+    left: 0;
+    translate: none;
+  }
+
+  .throne:nth-child(11n) .throne__name {
+    left: auto;
+    right: 0;
+    translate: none;
   }
 
   .throne {
