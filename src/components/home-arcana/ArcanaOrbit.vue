@@ -128,21 +128,23 @@
                   </li>
                 </ol>
                 <p v-else class="arc-orbit__loading">{{ t('home.arcana.deck.loading') }}</p>
-                <div id="arc-rung-detail" class="arc-rung" :class="{'is-open': rungDetail}" role="region" :aria-label="rungDetail?.title" :hidden="!rungDetail">
-                  <template v-if="rungDetail">
-                    <h4 class="arc-rung__title">{{ rungDetail.title }}</h4>
-                    <p v-if="rungDetail.about" class="arc-rung__about">{{ rungDetail.about }}</p>
-                    <ul v-if="rungDetail.abilities.length" class="arc-rung__abilities">
-                      <li v-for="ability in rungDetail.abilities" :key="ability.id">
-                        <strong>{{ ability.name }}</strong>
-                        <span>{{ ability.summary }}</span>
-                      </li>
-                    </ul>
-                    <RouterLink v-if="rungDetail.abilities.length" :to="$lp(`/pathways/${card.id}`)" class="arc-rung__full">
-                      {{ rungDetail.full }}
-                      <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </RouterLink>
-                  </template>
+                <div ref="rungFrame" class="arc-rung-frame">
+                  <div id="arc-rung-detail" class="arc-rung" role="region" :aria-label="rungDetail?.title" :hidden="!rungDetail">
+                    <div v-if="rungDetail" class="arc-rung__inner">
+                      <h4 class="arc-rung__title">{{ rungDetail.title }}</h4>
+                      <p v-if="rungDetail.about" class="arc-rung__about">{{ rungDetail.about }}</p>
+                      <ul v-if="rungDetail.abilities.length" class="arc-rung__abilities">
+                        <li v-for="ability in rungDetail.abilities" :key="ability.id">
+                          <strong>{{ ability.name }}</strong>
+                          <span>{{ ability.summary }}</span>
+                        </li>
+                      </ul>
+                      <RouterLink v-if="rungDetail.abilities.length" :to="$lp(`/pathways/${card.id}`)" class="arc-rung__full">
+                        {{ rungDetail.full }}
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                      </RouterLink>
+                    </div>
+                  </div>
                 </div>
                 <p v-if="card.boon" class="arc-orbit__note">{{ t('home.arcana.deck.boonNote') }}</p>
               </div>
@@ -220,17 +222,96 @@ const rungs = computed(() => [...reading.value.ladder].sort((a, b) => b.sequence
 const topRung = computed(() => rungs.value[rungs.value.length - 1]?.sequence ?? 0);
 const ladderLabel = computed(() => t('home.arcana.deck.ladderLabel').replace('{name}', reading.value.name));
 
-/* One rung open at a time; a different card closes it. */
+/*
+ * One rung open at a time; a different card closes it. The rung's tile answers at once
+ * (openRung); its panel (shownRung) moves: it grows open as its text fades in, fades and
+ * shrinks shut, and for another rung its text fades out, the panel eases to the new
+ * height and the new text fades in. Each move starts from wherever the panel is, so a
+ * quick second click carries on from there rather than jumping.
+ */
 const openRung = ref<number | null>(null);
-watch(currentId, () => (openRung.value = null));
+const shownRung = ref<number | null>(null);
+const rungFrame = ref<HTMLElement | null>(null);
+let rungMoves: Animation[] = [];
+let rungTurn = 0;
+watch(currentId, () => {
+  rungTurn++;
+  rungMoves.forEach(move => move.cancel());
+  rungMoves = [];
+  openRung.value = null;
+  shownRung.value = null;
+});
 function toggleRung(sequence: number) {
   openRung.value = openRung.value === sequence ? null : sequence;
+  void showRung(openRung.value);
+}
+
+async function showRung(next: number | null) {
+  const frame = rungFrame.value;
+  if (!frame || reducedMotion.value) {
+    shownRung.value = next;
+    return;
+  }
+  const my = ++rungTurn;
+  const stale = () => my !== rungTurn;
+  const panel = () => frame.querySelector<HTMLElement>('.arc-rung');
+  const inner = () => frame.querySelector<HTMLElement>('.arc-rung__inner');
+  // where everything is now, mid-move or at rest
+  const from = frame.getBoundingClientRect().height;
+  const panelOpacity = panel() ? Number(getComputedStyle(panel()!).opacity) : 1;
+  const innerOpacity = inner() ? Number(getComputedStyle(inner()!).opacity) : 1;
+  rungMoves.forEach(move => move.cancel());
+  rungMoves = [];
+  const track = (move: Animation | undefined) => (move && rungMoves.push(move), move);
+  frame.classList.add('is-moving');
+  const hold = track(frame.animate({height: [`${from}px`, `${from}px`]}, {duration: 1e6}))!;
+  const wasOpen = shownRung.value !== null && from > 0;
+
+  if (wasOpen) {
+    // closing: the whole panel fades; switching: only its text
+    const target = next === null ? panel() : inner();
+    const opacity = next === null ? panelOpacity : innerOpacity;
+    const out = track(target?.animate({opacity: [opacity, 0]}, {duration: 130, easing: 'ease-in', fill: 'forwards'}));
+    await out?.finished.catch(() => undefined);
+    if (stale()) return;
+  }
+
+  if (next === null) {
+    const shrink = track(frame.animate({height: [`${from}px`, '0px']}, {duration: 220, easing: SETTLE, fill: 'forwards'}))!;
+    hold.cancel();
+    await shrink.finished.catch(() => undefined);
+    if (stale()) return;
+    shownRung.value = null;
+    await nextTick();
+    if (stale()) return;
+  } else {
+    shownRung.value = next;
+    await nextTick();
+    if (stale()) return;
+    hold.cancel();
+    // the new height, measured without the held one; then from where it was to there
+    const to = frame.getBoundingClientRect().height;
+    const grow = track(frame.animate({height: [`${from}px`, `${to}px`]}, {duration: 260, easing: SETTLE}))!;
+    if (wasOpen) {
+      track(inner()?.animate({opacity: [0, 1], transform: ['translateY(6px)', 'none']}, {duration: 220, delay: 40, easing: SETTLE, fill: 'backwards'}));
+    } else {
+      track(panel()?.animate({opacity: [panelOpacity < 1 ? panelOpacity : 0, 1]}, {duration: 200, easing: 'ease-out', fill: 'backwards'}));
+      track(inner()?.animate({transform: ['translateY(6px)', 'none']}, {duration: 260, easing: SETTLE, fill: 'backwards'}));
+    }
+    // the fade-outs (held at 0) give way to the fade-ins just started
+    rungMoves.filter(move => move.effect?.getTiming().fill === 'forwards').forEach(move => move.cancel());
+    await grow.finished.catch(() => undefined);
+    if (stale()) return;
+  }
+  rungMoves.forEach(move => move.cancel());
+  rungMoves = [];
+  frame.classList.remove('is-moving');
 }
 /** Shown at most, so an open rung stays a glance; the rest are on the Pathway's page. */
 const RUNG_ABILITIES = 4;
 /** What the open rung is: its place on the climb (seats, rank) and the abilities it brings. */
 const rungDetail = computed(() => {
-  const n = openRung.value;
+  const n = shownRung.value;
   const module = data.value;
   if (n === null) return null;
   const rung = rungs.value.find(entry => entry.sequence === n);
@@ -1318,22 +1399,25 @@ onUnmounted(() => {
   transform: rotate(180deg);
 }
 
-/* the open rung: under the ladder, across its width */
+/* the open rung: under the ladder, across its width; its frame's height is what animates */
+.arc-rung-frame {
+  display: flow-root;
+}
+
+.arc-rung-frame.is-moving {
+  overflow: hidden;
+}
+
 .arc-rung {
   margin-top: 8px;
   padding: 18px 20px 20px;
   border-radius: var(--arc-r-lg);
   background: color-mix(in oklab, var(--acc) 5%, var(--arc-raised));
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-  animation: arc-rung-in .22s ease both;
 }
 
 .arc-rung[hidden] {
   display: none;
-}
-
-@keyframes arc-rung-in {
-  from { opacity: 0; transform: translateY(-4px); }
 }
 
 .arc-rung__title {
@@ -1514,10 +1598,6 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arc-rung {
-    animation: none;
-  }
-
   .arc-seal__orb,
   .arc-seal__orb img,
   .arc-orbit__step {
