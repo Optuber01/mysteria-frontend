@@ -1,5 +1,6 @@
 import {computed, nextTick, ref, shallowRef} from 'vue';
 import {useI18n} from '@/composables/useI18n';
+import {storyWarmed} from './progression/prewarm';
 import {
   ALL_CARDS,
   type ArcanaCard,
@@ -60,13 +61,18 @@ export function ensurePathwayData() {
 }
 
 type IdleWindow = Window & {requestIdleCallback?: (callback: () => void, options?: {timeout: number}) => number};
-const REACHING = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
+/* a hand on the page or the keyboard: a draw (which reads the archive) may be next */
+const REACHING = ['pointerdown', 'keydown'] as const;
+/** The longest the archive waits on the story's scenes after the load event. */
+const ARCHIVE_WAIT_MS = 10000;
 
 /**
  * The localized names, ladders and abilities are ~1.3 MB, and the first screen needs none
- * of them (the deck's own table and the Fool's inline reading paint it). They are fetched
- * once the page has loaded and gone idle, or as soon as the visitor touches, types or
- * scrolls, whichever comes first. A draw, the ring and the potion story still ask directly.
+ * of them (the deck's own table and the Fool's inline reading paint it). On a slow line
+ * they used to arrive alongside three.js and held the potion story's book back, so they
+ * come once the story's scenes are built (the story itself asks for them right after
+ * three.js) and the page is idle, or as soon as the visitor reaches for the deck or the
+ * keyboard. A draw, the ring and the potion story still ask directly.
  */
 export function schedulePathwayData() {
   if (data.value || typeof window === 'undefined') return;
@@ -83,8 +89,9 @@ export function schedulePathwayData() {
     if (idle) idle(start, {timeout: 4000});
     else setTimeout(start, 1500);
   };
-  if (document.readyState === 'complete') whenIdle();
-  else window.addEventListener('load', whenIdle, {once: true});
+  const afterLoad = () => void Promise.race([storyWarmed(), new Promise(done => setTimeout(done, ARCHIVE_WAIT_MS))]).then(whenIdle);
+  if (document.readyState === 'complete') afterLoad();
+  else window.addEventListener('load', afterLoad, {once: true});
 }
 
 /*

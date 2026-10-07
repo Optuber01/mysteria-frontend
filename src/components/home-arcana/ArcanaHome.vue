@@ -20,7 +20,7 @@
       <ArcanaFuture v-if="shown > 3"/>
       <SectionCompanion v-if="shown > 4"/>
       <!-- the room they will take, so the page is about as tall from the first paint -->
-      <div v-if="shown <= LAST" class="arc-pending" aria-hidden="true"></div>
+      <div v-if="shown <= LAST" ref="pendingRef" class="arc-pending" aria-hidden="true"></div>
     </main>
 
     <template v-if="shown > LAST">
@@ -40,6 +40,7 @@ import {useI18n} from '@/composables/useI18n';
 import {announceNight, lockNight, useTheme} from '@/composables/useTheme';
 import ArcanaHero from './ArcanaHero.vue';
 import {schedulePathwayData, useArcana} from './useArcana';
+import {storyWarmed} from './progression/prewarm';
 import {fillAccent, inkAccent} from './accentInk';
 import grain from './assets/grain.png';
 
@@ -47,8 +48,10 @@ import grain from './assets/grain.png';
  * First load: only the hero is in the page's first chunk and its first paint. The chapters
  * below the fold are their own chunks, fetched together right after that paint and mounted
  * one per task, in page order, so no single long task holds the main thread (the whole page
- * at once was a 1-2 s task on a slow phone). Back/forward and #links mount everything at once,
- * so the browser lands on the right spot.
+ * at once was a 1-2 s task on a slow phone). The potion story, right under the hero, comes
+ * first and builds its book and player before the rest mount (see progression/prewarm.ts):
+ * on a slow phone the later chapters' mounting kept the book from being ready in time.
+ * Back/forward and #links mount everything at once, so the browser lands on the right spot.
  */
 const loaders = [
   () => import('./progression/ProgressionStory.vue'),
@@ -65,6 +68,23 @@ const LAST = 5;
 const landing = typeof window !== 'undefined' && (!!window.location.hash || (window.history.state?.scroll?.top ?? 0) > 0);
 const shown = ref(landing ? LAST + 1 : 0);
 let mounting = true;
+/** The longest the later chapters wait on the story's scenes. */
+const STORY_FIRST_MAX = 8000;
+const pendingRef = ref<HTMLElement | null>(null);
+
+/** Resolves when the room kept for the chapters still to mount is two screens away. */
+function pendingNear(): Promise<void> {
+  return new Promise(resolve => {
+    const el = pendingRef.value;
+    if (!el) return resolve();
+    const near = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      near.disconnect();
+      resolve();
+    }, {rootMargin: '200% 0px'});
+    near.observe(el);
+  });
+}
 
 function mountChapters() {
   const chunks = loaders.map(loader => loader());
@@ -74,6 +94,8 @@ function mountChapters() {
     shown.value++;
     await nextTick();
     observeChapters();
+    // the rest wait for the story's scenes, unless the visitor is already near them (or something stalls)
+    if (shown.value === 1) await Promise.race([storyWarmed(), pendingNear(), new Promise(done => setTimeout(done, STORY_FIRST_MAX))]);
     // its own task: the browser can paint and answer input between two chapters
     setTimeout(next, 0);
   };
@@ -163,7 +185,7 @@ function revealFocus(event: FocusEvent) {
 
 onMounted(() => {
   document.addEventListener('focusin', revealFocus);
-  // The pathway data is ~1.3 MB: fetched once the page is idle after its first paint, or sooner when the visitor reaches for it.
+  // The pathway data is ~1.3 MB: fetched after the story's scenes are built, or sooner when the visitor reaches for it.
   schedulePathwayData();
   if (shown.value <= LAST) afterPaint(mountChapters);
 

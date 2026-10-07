@@ -11,7 +11,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type * as THREE from 'three';
 import bookAtlasUrl from '@/assets/images/home/progression/vanilla-book/vanilla_minecraft_book_reference_1.21.8/enchanting_table_book_1.21.8.png';
 import { hexToRgb, loadImage, mixRgb, rgbCss } from '../art';
-import { isNearby, whenApproached } from '../prewarm';
+import { isNearby, whenWanted } from '../prewarm';
 import type { Rgb } from '../art';
 
 export type BookEntry = { key: string; name: string; role: string; icon: string | null };
@@ -894,9 +894,7 @@ onMounted(() => {
   intersectionObserver.observe(hostRef.value);
   if (props.warm) void loadAssets().catch(() => undefined);
   // Built ahead of the first scroll into the story (see prewarm.ts).
-  cancelPrewarm = whenApproached(() => {
-    if (isNearby(hostRef.value)) void initialize();
-  });
+  cancelPrewarm = whenWanted(() => (isNearby(hostRef.value) ? initialize() : undefined));
 });
 
 watch(() => props.warm, (warm) => {

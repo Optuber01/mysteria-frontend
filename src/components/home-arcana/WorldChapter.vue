@@ -233,7 +233,7 @@
               :tabindex="item.copy ? -1 : undefined"
               @click="openShot(item.index)"
           >
-            <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm" epoch/>
+            <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="item.index < warmCount" epoch @loaded="tileLoaded(item.index)"/>
           </button>
         </li>
       </ul>
@@ -243,7 +243,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref, watch} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {useBeyonderStats} from '@/composables/useBeyonderStats';
 import IconDiscord from '@/assets/icons/IconDiscord.vue';
@@ -329,7 +329,6 @@ function dealFan() {
 const reducedMotion = ref(false);
 const paused = ref(false);
 const inView = ref(false);
-/* Once the strip is on screen, load every tile: lazy ones clipped by the strip would pop in blank. */
 /* where each system is explained in full: its announcement on this site, and the wiki */
 const WIKI = 'https://wiki.mysterria.net';
 const SYSTEM_LINKS: Record<string, {news?: string; wiki?: string}> = {
@@ -356,14 +355,30 @@ const ordeals = computed(() => (['bloodlust', 'hollowing', 'sealing'] as const).
   body: t(`home.world.ordeals.list.${key}.body`),
 })));
 
-const stripWarm = ref(false);
+/*
+ * The strip's tiles, loaded ahead and in order. Lazy ones clipped by the strip would pop in
+ * blank as they drift in, and all fifty at once shared a slow connection so evenly that the
+ * first tiles waited on the last. From a screen and a half away the first few load, then the
+ * next few each time those are in: the ones in view first, and always well ahead of the drift.
+ */
+const FIRST_TILES = 6;
+const NEXT_TILES = 4;
+const warmCount = ref(0);
+const tilesIn = new Set<number>();
+function tileLoaded(index: number) {
+  tilesIn.add(index);
+  if (warmCount.value && tilesIn.size >= warmCount.value - 2) warmCount.value = Math.min(GALLERY_SHOTS.length, warmCount.value + NEXT_TILES);
+}
+function warmStrip() {
+  if (warmCount.value) return;
+  warmCount.value = Math.min(GALLERY_SHOTS.length, Math.max(FIRST_TILES, tilesIn.size + NEXT_TILES));
+}
 
 /* the shot open in the lightbox (null: closed); the strip holds still while one is open */
 const openIndex = ref<number | null>(null);
 function openShot(index: number) {
   openIndex.value = index;
 }
-watch(inView, visible => visible && (stripWarm.value = true));
 const stripRef = ref<HTMLElement | null>(null);
 
 const gallery = computed(() => {
@@ -373,6 +388,7 @@ const gallery = computed(() => {
 });
 
 let observer: IntersectionObserver | null = null;
+let nearObserver: IntersectionObserver | null = null;
 let motionQuery: MediaQueryList | null = null;
 const syncMotion = () => (reducedMotion.value = !!motionQuery?.matches);
 
@@ -382,11 +398,20 @@ onMounted(() => {
   syncMotion();
   motionQuery.addEventListener('change', syncMotion);
   observer = new IntersectionObserver(([entry]) => (inView.value = entry.isIntersecting));
-  if (stripRef.value) observer.observe(stripRef.value);
+  nearObserver = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    warmStrip();
+    nearObserver?.disconnect();
+  }, {rootMargin: '150% 0px'});
+  if (stripRef.value) {
+    observer.observe(stripRef.value);
+    nearObserver.observe(stripRef.value);
+  }
 });
 
 onUnmounted(() => {
   observer?.disconnect();
+  nearObserver?.disconnect();
   motionQuery?.removeEventListener('change', syncMotion);
 });
 </script>

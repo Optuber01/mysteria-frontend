@@ -87,6 +87,7 @@ import {useArcana} from './useArcana';
 import SkyEffect from './sky/SkyEffect.vue';
 import {fade} from './sky/fade';
 import {prefetchEffects} from './sky/effectLoader';
+import {markHeroImagesIn} from './progression/prewarm';
 import {type Body, isSkyEffect, nextBody, skySceneFor} from './sky/skyScenes';
 import sky from './assets/moon/backlund-sky.webp';
 import skySmall from './assets/moon/backlund-sky-960.webp';
@@ -192,7 +193,11 @@ function onHide() {
 onMounted(() => {
   document.addEventListener('visibilitychange', onHide);
   const images = [skyRef.value, moonRef.value, cityRef.value].filter((img): img is HTMLImageElement => !!img);
-  void Promise.all(images.map(img => img.decode().catch(() => undefined))).then(decoded);
+  void Promise.all(images.map(img => img.decode().catch(() => undefined))).then(() => {
+    decoded();
+    // the first screen is complete: the story below may fetch its own (progression/prewarm.ts)
+    markHeroImagesIn();
+  });
 });
 onUnmounted(() => document.removeEventListener('visibilitychange', onHide));
 

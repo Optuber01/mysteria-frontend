@@ -23,7 +23,7 @@ import type { SkinViewer } from 'skinview3d';
 // Optuber's own skin (classic arms), from the Mojang session server.
 import playerSkinUrl from '@/assets/images/home/progression/player-skin.png';
 import { drawVial, hexToRgb, vialKey } from './art';
-import { isNearby, whenApproached } from './prewarm';
+import { isNearby, whenWanted } from './prewarm';
 
 /** The held bottle on screen: centre and height, px relative to this figure. */
 export type BottlePosition = { x: number; y: number; size: number };
@@ -744,9 +744,7 @@ onMounted(() => {
   );
   intersectionObserver.observe(host.value);
   // The context, shaders and skin are ready before the first scroll into the story (see prewarm.ts).
-  cancelPrewarm = whenApproached(() => {
-    if (isNearby(host.value)) void createViewer();
-  });
+  cancelPrewarm = whenWanted(() => (isNearby(host.value) ? createViewer() : undefined));
 });
 
 watch(() => props.armed, maybeCreateViewer);

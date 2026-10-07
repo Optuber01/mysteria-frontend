@@ -189,7 +189,7 @@ import { abilitySummary } from '../abilitySummary';
 import { CHAPTERS, T, awakenAt, blackoutAt, clamp01, dropStarts, ease, flashAt, gulpPulse, lerp, riskAt, scrollAt, span, storyAt } from './timeline';
 import type { ChapterId } from './timeline';
 import { stageLayout } from './layout';
-import { isNearby, visitorMoved, whenSettled } from './prewarm';
+import { isNearby, markStoryMounted, storyAssetsWanted, whenSettled } from './prewarm';
 import type { StageLayout } from './layout';
 import breweryScene from '@/assets/images/home/progression/brewery-scene.webp';
 import { sigilNative } from '../arcana-data';
@@ -634,15 +634,17 @@ onMounted(() => {
       update();
     }
   }, { rootMargin: '120px 0px' });
-  // The story starts right under the hero, so "a screen away" is true on arrival: it only
-  // counts once the visitor has started down the page (three.js and the data wait till then).
+  // The story starts right under the hero, so "a screen away" is true on arrival: three.js,
+  // the book's art and the names come once the hero's images are in (or the visitor starts
+  // down the page sooner), never in the hero's own load. See prewarm.ts.
   nearObserver = new IntersectionObserver(([entry]) => {
     if (!entry.isIntersecting) return;
     nearObserver?.disconnect();
     nearObserver = null;
-    void visitorMoved().then(() => {
+    void storyAssetsWanted().then(() => {
       near.value = true;
-      void preloadPathwayNames();
+      // three.js first (the book is the first thing down here, the names only label it), then the archive
+      void import('three').catch(() => undefined).finally(() => void preloadPathwayNames());
     });
   }, { rootMargin: '100% 0px' });
   // a screen ahead, so the layers are rastered before they scroll in
@@ -676,6 +678,8 @@ onMounted(() => {
   addEventListener('keydown', onKeydown);
   measureSection();
   measureStage();
+  // the book and the player have queued their warm-ups: the chapters below wait for them (ArcanaHome)
+  markStoryMounted();
 });
 onUnmounted(() => {
   clearTimeout(releaseTimer);

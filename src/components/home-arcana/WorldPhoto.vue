@@ -11,6 +11,8 @@
         :style="{objectPosition: shot.focus}"
         :loading="eager ? 'eager' : 'lazy'"
         decoding="async"
+        @load="emit('loaded')"
+        @error="emit('loaded')"
     >
     <figcaption v-if="shot.author" class="world-photo__credit">
       <span>{{ creditText }}</span>
@@ -34,6 +36,8 @@ const props = withDefaults(defineProps<{
   /** Show the season it was taken in. */
   epoch?: boolean;
 }>(), {sizes: '(max-width: 900px) 100vw, 50vw', eager: false, epoch: false});
+/** The image is in (or failed): the gallery strip loads its tiles in turns. */
+const emit = defineEmits<{loaded: []}>();
 
 const {t} = useI18n();
 
