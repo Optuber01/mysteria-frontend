@@ -1,38 +1,45 @@
 <template>
-  <ArcPage :title="t('shopPage.title')" :lede="t('shopPage.lede')">
-    <ContentLanguageNotice/>
+  <ArcPage>
+    <!-- a storefront: one tight column of head, balance bar and categories, then the items -->
+    <div class="store">
+      <ArcPageHead :title="t('shopPage.title')">
+        <template #lede>{{ t('shopPage.lede') }}</template>
+      </ArcPageHead>
 
-    <ShopBalance/>
+      <ContentLanguageNotice/>
 
-    <section class="store-catalogue" aria-labelledby="store-catalogue-title">
-      <h2 id="store-catalogue-title" class="arc-sr">{{ currentTabLabel }}</h2>
+      <ShopBalance/>
 
-      <ArcState v-if="isShopLoading" kind="loading" :text="t('shopPage.loading')"/>
-      <ArcState
-          v-else-if="shopError"
-          kind="error"
-          :text="t('shopPage.loadFailed')"
-          :retry-label="t('shopPage.retry')"
-          @retry="retryLoading"
-      />
+      <section class="store-catalogue" aria-labelledby="store-catalogue-title">
+        <h2 id="store-catalogue-title" class="arc-sr">{{ currentTabLabel }}</h2>
 
-      <template v-else>
-        <ArcTabs v-model="activeTab" :tabs="tabs" :label="t('shopPage.tabsLabel')" controls="store-items"/>
+        <ArcState v-if="isShopLoading" kind="loading" :text="t('shopPage.loading')"/>
+        <ArcState
+            v-else-if="shopError"
+            kind="error"
+            :text="t('shopPage.loadFailed')"
+            :retry-label="t('shopPage.retry')"
+            @retry="retryLoading"
+        />
 
-        <div id="store-items" class="store-catalogue__panel" role="tabpanel" :aria-label="currentTabLabel">
-          <ul v-if="visibleItems.length" class="arc-grid store-catalogue__grid">
-            <li v-for="(item, index) in visibleItems" :key="item.id">
-              <ShopItemCard
-                  :image-priority="index < 3 ? 'high' : 'auto'"
-                  :item="item"
-                  @purchase="handlePurchase"
-              />
-            </li>
-          </ul>
-          <ArcState v-else :text="t('shopPage.empty')"/>
-        </div>
-      </template>
-    </section>
+        <template v-else>
+          <ArcTabs v-model="activeTab" :tabs="tabs" :label="t('shopPage.tabsLabel')" controls="store-items"/>
+
+          <div id="store-items" class="store-catalogue__panel" role="tabpanel" :aria-label="currentTabLabel">
+            <ul v-if="visibleItems.length" class="arc-grid store-catalogue__grid">
+              <li v-for="(item, index) in visibleItems" :key="item.id">
+                <ShopItemCard
+                    :image-priority="index < 5 ? 'high' : 'auto'"
+                    :item="item"
+                    @purchase="handlePurchase"
+                />
+              </li>
+            </ul>
+            <ArcState v-else :text="t('shopPage.empty')"/>
+          </div>
+        </template>
+      </section>
+    </div>
 
     <StorePurchaseDialog ref="purchase"/>
     <DailyBonusCat page="shop"/>
@@ -42,6 +49,7 @@
 <script lang="ts" setup>
 import {computed, onMounted, ref, watch} from "vue";
 import ArcPage from "@/components/arcana/ArcPage.vue";
+import ArcPageHead from "@/components/arcana/ArcPageHead.vue";
 import ArcState from "@/components/arcana/ArcState.vue";
 import ArcTabs from "@/components/arcana/ArcTabs.vue";
 import ContentLanguageNotice from "@/components/ui/ContentLanguageNotice.vue";
@@ -161,20 +169,44 @@ export default {name: "ShopView"};
 </script>
 
 <style scoped>
+/* the store keeps its own, closer rhythm so the first row of items is in view on arrival */
+.store {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.store > :first-child {
+  margin-bottom: 4px;
+}
+
+/* the page head's lede, kept to a short note on the store */
+.store :deep(.arc-page-head) {
+  gap: 10px;
+}
+
+.store :deep(.arc-page-head .arc-lede) {
+  font-size: var(--arc-fs-small);
+  line-height: 1.55;
+}
+
 .store-catalogue__panel {
-  margin-top: var(--arc-group-gap);
+  margin-top: 14px;
 }
 
 .store-catalogue__grid {
-  --arc-grid-min: 300px;
+  --arc-grid-min: 220px;
   margin: 0;
   padding: 0;
   list-style: none;
+  gap: 14px;
 }
 
-@media (max-width: 420px) {
+/* phones: two to a row, like any shop window */
+@media (max-width: 560px) {
   .store-catalogue__grid {
-    --arc-grid-min: 260px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 }
 </style>

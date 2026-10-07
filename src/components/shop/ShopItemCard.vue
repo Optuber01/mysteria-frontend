@@ -1,5 +1,6 @@
 <template>
-  <!-- One item: its picture, what it is and does, the price, and the way to buy it. -->
+  <!-- One item, kept short: its picture, name and line, the price, and the way to buy it.
+       The full list of what it does is on the item's own page. -->
   <article v-if="item.is_active" class="store-card">
     <!-- the picture repeats the name's link for the pointer; keyboards and readers use the name -->
     <RouterLink :to="$lp(detailPath)" class="store-card__media" tabindex="-1" aria-hidden="true">
@@ -19,20 +20,10 @@
     </RouterLink>
 
     <div class="store-card__body">
-      <h3 class="arc-h4 store-card__name">
+      <h3 class="store-card__name">
         <RouterLink :to="$lp(detailPath)" class="store-card__link">{{ itemName }}</RouterLink>
       </h3>
       <p v-if="item.description" class="store-card__description">{{ item.description }}</p>
-
-      <ul v-if="item.points?.length" class="store-card__points">
-        <li v-for="(point, index) in item.points.slice(0, 4)" :key="index">
-          <i class="fa-solid fa-check" aria-hidden="true"></i>
-          <span>
-            {{ point.text }}
-            <span v-if="point.tooltip" class="store-card__hint">{{ point.tooltip }}</span>
-          </span>
-        </li>
-      </ul>
 
       <div class="store-card__tags">
         <span class="arc-tag">{{ termLabel }}</span>
@@ -117,10 +108,9 @@ const finalPrice = computed(() => new Decimal(props.item.price).mul(new Decimal(
   min-width: 0;
   height: 100%;
   overflow: hidden;
-  border-radius: var(--arc-r-lg);
+  border-radius: var(--arc-r-md);
   background: var(--arc-raised);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-  transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
 /* the hairline is drawn over the picture too, so the card keeps one edge */
@@ -158,7 +148,7 @@ const finalPrice = computed(() => new Decimal(props.item.price).mul(new Decimal(
 }
 
 .store-card__glyph {
-  font-size: 32px;
+  font-size: 24px;
   opacity: .6;
 }
 
@@ -166,12 +156,22 @@ const finalPrice = computed(() => new Decimal(props.item.price).mul(new Decimal(
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 12px;
-  padding: var(--arc-pad);
+  gap: 8px;
+  padding: 12px 14px 14px;
+}
+
+.store-card__name {
+  margin: 0;
+  font-family: var(--arc-display);
+  font-size: 16px;
+  font-variation-settings: 'FLAR' 100;
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
 }
 
 .store-card__link {
-  color: inherit;
+  color: var(--arc-ink);
   text-decoration: none;
 }
 
@@ -184,45 +184,27 @@ const finalPrice = computed(() => new Decimal(props.item.price).mul(new Decimal(
   overflow: hidden;
   margin: 0;
   color: var(--arc-muted);
-  font-size: var(--arc-fs-small);
-  line-height: 1.55;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.store-card__points {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 12px 0 0;
-  border-top: var(--arc-bw) solid var(--arc-line);
-  list-style: none;
-  font-size: var(--arc-fs-small);
-  line-height: 1.45;
-}
-
-.store-card__points li {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.store-card__points i {
-  flex: none;
-  color: var(--arc-muted);
-  font-size: 11px;
-}
-
-.store-card__hint {
-  display: block;
-  color: var(--arc-muted);
   font-size: var(--arc-fs-caption);
+  line-height: 1.45;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .store-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
+}
+
+.store-card__tags .arc-tag {
+  gap: 5px;
+  min-height: 20px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
+
+.store-card__tags .arc-tag i {
+  font-size: 10px;
 }
 
 .store-card__foot {
@@ -230,45 +212,59 @@ const finalPrice = computed(() => new Decimal(props.item.price).mul(new Decimal(
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px 16px;
+  gap: 8px 10px;
   margin-top: auto;
-  padding-top: 14px;
-  border-top: var(--arc-bw) solid var(--arc-line);
+  padding-top: 4px;
 }
 
+/* the price reads as one figure, the Marks under it */
 .store-card__price {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 10px;
+  display: grid;
   margin: 0;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
 .store-card__now {
   color: var(--arc-ink);
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 650;
-  line-height: 1.1;
 }
 
 .store-card__was,
 .store-card__marks {
   color: var(--arc-muted);
-  font-size: var(--arc-fs-small);
+  font-size: 12px;
 }
 
 .store-card__buy {
   flex: none;
+  min-height: 36px;
+  padding-inline: 14px;
+  font-size: 14px;
 }
 
-/* the longer "sign in" label takes the row's width, whether or not it wraps */
+/* the longer "sign in" label takes the row's width, and wraps in the longer languages */
 .store-card__buy.is-sign-in {
-  flex: 1 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-block: 6px;
+  text-align: center;
 }
 
-@media (max-width: 420px) {
-  .store-card__buy {
+/* two to a row on phones: the button takes the card's width under the price */
+@media (max-width: 560px) {
+  .store-card__body {
+    gap: 6px;
+    padding: 10px 10px 10px;
+  }
+
+  .store-card__name {
+    font-size: 15px;
+  }
+
+  .store-card__buy,
+  .store-card__buy.is-sign-in {
     flex: 1 1 100%;
   }
 }

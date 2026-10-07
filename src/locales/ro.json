@@ -181,7 +181,17 @@
     "error": "Noutățile nu au putut fi încărcate.",
     "articleError": "Articolul nu a putut fi încărcat.",
     "retry": "Încearcă din nou",
-    "back": "Înapoi la noutăți"
+    "back": "Înapoi la noutăți",
+    "searchLabel": "Caută în noutăți",
+    "searchPlaceholder": "Titlu sau dată, de exemplu octombrie 2026",
+    "searchClear": "Șterge căutarea",
+    "matches": "Rezultate",
+    "searching": "Se caută în toate noutățile...",
+    "noResults": "Nimic nu se potrivește cu „{q}”.",
+    "noResultsHere": "Aici nimic nu se potrivește cu „{q}”, dar alte noutăți se potrivesc.",
+    "searchAll": "Caută în toate noutățile",
+    "latest": "Ultimul jurnal de modificări",
+    "latestAreas": "Modificări la {areas}"
   },
   "contentLanguageNotice": {
     "label": "Notă privind limba",
@@ -203,8 +213,6 @@
     "ladderCost": "Cost"
   },
   "staffOrder": {
-    "lede": "Administratorii, moderatorii și constructorii care mențin lumea în mișcare. Contactează-i pe Discord pentru tichete și contestații, niciodată prin mesaje private.",
-    "helpQuestion": "Ai nevoie de ajutor sau vrei să raportezi ceva?",
     "openTicket": "Deschide un tichet"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "Exemple",
   "playerRules": "Reguli pentru jucători",
   "staffPage": {
-    "snapshotNote": "Această listă este un instantaneu din octombrie 2026 și poate fi depășită."
+    "snapshotNote": "Lista actuală nu s-a încărcat, așa că aceasta e situația din octombrie 2026.",
+    "lede": "Cine conduce Mysterria, pe ranguri. Alege un nume ca să vezi ce face fiecare și de cât timp e în echipă.",
+    "reach": {
+      "title": "Ai nevoie de cineva din echipă?",
+      "text": "Deschide un ticket pe Discordul nostru și ajunge la rangul care se ocupă de asta. Echipa nu preia cereri în mesaje private.",
+      "howTo": "Cum funcționează suportul"
+    },
+    "count": {
+      "one": "{n} persoană",
+      "few": "{n} persoane",
+      "many": "{n} de persoane"
+    },
+    "card": {
+      "staffFor": "În echipă de",
+      "staffSince": "În echipă din",
+      "joined": "Pe Discord din"
+    },
+    "ranks": {
+      "OWNER": "Proprietarul serverului. Se ocupă de plăți, probleme de cont și reclamații despre echipă.",
+      "ADMIN": "Administrează serverul și setările lui, cu toate permisiunile echipei.",
+      "LEADER": "Conduce echipa și decide contestațiile de ban și cererile de intrare în echipă.",
+      "DEVELOPER": "Construiește și repară pluginurile, botul și site-ul serverului.",
+      "EMISSARY": "Preia ticketele despre buguri și probleme tehnice.",
+      "MODERATOR": "Ține ordinea pe chat și pe server și răspunde la tickete. Poate da avertismente și banuri temporare.",
+      "HERALD": "Primul care răspunde la ticketele despre joc și problemele din joc.",
+      "DESIGNER": "Creează grafica și aspectul vizual al serverului.",
+      "TRANSLATOR": "Traduce serverul și site-ul.",
+      "TESTER": "Încearcă noutățile înainte să ajungă pe server.",
+      "EVENTER": "Plănuiește și conduce evenimentele de pe server."
+    }
   },
   "dailyBonusCatTitle": "O rezonanță ciudată...",
   "dailyBonusCatAlt": "O pisică misterioasă",
@@ -1099,7 +1136,10 @@
   "loginPage": {
     "title": "Autentifică-te pe Mysterria",
     "redirectHost": "După autentificare vei fi readus pe {host}.",
-    "redirectGeneric": "După autentificare vei fi redirecționat."
+    "redirectGeneric": "După autentificare vei fi redirecționat.",
+    "lede": "Conectează-te cu Discord pentru a-ți lega contul de Minecraft. Un cont legat poate revendica bonusul zilnic și poate cumpăra din magazin.",
+    "helpLead": "Nu ești sigur cum funcționează legarea?",
+    "helpLink": "Citește cum îți legi contul"
   },
   "logoutPage": {
     "lede": "Deconectează-te de pe acest dispozitiv."
@@ -1347,5 +1387,19 @@
       "title": "COI Client",
       "body": "Un mod Fabric opțional, făcut pentru Mysterria. Adaugă o interfață de Beyonder cu taste rapide pentru abilități și efecte de ritual, iar tot jocul merge și fără el. Există versiuni pentru 26.1.2 și 26.2."
     }
+  },
+  "guidePage": {
+    "joinNoMods": "Nu sunt necesare moduri de client",
+    "joinBedrock": "Bedrock acceptat prin Geyser",
+    "joinFree": "Gratuit pentru totdeauna",
+    "joinCompanion": "Vrei efectele vizuale? Obține Clientul COI",
+    "checklistEyebrow": "Prima oră",
+    "checklistTitle": "Șase pași de la lista serverelor la primul tău obiectiv",
+    "checklistLede": "Bifează-i pe parcurs - progresul tău este salvat pe acest dispozitiv.",
+    "checklistProgress": "Progres",
+    "topicsCount": "subiecte",
+    "noTopics": "Niciun subiect nu corespunde acelei expresii. Răsfoiește tot ce urmează mai jos.",
+    "browseAll": "Răsfoiește toate sistemele importante",
+    "coiClient": "Descarcă Clientul COI"
   }
 }

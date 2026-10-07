@@ -181,7 +181,17 @@
     "error": "Impossible de charger les actualités.",
     "articleError": "Impossible de charger l'article.",
     "retry": "Réessayer",
-    "back": "Retour aux actualités"
+    "back": "Retour aux actualités",
+    "searchLabel": "Rechercher dans les actualités",
+    "searchPlaceholder": "Titre ou date, par exemple octobre 2026",
+    "searchClear": "Effacer la recherche",
+    "matches": "Résultats",
+    "searching": "Recherche dans toutes les actualités...",
+    "noResults": "Aucun résultat pour « {q} ».",
+    "noResultsHere": "Aucun résultat pour « {q} » ici, mais d'autres actualités correspondent.",
+    "searchAll": "Chercher dans toutes les actualités",
+    "latest": "Dernier journal de modifications",
+    "latestAreas": "Modifications : {areas}"
   },
   "contentLanguageNotice": {
     "label": "Note sur la langue",
@@ -203,8 +213,6 @@
     "ladderCost": "Coût"
   },
   "staffOrder": {
-    "lede": "Les administrateurs, modérateurs et bâtisseurs qui font tourner le monde. Contacte-les sur Discord pour les tickets et recours, jamais en message privé.",
-    "helpQuestion": "Tu as besoin d’aide ou veux signaler quelque chose ?",
     "openTicket": "Ouvrir un ticket"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "Exemples",
   "playerRules": "Règles des joueurs",
   "staffPage": {
-    "snapshotNote": "Cette liste date d’octobre 2026 et peut être périmée."
+    "snapshotNote": "La liste en direct n'a pas pu être chargée : voici un instantané d'octobre 2026.",
+    "lede": "Qui fait tourner Mysterria, par rang. Choisis un nom pour voir ce que la personne fait et depuis combien de temps elle est dans l'équipe.",
+    "reach": {
+      "title": "Besoin de quelqu'un de l'équipe ?",
+      "text": "Ouvre un ticket sur notre Discord et il arrivera au rang qui s'en occupe. L'équipe ne traite pas les demandes en message privé.",
+      "howTo": "Comment fonctionne le support"
+    },
+    "count": {
+      "one": "{n} personne",
+      "few": "{n} personnes",
+      "many": "{n} personnes"
+    },
+    "card": {
+      "staffFor": "Dans l'équipe depuis",
+      "staffSince": "Arrivée dans l'équipe",
+      "joined": "Sur Discord depuis le"
+    },
+    "ranks": {
+      "OWNER": "Propriétaire du serveur. Gère les paiements, les problèmes de compte et les signalements visant l'équipe.",
+      "ADMIN": "Gère le serveur et ses réglages, avec toutes les permissions de l'équipe.",
+      "LEADER": "Dirige l'équipe et tranche les demandes de débannissement et les candidatures.",
+      "DEVELOPER": "Crée et corrige les plugins, le bot et le site du serveur.",
+      "EMISSARY": "Prend en charge les tickets sur les bugs et les problèmes techniques.",
+      "MODERATOR": "Fait régner l'ordre dans le chat et sur le serveur et répond aux tickets. Peut avertir et bannir temporairement.",
+      "HERALD": "Premier à répondre aux tickets sur le jeu et les problèmes en jeu.",
+      "DESIGNER": "Crée les visuels et l'identité graphique du serveur.",
+      "TRANSLATOR": "Traduit le serveur et le site.",
+      "TESTER": "Essaie les nouveautés avant leur arrivée sur le serveur.",
+      "EVENTER": "Prépare et anime les événements du serveur."
+    }
   },
   "dailyBonusCatTitle": "Une étrange résonance...",
   "dailyBonusCatAlt": "Un chat mystérieux",
@@ -1099,7 +1136,10 @@
   "loginPage": {
     "title": "Connexion à Mysterria",
     "redirectHost": "Après la connexion, tu seras ramené sur {host}.",
-    "redirectGeneric": "Après la connexion, tu seras redirigé."
+    "redirectGeneric": "Après la connexion, tu seras redirigé.",
+    "lede": "Connecte-toi avec Discord pour lier ton compte Minecraft. Un compte lié peut récupérer le bonus quotidien et acheter dans la boutique.",
+    "helpLead": "Tu ne sais pas comment fonctionne la liaison ?",
+    "helpLink": "Lire comment lier ton compte"
   },
   "logoutPage": {
     "lede": "Se déconnecter de cet appareil."
@@ -1347,5 +1387,19 @@
       "title": "COI Client",
       "body": "Un mod Fabric facultatif conçu pour Mysterria. Il ajoute une interface de Beyonder avec des raccourcis pour les capacités et des effets de rituel, et tout le jeu fonctionne aussi sans lui. Des versions existent pour 26.1.2 et 26.2."
     }
+  },
+  "guidePage": {
+    "joinNoMods": "Aucun mod client requis",
+    "joinBedrock": "Bedrock pris en charge via Geyser",
+    "joinFree": "Gratuit pour toujours",
+    "joinCompanion": "Tu veux les effets visuels ? Obtiens le Client COI",
+    "checklistEyebrow": "LA PREMIÈRE HEURE",
+    "checklistTitle": "Six étapes de la liste des serveurs à ton premier objectif",
+    "checklistLede": "Coche-les à mesure que tu avances : ta progression est enregistrée sur cet appareil.",
+    "checklistProgress": "Progression",
+    "topicsCount": "sujets",
+    "noTopics": "Aucun sujet ne correspond à cette expression. Parcours tout ce qui suit.",
+    "browseAll": "Parcourir tous les systèmes majeurs",
+    "coiClient": "Télécharge le Client COI"
   }
 }

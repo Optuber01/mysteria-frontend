@@ -1,6 +1,9 @@
 <template>
-  <ArcPage narrow :title="t('loginPage.title')">
-    <div class="arc-panel login">
+  <ArcCentered>
+    <ArcGateCard>
+      <h1 class="arc-h3">{{ t('loginPage.title') }}</h1>
+      <p class="arc-lede">{{ t('loginPage.lede') }}</p>
+
       <p v-if="redirectMessage" class="login__note" role="status">{{ redirectMessage }}</p>
 
       <button :disabled="authStore.isLoading" class="arc-btn arc-btn--solid login__button" type="button" @click="handleDiscordLogin">
@@ -9,9 +12,12 @@
         <span v-else>{{ t('loginWithDiscord') }}</span>
       </button>
 
-      <p class="login__info arc-muted">{{ t('secureLoginDisclaimer') }}</p>
-    </div>
-  </ArcPage>
+      <p class="arc-muted login__help">
+        {{ t('loginPage.helpLead') }}
+        <RouterLink :to="`${$lp('/help')}#linking`" class="arc-link">{{ t('loginPage.helpLink') }}</RouterLink>
+      </p>
+    </ArcGateCard>
+  </ArcCentered>
 </template>
 
 <script lang="ts" setup>
@@ -20,7 +26,8 @@ import {useRoute} from "vue-router";
 import {useAuthStore} from "@/stores/auth";
 import {useI18n} from "@/composables/useI18n";
 import {isAllowedRedirectUrl} from "@/utils/redirectGuard";
-import ArcPage from "@/components/arcana/ArcPage.vue";
+import ArcCentered from "@/components/arcana/ArcCentered.vue";
+import ArcGateCard from "@/components/arcana/ArcGateCard.vue";
 import IconDiscord from "@/assets/icons/IconDiscord.vue";
 
 const route = useRoute();
@@ -65,14 +72,8 @@ const handleDiscordLogin = async () => {
 </script>
 
 <style scoped>
-.login {
-  display: grid;
-  gap: var(--arc-group-gap);
-  max-width: 460px;
-}
-
 .login__note {
-  margin: 0;
+  width: 100%;
   padding: 12px 14px;
   border-radius: var(--arc-r-md);
   background: color-mix(in oklab, var(--acc) 8%, transparent);
@@ -82,10 +83,10 @@ const handleDiscordLogin = async () => {
 
 .login__button {
   width: 100%;
+  margin-top: 10px;
 }
 
-.login__info {
-  margin: 0;
+.login__help {
   font-size: var(--arc-fs-small);
 }
 </style>

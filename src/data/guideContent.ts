@@ -16,17 +16,17 @@ export type {
     GuideChoice,
     GuideCommand,
     GuideContent,
-    GuideDifference,
-    GuideFigure,
-    GuideImage,
-    GuideLink,
+    GuideDirection,
+    GuideExpectation,
+    GuideFact,
     GuideStep,
+    GuideTask,
     GuideTopic,
     GuideTopicSection,
 } from "./guide/types";
 
 /**
- * Re-narrows `category` and `image` from `string` back to their unions. The
+ * Re-narrows `category` from `string` back to `GuideCategory`. The
  * loader's type is what does the work: the whole tree is still shape-checked,
  * so a locale with a missing or misspelt field fails to compile.
  */
@@ -58,9 +58,3 @@ export const loadGuide = (language: Language): Promise<GuideContent> => {
     }
     return pending;
 };
-
-/* The wiki is translated too: English sits at its root, every other language under its own lower-cased code. */
-const WIKI = "https://wiki.mysterria.net/";
-
-export const wikiUrl = (path: string, language: Language): string =>
-    `${WIKI}${language === "en" ? "" : `${language.toLowerCase()}/`}${path}`;

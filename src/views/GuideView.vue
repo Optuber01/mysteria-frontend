@@ -1,13 +1,29 @@
 <template>
   <ArcPage
       :title="content ? (topic ? topic.title : content.ui.title) : undefined"
-      :lede="content ? (topic ? topic.answer : content.ui.lede) : undefined"
-      :back="content && topic ? {to: localePath('/guide', currentLanguage), label: content.ui.back} : undefined"
+      :lede="content ? (topic ? topic.summary : content.ui.lede) : undefined"
+      :back="content && topic ? {to: localePath('/guide', currentLanguage), label: content.ui.backToGuide} : undefined"
   >
+    <template v-if="content && !topic" #actions>
+      <a href="#first-hour" class="arc-btn arc-btn--solid">
+        {{ content.ui.startJourney }}
+        <i class="fa-solid fa-arrow-down" aria-hidden="true"></i>
+      </a>
+      <a href="#answers" class="arc-btn arc-btn--ghost" @click="focusSearch">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        {{ content.ui.findAnswer }}
+      </a>
+    </template>
+
     <ArcState v-if="!content" kind="loading"/>
     <div v-else class="arc-split guide-layout">
       <!-- every topic by group; on a topic page its sections sit under it -->
-      <ArcToc :key="topic?.id ?? 'hub'" :label="content.ui.topics" :groups="tocGroups" :current="topic?.id"/>
+      <ArcToc
+          :key="topic?.id ?? 'hub'"
+          :label="topic ? content.ui.mobileBrowse : t('guidePage.browseAll')"
+          :groups="tocGroups"
+          :current="topic?.id"
+      />
       <GuideTopic v-if="topic" :key="topic.id" :content="content" :topic="topic"/>
       <GuideHome v-else :content="content"/>
     </div>
@@ -28,7 +44,7 @@ import {localePath} from "@/composables/useLocalePath";
 import {breadcrumbLd, faqLd, useSeo} from "@/composables/useSeo";
 import {type GuideCategory, type GuideContent, type GuideTopic as Topic, loadGuide} from "@/data/guideContent";
 
-const {currentLanguage} = useI18n();
+const {t, currentLanguage} = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -93,14 +109,16 @@ useSeo(() => {
       imageAlt: "Getting started on Mysterria",
       jsonLd: [
         breadcrumbLd(trail),
-        faqLd(guide.topics.map(entry => ({question: entry.title, answer: entry.answer}))),
+        faqLd(guide.topics
+            .filter(entry => entry.summary && entry.answer)
+            .map(entry => ({question: entry.title, answer: entry.answer}))),
       ],
     };
   }
 
   return {
     title: current.title,
-    description: current.summary,
+    description: current.summary || current.answer,
     path: `/guide/${current.id}`,
     jsonLd: [
       breadcrumbLd([...trail, {name: current.shortTitle, path: `/guide/${current.id}`}]),
@@ -108,6 +126,11 @@ useSeo(() => {
     ],
   };
 });
+
+/* "Find an answer" lands on the search with the cursor in it, not just beside it */
+function focusSearch() {
+  requestAnimationFrame(() => document.getElementById("guide-search")?.focus({preventScroll: true}));
+}
 </script>
 
 <style scoped>

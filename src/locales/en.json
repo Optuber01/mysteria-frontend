@@ -181,7 +181,17 @@
     "error": "The news could not be loaded.",
     "articleError": "The article could not be loaded.",
     "retry": "Try again",
-    "back": "Back to news"
+    "back": "Back to news",
+    "searchLabel": "Search news",
+    "searchPlaceholder": "Title or date, for example October 2026",
+    "searchClear": "Clear search",
+    "matches": "Matches",
+    "searching": "Searching all news...",
+    "noResults": "Nothing matches “{q}”.",
+    "noResultsHere": "Nothing here matches “{q}”, but other kinds of news do.",
+    "searchAll": "Search all news",
+    "latest": "Latest changelog",
+    "latestAreas": "Changes to {areas}"
   },
   "contentLanguageNotice": {
     "label": "Language notice",
@@ -203,8 +213,6 @@
     "ladderCost": "Cost"
   },
   "staffOrder": {
-    "lede": "The administrators, moderators and builders who keep the world turning. Reach them in Discord for tickets and appeals, never in DMs.",
-    "helpQuestion": "Need help, or want to report something?",
     "openTicket": "Open a ticket"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "Examples",
   "playerRules": "Player Rules",
   "staffPage": {
-    "snapshotNote": "This list is a snapshot from October 2026 and may be out of date."
+    "snapshotNote": "The live list didn't load, so this is a snapshot from October 2026.",
+    "lede": "Who runs Mysterria, by rank. Select a name to see what they do and how long they've been on staff.",
+    "reach": {
+      "title": "Need a staff member?",
+      "text": "Open a ticket in our Discord and it goes to the rank that handles it. Staff don't take support requests in DMs.",
+      "howTo": "How support works"
+    },
+    "count": {
+      "one": "{n} person",
+      "few": "{n} people",
+      "many": "{n} people"
+    },
+    "card": {
+      "staffFor": "Staff for",
+      "staffSince": "Staff since",
+      "joined": "On Discord since"
+    },
+    "ranks": {
+      "OWNER": "Owns the server. Handles payments, account problems and reports about staff.",
+      "ADMIN": "Runs the server and its settings, with every staff permission.",
+      "LEADER": "Leads the staff team and decides ban appeals and staff applications.",
+      "DEVELOPER": "Builds and fixes the server's plugins, bot and website.",
+      "EMISSARY": "Takes the tickets about bugs and technical problems.",
+      "MODERATOR": "Keeps chat and the server in order and answers tickets. Can warn players and hand out temporary bans.",
+      "HERALD": "First to answer tickets about gameplay and problems in game.",
+      "DESIGNER": "Makes the server's art and visuals.",
+      "TRANSLATOR": "Translates the server and the website.",
+      "TESTER": "Tries new features before they reach the server.",
+      "EVENTER": "Plans and runs server events."
+    }
   },
   "dailyBonusCatTitle": "A strange resonance...",
   "dailyBonusCatAlt": "A mysterious cat",
@@ -1099,7 +1136,10 @@
   "loginPage": {
     "title": "Log in to Mysterria",
     "redirectHost": "You will be redirected back to {host} after login.",
-    "redirectGeneric": "You will be redirected after login."
+    "redirectGeneric": "You will be redirected after login.",
+    "lede": "Sign in with Discord to link your Minecraft account. A linked account can claim the daily bonus and buy in the store.",
+    "helpLead": "Not sure how linking works?",
+    "helpLink": "Read how to link"
   },
   "logoutPage": {
     "lede": "Sign out on this device."
@@ -1347,5 +1387,19 @@
       "title": "COI Client",
       "body": "An optional Fabric mod made for Mysterria. It adds a Beyonder interface with ability hotkeys and ritual visuals, and everything in the game still works without it. Builds are out for 26.1.2 and 26.2."
     }
+  },
+  "guidePage": {
+    "joinNoMods": "No client mods required",
+    "joinBedrock": "Bedrock supported via Geyser",
+    "joinFree": "Free to play, forever",
+    "joinCompanion": "Want the visuals? Get the COI Client",
+    "checklistEyebrow": "The First Hour",
+    "checklistTitle": "Six steps from the server list to your first objective",
+    "checklistLede": "Check them off as you go - your progress is saved on this device.",
+    "checklistProgress": "Progress",
+    "topicsCount": "topics",
+    "noTopics": "No topic matches that phrase. Browse everything below.",
+    "browseAll": "Browse every major system",
+    "coiClient": "Get the COI Client"
   }
 }

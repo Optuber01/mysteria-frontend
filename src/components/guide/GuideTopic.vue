@@ -1,103 +1,95 @@
 <template>
-  <!-- One topic: its sections as plain long text, then where to read more and what to read next. -->
+  <!-- One topic: the short answer, its sections as long text, then what to read next. -->
   <article class="guide-topic">
-    <GuideJoin v-if="topic.id === 'connect'" :ui="content.ui" class="guide-topic__join"/>
-    <GuideChoiceComparison v-if="topic.id === 'starter-choice'" :choices="content.starterChoices" :ui="content.ui"/>
-
-    <div class="arc-prose guide-topic__prose">
-      <section
-          v-for="(section, index) in topic.sections"
-          :id="sectionId(topic.id, index)"
-          :key="section.title"
-          class="guide-section"
-          :aria-labelledby="`${sectionId(topic.id, index)}-title`"
-      >
-        <h2 :id="`${sectionId(topic.id, index)}-title`">{{ section.title }}</h2>
-
-        <p v-for="paragraph in section.paragraphs" :key="paragraph">{{ paragraph }}</p>
-
-        <ul v-if="section.bullets">
-          <li v-for="bullet in section.bullets" :key="bullet">{{ bullet }}</li>
-        </ul>
-
-        <ol v-if="section.steps">
-          <li v-for="step in section.steps" :key="step">{{ step }}</li>
-        </ol>
-
-        <div v-if="section.commands" class="arc-table-wrap">
-          <table class="arc-table guide-commands">
-            <thead>
-              <tr>
-                <th scope="col">{{ content.ui.command }}</th>
-                <th scope="col">{{ content.ui.purpose }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="command in section.commands" :key="command.command">
-                <td><code>{{ command.command }}</code></td>
-                <td>{{ command.purpose }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <p v-if="section.warning" class="guide-note guide-note--warning">
-          <strong>{{ content.ui.warning }}</strong>
-          {{ section.warning }}
-        </p>
-        <p v-if="section.tip" class="guide-note">
-          <strong>{{ content.ui.tip }}</strong>
-          {{ section.tip }}
-        </p>
-
-        <div v-if="section.figures" class="guide-figures">
-          <figure v-for="figure in section.figures" :key="figure.image">
-            <img
-                :src="IMAGES[figure.image].src"
-                :width="IMAGES[figure.image].width"
-                :height="IMAGES[figure.image].height"
-                :alt="figure.caption"
-                loading="lazy"
-                decoding="async"
-            >
-            <figcaption aria-hidden="true">{{ figure.caption }}</figcaption>
-          </figure>
-        </div>
-      </section>
-    </div>
-
-    <section v-if="topic.links.length" class="guide-topic__block" aria-labelledby="guide-read-more">
-      <h2 id="guide-read-more" class="arc-h4">{{ content.ui.readMore }}</h2>
-      <ul class="arc-rows guide-links">
-        <li v-for="link in topic.links" :key="link.label + (link.wiki ?? link.to)" class="arc-row">
-          <a
-              v-if="link.wiki"
-              :href="wikiUrl(link.wiki, currentLanguage)"
-              class="guide-links__item"
-              target="_blank"
-              rel="noopener noreferrer"
-          >
-            <span>{{ link.label }}</span>
-            <span class="arc-tag">{{ content.ui.wikiTitle }}</span>
-            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-            <span class="arc-sr">({{ t('header.newTab') }})</span>
-          </a>
-          <RouterLink v-else-if="link.to" :to="$lp(link.to)" class="guide-links__item">
-            <span>{{ link.label }}</span>
-            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-          </RouterLink>
-        </li>
-      </ul>
+    <section class="arc-panel guide-answer" :aria-labelledby="`${topic.id}-answer`">
+      <h2 :id="`${topic.id}-answer`" class="guide-answer__label">{{ content.ui.quickAnswer }}</h2>
+      <p>{{ topic.answer }}</p>
     </section>
 
+    <!-- phones fold the contents column away, so the sections are listed here as well -->
+    <nav class="guide-index" :aria-label="content.ui.onThisPage">
+      <p class="guide-index__label" aria-hidden="true">{{ content.ui.onThisPage }}</p>
+      <ul>
+        <li v-for="(section, index) in topic.sections" :key="section.title">
+          <a :href="`#${sectionId(topic.id, index)}`" class="arc-link">{{ section.title }}</a>
+        </li>
+      </ul>
+    </nav>
+
+    <section v-if="topic.id === 'connect'" class="guide-shots" aria-labelledby="guide-shots-label">
+      <h2 id="guide-shots-label" class="guide-shots__label">{{ content.ui.screenshotsLabel }}</h2>
+      <div class="guide-shots__grid">
+        <figure v-for="(shot, index) in SHOTS" :key="shot.key">
+          <img
+              :src="shot.src"
+              :width="shot.width"
+              :height="shot.height"
+              :alt="content.ui[shot.key]"
+              loading="lazy"
+              decoding="async"
+          >
+          <figcaption aria-hidden="true">{{ String(index + 1).padStart(2, '0') }} · {{ content.ui[shot.key] }}</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <GuideChoiceComparison v-if="topic.id === 'starter-choice'" :choices="content.starterChoices" :ui="content.ui"/>
+
+    <div class="guide-sections">
+      <template v-for="(section, index) in topic.sections" :key="section.title">
+        <section
+            :id="sectionId(topic.id, index)"
+            class="arc-prose guide-section"
+            :aria-labelledby="`${sectionId(topic.id, index)}-title`"
+        >
+          <h2 :id="`${sectionId(topic.id, index)}-title`">{{ section.title }}</h2>
+
+          <p v-for="paragraph in section.paragraphs" :key="paragraph">{{ paragraph }}</p>
+
+          <ul v-if="section.bullets">
+            <li v-for="bullet in section.bullets" :key="bullet">{{ bullet }}</li>
+          </ul>
+
+          <ol v-if="section.steps">
+            <li v-for="step in section.steps" :key="step">{{ step }}</li>
+          </ol>
+
+          <!-- the command is each row's header, so the table needs no column titles -->
+          <div v-if="section.commands" class="arc-table-wrap">
+            <table class="arc-table guide-commands">
+              <tbody>
+                <tr v-for="command in section.commands" :key="command.command">
+                  <th scope="row"><code>{{ command.command }}</code></th>
+                  <td>{{ command.purpose }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p v-if="section.warning" class="guide-note guide-note--warning">
+            <strong>{{ content.ui.commonMistake }}</strong>
+            {{ section.warning }}
+          </p>
+          <p v-if="section.tip" class="guide-note">
+            <strong>{{ content.ui.usefulTip }}</strong>
+            {{ section.tip }}
+          </p>
+        </section>
+
+        <!-- the optional client belongs beside "no client mods are required" -->
+        <GuideCoiLinks v-if="topic.id === 'connect' && index === 0" class="arc-panel guide-topic__coi"/>
+      </template>
+    </div>
+
     <section v-if="related.length" class="guide-topic__block" aria-labelledby="guide-read-next">
-      <h2 id="guide-read-next" class="arc-h4">{{ content.ui.readNext }}</h2>
+      <h2 id="guide-read-next" class="arc-h4">{{ content.ui.relatedTopics }}</h2>
       <ul class="arc-grid guide-next">
         <li v-for="next in related" :key="next.id">
           <RouterLink :to="$lp(`/guide/${next.id}`)" class="arc-panel arc-panel--link guide-next__item">
             <span class="guide-next__title">
+              <i :class="next.icon" class="guide-next__icon" aria-hidden="true"></i>
               {{ next.shortTitle }}
-              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              <i class="fa-solid fa-arrow-right guide-next__arrow" aria-hidden="true"></i>
             </span>
             <span class="guide-next__body">{{ next.summary }}</span>
           </RouterLink>
@@ -110,29 +102,24 @@
 <script lang="ts" setup>
 import {computed} from "vue";
 import GuideChoiceComparison from "./GuideChoiceComparison.vue";
-import GuideJoin from "./GuideJoin.vue";
+import GuideCoiLinks from "./GuideCoiLinks.vue";
 import {sectionId} from "./sectionId";
-import {useI18n} from "@/composables/useI18n";
-import {type GuideContent, type GuideImage, type GuideTopic, wikiUrl} from "@/data/guideContent";
+import type {GuideContent, GuideTopic} from "@/data/guideContent";
 import ipShot from "@/assets/images/guide/ip.webp";
 import joinShot from "@/assets/images/guide/join.webp";
 import portalShot from "@/assets/images/guide/portal.webp";
-import verifyShot from "@/assets/images/guide/verify.webp";
 
 const props = defineProps<{
   content: GuideContent;
   topic: GuideTopic;
 }>();
 
-const {t, currentLanguage} = useI18n();
-
-/* the screenshots' real sizes, so the page doesn't jump as they load */
-const IMAGES: Record<GuideImage, {src: string; width: number; height: number}> = {
-  ip: {src: ipShot, width: 606, height: 259},
-  join: {src: joinShot, width: 652, height: 186},
-  portal: {src: portalShot, width: 447, height: 244},
-  verify: {src: verifyShot, width: 947, height: 423},
-};
+/* the joining screenshots in the order a player meets them, at their real sizes so nothing jumps */
+const SHOTS = [
+  {key: "screenshotIp", src: ipShot, width: 606, height: 259},
+  {key: "screenshotJoin", src: joinShot, width: 652, height: 186},
+  {key: "screenshotPortal", src: portalShot, width: 447, height: 244},
+] as const;
 
 const related = computed(() => props.topic.related
     .map(id => props.content.topics.find(topic => topic.id === id))
@@ -144,9 +131,83 @@ const related = computed(() => props.topic.related
   margin-top: var(--arc-block-gap);
 }
 
-.guide-topic__join + .guide-topic__prose,
-.guide-choices + .guide-topic__prose {
-  margin-top: var(--arc-head-gap);
+.guide-topic > .guide-answer + *,
+.guide-topic > .guide-index + * {
+  margin-top: var(--arc-group-gap);
+}
+
+/* the quick answer: the one paragraph to read if nothing else */
+.guide-answer {
+  max-width: var(--arc-measure);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
+}
+
+.guide-answer__label,
+.guide-shots__label,
+.guide-index__label {
+  margin: 0;
+  color: var(--arc-muted);
+  font-family: var(--arc-body);
+  font-size: var(--arc-fs-caption);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.guide-answer p {
+  margin: 8px 0 0;
+  font-size: var(--arc-fs-lede);
+  line-height: 1.6;
+}
+
+/* on this page: phones only; wide screens have the contents column */
+.guide-index {
+  display: none;
+}
+
+.guide-index ul {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-index a {
+  display: inline-block;
+  padding: 2px 0;
+}
+
+@media (max-width: 900px) {
+  .guide-index {
+    display: block;
+  }
+}
+
+.guide-shots__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  align-items: start;
+  gap: var(--arc-grid-gap);
+  margin-top: 12px;
+}
+
+.guide-shots figure {
+  margin: 0;
+}
+
+.guide-shots img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--arc-r-md);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.guide-shots figcaption {
+  margin-top: 8px;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-caption);
+  line-height: 1.4;
 }
 
 /* each section starts below the sticky header when reached from the contents */
@@ -154,29 +215,35 @@ const related = computed(() => props.topic.related
   scroll-margin-top: calc(var(--site-header-stack, 106px) + 24px);
 }
 
-.guide-section:first-child > h2 {
-  margin-top: 0;
+.guide-sections > * + * {
+  margin-top: 2.4em;
 }
 
 .guide-section > h2 {
-  margin-top: 1.9em;
+  margin-top: 0;
 }
 
-.guide-topic__prose .arc-table-wrap {
+.guide-topic__coi {
+  max-width: var(--arc-measure);
+}
+
+.guide-section .arc-table-wrap {
   margin-top: 1em;
 }
 
+.guide-commands th {
+  width: 40%;
+  font-weight: 400;
+  text-align: left;
+  vertical-align: top;
+}
+
 .guide-commands code {
-  /* the site's one family, as the homepage sets its address; no system monospace */
   font-family: var(--arc-mono);
   font-weight: 600;
   white-space: nowrap;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-}
-
-.guide-commands td:first-child {
-  width: 40%;
 }
 
 /* phones: commands wrap rather than push the table sideways */
@@ -191,7 +258,7 @@ const related = computed(() => props.topic.related
   }
 }
 
-/* a warning or a tip: an edge in the warning colour or the accent, the label in ink */
+/* a mistake or a tip: an edge in the warning colour or the accent, the label in ink */
 .guide-note {
   padding: 4px 0 4px 18px;
   border-left: var(--arc-bw-accent) solid var(--arc-line-acc);
@@ -205,76 +272,11 @@ const related = computed(() => props.topic.related
   margin-right: 6px;
 }
 
-.guide-figures {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-  align-items: start;
-  gap: var(--arc-grid-gap);
-  margin-top: 1.4em;
-}
-
-.guide-figures figure {
-  margin: 0;
-}
-
-.guide-figures img {
-  width: 100%;
-  height: auto;
-  border-radius: var(--arc-r-md);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-}
-
-.guide-figures figcaption {
-  margin-top: 8px;
-  color: var(--arc-muted);
-  font-size: var(--arc-fs-caption);
-  line-height: 1.4;
-}
-
-/* read more: wiki pages and site pages, one row each */
+/* continue reading */
 .guide-topic__block > .arc-h4 + * {
   margin-top: 12px;
 }
 
-.guide-links {
-  max-width: var(--arc-measure);
-}
-
-.guide-links .arc-row {
-  padding: 0;
-}
-
-.guide-links__item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 52px;
-  padding: 10px 2px;
-  color: var(--arc-ink);
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.guide-links__item > span:first-child {
-  flex: 1;
-}
-
-.guide-links__item i {
-  color: var(--arc-muted);
-  font-size: .85em;
-  transition: color .2s ease;
-}
-
-.guide-links__item:hover {
-  color: var(--acc-ink);
-}
-
-.guide-links__item:hover i {
-  color: var(--acc-ink);
-}
-
-/* read next */
 .guide-next {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   margin: 0;
@@ -292,14 +294,24 @@ const related = computed(() => props.topic.related
 .guide-next__title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   font-weight: 600;
 }
 
-.guide-next__title i {
+.guide-next__icon {
+  width: 18px;
   color: var(--acc-ink);
+  text-align: center;
+}
+
+.guide-next__arrow {
+  margin-left: auto;
+  color: var(--arc-muted);
   font-size: .85em;
+}
+
+.guide-next__item:hover .guide-next__arrow {
+  color: var(--acc-ink);
 }
 
 .guide-next__body {

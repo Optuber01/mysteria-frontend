@@ -1,45 +1,52 @@
 <template>
   <!--
-    The reader's balance and the way to add to it, with the plain answer to the question
-    players ask most: how a top-up works, and who to ask when one doesn't arrive.
+    One slim bar above the items: the reader's balance and the way to add to it. How a
+    top-up works (and who to ask when one doesn't arrive) opens under it on demand.
   -->
-  <section class="arc-panel shop-balance" aria-labelledby="shop-balance-title">
-    <div class="shop-balance__own">
-      <h2 id="shop-balance-title" class="arc-h4">{{ t('shopPage.balance.heading') }}</h2>
+  <section class="shop-balance" aria-labelledby="shop-balance-title">
+    <div class="shop-balance__bar">
+      <!-- signed out, the sentence beside it says what the bar is for -->
+      <h2 id="shop-balance-title" class="shop-balance__label" :class="{'arc-sr': !signedIn}">{{ t('shopPage.balance.heading') }}</h2>
 
       <template v-if="signedIn">
         <p class="shop-balance__amount">
           <IconMark class="shop-balance__mark" aria-hidden="true"/>
           <span>{{ amountLabel }}</span>
         </p>
-        <p v-if="needsSetup" class="shop-balance__note">
-          {{ setupText[0] }}<RouterLink :to="$lp('/profile')" class="arc-link">{{ t('shopPage.balance.setupLink') }}</RouterLink>{{ setupText[1] }}
-        </p>
-        <div class="shop-balance__actions">
-          <a :href="topUpUrl" class="arc-btn arc-btn--solid arc-btn--sm" target="_blank" rel="noopener noreferrer">
-            {{ t('shopPage.balance.topUp') }}
-            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
-            <span class="arc-sr">({{ t('shopPage.newTab') }})</span>
-          </a>
-        </div>
+        <a :href="topUpUrl" class="arc-btn arc-btn--solid arc-btn--sm shop-balance__btn" target="_blank" rel="noopener noreferrer">
+          {{ t('shopPage.balance.topUp') }}
+          <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+          <span class="arc-sr">({{ t('shopPage.newTab') }})</span>
+        </a>
       </template>
 
       <template v-else>
         <p class="shop-balance__note">{{ t('shopPage.balance.signedOut') }}</p>
-        <div class="shop-balance__actions">
-          <button type="button" class="arc-btn arc-btn--solid arc-btn--sm" @click="signIn">
-            {{ t('shopPage.balance.signIn') }}
-          </button>
-        </div>
+        <button type="button" class="arc-btn arc-btn--solid arc-btn--sm shop-balance__btn" @click="signIn">
+          {{ t('shopPage.balance.signIn') }}
+        </button>
       </template>
+
+      <div class="shop-balance__help">
+        <button
+            type="button"
+            class="shop-balance__toggle"
+            :aria-expanded="open"
+            aria-controls="shop-balance-steps"
+            @click="open = !open"
+        >
+          {{ t('shopPage.balance.howTitle') }}
+          <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+        </button>
+        <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link shop-balance__more is-wide">{{ t('shopPage.balance.more') }}</RouterLink>
+      </div>
     </div>
 
-    <!-- beside the balance on wide screens; a closed disclosure on phones -->
-    <component :is="wide ? 'div' : 'details'" class="shop-balance__how">
-      <component :is="wide ? 'div' : 'summary'" class="shop-balance__summary">
-        <h3 class="shop-balance__how-title">{{ t('shopPage.balance.howTitle') }}</h3>
-        <i v-if="!wide" class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-      </component>
+    <p v-if="signedIn && needsSetup" class="shop-balance__setup">
+      {{ setupText[0] }}<RouterLink :to="$lp('/profile')" class="arc-link">{{ t('shopPage.balance.setupLink') }}</RouterLink>{{ setupText[1] }}
+    </p>
+
+    <div v-show="open" id="shop-balance-steps" class="shop-balance__how">
       <ol class="arc-rows shop-balance__steps">
         <template v-if="provider === 'bmc'">
           <li class="arc-row">{{ bmcStep }}</li>
@@ -53,15 +60,14 @@
           </span>
         </li>
       </ol>
-      <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link shop-balance__more">
-        {{ t('shopPage.balance.more') }}
-      </RouterLink>
-    </component>
+      <!-- on wide screens this link already sits in the bar -->
+      <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link shop-balance__more is-narrow">{{ t('shopPage.balance.more') }}</RouterLink>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {computed, ref} from 'vue';
 import IconMark from '@/assets/icons/IconMark.vue';
 import {useI18n} from '@/composables/useI18n';
 import {useAuthStore} from '@/stores/auth';
@@ -74,6 +80,8 @@ const authStore = useAuthStore();
 const balanceStore = useBalanceStore();
 const userStore = useUserStore();
 const {marks, provider, topUpUrl, rates} = useStorePrice();
+
+const open = ref(false);
 
 const signedIn = computed(() => authStore.isAuthenticated);
 const amountLabel = computed(() => {
@@ -97,42 +105,39 @@ const nameStep = computed(() => nickname.value
     : t('shopPage.balance.stepBmcName'));
 
 const signIn = () => authStore.openDiscordAuth();
-
-/* the steps sit open beside the balance on wide screens; on phones they fold away */
-const wide = ref(true);
-let query: MediaQueryList | null = null;
-const sync = () => (wide.value = !!query?.matches);
-onMounted(() => {
-  query = window.matchMedia('(min-width: 761px)');
-  sync();
-  query.addEventListener('change', sync);
-});
-onUnmounted(() => query?.removeEventListener('change', sync));
 </script>
 
 <style scoped>
 .shop-balance {
-  display: grid;
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-  gap: clamp(20px, 3vw, 48px);
-  align-items: start;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-raised);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
-.shop-balance__own {
-  display: grid;
-  gap: 12px;
-  justify-items: start;
+.shop-balance__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 8px 8px 16px;
+}
+
+.shop-balance__label {
+  margin: 0;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
 }
 
 .shop-balance__amount {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
-  font-size: clamp(24px, 2.2vw, 30px);
+  font-size: 18px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1.2;
 }
 
 .shop-balance__mark {
@@ -143,57 +148,91 @@ onUnmounted(() => query?.removeEventListener('change', sync));
 
 .shop-balance__note {
   margin: 0;
-  max-width: 40ch;
   color: var(--arc-muted);
   font-size: var(--arc-fs-small);
-  line-height: 1.55;
+  line-height: 1.45;
 }
 
-.shop-balance__actions {
-  margin-top: 4px;
+.shop-balance__btn {
+  min-height: 36px;
+  padding-inline: 14px;
+  font-size: 14px;
+  box-shadow: none;
 }
 
-.shop-balance__summary {
+/* the reading help sits at the bar's far end */
+.shop-balance__help {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 32px;
-  list-style: none;
+  gap: 16px;
+  margin-left: auto;
 }
 
-summary.shop-balance__summary {
+.shop-balance__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--arc-r-sm);
+  background: none;
+  color: var(--arc-ink);
+  font: inherit;
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
   cursor: pointer;
 }
 
-.shop-balance__summary::-webkit-details-marker {
-  display: none;
+.shop-balance__toggle:hover {
+  color: var(--acc-ink);
 }
 
-.shop-balance__how-title {
-  margin: 0;
-  font-size: var(--arc-fs-body);
-  font-weight: 600;
-}
-
-.shop-balance__summary i {
+.shop-balance__toggle i {
   color: var(--arc-muted);
-  font-size: 13px;
+  font-size: 11px;
   transition: transform .25s ease;
 }
 
-details.shop-balance__how[open] .shop-balance__summary i {
+.shop-balance__toggle[aria-expanded="true"] i {
   transform: rotate(180deg);
 }
 
+.shop-balance__more {
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shop-balance__more.is-wide {
+  margin-right: 8px;
+}
+
+.shop-balance__more.is-narrow {
+  display: none;
+}
+
+.shop-balance__setup {
+  margin: 0;
+  padding: 0 16px 10px;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
+}
+
+.shop-balance__how {
+  padding: 4px 16px 14px;
+  border-top: var(--arc-bw) solid var(--arc-line);
+}
+
 .shop-balance__steps {
-  margin-top: 6px;
   counter-reset: step;
 }
 
 .shop-balance__steps .arc-row {
   align-items: baseline;
   min-height: 0;
-  padding: 10px 0;
+  padding: 9px 0;
   color: color-mix(in oklab, var(--arc-ink) 86%, var(--arc-muted));
   font-size: var(--arc-fs-small);
   line-height: 1.55;
@@ -209,31 +248,39 @@ details.shop-balance__how[open] .shop-balance__summary i {
   content: counter(step);
 }
 
-.shop-balance__more {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: var(--arc-fs-small);
-  font-weight: 600;
-}
-
+/* phones: the bar wraps into two short lines; the help link moves into the steps */
 @media (max-width: 760px) {
-  .shop-balance {
-    grid-template-columns: minmax(0, 1fr);
+  .shop-balance__bar {
+    padding: 8px 8px 8px 14px;
+    gap: 6px 12px;
   }
 
+  .shop-balance__help {
+    margin-left: -10px;
+    flex-basis: 100%;
+  }
+
+  .shop-balance__note {
+    flex: 1 1 200px;
+  }
+
+  .shop-balance__more.is-wide {
+    display: none;
+  }
+
+  .shop-balance__more.is-narrow {
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .shop-balance__setup,
   .shop-balance__how {
-    padding-top: 14px;
-    border-top: var(--arc-bw) solid var(--arc-line);
-  }
-
-  .shop-balance__summary {
-    justify-content: space-between;
-    min-height: 44px;
+    padding-inline: 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shop-balance__summary i {
+  .shop-balance__toggle i {
     transition: none;
   }
 }

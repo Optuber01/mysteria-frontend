@@ -1,225 +1,163 @@
 <template>
-  <ArcPage :lede="t('staffOrder.lede')" :title="t('footer.linkStaff')">
-    <ArcState v-if="loading" kind="loading" :text="t('loading')"/>
+  <ArcPage :lede="t('staffPage.lede')" :title="t('footer.linkStaff')">
+    <section aria-labelledby="staff-reach" class="arc-panel reach">
+      <div class="reach__text">
+        <h2 id="staff-reach" class="arc-h4">{{ t('staffPage.reach.title') }}</h2>
+        <p class="arc-muted">{{ t('staffPage.reach.text') }}</p>
+      </div>
+      <div class="reach__actions">
+        <a
+            class="arc-btn arc-btn--solid arc-btn--sm"
+            href="https://discord.com/invite/jc7GSxBWgb"
+            rel="noopener noreferrer"
+            target="_blank"
+        >
+          <IconDiscord aria-hidden="true" class="arc-btn__icon"/>
+          {{ t('staffOrder.openTicket') }}
+          <span class="arc-sr">{{ t('header.newTab') }}</span>
+        </a>
+        <router-link :to="$lp('/help#support')" class="arc-btn arc-btn--ghost arc-btn--sm">
+          {{ t('staffPage.reach.howTo') }}
+        </router-link>
+      </div>
+    </section>
 
-    <div v-else class="staff">
-      <p v-if="snapshot" class="arc-muted snapshot">{{ t('staffPage.snapshotNote') }}</p>
+    <ArcState v-if="loading" :text="t('loading')" kind="loading"/>
 
-      <section
-          v-for="(group, groupIndex) in memberGroups"
-          :key="group.position"
-          :aria-labelledby="`rank-${groupIndex}`"
-      >
-        <header class="rank__head">
-          <h2 :id="`rank-${groupIndex}`" class="arc-h3">{{ group.position }}</h2>
-        </header>
-
-        <ul class="arc-panel arc-grid members">
-          <li v-for="member in group.members" :key="`${group.position}-${member.nickname}`" class="member">
-            <img
-                v-if="member.avatarUrl"
-                :alt="member.nickname"
-                :src="member.avatarUrl"
-                class="member__avatar"
-                height="48"
-                loading="lazy"
-                referrerpolicy="no-referrer"
-                width="48"
-            >
-            <span v-else aria-hidden="true" class="member__avatar member__initial">
-              {{ member.nickname.charAt(0).toUpperCase() }}
-            </span>
-            <span class="member__text">
-              <span class="member__name">{{ member.nickname }}</span>
-              <span v-if="member.also" class="arc-muted member__also">{{ member.also }}</span>
-            </span>
-          </li>
-        </ul>
-      </section>
+    <div v-else class="roster">
+      <p v-if="snapshot" class="arc-muted roster__note">{{ t('staffPage.snapshotNote') }}</p>
+      <StaffRankRow v-for="rank in ranks" :key="rank.key" :rank="rank"/>
     </div>
-
-    <aside class="arc-panel help">
-      <p>{{ t('staffOrder.helpQuestion') }}</p>
-      <a
-          class="arc-btn arc-btn--ghost arc-btn--sm"
-          href="https://discord.com/invite/jc7GSxBWgb"
-          rel="noopener noreferrer"
-          target="_blank"
-      >
-        <IconDiscord aria-hidden="true" class="arc-btn__icon"/>
-        {{ t('staffOrder.openTicket') }}
-        <span class="arc-sr">{{ t('header.newTab') }}</span>
-      </a>
-    </aside>
   </ArcPage>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, provide, ref} from "vue";
 import {useI18n} from "@/composables/useI18n";
 import {breadcrumbLd, useSeo} from "@/composables/useSeo";
 import {useAuthStore} from "@/stores/auth";
 import ArcPage from "@/components/arcana/ArcPage.vue";
 import ArcState from "@/components/arcana/ArcState.vue";
 import IconDiscord from "@/assets/icons/IconDiscord.vue";
+import StaffRankRow from "@/components/staff/StaffRankRow.vue";
+import {STAFF_CARD} from "@/components/staff/staffCard";
+import {groupByRank, type StaffEntry} from "@/components/staff/staffRoster";
+import {STAFF_SNAPSHOT} from "@/components/staff/staffSnapshot";
+import {fetchStaff} from "@/utils/api/staff";
 import type {StaffMember} from "@/types/staff";
-
-type ListedMember = StaffMember & {also?: string};
 
 const {t} = useI18n();
 const authStore = useAuthStore();
 
-/*
- * The live list needs a signed-in account (the API answers 403 to everyone else), so
- * visitors get this snapshot of the Discord staff roles, taken 2026-10-07, until the
- * endpoint is made public. Ranks run from the top down; names are Discord usernames.
- */
-const SNAPSHOT: ListedMember[] = [
-  {position: 'Owner', nickname: 'ikeepca1m'},
-  {position: 'Leader', nickname: 'king_julien26'},
-  {position: 'Developer', nickname: 'djecka1337'},
-  {position: 'Developer', nickname: 'farmerjoe6262'},
-  {position: 'Developer', nickname: 'optuber'},
-  {position: 'Developer', nickname: 'ikeabird1', also: 'Eventer'},
-  {position: 'Emissary', nickname: 'tythecanasian'},
-  {position: 'Emissary', nickname: 'just_linaaa'},
-  {position: 'Emissary', nickname: 'curativeflame70', also: 'Translator'},
-  {position: 'Herald', nickname: 'canblisticchicn'},
-  {position: 'Herald', nickname: 'thecoolaids'},
-  {position: 'Herald', nickname: 'petrichormoths'},
-  {position: 'Herald', nickname: 'sashimi0628'},
-  {position: 'Designer', nickname: 'librarianoflotm'},
-  {position: 'Translator', nickname: 'roidelle4250'},
-  {position: 'Translator', nickname: 'ahealex', also: 'Tester'},
-  ...['_a_ce', 'chamonile', 'sombie.', '.moistjesus', 'phillip3235', 'delicousriceeater', '.taygan.', 'einlumian',
-    'penguins5997', 'lesouth03', 'fish713', 'sick_weeb'].map(nickname => ({position: 'Tester', nickname})),
-].map(member => ({avatarUrl: null, ...member}));
-
-const members = ref<ListedMember[]>([]);
+const members = ref<StaffMember[] | StaffEntry[]>([]);
 const loading = ref(true);
 const snapshot = ref(false);
 
+const ranks = computed(() => groupByRank(members.value));
+
 useSeo(() => ({
   title: t("footer.linkStaff"),
-  description: t("staffOrder.lede"),
+  description: t("staffPage.lede"),
   path: "/staff",
   jsonLd: [breadcrumbLd([{name: "Home", path: "/"}, {name: "Staff", path: "/staff"}])],
 }));
 
-interface MemberGroup {
-  position: string;
-  members: ListedMember[];
-}
-
-const memberGroups = computed<MemberGroup[]>(() => {
-  const groups: MemberGroup[] = [];
-  for (const member of members.value) {
-    const lastGroup = groups[groups.length - 1];
-    if (lastGroup && lastGroup.position === member.position) {
-      lastGroup.members.push(member);
-    } else {
-      groups.push({position: member.position, members: [member]});
-    }
-  }
-  return groups;
+/* One member card open at a time, shared by every chip (see staffCard.ts). */
+const openId = ref<string | null>(null);
+const pinned = ref(false);
+provide(STAFF_CARD, {
+  openId,
+  pinned,
+  open: (id, pin) => {
+    openId.value = id;
+    pinned.value = pin;
+  },
+  close: id => {
+    if (id && openId.value !== id) return;
+    openId.value = null;
+    pinned.value = false;
+  },
 });
 
+// Escape closes the open card wherever focus or the pointer is; a tap outside it does too.
+const onKey = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && openId.value) openId.value = null;
+};
+const onPointerDown = (event: PointerEvent) => {
+  if (openId.value && !(event.target as Element | null)?.closest?.('.staff-chip.is-open')) openId.value = null;
+};
+
 /*
- * The shared API client would raise an error toast on the 403 on top of the page,
- * so this asks for the list directly and falls back to the snapshot on any failure.
+ * The live roster comes from the backend, so staff changes show up on their own. Until
+ * the endpoint is public, visitors who aren't signed in get a 403; then (and on any other
+ * failure) the page shows the snapshot with a quiet note.
  */
+const controller = new AbortController();
 const load = async () => {
   loading.value = true;
   try {
-    const token = authStore.currentToken;
-    const response = await fetch('/api/members?minPriority=4', {
-      headers: {Accept: 'application/json', ...(token ? {Authorization: `Bearer ${token}`} : {})},
-    });
-    if (!response.ok) throw new Error(`members ${response.status}`);
-    const data: unknown = await response.json();
-    if (!Array.isArray(data) || !data.length) throw new Error('members: empty');
-    members.value = data as StaffMember[];
+    const list = await fetchStaff(authStore.currentToken, controller.signal);
+    if (!list.some(member => member.nickname)) throw new Error('members: empty');
+    members.value = list;
     snapshot.value = false;
   } catch {
-    members.value = SNAPSHOT;
+    if (controller.signal.aborted) return;
+    members.value = STAFF_SNAPSHOT;
     snapshot.value = true;
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(load);
+onMounted(() => {
+  document.addEventListener('keydown', onKey);
+  document.addEventListener('pointerdown', onPointerDown);
+  void load();
+});
+
+onBeforeUnmount(() => {
+  controller.abort();
+  document.removeEventListener('keydown', onKey);
+  document.removeEventListener('pointerdown', onPointerDown);
+});
 </script>
 
 <style scoped>
-.staff {
-  display: grid;
-  gap: var(--arc-block-gap);
-}
-
-.rank__head {
-  margin-bottom: var(--arc-group-gap);
-}
-
-.members {
-  --arc-grid-min: 250px;
-  margin: 0;
-  list-style: none;
-}
-
-.member {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.member__avatar {
-  flex: none;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--arc-r-md);
-  object-fit: cover;
-  background: var(--arc-glass);
-}
-
-.member__initial {
-  display: grid;
-  place-items: center;
-  color: var(--acc-ink);
-  font-size: var(--arc-fs-h4);
-  font-weight: 600;
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-}
-
-.member__text {
-  display: grid;
-  min-width: 0;
-}
-
-.member__name {
-  overflow-wrap: anywhere;
-  font-weight: 600;
-}
-
-.member__also {
-  font-size: var(--arc-fs-caption);
-}
-
-.snapshot {
-  margin: 0 0 var(--arc-group-gap);
-  font-size: var(--arc-fs-small);
-}
-
-.help {
+.reach {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 16px 32px;
 }
 
-.help p {
+.reach__text {
+  display: grid;
+  gap: 6px;
+  max-width: 62ch;
+}
+
+.reach__text p {
   margin: 0;
+}
+
+.reach__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* the panel above sits close to the roster; the page's block gap is for whole sections */
+.arc-page > .arc-shell > .reach + * {
+  margin-top: var(--arc-head-gap);
+}
+
+.roster__note {
+  margin: 0 0 var(--arc-group-gap);
+  font-size: var(--arc-fs-small);
+}
+
+.roster > :last-child {
+  border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 </style>

@@ -1,18 +1,22 @@
 <template>
-  <ArcPage :title="pageTitle" :back="{to: $lp('/store'), label: t('servicePage.back')}">
-    <template v-if="summary" #lede>{{ summary }}</template>
+  <ArcPage>
+    <!-- the item's page keeps the store's closer rhythm: head, then the item at once -->
+    <div class="svc-page">
+      <ArcPageHead :title="pageTitle" :back="{to: $lp('/store'), label: t('servicePage.back')}">
+        <template v-if="summary" #lede>{{ summary }}</template>
+      </ArcPageHead>
 
-    <ContentLanguageNotice/>
+      <ContentLanguageNotice/>
 
-    <ArcState v-if="loading && !service" kind="loading" :text="t('servicePage.loading')"/>
+      <ArcState v-if="loading && !service" kind="loading" :text="t('servicePage.loading')"/>
 
-    <ArcState v-else-if="!service" kind="error">
-      {{ t('servicePage.notFound') }}
-      <RouterLink :to="$lp('/store')" class="arc-link">{{ t('servicePage.toStore') }}</RouterLink>
-    </ArcState>
+      <ArcState v-else-if="!service" kind="error">
+        {{ t('servicePage.notFound') }}
+        <RouterLink :to="$lp('/store')" class="arc-link">{{ t('servicePage.toStore') }}</RouterLink>
+      </ArcState>
 
-    <div v-else class="svc">
-      <div class="svc__main">
+      <div v-else class="svc">
+        <!-- a modest picture beside the text on wide screens, above it on phones -->
         <figure v-if="service.imageUrl && !imageFailed" class="svc__figure">
           <img
               :src="service.imageUrl"
@@ -26,59 +30,61 @@
           >
         </figure>
 
-        <div v-if="renderedContent" v-dompurify-html="renderedContent" class="arc-prose svc__prose"></div>
-        <template v-else>
-          <ul v-if="listed?.points?.length" class="arc-prose svc__points">
-            <li v-for="(point, index) in listed.points" :key="index">{{ point.text }}</li>
-          </ul>
-          <p class="arc-muted">{{ t('servicePage.noDescription') }}</p>
-        </template>
-      </div>
+        <div class="svc__main">
+          <div v-if="renderedContent" v-dompurify-html="renderedContent" class="arc-prose svc__prose"></div>
+          <template v-else>
+            <ul v-if="listed?.points?.length" class="arc-prose svc__points">
+              <li v-for="(point, index) in listed.points" :key="index">{{ point.text }}</li>
+            </ul>
+            <p class="arc-muted">{{ t('servicePage.noDescription') }}</p>
+          </template>
+        </div>
 
-      <!-- the order: always in reach (beside the text on wide screens, a bar at the bottom on phones) -->
-      <aside class="svc__aside" :aria-label="t('servicePage.buyLabel')">
-        <div class="arc-panel svc-buy">
-          <p class="svc-buy__price">
-            <span class="svc-buy__now">{{ price.main(unitPrice) }}</span>
-            <span v-if="price.inMarks(unitPrice)" class="svc-buy__marks">{{ price.inMarks(unitPrice) }}</span>
-          </p>
+        <!-- the order: always in reach (beside the text on wide screens, a bar at the bottom on phones) -->
+        <aside class="svc__aside" :aria-label="t('servicePage.buyLabel')">
+          <div class="arc-panel svc-buy">
+            <p class="svc-buy__price">
+              <span class="svc-buy__now">{{ price.main(unitPrice) }}</span>
+              <span v-if="price.inMarks(unitPrice)" class="svc-buy__marks">{{ price.inMarks(unitPrice) }}</span>
+            </p>
 
-          <div class="svc-buy__tags">
-            <span class="arc-tag">{{ termLabel }}</span>
-            <span v-if="giftable" class="arc-tag">
-              <i class="fa-solid fa-gift" aria-hidden="true"></i>{{ t('shopPage.giftable') }}
-            </span>
-            <span v-if="bulkable" class="arc-tag">
-              <i class="fa-solid fa-layer-group" aria-hidden="true"></i>{{ t('servicePage.bulk') }}
-            </span>
+            <div class="svc-buy__tags">
+              <span class="arc-tag">{{ termLabel }}</span>
+              <span v-if="giftable" class="arc-tag">
+                <i class="fa-solid fa-gift" aria-hidden="true"></i>{{ t('shopPage.giftable') }}
+              </span>
+              <span v-if="bulkable" class="arc-tag">
+                <i class="fa-solid fa-layer-group" aria-hidden="true"></i>{{ t('servicePage.bulk') }}
+              </span>
+            </div>
+
+            <button type="button" class="arc-btn arc-btn--solid svc-buy__action" @click="buy">
+              {{ signedIn ? t('shopPage.buy') : t('shopPage.signInToBuy') }}
+            </button>
+
+            <p class="svc-buy__balance">
+              <template v-if="signedIn">
+                {{ t('servicePage.yourBalance') }}: <strong>{{ balanceLabel }}</strong>
+                <br>
+                <a :href="price.topUpUrl.value" class="arc-link" target="_blank" rel="noopener noreferrer">
+                  {{ t('shopPage.balance.topUp') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span>
+                </a>
+                ·
+              </template>
+              <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link">{{ t('shopPage.balance.howTitle') }}</RouterLink>
+            </p>
           </div>
+        </aside>
 
-          <button type="button" class="arc-btn arc-btn--solid svc-buy__action" @click="buy">
+        <div class="svc-bar">
+          <p class="svc-bar__price">
+            <strong>{{ price.main(unitPrice) }}</strong>
+            <span v-if="price.inMarks(unitPrice)">{{ price.inMarks(unitPrice) }}</span>
+          </p>
+          <button type="button" class="arc-btn arc-btn--solid arc-btn--sm" @click="buy">
             {{ signedIn ? t('shopPage.buy') : t('shopPage.signInToBuy') }}
           </button>
-
-          <p class="svc-buy__balance">
-            <template v-if="signedIn">
-              {{ t('servicePage.yourBalance') }}: <strong>{{ balanceLabel }}</strong>
-              <br>
-              <a :href="price.topUpUrl.value" class="arc-link" target="_blank" rel="noopener noreferrer">
-                {{ t('shopPage.balance.topUp') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span>
-              </a>
-              ·
-            </template>
-            <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link">{{ t('shopPage.balance.howTitle') }}</RouterLink>
-          </p>
         </div>
-      </aside>
-
-      <div class="svc-bar">
-        <p class="svc-bar__price">
-          <strong>{{ price.main(unitPrice) }}</strong>
-          <span v-if="price.inMarks(unitPrice)">{{ price.inMarks(unitPrice) }}</span>
-        </p>
-        <button type="button" class="arc-btn arc-btn--solid arc-btn--sm" @click="buy">
-          {{ signedIn ? t('shopPage.buy') : t('shopPage.signInToBuy') }}
-        </button>
       </div>
     </div>
 
@@ -92,6 +98,7 @@ import {useRoute} from 'vue-router';
 import MarkdownIt from 'markdown-it';
 import Decimal from 'decimal.js';
 import ArcPage from '@/components/arcana/ArcPage.vue';
+import ArcPageHead from '@/components/arcana/ArcPageHead.vue';
 import ArcState from '@/components/arcana/ArcState.vue';
 import ContentLanguageNotice from '@/components/ui/ContentLanguageNotice.vue';
 import StorePurchaseDialog from '@/components/shop/StorePurchaseDialog.vue';
@@ -236,23 +243,43 @@ export default {
 </script>
 
 <style scoped>
+.svc-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(20px, 2.2vw, 28px);
+}
+
+.svc-page :deep(.arc-page-head) {
+  gap: 10px;
+}
+
+/* the item's line, kept to the size of a note */
+.svc-page :deep(.arc-page-head .arc-lede) {
+  font-size: var(--arc-fs-body);
+  line-height: 1.55;
+}
+
+/* the text in a reading column; the picture and the order beside it, the order staying
+   in reach while the text is read */
 .svc {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: clamp(28px, 4vw, 64px);
+  grid-template-areas: "text figure" "text buy";
+  grid-template-columns: minmax(0, 680px) minmax(300px, 360px);
+  grid-template-rows: auto 1fr;
+  gap: 16px clamp(28px, 4vw, 64px);
   align-items: start;
 }
 
 .svc__main {
-  display: grid;
-  gap: var(--arc-group-gap);
+  grid-area: text;
   min-width: 0;
 }
 
 .svc__figure {
+  grid-area: figure;
   margin: 0;
   overflow: hidden;
-  border-radius: var(--arc-r-lg);
+  border-radius: var(--arc-r-md);
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
   background: var(--arc-card-2);
 }
@@ -265,9 +292,17 @@ export default {
   object-fit: cover;
 }
 
-/* the text's first heading follows the picture, not a paragraph */
+/* the text's first heading sits level with the picture */
 .svc__prose > :first-child {
   margin-top: 0;
+}
+
+.svc__prose :deep(:is(h2, h3, h4)) {
+  margin-top: 1.4em;
+}
+
+.svc__prose :deep(h2) {
+  font-size: clamp(20px, 1.7vw, 24px);
 }
 
 .svc__points {
@@ -275,51 +310,67 @@ export default {
 }
 
 .svc__aside {
+  grid-area: buy;
   position: sticky;
   top: calc(var(--site-header-stack, 106px) + 16px);
 }
 
 .svc-buy {
   display: grid;
-  gap: 16px;
+  gap: 12px;
+  padding: 18px;
+  border-radius: var(--arc-r-md);
 }
 
 .svc-buy__price {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 12px;
+  gap: 2px 10px;
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
 
 .svc-buy__now {
-  font-size: clamp(28px, 2.4vw, 34px);
+  font-size: 26px;
   font-weight: 650;
   line-height: 1.1;
 }
 
 .svc-buy__marks {
   color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
 }
 
 .svc-buy__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
+}
+
+.svc-buy__tags .arc-tag {
+  gap: 5px;
+  min-height: 20px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
+
+.svc-buy__tags .arc-tag i {
+  font-size: 10px;
 }
 
 .svc-buy__action {
   width: 100%;
+  min-height: var(--arc-btn-h-sm);
 }
 
 .svc-buy__balance {
   margin: 0;
-  padding-top: 14px;
+  padding-top: 12px;
   border-top: var(--arc-bw) solid var(--arc-line);
   color: var(--arc-muted);
   font-size: var(--arc-fs-small);
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
 .svc-buy__balance strong {
@@ -335,7 +386,10 @@ export default {
    button at the bottom of the screen while the page is read */
 @media (max-width: 900px) {
   .svc {
+    grid-template-areas: "figure" "text" "buy";
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    gap: var(--arc-group-gap);
   }
 
   .svc__aside {
@@ -354,8 +408,8 @@ export default {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 10px 10px 18px;
-    border-radius: var(--arc-r-lg);
+    padding: 8px 8px 8px 16px;
+    border-radius: var(--arc-r-md);
     background: var(--arc-pop);
     box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 12px 36px var(--arc-shadow);
   }
@@ -368,7 +422,7 @@ export default {
   }
 
   .svc-bar__price strong {
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 650;
   }
 

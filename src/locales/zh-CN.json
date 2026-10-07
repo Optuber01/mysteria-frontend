@@ -181,7 +181,17 @@
     "error": "无法加载新闻。",
     "articleError": "无法加载文章。",
     "retry": "重试",
-    "back": "返回新闻"
+    "back": "返回新闻",
+    "searchLabel": "搜索新闻",
+    "searchPlaceholder": "标题或日期，例如 2026年10月",
+    "searchClear": "清除搜索",
+    "matches": "匹配结果",
+    "searching": "正在搜索全部新闻...",
+    "noResults": "没有与「{q}」匹配的内容。",
+    "noResultsHere": "这里没有与「{q}」匹配的内容，但其他类型的新闻有。",
+    "searchAll": "搜索全部新闻",
+    "latest": "最新更新日志",
+    "latestAreas": "改动涉及：{areas}"
   },
   "contentLanguageNotice": {
     "label": "语言提示",
@@ -203,8 +213,6 @@
     "ladderCost": "代价"
   },
   "staffOrder": {
-    "lede": "维持这个世界运转的管理员、监督员与建筑师。工单与申诉请在 Discord 联系他们，切勿发送私信。",
-    "helpQuestion": "需要帮助，或想举报什么？",
     "openTicket": "提交工单"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "示例",
   "playerRules": "玩家规则",
   "staffPage": {
-    "snapshotNote": "此名单截取自 2026 年 10 月，可能已过时。"
+    "snapshotNote": "实时名单未能加载，以下为 2026 年 10 月的快照。",
+    "lede": "按等级列出运营 Mysterria 的成员。选择一个名字，即可查看其职责和任职时长。",
+    "reach": {
+      "title": "需要联系管理团队？",
+      "text": "在我们的 Discord 中提交工单，它会交给负责该事务的等级处理。管理团队不通过私信处理请求。",
+      "howTo": "支持流程说明"
+    },
+    "count": {
+      "one": "{n} 人",
+      "few": "{n} 人",
+      "many": "{n} 人"
+    },
+    "card": {
+      "staffFor": "任职时长",
+      "staffSince": "任职起始",
+      "joined": "加入 Discord"
+    },
+    "ranks": {
+      "OWNER": "服务器所有者。处理付款、账号问题以及针对管理团队的举报。",
+      "ADMIN": "管理服务器及其设置，拥有全部管理权限。",
+      "LEADER": "带领管理团队，裁决封禁申诉和加入团队的申请。",
+      "DEVELOPER": "开发和修复服务器的插件、机器人与网站。",
+      "EMISSARY": "负责有关漏洞和技术问题的工单。",
+      "MODERATOR": "维护聊天和服务器秩序并回复工单，可以发出警告和临时封禁。",
+      "HERALD": "最先回复有关玩法和游戏内问题的工单。",
+      "DESIGNER": "负责服务器的美术和视觉设计。",
+      "TRANSLATOR": "翻译服务器和网站。",
+      "TESTER": "在新功能上线前先行试用。",
+      "EVENTER": "策划并主持服务器活动。"
+    }
   },
   "dailyBonusCatTitle": "一阵奇异的共鸣……",
   "dailyBonusCatAlt": "一只神秘的猫",
@@ -1099,7 +1136,10 @@
   "loginPage": {
     "title": "登录 Mysterria",
     "redirectHost": "登录后将返回 {host}。",
-    "redirectGeneric": "登录后将自动跳转。"
+    "redirectGeneric": "登录后将自动跳转。",
+    "lede": "使用 Discord 登录，绑定你的 Minecraft 账号。绑定后的账号可以领取每日奖励，并在商店购买物品。",
+    "helpLead": "不确定绑定如何进行？",
+    "helpLink": "查看绑定方法"
   },
   "logoutPage": {
     "lede": "在此设备上登出。"
@@ -1347,5 +1387,19 @@
       "title": "COI Client",
       "body": "为 Mysterria 打造的可选 Fabric 模组。它提供非凡者界面，带有能力快捷键和仪式视觉效果，不装它游戏的所有内容也都能正常运行。目前有适用于 26.1.2 和 26.2 的版本。"
     }
+  },
+  "guidePage": {
+    "joinNoMods": "无需任何客户端模组",
+    "joinBedrock": "通过 Geyser 支持基岩版",
+    "joinFree": "永久免费游玩",
+    "joinCompanion": "想要视觉效果？获取 COI 客户端",
+    "checklistEyebrow": "最初一小时",
+    "checklistTitle": "从服务器列表到你的第一个目标，共六步",
+    "checklistLede": "边做边勾选--进度会保存在这台设备上。",
+    "checklistProgress": "进度",
+    "topicsCount": "个主题",
+    "noTopics": "没有主题符合该关键词。请浏览下方全部内容。",
+    "browseAll": "浏览所有主要系统",
+    "coiClient": "下载 COI 客户端"
   }
 }

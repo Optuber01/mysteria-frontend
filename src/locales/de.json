@@ -181,7 +181,17 @@
     "error": "Die Neuigkeiten konnten nicht geladen werden.",
     "articleError": "Der Artikel konnte nicht geladen werden.",
     "retry": "Erneut versuchen",
-    "back": "Zurück zu den Neuigkeiten"
+    "back": "Zurück zu den Neuigkeiten",
+    "searchLabel": "Neuigkeiten durchsuchen",
+    "searchPlaceholder": "Titel oder Datum, zum Beispiel Oktober 2026",
+    "searchClear": "Suche löschen",
+    "matches": "Treffer",
+    "searching": "Alle Neuigkeiten werden durchsucht ...",
+    "noResults": "Zu „{q}“ gibt es keine Treffer.",
+    "noResultsHere": "Zu „{q}“ gibt es hier keine Treffer, aber in anderen Neuigkeiten.",
+    "searchAll": "In allen Neuigkeiten suchen",
+    "latest": "Neuester Changelog",
+    "latestAreas": "Änderungen an {areas}"
   },
   "contentLanguageNotice": {
     "label": "Sprachhinweis",
@@ -203,8 +213,6 @@
     "ladderCost": "Kosten"
   },
   "staffOrder": {
-    "lede": "Die Administratoren, Moderatoren und Baumeister, die die Welt am Laufen halten. Erreiche sie auf Discord für Tickets und Einsprüche, niemals per DM.",
-    "helpQuestion": "Brauchst du Hilfe oder möchtest du etwas melden?",
     "openTicket": "Ticket öffnen"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "Beispiele",
   "playerRules": "Spielerregeln",
   "staffPage": {
-    "snapshotNote": "Diese Liste ist ein Stand vom Oktober 2026 und kann veraltet sein."
+    "snapshotNote": "Die aktuelle Liste wurde nicht geladen, daher ist das ein Stand vom Oktober 2026.",
+    "lede": "Wer Mysterria betreibt, nach Rang. Wähle einen Namen, um zu sehen, was die Person macht und wie lange sie schon im Team ist.",
+    "reach": {
+      "title": "Brauchst du jemanden aus dem Team?",
+      "text": "Öffne ein Ticket in unserem Discord, dann landet es beim zuständigen Rang. Per Direktnachricht nimmt das Team keine Anfragen an.",
+      "howTo": "So funktioniert der Support"
+    },
+    "count": {
+      "one": "{n} Person",
+      "few": "{n} Personen",
+      "many": "{n} Personen"
+    },
+    "card": {
+      "staffFor": "Im Team",
+      "staffSince": "Im Team seit",
+      "joined": "Im Discord seit"
+    },
+    "ranks": {
+      "OWNER": "Besitzt den Server. Kümmert sich um Zahlungen, Kontoprobleme und Meldungen über Teammitglieder.",
+      "ADMIN": "Betreibt den Server und seine Einstellungen, mit allen Teamrechten.",
+      "LEADER": "Leitet das Team und entscheidet über Entbannungsanträge und Bewerbungen.",
+      "DEVELOPER": "Baut und repariert die Plugins, den Bot und die Website des Servers.",
+      "EMISSARY": "Übernimmt die Tickets zu Bugs und technischen Problemen.",
+      "MODERATOR": "Sorgt für Ordnung im Chat und auf dem Server und beantwortet Tickets. Kann verwarnen und zeitlich begrenzte Banns vergeben.",
+      "HERALD": "Antwortet als Erstes auf Tickets zum Spielgeschehen und zu Problemen im Spiel.",
+      "DESIGNER": "Gestaltet die Grafik und das Erscheinungsbild des Servers.",
+      "TRANSLATOR": "Übersetzt den Server und die Website.",
+      "TESTER": "Probiert neue Funktionen aus, bevor sie auf den Server kommen.",
+      "EVENTER": "Plant und leitet Events auf dem Server."
+    }
   },
   "dailyBonusCatTitle": "Eine seltsame Resonanz…",
   "dailyBonusCatAlt": "Eine geheimnisvolle Katze",
@@ -1099,7 +1136,10 @@
   "loginPage": {
     "title": "Bei Mysterria anmelden",
     "redirectHost": "Nach der Anmeldung wirst du zu {host} zurückgeleitet.",
-    "redirectGeneric": "Nach der Anmeldung wirst du weitergeleitet."
+    "redirectGeneric": "Nach der Anmeldung wirst du weitergeleitet.",
+    "lede": "Melde dich mit Discord an, um dein Minecraft-Konto zu verknüpfen. Ein verknüpftes Konto kann den täglichen Bonus abholen und im Shop einkaufen.",
+    "helpLead": "Du weißt nicht, wie das Verknüpfen funktioniert?",
+    "helpLink": "So verknüpfst du dein Konto"
   },
   "logoutPage": {
     "lede": "Auf diesem Gerät abmelden."
@@ -1347,5 +1387,19 @@
       "title": "COI Client",
       "body": "Eine optionale Fabric-Mod, gemacht für Mysterria. Sie bringt eine Beyonder-Oberfläche mit Hotkeys für Fähigkeiten und Ritual-Effekten, und das ganze Spiel funktioniert auch ohne sie. Es gibt Builds für 26.1.2 und 26.2."
     }
+  },
+  "guidePage": {
+    "joinNoMods": "Keine Client-Mods erforderlich",
+    "joinBedrock": "Bedrock wird über Geyser unterstützt",
+    "joinFree": "Kostenlos spielbar, für immer",
+    "joinCompanion": "Du möchtest die visuellen Effekte? Hol dir den COI-Client",
+    "checklistEyebrow": "Die erste Stunde",
+    "checklistTitle": "Sechs Schritte von der Serverliste zu deinem ersten Ziel",
+    "checklistLede": "Hake die Punkte unterwegs ab – dein Fortschritt wird auf diesem Gerät gespeichert.",
+    "checklistProgress": "Fortschritt",
+    "topicsCount": "Themen",
+    "noTopics": "Kein Thema passt zu dieser Suche. Durchsuche unten alle Themen.",
+    "browseAll": "Alle wichtigen Systeme durchsuchen",
+    "coiClient": "Hol dir den COI-Client"
   }
 }

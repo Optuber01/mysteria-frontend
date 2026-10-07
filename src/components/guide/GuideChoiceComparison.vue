@@ -11,6 +11,8 @@
         <h3 class="arc-h4">{{ choice.name }}</h3>
         <span v-if="choice.recommended" class="arc-tag arc-tag--acc">{{ ui.recommended }}</span>
       </header>
+      <!-- what the choice is for, under its name rather than as a label above it -->
+      <p class="guide-choice__line">{{ choice.eyebrow }}</p>
       <dl class="guide-choice__terms">
         <div>
           <dt>{{ ui.benefit }}</dt>
@@ -54,6 +56,13 @@ defineProps<{
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.guide-choice__line {
+  margin: 6px 0 0;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-caption);
+  font-weight: 600;
 }
 
 .guide-choice__terms {

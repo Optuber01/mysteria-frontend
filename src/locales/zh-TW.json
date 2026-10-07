@@ -181,7 +181,17 @@
     "error": "無法載入新聞。",
     "articleError": "無法載入文章。",
     "retry": "重試",
-    "back": "返回新聞"
+    "back": "返回新聞",
+    "searchLabel": "搜尋新聞",
+    "searchPlaceholder": "標題或日期，例如 2026年10月",
+    "searchClear": "清除搜尋",
+    "matches": "符合結果",
+    "searching": "正在搜尋全部新聞...",
+    "noResults": "沒有與「{q}」相符的內容。",
+    "noResultsHere": "這裡沒有與「{q}」相符的內容，但其他類型的新聞有。",
+    "searchAll": "搜尋全部新聞",
+    "latest": "最新更新日誌",
+    "latestAreas": "變更涉及：{areas}"
   },
   "contentLanguageNotice": {
     "label": "語言提示",
@@ -203,8 +213,6 @@
     "ladderCost": "代價"
   },
   "staffOrder": {
-    "lede": "維持這個世界運轉的管理員、監督員與建築師。工單與申訴請在 Discord 聯絡他們，切勿傳送私訊。",
-    "helpQuestion": "需要幫助，或想舉報什麼？",
     "openTicket": "提交工單"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "示例",
   "playerRules": "玩家規則",
   "staffPage": {
-    "snapshotNote": "此名單截取自 2026 年 10 月，可能已過時。"
+    "snapshotNote": "即時名單未能載入，以下為 2026 年 10 月的快照。",
+    "lede": "依等級列出經營 Mysterria 的成員。選擇一個名字，即可查看其職責與任職時長。",
+    "reach": {
+      "title": "需要聯絡管理團隊？",
+      "text": "在我們的 Discord 中開立工單，它會交給負責該事務的等級處理。管理團隊不透過私訊處理請求。",
+      "howTo": "支援流程說明"
+    },
+    "count": {
+      "one": "{n} 人",
+      "few": "{n} 人",
+      "many": "{n} 人"
+    },
+    "card": {
+      "staffFor": "任職時長",
+      "staffSince": "任職起始",
+      "joined": "加入 Discord"
+    },
+    "ranks": {
+      "OWNER": "伺服器擁有者。處理付款、帳號問題以及針對管理團隊的檢舉。",
+      "ADMIN": "管理伺服器及其設定，擁有全部管理權限。",
+      "LEADER": "帶領管理團隊，裁決封鎖申訴與加入團隊的申請。",
+      "DEVELOPER": "開發與修復伺服器的外掛、機器人和網站。",
+      "EMISSARY": "負責有關漏洞與技術問題的工單。",
+      "MODERATOR": "維護聊天與伺服器秩序並回覆工單，可以發出警告與暫時封鎖。",
+      "HERALD": "最先回覆有關玩法與遊戲內問題的工單。",
+      "DESIGNER": "負責伺服器的美術與視覺設計。",
+      "TRANSLATOR": "翻譯伺服器與網站。",
+      "TESTER": "在新功能上線前搶先試用。",
+      "EVENTER": "策劃並主持伺服器活動。"
+    }
   },
   "dailyBonusCatTitle": "一陣奇異的共鳴……",
   "dailyBonusCatAlt": "一隻神秘的貓",
@@ -1108,7 +1145,10 @@
   "loginPage": {
     "title": "登入 Mysterria",
     "redirectHost": "登入後將返回 {host}。",
-    "redirectGeneric": "登入後將自動跳轉。"
+    "redirectGeneric": "登入後將自動跳轉。",
+    "lede": "使用 Discord 登入，綁定你的 Minecraft 帳號。綁定後的帳號可以領取每日獎勵，並在商店購買物品。",
+    "helpLead": "不確定綁定如何進行？",
+    "helpLink": "查看綁定方法"
   },
   "logoutPage": {
     "lede": "在此裝置上登出。"
@@ -1356,5 +1396,19 @@
       "title": "COI Client",
       "body": "為 Mysterria 打造的選用 Fabric 模組。它提供非凡者介面，帶有能力快捷鍵和儀式視覺效果，不裝它遊戲的所有內容也都能正常運作。目前有適用於 26.1.2 和 26.2 的版本。"
     }
+  },
+  "guidePage": {
+    "joinNoMods": "無需任何客戶端模組",
+    "joinBedrock": "透過 Geyser 支援基岩版",
+    "joinFree": "永久免費遊玩",
+    "joinCompanion": "想要視覺效果？獲取 COI 客戶端",
+    "checklistEyebrow": "最初一小時",
+    "checklistTitle": "從伺服器列表到你的第一個目標，共六步",
+    "checklistLede": "邊做邊勾選--進度會儲存在這台裝置上。",
+    "checklistProgress": "進度",
+    "topicsCount": "個主題",
+    "noTopics": "沒有主題符合該關鍵詞。請瀏覽下方全部內容。",
+    "browseAll": "瀏覽所有主要系統",
+    "coiClient": "下載 COI 客戶端"
   }
 }

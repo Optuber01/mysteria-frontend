@@ -181,7 +181,17 @@
     "error": "No se pudieron cargar las noticias.",
     "articleError": "No se pudo cargar el artículo.",
     "retry": "Reintentar",
-    "back": "Volver a las noticias"
+    "back": "Volver a las noticias",
+    "searchLabel": "Buscar noticias",
+    "searchPlaceholder": "Título o fecha, por ejemplo octubre de 2026",
+    "searchClear": "Borrar la búsqueda",
+    "matches": "Resultados",
+    "searching": "Buscando en todas las noticias...",
+    "noResults": "Nada coincide con «{q}».",
+    "noResultsHere": "Aquí nada coincide con «{q}», pero sí otras noticias.",
+    "searchAll": "Buscar en todas las noticias",
+    "latest": "Último registro de cambios",
+    "latestAreas": "Cambios en {areas}"
   },
   "contentLanguageNotice": {
     "label": "Aviso de idioma",
@@ -203,8 +213,6 @@
     "ladderCost": "Coste"
   },
   "staffOrder": {
-    "lede": "Administradores, moderadores y constructores que mantienen el mundo en marcha. Contáctalos por Discord para tickets y apelaciones, nunca por MD.",
-    "helpQuestion": "¿Necesitas ayuda o quieres reportar algo?",
     "openTicket": "Abrir un ticket"
   },
   "pathwaysPage": {
@@ -416,7 +424,36 @@
   "examples": "Ejemplos",
   "playerRules": "Reglas de jugadores",
   "staffPage": {
-    "snapshotNote": "Esta lista es una instantánea de octubre de 2026 y puede estar desactualizada."
+    "snapshotNote": "La lista en directo no se cargó, así que esta es una copia de octubre de 2026.",
+    "lede": "Quién lleva Mysterria, por rango. Elige un nombre para ver qué hace y cuánto tiempo lleva en el equipo.",
+    "reach": {
+      "title": "¿Necesitas a alguien del equipo?",
+      "text": "Abre un ticket en nuestro Discord y llegará al rango que se encarga de ello. El equipo no atiende solicitudes por mensaje directo.",
+      "howTo": "Cómo funciona el soporte"
+    },
+    "count": {
+      "one": "{n} persona",
+      "few": "{n} personas",
+      "many": "{n} personas"
+    },
+    "card": {
+      "staffFor": "Tiempo en el equipo",
+      "staffSince": "En el equipo desde",
+      "joined": "En Discord desde"
+    },
+    "ranks": {
+      "OWNER": "Dueño del servidor. Se ocupa de pagos, problemas de cuenta y denuncias sobre el equipo.",
+      "ADMIN": "Gestiona el servidor y su configuración, con todos los permisos del equipo.",
+      "LEADER": "Dirige el equipo y decide las apelaciones de baneo y las solicitudes para unirse al equipo.",
+      "DEVELOPER": "Crea y arregla los plugins, el bot y la web del servidor.",
+      "EMISSARY": "Atiende los tickets sobre errores y problemas técnicos.",
+      "MODERATOR": "Mantiene el orden en el chat y en el servidor y responde tickets. Puede dar advertencias y baneos temporales.",
+      "HERALD": "El primero en responder tickets sobre el juego y problemas dentro de él.",
+      "DESIGNER": "Crea el arte y el aspecto visual del servidor.",
+      "TRANSLATOR": "Traduce el servidor y la web.",
+      "TESTER": "Prueba las novedades antes de que lleguen al servidor.",
+      "EVENTER": "Planea y dirige los eventos del servidor."
+    }
   },
   "dailyBonusCatTitle": "Una extraña resonancia...",
   "dailyBonusCatAlt": "Un gato misterioso",
@@ -1099,7 +1136,10 @@
   "loginPage": {
     "title": "Inicia sesión en Mysterria",
     "redirectHost": "Tras iniciar sesión volverás a {host}.",
-    "redirectGeneric": "Tras iniciar sesión serás redirigido."
+    "redirectGeneric": "Tras iniciar sesión serás redirigido.",
+    "lede": "Inicia sesión con Discord para vincular tu cuenta de Minecraft. Una cuenta vinculada puede reclamar la recompensa diaria y comprar en la tienda.",
+    "helpLead": "¿No sabes cómo funciona la vinculación?",
+    "helpLink": "Lee cómo vincular tu cuenta"
   },
   "logoutPage": {
     "lede": "Cerrar sesión en este dispositivo."
@@ -1347,5 +1387,19 @@
       "title": "COI Client",
       "body": "Un mod opcional de Fabric hecho para Mysterria. Añade una interfaz de Trascendente con atajos para las habilidades y efectos de rituales, y todo el juego funciona igual sin él. Hay versiones para 26.1.2 y 26.2."
     }
+  },
+  "guidePage": {
+    "joinNoMods": "No se requieren mods de cliente",
+    "joinBedrock": "Bedrock compatible mediante Geyser",
+    "joinFree": "Gratis para jugar, para siempre",
+    "joinCompanion": "¿Quieres los efectos visuales? Obtén el Cliente COI",
+    "checklistEyebrow": "La primera hora",
+    "checklistTitle": "Seis pasos desde la lista de servidores hasta tu primer objetivo",
+    "checklistLede": "Márcalos mientras avanzas: tu progreso se guarda en este dispositivo.",
+    "checklistProgress": "Progreso",
+    "topicsCount": "temas",
+    "noTopics": "Ningún tema coincide con esa frase. Explora todo lo que hay abajo.",
+    "browseAll": "Explora cada sistema principal",
+    "coiClient": "Descarga el Cliente COI"
   }
 }

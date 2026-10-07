@@ -1,22 +1,22 @@
 <template>
   <!-- A popup of its own (Discord sends the reader back here), so no site header or footer. -->
   <main id="main-content" class="callback">
-    <div class="arc-panel callback__panel" :aria-busy="isProcessing">
+    <ArcGateCard class="callback__panel" :aria-busy="isProcessing">
       <template v-if="isProcessing">
         <span aria-hidden="true" class="callback__spinner"></span>
-        <h1 class="arc-h4" role="status">{{ t('authCallback.processing') }}</h1>
+        <h1 class="arc-h3" role="status">{{ t('authCallback.processing') }}</h1>
       </template>
       <template v-else-if="error">
-        <h1 class="arc-h4 callback__bad" role="alert">{{ t('authCallback.authError') }}</h1>
+        <h1 class="arc-h3 callback__bad" role="alert">{{ t('authCallback.authError') }}</h1>
         <p class="arc-muted">{{ error }}</p>
         <button class="arc-btn arc-btn--solid" type="button" @click="closeWindow">{{ t('close') }}</button>
       </template>
       <template v-else>
-        <h1 class="arc-h4 callback__ok">{{ t('authCallback.authSuccess') }}</h1>
+        <h1 class="arc-h3 callback__ok">{{ t('authCallback.authSuccess') }}</h1>
         <p class="arc-muted">{{ t('authCallback.closeWindow') }}</p>
         <button class="arc-btn arc-btn--solid" type="button" @click="closeWindow">{{ t('close') }}</button>
       </template>
-    </div>
+    </ArcGateCard>
   </main>
 </template>
 
@@ -26,6 +26,7 @@ import {useRoute} from "vue-router";
 import {useAuthStore} from "@/stores/auth";
 import {useI18n} from "@/composables/useI18n";
 import {isAllowedRedirectUrl} from "@/utils/redirectGuard";
+import ArcGateCard from "@/components/arcana/ArcGateCard.vue";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -126,24 +127,13 @@ const closeWindow = () => {
 .callback {
   display: grid;
   place-items: center;
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: var(--arc-gutter);
   background: var(--arc-bg);
   color: var(--arc-ink);
   font-family: var(--arc-body);
 }
 
-.callback__panel {
-  display: grid;
-  justify-items: center;
-  gap: 16px;
-  width: min(100%, 420px);
-  text-align: center;
-}
-
-.callback__panel p {
-  margin: 0;
-}
 
 .callback__ok {
   color: var(--arc-ok);
