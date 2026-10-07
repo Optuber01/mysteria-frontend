@@ -549,6 +549,17 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   opacity: 0;
 }
 
+/* the hero's tints, keyed by accent: the same length as the recolour crossfade */
+.arc-tint-enter-active,
+.arc-tint-leave-active {
+  transition: opacity .65s cubic-bezier(.4, 0, .2, 1);
+}
+
+.arc-tint-enter-from,
+.arc-tint-leave-to {
+  opacity: 0;
+}
+
 .arc-ambient__grain {
   position: absolute;
   inset: 0;
@@ -864,7 +875,9 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   }
 
   .arc-wash-enter-active,
-  .arc-wash-leave-active {
+  .arc-wash-leave-active,
+  .arc-tint-enter-active,
+  .arc-tint-leave-active {
     transition: opacity .3s ease;
   }
 }

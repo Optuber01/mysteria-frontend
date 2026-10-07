@@ -59,7 +59,9 @@
             @pointerup="onStageRelease"
             @pointercancel="onStageRelease"
         >
-          <i class="arc-stage__backlight" aria-hidden="true" data-recolour></i>
+          <Transition name="arc-tint">
+            <i :key="card.accent" class="arc-stage__backlight" :style="{'--acc': card.accent}" aria-hidden="true"></i>
+          </Transition>
           <svg class="arc-stage__orbit" :viewBox="`0 0 200 200`" aria-hidden="true">
             <circle cx="100" cy="100" r="99" fill="none" stroke="currentColor" stroke-width=".35" opacity=".5"/>
             <g stroke="currentColor" stroke-width=".5" opacity=".55">
@@ -161,7 +163,7 @@ import {useLatestNews} from './useLatestNews';
 import {useI18n} from '@/composables/useI18n';
 
 const {t, intlLocale} = useI18n();
-const {currentId, hasDrawn, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
+const {card, currentId, hasDrawn, readingFor, nameOf, seq9Of, reveal, registerDealer} = useArcana();
 
 /* ---------------- headline: what this is, the same before and after a draw ---------------- */
 const titleA = computed(() => t('home.arcana.hero.titleA'));

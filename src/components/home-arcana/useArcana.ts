@@ -68,37 +68,37 @@ export function ensurePathwayData() {
  * Chrome clears :hover inside everything a View Transition captures, so capturing the whole
  * page dropped the hovered card or button for the length of the crossfade (it fell back and
  * jumped up again). The page is captured region by region instead (header, each section,
- * footer...), all but the one under the hand: that region stays live and keeps its hover.
- * Its decorative layers whose accent lives in gradients (`data-recolour`, none of them
- * hoverable) still crossfade; its own colours switch as the card lands.
+ * footer...), all but the one under the hand, which stays live and keeps its hover.
+ * A captured element is drawn above everything that is not, so nothing that overlaps the
+ * live region may be captured: not the page's ambient layer (it crossfades itself,
+ * ArcanaHome), nothing inside the live region, and no region over or under it on screen
+ * (the fixed header over the hero, the deck control): those stay live with it. The hero's large tints crossfade themselves too
+ * (keyed copies, `arc-tint`), so whichever region is live, its sky does not snap.
  */
 type Recolour = {finished: Promise<void>; skipTransition?: () => void};
 type TransitionDocument = Document & {startViewTransition?: (update: () => Promise<void>) => Recolour};
 let recolour: Recolour | null = null;
 
-const REGIONS = '.concept-arcana > :not(.arc-main), .concept-arcana > .arc-main > *';
+const REGIONS = '.concept-arcana > :not(.arc-main, .arc-ambient), .concept-arcana > .arc-main > *';
 
-/** Names what the crossfade captures (only what is on screen); returns how to unname it. */
+/** Names the regions the crossfade captures (on screen, not under the hand); returns how to unname them. */
 function nameRegions(): () => void {
-  const named: HTMLElement[] = [];
   const vh = window.innerHeight;
-  const onScreen = (el: HTMLElement) => {
-    const r = el.getBoundingClientRect();
-    return r.bottom > 0 && r.top < vh && r.width > 0 && r.height > 0;
-  };
-  const name = (el: HTMLElement) => {
+  const regions = [...document.querySelectorAll<HTMLElement>(REGIONS)]
+      .map(el => ({el, r: el.getBoundingClientRect()}))
+      .filter(({r}) => r.bottom > 0 && r.top < vh && r.width > 0 && r.height > 0);
+  const hovered = [...document.querySelectorAll<HTMLElement>(':hover')].at(-1) ?? null;
+  const live = regions.find(({el}) => hovered && el.contains(hovered));
+  // Sections paint past their own boxes (the hero's sky runs ~350 px down behind the story,
+  // the story's backdrop ~390 px up), so neighbours count as overlapping within this reach.
+  const SPILL = 400;
+  const overlaps = (a: DOMRect, b: DOMRect) => a.left < b.right && b.left < a.right && a.top - SPILL < b.bottom && b.top - SPILL < a.bottom;
+  const named: HTMLElement[] = [];
+  for (const {el, r} of regions) {
+    if (live && (el === live.el || overlaps(r, live.r))) continue;
     el.style.setProperty('view-transition-name', `arc-region-${named.length}`);
     named.push(el);
-  };
-  const hovered = [...document.querySelectorAll<HTMLElement>(':hover')].at(-1) ?? null;
-  document.querySelectorAll<HTMLElement>(REGIONS).forEach(region => {
-    if (!onScreen(region)) return;
-    if (hovered && region.contains(hovered)) {
-      region.querySelectorAll<HTMLElement>('[data-recolour]').forEach(el => onScreen(el) && name(el));
-    } else {
-      name(region);
-    }
-  });
+  }
   return () => named.forEach(el => el.style.removeProperty('view-transition-name'));
 }
 

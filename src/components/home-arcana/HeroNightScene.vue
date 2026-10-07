@@ -5,7 +5,7 @@
     from the hero, which measures where the deck's pivot is and sets
     --moon-x/--moon-y/--moon-r and --city-* (all px, relative to the hero box).
   -->
-  <div ref="rootRef" class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true" data-recolour>
+  <div ref="rootRef" class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true">
     <!-- Everything that is far away: on the way down to the brewery it falls behind the page. -->
     <div ref="viewRef" class="night__view">
       <picture>
@@ -14,14 +14,21 @@
              drawn missing for a few frames on the way back, the scene flickering in -->
         <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="sync" width="1920" height="1080">
       </picture>
-      <i class="night__tint"></i>
+      <!-- the card's tints: keyed copies holding their own accent, so a recolour crossfades them -->
+      <Transition name="arc-tint">
+        <i :key="accent" class="night__tint" :style="{'--acc': accent}"></i>
+      </Transition>
 
       <div ref="moonBoxRef" class="night__moon">
         <div class="night__moon-rise">
           <i class="night__moon-glow"></i>
-          <i class="night__moon-corona"></i>
+          <Transition name="arc-tint">
+            <i :key="accent" class="night__moon-corona" :style="{'--acc': accent}"></i>
+          </Transition>
           <img ref="moonRef" class="night__moon-disc" :src="moon" alt="" decoding="sync" width="640" height="640" @load="moonReady = true" @error="moonReady = true">
-          <i class="night__moon-rim"></i>
+          <Transition name="arc-tint">
+            <i :key="accent" class="night__moon-rim" :style="{'--acc': accent}"></i>
+          </Transition>
         </div>
       </div>
 
@@ -43,7 +50,8 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from 'vue';
+import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {useArcana} from './useArcana';
 import sky from './assets/moon/backlund-sky.webp';
 import skySmall from './assets/moon/backlund-sky-960.webp';
 import city from './assets/moon/backlund-skyline.webp';
@@ -51,6 +59,9 @@ import citySmall from './assets/moon/backlund-skyline-960.webp';
 import moon from './assets/moon/crimson-moon.webp';
 
 defineProps<{risen: boolean}>();
+
+const {card} = useArcana();
+const accent = computed(() => card.value.accent);
 
 /* The moon only starts to rise once it is there to see. */
 const moonRef = ref<HTMLImageElement | null>(null);
