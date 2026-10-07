@@ -1138,7 +1138,7 @@ onUnmounted(() => {
   display: flex;
   gap: 14px;
   width: max-content;
-  animation: world-drift 120s linear infinite;
+  animation: world-drift 145s linear infinite;
 }
 
 .world-strip:hover .world-strip__track,
