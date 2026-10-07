@@ -255,25 +255,26 @@ body {
 }
 
 /* ---------- the shared header, the same bar on every page ---------- */
-.header-stack .header-grid {
+/* (:root keeps these above the header's and footer's own scoped styles, which they replace) */
+:root .header-stack .header-grid {
     max-width: calc(var(--arc-container) + 2 * var(--arc-gutter));
     padding-inline: var(--arc-gutter);
 }
 
-.header-stack .brand-mark,
-.footer-brand img,
-.mobile-nav .brand-mark {
+:root .header-stack .brand-mark,
+:root .footer-brand img,
+:root .mobile-nav .brand-mark {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45));
 }
 
-.header-stack .brand-name {
+:root .header-stack .brand-name {
     font-family: var(--arc-display);
     font-weight: 600;
     font-size: 17px;
     letter-spacing: .02em;
 }
 
-.header-stack .brand-tagline {
+:root .header-stack .brand-tagline {
     margin-top: 5px;
     font-family: var(--arc-body);
     font-size: 9px;
@@ -282,34 +283,34 @@ body {
     color: var(--arc-muted);
 }
 
-.header-stack .lang-label,
-.header-stack .lang-option-short {
+:root .header-stack .lang-label,
+:root .header-stack .lang-option-short {
     font-family: var(--arc-caps);
 }
 
 /* every control in the bar, the menu button included, at the card radius */
-.header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip, .mobile-nav-toggle) {
+:root .header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip, .mobile-nav-toggle) {
     min-height: 36px;
     border-radius: 10px;
 }
 
-.header-stack .header-actions :is(.ip-chip, .login-button) {
+:root .header-stack .header-actions :is(.ip-chip, .login-button) {
     padding-block: 0;
 }
 
-.header-stack .header-actions .theme-toggle {
+:root .header-stack .header-actions .theme-toggle {
     width: 36px;
     height: 36px;
 }
 
-.header-stack .nav-underline {
+:root .header-stack .nav-underline {
     height: var(--arc-bw-accent);
     border-radius: 1px;
     background: var(--acc-ink);
 }
 
-.header-stack :is(a, button):focus-visible,
-.site-footer a:focus-visible {
+:root .header-stack :is(a, button):focus-visible,
+:root .site-footer a:focus-visible {
     border-radius: 10px;
     outline: var(--arc-focus-w) solid var(--arc-ink);
     outline-offset: var(--arc-focus-off);
@@ -330,32 +331,32 @@ body {
 }
 
 /* ---------- the shared footer: part of the page, a hairline at the content's width ---------- */
-.site-footer {
+:root .site-footer {
     position: relative;
     z-index: 1;
     border-top: 0;
     background: transparent;
 }
 
-.site-footer.full {
+:root .site-footer.full {
     padding: 0 var(--arc-gutter) 36px;
 }
 
-.site-footer .footer-shell {
+:root .site-footer .footer-shell {
     max-width: var(--arc-container);
     padding-top: clamp(40px, 4vw, 56px);
     border-top: var(--arc-bw) solid var(--arc-line);
 }
 
-.site-footer .footer-columns {
+:root .site-footer .footer-columns {
     border-bottom-color: var(--arc-line);
 }
 
-.site-footer :is(.footer-copy, .footer-legal a) {
+:root .site-footer :is(.footer-copy, .footer-legal a) {
     color: var(--arc-muted);
 }
 
-.site-footer .footer-legal a:hover {
+:root .site-footer .footer-legal a:hover {
     color: var(--acc-ink);
 }
 
