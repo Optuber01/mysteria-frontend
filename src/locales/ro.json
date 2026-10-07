@@ -15,9 +15,7 @@
     "toggleNav": "Comută navigarea",
     "closeNav": "Închide navigarea",
     "themeLight": "Treci la modul luminos",
-    "themeDark": "Treci la modul întunecat",
-    "seasonHeadline": "Sezonul II tocmai a început!",
-    "seasonLink": "Citește anunțul"
+    "themeDark": "Treci la modul întunecat"
   },
   "footer": {
     "linkHelp": "Ajutor și suport",
@@ -55,21 +53,11 @@
     "circleStepTwoTitle": "Prepară și bea elixirul",
     "circleStepTwoBody": "Adună ingredientele principale, folosește cazanul și înghite-ți soarta. Abilități reale, costuri de spiritualitate - și nebunie reală dacă te grăbești.",
     "circleStepThreeTitle": "Interpretează rolul. Avansează.",
-    "circleStepThreeBody": "Digeră elixirul trăind rolul Secvenței tale. Efectuează ritualuri, completează interpretarea și urcă de la 9 → 0 de-a lungul unei călătorii de un sezon.",
     "tarotEyebrow": "Arhiva Beyonderilor",
     "tarotTitle": "Ce carte vei trage?",
     "tarotSeq": "SEQ 9",
     "tarotCta": "Deschide arhiva completă",
     "tarotCtaCount": "22 de Căi",
-    "observatoryEyebrow": "Observatorul",
-    "observatoryTitle": "O lume vie cu {count} Beyonderi",
-    "observatoryLede": "Recensământ în timp real al fiecărui jucător trezit din acest sezon – ce Căi urmează și cât de sus au urcat. Actualizat din oră în oră direct de server.",
-    "observatoryAdvanced": "Avansat (Secv. 0–3)",
-    "observatoryAverage": "Secvență medie",
-    "observatoryActive": "Căi active",
-    "observatoryPanelTitle": "Cele mai urmate Căi",
-    "observatoryPanelNote": "Acest sezon",
-    "observatoryRegistryCta": "Locurile Secvențelor 3–0 sunt limitate – vezi Registrul Ascensiunii",
     "newsEyebrow": "Din spatele Ceții Cenușii",
     "newsTitle": "Cele mai noi buletine",
     "newsAll": "Toate noutățile",
@@ -83,45 +71,68 @@
     "closingCopied": "✓ IP copiat",
     "closingDiscord": "Alătură-te Discordului"
   },
-  "companion": {
-    "eyebrow": "Companionul",
-    "title": "Clientul COI",
-    "lede": "Mysterria funcționează perfect pe un client Minecraft simplu - fiecare mecanică Beyonder se află pe server. Clientul COI este un mod mic și opțional care adaugă singurul lucru pe care clientul vanilla nu îl poate reda: magia însăși.",
-    "featureHotkeysTitle": "Lansează de la tastatură",
-    "featureHotkeysBody": "Leagă-ți abilitățile de taste rapide și lansează-le în mijlocul luptei fără să deschizi vreodată un meniu.",
-    "featureVisualsTitle": "Vezi-ți Calea",
-    "featureVisualsBody": "Cercuri ritualice, sigilii și efecte de lansare redate integral în propriul client.",
-    "featurePresenceTitle": "Auzi-o și arată-o",
-    "featurePresenceBody": "Design sonor specific serverului, plus rich presence Discord care îți afișează Secvența.",
-    "downloadEyebrow": "Obține modul",
-    "platformNote": "Cea mai nouă versiune · se instalează alături de pachetul de resurse al serverului",
-    "optionalLabel": "Opțional",
-    "optional": "Nimic de pe server nu este blocat în spatele modului și nu ți se va cere niciodată să-l instalezi. Alege platforma pe care o folosești deja – toate trei au aceeași versiune."
-  },
-  "guidePage": {
-    "joinNoMods": "Nu sunt necesare moduri de client",
-    "joinBedrock": "Bedrock acceptat prin Geyser",
-    "joinFree": "Gratuit pentru totdeauna",
-    "joinCompanion": "Vrei efectele vizuale? Obține Clientul COI",
-    "checklistEyebrow": "Prima oră",
-    "checklistTitle": "Șase pași de la lista serverelor la primul tău obiectiv",
-    "checklistLede": "Bifează-i pe parcurs - progresul tău este salvat pe acest dispozitiv.",
-    "checklistProgress": "Progres",
-    "topicsCount": "subiecte",
-    "noTopics": "Niciun subiect nu corespunde acelei expresii. Răsfoiește tot ce urmează mai jos.",
-    "browseAll": "Răsfoiește toate sistemele importante"
-  },
   "shopPage": {
-    "eyebrow": "Relicvariul",
-    "title": "Mărfurile Eternității Nopții",
-    "lede": "Susține serverul, nu cumpăra niciodată putere. Totul aici este cosmetic, comoditate sau o modalitate de a comanda o lucrare echipei - ascensiunea prin Secvențe rămâne sacră.",
-    "tabAll": "Toate mărfurile",
-    "showing": "Se afișează {shown} din {total} manifestări",
-    "giftable": "Totul poate fi dăruit altui jucător",
-    "perMonth": "Pe lună",
-    "oneTime": "O singură dată",
-    "fairPlayLabel": "Promisiunea jocului corect",
-    "fairPlay": "Nicio achiziție nu oferă putere de luptă, progres de Secvență, formule sau ingrediente. Achizițiile finanțează găzduirea și dezvoltarea pluginului Cercul Imaginației."
+    "title": "Magazin",
+    "lede": "Cumpărăturile plătesc găzduirea și pluginul Circle of Imagination. Niciuna nu dă putere de luptă, progres de Secvență, rețete sau ingrediente.",
+    "tabAll": "Toate",
+    "giftable": "Se poate dărui",
+    "tabsLabel": "Categorii",
+    "categories": {
+      "cosmetics-couriers": "Cosmetice și curieri",
+      "dungeons-items": "Temnițe și obiecte",
+      "ranks-commissions": "Ranguri și comenzi"
+    },
+    "loading": "Se încarcă magazinul…",
+    "loadFailed": "Magazinul nu s-a încărcat. Verifică-ți conexiunea și încearcă din nou.",
+    "retry": "Încearcă din nou",
+    "empty": "Încă nu e nimic în această categorie.",
+    "buy": "Cumpără",
+    "signInToBuy": "Conectează-te ca să cumperi",
+    "was": "Înainte",
+    "newTab": "se deschide într-o filă nouă",
+    "term": {
+      "oneTime": "Plată unică",
+      "monthsOne": "{n} lună",
+      "monthsFew": "{n} luni",
+      "monthsMany": "{n} de luni",
+      "yearsOne": "{n} an",
+      "yearsFew": "{n} ani",
+      "yearsMany": "{n} de ani"
+    },
+    "balance": {
+      "heading": "Sold",
+      "signedOut": "Conectează-te cu Discord ca să-ți vezi soldul și să cumperi.",
+      "signIn": "Conectează-te",
+      "topUp": "Alimentează",
+      "setup": "Înainte să cumperi, verifică-ți contul și setează-ți porecla în {link}.",
+      "setupLink": "profil",
+      "howTitle": "Cum funcționează alimentarea",
+      "stepBmc": "Plătește prin Buy Me a Coffee în dolari sau euro: 1 USD aduce {usd} Mărci, 1 EUR aduce {eur}.",
+      "stepBmcName": "Scrie ca nume de susținător porecla din joc, exact ca în joc. Plățile sunt potrivite după acest nume, nu după notă.",
+      "stepDonatello": "Plătește prin Donatello. Linkul de alimentare îți completează porecla; las-o așa.",
+      "stepCredited": "Mărcile intră în sold imediat ce trece plata.",
+      "missing": "Ai plătit, dar nu ai Mărci? {link} la Payment / Donation Issue și spune pe ce nume ai plătit și cât.",
+      "missingLink": "Deschide un tichet pe Discordul nostru",
+      "more": "Mai multe despre alimentare",
+      "stepBmcNameNick": "Scrie {nick} ca nume de susținător, exact așa. Plățile sunt potrivite după acest nume, nu după notă."
+    },
+    "purchase": {
+      "title": "Confirmă cumpărarea",
+      "each": "Preț pe bucată",
+      "quantity": "Cantitate",
+      "fewer": "Cu unul mai puțin",
+      "more": "Cu unul mai mult",
+      "gift": "Cumpără ca dar",
+      "recipient": "Destinatar",
+      "recipientPlaceholder": "Caută după poreclă",
+      "total": "Total",
+      "balance": "Soldul tău",
+      "after": "Rămân după",
+      "short": "Îți mai trebuie {amount}.",
+      "cancel": "Anulează",
+      "confirm": "Cumpără",
+      "processing": "Se cumpără…"
+    }
   },
   "profilePage": {
     "eyebrow": "Dosar Beyonder",
@@ -133,7 +144,7 @@
     "sequence": "Secvență",
     "actingProgress": "Progres de interpretare",
     "actingHint": "Digeră elixirul trăind rolul tău. La 100% poți încerca ritualul următoarei Secvențe.",
-    "climb": "Ascensiunea · 9 → 0",
+    "climb": "Secvența 9 până la 0",
     "climbed": "Urcat",
     "youAreHere": "Ești aici",
     "nextRitual": "Următorul ritual",
@@ -149,15 +160,28 @@
     "crossGuideTitle": "Avansarea s-a blocat?",
     "crossGuideBody": "Ghidul acoperă interpretarea, ritualurile și nebunia.",
     "crossPathwayTitle": "Studiază-ți Calea",
-    "crossPathwayBody": "Fiecare abilitate și fiecare Secvență de la 9 → 0, în arhivă.",
+    "crossPathwayBody": "Fiecare abilitate, de la Secvența 9 la 0.",
     "noBeyonder": "Încă nu există un dosar de Beyonder. Verifică-ți contul și bea primul elixir."
   },
   "newsPage": {
-    "eyebrow": "Din spatele Ceții Cenușii",
-    "title": "Buletine",
-    "earlier": "Buletine anterioare",
-    "season": "Season II · 2026",
-    "notFound": "Intrarea din registru nu a fost găsită sau este restricționată."
+    "title": "Noutăți",
+    "notFound": "Acest articol nu există sau nu este public.",
+    "lede": "Anunțurile fiecărei actualizări mari și arhiva jurnalelor de modificări zilnice.",
+    "filterLabel": "Tipul noutății",
+    "all": "Toate",
+    "changelogs": "Jurnale de modificări",
+    "announcements": "Anunțuri",
+    "changelog": "Jurnal de modificări",
+    "announcement": "Anunț",
+    "showMore": "Arată mai multe",
+    "loadingMore": "Se încarcă...",
+    "loading": "Se încarcă noutățile...",
+    "loadingArticle": "Se încarcă articolul...",
+    "empty": "Nu este nimic aici încă.",
+    "error": "Noutățile nu au putut fi încărcate.",
+    "articleError": "Articolul nu a putut fi încărcat.",
+    "retry": "Încearcă din nou",
+    "back": "Înapoi la noutăți"
   },
   "contentLanguageNotice": {
     "label": "Notă privind limba",
@@ -165,10 +189,8 @@
     "dismiss": "Închide această notă"
   },
   "rulesPage": {
-    "eyebrow": "Legământul",
     "lede": "Scurt, ușor de citit și aplicat cu judecată, nu cu scripturi. Când ai dubii: nu strica ziua cuiva.",
     "appeals": "Contestațiile se fac printr-un tichet Discord.",
-    "staffNote": "Acesta este legământul jucătorilor. Echipa operează sub un cod separat și mai strict, vizibil conturilor de echipă pe această pagină.",
     "warnForms": {
       "one": "avertisment",
       "few": "avertismente",
@@ -177,74 +199,64 @@
     "noWarning": "fără avertisment",
     "permanent": "permanent",
     "ladderHeading": "Cum se calculează",
-    "ladderAria": "Arată cum se calculează această regulă",
     "ladderCase": "Ce ai făcut",
     "ladderCost": "Cost"
   },
   "staffOrder": {
-    "eyebrow": "Păzitorii Ceții Cenușii",
-    "title": "Ordinul",
-    "lede": "Administratorii, moderatorii și constructorii care mențin lumea în mișcare. Contactează-i pe Discord pentru tichete și contestații - niciodată prin mesaje private.",
+    "lede": "Administratorii, moderatorii și constructorii care mențin lumea în mișcare. Contactează-i pe Discord pentru tichete și contestații, niciodată prin mesaje private.",
     "helpQuestion": "Ai nevoie de ajutor sau vrei să raportezi ceva?",
     "openTicket": "Deschide un tichet"
   },
   "pathwaysPage": {
-    "archive": "ARHIVA BEYONDER",
-    "title": "Căi și Secvențe",
-    "subtitle": "Studiază fiecare drum spre divin. Descoperă fiecare Secvență și abilitățile pe care le deblochează înainte să-ți alegi soarta.",
-    "pathways": "Căi",
-    "sequences": "Secvențe",
-    "abilities": "Abilități",
-    "search": "Caută Căi sau abilități…",
-    "allPathways": "Toate Căile",
-    "pathway": "Cale",
-    "progression": "Progresul Secvențelor · 9 → 0",
-    "seq": "SEQ",
-    "sequence": "Secvență",
-    "designation": "Denumire",
-    "noResults": "Nu s-a găsit nimic în arhivă.",
-    "noAbilities": "Nicio abilitate potrivită",
-    "trySearch": "Încearcă altă căutare sau șterge câmpul.",
-    "registryCta": "Locurile Secvențelor 3–0 sunt limitate – vezi disponibilitatea live",
-    "lastUpdated": "Ultima actualizare",
-    "dataDisclaimer": "Detaliile pot diferi ușor de versiunea actuală a jocului",
-    "searchLabel": "Caută în arhivă",
-    "clearSearch": "Șterge căutarea",
-    "groupStandard": "Căi standard",
-    "groupBoons": "Haruri"
-  },
-  "ascensionPage": {
-    "eyebrow": "REGISTRUL SECVENȚELOR ÎNALTE",
-    "title": "Tronurile Ascensiunii",
-    "subtitle": "Deasupra Secvenței 4, scara se îngustează: fiecare Cale are doar un număr limitat de Beyonderi simultan. Vezi cine a urcat și unde un tron este încă liber înainte să-ți alegi drumul.",
-    "archiveLink": "Studiază Căile în arhivă",
-    "epochTitle": "Epoca se va întoarce",
-    "epochBody": "Când începe următoarea Epocă, fiecare Beyonder este resetat și toate aceste locuri sunt eliberate. Tot ce este revendicat mai jos este păstrat doar pentru moment - odată cu noua Epocă, toți luptă din nou pentru tronuri.",
-    "seatsClaimed": "locuri revendicate",
-    "deitiesSeated": "Zeități întronate",
-    "pathwaysOpen": "Căi complet deschise",
-    "sortLabel": "Sortează Căile",
-    "sortContested": "Disputate primele",
-    "sortOpen": "Deschise primele",
-    "sortAz": "A–Z",
-    "badges": {
-      "deity": "Zeitate întronată",
-      "contested": "Disputat",
-      "open": "Toate locurile sunt libere"
+    "title": "Căi",
+    "abilities": {
+      "one": "{count} abilitate",
+      "few": "{count} abilități",
+      "many": "{count} de abilități"
     },
-    "standard": "Căi standard",
-    "boons": "Haruri",
-    "claimedShort": "revendicate",
-    "liveNote": "Numărătorile vin direct de pe server și se actualizează la câteva minute.",
-    "asOf": "La data de",
-    "errorTitle": "Registrul nu poate fi accesat",
-    "errorBody": "Recensământul nu a putut fi consultat. Încearcă din nou peste un moment.",
-    "retry": "Consultă din nou",
-    "seatWord": {
-      "one": "loc",
-      "few": "locuri",
-      "many": "locuri"
-    }
+    "noResults": "Nimic nu se potrivește cu „{query}”.",
+    "searchLabel": "Caută Căi și abilități",
+    "clearSearch": "Șterge căutarea",
+    "lede": "Secvențele fiecărei Căi, de la 9 la 0, cu fiecare abilitate așa cum o descrie jocul.",
+    "tabsLabel": "Căi și Haruri",
+    "tabCore": "Căi",
+    "tabBoons": "Haruri",
+    "boonsNote": "Un Har îți este împrumutat de un Zeu Exterior. Urcă de la Secvența 9 la 5, alături de propria ta Cale, niciodată înaintea ei.",
+    "searchPlaceholder": "De ex. Seer sau Divination",
+    "resultsPathways": "Căi",
+    "resultsAbilities": "Abilități",
+    "moreResults": "Se afișează primele {shown} din {total}. Adaugă un cuvânt ca să restrângi căutarea.",
+    "range": "Secvența 9 până la {top}",
+    "seq9": "Secvența 9: {name}",
+    "updated": "Textele abilităților au fost preluate din joc pe {date}.",
+    "ascension": "Cine ocupă locurile",
+    "wikiPathways": "Căile pe wiki",
+    "wikiBoons": "Harurile pe wiki",
+    "loading": "Se încarcă Căile…",
+    "loadError": "Căile nu s-au încărcat. Verifică-ți conexiunea și încearcă din nou.",
+    "retry": "Încearcă din nou",
+    "back": "Toate Căile",
+    "detailLede": "De la {first} în Secvența 9 până la {last} în Secvența {top}, cu {abilities} pe drum.",
+    "ladder": "Secvențe",
+    "seats": {
+      "one": "{count} loc",
+      "few": "{count} locuri",
+      "many": "{count} de locuri"
+    },
+    "throne": "Secvența 0 este un tron. Îl ocupă un singur jucător odată, care devine zeul acestei Căi.",
+    "throneLink": "Cine îl ocupă",
+    "empty": "Încă nu sunt abilități listate pentru această Secvență.",
+    "previous": "Calea anterioară",
+    "next": "Calea următoare",
+    "notFound": "Nu există nicio Cale numită „{id}”.",
+    "ranks": {
+      "0": "Zeitate",
+      "1": "Arhanghel",
+      "2": "Înger",
+      "3": "Sfânt",
+      "4": "Semizeu"
+    },
+    "sequence": "Secvența {n}"
   },
   "servicesWikiDesc": "Bază de cunoștințe și ghiduri",
   "servicesDiscord": "Discord",
@@ -266,11 +278,7 @@
   "giftable": "Poate fi dăruit",
   "bulkPurchase": "Cumpărare în masă",
   "amount": "Cantitate",
-  "buyAsGift": "Cumpără drept cadou",
   "recipient": "Destinatar",
-  "searchRecipient": "Caută după poreclă...",
-  "totalCost": "Cost total",
-  "pricePerUnit": "Preț pe unitate",
   "selectRecipient": "Selectează destinatarul...",
   "giftFrom": "Cadou de la",
   "giftSuccess": "Cadoul a fost trimis cu succes!",
@@ -308,8 +316,6 @@
   "verified": "Verificat",
   "pathway": "Cale",
   "sequence": "Secvență",
-  "pageNotFoundTitle": "Ups! Se pare că te-ai rătăcit...",
-  "pageNotFoundMessage": "Din păcate, pagina pe care o cauți nu a fost găsită. Dar nu-ți face griji, te poți întoarce oricând.",
   "goBack": "Înapoi",
   "verifyMinecraftAccount": "Verifică contul Minecraft",
   "unavailable": "Indisponibil",
@@ -383,26 +389,11 @@
     "PENALTY": "Penalizare",
     "REWARD": "Recompensă"
   },
-  "insufficientFundsMessage": "Fonduri insuficiente pentru cumpărare. Vrei să reîncarci prin",
-  "confirmPurchase": "Confirmă cumpărarea",
-  "shopLoginRequired": "Autentifică-te în contul tău pentru a accesa Magazinul!",
   "profileSetupRequired": "Te rugăm să-ți verifici contul și să-ți configurezi profilul pentru a face cumpărături",
   "itemNotFound": "Obiectul nu a fost găsit",
   "itemNotAvailable": "Acest obiect nu este disponibil momentan pentru cumpărare",
-  "noItemsFound": "Nu este oferit nimic încă în această categorie.",
-  "shopLoading": "Se încarcă magazinul...",
-  "shopLoadFailed": "Magazinul nu a putut fi încărcat",
   "tryAgain": "Încearcă din nou",
-  "serviceTypeItem": "Obiect",
-  "serviceTypePermission": "Permisiune",
-  "serviceTypeSubscription": "Abonament",
-  "serviceTypeDiscordRole": "Rol Discord",
-  "loadingService": "Se încarcă serviciul...",
   "serviceNotFound": "Obiectul nu a fost găsit",
-  "serviceNotFoundMessage": "Descrierea acestui obiect nu este încă disponibilă sau a fost mutată.",
-  "serviceContentNotCreated": "Informațiile detaliate pentru acest serviciu nu au fost încă create.",
-  "backToShop": "Înapoi la Magazin",
-  "loginToPurchase": "Autentifică-te pentru a cumpăra acest serviciu",
   "purchaseError": "Cumpărarea nu a putut fi pregătită",
   "authenticationRequired": "Autentificare necesară",
   "accessExclusiveItems": "Accesează obiecte exclusive",
@@ -418,17 +409,14 @@
   "copySuccess": "Copiat!",
   "profileTitle": "Configurează-ți profilul",
   "termsViewTitle": "Termeni de utilizare",
-  "privacyViewTitle": "Confidențialitate",
-  "slaViewTitle": "SLA",
+  "privacyViewTitle": "Politica de confidențialitate",
   "navRules": "Reguli",
-  "lawsOfMysterria": "Legile Mysterriei",
   "tableOfContents": "Cuprins",
   "staffRules": "Reguli pentru echipă",
   "examples": "Exemple",
   "playerRules": "Reguli pentru jucători",
   "staffPage": {
-    "members": "membri",
-    "loadError": "Membrii echipei nu au putut fi încărcați. Încearcă mai târziu."
+    "snapshotNote": "Această listă este un instantaneu din octombrie 2026 și poate fi depășită."
   },
   "dailyBonusCatTitle": "O rezonanță ciudată...",
   "dailyBonusCatAlt": "O pisică misterioasă",
@@ -714,7 +702,7 @@
         "sceneLabel": "Becoming a Beyonder",
         "panelSub": "{pathway}: Sequence 9",
         "abilitiesHeading": "First abilities",
-        "cta": "Game guide",
+        "cta": "How to join",
         "whisper1": "Listen.",
         "whisper2": "Remember.",
         "whisper3": "Silence.",
@@ -925,7 +913,7 @@
       },
       "incursions": {
         "title": "PvP with real stakes",
-        "body": "The open world is safe. When 30 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
+        "body": "The open world is safe. When 50 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
         "tiersLabel": "Zone colours and what dying costs",
         "tiers": {
           "green": {
@@ -1099,6 +1087,265 @@
           }
         }
       }
+    }
+  },
+  "legalPage": {
+    "updated": "Ultima actualizare"
+  },
+  "notFound": {
+    "title": "Pagina nu a fost găsită",
+    "message": "Poate adresa are o greșeală sau pagina a fost mutată."
+  },
+  "loginPage": {
+    "title": "Autentifică-te pe Mysterria",
+    "redirectHost": "După autentificare vei fi readus pe {host}.",
+    "redirectGeneric": "După autentificare vei fi redirecționat."
+  },
+  "logoutPage": {
+    "lede": "Deconectează-te de pe acest dispozitiv."
+  },
+  "ascensionPage": {
+    "title": "Locurile Secvențelor înalte",
+    "lede": "De la Secvența 3 în sus, fiecare Cale are loc doar pentru un număr limitat de Beyonderi în același timp. Iată cine ocupă fiecare loc, Cale cu Cale, și câți jucători urmează fiecare Cale. O nouă Epocă golește toate locurile.",
+    "limitsTitle": "Limite de locuri",
+    "tableTitle": "Locuri pe Căi",
+    "sortLabel": "Sortează Căile",
+    "sort": {
+      "held": "Cele mai ocupate",
+      "open": "Cele mai libere",
+      "walkers": "Cele mai urmate",
+      "az": "A la Z"
+    },
+    "colPathway": "Cale",
+    "colWalkers": "Beyonderi",
+    "noLimit": "Fără limită",
+    "perPathway": "{count} pe Cale",
+    "heldOf": "{held} din {total} ocupate",
+    "beyonders": {
+      "one": "{count} Beyonder",
+      "few": "{count} Beyonderi",
+      "many": "{count} de Beyonderi"
+    },
+    "seatsOf": "{count} din {limit} locuri ocupate",
+    "taken": "Ocupat",
+    "open": "Liber",
+    "notCounted": "Nenumărat",
+    "holders": "Deținători",
+    "holdersOf": "{pathway}: deținătorii locurilor",
+    "sequence": "Secvența {n}",
+    "openSeats": {
+      "one": "{count} liber",
+      "few": "{count} libere",
+      "many": "{count} de libere"
+    },
+    "updated": "Verificat la {time}.",
+    "walkersNote": "Numărul de Beyonderi apare doar pentru cele mai urmate opt Căi.",
+    "boonsTitle": "Haruri",
+    "boonsNote": "Harurile se opresc la Secvența 5 și nu au locuri. Beyonderi pe fiecare:",
+    "loading": "Se încarcă locurile…",
+    "error": "Numărul de locuri nu a putut fi încărcat. Încearcă din nou peste un moment.",
+    "retry": "Încearcă din nou",
+    "empty": "Nimeni nu deține încă un loc înalt în această Epocă. Toate locurile sunt libere.",
+    "recordsNote": "Numerele și numele provin din evidența jucătorilor de pe server. Pot include conturi inactive și ale echipei, deci pot diferi de numărătoarea locurilor din joc.",
+    "nobody": "Nimeni încă"
+  },
+  "servicePage": {
+    "back": "Magazin",
+    "loading": "Se încarcă…",
+    "notFoundTitle": "Articol negăsit",
+    "notFound": "Acest articol nu e în magazin sau linkul lui s-a schimbat.",
+    "toStore": "Înapoi la magazin",
+    "noDescription": "Acest articol nu are încă o descriere completă.",
+    "buyLabel": "Preț și cumpărare",
+    "bulk": "Se cumpără la bucată",
+    "yourBalance": "Soldul tău"
+  },
+  "helpPage": {
+    "title": "Ajutor",
+    "lede": "Răspunsuri la întrebările pe care jucătorii le pun cel mai des pe Discord.",
+    "seoDescription": "Cum îți conectezi contul de Minecraft, îți încarci soldul, votezi, prinzi evenimentele, deschizi un tichet și contești un ban pe Mysterria.",
+    "tocLabel": "Pe această pagină",
+    "toc": {
+      "linking": "Conectarea contului",
+      "topUps": "Încărcări",
+      "vote": "Votare",
+      "events": "Evenimente",
+      "epochs": "Epoci",
+      "support": "Suport și contestații",
+      "joining": "Cum intri",
+      "client": "COI Client"
+    },
+    "linking": {
+      "title": "Conectează-ți contul de Minecraft",
+      "intro": "Conectarea leagă contul tău de pe site de personajul din joc. Ai nevoie de ea ca să cumperi din magazin și să primești bonusul zilnic, iar pe Discord îți aduce rolul Verified.",
+      "steps": [
+        "Autentifică-te pe acest site cu Discord și deschide-ți profilul.",
+        "Apasă „Generează cod”. Codul are 8 caractere și e valabil 10 minute. Un cod nou îl înlocuiește pe cel vechi.",
+        "Intră pe server și scrie `/verify <cod>`. Dacă scrii doar `/verify`, se deschide o fereastră în care lipești codul.",
+        "Când a mers, Discord îți trimite un mesaj, iar profilul nu îți mai oferă cod."
+      ],
+      "offlineTitle": "Conturi fără licență oficială",
+      "offline": "Conturile non-premium nu pot juca până nu sunt conectate. Înregistrează-te o dată cu `/register <parolă> <parolă>`, apoi folosește `/login <parolă>` de fiecare dată când intri. Conturile oficiale sar peste acest pas.",
+      "troubleTitle": "Dacă nu merge",
+      "trouble": [
+        {
+          "term": "Nu apare butonul „Generează cod”",
+          "detail": "Contul tău e deja conectat. Butonul apare doar până la conectare."
+        },
+        {
+          "term": "Codul e respins",
+          "detail": "A expirat sau l-a înlocuit unul mai nou. Generează altul și folosește-l în 10 minute."
+        },
+        {
+          "term": "Ți-ai schimbat numele în Minecraft",
+          "detail": "Progresul din joc rămâne, dar site-ul păstrează numele cu care te-ai conectat și nu îl poate schimba. Deschide un tichet la categoria Account, iar staff-ul te deconectează ca să te poți conecta din nou. Până atunci, livrările din magazin și încărcările folosesc numele vechi."
+        },
+        {
+          "term": "Cont greșit sau deja ocupat",
+          "detail": "Un cont de Minecraft poate fi conectat la un singur cont de pe site. Dacă e conectat contul greșit sau al tău e deja ocupat, deschide un tichet la categoria Account."
+        },
+        {
+          "term": "Java și Bedrock",
+          "detail": "Ca să joci același personaj pe ambele, leagă mai întâi conturile Java și Bedrock prin GeyserMC, apoi conectează acel cont aici. Conturile separate, nelegate, contează ca alt-uri."
+        }
+      ],
+      "geyserLink": "Leagă Java și Bedrock pe GeyserMC"
+    },
+    "topUps": {
+      "title": "Încarcă-ți soldul",
+      "intro": "Magazinul vinde în Mărci, iar Mărcile se cumpără prin Buy Me a Coffee. 1 USD aduce 40 de Mărci, iar 1 EUR aduce 44.",
+      "steps": [
+        "Autentifică-te și conectează-ți mai întâi contul de Minecraft. Plățile sunt potrivite după numele conectat.",
+        "Apasă pe sold în partea de sus a site-ului, apoi pe „Reîncarcă soldul”.",
+        "Pe Buy Me a Coffee, scrie numele tău din joc în câmpul pentru nume, exact ca în joc. Mesajul nu e folosit ca să te găsim.",
+        "Plătește suma pe care vrei s-o vezi în sold. Mărcile se adaugă automat imediat ce trece plata."
+      ],
+      "missTitle": "Dacă Mărcile nu ajung",
+      "miss": "Un nume care nu se potrivește cu niciun cont nu primește nimic, iar staff-ul e anunțat. Deschide un tichet la categoria Payment / Donation Issue cu numele sub care ai plătit, suma, moneda și ora. Proprietarul verifică și adaugă Mărcile manual.",
+      "renamed": "Ți-ai schimbat numele în Minecraft? Plătește sub numele conectat până când staff-ul te conectează din nou.",
+      "donatello": "Pe versiunea ucraineană a site-ului, butonul deschide Donatello, cu numele tău deja completat.",
+      "bmcLink": "Buy Me a Coffee"
+    },
+    "vote": {
+      "title": "Votează serverul",
+      "intro": "Voturile aduc puncte Brilliant Emporium, pe care le cheltui în `/emporium`. Fiecare site primește un vot de la tine la fiecare 24 de ore.",
+      "steps": [
+        "Scrie `/vote` în joc sau deschide unul dintre site-urile de mai jos.",
+        "Scrie-ți numele din joc exact cum e. Numele de pe Bedrock încep cu un punct."
+      ],
+      "points": "{n} puncte",
+      "notCountTitle": "Dacă un vot nu se pune",
+      "notCount": "Numele trebuie să fie al unui jucător care a intrat deja pe server, scris exact ca în joc. Nici un al doilea vot pe același site în mai puțin de 24 de ore nu se pune.",
+      "more": "Punctele Emporium vin și din seria de autentificări zilnice și din rapoartele de buguri."
+    },
+    "events": {
+      "title": "Evenimente și program",
+      "intro": "Majoritatea evenimentelor pornesc singure când sunt destui jucători online, așa că nu există un program fix. Serverul le anunță în chat înainte să înceapă.",
+      "rows": [
+        {
+          "term": "Bedwars",
+          "detail": "La fiecare 5 ore, dacă sunt online cel puțin 40 de jucători. Anunțurile vin cu 60, 30 și 10 minute înainte. Scrie `/bedwars` ca să vezi când e următorul. Recompensele sunt limitate la 8 pachete pe zi."
+        },
+        {
+          "term": "Incursiunea Cosmosului",
+          "detail": "Pornește când sunt online 50 de jucători sau mai mulți, cel mult o dată la 5 ore. Durează 30 de minute, după o numărătoare inversă de 3 minute. Dacă ieși din joc înăuntru, un Hollow rămâne în locul tău 5 minute. Rezultatele apar în #events pe Discord."
+        },
+        {
+          "term": "Ancorele Zeilor Exteriori",
+          "detail": "Serverul încearcă să planteze una cam la fiecare 3 zile, cu 12 ore în plus sau în minus, când sunt online cel puțin 5 jucători. Niciuna nu pornește între 02:00 și 08:00, ora serverului. O ancoră incubează cam o zi, cu indicii în chat la fiecare 30 de minute."
+        },
+        {
+          "term": "Mareele zilnice",
+          "detail": "Un modificator pe zi, într-o rotație săptămânală de șapte. `/coi tide calendar` arată următoarele 14 zile."
+        },
+        {
+          "term": "Evenimente ale staff-ului",
+          "detail": "Concursurile de construcții, turneele, quiz-urile și vânătorile de comori sunt anunțate în #announcements pe Discord, fiecare cu regulile lui. Magazinele de eveniment se închid la data anunțată acolo."
+        }
+      ]
+    },
+    "epochs": {
+      "title": "Epoci",
+      "intro": "O epocă este o rundă a lumii. Când se termină, serverul se resetează: harta și tot progresul jucătorilor o iau de la capăt, iar conectările de pe site se șterg, așa că toată lumea se conectează din nou.",
+      "now": "Epoca I s-a încheiat pe {end}. Epoca II, cea actuală, a început pe {start}.",
+      "next": "Nu a fost anunțată o dată de final pentru Epoca II. Resetările nu urmează un calendar fix, așa că urmărește #announcements pe Discord.",
+      "carry": "Se păstrează puțin. Premiile care se păstrează spun asta când sunt acordate. Data trecută, recompensele Server Slam și o recompensă pentru deținătorii unei Unicități au trecut în Epoca II."
+    },
+    "support": {
+      "title": "Suport, reclamații și contestații",
+      "intro": "Suportul se face prin tichete pe serverul nostru de Discord. Întrebările despre cum funcționează jocul primesc adesea răspuns mai repede în ghid sau pe wiki.",
+      "steps": [
+        "Intră pe Discordul Mysterria.",
+        "Deschide #create-ticket, sau #створити-заявку pentru ajutor în ucraineană.",
+        "Alege categoria potrivită și descrie ce s-a întâmplat. Adaugă nume și ore, cu capturi de ecran dacă ai."
+      ],
+      "categoriesTitle": "Ce categorie alegi",
+      "categories": [
+        {
+          "term": "Gameplay question or issue",
+          "detail": "Ajutor cu ceva din joc."
+        },
+        {
+          "term": "Bug",
+          "detail": "Ceva din joc sau de pe site nu merge."
+        },
+        {
+          "term": "Account",
+          "detail": "Un nume nou în Minecraft, o conectare greșită sau altă problemă de cont."
+        },
+        {
+          "term": "Payment / Donation Issue",
+          "detail": "Mărci care n-au ajuns sau altă problemă cu o plată."
+        },
+        {
+          "term": "Ban appeal",
+          "detail": "Crezi că un ban ar trebui ridicat sau scurtat."
+        },
+        {
+          "term": "Staff report",
+          "detail": "O plângere despre un membru al staff-ului. Ajunge la proprietar."
+        },
+        {
+          "term": "Other",
+          "detail": "Orice altceva."
+        }
+      ],
+      "appealTitle": "Contestă un ban sau un mute",
+      "appealIntro": "Sancțiunile se numără în avertismente, iar fiecare expiră la 6 luni după ce a fost dat. 8 avertismente active înseamnă ban permanent pe server și pe Discord, iar expirarea nu îl anulează.",
+      "appealSteps": [
+        "Deschide un tichet. Pentru un ban, alege Ban appeal.",
+        "Spune pentru ce și când ai fost sancționat și de ce ar trebui schimbat.",
+        "Un admin care nu a fost implicat analizează cererea și îți poate reduce sau anula avertismentele. Reducerile și debanările sunt publicate, iar decizia e definitivă."
+      ],
+      "lostTitle": "Obiecte pierdute",
+      "lost": "Obiectele sunt returnate doar după o defecțiune confirmată a serverului, cum ar fi un crash sau un bug cu void-ul. Deschide un tichet cu ora și ce ai pierdut.",
+      "discordLink": "Discordul Mysterria",
+      "guideLink": "Ghidul jucătorului",
+      "wikiLink": "Wiki",
+      "rulesLink": "Avertismente și banuri în regulament"
+    },
+    "joining": {
+      "title": "Intră pe server",
+      "rows": [
+        {
+          "term": "Adresă",
+          "detail": "mc.mysterria.net sau play.mysterria.net"
+        },
+        {
+          "term": "Java Edition",
+          "detail": "Portul 25565. Serverul rulează pe 26.2, iar cu 26.1.2 încă poți intra."
+        },
+        {
+          "term": "Bedrock Edition",
+          "detail": "Aceeași adresă, portul 19132."
+        }
+      ],
+      "launcher": "Folosește launcherul oficial sau SKLauncher. Evită TLauncher: staff-ul îl consideră malware.",
+      "guideLink": "Ghidul complet de intrare"
+    },
+    "client": {
+      "title": "COI Client",
+      "body": "Un mod Fabric opțional, făcut pentru Mysterria. Adaugă o interfață de Beyonder cu taste rapide pentru abilități și efecte de ritual, iar tot jocul merge și fără el. Există versiuni pentru 26.1.2 și 26.2."
     }
   }
 }

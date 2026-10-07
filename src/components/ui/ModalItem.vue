@@ -1,24 +1,32 @@
 <template>
   <Teleport to="body">
-    <Transition name="ritual-fade">
-      <div v-if="localShow" class="modal-ritual-overlay" @click="handleOverlayClick">
+    <Transition name="arc-modal">
+      <div v-if="localShow" class="arc-modal" @click="handleOverlayClick">
         <div
+            ref="panel"
+            :aria-labelledby="titleId"
             :class="[size, { 'has-footer': $slots.footer }]"
-            class="modal-ritual-content"
+            aria-modal="true"
+            class="arc-modal__panel"
+            role="dialog"
+            tabindex="-1"
             @click.stop
+            @keydown="onKeydown"
         >
-          <div class="modal-ritual-header">
-            <h3 class="ritual-title">
+          <div class="arc-modal__head">
+            <h2 :id="titleId" class="arc-h4 arc-modal__title">
               <slot name="header">{{ localTitle }}</slot>
-            </h3>
-            <button class="modal-ritual-close" @click="close">†</button>
+            </h2>
+            <button :aria-label="t('close')" class="arc-modal__close" type="button" @click="close">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
           </div>
 
-          <div class="modal-ritual-body no-scrollbar">
+          <div class="arc-modal__body">
             <slot></slot>
           </div>
 
-          <div v-if="$slots.footer" class="modal-ritual-footer">
+          <div v-if="$slots.footer" class="arc-modal__foot">
             <slot name="footer"></slot>
           </div>
         </div>
@@ -28,7 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, watch} from 'vue';
+import {nextTick, ref, useId, watch} from 'vue';
+import {useI18n} from '@/composables/useI18n';
 
 const props = withDefaults(defineProps<{
   show?: boolean;
@@ -42,6 +51,9 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits(['close', 'confirm', 'cancel']);
+const {t} = useI18n();
+const titleId = `arc-modal-${useId()}`;
+const panel = ref<HTMLElement | null>(null);
 
 const localShow = ref(props.show);
 const localTitle = ref(props.title);
@@ -51,6 +63,45 @@ const onCancelCallback = ref<(() => void) | null>(null);
 watch(() => props.show, (newVal) => {
   localShow.value = newVal;
 });
+
+/* a dialog takes focus when it opens, keeps Tab inside, closes on Escape, and hands
+   focus back to whatever opened it */
+let opener: HTMLElement | null = null;
+watch(localShow, async (open) => {
+  if (open) {
+    opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    await nextTick();
+    const first = panel.value?.querySelector<HTMLElement>('input, select, textarea, [autofocus]');
+    (first ?? panel.value)?.focus();
+  } else {
+    opener?.focus();
+    opener = null;
+  }
+});
+
+const focusables = () => [...(panel.value?.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+) ?? [])];
+
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    event.stopPropagation();
+    close();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  const items = focusables();
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (event.shiftKey && (document.activeElement === first || document.activeElement === panel.value)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+};
 
 const handleOverlayClick = () => {
   if (props.closeOnOverlay) {
@@ -91,69 +142,79 @@ defineExpose({
 </script>
 
 <style scoped>
-.modal-ritual-overlay {
+.arc-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
+  z-index: 3000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
   padding: 20px;
+  background: color-mix(in oklab, var(--arc-bg) 72%, transparent);
+  backdrop-filter: blur(8px);
 }
 
-.modal-ritual-content {
-  background: #080a14;
-  border: 1px solid rgba(200, 178, 115, 0.2);
-  width: 100%;
+.arc-modal__panel {
+  position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-  position: relative;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  border-radius: var(--arc-r-lg);
+  background: var(--arc-pop);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 24px 70px var(--arc-shadow-strong);
+  color: var(--arc-ink);
 }
 
-.modal-ritual-header {
-  padding: 24px 32px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+.arc-modal__panel:focus-visible {
+  outline: none;
+}
+
+.arc-modal__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.ritual-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 20px;
-  color: var(--myst-gold);
-  margin: 0;
-}
-
-.modal-ritual-close {
-  background: none;
-  border: none;
-  color: #444;
-  font-size: 24px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.modal-ritual-close:hover {
-  color: var(--myst-gold);
-}
-
-.modal-ritual-body {
-  padding: 32px;
-  overflow-y: auto;
-  max-height: calc(90vh - 140px);
-}
-
-.modal-ritual-footer {
-  padding: 24px 32px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  justify-content: flex-end;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 18px var(--arc-pad);
+  border-bottom: var(--arc-bw) solid var(--arc-line);
+}
+
+.arc-modal__close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--arc-r-md);
+  background: none;
+  color: var(--arc-muted);
+  font-size: 18px;
+  cursor: pointer;
+  transition: color .2s ease, background-color .2s ease;
+}
+
+.arc-modal__close:hover {
+  background: var(--arc-glass);
+  color: var(--arc-ink);
+}
+
+.arc-modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--arc-pad);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.arc-modal__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px var(--arc-pad);
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
 /* Sizes */
@@ -162,7 +223,7 @@ defineExpose({
 }
 
 .md {
-  max-width: 600px;
+  max-width: 560px;
 }
 
 .lg {
@@ -178,45 +239,43 @@ defineExpose({
   height: 95vh;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+@media (max-width: 520px) {
+  .arc-modal {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .arc-modal__foot > :deep(*) {
+    flex: 1 1 auto;
+  }
 }
 
-/* Transitions */
-.ritual-fade-enter-active, .ritual-fade-leave-active {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+.arc-modal-enter-active,
+.arc-modal-leave-active {
+  transition: opacity .25s ease;
 }
 
-.ritual-fade-enter-from, .ritual-fade-leave-to {
+.arc-modal-enter-active .arc-modal__panel,
+.arc-modal-leave-active .arc-modal__panel {
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.arc-modal-enter-from,
+.arc-modal-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(10px);
 }
 
-/* Light theme: a paper sheet over a dimmed page; text inherits the ink colour. */
-:root[data-theme="parchment"] .modal-ritual-overlay {
-  background: var(--myst-overlay);
+.arc-modal-enter-from .arc-modal__panel,
+.arc-modal-leave-to .arc-modal__panel {
+  transform: translateY(10px) scale(.98);
 }
 
-:root[data-theme="parchment"] .modal-ritual-content {
-  background: var(--myst-pop);
-  border-color: var(--myst-line-20);
-  box-shadow: 0 20px 60px var(--myst-shadow);
-}
-
-:root[data-theme="parchment"] .modal-ritual-header {
-  border-bottom-color: var(--myst-line-14);
-}
-
-:root[data-theme="parchment"] .modal-ritual-close {
-  color: var(--myst-ink-muted);
-}
-
-:root[data-theme="parchment"] .modal-ritual-close:hover {
-  color: var(--myst-gold);
-}
-
-:root[data-theme="parchment"] .modal-ritual-footer {
-  border-top-color: var(--myst-line-14);
-  background: var(--myst-surface-sunk);
+@media (prefers-reduced-motion: reduce) {
+  .arc-modal-enter-active,
+  .arc-modal-leave-active,
+  .arc-modal-enter-active .arc-modal__panel,
+  .arc-modal-leave-active .arc-modal__panel {
+    transition: none;
+  }
 }
 </style>

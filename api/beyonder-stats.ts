@@ -7,8 +7,9 @@ import type {VercelRequest, VercelResponse} from '@vercel/node';
  * vite.config.ts imports loadBeyonderStats from here instead - the @vercel/node
  * import above is type-only and gets erased when the config is bundled.
  *
- * Only pre-aggregated counts ever leave this module; the per-player roster
- * from catwalk stays server-side.
+ * Only aggregates leave this module, plus the names of the players on the
+ * seats (Sequence 4 and above), which the Ascension page lists by Pathway. The
+ * rest of the roster from catwalk stays server-side.
  */
 
 const CATWALK_BASE_URL = 'https://catwalk.mysterria.net';
@@ -30,11 +31,16 @@ interface UpstreamBeyonderResponse {
     };
 }
 
+/** The seats: Sequence 4 (uncapped) and the capped Sequences 3 to 0. */
+const SEAT_TOP = 4;
+
 export interface PathwaySeatOccupancy {
     /** Lowercased pathway id, matching src/data/pathways.ts. */
     pathway: string;
-    /** Players currently holding Sequence 0..3, indexed by sequence. */
-    counts: [number, number, number, number];
+    /** Players currently holding Sequence 0..4, indexed by sequence. */
+    counts: [number, number, number, number, number];
+    /** Their names, indexed the same way, sorted. */
+    holders: [string[], string[], string[], string[], string[]];
 }
 
 export interface BeyonderStatsData {
@@ -45,12 +51,14 @@ export interface BeyonderStatsData {
     topPathways: { name: string; count: number }[];
     sequenceDistribution: { sequence: string; count: number }[];
     highSeats: PathwaySeatOccupancy[];
+    /** Beyonders on every pathway (topPathways keeps only the eight largest). */
+    pathwayCounts: { name: string; count: number }[];
 }
 
 export function aggregateBeyonderStats(beyonders: UpstreamBeyonderData[]): BeyonderStatsData {
     const pathwayCounts = new Map<string, number>();
     const sequenceCounts = new Map<string, number>();
-    const seatCounts = new Map<string, [number, number, number, number]>();
+    const seats = new Map<string, PathwaySeatOccupancy>();
     let sequenceSum = 0;
     let advancedBeyonders = 0;
 
@@ -61,12 +69,14 @@ export function aggregateBeyonderStats(beyonders: UpstreamBeyonderData[]): Beyon
         if (Number.isNaN(seq)) continue;
 
         sequenceSum += seq;
-        if (seq >= 0 && seq <= 3) {
-            advancedBeyonders++;
+        if (seq >= 0 && seq <= 3) advancedBeyonders++;
+        if (seq >= 0 && seq <= SEAT_TOP) {
             const key = b.pathway.toLowerCase();
-            const counts = seatCounts.get(key) ?? [0, 0, 0, 0];
-            counts[seq]++;
-            seatCounts.set(key, counts);
+            const entry: PathwaySeatOccupancy = seats.get(key)
+                ?? {pathway: key, counts: [0, 0, 0, 0, 0], holders: [[], [], [], [], []]};
+            entry.counts[seq]++;
+            if (b.playerName) entry.holders[seq].push(b.playerName);
+            seats.set(key, entry);
         }
         if (seq >= 1 && seq <= 9) {
             const key = seq.toString();
@@ -74,17 +84,18 @@ export function aggregateBeyonderStats(beyonders: UpstreamBeyonderData[]): Beyon
         }
     }
 
-    const topPathways = Array.from(pathwayCounts.entries())
+    const allPathways = Array.from(pathwayCounts.entries())
         .map(([name, count]) => ({name, count}))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8);
+        .sort((a, b) => b.count - a.count);
+    const topPathways = allPathways.slice(0, 8);
 
     const sequenceDistribution = Array.from(sequenceCounts.entries())
         .map(([sequence, count]) => ({sequence, count}))
         .sort((a, b) => parseInt(a.sequence, 10) - parseInt(b.sequence, 10));
 
-    const highSeats = Array.from(seatCounts.entries())
-        .map(([pathway, counts]) => ({pathway, counts}))
+    const byName = (a: string, b: string) => a.localeCompare(b, 'en', {sensitivity: 'base'});
+    const highSeats = Array.from(seats.values())
+        .map(entry => ({...entry, holders: entry.holders.map(names => names.sort(byName)) as PathwaySeatOccupancy['holders']}))
         .sort((a, b) => a.pathway.localeCompare(b.pathway));
 
     const averageSequence = beyonders.length > 0 ? (sequenceSum / beyonders.length).toFixed(1) : '0';
@@ -97,6 +108,7 @@ export function aggregateBeyonderStats(beyonders: UpstreamBeyonderData[]): Beyon
         topPathways,
         sequenceDistribution,
         highSeats,
+        pathwayCounts: allPathways,
     };
 }
 
@@ -105,7 +117,7 @@ export interface BeyonderStatsResult {
     body: { success: boolean; message?: string; data?: BeyonderStatsData };
 }
 
-/** Fetches the full roster from catwalk and returns only the aggregate. */
+/** Fetches the full roster from catwalk and returns the aggregate and the seat holders. */
 export async function loadBeyonderStats(token: string | undefined): Promise<BeyonderStatsResult> {
     const headers: Record<string, string> = {Accept: 'application/json'};
     if (token) {

@@ -15,9 +15,7 @@
     "toggleNav": "Afficher la navigation",
     "closeNav": "Fermer la navigation",
     "themeLight": "Passer en mode clair",
-    "themeDark": "Passer en mode sombre",
-    "seasonHeadline": "La saison II vient de commencer !",
-    "seasonLink": "Lire l’annonce"
+    "themeDark": "Passer en mode sombre"
   },
   "footer": {
     "linkHelp": "Aide et support",
@@ -55,21 +53,11 @@
     "circleStepTwoTitle": "Prépare et bois la potion",
     "circleStepTwoBody": "Réunis les ingrédients principaux, utilise le chaudron et avale ton destin. De vraies capacités, un coût en spiritualité et une vraie folie si tu te précipites.",
     "circleStepThreeTitle": "Interprète ton rôle. Élève-toi.",
-    "circleStepThreeBody": "Digère la potion en vivant le rôle de ta Séquence. Accomplis des rituels, progresse en Interprétation et gravis les Séquences de 9 → 0 au cours d’une saison.",
     "tarotEyebrow": "Archives Beyonder",
     "tarotTitle": "Quelle carte tireras-tu ?",
     "tarotSeq": "SEQ 9",
     "tarotCta": "Ouvrir les archives complètes",
     "tarotCtaCount": "22 Voies",
-    "observatoryEyebrow": "L’Observatoire",
-    "observatoryTitle": "Un monde vivant de {count} Beyonders",
-    "observatoryLede": "Recensement en direct de chaque joueur éveillé cette saison : les Voies qu’ils parcourent et jusqu’où ils se sont élevés. Mis à jour chaque heure depuis le serveur.",
-    "observatoryAdvanced": "Avancé (Séqu. 0–3)",
-    "observatoryAverage": "Séquence moyenne",
-    "observatoryActive": "Voies actives",
-    "observatoryPanelTitle": "Voies les plus parcourues",
-    "observatoryPanelNote": "Cette saison",
-    "observatoryRegistryCta": "Les sièges des Séquences 3–0 sont limités : consulter le Registre des Ascensions",
     "newsEyebrow": "Depuis l’autre côté de la Brume",
     "newsTitle": "Dernières dépêches",
     "newsAll": "Toutes les actualités",
@@ -83,45 +71,68 @@
     "closingCopied": "✓ IP copiée",
     "closingDiscord": "Rejoindre le Discord"
   },
-  "companion": {
-    "eyebrow": "Le Compagnon",
-    "title": "COI Client",
-    "lede": "Mysterria fonctionne parfaitement avec un client Minecraft classique : chaque mécanique Beyonder se trouve sur le serveur. Le Client COI est un petit mod facultatif qui ajoute la seule chose qu’un client vanilla ne peut afficher : la magie elle-même.",
-    "featureHotkeysTitle": "Lance tes sorts au clavier",
-    "featureHotkeysBody": "Associe tes capacités à des raccourcis et lance-les en plein combat sans jamais ouvrir de menu.",
-    "featureVisualsTitle": "Vois ta Voie",
-    "featureVisualsBody": "Cercles rituels, sigils et effets de lancement entièrement rendus sur ton propre client.",
-    "featurePresenceTitle": "Entends-la et montre-la",
-    "featurePresenceBody": "Une ambiance sonore propre au serveur, ainsi qu’une riche présence Discord affichant ta Séquence.",
-    "downloadEyebrow": "Obtenir le mod",
-    "platformNote": "Dernière version · s’installe aux côtés du pack de ressources du serveur",
-    "optionalLabel": "Facultatif",
-    "optional": "Rien sur le serveur n’est verrouillé derrière le mod et il ne te sera jamais demandé de l’installer. Choisis simplement la plateforme que tu utilises déjà : les trois proposent la même version."
-  },
-  "guidePage": {
-    "joinNoMods": "Aucun mod client requis",
-    "joinBedrock": "Bedrock pris en charge via Geyser",
-    "joinFree": "Gratuit pour toujours",
-    "joinCompanion": "Tu veux les effets visuels ? Obtiens le Client COI",
-    "checklistEyebrow": "LA PREMIÈRE HEURE",
-    "checklistTitle": "Six étapes de la liste des serveurs à ton premier objectif",
-    "checklistLede": "Coche-les à mesure que tu avances : ta progression est enregistrée sur cet appareil.",
-    "checklistProgress": "Progression",
-    "topicsCount": "sujets",
-    "noTopics": "Aucun sujet ne correspond à cette expression. Parcours tout ce qui suit.",
-    "browseAll": "Parcourir tous les systèmes majeurs"
-  },
   "shopPage": {
-    "eyebrow": "Le Reliquaire",
-    "title": "Marchandises de l’Éternelle Nuit",
-    "lede": "Soutiens le serveur sans jamais acheter de puissance. Tout ce qui est proposé ici est cosmétique, pratique ou permet de commander une prestation au staff : l’Ascension des Séquences reste sacrée.",
-    "tabAll": "Toutes les marchandises",
-    "showing": "Affichage de {shown} manifestations sur {total}",
-    "giftable": "Tout peut être offert à un autre joueur",
-    "perMonth": "Par mois",
-    "oneTime": "Paiement unique",
-    "fairPlayLabel": "Promesse de jeu équitable",
-    "fairPlay": "Aucun achat ne confère de puissance de combat, de progression de Séquence, de formules ou d’ingrédients. Les achats financent l’hébergement et le développement du plugin Circle of Imagination."
+    "title": "Boutique",
+    "lede": "Les achats paient l'hébergement et le plugin Circle of Imagination. Aucun ne donne de puissance de combat, de progrès de Séquence, de recettes ni d'ingrédients.",
+    "tabAll": "Tout",
+    "giftable": "Peut s'offrir",
+    "tabsLabel": "Catégories",
+    "categories": {
+      "cosmetics-couriers": "Cosmétiques et coursiers",
+      "dungeons-items": "Donjons et objets",
+      "ranks-commissions": "Rangs et commandes"
+    },
+    "loading": "Chargement de la boutique…",
+    "loadFailed": "La boutique ne s'est pas chargée. Vérifie ta connexion et réessaie.",
+    "retry": "Réessayer",
+    "empty": "Rien dans cette catégorie pour l'instant.",
+    "buy": "Acheter",
+    "signInToBuy": "Se connecter pour acheter",
+    "was": "Avant",
+    "newTab": "s'ouvre dans un nouvel onglet",
+    "term": {
+      "oneTime": "Paiement unique",
+      "monthsOne": "{n} mois",
+      "monthsFew": "{n} mois",
+      "monthsMany": "{n} mois",
+      "yearsOne": "{n} an",
+      "yearsFew": "{n} ans",
+      "yearsMany": "{n} ans"
+    },
+    "balance": {
+      "heading": "Solde",
+      "signedOut": "Connecte-toi avec Discord pour voir ton solde et acheter.",
+      "signIn": "Se connecter",
+      "topUp": "Recharger",
+      "setup": "Avant d'acheter, vérifie ton compte et indique ton pseudo dans ton {link}.",
+      "setupLink": "profil",
+      "howTitle": "Comment marche la recharge",
+      "stepBmc": "Paie via Buy Me a Coffee en dollars ou en euros : 1 USD donne {usd} Marques, 1 EUR en donne {eur}.",
+      "stepBmcName": "Indique ton pseudo en jeu comme nom de supporter, exactement comme dans le jeu. Les paiements sont reliés par ce nom, pas par la note.",
+      "stepDonatello": "Paie via Donatello. Le lien de recharge remplit ton pseudo ; laisse-le tel quel.",
+      "stepCredited": "Les Marques arrivent sur ton solde dès que le paiement passe.",
+      "missing": "Payé, mais pas de Marques ? {link} dans Payment / Donation Issue, en précisant sous quel nom tu as payé et combien.",
+      "missingLink": "Ouvre un ticket sur notre Discord",
+      "more": "En savoir plus sur la recharge",
+      "stepBmcNameNick": "Indique {nick} comme nom de supporter, exactement comme écrit. Les paiements sont reliés par ce nom, pas par la note."
+    },
+    "purchase": {
+      "title": "Confirmer l'achat",
+      "each": "Prix à l'unité",
+      "quantity": "Quantité",
+      "fewer": "Un de moins",
+      "more": "Un de plus",
+      "gift": "Acheter en cadeau",
+      "recipient": "Destinataire",
+      "recipientPlaceholder": "Chercher par pseudo",
+      "total": "Total",
+      "balance": "Ton solde",
+      "after": "Restant après",
+      "short": "Il te manque {amount}.",
+      "cancel": "Annuler",
+      "confirm": "Acheter",
+      "processing": "Achat en cours…"
+    }
   },
   "profilePage": {
     "eyebrow": "Dossier Beyonder",
@@ -133,7 +144,7 @@
     "sequence": "Séquence",
     "actingProgress": "Progression d’Interprétation",
     "actingHint": "Digère ton potion en vivant ton rôle. À 100 %, tu peux tenter le rituel de la prochaine Séquence.",
-    "climb": "L’ascension · 9 → 0",
+    "climb": "Séquence 9 à 0",
     "climbed": "Atteint",
     "youAreHere": "Tu es ici",
     "nextRitual": "Prochain rituel",
@@ -149,15 +160,28 @@
     "crossGuideTitle": "Ascension bloquée ?",
     "crossGuideBody": "Le manuel traite de l’Interprétation, des rituels et de la folie.",
     "crossPathwayTitle": "Étudie ta Voie",
-    "crossPathwayBody": "Toutes les capacités, de la Séquence 9 à 0, dans les archives.",
+    "crossPathwayBody": "Toutes les capacités, de la Séquence 9 à 0.",
     "noBeyonder": "Aucun dossier Beyonder pour l’instant. Vérifie ton compte et bois ton premier potion."
   },
   "newsPage": {
-    "eyebrow": "Depuis l’autre côté de la Brume",
-    "title": "Dépêches",
-    "earlier": "Dépêches précédentes",
-    "season": "Season II · 2026",
-    "notFound": "Entrée du registre introuvable ou restreinte."
+    "title": "Actualités",
+    "notFound": "Cet article n'existe pas ou n'est pas public.",
+    "lede": "Les annonces de chaque grande mise à jour et l'archive des journaux de modifications quotidiens.",
+    "filterLabel": "Type d'actualité",
+    "all": "Toutes",
+    "changelogs": "Journaux de modifications",
+    "announcements": "Annonces",
+    "changelog": "Journal de modifications",
+    "announcement": "Annonce",
+    "showMore": "Afficher plus",
+    "loadingMore": "Chargement...",
+    "loading": "Chargement des actualités...",
+    "loadingArticle": "Chargement de l'article...",
+    "empty": "Rien ici pour l'instant.",
+    "error": "Impossible de charger les actualités.",
+    "articleError": "Impossible de charger l'article.",
+    "retry": "Réessayer",
+    "back": "Retour aux actualités"
   },
   "contentLanguageNotice": {
     "label": "Note sur la langue",
@@ -165,10 +189,8 @@
     "dismiss": "Fermer cette note"
   },
   "rulesPage": {
-    "eyebrow": "Le Pacte",
     "lede": "Courtes, compréhensibles et appliquées avec jugement plutôt qu’avec des scripts. En cas de doute : ne gâche pas la journée de quelqu’un.",
     "appeals": "Les recours passent par un ticket Discord.",
-    "staffNote": "Voici le pacte des joueurs. Le staff suit un code distinct et plus strict, visible aux comptes du staff sur cette page.",
     "warnForms": {
       "one": "avertissement",
       "few": "avertissements",
@@ -177,74 +199,64 @@
     "noWarning": "aucun avertissement",
     "permanent": "définitif",
     "ladderHeading": "Comment c'est compté",
-    "ladderAria": "Afficher comment cette règle est comptée",
     "ladderCase": "Ce que vous avez fait",
     "ladderCost": "Coût"
   },
   "staffOrder": {
-    "eyebrow": "Gardiens de la Brume",
-    "title": "L’Ordre",
     "lede": "Les administrateurs, modérateurs et bâtisseurs qui font tourner le monde. Contacte-les sur Discord pour les tickets et recours, jamais en message privé.",
     "helpQuestion": "Tu as besoin d’aide ou veux signaler quelque chose ?",
     "openTicket": "Ouvrir un ticket"
   },
   "pathwaysPage": {
-    "archive": "ARCHIVES BEYONDER",
-    "title": "Voies et Séquences",
-    "subtitle": "Étudie chaque route vers le divin. Découvre chaque Séquence et les capacités qu’elle déverrouille avant de choisir ton destin.",
-    "pathways": "Voies",
-    "sequences": "Séquences",
-    "abilities": "Capacités",
-    "search": "Rechercher des Voies ou capacités…",
-    "allPathways": "Toutes les Voies",
-    "pathway": "Voie",
-    "progression": "Progression des Séquences · 9 → 0",
-    "seq": "SEQ",
-    "sequence": "Séquence",
-    "designation": "Désignation",
-    "noResults": "Rien n’a été trouvé dans les archives.",
-    "noAbilities": "Aucune capacité correspondante",
-    "trySearch": "Essaie une autre recherche ou efface le champ.",
-    "registryCta": "Les sièges des Séquences 3–0 sont limités – voir la disponibilité en direct",
-    "lastUpdated": "Dernière mise à jour",
-    "dataDisclaimer": "Les détails peuvent légèrement différer de la version actuelle du jeu",
-    "searchLabel": "Rechercher dans les archives",
-    "clearSearch": "Effacer la recherche",
-    "groupStandard": "Voies standard",
-    "groupBoons": "Voies de Grâce"
-  },
-  "ascensionPage": {
-    "eyebrow": "REGISTRE DES HAUTES SÉQUENCES",
-    "title": "Trônes de l’Ascension",
-    "subtitle": "Au-dessus de la Séquence 4, l’échelle se resserre : chaque Voie n’accueille qu’un nombre limité de Beyonders. Découvre qui s’est élevé et quels trônes restent vides avant de choisir ta route.",
-    "archiveLink": "Étudier les Voies dans les archives",
-    "epochTitle": "L’Époque changera",
-    "epochBody": "Au début de la prochaine Époque, chaque Beyonder est réinitialisé et tous ces sièges sont libérés. Ce qui est revendiqué ci-dessous ne l’est que pour l’instant : à la nouvelle Époque, chacun se bat à nouveau pour les trônes.",
-    "seatsClaimed": "sièges revendiqués",
-    "deitiesSeated": "Divinités intronisées",
-    "pathwaysOpen": "Voies entièrement ouvertes",
-    "sortLabel": "Trier les Voies",
-    "sortContested": "Contestées d’abord",
-    "sortOpen": "Ouvertes d’abord",
-    "sortAz": "A–Z",
-    "badges": {
-      "deity": "Divinité intronisée",
-      "contested": "Contesté",
-      "open": "Tous les sièges sont libres"
+    "title": "Voies",
+    "abilities": {
+      "one": "{count} capacité",
+      "few": "{count} capacités",
+      "many": "{count} capacités"
     },
-    "standard": "Voies standards",
-    "boons": "Voies de Grâce",
-    "claimedShort": "occupés",
-    "liveNote": "Les décomptes proviennent directement du serveur et sont actualisés toutes les quelques minutes.",
-    "asOf": "Au",
-    "errorTitle": "Le registre est inaccessible",
-    "errorBody": "Le recensement n’a pas pu être consulté. Réessaie dans un instant.",
-    "retry": "Consulter à nouveau",
-    "seatWord": {
-      "one": "siège",
-      "few": "sièges",
-      "many": "sièges"
-    }
+    "noResults": "Rien ne correspond à « {query} ».",
+    "searchLabel": "Rechercher des Voies et des capacités",
+    "clearSearch": "Effacer la recherche",
+    "lede": "Les Séquences de chaque Voie, de 9 à 0, avec chaque capacité telle que le jeu la décrit.",
+    "tabsLabel": "Voies et Voies de Grâce",
+    "tabCore": "Voies",
+    "tabBoons": "Voies de Grâce",
+    "boonsNote": "Une Voie de Grâce vous est prêtée par un Dieu Extérieur. Elle va de la Séquence 9 à 5, à côté de votre propre Voie, jamais devant elle.",
+    "searchPlaceholder": "Ex. : Seer ou Divination",
+    "resultsPathways": "Voies",
+    "resultsAbilities": "Capacités",
+    "moreResults": "Les {shown} premiers résultats sur {total}. Ajoutez un mot pour affiner.",
+    "range": "Séquence 9 à {top}",
+    "seq9": "Séquence 9 : {name}",
+    "updated": "Textes des capacités repris du jeu le {date}.",
+    "ascension": "Qui occupe les sièges",
+    "wikiPathways": "Les Voies sur le wiki",
+    "wikiBoons": "Les Voies de Grâce sur le wiki",
+    "loading": "Chargement des Voies…",
+    "loadError": "Les Voies n’ont pas pu être chargées. Vérifiez votre connexion et réessayez.",
+    "retry": "Réessayer",
+    "back": "Toutes les Voies",
+    "detailLede": "De {first} à la Séquence 9 jusqu’à {last} à la Séquence {top}, avec {abilities} en chemin.",
+    "ladder": "Séquences",
+    "seats": {
+      "one": "{count} siège",
+      "few": "{count} sièges",
+      "many": "{count} sièges"
+    },
+    "throne": "La Séquence 0 est un trône. Un seul joueur l’occupe à la fois et devient le dieu de cette Voie.",
+    "throneLink": "Qui l’occupe",
+    "empty": "Aucune capacité n’est encore listée pour cette Séquence.",
+    "previous": "Voie précédente",
+    "next": "Voie suivante",
+    "notFound": "Il n’existe aucune Voie nommée « {id} ».",
+    "ranks": {
+      "0": "Divinité",
+      "1": "Archange",
+      "2": "Ange",
+      "3": "Saint",
+      "4": "Demi-dieu"
+    },
+    "sequence": "Séquence {n}"
   },
   "servicesWikiDesc": "Base de connaissances et guides",
   "servicesDiscord": "Discord",
@@ -266,11 +278,7 @@
   "giftable": "Offrable",
   "bulkPurchase": "Achat groupé",
   "amount": "Quantité",
-  "buyAsGift": "Acheter comme cadeau",
   "recipient": "Destinataire",
-  "searchRecipient": "Rechercher par pseudo...",
-  "totalCost": "Coût total",
-  "pricePerUnit": "Prix unitaire",
   "selectRecipient": "Choisir un destinataire...",
   "giftFrom": "Cadeau de",
   "giftSuccess": "Cadeau envoyé avec succès !",
@@ -308,8 +316,6 @@
   "verified": "Vérifié",
   "pathway": "Voie",
   "sequence": "Séquence",
-  "pageNotFoundTitle": "Oups ! On dirait que tu t’es perdu...",
-  "pageNotFoundMessage": "Malheureusement, la page que tu cherches est introuvable. Ne t’inquiète pas, tu peux toujours revenir en arrière.",
   "goBack": "Retour",
   "verifyMinecraftAccount": "Vérifier le compte Minecraft",
   "unavailable": "Indisponible",
@@ -383,26 +389,11 @@
     "PENALTY": "Pénalité",
     "REWARD": "Récompense"
   },
-  "insufficientFundsMessage": "Fonds insuffisants pour l’achat. Veux-tu recharger via",
-  "confirmPurchase": "Confirmer l’achat",
-  "shopLoginRequired": "Connecte-toi à ton compte pour accéder à la boutique !",
   "profileSetupRequired": "Vérifie ton compte et configure ton profil pour effectuer des achats",
   "itemNotFound": "Objet introuvable",
   "itemNotAvailable": "Cet objet n’est actuellement pas disponible à l’achat",
-  "noItemsFound": "Rien n’est encore proposé dans cette catégorie.",
-  "shopLoading": "Chargement de la boutique...",
-  "shopLoadFailed": "Impossible de charger la boutique",
   "tryAgain": "Réessayer",
-  "serviceTypeItem": "Objet",
-  "serviceTypePermission": "Permission",
-  "serviceTypeSubscription": "Abonnement",
-  "serviceTypeDiscordRole": "Rôle Discord",
-  "loadingService": "Chargement du service...",
   "serviceNotFound": "Objet introuvable",
-  "serviceNotFoundMessage": "La description de cet objet n’est pas encore disponible ou a été déplacée.",
-  "serviceContentNotCreated": "Les informations détaillées de ce service n’ont pas encore été créées.",
-  "backToShop": "Retour à la boutique",
-  "loginToPurchase": "Connecte-toi pour acheter ce service",
   "purchaseError": "Impossible de préparer l’achat",
   "authenticationRequired": "Authentification requise",
   "accessExclusiveItems": "Accéder aux objets exclusifs",
@@ -418,17 +409,14 @@
   "copySuccess": "Copié !",
   "profileTitle": "Configure ton profil",
   "termsViewTitle": "Conditions d’utilisation",
-  "privacyViewTitle": "Confidentialité",
-  "slaViewTitle": "SLA",
+  "privacyViewTitle": "Politique de confidentialité",
   "navRules": "Règles",
-  "lawsOfMysterria": "Lois de Mysterria",
   "tableOfContents": "Table des matières",
   "staffRules": "Règles de l’équipe",
   "examples": "Exemples",
   "playerRules": "Règles des joueurs",
   "staffPage": {
-    "members": "membres",
-    "loadError": "Impossible de charger les membres de l’équipe. Réessaie plus tard."
+    "snapshotNote": "Cette liste date d’octobre 2026 et peut être périmée."
   },
   "dailyBonusCatTitle": "Une étrange résonance...",
   "dailyBonusCatAlt": "Un chat mystérieux",
@@ -714,7 +702,7 @@
         "sceneLabel": "Becoming a Beyonder",
         "panelSub": "{pathway}: Sequence 9",
         "abilitiesHeading": "First abilities",
-        "cta": "Game guide",
+        "cta": "How to join",
         "whisper1": "Listen.",
         "whisper2": "Remember.",
         "whisper3": "Silence.",
@@ -925,7 +913,7 @@
       },
       "incursions": {
         "title": "PvP with real stakes",
-        "body": "The open world is safe. When 30 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
+        "body": "The open world is safe. When 50 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
         "tiersLabel": "Zone colours and what dying costs",
         "tiers": {
           "green": {
@@ -1099,6 +1087,265 @@
           }
         }
       }
+    }
+  },
+  "legalPage": {
+    "updated": "Dernière mise à jour"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "message": "L’adresse contient peut-être une faute, ou la page a été déplacée."
+  },
+  "loginPage": {
+    "title": "Connexion à Mysterria",
+    "redirectHost": "Après la connexion, tu seras ramené sur {host}.",
+    "redirectGeneric": "Après la connexion, tu seras redirigé."
+  },
+  "logoutPage": {
+    "lede": "Se déconnecter de cet appareil."
+  },
+  "ascensionPage": {
+    "title": "Sièges des hautes Séquences",
+    "lede": "À partir de la Séquence 3, chaque Voie n’accueille qu’un nombre limité de Beyonders à la fois. Voici qui siège où, Voie par Voie, et combien de joueurs suivent chacune. Une nouvelle Époque vide tous les sièges.",
+    "limitsTitle": "Limites de sièges",
+    "tableTitle": "Sièges par Voie",
+    "sortLabel": "Trier les Voies",
+    "sort": {
+      "held": "Les plus occupées",
+      "open": "Les plus libres",
+      "walkers": "Les plus suivies",
+      "az": "De A à Z"
+    },
+    "colPathway": "Voie",
+    "colWalkers": "Beyonders",
+    "noLimit": "Sans limite",
+    "perPathway": "{count} par Voie",
+    "heldOf": "{held} sur {total} occupés",
+    "beyonders": {
+      "one": "{count} Beyonder",
+      "few": "{count} Beyonders",
+      "many": "{count} Beyonders"
+    },
+    "seatsOf": "{count} sièges occupés sur {limit}",
+    "taken": "Occupé",
+    "open": "Libre",
+    "notCounted": "Non compté",
+    "holders": "Titulaires",
+    "holdersOf": "{pathway} : titulaires des sièges",
+    "sequence": "Séquence {n}",
+    "openSeats": {
+      "one": "{count} libre",
+      "few": "{count} libres",
+      "many": "{count} libres"
+    },
+    "updated": "Consulté à {time}.",
+    "walkersNote": "Le nombre de Beyonders n’est donné que pour les huit Voies les plus suivies.",
+    "boonsTitle": "Voies de Grâce",
+    "boonsNote": "Les Voies de Grâce s’arrêtent à la Séquence 5 et n’ont pas de sièges. Beyonders sur chacune :",
+    "loading": "Chargement des sièges…",
+    "error": "Impossible de charger le nombre de sièges. Réessaie dans un instant.",
+    "retry": "Réessayer",
+    "empty": "Personne n’occupe encore de haut siège pendant cette Époque. Tous les sièges sont libres.",
+    "recordsNote": "Les chiffres et les noms viennent des fiches joueurs du serveur. Ils peuvent inclure des comptes inactifs et ceux de l’équipe, et donc différer du décompte des sièges en jeu.",
+    "nobody": "Personne pour l’instant"
+  },
+  "servicePage": {
+    "back": "Boutique",
+    "loading": "Chargement…",
+    "notFoundTitle": "Article introuvable",
+    "notFound": "Cet article n'est pas dans la boutique, ou son lien a changé.",
+    "toStore": "Retour à la boutique",
+    "noDescription": "Cet article n'a pas encore de description complète.",
+    "buyLabel": "Prix et achat",
+    "bulk": "Achat en lot",
+    "yourBalance": "Ton solde"
+  },
+  "helpPage": {
+    "title": "Aide",
+    "lede": "Les réponses aux questions que les joueurs posent le plus sur Discord.",
+    "seoDescription": "Comment lier ton compte Minecraft, recharger ton solde, voter, suivre les événements, ouvrir un ticket et contester un bannissement sur Mysterria.",
+    "tocLabel": "Sur cette page",
+    "toc": {
+      "linking": "Lier ton compte",
+      "topUps": "Recharges",
+      "vote": "Voter",
+      "events": "Événements",
+      "epochs": "Époques",
+      "support": "Support et recours",
+      "joining": "Rejoindre",
+      "client": "COI Client"
+    },
+    "linking": {
+      "title": "Lie ton compte Minecraft",
+      "intro": "La liaison relie ton compte du site à ton personnage en jeu. Elle est nécessaire pour acheter en boutique et récupérer le bonus quotidien, et elle te donne le rôle Verified sur Discord.",
+      "steps": [
+        "Connecte-toi sur ce site avec Discord et ouvre ton profil.",
+        "Appuie sur « Générer un code ». Le code fait 8 caractères et reste valable 10 minutes. Un nouveau code remplace l’ancien.",
+        "Rejoins le serveur et tape `/verify <code>`. Taper `/verify` seul ouvre une fenêtre où coller le code.",
+        "Quand ça a marché, Discord t’envoie un message et ton profil ne propose plus de code."
+      ],
+      "offlineTitle": "Comptes sans licence officielle",
+      "offline": "Les comptes non premium ne peuvent pas jouer tant qu’ils ne sont pas liés. Inscris-toi une fois avec `/register <mot de passe> <mot de passe>`, puis utilise `/login <mot de passe>` à chaque connexion. Les comptes officiels n’ont pas cette étape.",
+      "troubleTitle": "Si ça ne marche pas",
+      "trouble": [
+        {
+          "term": "Pas de bouton « Générer un code »",
+          "detail": "Ton compte est déjà lié. Le bouton n’apparaît que tant que tu n’as pas lié ton compte."
+        },
+        {
+          "term": "Le code est refusé",
+          "detail": "Il a expiré ou un code plus récent l’a remplacé. Génères-en un nouveau et utilise-le dans les 10 minutes."
+        },
+        {
+          "term": "Tu as changé de pseudo Minecraft",
+          "detail": "Ta progression en jeu ne bouge pas, mais le site garde le pseudo avec lequel tu t’es lié et ne peut pas le modifier. Ouvre un ticket dans la catégorie Account : le staff supprimera la liaison pour que tu puisses te lier à nouveau. En attendant, les livraisons de la boutique et les recharges utilisent ton ancien pseudo."
+        },
+        {
+          "term": "Mauvais compte ou compte déjà pris",
+          "detail": "Un compte Minecraft ne peut être lié qu’à un seul compte du site. Si le mauvais est lié, ou si le tien est déjà pris, ouvre un ticket dans la catégorie Account."
+        },
+        {
+          "term": "Java et Bedrock",
+          "detail": "Pour jouer le même personnage sur les deux, relie d’abord tes comptes Java et Bedrock via GeyserMC, puis lie ce compte ici. Des comptes séparés et non reliés comptent comme des doubles comptes."
+        }
+      ],
+      "geyserLink": "Relier Java et Bedrock sur GeyserMC"
+    },
+    "topUps": {
+      "title": "Recharge ton solde",
+      "intro": "La boutique vend en Marques, et les Marques s’achètent via Buy Me a Coffee. 1 USD donne 40 Marques et 1 EUR en donne 44.",
+      "steps": [
+        "Connecte-toi et lie d’abord ton compte Minecraft. Les paiements sont rattachés au pseudo lié.",
+        "Appuie sur ton solde en haut du site, puis sur « Recharger le solde ».",
+        "Sur Buy Me a Coffee, mets ton pseudo en jeu dans le champ du nom, exactement comme en jeu. Le message ne sert pas à te retrouver.",
+        "Paie le montant que tu veux voir sur ton solde. Les Marques sont ajoutées automatiquement dès que le paiement passe."
+      ],
+      "missTitle": "Si les Marques n’arrivent pas",
+      "miss": "Un nom qui ne correspond à aucun compte ne reçoit rien, et le staff est prévenu. Ouvre un ticket dans la catégorie Payment / Donation Issue avec le nom sous lequel tu as payé, le montant, la devise et l’heure. Le propriétaire vérifie et ajoute les Marques à la main.",
+      "renamed": "Tu as changé de pseudo Minecraft ? Paie sous le pseudo lié jusqu’à ce que le staff refasse la liaison.",
+      "donatello": "Sur la version ukrainienne du site, le bouton ouvre Donatello à la place, avec ton pseudo déjà rempli.",
+      "bmcLink": "Buy Me a Coffee"
+    },
+    "vote": {
+      "title": "Vote pour le serveur",
+      "intro": "Les votes rapportent des points du Brilliant Emporium, à dépenser dans `/emporium`. Chaque site accepte un vote de ta part toutes les 24 heures.",
+      "steps": [
+        "Tape `/vote` en jeu, ou ouvre un des sites ci-dessous.",
+        "Saisis ton pseudo exactement comme en jeu. Les pseudos Bedrock commencent par un point."
+      ],
+      "points": "{n} points",
+      "notCountTitle": "Si un vote ne compte pas",
+      "notCount": "Le pseudo doit appartenir à un joueur qui a déjà rejoint le serveur, écrit exactement comme en jeu. Un second vote sur le même site en moins de 24 heures ne compte pas non plus.",
+      "more": "Les points d’Emporium viennent aussi de la série de connexions quotidiennes et des rapports de bugs."
+    },
+    "events": {
+      "title": "Événements et horaires",
+      "intro": "La plupart des événements démarrent seuls dès qu’il y a assez de joueurs en ligne, il n’y a donc pas d’horaire fixe. Le serveur les annonce dans le chat avant le début.",
+      "rows": [
+        {
+          "term": "Bedwars",
+          "detail": "Toutes les 5 heures, s’il y a au moins 40 joueurs en ligne. Des alertes tombent 60, 30 et 10 minutes avant. Tape `/bedwars` pour voir quand a lieu la prochaine. Les récompenses sont plafonnées à 8 lots par jour."
+        },
+        {
+          "term": "Incursion du Cosmos",
+          "detail": "Démarre quand 50 joueurs ou plus sont en ligne, au plus une fois toutes les 5 heures. Elle dure 30 minutes après un compte à rebours de 3 minutes. Si tu te déconnectes à l’intérieur, un Hollow reste à ta place pendant 5 minutes. Les résultats sont publiés dans #events sur Discord."
+        },
+        {
+          "term": "Ancres des Dieux Extérieurs",
+          "detail": "Le serveur tente d’en planter une environ tous les 3 jours, à 12 heures près, quand au moins 5 joueurs sont en ligne. Aucune ne démarre entre 02:00 et 08:00, heure du serveur. Une ancre incube environ un jour, avec des indices dans le chat toutes les 30 minutes."
+        },
+        {
+          "term": "Marées quotidiennes",
+          "detail": "Un modificateur par jour, dans une rotation hebdomadaire de sept. `/coi tide calendar` affiche les 14 prochains jours."
+        },
+        {
+          "term": "Événements du staff",
+          "detail": "Concours de construction, tournois, quiz et chasses au trésor sont annoncés dans #announcements sur Discord, chacun avec ses propres règles. Les boutiques d’événement ferment à la date indiquée là-bas."
+        }
+      ]
+    },
+    "epochs": {
+      "title": "Époques",
+      "intro": "Une époque, c’est un cycle du monde. Quand elle se termine, le serveur est réinitialisé : la carte et toute la progression des joueurs repartent de zéro, et les liaisons du site sont effacées, donc tout le monde se lie à nouveau.",
+      "now": "L’Époque I s’est terminée le {end}. L’Époque II, l’actuelle, a ouvert le {start}.",
+      "next": "Aucune date de fin n’a été annoncée pour l’Époque II. Les réinitialisations ne suivent pas de calendrier fixe, alors garde un œil sur #announcements sur Discord.",
+      "carry": "Peu de choses sont conservées. Les prix qui le sont le précisent quand ils sont remis. La dernière fois, les récompenses du Server Slam et une récompense pour les détenteurs d’une Unicité sont passées à l’Époque II."
+    },
+    "support": {
+      "title": "Support, signalements et recours",
+      "intro": "Le support passe par des tickets sur notre serveur Discord. Pour savoir comment fonctionne le jeu, le guide ou le wiki répondent souvent plus vite.",
+      "steps": [
+        "Rejoins le Discord de Mysterria.",
+        "Ouvre #create-ticket, ou #створити-заявку pour de l’aide en ukrainien.",
+        "Choisis la catégorie qui convient et décris ce qui s’est passé. Ajoute des pseudos et des heures, avec des captures si tu en as."
+      ],
+      "categoriesTitle": "Quelle catégorie choisir",
+      "categories": [
+        {
+          "term": "Gameplay question or issue",
+          "detail": "De l’aide sur quelque chose en jeu."
+        },
+        {
+          "term": "Bug",
+          "detail": "Quelque chose est cassé en jeu ou sur le site."
+        },
+        {
+          "term": "Account",
+          "detail": "Un nouveau pseudo Minecraft, une mauvaise liaison ou un autre problème de compte."
+        },
+        {
+          "term": "Payment / Donation Issue",
+          "detail": "Des Marques qui ne sont pas arrivées, ou un autre souci de paiement."
+        },
+        {
+          "term": "Ban appeal",
+          "detail": "Tu penses qu’un bannissement devrait être levé ou raccourci."
+        },
+        {
+          "term": "Staff report",
+          "detail": "Une plainte contre un membre du staff. Elle va au propriétaire."
+        },
+        {
+          "term": "Other",
+          "detail": "Tout le reste."
+        }
+      ],
+      "appealTitle": "Conteste un bannissement ou un mute",
+      "appealIntro": "Les sanctions se comptent en avertissements, et chacun expire 6 mois après avoir été donné. 8 avertissements actifs entraînent un bannissement permanent du serveur et de Discord, et l’expiration ne l’annule pas.",
+      "appealSteps": [
+        "Ouvre un ticket. Pour un bannissement, choisis Ban appeal.",
+        "Explique pour quoi et quand tu as été sanctionné, et pourquoi ça devrait changer.",
+        "Un admin qui n’était pas impliqué l’examine et peut réduire ou retirer tes avertissements. Les réductions et les débannissements sont publiés, et la décision est définitive."
+      ],
+      "lostTitle": "Objets perdus",
+      "lost": "Les objets ne sont rendus qu’après une panne du serveur confirmée, comme un crash ou un bug du vide. Ouvre un ticket avec l’heure et ce que tu as perdu.",
+      "discordLink": "Discord de Mysterria",
+      "guideLink": "Guide du joueur",
+      "wikiLink": "Wiki",
+      "rulesLink": "Avertissements et bannissements dans le règlement"
+    },
+    "joining": {
+      "title": "Rejoindre le serveur",
+      "rows": [
+        {
+          "term": "Adresse",
+          "detail": "mc.mysterria.net ou play.mysterria.net"
+        },
+        {
+          "term": "Java Edition",
+          "detail": "Port 25565. Le serveur tourne en 26.2, et la 26.1.2 peut encore se connecter."
+        },
+        {
+          "term": "Bedrock Edition",
+          "detail": "La même adresse, port 19132."
+        }
+      ],
+      "launcher": "Utilise le launcher officiel ou SKLauncher. Évite TLauncher : le staff le considère comme un logiciel malveillant.",
+      "guideLink": "Guide complet pour rejoindre"
+    },
+    "client": {
+      "title": "COI Client",
+      "body": "Un mod Fabric facultatif conçu pour Mysterria. Il ajoute une interface de Beyonder avec des raccourcis pour les capacités et des effets de rituel, et tout le jeu fonctionne aussi sans lui. Des versions existent pour 26.1.2 et 26.2."
     }
   }
 }

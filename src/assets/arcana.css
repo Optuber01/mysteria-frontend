@@ -54,7 +54,12 @@
     initial-value: #e45a64;
 }
 
-:root {
+/*
+ * Declared on body too: App.vue sets the drawn card's --acc (and --acc-deep/--acc-fill) on
+ * body, and tokens built from it must resolve there, not against :root's initial value.
+ */
+:root,
+body {
     /* Chinese has no Commissioner glyphs: the system's own CJK sans carries it (:lang below) */
     --arc-cjk: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC';
     --arc-display: 'Commissioner', var(--arc-cjk), 'Segoe UI', system-ui, sans-serif;
@@ -160,12 +165,14 @@
     --font-display: var(--arc-display);
 }
 
-:root:lang(zh-Hant) {
+:root:lang(zh-Hant),
+:root:lang(zh-Hant) body {
     --arc-cjk: 'PingFang TC', 'Hiragino Sans CNS', 'Microsoft JhengHei', 'Noto Sans TC', 'Noto Sans CJK TC';
 }
 
 @media (min-width: 1280px) {
-    :root {
+    :root,
+    body {
         --arc-gutter: 64px;
     }
 }
@@ -175,7 +182,8 @@
  * keeps tinting washes and fills, while text, hairlines and solid controls use --acc-deep,
  * the same hue deepened to >= 5.3:1 on the paper for every card (accentInk.ts). No gold.
  */
-:root[data-theme="parchment"] {
+:root[data-theme="parchment"],
+:root[data-theme="parchment"] body {
     --arc-bg: #efede8;
     --arc-surface: #f8f7f4;
     --arc-line: rgba(28, 24, 36, .13);
@@ -312,7 +320,7 @@ body {
     background: color-mix(in srgb, var(--myst-bg) 95%, transparent);
 }
 
-:root[data-theme="parchment"] .header-stack :is(.season-headline, .lang-label) {
+:root[data-theme="parchment"] .header-stack .lang-label {
     color: color-mix(in oklab, var(--acc-ink) 62%, var(--arc-ink));
 }
 

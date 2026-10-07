@@ -1,55 +1,67 @@
 <template>
-  <article v-if="item.is_active" class="ware-card">
-    <RouterLink :aria-label="itemName" :to="$lp(getServiceDetailPath(item))" class="ware-media">
+  <!-- One item: its picture, what it is and does, the price, and the way to buy it. -->
+  <article v-if="item.is_active" class="store-card">
+    <!-- the picture repeats the name's link for the pointer; keyboards and readers use the name -->
+    <RouterLink :to="$lp(detailPath)" class="store-card__media" tabindex="-1" aria-hidden="true">
       <img
           v-if="imageUrl && !imageFailed"
-          :alt="itemName"
+          :src="imageUrl"
           :fetchpriority="imagePriority"
           :loading="imagePriority === 'high' ? 'eager' : 'lazy'"
-          :src="imageUrl"
-          class="ware-image"
+          alt=""
+          class="store-card__image"
           decoding="async"
+          width="640"
+          height="360"
           @error="imageFailed = true"
       >
-      <i v-else class="fa-solid fa-wand-sparkles ware-glyph" aria-hidden="true"></i>
-
-      <span v-if="item.category" class="ware-category">{{ item.category }}</span>
-      <span v-if="hasDiscount" class="ware-discount">−{{ discountPercent }}%</span>
+      <i v-else class="fa-solid fa-box-open store-card__glyph"></i>
     </RouterLink>
 
-    <div class="ware-body">
-      <h3 class="ware-name">{{ itemName }}</h3>
-      <p v-if="item.description" class="ware-description">{{ item.description }}</p>
+    <div class="store-card__body">
+      <h3 class="arc-h4 store-card__name">
+        <RouterLink :to="$lp(detailPath)" class="store-card__link">{{ itemName }}</RouterLink>
+      </h3>
+      <p v-if="item.description" class="store-card__description">{{ item.description }}</p>
 
-      <ul v-if="item.points?.length" class="ware-points">
+      <ul v-if="item.points?.length" class="store-card__points">
         <li v-for="(point, index) in item.points.slice(0, 4)" :key="index">
           <i class="fa-solid fa-check" aria-hidden="true"></i>
-          <span>{{ point.text }}</span>
-          <span v-if="point.tooltip" class="ware-tooltip" tabindex="0">
-            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <span role="tooltip">{{ point.tooltip }}</span>
+          <span>
+            {{ point.text }}
+            <span v-if="point.tooltip" class="store-card__hint">{{ point.tooltip }}</span>
           </span>
         </li>
       </ul>
 
-      <div class="ware-footer">
-        <div class="ware-price">
-          <span class="price-label">{{ priceNote }}</span>
-          <div class="price-values">
-            <span v-if="hasDiscount" class="price-old">
-              <span v-if="currentCurrency !== 'POINTS'">{{ getCurrencySymbol() }}</span>{{ displayOriginalPrice }}
-              <IconMark v-if="currentCurrency === 'POINTS'"/>
-            </span>
-            <span class="price-current">
-              <span v-if="currentCurrency !== 'POINTS'">{{ getCurrencySymbol() }}</span>{{ displayPrice }}
-              <IconMark v-if="currentCurrency === 'POINTS'"/>
-            </span>
-          </div>
-        </div>
+      <div class="store-card__tags">
+        <span class="arc-tag">{{ termLabel }}</span>
+        <span v-if="item.is_giftable" class="arc-tag">
+          <i class="fa-solid fa-gift" aria-hidden="true"></i>{{ t('shopPage.giftable') }}
+        </span>
+        <span v-if="hasDiscount" class="arc-tag arc-tag--acc">−{{ discountPercent }}%</span>
+      </div>
 
-        <button :disabled="isProcessing" class="ware-purchase" @click="handlePurchase">
+      <div class="store-card__foot">
+        <p class="store-card__price">
+          <span v-if="hasDiscount" class="store-card__was">
+            <span class="arc-sr">{{ t('shopPage.was') }}</span>
+            <s>{{ price.main(item.price) }}</s>
+          </span>
+          <span class="store-card__now">{{ price.main(finalPrice) }}</span>
+          <span v-if="price.inMarks(finalPrice)" class="store-card__marks">{{ price.inMarks(finalPrice) }}</span>
+        </p>
+
+        <button
+            :disabled="isProcessing"
+            type="button"
+            :class="{'is-sign-in': !signedIn}"
+            class="arc-btn arc-btn--ghost arc-btn--sm store-card__buy"
+            @click="emit('purchase', item.id)"
+        >
           <i v-if="isProcessing" class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
-          <span>{{ isProcessing ? t('processing') : t('purchase') }}</span>
+          {{ signedIn ? t('shopPage.buy') : t('shopPage.signInToBuy') }}
+          <span v-if="signedIn" class="arc-sr">: {{ itemName }}</span>
         </button>
       </div>
     </div>
@@ -58,12 +70,13 @@
 
 <script lang="ts" setup>
 import {computed, ref, watch} from "vue";
-import {useI18n} from "@/composables/useI18n";
-import {useCurrency} from "@/composables/useCurrency";
-import {type ServiceResponse, ServiceType} from "@/types/services";
 import {Decimal} from "decimal.js";
-import IconMark from "@/assets/icons/IconMark.vue";
+import {useI18n} from "@/composables/useI18n";
+import {useAuthStore} from "@/stores/auth";
+import type {ServiceResponse} from "@/types/services";
 import {getServiceDetailPath} from "@/utils/slug";
+import {useStorePrice} from "./useStorePrice";
+import {useTermLabel} from "./useTermLabel";
 
 const props = withDefaults(defineProps<{
   item: ServiceResponse;
@@ -73,28 +86,19 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{ (e: "purchase", itemId: string): void }>();
 const {t} = useI18n();
-const {currentCurrency, formatCurrency, getCurrencySymbol, usesRealCurrency} = useCurrency();
+const authStore = useAuthStore();
+const price = useStorePrice();
+const termLabel = useTermLabel(() => props.item.duration_months);
 
+const signedIn = computed(() => authStore.isAuthenticated);
 const imageFailed = ref(false);
 const itemName = computed(() => props.item.display_name || props.item.name);
+const detailPath = computed(() => getServiceDetailPath(props.item));
 
-const resolveImagePath = (path?: string) => {
-  if (!path) return "";
-  if (/^https?:\/\//.test(path) || path.startsWith("/")) return path;
-  if (path.startsWith("@/assets/")) return new URL(path.replace("@/assets/", "/src/assets/"), import.meta.url).href;
-  if (path.startsWith("src/")) return new URL(`/${path}`, import.meta.url).href;
-  return path;
-};
-
-const imageUrl = computed(() => resolveImagePath(props.item.image));
+const imageUrl = computed(() => props.item.image || "");
 watch(imageUrl, () => {
   imageFailed.value = false;
 });
-
-const isRecurring = computed(
-    () => props.item.type === ServiceType.SUBSCRIPTION || Boolean(props.item.duration_months),
-);
-const priceNote = computed(() => (isRecurring.value ? t("shopPage.perMonth") : t("shopPage.oneTime")));
 
 const activeDiscount = computed(() => props.item.discounts?.find(discount => {
   const now = Date.now();
@@ -103,320 +107,180 @@ const activeDiscount = computed(() => props.item.discounts?.find(discount => {
 const hasDiscount = computed(() => Boolean(activeDiscount.value));
 const discountPercent = computed(() => activeDiscount.value?.discount_percent || 0);
 const finalPrice = computed(() => new Decimal(props.item.price).mul(new Decimal(1).minus(new Decimal(discountPercent.value).div(100))));
-
-const formatPrice = (price: Decimal) => usesRealCurrency.value && currentCurrency.value !== 'POINTS'
-    ? formatCurrency(price, {showSymbol: false, decimals: 2})
-    : price.toString();
-
-const displayPrice = computed(() => formatPrice(finalPrice.value));
-const displayOriginalPrice = computed(() => formatPrice(new Decimal(props.item.price)));
-const handlePurchase = () => emit("purchase", props.item.id);
 </script>
 
 <style scoped>
-.ware-card {
+.store-card {
   position: relative;
-  min-width: 0;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--myst-panel-strong);
-  border: 1px solid var(--myst-line-18);
-  /* Named properties, not `all` - the grid renders one of these per item, and
-     `all` makes every one of them a candidate for transitioning layout
-     properties too. */
-  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--arc-r-lg);
+  background: var(--arc-raised);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+  transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
 }
 
-.ware-card:hover {
-  border-color: var(--myst-line-55);
-  transform: translateY(-5px);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.45);
+/* the hairline is drawn over the picture too, so the card keeps one edge */
+.store-card::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+  content: '';
+  pointer-events: none;
+  transition: box-shadow .25s ease;
 }
 
-/* Media */
-.ware-media {
-  position: relative;
+.store-card:hover {
+  transform: translateY(-2px);
+}
+
+.store-card:hover::after {
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+.store-card__media {
   display: grid;
   place-items: center;
-  aspect-ratio: 16 / 8;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 120%, rgb(var(--sic-c8b273) / 0.12), transparent 60%), rgb(var(--sic-0c0f1c));
-  color: inherit;
+  background: var(--arc-card-2);
+  color: var(--arc-muted);
 }
 
-.ware-image {
+.store-card__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(0.88);
-  transition: transform 0.6s ease, filter 0.4s ease;
 }
 
-.ware-card:hover .ware-image {
-  transform: scale(1.05);
-  filter: saturate(1);
+.store-card__glyph {
+  font-size: 32px;
+  opacity: .6;
 }
 
-.ware-glyph {
-  font-size: 44px;
-  color: rgb(var(--sic-c8b273) / 0.5);
-  filter: drop-shadow(0 0 18px rgb(var(--sic-c8b273) / 0.25));
-}
-
-.ware-category,
-.ware-discount {
-  position: absolute;
-  top: 14px;
-  font-family: var(--myst-font-mono);
-  text-transform: uppercase;
-}
-
-.ware-category {
-  left: 14px;
-  max-width: 65%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 6px 11px;
-  background: rgb(var(--sic-080a12) / 0.7);
-  border: 1px solid rgb(var(--sic-c8b273) / 0.25);
-  color: rgb(var(--sic-c8b273) / 0.7);
-  font-size: 9px;
-  letter-spacing: 0.24em;
-}
-
-.ware-discount {
-  right: 14px;
-  padding: 6px 11px;
-  background: var(--myst-gold);
-  color: var(--myst-on-gold);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-/* Body */
-.ware-body {
-  flex: 1;
+.store-card__body {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  padding: 24px 26px 26px;
+  gap: 12px;
+  padding: var(--arc-pad);
 }
 
-.ware-name {
-  margin: 0 0 8px;
-  font-family: var(--myst-font-display);
-  font-size: 21px;
-  font-weight: 700;
-  color: var(--myst-offwhite);
+.store-card__link {
+  color: inherit;
+  text-decoration: none;
 }
 
-.ware-description {
+.store-card__link:hover {
+  color: var(--acc-ink);
+}
+
+.store-card__description {
   display: -webkit-box;
   overflow: hidden;
-  margin: 0 0 18px;
-  color: var(--myst-ink-muted);
-  font-size: 13.5px;
-  line-height: 1.6;
+  margin: 0;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
+  line-height: 1.55;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
 }
 
-.ware-points {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.store-card__points {
+  display: grid;
+  gap: 6px;
   margin: 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--myst-line-10);
+  padding: 12px 0 0;
+  border-top: var(--arc-bw) solid var(--arc-line);
   list-style: none;
+  font-size: var(--arc-fs-small);
+  line-height: 1.45;
 }
 
-.ware-points li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  color: rgb(var(--sic-bdc0ca));
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.ware-points > li > i {
-  margin-top: 3px;
-  color: var(--myst-gold);
-  font-size: 9px;
-}
-
-.ware-points li > span:nth-child(2) {
-  flex: 1;
-}
-
-.ware-tooltip {
-  position: relative;
-  cursor: help;
-  color: rgb(var(--sic-777f92));
-}
-
-.ware-tooltip > span {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 8px);
-  width: min(230px, 70vw);
-  padding: 10px 12px;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(4px);
-  border: 1px solid var(--myst-line-28);
-  background: var(--myst-bg-deep);
-  color: rgb(var(--sic-e2e2e6));
-  box-shadow: 0 10px 30px #000;
-  transition: 0.2s ease;
-  z-index: 10;
-}
-
-.ware-tooltip:hover > span,
-.ware-tooltip:focus > span {
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-}
-
-/* Footer */
-.ware-footer {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: auto;
-  padding-top: 24px;
-}
-
-.price-label {
-  display: block;
-  margin-bottom: 5px;
-  font-family: var(--myst-font-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--myst-ink-muted);
-}
-
-.price-values {
+.store-card__points li {
   display: flex;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 9px;
+  gap: 10px;
 }
 
-.price-old {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  color: rgb(var(--sic-6f7481));
-  font-family: var(--myst-font-mono);
-  font-size: 12px;
-  text-decoration: line-through;
-}
-
-.price-current {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--myst-gold);
-  font-family: var(--myst-font-mono);
-  font-size: 22px;
-  font-weight: 800;
-}
-
-.price-values svg {
-  width: 18px;
-  height: 18px;
-}
-
-.price-old svg {
-  width: 12px;
-  height: 12px;
-}
-
-.ware-purchase {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 22px;
-  border: 1px solid var(--myst-line-55);
-  background: rgb(var(--sic-c8b273) / 0.08);
-  color: var(--myst-gold);
-  cursor: pointer;
-  font-family: var(--myst-font-mono);
+.store-card__points i {
+  flex: none;
+  color: var(--arc-muted);
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  transition: all 0.25s ease;
 }
 
-.ware-purchase:hover:not(:disabled) {
-  background: var(--myst-gold);
-  color: var(--myst-on-gold);
+.store-card__hint {
+  display: block;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-caption);
 }
 
-.ware-purchase:disabled {
-  opacity: 0.45;
-  cursor: wait;
+.store-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.ware-media:focus-visible,
-.ware-purchase:focus-visible {
-  outline: 2px solid var(--myst-gold);
-  outline-offset: -2px;
+.store-card__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: var(--arc-bw) solid var(--arc-line);
 }
 
-@media (max-width: 600px) {
-  .ware-body {
-    padding: 20px;
+.store-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.store-card__now {
+  color: var(--arc-ink);
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.store-card__was,
+.store-card__marks {
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
+}
+
+.store-card__buy {
+  flex: none;
+}
+
+/* the longer "sign in" label takes the row's width, whether or not it wraps */
+.store-card__buy.is-sign-in {
+  flex: 1 0 auto;
+}
+
+@media (max-width: 420px) {
+  .store-card__buy {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-card,
+  .store-card::after {
+    transition: none;
   }
 
-  .ware-footer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
+  .store-card:hover {
+    transform: none;
   }
-
-  .ware-purchase {
-    justify-content: center;
-    min-height: 48px;
-  }
-}
-
-/* Light theme: the category tag's faded accent would drop under 4.5:1. */
-:root[data-theme="parchment"] .ware-category {
-  color: var(--myst-gold);
 }
 </style>
-
-<style>
-/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
-   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
-   re-points them. Global so teleported content (modals) resolves them too. */
-:root {
-    --sic-080a12: 8 10 18;
-    --sic-0c0f1c: 12 15 28;
-    --sic-6f7481: 111 116 129;
-    --sic-777f92: 119 127 146;
-    --sic-bdc0ca: 189 192 202;
-    --sic-c8b273: 200 178 115;
-    --sic-e2e2e6: 226 226 230;
-}
-
-:root[data-theme="parchment"] {
-    --sic-080a12: 255 255 255;
-    --sic-0c0f1c: 255 255 255;
-    --sic-6f7481: 85 83 94;
-    --sic-777f92: 85 83 94;
-    --sic-bdc0ca: 23 22 28;
-    --sic-c8b273: 180 44 62;
-    --sic-e2e2e6: 23 22 28;
-}
-</style>
-

@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-17",
+  "lastUpdated": "2026-10-07",
   "pathways": [
     {
       "id": "abyss",
@@ -1647,8 +1647,8 @@
                 "zh-TW": "夢魘之肢"
               },
               "description": {
-                "en": "Manifest four shadowy limbs with their own health that take half of the damage aimed at you. Attacking a target within 6 blocks sends every limb to strike it, after which they need 9 seconds to recover. If the limbs are destroyed, the backlash wounds you slightly.",
-                "uk": "Прояви чотири тіньові кінцівки з власним запасом здоров'я, що беруть на себе половину спрямованої на вас шкоди. Атака цілі в межах 6 блоків відправляє всі кінцівки вразити її, після чого їм потрібно 9 секунд на відновлення. Якщо кінцівки знищено, віддача легко ранить вас.",
+                "en": "Manifest four shadowy limbs with their own health that take half of the damage aimed at you. Attacking a target within 6 blocks sends every limb to strike it, after which they need 4 seconds to recover. If the limbs are destroyed, the backlash wounds you slightly.",
+                "uk": "Прояви чотири тіньові кінцівки з власним запасом здоров'я, що беруть на себе половину спрямованої на вас шкоди. Атака цілі в межах 6 блоків відправляє всі кінцівки вразити її, після чого їм потрібно 4 секунди на відновлення. Якщо кінцівки знищено, віддача легко ранить вас.",
                 "zh-CN": "显化幽影之肢，可独立于你自行攻击。",
                 "zh-TW": "顯化幽影之肢，可獨立於你自行攻擊。"
               }
@@ -3388,8 +3388,8 @@
                 "zh-TW": "鏡界"
               },
               "description": {
-                "en": "Enter your personal mirror dimension - a glass sanctuary that grows larger as your Sequence advances.",
-                "uk": "Увійдіть у ваш особистий дзеркальний вимір - скляне сховище, яке стає більшим з підвищенням вашої Послідовності.",
+                "en": "Enter your personal mirror dimension - a glass sanctuary that grows with your Sequence, clearing its old inner shell. Shell glass drops no items.",
+                "uk": "Увійдіть у ваш особистий дзеркальний вимір - скляне сховище, яке зростає з вашою Послідовністю, прибираючи стару внутрішню оболонку. Скло оболонки не випадає як предмети.",
                 "zh-CN": "进入你私人的镜之维度——一座随你序列晋升而愈发广阔的琉璃圣所。",
                 "zh-TW": "進入你私人的鏡之維度——一座隨你序列晉升而愈發廣闊的琉璃聖所。"
               }
@@ -4908,21 +4908,6 @@
           },
           "abilities": [
             {
-              "id": "eloquence",
-              "name": {
-                "en": "Eloquence",
-                "uk": "Красномовство",
-                "zh-CN": "口才",
-                "zh-TW": "口才"
-              },
-              "description": {
-                "en": "Build a 0–100 Eloquence reserve while visible players are within 12 blocks. Enemy hits drain it, mobs have a reserve-percent chance to leave you alone, and reserves above 80 grant Hero of the Village II (III at 100).",
-                "uk": "Накопичуйте запас Красномовства 0–100, поки видимі гравці перебувають у радіусі 12 блоків. Удари ворогів зменшують його, моби мають шанс у відсотках запасу залишити вас у спокої, а запас понад 80 дає Героя Села II (III при 100).",
-                "zh-CN": "当可见的玩家位于 12 格内时，累积 0–100 的口才储备。被敌人命中会消耗储备；怪物有相当于储备百分比的概率对你视而不见；储备高于 80 时赋予村庄英雄 II（满 100 时为 III）。",
-                "zh-TW": "當可見的玩家位於 12 格內時，累積 0–100 的口才儲備。被敵人命中會消耗儲備；怪物有相當於儲備百分比的機率對你視而不見；儲備高於 80 時賦予村莊英雄 II（滿 100 時為 III）。"
-              }
-            },
-            {
               "id": "charm",
               "name": {
                 "en": "Charm",
@@ -4965,6 +4950,21 @@
                 "uk": "Поруште свідомість одного гравця на 5 секунд Засліпленням, Нудотою й Темрявою або блокуванням випадкового напрямку WASD. На Послідовності 5 Засліплення приховує істот поруч, Викривлення Погляду рухає камеру, а Порушення Керування інвертує рух. На Послідовності 3 діє на гравців у радіусі 8 блоків від цілі протягом 10 секунд.",
                 "zh-CN": "使一名玩家在 5 秒内受到失明、恶心与黑暗，或随机锁死一个 WASD 方向。序列5 时，失明会隐去附近实体，视角扭曲会移动其镜头，操作扰乱则反转其移动。序列3 时，效果扩及目标 8 格内的玩家，持续 10 秒。",
                 "zh-TW": "使一名玩家在 5 秒內受到失明、噁心與黑暗，或隨機鎖死一個 WASD 方向。序列5 時，失明會隱去附近實體，視角扭曲會移動其鏡頭，操作擾亂則反轉其移動。序列3 時，效果擴及目標 8 格內的玩家，持續 10 秒。"
+              }
+            },
+            {
+              "id": "eloquence",
+              "name": {
+                "en": "Eloquence",
+                "uk": "Красномовство",
+                "zh-CN": "口才",
+                "zh-TW": "口才"
+              },
+              "description": {
+                "en": "Build a 0–100 Eloquence reserve while visible players are within 12 blocks. Enemy hits drain it, mobs have a reserve-percent chance to leave you alone, and reserves above 80 grant Hero of the Village II (III at 100).",
+                "uk": "Накопичуйте запас Красномовства 0–100, поки видимі гравці перебувають у радіусі 12 блоків. Удари ворогів зменшують його, моби мають шанс у відсотках запасу залишити вас у спокої, а запас понад 80 дає Героя Села II (III при 100).",
+                "zh-CN": "当可见的玩家位于 12 格内时，累积 0–100 的口才储备。被敌人命中会消耗储备；怪物有相当于储备百分比的概率对你视而不见；储备高于 80 时赋予村庄英雄 II（满 100 时为 III）。",
+                "zh-TW": "當可見的玩家位於 12 格內時，累積 0–100 的口才儲備。被敵人命中會消耗儲備；怪物有相當於儲備百分比的機率對你視而不見；儲備高於 80 時賦予村莊英雄 II（滿 100 時為 III）。"
               }
             }
           ]
@@ -5643,6 +5643,21 @@
                 "zh-CN": "查询本地时间的丝线。以 CoreProtect 记录扫描半径 32 格内过去 1 小时的方块放置、破坏与容器交互，并将最近 12 条日志直接打印到你的聊天栏。",
                 "zh-TW": "查詢本地時間的絲線。以 CoreProtect 記錄掃描半徑 32 格內過去 1 小時的方塊放置、破壞與容器互動，並將最近 12 條日誌直接列印到你的聊天欄。"
               }
+            },
+            {
+              "id": "error-family",
+              "name": {
+                "en": "Error Family",
+                "uk": "Родина Помилки",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Left-click to invite an Error, or a Player Avatar previously fully taken over by this family; identity theft completes after one Minecraft day (20 minutes); right-click to manage and synchronize your family.",
+                "uk": "Лівий клік запрошує гравця шляху Помилки або Аватара-гравця, якого раніше повністю захопила ця родина, стати Аватаром-гравцем; викрадення особистості триває один ігровий день (20 хвилин); правий клік відкриває керування та синхронізацію родини.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
             }
           ]
         }
@@ -5742,6 +5757,21 @@
             "zh-TW": "魔術師"
           },
           "abilities": [
+            {
+              "id": "damage-transfer",
+              "name": {
+                "en": "Damage Transfer",
+                "uk": "Перенесення Пошкодження",
+                "zh-CN": "伤害转移",
+                "zh-TW": "傷害轉移"
+              },
+              "description": {
+                "en": "From Sequence 7, transfer recent damage to your body, or to paper from Sequence 4. Recover up to 60% of damage taken in the last 10 seconds. Both modes share 5 charges with no delay between uses. Using all charges starts a 45-second cooldown; all 5 charges refill after 60 seconds without a successful transfer when partially spent.",
+                "uk": "З Послідовності 7 перенесіть недавні пошкодження на своє тіло, а з Послідовності 4 також на папір. Відновіть до 60% пошкоджень, отриманих за останні 10 секунд. Обидва режими мають 5 спільних зарядів без затримки між використаннями. Після витрати всіх зарядів відновлення триває 45 секунд; частково витрачені заряди відновлюються до всіх 5 після 60 секунд без успішного перенесення.",
+                "zh-CN": "将受到的伤害转移至其他身体部位或纸人替身。",
+                "zh-TW": "將受到的傷害轉移至其他身體部位或紙人替身。"
+              }
+            },
             {
               "id": "flaming-jump",
               "name": {
@@ -5910,21 +5940,6 @@
             "zh-TW": "詭法師"
           },
           "abilities": [
-            {
-              "id": "damage-transfer",
-              "name": {
-                "en": "Damage Transfer",
-                "uk": "Перенесення Пошкодження",
-                "zh-CN": "伤害转移",
-                "zh-TW": "傷害轉移"
-              },
-              "description": {
-                "en": "Transfer received damage to other body parts or paper figurines.",
-                "uk": "Перенесіть отримані пошкодження на інші частини тіла або паперові фігурки",
-                "zh-CN": "将受到的伤害转移至其他身体部位或纸人替身。",
-                "zh-TW": "將受到的傷害轉移至其他身體部位或紙人替身。"
-              }
-            },
             {
               "id": "worms-of-spirit",
               "name": {
@@ -6380,8 +6395,8 @@
                 "zh-TW": "幸運操縱"
               },
               "description": {
-                "en": "Marks your target with a 60-second Luck or Unluck effect. A blessed target gains Speed (and Resistance at low Sequence); a cursed target takes immediate damage and Slowness, and deals periodic aura damage to anyone standing within 8 blocks of them while the curse holds.",
-                "uk": "Накладає на ціль ефект Удачі або Невдачі на 60 секунд. Благословенна ціль отримує Швидкість (та Опір на нижчих Послідовностях); проклята ціль одразу отримує пошкодження й Повільність, а також періодично завдає аурного пошкодження всім, хто перебуває в межах 8 блоків від неї, поки прокляття діє.",
+                "en": "Marks your target with a 60-second Luck or Unluck effect. A blessed target is healed and gains Speed (and Resistance at low Sequence); a cursed target takes immediate damage, Weakness and Slowness, and radiates misfortune every 2 seconds to anyone standing within 8 blocks of them while the curse holds. Both modes work on players and mobs alike.",
+                "uk": "Накладає на ціль ефект Удачі або Невдачі на 60 секунд. Благословенна ціль зцілюється та отримує Швидкість (і Опір на нижчих Послідовностях); проклята ціль одразу отримує пошкодження, Слабкість і Повільність, а також кожні 2 секунди випромінює нещастя на всіх, хто перебуває в межах 8 блоків від неї, поки прокляття діє. Обидва режими працюють і на гравцях, і на мобах.",
                 "zh-CN": "为目标标记一个持续 60 秒的幸运或厄运效果。受祝福的目标获得速度（低序列时另有抗性提升）；受诅咒的目标立即受到伤害与缓慢，且在诅咒存续期间，对站在其 8 格内的任何人造成周期性的光环伤害。",
                 "zh-TW": "為目標標記一個持續 60 秒的幸運或厄運效果。受祝福的目標獲得速度（低序列時另有抗性提升）；受詛咒的目標立即受到傷害與緩慢，且在詛咒存續期間，對站在其 8 格內的任何人造成周期性的光環傷害。"
               }
@@ -6563,8 +6578,8 @@
                 "zh-TW": "機率風暴"
               },
               "description": {
-                "en": "Summons a storm centered on you (up to 24 blocks at low Sequence) that periodically rolls a random probability effect on everyone caught inside - teleport, position-swap with you, random knockback, instant damage or healing, a random buff potion, aim confusion, levitation, invisibility, or freezing - while also giving nearby entities a chance to dodge or take double damage from ongoing hits. Effects lean positive or negative for others based on your current luck.",
-                "uk": "Викликає шторм з центром на вас (до 24 блоків на низькій Послідовності), який періодично накладає випадковий ефект ймовірності на всіх, хто опинився всередині — телепортацію, обмін місцями з вами, випадковий поштовх, миттєве пошкодження чи зцілення, випадкове зілля-баф, збивання прицілу, левітацію, невидимість або заморожування — а також дає сутностям поблизу шанс ухилитися від атак або отримати подвійне пошкодження. Ефекти схиляються до позитивних чи негативних для інших залежно від вашої поточної удачі.",
+                "en": "Summons a storm centered on you (up to 24 blocks at low Sequence) that periodically rolls a random probability effect on everyone caught inside - teleport, position-swap with you, random knockback, instant damage or healing, a random buff potion, aim confusion, levitation, invisibility, or freezing - while also giving nearby entities a chance to dodge or take double damage from ongoing hits. Effects lean positive or negative for others based on your current luck; left-click while holding the ability to invert that reading, so high luck rains misfortune on your enemies instead of blessing them. Allies and players you cannot fight are only ever rolled harmless effects.",
+                "uk": "Викликає шторм з центром на вас (до 24 блоків на низькій Послідовності), який періодично накладає випадковий ефект ймовірності на всіх, хто опинився всередині — телепортацію, обмін місцями з вами, випадковий поштовх, миттєве пошкодження чи зцілення, випадкове зілля-баф, збивання прицілу, левітацію, невидимість або заморожування — а також дає сутностям поблизу шанс ухилитися від атак або отримати подвійне пошкодження. Ефекти схиляються до позитивних чи негативних для інших залежно від вашої поточної удачі; лівий клік з активною здібністю інвертує це читання, і висока удача натомість насилає нещастя на ворогів. На союзників і гравців, з якими ви не можете битися, випадають лише нешкідливі ефекти.",
                 "zh-CN": "召唤一场以你为中心的风暴（低序列时最远 24 格），周期性地对陷入其中的每一个人掷出一种随机概率效果——传送、与你交换位置、随机击退、瞬间伤害或治疗、随机增益药水、瞄准混乱、飘浮、隐身或冻结——同时让附近实体有概率闪避，或从持续命中中受到双倍伤害。对他人而言，效果偏吉或偏凶取决于你当前的幸运值。",
                 "zh-TW": "召喚一場以你為中心的風暴（低序列時最遠 24 格），週期性地對陷入其中的每一個人擲出一種隨機機率效果——傳送、與你交換位置、隨機擊退、瞬間傷害或治療、隨機增益藥水、瞄準混亂、飄浮、隱身或凍結——同時讓附近實體有機率閃避，或從持續命中中受到雙倍傷害。對他人而言，效果偏吉或偏兇取決於你當前的幸運值。"
               }
@@ -6664,8 +6679,8 @@
                 "zh-TW": "封印混亂"
               },
               "description": {
-                "en": "Seals negative effects from otherworldly beings and releases them upon enemies. Holds up to 10 effects. Same-type effects stack their duration; different amplifier levels merge with the highest level kept, scaling lower durations by 0.5 / 0.3 / 0.1.",
-                "uk": "Запечатує негативні ефекти надприродних істот та вивільняє їх на ворогів. Вміщує до 10 ефектів. Однакові ефекти підсумовують тривалість; ефекти різного рівня зливаються з найвищим рівнем, множачи нижчі тривалості на 0.5 / 0.3 / 0.1.",
+                "en": "Seals negative potion effects and Beyonder afflictions (madness, mental pressure, freeze stacks) off a target, then unleashes them upon an enemy. Holds up to 10 sealed entries in total. Same-type potion effects stack their duration; different amplifier levels merge with the highest level kept, scaling lower durations by 0.5 / 0.3 / 0.1. A single release delivers at most 15 madness, 30 mental pressure and 30 freeze stacks.",
+                "uk": "Запечатує негативні ефекти зілль та потойбічні недуги (божевілля, ментальний тиск, стаки обмороження) з цілі, а потім вивільняє їх на ворога. Вміщує до 10 записів загалом. Однакові ефекти зілль підсумовують тривалість; ефекти різного рівня зливаються з найвищим рівнем, множачи нижчі тривалості на 0.5 / 0.3 / 0.1. За одне вивільнення передається щонайбільше 15 божевілля, 30 ментального тиску та 30 стаків обмороження.",
                 "zh-CN": "封印来自异界存在的负面效果，并将其释放于敌人身上。最多容纳 10 项效果。同类效果持续时间叠加；不同等级则合并并保留最高等级，较低持续时间按 0.5 / 0.3 / 0.1 缩放。",
                 "zh-TW": "封印來自異界存在的負面效果，並將其釋放於敵人身上。最多容納 10 項效果。同類效果持續時間疊加；不同等級則合併並保留最高等級，較低持續時間按 0.5 / 0.3 / 0.1 縮放。"
               }
@@ -6735,8 +6750,8 @@
                 "zh-TW": "命運啟示"
               },
               "description": {
-                "en": "Consult the fates. Has a 50% chance to grant powerful buffs (Speed, Strength, Resistance, Fire Resistance, or Regeneration) for 60 seconds based on the revelation. Otherwise, inflicts double damage vulnerability for 3 minutes (25% chance) or triple damage vulnerability, 1000 spirituality loss, -5000 luck, and silences abilities for 1 minute (25% chance).",
-                "uk": "Радьтеся з долями. Має 50% шанс дати потужні бафи (Швидкість, Сила, Опір, Вогнетривкість або Регенерація) на 60 секунд. Інакше накладає вразливість до подвійної шкоди на 3 хвилини (25% шанс) або вразливість до потрійної шкоди, блокування здібностей на 1 хвилину, втрату 1000 духовності та -5000 удачі (25% шанс).",
+                "en": "Consult the fates. The outcome is weighted by your luck: at neutral luck it is 50% true / 25% false / 25% deceptive, shifting to 80% true / 15% false / 5% deceptive at your maximum luck and to 20% true / 35% false / 45% deceptive at your minimum. A true revelation grants 60 seconds of buffs matching the vision (Speed, Strength and Resistance; Fire Resistance, Night Vision and Water Breathing; full hunger plus Saturation and Regeneration; or Regeneration and Health Boost). A false revelation inflicts double damage vulnerability for 3 minutes. A deceptive revelation inflicts triple damage vulnerability, 1000 spirituality loss, silences your abilities for 1 minute, and strips a quarter of the luck you hold above your minimum (about 250 at neutral luck).",
+                "uk": "Радьтеся з долями. Результат залежить від вашої удачі: за нейтральної удачі це 50% правда / 25% брехня / 25% омана, за максимальної удачі — 80% правда / 15% брехня / 5% омана, а за мінімальної — 20% правда / 35% брехня / 45% омана. Правдиве одкровення дає на 60 секунд бафи відповідно до видіння (Швидкість, Сила та Опір; Вогнетривкість, Нічний зір та Дихання під водою; повне насичення плюс Saturation і Регенерація; або Регенерація та Приріст здоров'я). Хибне одкровення накладає вразливість до подвійної шкоди на 3 хвилини. Оманливе одкровення накладає вразливість до потрійної шкоди, втрату 1000 духовності, блокування здібностей на 1 хвилину та забирає чверть удачі, яку ви маєте понад свій мінімум (близько 250 за нейтральної удачі).",
                 "zh-CN": "垂询命运。有 50% 概率依启示赋予 60 秒的强力增益（速度、力量、抗性提升、防火或生命恢复）。否则，将施加 3 分钟的双倍伤害易伤（25% 概率），或三倍伤害易伤、损失 1000 灵性、-5000 幸运值，并沉默能力 1 分钟（25% 概率）。",
                 "zh-TW": "垂詢命運。有 50% 機率依啟示賦予 60 秒的強力增益（速度、力量、抗性提升、防火或生命恢復）。否則，將施加 3 分鐘的雙倍傷害易傷（25% 機率），或三倍傷害易傷、損失 1000 靈性、-5000 幸運值，並沉默能力 1 分鐘（25% 機率）。"
               }
@@ -6759,8 +6774,8 @@
             {
               "id": "soothsayer-mercury",
               "name": {
-                "en": "Mercury's Body",
-                "uk": "Тіло Меркурія",
+                "en": "Soothsayer's Mercury",
+                "uk": "Ртуть Віщуна",
                 "zh-CN": "水银之体",
                 "zh-TW": "水銀之體"
               },
@@ -6791,8 +6806,8 @@
                 "zh-TW": "水銀之蛇"
               },
               "description": {
-                "en": "Attack sleeping targets in their dreams. Opens a GUI of online sleeping players to enter a Dream Invasion arena, spawning their astral armor-stand projection. Attacking the projection within 40 seconds deals massive magic damage to the real player, alerts them, and returns you safely.",
-                "uk": "Атакуйте сплячих гравців у їхніх снах. Відкриває меню сплячих гравців, телепортуючи вас на арену Вторгнення у сновидіння, де створюється їхня астральна проекція (стійка для обладунків). Атака проекції протягом 40 секунд завдає реальному гравцеві величезної магічної шкоди, будить його та повертає вас назад.",
+                "en": "Attack sleeping or unconscious targets in their dreams. Opens a GUI of online players who are asleep, magically slumbering or knocked unconscious, and sends you into a Dream Invasion arena where their astral armor-stand projection is spawned. Attacking the projection within 40 seconds deals massive magic damage to the real player, alerts them, and returns you safely.",
+                "uk": "Атакуйте сплячих або непритомних гравців у їхніх снах. Відкриває меню гравців, які сплять, занурені в магічний сон або непритомні, та телепортує вас на арену Вторгнення у сновидіння, де створюється їхня астральна проекція (стійка для обладунків). Атака проекції протягом 40 секунд завдає реальному гравцеві величезної магічної шкоди, будить його та повертає вас назад.",
                 "zh-CN": "在梦中攻击睡眠中的目标。打开在线睡眠玩家的界面以进入梦境侵袭场地，并生成其星界盔甲架投影。在 40 秒内攻击该投影，会对真实玩家造成巨额魔法伤害、向其发出警示，并使你安全返回。",
                 "zh-TW": "在夢中攻擊睡眠中的目標。開啟線上睡眠玩家的介面以進入夢境侵襲場地，並生成其星界盔甲架投影。在 40 秒內攻擊該投影，會對真實玩家造成鉅額魔法傷害、向其發出警示，並使你安全返回。"
               }
@@ -6806,8 +6821,8 @@
                 "zh-TW": "命運系連"
               },
               "description": {
-                "en": "Seal an ability or a luck adjustment (+/- 500, 1000, 2500, 5000) into a held item or a door-like block. When a non-caster picks up or breaks the item, or interacts with the door, the bond triggers: modifies the target player's luck (HOLDER or PRESET), replicates the sealed ability's real effect where supported, or otherwise inflicts magic damage (using that ability's own configured value) and luck penalties based on its category.",
-                "uk": "Запечатайте здібність або модифікатор удачі (+/- 500, 1000, 2500, 5000) у триманий предмет або блок дверей/люка. Коли інший гравець піднімає/ламає предмет або взаємодіє з дверима, зв'язок активується: змінює удачу цілі (HOLDER або PRESET), відтворює справжній ефект запечатаної здібності, де це підтримується, або ж наносить магічну шкоду (за власним значенням цієї здібності) та дебафи удачі відповідно до її категорії.",
+                "en": "Seal an ability or a luck adjustment (+/- 500, 1000, 2500, 5000) into a held item or a door-like block. When a non-caster picks up or breaks the item, or interacts with or breaks the bound block, the bond triggers: modifies the target player's luck (HOLDER or PRESET), replicates the sealed ability's real effect where supported, or otherwise inflicts magic damage (using that ability's own configured value) and luck penalties based on its category. A bound block is not consumed on activation — it stays armed until the bond expires, though the same victim can only set it off once every few seconds.",
+                "uk": "Запечатайте здібність або модифікатор удачі (+/- 500, 1000, 2500, 5000) у триманий предмет або блок дверей/люка. Коли інший гравець піднімає/ламає предмет або взаємодіє з запечатаним блоком чи ламає його, зв'язок активується: змінює удачу цілі (HOLDER або PRESET), відтворює справжній ефект запечатаної здібності, де це підтримується, або ж наносить магічну шкоду (за власним значенням цієї здібності) та дебафи удачі відповідно до її категорії. Запечатаний блок не витрачається після активації — він лишається зарядженим, доки зв'язок не спливе, проте та сама жертва може активувати його лише раз на кілька секунд.",
                 "zh-CN": "将一项能力或一次幸运调整（+/- 500、1000、2500、5000）封入手持物品或门类方块。当非施术者拾取或破坏该物品、或与该门交互时，系连便会触发：修改目标玩家的幸运值（持有者或预设），在支持的情形下复现被封能力的真实效果，否则依其类别造成魔法伤害（沿用该能力自身配置的数值）与幸运惩罚。",
                 "zh-TW": "將一項能力或一次幸運調整（+/- 500、1000、2500、5000）封入手持物品或門類方塊。當非施術者拾取或破壞該物品、或與該門互動時，系連便會觸發：修改目標玩家的幸運值（持有者或預設），在支援的情形下復現被封能力的真實效果，否則依其類別造成魔法傷害（沿用該能力自身配置的數值）與幸運懲罰。"
               }
@@ -6821,8 +6836,8 @@
                 "zh-TW": "重啟"
               },
               "description": {
-                "en": "Left-click cycles between three modes: checkpoint (saves position, HP, and potion effects of nearby mobs and allied players in a 30m radius); reboot-destiny (restores their saved checkpoint state within 5 minutes); reboot-entity (targets an entity to clear all potion effects, delete Error avatars or Fool marionette bindings, and if they are a player, cure mental plagues and diseases while silencing their abilities for 30s).",
-                "uk": "Лівий клік перемикає три режими: checkpoint (зберігає позицію, здоров'я та ефекти зілля мобів і союзних гравців у радіусі 30м); reboot-destiny (протягом 5 хвилин відновлює їхній збережений стан); reboot-entity (очищає ефекти цілі, видаляє аватари Error або маріонеток Fool, а для гравців — зцілює ментальні хвороби, блокуючи їхні здібності на 30 секунд).",
+                "en": "Left-click cycles between three modes: checkpoint (saves position, HP, and potion effects of nearby mobs and allied players in a 30m radius); reboot-destiny (restores their saved checkpoint state within 5 minutes); reboot-entity (targets an entity to clear all potion effects, delete Error avatars or Fool marionette bindings, and if they are a player, cure plagues, mental plagues, and diseases while silencing their abilities for 30s).",
+                "uk": "Лівий клік перемикає три режими: checkpoint (зберігає позицію, здоров'я та ефекти зілля мобів і союзних гравців у радіусі 30м); reboot-destiny (протягом 5 хвилин відновлює їхній збережений стан); reboot-entity (очищає ефекти цілі, видаляє аватари Error або маріонеток Fool, а для гравців — зцілює чуму, ментальні хвороби та захворювання, блокуючи їхні здібності на 30 секунд).",
                 "zh-CN": "左键循环切换三种模式：存档点（保存半径 30 米内附近怪物与友方玩家的位置、生命与药水效果）；重启命运（在 5 分钟内还原其保存的存档点状态）；重启实体（锁定一个实体以清除其所有药水效果、删除偷盗者途径的化身或占卜家途径的秘偶绑定；若为玩家，则治愈其精神疫病与疾病，并沉默其能力 30 秒）。",
                 "zh-TW": "左鍵循環切換三種模式：存檔點（儲存半徑 30 米內附近怪物與友方玩家的位置、生命與藥水效果）；重啟命運（在 5 分鐘內還原其儲存的存檔點狀態）；重啟實體（鎖定一個實體以清除其所有藥水效果、刪除偷盜者途徑的化身或占卜家途徑的秘偶綁定；若為玩家，則治癒其精神疫病與疾病，並沉默其能力 30 秒）。"
               }
@@ -6836,8 +6851,8 @@
                 "zh-TW": "命運之環"
               },
               "description": {
-                "en": "First cast: select target players in 50m via head GUI to bind them to a cycle. Second cast: choose to Restart the cycle at a cost of 1,000 luck per online victim (caster dies if luck reaches -10,000) — after 10 seconds, select a resolution effect: Spirituality (drains 10% max spirituality); Health (deals magic damage to you and victims); Sealed Chaos (applies your sealed potion effects); or Fate Bond (deals damage and -300 luck) — or choose to Cut the cycle, ending it immediately at no cost.",
-                "uk": "Перший каст: виберіть гравців у радіусі 50м для прив'язки до циклу. Другий каст: виберіть Перезапустити цикл ціною 1,000 удачі за кожну жертву (заклинач гине, якщо удача впаде до -10,000) — через 10 секунд виберіть ефект вирішення: Spirituality (забирає 10% макс. духовності); Health (наносить магічну шкоду вам і жертвам); Sealed Chaos (накладає ваші запечатані зілля); або Fate Bond (наносить шкоду та -300 удачі) — або Обірвати цикл, завершивши його негайно без витрат.",
+                "en": "First cast: select target players in 50m via head GUI to bind them to a cycle. Second cast: choose to Restart the cycle at a cost of 100 luck per online victim (if this drives your luck down to your personal minimum — normally -1,000 — the cycle kills you) — after 10 seconds, select a resolution effect: Spirituality (drains 10% max spirituality); Health (deals magic damage to you and victims); Sealed Chaos (applies your sealed potion effects); or Fate Bond (deals damage and -300 luck) — or choose to Cut the cycle, ending it immediately at no cost.",
+                "uk": "Перший каст: виберіть гравців у радіусі 50м для прив'язки до циклу. Другий каст: виберіть Перезапустити цикл ціною 100 удачі за кожну жертву (якщо це опустить вашу удачу до вашого особистого мінімуму — зазвичай -1,000 — цикл вас вбиває) — через 10 секунд виберіть ефект вирішення: Spirituality (забирає 10% макс. духовності); Health (наносить магічну шкоду вам і жертвам); Sealed Chaos (накладає ваші запечатані зілля); або Fate Bond (наносить шкоду та -300 удачі) — або Обірвати цикл, завершивши його негайно без витрат.",
                 "zh-CN": "首次施放：通过头像界面选定 50 米内的目标玩家，将其绑入一个轮回。再次施放：可选择「重启」轮回，代价为每位在线受害者 1,000 幸运值（若施术者幸运值降至 -10,000 则死亡）——10 秒后，选择一种结算效果：灵性（抽取最大灵性的 10%）；生命（对你与受害者造成魔法伤害）；封印混乱（施加你已封印的药水效果）；或命运系连（造成伤害与 -300 幸运值）——亦可选择「斩断」轮回，无代价地立即终结它。",
                 "zh-TW": "首次施放：透過頭像介面選定 50 米內的目標玩家，將其綁入一個輪迴。再次施放：可選擇「重啟」輪迴，代價為每位線上受害者 1,000 幸運值（若施術者幸運值降至 -10,000 則死亡）——10 秒後，選擇一種結算效果：靈性（抽取最大靈性的 10%）；生命（對你與受害者造成魔法傷害）；封印混亂（施加你已封印的藥水效果）；或命運系連（造成傷害與 -300 幸運值）——亦可選擇「斬斷」輪迴，無代價地立即終結它。"
               }
@@ -7442,6 +7457,21 @@
           },
           "abilities": [
             {
+              "id": "chosen-deity",
+              "name": {
+                "en": "Chosen Deity",
+                "uk": "Обране Божество",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Passive. Swear allegiance to the deity you act on behalf of. Opens a selection menu until a deity is chosen. Your choice decides what your Hand of God embodies and what Proxy lends and unleashes. Sneak-cast Hand of God — Invocation to re-pledge (1h cooldown). The sidebar shows your deity and its timers.",
+                "uk": "Пасивна. Присягніть на вірність божеству, від імені якого ви дієте. Відкриває меню вибору, доки божество не обрано. Ваш вибір визначає, що втілює ваша Рука Бога і що Проксі позичає та вивільняє. Використання Руки Бога — Заклику в присіді — нова присяга (перезарядка 1 год). Бічна панель показує ваше божество та його таймери.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
               "id": "hand-of-god",
               "name": {
                 "en": "Hand of God",
@@ -7450,10 +7480,10 @@
                 "zh-TW": "神明之手"
               },
               "description": {
-                "en": "Passive. A channel for divine alignment. Periodically opens a selection interface to align with one of five deities (Red Priest, Evernight, Steam, War, or Wisdom). This choice dictates the path-specific blessings and detonations of the Proxy ability.",
-                "uk": "Пасивна. Провідник божественного вирівнювання. Періодично відкриває меню вибору для присяги одному з п'яти божеств (Червоний Жрець, Вічна Ніч, Пар/Паргон, Війна або Мудрість). Цей вибір визначає бафи та тип вибуху для здібності Проксі.",
-                "zh-CN": "被动。一条通往神性契合的通道。周期性地打开选择界面，以与五位神明之一契合（红祭司、永夜、蒸汽、战争或智慧）。此选择决定「代行」能力中与该神明相应的祝福与引爆。",
-                "zh-TW": "被動。一條通往神性契合的通道。週期性地開啟選擇介面，以與五位神明之一契合（紅祭司、永夜、蒸汽、戰爭或智慧）。此選擇決定「代行」能力中與該神明相應的祝福與引爆。"
+                "en": "Passive. Your right hand embodies your Chosen Deity: each deity gives your punches a unique effect and grants Hand of God — Invocation, which casts that deity's power (12s cooldown).",
+                "uk": "Пасивна. Ваша права рука втілює Обране Божество: кожне божество дає вашим ударам унікальний ефект, і дарує Руку Бога — Заклик, що вивільняє силу цього божества (перезарядка 12с).",
+                "zh-CN": "Passive. Your right hand embodies your Chosen Deity: each deity gives your punches a unique effect and grants Hand of God — Invocation, which casts that deity's power (12s cooldown).",
+                "zh-TW": "Passive. Your right hand embodies your Chosen Deity: each deity gives your punches a unique effect and grants Hand of God — Invocation, which casts that deity's power (12s cooldown)."
               }
             },
             {
@@ -7465,10 +7495,10 @@
                 "zh-TW": "代行"
               },
               "description": {
-                "en": "Cycle modes with Left-Click: restraint (toggles active channel: drains spirituality, adds 1.5 madness/s, but grants Strength V, Speed III, Resistance III, Regeneration IV, and deity-specific buffs); detonation (adds 25-40 madness, unleashes an apocalyptic 12m AoE explosion based on your deity, but carries a 15-30% chance to regress your Sequence level).",
-                "uk": "Вибір режимів лівим кліком: restraint (активне перемикання: споживає духовність, додає 1.5 безумства/с, але дає Силу V, Швидкість III, Опір III, Регенерацію IV та бафи обраного божества); detonation (додає 25-40 безумства та створює руйнівний вибух у радіусі 12м, проте несе 15-30% шанс знизити рівень вашої Послідовності).",
-                "zh-CN": "左键循环切换模式：束缚（开关生效通道：消耗灵性，每秒增加 1.5 点疯狂值，但赋予力量 V、速度 III、抗性提升 III、生命恢复 IV 与该神明专属的增益）；引爆（增加 25-40 点疯狂值，依你所契合的神明释放一场 12 米范围的末日爆炸，但有 15-30% 概率使你的序列层级倒退）。",
-                "zh-TW": "左鍵循環切換模式：束縛（開關生效通道：消耗靈性，每秒增加 1.5 點瘋狂值，但賦予力量 V、速度 III、抗性提升 III、生命恢復 IV 與該神明專屬的增益）；引爆（增加 25-40 點瘋狂值，依你所契合的神明釋放一場 12 米範圍的末日爆炸，但有 15-30% 機率使你的序列層級倒退）。"
+                "en": "Act on behalf of your Chosen Deity. Cycle modes with Left-Click: restraint (toggle: drains spirituality and adds 1.5 madness/s; lends your deity's Sequence 9-7 abilities at your own Sequence and grants its restraint passive); detonation (adds 25-40 madness and unleashes your deity's signature attack, with a 40% chance to seal every ability of your current Sequence for 4 hours, or 1 hour at Sequence 0).",
+                "uk": "Дійте від імені Обраного Божества. Вибір режимів лівим кліком: restraint (перемикання: споживає духовність і додає 1.5 безумства/с; позичає здібності Послідовностей 9-7 вашого божества на рівні вашої Послідовності та дає його пасивний ефект); detonation (додає 25-40 безумства і вивільняє фірмову атаку божества, з шансом 40% запечатати всі здібності вашої поточної Послідовності на 4 години, або на 1 годину на Послідовності 0).",
+                "zh-CN": "左键循环切换模式：束缚（开关生效通道：消耗灵性，每秒增加 1.5 点疯狂值，但赋予力量 V、速度 III、抗性提升 III、生命恢复 IV 与该神明专属的增益）；引爆（增加 25-40 点疯狂值，依你所契合的神明释放一场 12 米范围的末日爆炸，但有 40% 概率封印你当前序列的全部能力 4 小时（序列 0 时为 1 小时））。",
+                "zh-TW": "左鍵循環切換模式：束縛（開關生效通道：消耗靈性，每秒增加 1.5 點瘋狂值，但賦予力量 V、速度 III、抗性提升 III、生命恢復 IV 與該神明專屬的增益）；引爆（增加 25-40 點瘋狂值，依你所契合的神明釋放一場 12 米範圍的末日爆炸，但有 40% 機率封印你當前序列的全部能力 4 小時（序列 0 時為 1 小時））。"
               }
             },
             {
@@ -7484,6 +7514,21 @@
                 "uk": "Конденсуй силу своїх таємних мистецтв у мітку і надай її обраним одержувачам. Скасуй мітку, щоб повернути силу.",
                 "zh-CN": "将你神秘学之力凝为一枚印记，赐予选定的受赐者。撤除该印记即可收回那份力量。",
                 "zh-TW": "將你神秘學之力凝為一枚印記，賜予選定的受賜者。撤除該印記即可收回那份力量。"
+              }
+            },
+            {
+              "id": "hand-of-god-invocation",
+              "name": {
+                "en": "Hand of God — Invocation",
+                "uk": "Рука Бога — Заклик",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Cast the power of your Chosen Deity through your right hand (12s cooldown). Each deity grants a different power; see the pledge menu. Sneak-cast to re-pledge to another deity (1h cooldown).",
+                "uk": "Вивільніть силу вашого Обраного Божества через праву руку (перезарядка 12с). Кожне божество дає різну силу — дивіться меню присяги. Використання в присіді — нова присяга іншому божеству (перезарядка 1 год).",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -8881,10 +8926,10 @@
                 "zh-TW": "精神穿刺"
               },
               "description": {
-                "en": "Fires a psychic projectile dealing 15 magic damage. Upgrades to 30 magic damage at Sequence 4.",
-                "uk": "Випускає психічний снаряд, що завдає 15 магічного урону. На Послідовності 4 оновлюється до 30 магічного урону.",
-                "zh-CN": "射出一枚精神投射物，造成 15 点魔法伤害。序列4 时提升为 30 点魔法伤害。",
-                "zh-TW": "射出一枚精神投射物，造成 15 點魔法傷害。序列4 時提升為 30 點魔法傷害。"
+                "en": "Fires a psychic projectile dealing 15 magic damage. Upgrades to 30 magic damage at Sequence 4. Cooldown decreases by 1s per sequence level gained.",
+                "uk": "Випускає психічний снаряд, що завдає 15 магічного урону. На Послідовності 4 оновлюється до 30 магічного урону. Перезарядка зменшується на 1 с за кожен рівень послідовності.",
+                "zh-CN": "射出一枚精神投射物，造成 15 点魔法伤害。序列4 时提升为 30 点魔法伤害。每提升一个序列等级，冷却时间减少 1 秒。",
+                "zh-TW": "射出一枚精神投射物，造成 15 點魔法傷害。序列4 時提升為 30 點魔法傷害。每提升一個序列等級，冷卻時間減少 1 秒。"
               }
             },
             {
@@ -8911,10 +8956,10 @@
                 "zh-TW": "精神鞭擊"
               },
               "description": {
-                "en": "For 30 seconds, all physical attacks with vanilla weapons also deal bonus magic damage equal to the hit's final damage. Scales with Authority and Jurisdiction bonuses.",
-                "uk": "Протягом 30 секунд усі фізичні удари звичайною зброєю також завдають бонусний магічний урон, рівний фінальному урону удару. Масштабується з Авторитетом та бонусом Юрисдикції.",
-                "zh-CN": "在 30 秒内，所有以原版武器进行的物理攻击都会额外造成等同该次最终伤害的魔法伤害。随权柄与辖域加成而增强。",
-                "zh-TW": "在 30 秒內，所有以原版武器進行的物理攻擊都會額外造成等同該次最終傷害的魔法傷害。隨權柄與轄域加成而增強。"
+                "en": "For 30 seconds, all physical attacks deal bonus magic damage equal to the hit's final damage, regardless of what you are holding. Scales with Authority and Jurisdiction bonuses.",
+                "uk": "Протягом 30 секунд усі фізичні удари також завдають бонусний магічний урон, рівний фінальному урону удару, незалежно від того, що тримається в руці. Масштабується з Авторитетом та бонусом Юрисдикції.",
+                "zh-CN": "在 30 秒内，所有物理攻击都会额外造成等同该次最终伤害的魔法伤害，无论手持何物。随权柄与辖域加成而增强。",
+                "zh-TW": "在 30 秒內，所有物理攻擊都會額外造成等同該次最終傷害的魔法傷害，無論手持何物。隨權柄與轄域加成而增強。"
               }
             }
           ]
@@ -8967,10 +9012,25 @@
                 "zh-TW": "判決：囚禁"
               },
               "description": {
-                "en": "Surrounds a target with iron prison bars. Drains 100 spirituality per second from the caster. Deactivate to release. Costs 20% Authority.",
-                "uk": "Оточує ціль залізними ґратами тюрми. Витрачає 100 духовності за секунду. Деактивуйте, щоб відпустити. Вартість: 20% Авторитету.",
+                "en": "Surrounds a target with iron prison bars. Drains 2 Authority each second alongside increasing spirituality upkeep. At zero Authority, the prison ends after 5 seconds even if Authority recovers. Deactivate to release sooner.",
+                "uk": "Оточує ціль залізними ґратами. Щосекунди витрачає 2 Авторитету та дедалі більше духовності. Коли Авторитет вичерпано, ув'язнення закінчиться за 5 секунд, навіть якщо Авторитет відновиться. Деактивуйте, щоб звільнити ціль раніше.",
                 "zh-CN": "以铁质牢栏围住目标。每秒自施术者抽取 100 点灵性。取消即释放。消耗 20% 权柄。",
                 "zh-TW": "以鐵質牢欄圍住目標。每秒自施術者抽取 100 點靈性。取消即釋放。消耗 20% 權柄。"
+              }
+            },
+            {
+              "id": "verdict-death",
+              "name": {
+                "en": "Verdict: Death",
+                "uk": "Вердикт: Смерть",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Declare death upon a target within 25 blocks and crash toward them in a fast, powerful rush. Contact delivers magic damage and heavy knockback. Costs 150 spirituality; 30-second cooldown. Warning: obstacles stop the rush immediately. A blocked or evaded charge still consumes its cost and cooldown.",
+                "uk": "Оголосіть смерть цілі в межах 25 блоків і вріжтеся в неї стрімким потужним ривком. Зіткнення завдає магічної шкоди та сильно відкидає ціль. Вартість: 150 духовності; перезарядка: 30 секунд. Увага: перешкоди негайно зупиняють ривок. Заблокований ривок або промах також витрачає духовність і запускає перезарядку.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -8982,10 +9042,10 @@
                 "zh-TW": "禁令"
               },
               "description": {
-                "en": "Declares a zone of law prohibiting chosen actions. Sequence 2 and above can combine up to three prohibitions in one zone. Violators grant you +3% Authority. Beyonders of higher sequence can resist your zone (70%/80%/100% chance per rank difference).",
-                "uk": "Оголошує зону закону, що забороняє обрані дії. На Послідовності 2 і вище можна поєднати до трьох заборон в одній зоні. Порушники надають вам +3% Авторитету. Позамежні вищої послідовності можуть протистояти вашій зоні (70%/80%/100% шанс за кожну різницю в рангу).",
-                "zh-CN": "宣告一片禁止特定行为的律法区域。序列2 及以上可在一片区域内合并最多三项禁令。违犯者为你带来 +3% 权柄。序列更高的非凡者可抵抗你的区域（每高一级 70%/80%/100% 概率）。",
-                "zh-TW": "宣告一片禁止特定行為的律法區域。序列2 及以上可在一片區域內合併最多三項禁令。違犯者為你帶來 +3% 權柄。序列更高的非凡者可抵抗你的區域（每高一級 70%/80%/100% 機率）。"
+                "en": "Declares a zone of law prohibiting chosen actions, including specter and wraith forms. Applicable ongoing abilities end on entry; projections return to their normal return location. Sequence 4 unlocks Substitutions and Marionette Interchange. These block substitute activation and voluntary marionette swaps, control changes, and return to body. Sequence 2 and above can combine up to three prohibitions. Violators grant you +3% Authority. Stronger Beyonders can resist (70%/80%/100% for one/two/three or more ranks above).",
+                "uk": null,
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -9079,10 +9139,10 @@
                 "zh-TW": "律法：傳送"
               },
               "description": {
-                "en": "Erases the distance between yourself and your target location, teleporting up to 20 blocks instantly. Costs 5% Authority. At Sequence 3, the distance limit is removed when teleporting within your own Jurisdiction.",
-                "uk": "Знищує відстань між вами та цільовою локацією, миттєво телепортуючи на 20 блоків. Вартість: 5% Авторитету. На Послідовності 3 обмеження відстані знімається при телепортації у межах власної Юрисдикції.",
-                "zh-CN": "抹去你与目标位置之间的距离，瞬间传送最远 20 格。消耗 5% 权柄。序列3 时，在自己的辖域内传送不再受距离限制。",
-                "zh-TW": "抹去你與目標位置之間的距離，瞬間傳送最遠 20 格。消耗 5% 權柄。序列3 時，在自己的轄域內傳送不再受距離限制。"
+                "en": "Erases the distance between yourself and your target location, teleporting up to 20 blocks instantly. Midair, lava, and fire destinations are allowed; solid obstructions and world limits still block travel. Costs 5% Authority only on successful teleportation. At Sequence 3, the distance limit is removed when teleporting within your own Jurisdiction.",
+                "uk": null,
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -9139,10 +9199,10 @@
                 "zh-TW": "判決：處決"
               },
               "description": {
-                "en": "Summons a law guillotine above a target location. After a 2-second warning it falls, dealing damage scaled by Authority tier: Base (<60%), Enhanced (60-84%), Full (85-100%). Drains all Authority and locks gain for 10 seconds.",
-                "uk": "Викликає гільйотину закону над цільовою локацією. Після 2-секундного попередження вона падає, завдаючи урону залежно від рівня Авторитету: Базовий (<60%), Посилений (60-84%), Повний (85-100%). Витрачає весь Авторитет та блокує його приріст на 10 секунд.",
-                "zh-CN": "在目标位置上方召出一台律法断头台。经 2 秒警示后落下，伤害依权柄层级递增：基础（<60%）、强化（60-84%）、完全（85-100%）。耗尽全部权柄，并在 10 秒内锁死其增长。",
-                "zh-TW": "在目標位置上方召出一臺律法斷頭臺。經 2 秒警示後落下，傷害依權柄層級遞增：基礎（<60%）、強化（60-84%）、完全（85-100%）。耗盡全部權柄，並在 10 秒內鎖死其增長。"
+                "en": "Summons a law guillotine above a target location. After a 2-second warning it falls, dealing damage scaled by Authority tier: Base (above 0% and below 60%), Enhanced (60-84%), Full (85-100%). Damage increases with each target's missing health at impact: 1x at full health, 1.5x at half health, up to 2x. No damage at zero Authority. Drains all Authority and locks gain for 10 seconds.",
+                "uk": null,
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -9214,6 +9274,21 @@
                 "uk": "Телепортується до вашої захопленої або найсильніше позначеної Безладної цілі, потім завдає неминучого удару. Шкода залежить від рівня Безладу. При рівні 4+ розповсюджується на сусідніх Безладних сутностей. Використайте навприсядки, щоб відсікти Безлад від себе, очистивши шкідливі ефекти та позбавлення здібностей.",
                 "zh-CN": "传送至你锁定的、或标记最重的混乱目标身旁，随后施出一记无可回避的打击。伤害随混乱等级提升。混乱等级 4 级及以上时，会连锁至附近的混乱实体。潜行+使用可自你自身斩去混乱，清除有害效果与能力剥夺。",
                 "zh-TW": "傳送至你鎖定的、或標記最重的混亂目標身旁，隨後施出一記無可迴避的打擊。傷害隨混亂等級提升。混亂等級 4 級及以上時，會連鎖至附近的混亂實體。潛行+使用可自你自身斬去混亂，清除有害效果與能力剝奪。"
+              }
+            },
+            {
+              "id": "disorder-aura",
+              "name": {
+                "en": "Disorder Aura Checking",
+                "uk": "Аура Безладу Перевірка",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Passively radiates an aura of checking that gradually marks nearby enemies with 1–2 Disorder stacks every 3 seconds within 20 blocks, making it easier to build up Disorder for Sword of Judgment.",
+                "uk": "Пасивно випромінює ауру стримування, яка кожні 3 секунди накладає на ворогів у радіусі 20 блоків 1–2 стаки Безладу, полегшуючи накопичення Безладу для Меча Правосуддя.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -9307,10 +9382,10 @@
                 "zh-TW": "秩序感知"
               },
               "description": {
-                "en": "Passively perceives all ability activations within 50 blocks and displays them as an action bar alert. Ability users within 30 blocks are marked as offenders and rebuked with damage, Slowness, and Weakness. Disordered entities within 30 blocks are suppressed. Weaker Beyonders nearby are forced to bow. Magic damage from lower-sequence Beyonders is reduced by 15% per sequence level below (maximum 75%).",
-                "uk": "Пасивно сприймає всі активації здібностей в межах 50 блоків та відображає їх як повідомлення на рядку дії. Невпорядковані сутності в межах 30 блоків отримують Повільність та Слабкість. Слабші Потойбічні поблизу змушені кланятися. Магічна шкода від Потойбічних нижчих послідовностей знижується на 15% за кожен рівень нижче (максимум 75%).",
-                "zh-CN": "被动察觉 50 格内一切能力的施放，并以动作栏提示显示。30 格内使用能力者会被标记为违犯者，并遭受伤害、缓慢与虚弱的谴责。30 格内的混乱实体会被压制。附近较弱的非凡者会被迫俯首。来自更低序列非凡者的魔法伤害，每低一个序列减少 15%（最高 75%）。",
-                "zh-TW": "被動察覺 50 格內一切能力的施放，並以動作欄提示顯示。30 格內使用能力者會被標記為違犯者，並遭受傷害、緩慢與虛弱的譴責。30 格內的混亂實體會被壓制。附近較弱的非凡者會被迫俯首。來自更低序列非凡者的魔法傷害，每低一個序列減少 15%（最高 75%）。"
+                "en": "Passively perceives ability activations within 50 blocks and displays them as an action bar alert. Enemies within 30 blocks require disorder level 3 or higher to be marked and rebuked for ability use, suffer Slowness and Weakness, or be forced to bow if weaker than you. Uses the higher of detected disorder and your active judgment mark, including marks from Balancing. Magic damage from lower-sequence Beyonders is reduced by 15% per sequence level below (maximum 75%).",
+                "uk": null,
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -9322,10 +9397,10 @@
                 "zh-TW": "秩序代行"
               },
               "description": {
-                "en": "Assume the role of Order's proxy for 30 seconds. While active, declared Edicts gain larger scope and longer duration, your magic is strengthened, your body is stabilized, and ability use releases a controlled authority burst. Recast to cancel. Sneak-recast to Overreach for 3 seconds, greatly increasing pressure against Disorderly entities at the cost of health and a small amount of madness.",
-                "uk": "Прийміть роль представника Порядку на 30 секунд. Поки активний, оголошені Едикти отримують більший масштаб і тривалість, ваша магія посилюється, тіло стабілізується, а використання здібностей випускає контрольований вибух авторитету. Повторне використання скасовує ефект. Використайте повторно під час присідання, щоб перейти в Перевищення на 3 секунди, значно посилюючи тиск на Безладних сутностей ціною здоров'я та невеликої кількості безумства.",
-                "zh-CN": "在 30 秒内担任秩序的代行者。生效期间，你所宣告的敕令范围更广、持续更久，你的魔法得到强化，你的身体趋于稳固，且能力的使用会释放一阵受控的权柄爆发。再次施放即取消。潜行+再次施放则「越权」3 秒，以生命与少量疯狂值为代价，大幅提升对混乱实体的压制。",
-                "zh-TW": "在 30 秒內擔任秩序的代行者。生效期間，你所宣告的敕令範圍更廣、持續更久，你的魔法得到強化，你的身體趨於穩固，且能力的使用會釋放一陣受控的權柄爆發。再次施放即取消。潛行+再次施放則「越權」3 秒，以生命與少量瘋狂值為代價，大幅提升對混亂實體的壓制。"
+                "en": "Assume the role of Order's proxy for 30 seconds. While active, declared Edicts gain larger scope and longer duration, your magic is strengthened, your body is stabilized, and ability use releases a controlled authority burst. Recast to cancel. Sneak-recast to Overreach for 3 seconds, greatly increasing pressure against Disorderly entities at the cost of self-damage and 3 madness per second.",
+                "uk": null,
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -9352,10 +9427,10 @@
                 "zh-TW": "審判瘋狂"
               },
               "description": {
-                "en": "When your madness reaches 90% or higher, channel your authority to judge the corruption within yourself. Reliably reduces madness by 18%, plus extra reduction for madness above 90%, up to 35%.",
-                "uk": "Коли ваше безумство сягає 90% або вище, сконцентруйте свою владу, щоб судити скверну всередині себе. Є 50% шанс зменшити ваше безумство на 10%. При невдачі духовність все одно витрачається, але безумство не зменшується.",
-                "zh-CN": "当你的疯狂值达到 90% 或以上时，引导你的权柄审判自身内里的腐化。稳定降低 18% 疯狂值，并对高于 90% 的部分额外削减，最多可达 35%。",
-                "zh-TW": "當你的瘋狂值達到 90% 或以上時，引導你的權柄審判自身內裡的腐化。穩定降低 18% 瘋狂值，並對高於 90% 的部分額外削減，最多可達 35%。"
+                "en": "Aim at a player within 30 blocks and clear line of sight to judge their madness, or sneak to treat yourself. The recipient must have at least 90% madness. Reduces madness by 18 percentage points, plus the amount above 90%, up to 35 points, respecting their madness floor.",
+                "uk": null,
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -9418,6 +9493,21 @@
                 "zh-CN": "以草药医治自己或同伴",
                 "zh-TW": "以草藥醫治自己或同伴"
               }
+            },
+            {
+              "id": "apothecary-vision",
+              "name": {
+                "en": "Apothecary Vision",
+                "uk": "Аптекарський Погляд",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Hold your gaze on a player for 5 seconds to read their health, spirituality and state of mind. Those two or more sequences above you are beyond your reading.",
+                "uk": "Затримайте погляд на гравцеві 5 секунд, щоб прочитати його здоров'я, духовність і стан розуму. Ті, хто на дві чи більше послідовностей вище за вас, вам не під силу.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
             }
           ]
         },
@@ -9439,10 +9529,25 @@
                 "zh-TW": "馴獸"
               },
               "description": {
-                "en": "Instantly tame and enhance animals",
-                "uk": "Миттєво приборкує тварин",
+                "en": "Strike a creature for 100 damage. If the blow kills it, the creature is tamed into your roster instead of dying. Wardens, Withers, Ender Dragons and bosses can't be tamed. From Sequence 7, left-click one of your called-out beasts to remake it as a Blood Servant.",
+                "uk": "Завдає істоті 100 шкоди. Якщо удар її вбиває, істота не гине, а приборкується й потрапляє до вашого списку. Вардена, Візера, Дракона Енду та босів приборкати неможливо. З 7-ї послідовності ЛКМ по закликаному звіру перетворює його на Кровного Слугу.",
                 "zh-CN": "即刻驯服并强化动物",
                 "zh-TW": "即刻馴服並強化動物"
+              }
+            },
+            {
+              "id": "beast-management",
+              "name": {
+                "en": "Beast Management",
+                "uk": "Керування Звірами",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Open your roster of captured creatures. Name them, call them out to follow and fight beside you, or send them back. From Sequence 7 it becomes Blood Servant Management, with a Thralls tab.",
+                "uk": "Відкриває список спійманих істот. Давайте їм імена, закликайте їх битися поруч або відсилайте назад. З 7-ї послідовності стає Керуванням Кровними Слугами з вкладкою Трелів.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -9495,8 +9600,8 @@
                 "zh-TW": "嗜血"
               },
               "description": {
-                "en": "A mystical ability known as Blood Thirst.",
-                "uk": "Містична здатність.",
+                "en": "Drinking a blood vial takes 10 off your madness (half for animal blood) and keeps your hunger from falling below half for 30 minutes; from Sequence 2 you gain Saturation instead. Those 30 minutes are a real cooldown — a second vial is refused until they run out. Your Blood Reserve fills under the moon and in combat and drains in sunlight.",
+                "uk": "Випита фіалка крові знімає 10 безумства (удвічі менше для крові тварин) і 30 хвилин не дає голоду впасти нижче половини; з 2-ї послідовності натомість дає Насичення. Ці 30 хвилин — справжня перезарядка: другу фіалку не вип'єте, доки вони не минуть. Кровний Запас наповнюється під місяцем і в бою та висихає на сонці.",
                 "zh-CN": "一种名为嗜血的神秘能力。",
                 "zh-TW": "一種名為嗜血的神秘能力。"
               }
@@ -9510,8 +9615,8 @@
                 "zh-TW": "腐蝕之爪"
               },
               "description": {
-                "en": "Your bare-hand attacks become deadly with corrosive power",
-                "uk": "Атаки голими руками стають смертельними",
+                "en": "Your bare-hand attacks corrode: extra damage, Poison and Wither. Against a target of your sequence or lower they also strip Resistance and lock their pathway's signature defence for 10 seconds.",
+                "uk": "Ваші удари голими руками роз'їдають: додаткова шкода, Отрута та Візер. Проти цілі вашої послідовності чи нижчої вони також знімають Опір і на 10 секунд блокують її головний захист шляху.",
                 "zh-CN": "你的空手攻击带上腐蚀之力，变得致命",
                 "zh-TW": "你的空手攻擊帶上腐蝕之力，變得致命"
               }
@@ -9540,55 +9645,70 @@
                 "zh-TW": "深淵鐐銬"
               },
               "description": {
-                "en": "Bind enemies with chains of darkness",
-                "uk": "Зв'язує ворогів ланцюгами темряви",
+                "en": "Condense darkness into chains that truly stun a target: no movement, flight or teleports. Left-click to choose Bind, Pull, Push or Launch; from Sequence 4 the stun lasts longer, and at Sequence 1 you can force them to Kneel.",
+                "uk": "Згущує темряву в кайдани, що справді оглушують ціль: без руху, польоту чи телепортації. ЛКМ обирає Скути, Притягнути, Відштовхнути чи Підкинути; з 4-ї послідовності оглушення довше, а на 1-й можна змусити ціль стати на коліна.",
                 "zh-CN": "以黑暗的锁链束缚敌人",
                 "zh-TW": "以黑暗的鎖鏈束縛敵人"
               }
             },
             {
-              "id": "blood-servant-conversion",
+              "id": "blood-theft",
               "name": {
-                "en": "Blood Servant Conversion",
-                "uk": "Перетворення Кров'яного Слуги",
-                "zh-CN": "血仆转化",
-                "zh-TW": "血僕轉化"
+                "en": "Blood Theft",
+                "uk": "Крадіжка Крові",
+                "zh-CN": null,
+                "zh-TW": null
               },
               "description": {
-                "en": "Convert weakened creatures into loyal blood servants",
-                "uk": "Перетворює ослаблених істот",
-                "zh-CN": "将虚弱的生物转化为忠诚的血仆",
-                "zh-TW": "將虛弱的生物轉化為忠誠的血僕"
+                "en": "Unlocks the Syringe. Draw blood vials from players (hold still for 4 seconds) or instantly from any living, non-undead creature, then drink them for Blood Thirst.",
+                "uk": "Відкриває Шприц. Набирайте фіалки крові з гравців (4 секунди нерухомо) або миттєво з будь-якої живої не-нежиті, а потім пийте їх для Спраги Крові.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
-              "id": "blood-doll-management",
+              "id": "feeding",
               "name": {
-                "en": "Blood Doll Management",
-                "uk": "Керування кривавими ляльками",
-                "zh-CN": "血偶管理",
-                "zh-TW": "血偶管理"
+                "en": "Feeding",
+                "uk": "Живлення",
+                "zh-CN": null,
+                "zh-TW": null
               },
               "description": {
-                "en": "Manage your blood dolls and servants.",
-                "uk": "Керуйте своїми кривавими ляльками та слугами.",
-                "zh-CN": "管理你的血偶与血仆。",
-                "zh-TW": "管理你的血偶與血僕。"
+                "en": "Dash forward and feed on the first creature you reach. Bite: stun you both, gain Blood Thirst, and weaken the victim for 5 minutes. Bloodless Embrace: cling to their back and slowly drain them until they break free.",
+                "uk": "Ривок уперед і живлення першою досягнутою істотою. Укус: оглушує вас обох, дає Спрагу Крові й на 5 хвилин послаблює жертву. Безкровні Обійми: вчепіться їй у спину й повільно висмоктуйте, доки вона не вирветься.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
-              "id": "blood-servant-embrace",
+              "id": "enhanced-charisma",
               "name": {
-                "en": "Blood Servant Embrace",
-                "uk": "Прийняття кривавого слуги",
-                "zh-CN": "血仆拥抱",
-                "zh-TW": "血僕擁抱"
+                "en": "Enhanced Charisma",
+                "uk": "Посилена Харизма",
+                "zh-CN": null,
+                "zh-TW": null
               },
               "description": {
-                "en": "Embrace a blood servant to gain its powers and loyalty.",
-                "uk": "Прийміть кривавого слугу, щоб отримати його сили та вірність.",
-                "zh-CN": "拥抱一名血仆，获取其力量与忠诚。",
-                "zh-TW": "擁抱一名血僕，獲取其力量與忠誠。"
+                "en": "Passively grants Speed I and Haste I; at night the speed stacks with other speed boosts. Anyone weaker than you who stares at you for 10 seconds is struck with Slowness I for 2 seconds.",
+                "uk": "Пасивно дає Швидкість I та Поспіх I; уночі швидкість складається з іншими прискореннями. Будь-хто слабший, хто дивиться на вас 10 секунд, дістає Сповільнення I на 2 секунди.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "embrace",
+              "name": {
+                "en": "Embrace",
+                "uk": "Обійми",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Right-click a Wild Beyonder of a lower sequence than you, or one below 15% health, to make it your Thrall. Sneak + right-click with a Moon characteristic of your sequence or lower to raise a Thrall from it. Right-click your Thrall with the Moon potion of its next sequence in your offhand to advance it.",
+                "uk": "ПКМ по Дикому Потойбічному нижчої за вас послідовності або з менш ніж 15% здоров'я робить його вашим Трелом. Shift + ПКМ з характеристикою Місяця вашої послідовності чи нижчої підіймає з неї Трела. ПКМ по Трелу із зіллям Місяця його наступної послідовності в лівій руці підвищує його.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -9631,6 +9751,51 @@
                 "zh-CN": "调制具有独特效果的强力香水",
                 "zh-TW": "調變具有獨特效果的強力香水"
               }
+            },
+            {
+              "id": "sanguine-infusion",
+              "name": {
+                "en": "Sanguine Infusion",
+                "uk": "Кровава Інфузія",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Tear the virtue out of a potion in your inventory — whatever it was mixed for — and push it into your own blood as an 8-second burst of regeneration, movement or resistance. The potion is destroyed; sequence potions are never used.",
+                "uk": "Вириває силу з зілля в інвентарі — незалежно від того, для чого його варили — і вливає її у власну кров як 8-секундний сплеск регенерації, швидкості або стійкості. Зілля знищується; зілля послідовностей ніколи не витрачаються.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "potion-appraisal",
+              "name": {
+                "en": "Potion Appraisal",
+                "uk": "Оцінка Зілля",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Cycle modes: extend (stretches every timed effect of the held potion ×1.5) and reduce (cuts it to ×0.5). A Beyonder's own brew resists the reading — only from Sequence 2, but it bends by the same ×1.5 / ×0.5. Sequence potions cannot be appraised, and no potion can be appraised twice.",
+                "uk": "Переключає режими: подовжити (розтягує всі часові ефекти зілля в руці у 1,5 раза) та скоротити (удвічі). Власне зілля Потойбічного опирається читанню — лише з 2-ї послідовності, але гнеться на ті самі 1,5 раза. Зілля послідовностей оцінити неможливо, і жодне зілля не оцінюється двічі.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "professor-senses",
+              "name": {
+                "en": "Potions Professor Senses",
+                "uk": "Чуття Професора Зілля",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Passively outlines hostile players and Beyonder creatures within 24 blocks, through walls, for your eyes only. Also gives a 12% chance to sidestep an incoming blow, physical or magical, at most once every 3 seconds.",
+                "uk": "Пасивно підсвітлює ворожих гравців і створіння-Потойбічних у межах 24 блоків навіть за стінами — лише для вас. Також дає 12% шансу ухилитися від удару, фізичного чи магічного, не частіше ніж раз на 3 секунди.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
             }
           ]
         },
@@ -9652,8 +9817,8 @@
                 "zh-TW": "滿月"
               },
               "description": {
-                "en": "Wrap a moonlit domain around yourself that follows you, bathes everyone caught in it in your own night sky, buffs you, and strips concealment from your enemies",
-                "uk": "Огортає вас місячним доменом, що слідує за вами, занурює всіх у ньому у ваше особисте нічне небо, підсилює вас і знімає приховування з ваших ворогів",
+                "en": "Cycle modes: moonrise (Chained and Abyss inside take +20% magic damage and fumble 40% of casts; a favoured pathway present discounts your spirit-linked abilities by 20%; everyone else regains spirituality 1.5x faster), new moon (Darkness, Hanged Man and Error inside are blinded and slowed, lose concealment, pay +20% for spirit-reliant casts, and their running effects burn down 15% faster), auto (opens in moonrise and flips when struck by a pathway the other face is built for). A 32-block domain that follows you for 100 spirituality a second; only you can close it, and doing so costs five minutes of cooldown.",
+                "uk": "Переключає режими: схід місяця (Скутий і Безодня всередині отримують +20% магічного урону та зривають 40% заклинань; присутність прихильного шляху знижує ваші духовні здібності на 20%; решта відновлює духовність у 1,5 раза швидше), новомісяччя (Темрява, Повішений і Помилка всередині сліпнуть і сповільнюються, втрачають приховування, платять +20% за духовні заклинання, а їхні ефекти згорають на 15% швидше), авто (починається зі сходу і перекидається після удару від шляху, проти якого створена інша грань). Домен на 32 блоки, що слідує за вами, за 100 духовності на секунду; закрити його можете лише ви, і це коштує пʼять хвилин перезарядки.",
                 "zh-CN": "在自身周围展开一片随你移动的月光领域，将其中所有人笼罩于你自己的夜空之下，强化你自身，并剥去敌人的隐匿",
                 "zh-TW": "在自身周圍展開一片隨你移動的月光領域，將其中所有人籠罩於你自己的夜空之下，強化你自身，並剝去敵人的隱匿"
               }
@@ -9667,8 +9832,8 @@
                 "zh-TW": "月光化形"
               },
               "description": {
-                "en": "Transform into spectral moonlight",
-                "uk": "Перетворення під місячним світлом",
+                "en": "Become moonlight: unseen by other players, weightless, immune to harm. The fifth blow shatters the form for 2 seconds; a hit landed in that gap may break it outright, costing 30% of your health and 45 seconds. Drains 20 spirituality a second and needs moonlight until Sequence 2.",
+                "uk": "Станьте місячним світлом: невидимі для інших гравців, невагомі, невразливі. Пʼятий удар розбиває форму на 2 секунди; удар у цю мить може зруйнувати її зовсім, що коштує 30% здоровʼя та 45 секунд. Витрачає 20 духовності на секунду і потребує місячного світла до 2-ї послідовності.",
                 "zh-CN": "化为幽质的月光",
                 "zh-TW": "化為幽質的月光"
               }
@@ -9686,6 +9851,36 @@
                 "uk": "Телепортація на коротку відстань",
                 "zh-CN": "在一群蝙蝠中短距传送",
                 "zh-TW": "在一群蝙蝠中短距傳送"
+              }
+            },
+            {
+              "id": "physical-enhancement",
+              "name": {
+                "en": "Physical Enhancement",
+                "uk": "Фізичне Посилення",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Passive. Your rebuilt body simply moves faster — a movement-speed bonus that stacks with other speed rather than overwriting it — and leaves a red afterimage behind you at a sprint.",
+                "uk": "Пасивна. Ваше перебудоване тіло просто рухається швидше — бонус швидкості, що складається з іншими, а не замінює їх — і на бігу залишає за собою червоний шлейф.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "nightmare-resistance",
+              "name": {
+                "en": "Nightmare Influence Resistance",
+                "uk": "Стійкість до Впливу Кошмарів",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Passive. The night cannot simply take you: it fails to pull you into a nightmare 40% of the time, 70% from Sequence 3 and always from Sequence 1. Inside a Night Domain your casts are never sealed and its influence lasts half as long.",
+                "uk": "Пасивна. Ніч не забере вас просто так: втягнути вас у кошмар не вдається у 40% випадків, у 70% з 3-ї послідовності і завжди з 1-ї. У Ночному Домені ваші заклинання ніколи не запечатуються, а його вплив триває вдвічі менше.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -9723,8 +9918,8 @@
                 "zh-TW": "黑暗凝視"
               },
               "description": {
-                "en": "Channel a beam of darkness that damages and weakens enemies",
-                "uk": "Темний погляд що шкодить",
+                "en": "One look at whoever stands in your crosshair within 32 blocks, straight to their magic health. Costs you 5 seconds of Blindness and 10 of Darkness, and 45 seconds before you can look again.",
+                "uk": "Один погляд на того, хто стоїть у вашому прицілі в межах 32 блоків — прямо в їхнє магічне здоровʼя. Коштує вам 5 секунд Сліпоти та 10 Темряви, і 45 секунд до наступного разу.",
                 "zh-CN": "引导一道黑暗光束，伤害并削弱敌人",
                 "zh-TW": "引導一道黑暗光束，傷害並削弱敵人"
               }
@@ -9738,10 +9933,70 @@
                 "zh-TW": "蝠群化形"
               },
               "description": {
-                "en": "Transform into a swarm of bats",
-                "uk": "Перетворення на зграю кажанів",
+                "en": "Come apart into a swarm of bats: a flying body disguised as a bat, with max health cut to 20%. Everything within 3.5 blocks is bitten once a second and you heal half of what lands. A lethal blow drops the form at 1 health instead of killing you, locking the swarm for 150 seconds.",
+                "uk": "Розсипаєтеся на зграю кажанів: літаюче тіло під маскою кажана, а максимальне здоровʼя врізане до 20%. Усе в межах 3,5 блока кусається щосекунди, а ви лікуєтеся на половину завданого. Смертельний удар зриває форму з 1 здоровʼя замість смерті та блокує зграю на 150 секунд.",
                 "zh-CN": "化为一群蝙蝠",
                 "zh-TW": "化為一群蝙蝠"
+              }
+            },
+            {
+              "id": "nature-interaction",
+              "name": {
+                "en": "Nature Interaction",
+                "uk": "Взаємодія з Природою",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "For one minute your maximum spirituality rises 10%, you stand 15% taller, and every undead within 48 blocks fights for you. Look up at the moon as it lands and it answers: a shell of borrowed vitality worth 25% of your health, one creature of the night called through, and a share of madness — 15% at Sequence 4, five less for each sequence above, none at Sequence 1.",
+                "uk": "На хвилину ваша максимальна духовність зростає на 10%, ви стаєте на 15% вищими, а вся нежить у межах 48 блоків биється за вас. Подивіться на місяць у момент заклинання, і він відповість: щит позиченої життєвої сили на 25% здоровʼя, одна створа ночі й частка безумства — 15% на 4-й послідовності, на 5 менше за кожну вищу, жодного на 1-й.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "blood-moon-arrow",
+              "name": {
+                "en": "Blood Moon Arrow",
+                "uk": "Стріла Кривавого Місяця",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Cycle modes: single (one heavy shaft of blood gathered over a second — 15 damage, healing blocked 4s, Weakness I 5s, and 2 blood reserve back to you) and hail (180 spirituality — paint a 9-block circle up to 30 blocks away and 24 shafts tear out of your body into it over 3 seconds, 8 damage each with the same wound; allies are spared).",
+                "uk": "Переключає режими: одинарна (одне важке древко крові, зібране за секунду — 15 урону, лікування заблоковано на 4 с, Слабкість I на 5 с і 2 кровʼяного запасу вам) та злива (180 духовності — позначте коло на 9 блоків у межах 30, і 24 древка вирвуться з вашого тіла у нього за 3 секунди по 8 урону; союзників не зачіпає).",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "howl",
+              "name": {
+                "en": "Howl",
+                "uk": "Виття",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "A howl that leaves you in every direction at once, racing outward over half a second. Everything it sweeps over takes 12 damage, freeze stacks and Slowness II, once per howl. Reaches 10 blocks at Sequence 4 and 17 at Sequence 1; walls stop it and allies are spared.",
+                "uk": "Виття, що лишає вас у всі боки водночас і розбігається за півсекунди. Все, чого воно торкнеться, отримує 12 урону, стаки замерзання та Сповільнення II — один раз за виття. Сягає 10 блоків на 4-й послідовності та 17 на 1-й; стіни її зупиняють, союзників не зачіпає.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "crimson-carapace",
+              "name": {
+                "en": "Crimson Carapace",
+                "uk": "Багровий Панцир",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "A shell of crystallised blood holding twice your maximum magic health. While raised, damage comes out of the shell instead of you. What a fight took out of it stays missing — it only mends while lowered, 2% a second, or 3% with a blood reserve of 50 or more. 80 spirituality a second, 50 seconds of cooldown once it comes down.",
+                "uk": "Панцир із закристалізованої крові на подвійне ваше максимальне магічне здоровʼя. Поки піднятий, урон йде в нього, а не в вас. Відновлюється лише опущений — 2% на секунду, або 3% з кровʼяним запасом від 50. 80 духовності на секунду, 50 секунд перезарядки.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -9764,8 +10019,8 @@
                 "zh-TW": "召喚之門"
               },
               "description": {
-                "en": "Opens a Door and summons a random creature (5% chance of Seq 2, 10% Seq 5-4, 85% Seq 3; lower-sequence summons have a 75% chance to be hostile), spawning up to 30 helping minions. Sneak while casting at Seq 2 or better to open 3-4 Doors at once in a diamond formation, each summoning its own creature. Recast to dismiss all active Doors. Use Contracted Summons to boost a creature's odds, guarantee it stays loyal, and extend its lifespan, or to contract with another player; use Ally Summon to summon a contracted player to your side.",
-                "uk": "Відкриває Двері та прикликає випадкову істоту (5% шанс на Послідовність 2, 10% на 5-4, 85% на 3; слабші істоти мають 75% шанс виявитися ворожими), створюючи до 30 допоміжних міньйонів. Присядьте під час використання на Послідовності 2 або вище, щоб відкрити 3-4 Дверей одразу у формі ромба, кожні з яких прикличуть власну істоту. Повторне використання відкликає всі активні Двері. Використовуйте Законтрактовані Виклики, щоб підвищити шанси істоти, гарантувати її вірність та продовжити її час життя, або щоб законтрактувати іншого гравця; використовуйте Виклик Союзника, щоб прикликати законтрактованого гравця до себе.",
+                "en": "Cycle modes: contract summon (every beast and boss in your roster at once, out-cap ignored, for 5 minutes), thrall summon (every thrall On Call, for 15 minutes), spirit world summon (a menu of creature and human calls, each on its own timer), player summon (ask an online player to travel to the door), close door (shuts every door and sends back everything that came through). 220 spirituality once per cast, not per second — the two menus only charge once something is actually called; three doors at Sequence 2 and four at Sequence 1.",
+                "uk": "Перемикає режими: призов за контрактом (усі звірі й боси з вашого списку одразу, без ліміту, на 5 хвилин), призов тралів (усі трали На Виклику, на 15 хвилин), призов зі Світу Духів (меню викликів створінь і людей, кожен зі своїм таймером), призов гравця (попросити гравця в мережі пройти крізь двері), закрити двері (зачиняє всі двері й відсилає назад усе, що прийшло). 220 духовності один раз за використання, а не щосекунди — обидва меню стягують її лише тоді, коли хтось справді відповів; троє дверей на 2-й послідовності й четверо на 1-й.",
                 "zh-CN": "切换模式：开启（召唤一只随机生物，其中 5% 为序列2，10% 为序列5-4，85% 为序列3；低序列召唤物有 75% 概率呈敌对。另生成最多 30 只协助的仆从）；契约（安全地召唤一只友善的序列3 生物与其仆从）；取消（遣散所有召唤物并关闭门户）。",
                 "zh-TW": "切換模式：開啟（召喚一隻隨機生物，其中 5% 為序列2，10% 為序列5-4，85% 為序列3；低序列召喚物有 75% 機率呈敵對。另生成最多 30 只協助的僕從）；契約（安全地召喚一隻友善的序列3 生物與其僕從）；取消（遣散所有召喚物並關閉門戶）。"
               }
@@ -9820,8 +10075,8 @@
                 "zh-TW": "創生"
               },
               "description": {
-                "en": "Cycle modes: lively-vitality (heals nearby players and animals with Regeneration II, deals magic damage to undead in a 20-block radius, and grows crops by 2 stages); life-of-madness (toggles cleansing aura: reduces nearby players' madness by 1 point every 10 seconds, transferring the corruption to yourself); cancel (stops the aura).",
-                "uk": "Вибір режимів: lively-vitality (накладає Регенерацію II на гравців і тварин поруч, завдає магічної шкоди нежиті в радіусі 20м та прискорює ріст врожаю на 2 стадії); life-of-madness (активує ауру очищення: знижує безумство гравців поруч на 1 одиницю кожні 10 секунд, забираючи це безумство собі); cancel (вимикає ауру).",
+                "en": "Three modes, each with a darker half reached by sneak + right-click. Lively vitality: Regeneration II to nearby living things, magic damage to undead, crops grown — sneak for Life Steal, taking 5% of every enemy maximum health every 10s and keeping it. Life of madness: every 10s nearby players lose 1 madness and you gain it — sneak to open Transfer and pour it into something else instead. Life vessel: bind a tree, plant or held block into a weak allied golem for 2 minutes, up to three — sneak on someone carrying a Mother seed for Seed Surgery.",
+                "uk": "Три режими, кожен із темнішою половиною, до якої веде присідання + правий клік. Жива сила: Регенерація II для живих поруч, магічна шкода нежиті, ріст врожаю — присядьте для Крадіжки Життя, що кожні 10 с забирає 5% максимального здоровʼя кожного ворога й лишає його вам. Життя безумства: кожні 10 с гравці поруч втрачають 1 безумства, а ви його отримуєте — присядьте, щоб відкрити Переливання й віддати його комусь іншому. Посудина життя: перетворіть дерево, рослину чи блок у руці на слабкого голема-союзника на 2 хвилини, до трьох — присядьте, дивлячись на носія сімені Матері, для Хірургії Сімені.",
                 "zh-CN": "切换模式：生机盎然（以生命恢复 II 治疗附近的玩家与动物，对半径 20 格内的亡灵造成魔法伤害，并使作物生长 2 个阶段）；疯狂之生（开关净化光环：每 10 秒降低附近玩家 1 点疯狂值，并将该份污染转移至自身）；取消（停止光环）。",
                 "zh-TW": "切換模式：生機盎然（以生命恢復 II 治療附近的玩家與動物，對半徑 20 格內的亡靈造成魔法傷害，並使作物生長 2 個階段）；瘋狂之生（開關淨化光環：每 10 秒降低附近玩家 1 點瘋狂值，並將該份汙染轉移至自身）；取消（停止光環）。"
               }
@@ -9835,8 +10090,8 @@
                 "zh-TW": "無盡之生"
               },
               "description": {
-                "en": "When death claims you, dissolve into blood mist. Others may destroy your circles to end the mist — if any circle survives, you are reborn at full health.",
-                "uk": "Коли смерть наздоганяє вас, ви розчиняєтеся у кривавому тумані. Інші можуть знищити ваші кола, щоб розсіяти туман — якщо хоч одне коло вцілить, ви відродитеся з повним здоров'ям.",
+                "en": "When death claims you, dissolve into blood mist; others may destroy your circles to end it, and if any survives you are reborn. Two charges. With both spent, the Blood Reserve becomes your way back: every hit you deal or take pays in 5% of the bar, and each time it fills it empties and takes five minutes off the ten-minute wait.",
+                "uk": "Коли смерть наздоганяє вас, ви розчиняєтеся у кривавому тумані; інші можуть знищити ваші кола, щоб розсіяти його, і якщо хоч одне вцілить — ви відродитеся. Два заряди. Коли обидва витрачено, шляхом назад стає Кровний Запас: кожен ваш удар — завданий чи отриманий — вносить 5% смуги, і щоразу, наповнившись, вона спорожняється та знімає пʼять хвилин із десятихвилинного очікування.",
                 "zh-CN": "当死亡将至，你化作血雾消散。他人可摧毁你的法阵以终结血雾——只要有任一法阵存留，你便以全满生命重生。",
                 "zh-TW": "當死亡將至，你化作血霧消散。他人可摧毀你的法陣以終結血霧——只要有任一法陣存留，你便以全滿生命重生。"
               }
@@ -9854,6 +10109,21 @@
                 "uk": "Пасивна. Випромінює ауру радіусом 20 блоків. Союзники (учасники загону чи церкви) отримують посилену регенерацію духовності та періодичні сплески відновлення здоров'я. Не-союзники в радіусі дії отримують Печать Впливу.",
                 "zh-CN": "被动。辐射 20 格光环。盟友（队伍或教会成员）获得强化灵性恢复与周期性生命恢复爆发。范围内非盟友会被施加影响标记。",
                 "zh-TW": "被動。輻射 20 格光環。盟友（隊伍或教會成員）獲得強化靈性恢復與週期性生命恢復爆發。範圍內非盟友會被施加影響標記。"
+              }
+            },
+            {
+              "id": "bat-wings",
+              "name": {
+                "en": "Bat Wings",
+                "uk": "Крила Кажана",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Toggle wings that carry you, for 30 spirituality a second and 20 seconds of cooldown once folded. Sneak + right-click while flying and the wings close over you: spectator flight, click a block to land, 60 a second. Sneak again to unwrap. A single blow worth a quarter of your health tears them off.",
+                "uk": "Перемикає крила, що несуть вас, за 30 духовності на секунду та 20 секунд перезарядки. Присідання + правий клік у польоті — крила закриваються навколо вас: спектаторський політ, клік по блоку для посадки, 60 на секунду. Удар на чверть вашого здоровʼя рве їх.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -9876,25 +10146,70 @@
                 "zh-TW": "月亮"
               },
               "description": {
-                "en": "Toggleable authority. Asserts a NIGHT claim over the world. While active, drains spirituality but bestows immense power: Strength IV, Speed IV, Haste III, Health Boost VII (adds 6 extra hearts), and Night Vision. If overridden by a Sun pathway user's SUN claim, the ability is forced off with a 10-minute penalty cooldown.",
-                "uk": "Перемикаєма влада. Встановлює владу НОЧІ над світом. Поки активна, споживає духовність, але надає колосальну силу: Силу IV, Швидкість IV, Поспіх III, Збільшення здоров'я VII (додаткові 6 сердець) та Нічний зір. Якщо буде перекрита сонячним Декретом, вимикається з 10-хвилинним штрафним КД.",
+                "en": "Toggleable authority. Asserts a NIGHT claim over the world. While active, drains spirituality but bestows immense power: Strength IV, Speed IV, Haste III and Night Vision. If overridden by a Sun pathway user's SUN claim, the ability is forced off with a 10-minute penalty cooldown.",
+                "uk": "Перемикаєма влада. Встановлює владу НОЧІ над світом. Поки активна, споживає духовність, але надає колосальну силу: Силу IV, Швидкість IV, Поспіх III та Нічний зір. Якщо буде перекрита сонячним Декретом, вимикається з 10-хвилинним штрафним КД.",
                 "zh-CN": "可开关的权柄。向世界宣示「夜」之主张。生效期间持续消耗灵性，但赐予磅礴之力：力量 IV、速度 IV、急迫 III、生命提升 VII（额外 6 颗心）与夜视。若被歌颂者途径使用者的「日」之主张压过，该能力将被强制关闭，并附带 10 分钟的惩罚冷却。",
                 "zh-TW": "可開關的權柄。向世界宣示「夜」之主張。生效期間持續消耗靈性，但賜予磅礴之力：力量 IV、速度 IV、急迫 III、生命提升 VII（額外 6 顆心）與夜視。若被歌頌者途徑使用者的「日」之主張壓過，該能力將被強制關閉，並附帶 10 分鐘的懲罰冷卻。"
               }
             },
             {
-              "id": "beauty",
+              "id": "moon-authority",
               "name": {
-                "en": "Divine Beauty",
-                "uk": "Божественна Краса",
-                "zh-CN": "神性之美",
-                "zh-TW": "神性之美"
+                "en": "Moon Authority",
+                "uk": "Влада Місяця",
+                "zh-CN": null,
+                "zh-TW": null
               },
               "description": {
-                "en": "Passive. Radiate transcendent beauty. Every 4 seconds, entities within 20 blocks looking at you have a 40% chance to be Awed. Awed players receive 20 madness, Slowness IV, and Nausea for 5 seconds. Awed mobs have their AI disabled (paralyzed) for 10 seconds. Targets have a 10-second immunity cooldown after being awed.",
-                "uk": "Пасивна. Випромінюйте трансцендентну красу. Кожні 4 секунди істоти в радіусі 20 блоків, які дивляться на вас, мають 40% шанс бути враженими благоговінням. Вражені гравці отримують 20 безумства, Сповільнення IV та Нудоту на 5 секунд. Вражені моби повністю паралізуються (вимкнено AI) на 10 секунд.",
-                "zh-CN": "被动。散发超越凡俗的美。每 4 秒，20 格内注视你的实体有 40% 概率陷入惊叹。惊叹的玩家获得 20 点疯狂值，并受到 5 秒的缓慢 IV 与恶心。惊叹的怪物其 AI 被禁用（麻痹）10 秒。目标在惊叹后有 10 秒免疫冷却。",
-                "zh-TW": "被動。散發超越凡俗的美。每 4 秒，20 格內注視你的實體有 40% 機率陷入驚歎。驚歎的玩家獲得 20 點瘋狂值，並受到 5 秒的緩慢 IV 與噁心。驚歎的怪物其 AI 被停用（麻痺）10 秒。目標在驚歎後有 10 秒免疫冷卻。"
+                "en": "Decide what kind of night it is. One face per world, held until dawn: Clear, Blue, Crimson, Silver, Full, Blood or Eclipse. Nothing can replace an authority already up except a Clear Moon. Night only, and an hour between casts.",
+                "uk": "Вирішіть, якою буде ніч. Одна грань на світ до ранку: Ясний, Синій, Багряний, Срібний, Повний, Кривавий або Затемнення. Ніщо не замінить чинну владу, окрім Ясного Місяця. Лише вночі, година між заклинаннями.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "radiant-grace",
+              "name": {
+                "en": "Radiant Grace",
+                "uk": "Сяюча Грація",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Passive. Madness aimed at you lands at half strength; hostile players within 16 blocks fumble 30% of their casts; hostile mobs will not target you; and hostile summons nearby falter, with one attack in five turning on their own owner. Party and church are never affected.",
+                "uk": "Пасивна. Безумство, спрямоване на вас, влучає вдвічі слабше; ворожі гравці в межах 16 блоків зривають 30% заклинань; ворожі моби не вибирають вас ціллю; а ворожі призови поруч втрачають запал — один удар із пʼяти обертається проти власника. Партію та церкву не зачіпає.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "fertility",
+              "name": {
+                "en": "Fertility",
+                "uk": "Плодючість",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Toggle a 128-block field. Animals inside breed without pause. Every hostile player inside carries an Urge that fills 1% a second, 1.1% within 16 blocks of you, and decays 2% a second outside. At full it takes them: their armour drops where they stand, 35 damage, and 10% madness. Party and church are never affected. 100 spirituality to raise, 20 a second to hold.",
+                "uk": "Перемикає поле на 128 блоків. Тварини всередині розмножуються без паузи. Кожен ворожий гравець усередині несе Потяг, що зростає на 1% за секунду, 1,1% у межах 16 блоків, і спадає на 2% за секунду знадвору. На повному: броня падає, 35 урону та 10% безумства. Партію та церкву не зачіпає. 100 духовності на підняття, 20 на секунду на утримання.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "proliferation",
+              "name": {
+                "en": "Proliferation",
+                "uk": "Розростання",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Reach into someone within 16 blocks and decide what they are. Always undoes whatever is changing their body size. Then one of their abilities is chosen and either sealed for a minute (Cell Remove), turned back on them for a minute (Cell Backfire), or marked to be bled, eaten and grown in you (Cell Morph).",
+                "uk": "Сягніть у когось у межах 16 блоків і вирішіть, хто вони такі. Завжди скасовує все, що змінює розмір їхнього тіла. Потім одну з їхніх здібностей або запечатано на хвилину, або обернено проти них, або позначено, щоб виростити в собі.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -10720,16 +11035,31 @@
             {
               "id": "soul-harvest",
               "name": {
-                "en": "Soul Extraction",
-                "uk": "Витягування душ",
+                "en": "Soul Harvest",
+                "uk": "Збір душ",
                 "zh-CN": "灵魂收割",
                 "zh-TW": "靈魂收割"
               },
               "description": {
-                "en": "Extract 1% of your maximum souls each second, plus 0.1% per plant drained within 5 blocks. Your soul capacity is half your maximum spirituality. Condense 1000 souls into a crystal by sneaking and right-clicking with an empty hand.",
-                "uk": "Щосекунди отримуйте 1% максимального запасу душ і ще 0,1% за кожну виснажену рослину в радіусі 5 блоків. Запас душ дорівнює половині максимальної духовності. Присівши, клацніть правою кнопкою порожньою рукою, щоб створити кристал із 1000 душ.",
+                "en": "Enables your soul reserve, capped at half your maximum spirituality. Souls do not regenerate passively. Use Soul Extraction to gather souls or condense gems.",
+                "uk": "Відкриває запас душ, обмежений половиною максимальної духовності. Душі не відновлюються пасивно. Використовуйте Вилучення душ для їх збору або створення кристалів.",
                 "zh-CN": "使你得以自其他生物身上抽取生命力，为制作出的物品注入生命。藉由杀死生物累积灵魂。",
                 "zh-TW": "使你得以自其他生物身上抽取生命力，為製作出的物品注入生命。藉由殺死生物累積靈魂。"
+              }
+            },
+            {
+              "id": "soul-extraction",
+              "name": {
+                "en": "Soul Extraction",
+                "uk": "Вилучення душ",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Mode 1: toggle extraction, spending 1% of maximum spirituality each second to gain 1% of maximum souls, plus 0.1% per plant drained within 5 blocks. Mode 2: instantly condense 1000 souls into a gem. Zero cooldown. Requires Soul Harvest; unavailable while piloting an Artificial Life Body.",
+                "uk": "Режим 1: увімкніть вилучення, витрачаючи 1% максимальної духовності щосекунди для отримання 1% максимального запасу душ і ще 0,1% за кожну виснажену рослину в радіусі 5 блоків. Режим 2: миттєво стисніть 1000 душ у кристал. Без перезарядки. Потребує Збору душ; недоступно під час керування Штучним живим тілом.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
@@ -11318,8 +11648,8 @@
                 "zh-TW": "火焰化形"
               },
               "description": {
-                "en": "Merge with flame for 45 spirituality per second, gaining fire immunity and 15% physical and magical damage reduction. Flight unlocks at Sequence 4. Left-click while active to Disperse, briefly scattering your body and igniting nearby enemies.",
-                "uk": "Merge with flame for 45 spirituality per second, gaining fire immunity and 15% physical and magical damage reduction. Flight unlocks at Sequence 4. Left-click while active to Disperse, briefly scattering your body and igniting nearby enemies.",
+                "en": "Merge with flame for 45 spirituality per second, gaining fire immunity and 15% physical and magical damage reduction. Flight and a slow self-repair of half a heart per second unlock at Sequence 4. Left-click while active to Disperse, briefly scattering your body and igniting nearby enemies.",
+                "uk": "Злиття з полум’ям за 45 духовності на секунду: імунітет до вогню та зменшення фізичної й магічної шкоди на 15%. На Послідовності 4 відкриваються політ і повільне відновлення на півсерця за секунду. Лівий клік у активному стані запускає Розсіювання, ненадовго розсипаючи ваше тіло та підпалюючи ворогів поблизу.",
                 "zh-CN": "Merge with flame for 45 spirituality per second, gaining fire immunity and 15% physical and magical damage reduction. Flight unlocks at Sequence 4. Left-click while active to Disperse, briefly scattering your body and igniting nearby enemies.",
                 "zh-TW": "Merge with flame for 45 spirituality per second, gaining fire immunity and 15% physical and magical damage reduction. Flight unlocks at Sequence 4. Left-click while active to Disperse, briefly scattering your body and igniting nearby enemies."
               }
@@ -11344,10 +11674,10 @@
                 "zh-TW": "弱點探查"
               },
               "description": {
-                "en": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 100% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 8 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts.",
-                "uk": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 100% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 8 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts.",
-                "zh-CN": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 100% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 8 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts.",
-                "zh-TW": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 100% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 8 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts."
+                "en": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 20% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 2 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts.",
+                "uk": "Фізична або магічна шкода, зокрема шкода, поглинута серцями поглинання, заповнює особисту шкалу місткістю в половину вашого максимального здоров’я без посилень. Отримуйте до 20% додаткової шкоди. Удари Вогняного Меча дають подвійний прогрес, а цілі під впливом Завоювання — у 1,5 раза; застосовується лише більший множник. Без завдання шкоди втрачається 2 відсоткові пункти кожні десять секунд. Прогрес зберігається після виходу з нормальною втратою, але скидається після смерті, вимкнення чи втрати здібності та перезапуску сервера.",
+                "zh-CN": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 20% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 8 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts.",
+                "zh-TW": "Dealing physical or magical damage, including damage absorbed by absorption hearts, fills a personal meter with capacity equal to half your unbuffed sequence maximum health. Gain up to 20% bonus damage. Flame-sword hits give double progress; Conquest-affected targets give 1.5 times progress; only the higher applies. Lose 8 percentage points every ten seconds without dealing damage. Progress survives disconnects with normal decay, but resets on death, disabling or losing the ability, and server restarts."
               }
             },
             {
@@ -11400,8 +11730,8 @@
                 "zh-TW": "鋼鐵意志"
               },
               "description": {
-                "en": "An iron will grants you extraordinary resistance to mental attacks and negative effects. Your bravery, comparable to steel, gradually weakens and eliminates harmful potion effects.",
-                "uk": "Залізна воля надає вам надзвичайну стійкість до ментальних атак та негативних ефектів. Ваша хоробрість, порівнянна зі сталлю, поступово послаблює та усуває шкідливі ефекти зілль.",
+                "en": "An iron will grants resistance to mental attacks and removes harmful potion effects up to tier II. Effects maintained by other abilities or systems follow their own protection rules.",
+                "uk": "Залізна воля захищає від ментальних атак і знімає шкідливі ефекти зілля до II рівня. Ефекти, які підтримують інші здібності чи системи, підпорядковуються власним правилам захисту.",
                 "zh-CN": "钢铁般的意志赋予你对精神攻击与负面效果的非凡抗性。你那可比钢铁的勇气会逐步削弱并消除有害的药水效果。",
                 "zh-TW": "鋼鐵般的意志賦予你對精神攻擊與負面效果的非凡抗性。你那可比鋼鐵的勇氣會逐步削弱並消除有害的藥水效果。"
               }
@@ -11471,8 +11801,8 @@
                 "zh-TW": "戰歌與戰吼"
               },
               "description": {
-                "en": "Cycle modes: war-song (buffs you and all online cohort allies for 30 seconds with Speed, Haste, Strength, and up to +50% extra damage based on sequence); war-cry (deals magic damage, applies Weakness I and Slowness II for 10 seconds to all enemies within 15 blocks, and adds Nausea to players).",
-                "uk": "Вибір режимів: war-song (надихає вас та всіх онлайн союзників по когорті на 30 секунд: дає Швидкість, Поспіх, Силу та до +50% до шкоди залежно від послідовності); war-cry (завдає магічної шкоди, накладає Слабкість I та Сповільнення II на 10 секунд на ворогів у радіусі 15 блоків, а також Нудоту на гравців).",
+                "en": "Cycle modes: war-song (buffs you and all online cohort allies for 30 seconds with Speed, Haste, Strength, and +50% extra damage to both weapon strikes and abilities); war-cry (deals magic damage, applies Weakness I and Slowness II for 10 seconds to all enemies within 15 blocks, and adds Nausea to players).",
+                "uk": "Вибір режимів: war-song (надихає вас та всіх онлайн союзників по когорті на 30 секунд: дає Швидкість, Поспіх, Силу та +50% шкоди зброєю і здібностями); war-cry (завдає магічної шкоди, накладає Слабкість I та Сповільнення II на 10 секунд на ворогів у радіусі 15 блоків, а також Нудоту на гравців).",
                 "zh-CN": "切换模式：战歌（在 30 秒内为你与所有在线部众友方赋予速度、急迫、力量，并依序列提供最多 +50% 的额外伤害）；战吼（造成魔法伤害，对 15 格内所有敌人施加 10 秒的虚弱 I 与缓慢 II，并对玩家另加恶心）。",
                 "zh-TW": "切換模式：戰歌（在 30 秒內為你與所有線上部眾友方賦予速度、急迫、力量，並依序列提供最多 +50% 的額外傷害）；戰吼（造成魔法傷害，對 15 格內所有敵人施加 10 秒的虛弱 I 與緩慢 II，並對玩家另加噁心）。"
               }
@@ -11572,8 +11902,8 @@
                 "zh-TW": "天氣術士特質"
               },
               "description": {
-                "en": "Enhanced charm, environmental perception, spirituality, strength, and stamina. Your battle stature expands toward that of a small giant.",
-                "uk": "Посилені харизма, сприйняття довкілля, духовність, сила й витривалість. У бою ваша статура зростає до розміру малого гіганта.",
+                "en": "Enhanced charm, environmental perception, spirituality, strength, and stamina. Ordinary hostile creatures will not hold a line against you, and an attacker who strikes you hesitates briefly. Your battle stature expands toward that of a small giant.",
+                "uk": "Посилені харизма, сприйняття довкілля, духовність, сила й витривалість. Звичайні ворожі істоти не можуть довго тримати вас у прицілі, а нападник, який ударить вас, ненадовго вагається. У бою ваша статура зростає до розміру малого гіганта.",
                 "zh-CN": "强化的魅力、环境感知、灵性、力量与耐力。你的战斗体型向小型巨人趋近。",
                 "zh-TW": "強化的魅力、環境感知、靈性、力量與耐力。你的戰鬥體型向小型巨人趨近。"
               }
@@ -11649,6 +11979,21 @@
                 "zh-CN": "迷魅附近的生物，并为友方提供增益。",
                 "zh-TW": "迷魅附近的生物，併為友方提供增益。"
               }
+            },
+            {
+              "id": "physical-enhancement",
+              "name": {
+                "en": "Physical Enhancement",
+                "uk": "Фізичне Посилення",
+                "zh-CN": "体质强化",
+                "zh-TW": "體質強化"
+              },
+              "description": {
+                "en": "The Sun’s light strengthens your body outright, quickening your step and, in time, your arm.",
+                "uk": "Світло Сонця напряму зміцнює ваше тіло, пришвидшуючи крок, а з часом і руку.",
+                "zh-CN": "吸收光以累积太阳储备，从而获得强化的体质。在黑暗中散发光芒可维持你的力量，但需当心——储备耗尽会使你陷入虚弱。",
+                "zh-TW": "吸收光以累積太陽儲備，從而獲得強化的體質。在黑暗中散發光芒可維持你的力量，但需當心——儲備耗盡會使你陷入虛弱。"
+              }
             }
           ]
         },
@@ -11677,33 +12022,48 @@
               }
             },
             {
-              "id": "horror-immunity",
+              "id": "evil-detection",
               "name": {
-                "en": "Horror Resistance",
-                "uk": "Опір Жахам",
-                "zh-CN": "恐惧抗性",
-                "zh-TW": "恐懼抗性"
+                "en": "Evil Detection",
+                "uk": "Виявлення Зла",
+                "zh-CN": null,
+                "zh-TW": null
               },
               "description": {
-                "en": "Reduces external madness and explicitly supported psychological effect durations by 12% at Sequence 8, increasing to 36% at Sequence 0. Plugin-applied Nausea, Blindness, and Darkness are shortened and may be prevented, with stronger effects being harder to prevent. Does not block abilities, damage, or unrelated control effects. Disabled while mutating.",
-                "uk": "Зменшує зовнішнє божевілля та тривалість явно підтримуваних психологічних ефектів на 12% на Послідовності 8, зі зростанням до 36% на Послідовності 0. Нудота, Сліпота й Темрява, накладені плагіном, тривають менше та можуть бути відвернені; сильніші ефекти відвернути важче. Не блокує здібності, шкоду чи не пов’язані з цим ефекти контролю. Не діє під час мутації.",
-                "zh-CN": "抵抗恐惧效果与精神攻击；此抗性随你的序列而增长。",
-                "zh-TW": "抵抗恐懼效果與精神攻擊；此抗性隨你的序列而增長。"
+                "en": "Sense every beyonder of an unholy pathway who steps within 64 blocks of you. The warning grows vaguer and more dreadful the further the intruder stands above your own sequence.",
+                "uk": "Відчувайте кожного Потойбічного нечестивого шляху, який наближається до вас на 64 блоки. Попередження стає тим туманнішим і жахливішим, чим вище прибулець стоїть над вашою власною послідовністю.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             },
             {
-              "id": "physical-enhancement",
+              "id": "sun-night-vision",
               "name": {
-                "en": "Physical Enhancement",
-                "uk": "Фізичне Посилення",
-                "zh-CN": "体质强化",
-                "zh-TW": "體質強化"
+                "en": "Night Vision",
+                "uk": "Нічний зір",
+                "zh-CN": null,
+                "zh-TW": null
               },
               "description": {
-                "en": "Absorb light to build solar reserves, gaining enhanced physical abilities. Emit light in darkness to maintain your power, but beware - depleted reserves leave you weakened.",
-                "uk": "Поглинайте світло, щоб накопичувати сонячні резерви та отримувати посилені фізичні здібності. Випромінюйте світло в темряві, щоб підтримувати силу, але остерігайтеся - виснажені резерви залишать вас ослабленим.",
-                "zh-CN": "吸收光以累积太阳储备，从而获得强化的体质。在黑暗中散发光芒可维持你的力量，但需当心——储备耗尽会使你陷入虚弱。",
-                "zh-TW": "吸收光以累積太陽儲備，從而獲得強化的體質。在黑暗中散發光芒可維持你的力量，但需當心——儲備耗盡會使你陷入虛弱。"
+                "en": "The Lord's light never leaves your eyes: you see clearly in total darkness at all times.",
+                "uk": "Світло Господнє ніколи не покидає ваших очей: ви завжди чітко бачите в цілковитій темряві.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "sun-blessing",
+              "name": {
+                "en": "Blessing",
+                "uk": "Благословення",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Bless yourself and every ally within 16 blocks for 30 seconds (45 seconds at Sequence 4 or lower). The blessed are immune to Darkness, deal 10% more damage to unholy pathways and regenerate steadily. At Sequence 4 or lower the blessing also grants Speed II, Strength I, Fire Resistance, Resistance and 10% magic damage resistance.",
+                "uk": "Благословляє вас і кожного союзника в радіусі 16 блоків на 30 секунд (45 секунд на Послідовності 4 та нижче). Благословенні несприйнятливі до Темряви, завдають на 10% більше шкоди нечестивим шляхам і поступово відновлюють здоров'я. На Послідовності 4 та нижче благословення також дарує Швидкість II, Силу I, Вогнетривкість, Опір та 10% опору магічній шкоді.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -11741,8 +12101,8 @@
                 "zh-TW": "淨化之斬"
               },
               "description": {
-                "en": "A forward wave of purifying light that can strike each target only once per cast.",
-                "uk": "Хвиля очищувального світла вперед, яка може вразити кожну ціль лише один раз за використання.",
+                "en": "Coat whatever weapon you hold in purifying light. While active, a melee hit you land also strikes with holy damage, at most once every 4 seconds. Drains spirituality over time.",
+                "uk": "Покрийте будь-яку зброю у вашій руці очищувальним світлом. Поки активно, ваш удар у ближньому бою також завдає святої шкоди, не частіше ніж раз на 4 секунди. Поступово витрачає духовність.",
                 "zh-CN": "每一次挥击都涤除腐化的打击。",
                 "zh-TW": "每一次揮擊都滌除腐化的打擊。"
               }
@@ -11756,8 +12116,8 @@
                 "zh-TW": "神聖誓約"
               },
               "description": {
-                "en": "Swear an unbreakable oath, empowering yourself with divine strength. At Sequence 4 and below, hold shift to empower nearby allies within 100 blocks. While active at Sequence 4 or lower, left-click to unleash Pure White Ray.",
-                "uk": "Присягніть непохитною клятвою, надаючи собі божественну силу. На Послідовності 4 і нижче, утримуйте shift, щоб посилити союзників поблизу в радіусі 100 блоків. У активному стані на Послідовності 4 або нижче, натисніть ліву кнопку миші, щоб випустити Чистий Білий Промінь.",
+                "en": "Swear an oath of holiness for 30 seconds: Strength I, Speed II, +5% ability damage and +10% damage against unholy paths. At Sequence 4: Strength II, Speed III, Intuition dodge raised to 8%, +10% ability damage, and you can swear the oath onto an ally you are looking at.",
+                "uk": "Присягніть клятвою святості на 30 секунд: Сила I, Швидкість II, +5% шкоди здібностей і +10% шкоди проти нечестивих шляхів. На Послідовності 4: Сила II, Швидкість III, шанс ухилення Інтуїції зростає до 8%, +10% шкоди здібностей, а клятву можна накласти на союзника, на якого ви дивитеся.",
                 "zh-CN": "立下不可违背的誓约，以神性之力强化自身。序列4 及以下，按住 Shift 可强化 100 格内的附近友方。序列4 或更低时生效期间，左键可释放纯白光线。",
                 "zh-TW": "立下不可違背的誓約，以神性之力強化自身。序列4 及以下，按住 Shift 可強化 100 格內的附近友方。序列4 或更低時生效期間，左鍵可釋放純白光線。"
               }
@@ -11790,6 +12150,36 @@
                 "uk": "Ваші удари в ближньому бою обпікають скверних ворогів священною магічною шкодою. На Послідовності 4 ваші удари також випалюють їхню духовність.",
                 "zh-CN": "你的近战打击以神圣魔法伤害灼烧被腐化的敌人。序列4 时，你的打击还会烧去他们的灵性。",
                 "zh-TW": "你的近戰打擊以神聖魔法傷害灼燒被腐化的敵人。序列4 時，你的打擊還會燒去他們的靈性。"
+              }
+            },
+            {
+              "id": "horror-immunity",
+              "name": {
+                "en": "Horror Resistance",
+                "uk": "Опір Жахам",
+                "zh-CN": "恐惧抗性",
+                "zh-TW": "恐懼抗性"
+              },
+              "description": {
+                "en": "Toggle. Drains spirituality every second while active. Reduces external madness and explicitly supported psychological effect durations by 15% at Sequence 7, increasing to 36% at Sequence 0. Plugin-applied Nausea, Blindness, and Darkness are shortened and may be prevented, with stronger effects being harder to prevent. Does not block abilities, damage, or unrelated control effects. Disabled while mutating.",
+                "uk": "Перемикач. Щосекунди витрачає духовність, поки активний. Зменшує зовнішнє божевілля та тривалість явно підтримуваних психологічних ефектів на 15% на Послідовності 7, зі зростанням до 36% на Послідовності 0. Нудота, Сліпота й Темрява, накладені плагіном, тривають менше та можуть бути відвернені; сильніші ефекти відвернути важче. Не блокує здібності, шкоду чи не пов’язані з цим ефекти контролю. Не діє під час мутації.",
+                "zh-CN": "抵抗恐惧效果与精神攻击；此抗性随你的序列而增长。",
+                "zh-TW": "抵抗恐懼效果與精神攻擊；此抗性隨你的序列而增長。"
+              }
+            },
+            {
+              "id": "sun-halo",
+              "name": {
+                "en": "Sun Halo",
+                "uk": "Німб Сонця",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "A ring of holy light crowns your head. Drains 1 spirituality per second and builds 1% Purification per second on every party ally within 16 blocks.",
+                "uk": "Коло святого світла вінчає вашу голову. Витрачає 1 духовність за секунду та накопичує 1% Очищення за секунду кожному союзнику з вашої групи в радіусі 16 блоків.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -11827,8 +12217,8 @@
                 "zh-TW": "增幅"
               },
               "description": {
-                "en": "Temporarily amplify an ally's damage, resource efficiency, and success chances. Strength scales with Sequence. While damage is amplified, the combined Sequence, Amplification, Justice Halo, and Contract Authority multiplier cannot exceed 2.0x.",
-                "uk": "Temporarily amplify an ally's damage, resource efficiency, and success chances. Strength scales with Sequence. While damage is amplified, the combined Sequence, Amplification, Justice Halo, and Contract Authority multiplier cannot exceed 2.0x.",
+                "en": "Cast on the player you look at (or yourself) and choose one of their Symbolisms. The next time they cast an ability of it, for 30 seconds that Symbolism's abilities deal more damage (10%, up to 50% at Sequence 0) and cost less spirituality (5%, up to 25%). The bonus is split across the abilities it covers: full for 1, 1/2 each for 2, 3/10 each for 3-4, 1/5 each for 5+. At Sequence 4: Symbolism mode is stronger (up to 65% damage / 40% cost) on a 2-minute cooldown, and sneak-casting amplifies your whole party at once with the base values. Damage can never exceed 2x its designed value.",
+                "uk": "Застосуйте до гравця, на якого дивитеся (або до себе), і оберіть один з його Символізмів. Коли він наступного разу використає здібність цього Символізму, протягом 30 секунд здібності цього Символізму завдають більше шкоди (10%, до 50% на Послідовності 0) і коштують менше духовності (5%, до 25%). Бонус ділиться між охопленими здібностями: повний для 1, 1/2 кожній для 2, 3/10 кожній для 3-4, 1/5 кожній для 5+. На Послідовності 4: режим Символізму сильніший (до 65% шкоди / 40% вартості) з відновленням 2 хвилини, а застосування крадучись посилює всю групу базовими значеннями. Шкода ніколи не перевищує 2x задуманої.",
                 "zh-CN": "Temporarily amplify an ally's damage, resource efficiency, and success chances. Strength scales with Sequence. While damage is amplified, the combined Sequence, Amplification, Justice Halo, and Contract Authority multiplier cannot exceed 2.0x.",
                 "zh-TW": "Temporarily amplify an ally's damage, resource efficiency, and success chances. Strength scales with Sequence. While damage is amplified, the combined Sequence, Amplification, Justice Halo, and Contract Authority multiplier cannot exceed 2.0x."
               }
@@ -11842,8 +12232,8 @@
                 "zh-TW": "無效化"
               },
               "description": {
-                "en": "Nullify your enemy's efforts, and decrease their damage.",
-                "uk": "Зведіть нанівець зусилля ворога та зменшіть його шкоду!",
+                "en": "Amplification in reverse. Choose one of your target's Symbolisms: the next time they cast an ability of it, for 30 seconds that Symbolism's abilities deal less damage (10%, up to 50% at Sequence 0) and cost more. The penalty is split across the abilities it covers: full for 1, 1/2 each for 2, 3/10 each for 3-4, 1/5 each for 5+. Targets two or more Sequences above you suffer only half. At Sequence 4: a stronger Symbolism mode (2-minute cooldown), and Edict mode — choose any pathway's Symbolism; for 15 seconds its casts within 32 blocks of you fail and are locked for a minute (4 casts at Sequence 4, 6 at Sequence 2, 10 at Sequence 0).",
+                "uk": "Посилення навпаки. Оберіть один із Символізмів цілі: коли вона наступного разу використає здібність цього Символізму, протягом 30 секунд здібності цього Символізму завдають менше шкоди (10%, до 50% на Послідовності 0) і коштують більше. Штраф ділиться між охопленими здібностями: повний для 1, 1/2 кожній для 2, 3/10 кожній для 3-4, 1/5 кожній для 5+. Цілі на дві чи більше Послідовностей вищі за вас страждають лише наполовину. На Послідовності 4: сильніший режим Символізму (відновлення 2 хв) і режим Едикту — оберіть Символізм будь-якого шляху; 15 секунд його застосування в межах 32 блоків від вас провалюються й блокуються на хвилину (4 застосування на Послідовності 4, 6 на Послідовності 2, 10 на Послідовності 0).",
                 "zh-CN": "使敌人的努力归于无效，并削减其伤害。",
                 "zh-TW": "使敵人的努力歸於無效，並削減其傷害。"
               }
@@ -11883,10 +12273,25 @@
                 "zh-TW": "淨化之環"
               },
               "description": {
-                "en": "The area around you purifies any manifestation of evil for a certain period.",
-                "uk": "Ділянка навколо вас очищує будь-який прояв зла протягом деякого часу",
+                "en": "The area around you purifies any manifestation of evil for a certain period. Left-click to cycle the circle's range: Focused (3 blocks, 1.5x damage), Standard (5 blocks) or Wide (9 blocks, 0.6x damage).",
+                "uk": "Область навколо вас очищує будь-який прояв зла протягом певного часу. Ліва кнопка — змінити радіус кола: Зосереджене (3 блоки, 1,5x шкоди), Стандартне (5 блоків) або Широке (9 блоків, 0,6x шкоди).",
                 "zh-CN": "在一定时间内，你周围的区域会净化一切邪恶的显化。",
                 "zh-TW": "在一定時間內，你周圍的區域會淨化一切邪惡的顯化。"
+              }
+            },
+            {
+              "id": "purification-halo",
+              "name": {
+                "en": "Purification Halo",
+                "uk": "Німб Очищення",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Your halo blazes into a true corona. Drains 2 spirituality per second, builds 1.5% Purification per second on every party ally within 24 blocks and makes them immune to Freezing and to frostbite.",
+                "uk": "Ваш німб спалахує справжньою короною. Витрачає 2 духовності за секунду, накопичує 1.5% Очищення за секунду кожному союзнику з вашої групи в радіусі 24 блоків і робить їх несприйнятливими до Обмороження та до обмороження від холоду.",
+                "zh-CN": null,
+                "zh-TW": null
               }
             }
           ]
@@ -11933,14 +12338,14 @@
             {
               "id": "unshadowed-domain",
               "name": {
-                "en": "Domain of Light",
-                "uk": "Володіння Світла",
+                "en": "Unshadowed Domain",
+                "uk": "Незатінений Домен",
                 "zh-CN": "光之领域",
                 "zh-TW": "光之領域"
               },
               "description": {
-                "en": "Allow bright blazing Light to illuminate every corner of the region, eliminating all darkness and revealing all hidden objects within it. It also has a purifying effect, weakening evil forces within the radius.",
-                "uk": "Дозволити яскравому палаючому Світлу освітити кожен куточок у регіоні, усуваючи всю темряву і виявляючи всі приховані об'єкти в ньому. Воно також має очисний ефект, послаблюючи злі сили в радіусі дії",
+                "en": "Blazing Light fills a 16-block radius for 20 seconds, revealing everything hidden and building Purification on you and your party (5% per second). Unholy Beyonders of your Sequence or lower deal 25% less ability damage and lose their dark arts: Hanged cannot use shadows or Profane Language, Abyss cannot use shadow or filth (and inflicts only a quarter of its madness), Chained lose Zombie Physique and Resurrection, burn in Wraith Form and are exposed in True or Mythical Form, Darkness cannot conceal itself or command spirits, Death cannot call on spirits or the undead. At Sequence 3 it also silences Demoness and Second Law plagues and Mother's Evil Spirit Transformation, Descent of Death and Manipulation of the Lands.",
+                "uk": "Палюче Світло заповнює радіус 16 блоків на 20 секунд, викриваючи все приховане й накопичуючи Очищення на вас і вашій групі (5% за секунду). Нечестиві Потойбічні вашої Послідовності або нижчої завдають на 25% менше шкоди здібностями й втрачають темні мистецтва: Повішений не може використовувати тіні чи Нечестиву Мову, Безодня — тіні чи скверну (і завдає лише чверть божевілля), Скуті втрачають Тіло Зомбі та Воскресіння, горять у Формі Привида та викриваються в Справжній чи Міфічній Формі, Темрява не може приховатися чи керувати духами, Смерть не може закликати духів чи нежить. На Послідовності 3 також замовкають хвороби Демониці та Другого Закону, а також Перетворення на Злого Духа, Сходження Смерті та Маніпуляція Землями Матері.",
                 "zh-CN": "让炽亮的光辉照亮区域的每一个角落，消除一切黑暗，并显现其中所有隐匿之物。它同时具有净化之效，削弱半径内的邪恶之力。",
                 "zh-TW": "讓熾亮的光輝照亮區域的每一個角落，消除一切黑暗，並顯現其中所有隱匿之物。它同時具有淨化之效，削弱半徑內的邪惡之力。"
               }
@@ -11948,8 +12353,8 @@
             {
               "id": "purification",
               "name": {
-                "en": "Purification",
-                "uk": "Очищення",
+                "en": "Beyonder Characteristic Purification",
+                "uk": "Очищення Характеристики Незвичайного",
                 "zh-CN": "净化",
                 "zh-TW": "淨化"
               },
@@ -11963,14 +12368,14 @@
             {
               "id": "salvation",
               "name": {
-                "en": "Salvation",
-                "uk": "Спасіння",
+                "en": "Purification",
+                "uk": "Очищення",
                 "zh-CN": "救赎",
                 "zh-TW": "救贖"
               },
               "description": {
-                "en": "Emanate a holy light that cleanses ailments, calms bloodlust, removes Withering Wind corrosion, and temporarily seals the drawbacks of artifacts held by nearby Beyonders and yourself.",
-                "uk": "Святе сяйво виходить з вас, очищаючи недуги поблизьких Потойбічних, заспокоюючи жагу крові, знімаючи корозію Withering Wind і тимчасово запечатуючи негативні ефекти артефактів у вас та близьких Потойбічних.",
+                "en": "Charge a target ally’s Purification. When it fills, their afflictions are burned away at once — parasites, seeds, curses, madness, dread, corruption and more. Becomes an area effect at Sequence 2, charging each ally by up to 50% — a full 100% at Sequence 0.",
+                "uk": "Наповнює шкалу Очищення союзника. Коли вона заповнюється, усі його недуги згорають водночас. З 2-ї Послідовності діє по площі, наповнюючи шкалу кожного союзника до 50% — а на Послідовності 0 повністю, на 100%.",
                 "zh-CN": "散发神圣之光，清除病症、平息血之渴求、去除凋零之风的腐蚀，并临时封印附近非凡者与你自身所持神器的负面效应。",
                 "zh-TW": "散發神聖之光，清除病症、平息血之渴求、去除凋零之風的腐蝕，並臨時封印附近非凡者與你自身所持神器的負面效應。"
               }
@@ -11999,8 +12404,53 @@
                 "zh-TW": null
               },
               "description": {
-                "en": "Open a divine eye that detects Beyonders of evil pathways within 30 blocks, revealing them with a red glow. Activate again while looking at a glowing target to fire a burning beam of purifying light.",
-                "uk": "Відкрийте божественне око, що виявляє Потойбічних злих шляхів у радіусі 30 блоків, позначаючи їх червоним сіянням. Активуйте знову, дивлячись на ціль, щоб випустити палючий промінь очисного світла.",
+                "en": "Open a divine eye that detects Beyonders of evil pathways within 30 blocks, revealing them with a red glow. Activate again while looking at a glowing target to fire a burning beam of purifying light. The beam deals 15% more damage to Beyonders your Evil Detection sensed first.",
+                "uk": "Відкрийте божественне око, що виявляє Потойбічних злих шляхів у радіусі 30 блоків, позначаючи їх червоним сяйвом. Активуйте знову, дивлячись на ціль, щоб випустити палючий промінь очисного світла. Промінь завдає на 15% більше шкоди Потойбічним, яких першим відчуло ваше Виявлення Зла.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "intuition",
+              "name": {
+                "en": "Intuition",
+                "uk": "Інтуїція",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "A solar premonition warns you a heartbeat before a blow lands, letting you slip aside entirely. 5% chance to dodge an attack; Oath of Holiness raises it to 8% while active.",
+                "uk": "Сонячне передчуття попереджає вас за мить до удару, дозволяючи повністю ухилитися. Шанс ухилення 5%; Клятва Святості підвищує його до 8%, поки активна.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "pure-white-ray",
+              "name": {
+                "en": "Pure White Ray",
+                "uk": "Чистий Білий Промінь",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Condense light for 2.5 seconds, then unleash a beam of pure white light for 8 seconds. The beam follows your gaze — sweep it across your foes. Casting another ability breaks the beam.",
+                "uk": "Конденсуйте світло 2,5 секунди, а потім випустіть промінь чистого білого світла на 8 секунд. Промінь слідує за вашим поглядом — проведіть ним по ворогах. Використання іншої здібності перериває промінь.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
+              "id": "flaring-sun-charm",
+              "name": {
+                "en": "Flaring Sun Charm Creation",
+                "uk": "Створення Амулетів Палаючого Сонця",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Your blood now carries divinity. A Sun Beyonder who knows the Sun Domain's rituals can turn a vial of it into a Flaring Sun Charm (sneak-right-click Glowstone Dust with the vial in the off hand). Charms strike harder the lower your Sequence; with Sequence 0 blood they devastate an unholy Beyonder's divine form. A charm made from your drawn blood stays linked to you — anyone can curse you through it until it is washed in Holy Water — and whoever makes one without you making it yourself, or without praying in your church, slowly falls under your church's pull.",
+                "uk": "Ваша кров тепер несе божественність. Потойбічний Сонця, що знає ритуали Домену Сонця, може перетворити її флакон на Амулет Палаючого Сонця (клацніть правою крадучись Світлопилом із флаконом у другій руці). Амулети б'ють сильніше, що нижча ваша Послідовність; з кров'ю Послідовності 0 вони нищать божественну форму нечестивого Потойбічного. Амулет із вашої взятої крові лишається пов'язаним з вами — будь-хто може проклясти вас через нього, доки його не омиють Святою Водою, — а той, хто робить амулет не вашими руками й не молячись у вашій церкві, поступово підпадає під тяжіння вашої церкви.",
                 "zh-CN": null,
                 "zh-TW": null
               }
@@ -12032,6 +12482,21 @@
               }
             },
             {
+              "id": "core-justice-principles",
+              "name": {
+                "en": "Core Justice Principles",
+                "uk": "Основні Принципи Справедливості",
+                "zh-CN": null,
+                "zh-TW": null
+              },
+              "description": {
+                "en": "Choose the Justice Principles your Justice Halo enforces on everyone in range — you and your party included. Breakers deal less and take more damage for 5 seconds and their ability is weakened; if you break one yourself you gain 10 madness. Changing the set costs 10% of your Contract & Order Authority and has a 30-minute cooldown. You uphold more principles at lower Sequences.",
+                "uk": "Оберіть Принципи Справедливості, які ваш Ореол Справедливості застосовує до всіх у радіусі — зокрема до вас і вашої групи. Порушники 5 секунд завдають менше і отримують більше шкоди, а їхня здібність слабшає; якщо порушите принцип самі, отримаєте 10 божевілля. Зміна набору коштує 10% вашої Влади Договору й Порядку та має 30-хвилинне відновлення. На нижчих Послідовностях можна підтримувати більше принципів.",
+                "zh-CN": null,
+                "zh-TW": null
+              }
+            },
+            {
               "id": "justice-halo",
               "name": {
                 "en": "Justice Halo",
@@ -12040,8 +12505,8 @@
                 "zh-TW": "正義光環"
               },
               "description": {
-                "en": "A permanent halo of light hovers above the Justice Mentor's head, glowing brighter in sunlight and dimming in darkness. It passively empowers the outgoing damage of the caster and their allies, while weakening the outgoing damage of non-allies within range. When shining bright, it also occasionally blesses the caster and allies with regeneration and, more rarely, restores a bit of spirituality. Radius and strength grow with sequence, while the damage swing scales with Contract & Order Authority.",
-                "uk": "Над головою Наставника Справедливості сяє незгасний ореол світла — яскравіший на сонці й тьмяніший у темряві. Він пасивно підсилює вихідну шкоду власника та його союзників, водночас послаблюючи вихідну шкоду не-союзників поблизу. Коли сяє яскраво, він також час від часу благословляє власника і союзників регенерацією, а зрідка — відновлює трохи духовності. Радіус і сила зростають із послідовністю, а зміна шкоди масштабується Авторитетом Договору й Порядку.",
+                "en": "A permanent halo of light hovers above the Justice Mentor's head, glowing brighter in sunlight and dimming in darkness. It empowers the outgoing damage of the caster and their allies and weakens that of non-allies within range, builds 2% Purification per second on the caster and every party ally in range, and keeps them free of Freezing and Frostbite. It also enforces your Core Justice Principles on everyone in range. When shining bright, it occasionally blesses allies with regeneration and restores a bit of spirituality.",
+                "uk": "Постійний ореол світла ширяє над головою Наставника Справедливості, яскравішаючи на сонці й тьмяніючи в темряві. Він посилює вихідну шкоду заклинателя та союзників і послаблює шкоду не-союзників у радіусі, накопичує 2% Очищення за секунду на заклинателі й кожному союзнику групи в радіусі та захищає їх від Замерзання й Обмороження. Він також застосовує ваші Основні Принципи Справедливості до всіх у радіусі. Коли сяє яскраво, іноді дарує союзникам регенерацію та трохи духовності.",
                 "zh-CN": "一圈恒久的光环悬于正义导师头顶，在阳光下更为明亮，在黑暗中则黯淡。它被动强化施术者及其友方所造成的伤害，同时削弱范围内非友方所造成的伤害。光辉炽亮时，还会偶尔为施术者与友方赐下生命恢复，更罕见地恢复少许灵性。半径与强度随序列增长，伤害的增减幅度则随契约与秩序权柄而变化。",
                 "zh-TW": "一圈恆久的光環懸於正義導師頭頂，在陽光下更為明亮，在黑暗中則黯淡。它被動強化施術者及其友方所造成的傷害，同時削弱範圍內非友方所造成的傷害。光輝熾亮時，還會偶爾為施術者與友方賜下生命恢復，更罕見地恢復少許靈性。半徑與強度隨序列增長，傷害的增減幅度則隨契約與秩序權柄而變化。"
               }
@@ -12055,8 +12520,8 @@
                 "zh-TW": "正義之裁"
               },
               "description": {
-                "en": "Focuses the Justice Mentor's divine authority into a single condemning strike. Deals twice the damage and applies a deeper curse of Weakness to the targeted player. Effect scales with Contract & Order Authority.",
-                "uk": "Фокусує божественний авторитет Наставника Справедливості в єдиний засуджувальний удар. Завдає вдвічі більше шкоди та накладає глибше прокляття Слабкості на обраного гравця. Ефект масштабується з Авторитетом Контракту та Порядку.",
+                "en": "Two modes. Principle: choose the Justice Principle your Judgement enforces. Judgement: a single-target verdict costing 5% Contract & Order Authority (10-minute cooldown) — doubles the Justice Halo weakening on the target and locks every ability of the chosen principle for 30 seconds.",
+                "uk": "Два режими. Принцип: оберіть Принцип Справедливості для вашого Суду. Суд: вирок одній цілі за 5% Влади Договору й Порядку (відновлення 10 хвилин) — подвоює послаблення Ореолу Справедливості на цілі та блокує всі її здібності обраного принципу на 30 секунд.",
                 "zh-CN": "将正义导师的神性权柄聚为一记定罪之击。造成双倍伤害，并对目标玩家施加更深的虚弱诅咒。效果随契约与秩序权柄而变化。",
                 "zh-TW": "將正義導師的神性權柄聚為一記定罪之擊。造成雙倍傷害，並對目標玩家施加更深的虛弱詛咒。效果隨契約與秩序權柄而變化。"
               }
@@ -12126,8 +12591,8 @@
                 "zh-TW": "光之權柄（部分）"
               },
               "description": {
-                "en": "Channels a fragment of the Lightseeker's divine authority over light. Left-click to switch mode. Light Authority mode grants slightly accelerated creative flight and Regeneration II while draining spirituality each second. Sun Authority mode interacts with space-time labyrinths.",
-                "uk": "Канал фрагменту божественної влади Шукача Світла над світлом. Лівий клік для зміни режиму. Режим Влади Світла надає трохи прискорений творчий політ і Регенерацію II, щосекунди витрачаючи духовність. Режим Влади Сонця взаємодіє з лабіринтами простору-часу.",
+                "en": "Channels a fragment of the Lightseeker's divine authority over light. Left-click to switch mode. Light Authority mode grants slightly accelerated creative flight and Regeneration II while draining spirituality each second. Light Shift mode moves you alone to typed coordinates at the speed of light, paying spirituality by distance like a Traveler's Door. Sun Authority mode interacts with space-time labyrinths.",
+                "uk": "Спрямовує частку божественної влади Шукача Світла над світлом. Ліва кнопка — змінити режим. Режим Влади Світла дає трохи прискорений творчий політ і Регенерацію II, щосекунди витрачаючи духовність. Режим Світлового Зсуву переносить лише вас до введених координат зі швидкістю світла, витрачаючи духовність залежно від відстані, як Двері Мандрівника. Режим Влади Сонця взаємодіє з просторово-часовими лабіринтами.",
                 "zh-CN": "引导逐光者对光之神性权柄的一个碎片。左键切换模式。光之权柄模式赋予略微加速的创造模式飞行与生命恢复 II，同时每秒消耗灵性。太阳权柄模式则与时空迷宫相互作用。",
                 "zh-TW": "引導逐光者對光之神性權柄的一個碎片。左鍵切換模式。光之權柄模式賦予略微加速的創造模式飛行與生命恢復 II，同時每秒消耗靈性。太陽權柄模式則與時空迷宮相互作用。"
               }
@@ -12156,8 +12621,8 @@
                 "zh-TW": "正義審判"
               },
               "description": {
-                "en": "Channels the full weight of divine law into a single devastating verdict. Deals 3-4x the damage of Justice Halo with extreme Weakness on impact. Requires direct line of sight. Long cooldown.",
-                "uk": "Спрямовує всю вагу божественного закону в єдиний нищівний вирок. Завдає 3-4x шкоди від Ореолу Справедливості з надзвичайною Слабкістю при влученні. Потребує прямої лінії зору. Тривале перезарядження.",
+                "en": "Only usable at full Contract & Order Authority; consumes 20% of it. Locks every ability of every principle you uphold on the target for one minute and weakens them by 3x to 5x the Justice Halo weakening, depending on your potion digestion.",
+                "uk": "Доступно лише за повної Влади Договору й Порядку; витрачає 20% її. Блокує на цілі всі здібності кожного вашого принципу на одну хвилину та послаблює її в 3-5 разів сильніше за Ореол Справедливості залежно від засвоєння зілля.",
                 "zh-CN": "将神圣律法的全部重量倾注为一道毁灭性的判决。造成正义光环 3-4 倍的伤害，并在命中时施加极度虚弱。需要直接的视线。冷却漫长。",
                 "zh-TW": "將神聖律法的全部重量傾注為一道毀滅性的判決。造成正義光環 3-4 倍的傷害，並在命中時施加極度虛弱。需要直接的視線。冷卻漫長。"
               }
@@ -12197,8 +12662,8 @@
                 "zh-TW": "神聖王國"
               },
               "description": {
-                "en": "Toggle a 50-block domain that drains six spirituality every two seconds, damages undead, and weakens hostile Darkness offense.",
-                "uk": "Toggle a 50-block domain that drains six spirituality every two seconds, damages undead, and weakens hostile Darkness offense.",
+                "en": "Toggle a Holy Kingdom 25 blocks around you, draining 500 spirituality per second. It carries every effect of the Unshadowed Domain, builds Purification on your party at 10% per second, destroys undead instantly, scorches Death, Chained and Abyss Beyonders (and, more lightly, every other unholy path), and forbids Chained from taking Wraith Form.",
+                "uk": "Увімкніть Святе Королівство в радіусі 25 блоків, що витрачає 500 духовності за секунду. Воно має всі ефекти Незатіненого Домену, накопичує Очищення на вашій групі на 10% за секунду, миттєво знищує нежить, опалює Потойбічних Смерті, Скутих і Безодні (і слабше — усіх інших нечестивих шляхів) та забороняє Скутим приймати Форму Привида.",
                 "zh-CN": "Toggle a 50-block domain that drains six spirituality every two seconds, damages undead, and weakens hostile Darkness offense.",
                 "zh-TW": "Toggle a 50-block domain that drains six spirituality every two seconds, damages undead, and weakens hostile Darkness offense."
               }
@@ -12212,8 +12677,8 @@
                 "zh-TW": "信仰之僕"
               },
               "description": {
-                "en": "Toggle a 30-block domain that drains 1.5% maximum spirituality each second. Every five seconds hostile players look upward briefly, active toggles are interrupted, and ability casts are locked for one second.",
-                "uk": "Toggle a 30-block domain that drains 1.5% maximum spirituality each second. Every five seconds hostile players look upward briefly, active toggles are interrupted, and ability casts are locked for one second.",
+                "en": "Ward the faithful against unholy magic. Church mode: every member of your church except you resists magic damage from unholy Beyonders (Darkness included) — junior followers 33%, followers 66%, senior followers and above fully — draining 5% of your maximum spirituality per second. Self mode: only you are fully warded, draining 1% of your maximum spirituality per second. Left-click to switch modes.",
+                "uk": "Захистіть вірних від нечестивої магії. Режим церкви: кожен член вашої церкви, крім вас, опирається магічній шкоді від нечестивих Потойбічних (включно з Темрявою) — молодші послідовники на 33%, послідовники на 66%, старші послідовники й вище повністю — витрачаючи 5% вашої максимальної духовності за секунду. Режим себе: повністю захищені лише ви, витрачаючи 1% вашої максимальної духовності за секунду. Ліва кнопка — змінити режим.",
                 "zh-CN": "Toggle a 30-block domain that drains 1.5% maximum spirituality each second. Every five seconds hostile players look upward briefly, active toggles are interrupted, and ability casts are locked for one second.",
                 "zh-TW": "Toggle a 30-block domain that drains 1.5% maximum spirituality each second. Every five seconds hostile players look upward briefly, active toggles are interrupted, and ability casts are locked for one second."
               }

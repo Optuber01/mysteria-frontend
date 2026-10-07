@@ -57,7 +57,9 @@ watch(() => card.value.accent, accent => {
 // `behavior: "instant"` overrides the global `scroll-behavior: smooth`, which
 // would otherwise animate the whole page back to the top on every navigation -
 // on a long page that reads as the site lagging behind the click.
+// A link to an anchor (/rules#rule-3.1) is left to the router, which scrolls to it.
 watch(() => route.path, () => {
+  if (route.hash) return;
   // Use requestAnimationFrame to ensure it happens after DOM updates
   requestAnimationFrame(() => {
     window.scrollTo({top: 0, left: 0, behavior: "instant"});

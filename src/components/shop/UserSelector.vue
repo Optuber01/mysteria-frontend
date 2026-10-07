@@ -1,57 +1,60 @@
 <template>
-  <div class="user-ritual-selector">
-    <label v-if="label" class="ritual-label">{{ label }}</label>
+  <!-- Finds a verified player by nickname, for a gift. -->
+  <div class="recipient">
+    <label v-if="label" :for="inputId" class="recipient__label">{{ label }}</label>
 
-    <div class="ritual-search-wrapper">
+    <div class="recipient__search">
       <input
+          :id="inputId"
           v-model="searchQuery"
-          :class="['ritual-search-input', { 'is-selected': isUserSelected }]"
+          :aria-controls="listId"
+          :aria-expanded="userOptions.length > 0"
+          :class="{'is-selected': isUserSelected}"
           :disabled="disabled"
           :placeholder="placeholder || t('selectRecipient')"
+          autocomplete="off"
+          class="arc-field recipient__input"
+          role="combobox"
+          aria-autocomplete="list"
           type="text"
           @input="handleSearchInput"
       />
-      <div class="ritual-search-icon">
+      <span class="recipient__icon" aria-hidden="true">
         <i v-if="isLoading" class="fa-solid fa-spinner fa-spin"></i>
-        <i v-else-if="isUserSelected" class="fa-solid fa-check-double success-ritual"></i>
+        <i v-else-if="isUserSelected" class="fa-solid fa-check recipient__ok"></i>
         <i v-else class="fa-solid fa-magnifying-glass"></i>
-      </div>
+      </span>
     </div>
 
-    <Transition name="ritual-fade">
-      <div v-if="userOptions.length > 0" class="ritual-results no-scrollbar">
-        <div
-            v-for="user in userOptions"
-            :key="user.value"
-            :class="{ selected: modelValue === user.value }"
-            class="ritual-user-option"
+    <ul v-if="userOptions.length > 0" :id="listId" class="recipient__results" role="listbox" :aria-label="label">
+      <li v-for="user in userOptions" :key="user.value" role="presentation">
+        <button
+            :aria-selected="modelValue === user.value"
+            :class="{'is-selected': modelValue === user.value}"
+            class="recipient__option"
+            role="option"
+            type="button"
             @click="handleUserSelect(user.value)"
         >
-          <div class="user-ritual-info">
-            <div class="user-ritual-name">
-              {{ user.label }}
-              <i v-if="user.verified" :title="t('verified')" class="fa-solid fa-certificate gold-seal"></i>
-            </div>
-            <div v-if="user.description" class="user-ritual-desc">{{ user.description }}</div>
-          </div>
-        </div>
-      </div>
-    </Transition>
+          <span>{{ user.label }}</span>
+          <span v-if="user.description" class="recipient__desc">{{ user.description }}</span>
+        </button>
+      </li>
+    </ul>
 
-    <div v-if="!isLoading && !isUserSelected && searchQuery.length >= 2 && userOptions.length === 0"
-         class="ritual-no-results">
-      {{ t('noUsersFound') || 'No verified users found' }}
-    </div>
+    <p v-if="!isLoading && !isUserSelected && searchQuery.length >= 2 && userOptions.length === 0" class="recipient__note" role="status">
+      {{ t('noUsersFound') }}
+    </p>
 
-    <div v-if="error" class="ritual-error">
-      <i class="fa-solid fa-triangle-exclamation"></i>
+    <p v-if="error" class="recipient__note recipient__error" role="alert">
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
       {{ error }}
-    </div>
+    </p>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {computed, ref} from 'vue';
+import {computed, ref, useId} from 'vue';
 import {useI18n} from '@/composables/useI18n';
 import {usersAPI} from '@/utils/api/users';
 import type {UserSearchDto} from '@/types/users';
@@ -69,6 +72,9 @@ const emit = defineEmits<{
 }>();
 
 const {t} = useI18n();
+const uid = useId();
+const inputId = `recipient-${uid}`;
+const listId = `recipient-list-${uid}`;
 const users = ref<UserSearchDto[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
@@ -125,175 +131,90 @@ const handleUserSelect = (userId: string) => {
 </script>
 
 <style scoped>
-.user-ritual-selector {
+.recipient {
   position: relative;
+  display: grid;
+  gap: 8px;
   width: 100%;
 }
 
-.ritual-label {
-  display: block;
-  margin-bottom: 12px;
-  font-family: 'Playfair Display', serif;
-  font-size: 14px;
-  color: var(--myst-gold);
-  text-transform: uppercase;
-  letter-spacing: 2px;
+.recipient__label {
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
 }
 
-.ritual-search-wrapper {
+.recipient__search {
   position: relative;
 }
 
-.ritual-search-input {
-  width: 100%;
-  padding: 14px 44px 14px 16px;
-  background: rgb(var(--us-ffffff) / 0.02);
-  border: 1px solid rgb(var(--us-ffffff) / 0.1);
-  border-radius: 4px;
-  color: rgb(var(--us-ffffff));
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  transition: all 0.3s ease;
+.recipient__input {
+  padding-right: 42px;
 }
 
-.ritual-search-input:focus {
-  outline: none;
-  border-color: var(--myst-gold);
-  background: rgb(var(--us-c8b273) / 0.05);
-  box-shadow: 0 0 20px rgb(var(--us-c8b273) / 0.1);
+.recipient__input.is-selected {
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-ok);
 }
 
-.ritual-search-input.is-selected {
-  border-color: rgb(var(--us-4ade80) / 0.3);
-  color: rgb(var(--us-4ade80));
-}
-
-.ritual-search-icon {
+.recipient__icon {
   position: absolute;
-  right: 16px;
   top: 50%;
-  transform: translateY(-50%);
-  color: rgb(var(--us-444444));
+  right: 14px;
+  color: var(--arc-muted);
   font-size: 14px;
+  transform: translateY(-50%);
 }
 
-.success-ritual {
-  color: rgb(var(--us-4ade80));
+.recipient__ok {
+  color: var(--arc-ok);
 }
 
-.ritual-results {
+.recipient__results {
   position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
+  top: calc(100% + 6px);
   right: 0;
+  left: 0;
+  z-index: 10;
   max-height: 240px;
+  margin: 0;
+  padding: 6px;
   overflow-y: auto;
-  background: rgb(var(--us-080a14));
-  border: 1px solid rgb(var(--us-c8b273) / 0.2);
-  border-radius: 4px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-pop);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 14px 40px var(--arc-shadow);
+  list-style: none;
 }
 
-.ritual-user-option {
-  padding: 14px 16px;
+.recipient__option {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--arc-r-sm);
+  background: none;
+  color: var(--arc-ink);
+  font: inherit;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid rgb(var(--us-ffffff) / 0.03);
 }
 
-.ritual-user-option:last-child {
-  border-bottom: none;
+.recipient__option:hover,
+.recipient__option.is-selected {
+  background: color-mix(in oklab, var(--acc) 10%, transparent);
 }
 
-.ritual-user-option:hover {
-  background: rgb(var(--us-ffffff) / 0.03);
+.recipient__desc,
+.recipient__note {
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-caption);
 }
 
-.ritual-user-option.selected {
-  background: rgb(var(--us-c8b273) / 0.05);
-  border-left: 2px solid var(--myst-gold);
+.recipient__note {
+  margin: 0;
 }
 
-.user-ritual-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.user-ritual-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  color: rgb(var(--us-ffffff));
-}
-
-.gold-seal {
-  color: var(--myst-gold);
-  font-size: 12px;
-}
-
-.user-ritual-desc {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: rgb(var(--us-555555));
-}
-
-.ritual-no-results {
-  padding: 16px;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: rgb(var(--us-444444));
-}
-
-.ritual-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  color: rgb(var(--us-ff5252));
-  font-size: 13px;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.ritual-fade-enter-active, .ritual-fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.ritual-fade-enter-from, .ritual-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+.recipient__error {
+  color: var(--arc-bad);
 }
 </style>
-
-<style>
-/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
-   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
-   re-points them. Global so teleported content (modals) resolves them too. */
-:root {
-    --us-080a14: 8 10 20;
-    --us-444444: 68 68 68;
-    --us-4ade80: 74 222 128;
-    --us-555555: 85 85 85;
-    --us-c8b273: 200 178 115;
-    --us-ff5252: 255 82 82;
-    --us-ffffff: 255 255 255;
-}
-
-:root[data-theme="parchment"] {
-    --us-080a14: 255 255 255;
-    --us-444444: 120 118 128;
-    --us-4ade80: 0 112 54;
-    --us-555555: 85 83 94;
-    --us-c8b273: 180 44 62;
-    --us-ff5252: 196 1 33;
-    --us-ffffff: 23 22 28;
-}
-</style>
-

@@ -15,9 +15,7 @@
     "toggleNav": "切换导航",
     "closeNav": "关闭导航",
     "themeLight": "切换到浅色模式",
-    "themeDark": "切换到深色模式",
-    "seasonHeadline": "第二赛季已经开启！",
-    "seasonLink": "阅读公告"
+    "themeDark": "切换到深色模式"
   },
   "footer": {
     "linkHelp": "帮助与支持",
@@ -55,21 +53,11 @@
     "circleStepTwoTitle": "配制并服下魔药",
     "circleStepTwoBody": "收集主材料，操作炼金锅，然后咽下自己的命运。能力是真实的，灵性消耗也是真实的--若你贪快，失控同样真实。",
     "circleStepThreeTitle": "扮演你的角色，然后晋升。",
-    "circleStepThreeBody": "以序列所指定的角色生活，藉此消化魔药。举行仪式、完成扮演，在长达一个赛季的旅途中从序列9攀至序列0。",
     "tarotEyebrow": "非凡者档案",
     "tarotTitle": "你会抽到哪一张牌？",
     "tarotSeq": "序列9",
     "tarotCta": "查阅完整档案",
     "tarotCtaCount": "22 条途径",
-    "observatoryEyebrow": "观星台",
-    "observatoryTitle": "一个由 {count} 位非凡者构成的鲜活世界",
-    "observatoryLede": "本赛季每一位已觉醒玩家的实时统计--他们行走于哪条途径，又攀到了多高。数据每小时自服务器更新。",
-    "observatoryAdvanced": "高序列（序列0–3）",
-    "observatoryAverage": "平均序列",
-    "observatoryActive": "活跃途径",
-    "observatoryPanelTitle": "最多人行走的途径",
-    "observatoryPanelNote": "本赛季",
-    "observatoryRegistryCta": "序列3–0 席位有限--查看晋升名录",
     "newsEyebrow": "自灰雾之后",
     "newsTitle": "最新讯报",
     "newsAll": "全部新闻",
@@ -83,45 +71,68 @@
     "closingCopied": "✓ 已复制 IP",
     "closingDiscord": "加入 Discord"
   },
-  "companion": {
-    "eyebrow": "伴随模组",
-    "title": "COI 客户端",
-    "lede": "Mysterria 在原版 Minecraft 客户端上就能完美运行--所有非凡者机制都在服务端。COI 客户端是一个小巧的可选模组，只补上原版客户端画不出来的那一样东西：魔法本身。",
-    "featureHotkeysTitle": "以键盘施法",
-    "featureHotkeysBody": "把能力绑定到快捷键，战斗中无需打开任何菜单即可施放。",
-    "featureVisualsTitle": "看见你的途径",
-    "featureVisualsBody": "仪式法阵、印记与施法特效，在你自己的客户端上完整呈现。",
-    "featurePresenceTitle": "听见它，也展示它",
-    "featurePresenceBody": "服务器专属音效设计，另有 Discord 动态状态显示你的序列。",
-    "downloadEyebrow": "获取模组",
-    "platformNote": "最新版本 · 与服务器资源包一同安装",
-    "optionalLabel": "可选",
-    "optional": "服务器上没有任何内容需要该模组才能解锁，我们也绝不会要求你安装它。挑你本来就在用的平台即可--三者提供的是同一个构建。"
-  },
-  "guidePage": {
-    "joinNoMods": "无需任何客户端模组",
-    "joinBedrock": "通过 Geyser 支持基岩版",
-    "joinFree": "永久免费游玩",
-    "joinCompanion": "想要视觉效果？获取 COI 客户端",
-    "checklistEyebrow": "最初一小时",
-    "checklistTitle": "从服务器列表到你的第一个目标，共六步",
-    "checklistLede": "边做边勾选--进度会保存在这台设备上。",
-    "checklistProgress": "进度",
-    "topicsCount": "个主题",
-    "noTopics": "没有主题符合该关键词。请浏览下方全部内容。",
-    "browseAll": "浏览所有主要系统"
-  },
   "shopPage": {
-    "eyebrow": "圣物库",
-    "title": "永夜珍品",
-    "lede": "支持服务器，但绝不购买力量。这里的一切都是外观、便利，或是向管理团队发起委托的途径--序列攀登始终神圣不可侵犯。",
-    "tabAll": "全部货品",
-    "showing": "已显示 {shown} / {total} 件显化",
-    "giftable": "所有货品均可赠送给其他玩家",
-    "perMonth": "每月",
-    "oneTime": "一次性",
-    "fairPlayLabel": "公平游玩承诺",
-    "fairPlay": "任何购买都不会给予战斗力、序列进度、配方或材料。购买所得用于服务器托管与空想之环插件的开发。"
+    "title": "商店",
+    "lede": "购买所得用于支付服务器托管和 Circle of Imagination 插件的开发。任何商品都不会提供战斗力、序列进度、配方或材料。",
+    "tabAll": "全部",
+    "giftable": "可赠送",
+    "tabsLabel": "分类",
+    "categories": {
+      "cosmetics-couriers": "外观与信使",
+      "dungeons-items": "地牢与物品",
+      "ranks-commissions": "等级与委托"
+    },
+    "loading": "正在加载商店…",
+    "loadFailed": "商店没有加载出来。请检查网络后重试。",
+    "retry": "重试",
+    "empty": "这个分类暂时没有商品。",
+    "buy": "购买",
+    "signInToBuy": "登录后购买",
+    "was": "原价",
+    "newTab": "在新标签页中打开",
+    "term": {
+      "oneTime": "一次性",
+      "monthsOne": "{n} 个月",
+      "monthsFew": "{n} 个月",
+      "monthsMany": "{n} 个月",
+      "yearsOne": "{n} 年",
+      "yearsFew": "{n} 年",
+      "yearsMany": "{n} 年"
+    },
+    "balance": {
+      "heading": "余额",
+      "signedOut": "使用 Discord 登录即可查看余额并购买。",
+      "signIn": "登录",
+      "topUp": "充值",
+      "setup": "购买前，请在{link}中验证账户并设置昵称。",
+      "setupLink": "个人资料",
+      "howTitle": "如何充值",
+      "stepBmc": "通过 Buy Me a Coffee 用美元或欧元付款：1 USD 可得 {usd} 马克，1 EUR 可得 {eur} 马克。",
+      "stepBmcName": "支持者名称请填写你的游戏昵称，与游戏内完全一致。系统按这个名称匹配付款，不看留言。",
+      "stepDonatello": "通过 Donatello 付款。充值链接会自动填好你的昵称，请不要修改。",
+      "stepCredited": "付款一到账，马克就会加到你的余额里。",
+      "missing": "已付款但没收到马克？请{link}，选择 Payment / Donation Issue 类别，并说明付款时用的名称和金额。",
+      "missingLink": "在我们的 Discord 开一个工单",
+      "more": "了解更多充值说明",
+      "stepBmcNameNick": "支持者名称请填写 {nick}，与此处写法完全一致。系统按这个名称匹配付款，不看留言。"
+    },
+    "purchase": {
+      "title": "确认购买",
+      "each": "单价",
+      "quantity": "数量",
+      "fewer": "减少一个",
+      "more": "增加一个",
+      "gift": "作为礼物购买",
+      "recipient": "接收者",
+      "recipientPlaceholder": "按昵称搜索",
+      "total": "合计",
+      "balance": "你的余额",
+      "after": "购买后剩余",
+      "short": "还差 {amount}。",
+      "cancel": "取消",
+      "confirm": "购买",
+      "processing": "购买中…"
+    }
   },
   "profilePage": {
     "eyebrow": "非凡者卷宗",
@@ -133,7 +144,7 @@
     "sequence": "序列",
     "actingProgress": "扮演进度",
     "actingHint": "以你的角色生活，藉此消化魔药。达到 100% 后即可尝试下一个序列的仪式。",
-    "climb": "攀登 · 序列9 → 0",
+    "climb": "序列9至0",
     "climbed": "已攀登",
     "youAreHere": "你在此处",
     "nextRitual": "下一个仪式",
@@ -149,15 +160,28 @@
     "crossGuideTitle": "晋升卡住了？",
     "crossGuideBody": "手册中有扮演、仪式与疯狂的相关说明。",
     "crossPathwayTitle": "研读你的途径",
-    "crossPathwayBody": "档案收录序列9 → 0 的每一项能力。",
+    "crossPathwayBody": "序列9至0的每一项能力。",
     "noBeyonder": "尚无非凡者记录。请先验证账户，并服下你的第一瓶魔药。"
   },
   "newsPage": {
-    "eyebrow": "自灰雾之后",
-    "title": "讯报",
-    "earlier": "更早的讯报",
-    "season": "第二赛季 · 2026",
-    "notFound": "未找到该记录条目，或其访问受限。"
+    "title": "新闻",
+    "notFound": "这篇文章不存在或未公开。",
+    "lede": "每次大型更新的公告，以及每日更新日志的存档。",
+    "filterLabel": "新闻类型",
+    "all": "全部",
+    "changelogs": "更新日志",
+    "announcements": "公告",
+    "changelog": "更新日志",
+    "announcement": "公告",
+    "showMore": "显示更多",
+    "loadingMore": "加载中...",
+    "loading": "正在加载新闻...",
+    "loadingArticle": "正在加载文章...",
+    "empty": "这里还没有内容。",
+    "error": "无法加载新闻。",
+    "articleError": "无法加载文章。",
+    "retry": "重试",
+    "back": "返回新闻"
   },
   "contentLanguageNotice": {
     "label": "语言提示",
@@ -165,10 +189,8 @@
     "dismiss": "关闭提示"
   },
   "rulesPage": {
-    "eyebrow": "契约",
     "lede": "简短、易读，靠判断力而非脚本来执行。若有疑虑，请记住：不要毁掉别人的一天。",
-    "appeals": "申诉一律通过 Discord 工单处理--绝不在公共聊天中进行。",
-    "staffNote": "这是玩家契约。管理团队另有一套更严格的准则--该页面仅对管理团队账户显示。",
+    "appeals": "申诉请通过 Discord 工单提交，不要在公共聊天中进行。",
     "warnForms": {
       "one": "次警告",
       "few": "次警告",
@@ -177,74 +199,64 @@
     "noWarning": "无警告",
     "permanent": "永久",
     "ladderHeading": "如何计算",
-    "ladderAria": "显示该规则的计算方式",
     "ladderCase": "你做了什么",
     "ladderCost": "代价"
   },
   "staffOrder": {
-    "eyebrow": "灰雾守望者",
-    "title": "修会",
-    "lede": "维持这个世界运转的管理员、监督员与建筑师。工单与申诉请在 Discord 联系他们--切勿发送私信。",
+    "lede": "维持这个世界运转的管理员、监督员与建筑师。工单与申诉请在 Discord 联系他们，切勿发送私信。",
     "helpQuestion": "需要帮助，或想举报什么？",
     "openTicket": "提交工单"
   },
   "pathwaysPage": {
-    "archive": "非凡者档案",
-    "title": "途径与序列",
-    "subtitle": "研读通往神位的每一条道路。在决定自己的命运之前，先了解每一个序列及其解锁的能力。",
-    "pathways": "条途径",
-    "sequences": "个序列",
-    "abilities": "项能力",
-    "search": "搜索途径或能力……",
-    "allPathways": "全部途径",
-    "pathway": "途径",
-    "progression": "序列进程 · 9 → 0",
-    "seq": "序列",
-    "sequence": "序列",
-    "designation": "称号",
-    "noResults": "档案中没有找到任何内容。",
-    "noAbilities": "没有匹配的能力",
-    "trySearch": "试试其他关键词，或清空搜索框。",
-    "registryCta": "序列3–0 席位有限--查看实时空缺",
-    "lastUpdated": "最后更新",
-    "dataDisclaimer": "部分内容可能与当前游戏版本略有差异",
-    "searchLabel": "检索档案",
-    "clearSearch": "清除搜索",
-    "groupStandard": "常规途径",
-    "groupBoons": "恩赐途径"
-  },
-  "ascensionPage": {
-    "eyebrow": "高序列名录",
-    "title": "晋升之座",
-    "subtitle": "序列4 之上，阶梯陡然收窄：每条途径同时只能容纳这么多位非凡者。在选定自己的道路之前，先看看谁已攀上高位--以及哪一座王座仍然空悬。",
-    "archiveLink": "在档案中研读各条途径",
-    "epochTitle": "纪元终将轮转",
-    "epochBody": "新的纪元开启时，所有非凡者都会被重置，这些席位也将全部空出。下方已被占据的一切，都只是暂时属于某人--新纪元一到，众人将重新争夺这些王座。",
-    "seatsClaimed": "席位已被占据",
-    "deitiesSeated": "位神灵已登座",
-    "pathwaysOpen": "条途径完全空缺",
-    "sortLabel": "途径排序",
-    "sortContested": "争夺激烈优先",
-    "sortOpen": "空缺优先",
-    "sortAz": "按字母",
-    "badges": {
-      "deity": "神灵已登座",
-      "contested": "有人争夺",
-      "open": "席位全空"
+    "title": "途径",
+    "abilities": {
+      "one": "{count} 项能力",
+      "few": "{count} 项能力",
+      "many": "{count} 项能力"
     },
-    "standard": "标准途径",
-    "boons": "恩赐途径",
-    "claimedShort": "已占据",
-    "liveNote": "数据来自服务器本身，每隔几分钟刷新一次。",
-    "asOf": "截至",
-    "errorTitle": "无法访问名录",
-    "errorBody": "未能查询到统计数据。请稍后再试。",
-    "retry": "重新查询",
-    "seatWord": {
-      "one": "个席位",
-      "few": "个席位",
-      "many": "个席位"
-    }
+    "noResults": "没有与“{query}”匹配的结果。",
+    "searchLabel": "搜索途径与能力",
+    "clearSearch": "清除搜索",
+    "lede": "每条途径从序列9到序列0的全部序列，以及游戏中每项能力的原文描述。",
+    "tabsLabel": "途径与恩赐途径",
+    "tabCore": "途径",
+    "tabBoons": "恩赐途径",
+    "boonsNote": "恩赐途径由外神借予你，从序列9延伸到序列5，与你自己的途径并行，绝不会超越它。",
+    "searchPlaceholder": "例如：占卜家、占卜",
+    "resultsPathways": "途径",
+    "resultsAbilities": "能力",
+    "moreResults": "仅显示前 {shown} 项，共 {total} 项。再加一个词可缩小范围。",
+    "range": "序列9至序列{top}",
+    "seq9": "序列9：{name}",
+    "updated": "能力文本于 {date} 取自游戏。",
+    "ascension": "查看谁占据席位",
+    "wikiPathways": "在维基上了解途径",
+    "wikiBoons": "在维基上了解恩赐途径",
+    "loading": "正在加载途径…",
+    "loadError": "途径加载失败。请检查网络连接后重试。",
+    "retry": "重试",
+    "back": "全部途径",
+    "detailLede": "从序列9的{first}到序列{top}的{last}，共 {abilities}。",
+    "ladder": "序列",
+    "seats": {
+      "one": "{count} 个席位",
+      "few": "{count} 个席位",
+      "many": "{count} 个席位"
+    },
+    "throne": "序列0是一个神座。同一时间只有一名玩家能占据它，并成为这条途径的神。",
+    "throneLink": "查看谁占据它",
+    "empty": "这个序列暂无能力条目。",
+    "previous": "上一条途径",
+    "next": "下一条途径",
+    "notFound": "没有名为“{id}”的途径。",
+    "ranks": {
+      "0": "神灵",
+      "1": "大天使",
+      "2": "天使",
+      "3": "圣者",
+      "4": "半神"
+    },
+    "sequence": "序列{n}"
   },
   "servicesWikiDesc": "知识库与攻略",
   "servicesDiscord": "Discord",
@@ -266,11 +278,7 @@
   "giftable": "可赠送",
   "bulkPurchase": "批量购买",
   "amount": "数量",
-  "buyAsGift": "作为礼物购买",
   "recipient": "收礼人",
-  "searchRecipient": "按昵称搜索……",
-  "totalCost": "总计",
-  "pricePerUnit": "单价",
   "selectRecipient": "选择收礼人……",
   "giftFrom": "礼物来自",
   "giftSuccess": "礼物已成功送出！",
@@ -308,8 +316,6 @@
   "verified": "已验证",
   "pathway": "途径",
   "sequence": "序列",
-  "pageNotFoundTitle": "哎呀！你好像迷路了……",
-  "pageNotFoundMessage": "很遗憾，没有找到你要访问的页面。不过别担心，你随时可以返回。",
   "goBack": "返回",
   "verifyMinecraftAccount": "验证 Minecraft 账户",
   "unavailable": "不可用",
@@ -383,26 +389,11 @@
     "PENALTY": "罚款",
     "REWARD": "奖励"
   },
-  "insufficientFundsMessage": "余额不足，无法完成购买。是否要充值",
-  "confirmPurchase": "确认购买",
-  "shopLoginRequired": "登录账户即可进入商店！",
   "profileSetupRequired": "请先验证账户并完成个人资料设置，才能进行购买",
   "itemNotFound": "未找到物品",
   "itemNotAvailable": "该物品目前无法购买",
-  "noItemsFound": "此分类下暂无货品。",
-  "shopLoading": "正在加载商店……",
-  "shopLoadFailed": "加载商店失败",
   "tryAgain": "重试",
-  "serviceTypeItem": "物品",
-  "serviceTypePermission": "权限",
-  "serviceTypeSubscription": "订阅",
-  "serviceTypeDiscordRole": "Discord 身份组",
-  "loadingService": "正在加载服务……",
   "serviceNotFound": "未找到物品",
-  "serviceNotFoundMessage": "该物品的说明尚未提供，或已被移动。",
-  "serviceContentNotCreated": "该服务的详细信息尚未撰写。",
-  "backToShop": "返回商店",
-  "loginToPurchase": "请登录后购买此服务",
   "purchaseError": "准备购买时失败",
   "authenticationRequired": "需要身份验证",
   "accessExclusiveItems": "获取专属物品",
@@ -419,16 +410,13 @@
   "profileTitle": "设置你的个人资料",
   "termsViewTitle": "服务条款",
   "privacyViewTitle": "隐私政策",
-  "slaViewTitle": "服务等级协议",
   "navRules": "规则",
-  "lawsOfMysterria": "Mysterria 律法",
   "tableOfContents": "目录",
   "staffRules": "管理团队准则",
   "examples": "示例",
   "playerRules": "玩家规则",
   "staffPage": {
-    "members": "位成员",
-    "loadError": "加载管理团队成员失败，请稍后重试。"
+    "snapshotNote": "此名单截取自 2026 年 10 月，可能已过时。"
   },
   "dailyBonusCatTitle": "一阵奇异的共鸣……",
   "dailyBonusCatAlt": "一只神秘的猫",
@@ -714,7 +702,7 @@
         "sceneLabel": "Becoming a Beyonder",
         "panelSub": "{pathway}: Sequence 9",
         "abilitiesHeading": "First abilities",
-        "cta": "Game guide",
+        "cta": "How to join",
         "whisper1": "Listen.",
         "whisper2": "Remember.",
         "whisper3": "Silence.",
@@ -925,7 +913,7 @@
       },
       "incursions": {
         "title": "PvP with real stakes",
-        "body": "The open world is safe. When 30 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
+        "body": "The open world is safe. When 50 or more players are online, Cosmos Incursions open PvP zones at random spots on the live map, and a zone's colour tells you what you risk by dying there.",
         "tiersLabel": "Zone colours and what dying costs",
         "tiers": {
           "green": {
@@ -1099,6 +1087,265 @@
           }
         }
       }
+    }
+  },
+  "legalPage": {
+    "updated": "最后更新"
+  },
+  "notFound": {
+    "title": "找不到页面",
+    "message": "地址可能输错了，或者页面已经移动。"
+  },
+  "loginPage": {
+    "title": "登录 Mysterria",
+    "redirectHost": "登录后将返回 {host}。",
+    "redirectGeneric": "登录后将自动跳转。"
+  },
+  "logoutPage": {
+    "lede": "在此设备上登出。"
+  },
+  "ascensionPage": {
+    "title": "高序列席位",
+    "lede": "从序列3 起，每条途径同时只能容纳有限的非凡者。这里按途径列出谁坐在哪个席位，以及每条途径有多少玩家。新纪元开启时，所有席位都会清空。",
+    "limitsTitle": "席位上限",
+    "tableTitle": "各途径席位",
+    "sortLabel": "排序途径",
+    "sort": {
+      "held": "已占最多",
+      "open": "空缺最多",
+      "walkers": "人数最多",
+      "az": "按名称"
+    },
+    "colPathway": "途径",
+    "colWalkers": "非凡者",
+    "noLimit": "不设上限",
+    "perPathway": "每条途径 {count} 个",
+    "heldOf": "已占 {held} / {total}",
+    "beyonders": {
+      "one": "{count} 位非凡者",
+      "few": "{count} 位非凡者",
+      "many": "{count} 位非凡者"
+    },
+    "seatsOf": "{limit} 个席位中已占 {count} 个",
+    "taken": "已占",
+    "open": "空缺",
+    "notCounted": "未统计",
+    "holders": "席位持有者",
+    "holdersOf": "{pathway}：席位持有者",
+    "sequence": "序列{n}",
+    "openSeats": {
+      "one": "{count} 个空缺",
+      "few": "{count} 个空缺",
+      "many": "{count} 个空缺"
+    },
+    "updated": "查询于 {time}。",
+    "walkersNote": "非凡者人数仅显示人数最多的八条途径。",
+    "boonsTitle": "恩赐途径",
+    "boonsNote": "恩赐途径止于序列5，没有席位。各途径的非凡者人数：",
+    "loading": "正在加载席位…",
+    "error": "无法加载席位数据，请稍后再试。",
+    "retry": "重试",
+    "empty": "本纪元尚无人登上高序列席位，所有席位都空缺。",
+    "recordsNote": "人数与名称来自服务器的玩家记录，可能包含不活跃账号和工作人员账号，因此可能与游戏内的席位统计不一致。",
+    "nobody": "暂无"
+  },
+  "servicePage": {
+    "back": "商店",
+    "loading": "加载中…",
+    "notFoundTitle": "未找到商品",
+    "notFound": "商店里没有这件商品，或者它的链接已经变更。",
+    "toStore": "返回商店",
+    "noDescription": "这件商品暂时还没有完整介绍。",
+    "buyLabel": "价格与购买",
+    "bulk": "可批量购买",
+    "yourBalance": "你的余额"
+  },
+  "helpPage": {
+    "title": "帮助",
+    "lede": "玩家在 Discord 上最常问的问题，答案都在这里。",
+    "seoDescription": "在 Mysterria 如何绑定 Minecraft 账号、充值、投票、参加活动、提交工单以及申诉封禁。",
+    "tocLabel": "本页内容",
+    "toc": {
+      "linking": "绑定账号",
+      "topUps": "充值",
+      "vote": "投票",
+      "events": "活动",
+      "epochs": "纪元",
+      "support": "支持与申诉",
+      "joining": "加入服务器",
+      "client": "COI Client"
+    },
+    "linking": {
+      "title": "绑定你的 Minecraft 账号",
+      "intro": "绑定会把你的网站账号和游戏里的角色连在一起。在商店购物和领取每日奖励都需要绑定，绑定后你还会在 Discord 上获得 Verified 身份组。",
+      "steps": [
+        "用 Discord 登录本网站，然后打开你的个人资料。",
+        "点击“生成验证码”。验证码有 8 位，10 分钟内有效。重新生成会替换旧的验证码。",
+        "进入服务器，输入 `/verify <验证码>`。只输入 `/verify` 会打开一个窗口，可以把验证码粘贴进去。",
+        "绑定成功后，Discord 会给你发一条消息，个人资料里也不再显示验证码。"
+      ],
+      "offlineTitle": "没有正版授权的账号",
+      "offline": "离线账号在绑定之前无法游玩。先用 `/register <密码> <密码>` 注册一次，之后每次进服用 `/login <密码>` 登录。正版账号跳过这一步。",
+      "troubleTitle": "如果绑定失败",
+      "trouble": [
+        {
+          "term": "没有“生成验证码”按钮",
+          "detail": "你的账号已经绑定了。这个按钮只在绑定之前显示。"
+        },
+        {
+          "term": "验证码被拒绝",
+          "detail": "它已过期，或者被更新的验证码替换了。重新生成一个，并在 10 分钟内使用。"
+        },
+        {
+          "term": "你改了 Minecraft 名字",
+          "detail": "游戏进度不会受影响，但网站保存的是你绑定时的名字，而且无法修改。请在 Account 类别下提交工单，管理组会为你解除绑定，之后你再重新绑定。在此之前，商店发货和充值都使用你的旧名字。"
+        },
+        {
+          "term": "绑错账号或账号已被占用",
+          "detail": "一个 Minecraft 账号只能绑定一个网站账号。如果绑错了，或者你的账号已被占用，请在 Account 类别下提交工单。"
+        },
+        {
+          "term": "Java 版和基岩版",
+          "detail": "想在两个版本上用同一个角色，先通过 GeyserMC 把 Java 版和基岩版账号关联起来，再在这里绑定。没有关联的独立账号算作小号。"
+        }
+      ],
+      "geyserLink": "在 GeyserMC 关联 Java 版和基岩版"
+    },
+    "topUps": {
+      "title": "充值余额",
+      "intro": "商店用马克计价，马克通过 Buy Me a Coffee 购买。1 美元可得 40 马克，1 欧元可得 44 马克。",
+      "steps": [
+        "先登录并绑定你的 Minecraft 账号。付款会按你绑定的名字匹配。",
+        "点击网站顶部的余额，再点击“充值余额”。",
+        "在 Buy Me a Coffee 的名字一栏填写你的游戏昵称，必须和游戏里完全一致。留言不会用来查找你。",
+        "支付你想在余额里看到的金额。付款成功后，马克会自动到账。"
+      ],
+      "missTitle": "如果马克没有到账",
+      "miss": "名字匹配不到任何账号时不会入账，管理组会收到提醒。请在 Payment / Donation Issue 类别下提交工单，写明付款时用的名字、金额、币种和时间。服主核实后会手动为你补上马克。",
+      "renamed": "改了 Minecraft 名字？在管理组为你重新绑定之前，请用绑定时的名字付款。",
+      "donatello": "在网站的乌克兰语版本中，这个按钮会打开 Donatello，并自动填好你的昵称。",
+      "bmcLink": "Buy Me a Coffee"
+    },
+    "vote": {
+      "title": "为服务器投票",
+      "intro": "投票可以获得璀璨商行点数，在 `/emporium` 中使用。每个网站每 24 小时接受你一次投票。",
+      "steps": [
+        "在游戏里输入 `/vote`，或打开下面的网站。",
+        "准确输入你的游戏名字。基岩版的名字以一个点开头。"
+      ],
+      "points": "{n} 点",
+      "notCountTitle": "如果投票没有生效",
+      "notCount": "名字必须属于已经进过服务器的玩家，并且和游戏里写法完全一致。24 小时内在同一网站再次投票也不会计入。",
+      "more": "商行点数还可以通过每日连续登录和错误报告获得。"
+    },
+    "events": {
+      "title": "活动与时间",
+      "intro": "大多数活动会在在线人数足够时自动开始，所以没有固定时间表。开始前服务器会在聊天里公告。",
+      "rows": [
+        {
+          "term": "Bedwars",
+          "detail": "每 5 小时一次，前提是至少有 40 名玩家在线。开始前 60、30 和 10 分钟会有提醒。输入 `/bedwars` 查看下一场的时间。奖励每天最多 8 份。"
+        },
+        {
+          "term": "宇宙入侵",
+          "detail": "在线玩家达到 50 人或以上时开始，最多每 5 小时一次。倒计时 3 分钟后开始，持续 30 分钟。如果你在区域内下线，会有一个 Hollow 在原地留 5 分钟。结果会发布在 Discord 的 #events 频道。"
+        },
+        {
+          "term": "外神锚点",
+          "detail": "服务器大约每 3 天尝试放置一个，前后浮动 12 小时，前提是至少有 5 名玩家在线。服务器时间 02:00 到 08:00 之间不会开始。锚点孕育约一天，期间每 30 分钟在聊天里给出提示。"
+        },
+        {
+          "term": "每日潮汐",
+          "detail": "每天一个修正效果，按七天一周轮换。`/coi tide calendar` 可以查看接下来 14 天。"
+        },
+        {
+          "term": "管理组活动",
+          "detail": "建筑比赛、锦标赛、知识竞赛和寻宝活动会在 Discord 的 #announcements 频道公布，各有各的规则。活动商店在公告里写明的日期关闭。"
+        }
+      ]
+    },
+    "epochs": {
+      "title": "纪元",
+      "intro": "一个纪元就是世界的一轮。纪元结束时服务器会清档：地图和所有玩家进度从头开始，网站上的绑定也会被清空，所以每个人都要重新绑定。",
+      "now": "第一纪元于 {end} 结束。当前的第二纪元于 {start} 开启。",
+      "next": "第二纪元的结束日期尚未公布。清档没有固定周期，请关注 Discord 的 #announcements 频道。",
+      "carry": "能保留下来的东西很少。会保留的奖品在发放时都会说明。上一次，Server Slam 奖励和给独特性持有者的奖励被带进了第二纪元。"
+    },
+    "support": {
+      "title": "支持、举报与申诉",
+      "intro": "支持通过我们 Discord 服务器上的工单进行。关于游戏机制的问题，在指南或维基里往往能更快找到答案。",
+      "steps": [
+        "加入 Mysterria 的 Discord。",
+        "打开 #create-ticket 频道，需要乌克兰语帮助则打开 #створити-заявку。",
+        "选择合适的类别并描述发生了什么。写上相关名字和时间，有截图的话一并附上。"
+      ],
+      "categoriesTitle": "该选哪个类别",
+      "categories": [
+        {
+          "term": "Gameplay question or issue",
+          "detail": "游戏内的问题需要帮助。"
+        },
+        {
+          "term": "Bug",
+          "detail": "游戏或网站上有东西坏了。"
+        },
+        {
+          "term": "Account",
+          "detail": "改了 Minecraft 名字、绑错账号或其他账号问题。"
+        },
+        {
+          "term": "Payment / Donation Issue",
+          "detail": "马克没有到账，或其他付款问题。"
+        },
+        {
+          "term": "Ban appeal",
+          "detail": "你认为某次封禁应该解除或缩短。"
+        },
+        {
+          "term": "Staff report",
+          "detail": "投诉某位管理组成员。会直接交给服主。"
+        },
+        {
+          "term": "Other",
+          "detail": "其他任何问题。"
+        }
+      ],
+      "appealTitle": "申诉封禁或禁言",
+      "appealIntro": "处罚以警告计数，每条警告在发出 6 个月后失效。累计 8 条有效警告会被永久封禁服务器和 Discord，警告失效也不会撤销封禁。",
+      "appealSteps": [
+        "提交工单。封禁申诉请选择 Ban appeal。",
+        "说明你因为什么、在什么时候受到处罚，以及为什么应该更改。",
+        "一位未参与此事的管理员会审核申诉，可以减少或撤销你的警告。减免和解封会公开发布，决定为最终结果。"
+      ],
+      "lostTitle": "物品丢失",
+      "lost": "只有在确认是服务器故障时才会补发物品，例如崩溃或虚空漏洞。请提交工单，写明时间和丢失的物品。",
+      "discordLink": "Mysterria Discord",
+      "guideLink": "玩家指南",
+      "wikiLink": "维基",
+      "rulesLink": "规则中的警告与封禁"
+    },
+    "joining": {
+      "title": "加入服务器",
+      "rows": [
+        {
+          "term": "地址",
+          "detail": "mc.mysterria.net 或 play.mysterria.net"
+        },
+        {
+          "term": "Java 版",
+          "detail": "端口 25565。服务器运行 26.2，26.1.2 仍然可以加入。"
+        },
+        {
+          "term": "基岩版",
+          "detail": "相同地址，端口 19132。"
+        }
+      ],
+      "launcher": "请使用官方启动器或 SKLauncher。不要使用 TLauncher：管理组认定它是恶意软件。",
+      "guideLink": "完整的加入指南"
+    },
+    "client": {
+      "title": "COI Client",
+      "body": "为 Mysterria 打造的可选 Fabric 模组。它提供非凡者界面，带有能力快捷键和仪式视觉效果，不装它游戏的所有内容也都能正常运行。目前有适用于 26.1.2 和 26.2 的版本。"
     }
   }
 }

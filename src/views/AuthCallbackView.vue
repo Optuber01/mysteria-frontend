@@ -1,22 +1,23 @@
 <template>
-  <div class="auth-callback">
-    <div class="callback-content">
-      <div v-if="isProcessing" class="processing">
-        <div class="spinner"></div>
-        <h2>{{ t('authCallback.processing') }}</h2>
-      </div>
-      <div v-else-if="error" class="error">
-        <h2>{{ t('authCallback.authError') }}</h2>
-        <p>{{ error }}</p>
-        <button @click="closeWindow">{{ t('close') }}</button>
-      </div>
-      <div v-else class="success">
-        <h2>{{ t('authCallback.authSuccess') }}</h2>
-        <p>{{ t('authCallback.closeWindow') }}</p>
-        <button @click="closeWindow">{{ t('close') }}</button>
-      </div>
+  <!-- A popup of its own (Discord sends the reader back here), so no site header or footer. -->
+  <main id="main-content" class="callback">
+    <div class="arc-panel callback__panel" :aria-busy="isProcessing">
+      <template v-if="isProcessing">
+        <span aria-hidden="true" class="callback__spinner"></span>
+        <h1 class="arc-h4" role="status">{{ t('authCallback.processing') }}</h1>
+      </template>
+      <template v-else-if="error">
+        <h1 class="arc-h4 callback__bad" role="alert">{{ t('authCallback.authError') }}</h1>
+        <p class="arc-muted">{{ error }}</p>
+        <button class="arc-btn arc-btn--solid" type="button" @click="closeWindow">{{ t('close') }}</button>
+      </template>
+      <template v-else>
+        <h1 class="arc-h4 callback__ok">{{ t('authCallback.authSuccess') }}</h1>
+        <p class="arc-muted">{{ t('authCallback.closeWindow') }}</p>
+        <button class="arc-btn arc-btn--solid" type="button" @click="closeWindow">{{ t('close') }}</button>
+      </template>
     </div>
-  </div>
+  </main>
 </template>
 
 <script lang="ts" setup>
@@ -122,115 +123,54 @@ const closeWindow = () => {
 </script>
 
 <style scoped>
-.auth-callback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.callback {
+  display: grid;
+  place-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f1419 0%, #1a1d23 100%);
-  color: #ffffff;
-  font-family: inherit;
+  padding: var(--arc-gutter);
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+  font-family: var(--arc-body);
 }
 
-.callback-content {
+.callback__panel {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  width: min(100%, 420px);
   text-align: center;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #ee7828;
+.callback__panel p {
+  margin: 0;
+}
+
+.callback__ok {
+  color: var(--arc-ok);
+}
+
+.callback__bad {
+  color: var(--arc-bad);
+}
+
+.callback__spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--arc-line);
+  border-top-color: var(--acc-ink);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  animation: callback-spin .9s linear infinite;
 }
 
-@keyframes spin {
+@keyframes callback-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.processing h2,
-.error h2,
-.success h2 {
-  margin: 0 0 16px 0;
-  font-size: 24px;
-}
-
-.processing p,
-.error p,
-.success p {
-  margin: 0 0 24px 0;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-button {
-  background: #ee7828;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.2s;
-}
-
-button:hover {
-  background: #f48a3f;
-}
-
-.error {
-  color: #ff6b6b;
-}
-
-.success {
-  color: #51cf66;
-}
-
-/* Light theme */
-:root[data-theme="parchment"] .auth-callback {
-  background: var(--myst-bg);
-  color: var(--myst-ink);
-}
-
-:root[data-theme="parchment"] .callback-content {
-  background: var(--myst-bg-2);
-  border-color: var(--myst-line-16);
-  box-shadow: 0 8px 32px var(--myst-shadow);
-}
-
-:root[data-theme="parchment"] .spinner {
-  border-color: var(--myst-line-20);
-  border-top-color: var(--myst-gold);
-}
-
-:root[data-theme="parchment"] .processing p,
-:root[data-theme="parchment"] .error p,
-:root[data-theme="parchment"] .success p {
-  color: var(--myst-ink-muted);
-}
-
-:root[data-theme="parchment"] button {
-  background: var(--myst-gold);
-  color: var(--myst-on-gold);
-}
-
-:root[data-theme="parchment"] button:hover {
-  background: var(--myst-gold-soft);
-}
-
-:root[data-theme="parchment"] .error {
-  color: var(--myst-red);
-}
-
-:root[data-theme="parchment"] .success {
-  color: var(--myst-green);
+@media (prefers-reduced-motion: reduce) {
+  .callback__spinner {
+    animation-duration: 2.4s;
+  }
 }
 </style>

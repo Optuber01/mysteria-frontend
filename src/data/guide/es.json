@@ -1,1137 +1,1023 @@
 {
-    "ui": {
-        "eyebrow": "MANUAL PARA NUEVOS JUGADORES",
-        "title": "Tus primeros pasos a través de la Niebla",
-        "lede": "Empieza a jugar en solo unos minutos, entiende que decisiones importan y encuentra las respuestas correctas cuando Mysterria hace algo distinto al Minecraft común y corriente.",
-        "serverAddress": "DIRECCIÓN DEL SERVIDOR",
-        "copyAddress": "Copiar dirección",
-        "copied": "Copiado",
-        "startJourney": "Comienza tu primera hora",
-        "findAnswer": "Encuentra una respuesta",
-        "quickFactsLabel": "ANTES DE CONECTARTE",
-        "expectationsEyebrow": "MYSTERRIA ES DIFERENTE",
-        "expectationsTitle": "Conoce esto antes de establecerte",
-        "expectationsLede": "El servidor toma algunas decisiones deliberadas que sorprenden a quienes vienen de servidores de supervivencia convencionales.",
-        "tasksEyebrow": "AYUDA RÁPIDA",
-        "tasksTitle": "¿Qué intentas hacer?",
-        "tasksLede": "Elige un objetivo o busca con tus propias palabras. Solo verás la información necesaria para esa tarea.",
-        "searchPlaceholder": "Prueba «primera poción», «teletransportarse a casa» o «interfaz ausente»…",
-        "clearSearch": "Limpiar",
-        "searchResults": "Respuestas coincidentes",
-        "noResults": "No se encontró una respuesta directa",
-        "noResultsHint": "Prueba una frase más corta, busca en los temas de abajo o pregunta en Discord.",
-        "firstHourEyebrow": "PRIMERA HORA",
-        "firstHourTitle": "Desde unirte hasta tu primer objetivo real",
-        "firstHourLede": "Esta es la ruta fiable más corta desde la lista de servidores hasta saber qué hacer después.",
-        "openStep": "Ver detalles",
-        "starterEyebrow": "UNA DECISIÓN IMPORTANTE",
-        "starterTitle": "Elige ayuda, no tu destino",
-        "starterLede": "El Camino seleccionado en el menú de principiante solo indica tu bonificación inicial. Más adelante puedes beber una pócima de Secuencia 9 de un Sendero completamente distinto.",
-        "benefit": "Recibes",
-        "cost": "Coste permanente",
-        "bestFor": "Ideal para",
-        "recommended": "POTENCIA COMPLETA",
-        "important": "Importante",
-        "starterWarning": "Normalmente la bonificación elegida no puede cambiarse. El equipo puede restablecer un error genuino mediante un ticket de Discord, pero la confirmación será tratada como definitiva.",
-        "directionEyebrow": "TU PRIMER OBJETIVO",
-        "directionTitle": "Elige una dirección en vez de deambular",
-        "directionLede": "Ambos enfoques son válidos y ninguno te impide tomar el otro más adelante.",
-        "browseEyebrow": "MANUAL",
-        "browseTitle": "Explora cada sistema principal",
-        "browseLede": "La información avanzada se mantiene fuera de tu camino hasta que la necesitas.",
-        "topics": "temas",
-        "popularEyebrow": "PREGUNTAS FRECUENTES",
-        "popularTitle": "Preguntas populares de jugadores",
-        "openTopic": "Abrir guía",
-        "backToGuide": "Volver al inicio de la guía",
-        "quickAnswer": "RESPUESTA RÁPIDA",
-        "onThisPage": "EN ESTA PÁGINA",
-        "relatedTopics": "Seguir leyendo",
-        "commonMistake": "ERROR COMÚN",
-        "usefulTip": "CONSEJO ÚTIL",
-        "screenshotsLabel": "LO QUE VERÁS",
-        "screenshotIp": "Añade la dirección del servidor",
-        "screenshotPortal": "Elige Mysteries en el selector",
-        "screenshotJoin": "El servidor en tu lista",
-        "profileCta": "Abrir perfil",
-        "pathwaysCta": "Explorar Caminos",
-        "fullRulesCta": "Leer las reglas completas",
-        "supportCta": "Pregunta en Discord",
-        "mobileBrowse": "Explorar temas"
+  "ui": {
+    "title": "Guía",
+    "lede": "Cómo unirte a Mysterria y qué hacer primero. Si quieres cada detalle de un sistema, la wiki lo tiene.",
+    "topics": "Temas",
+    "joinTitle": "Únete al servidor",
+    "joinLink": "Guía completa para unirte",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copyFailed": "No se pudo copiar",
+    "copyHint": "Multijugador → Añadir servidor. No necesitas mods.",
+    "copiedHint": "Copiado. Pégalo en Multijugador → Añadir servidor.",
+    "copyFailedHint": "El portapapeles está bloqueado. Selecciona y copia la dirección a mano.",
+    "javaName": "Java Edition",
+    "javaBody": "Versión 26.1.2 o posterior. Acepta el paquete de recursos al entrar.",
+    "bedrockName": "Bedrock Edition",
+    "bedrockBody": "La misma dirección, puerto 19132, en móvil o PC. Algunos menús propios se ven más sencillos.",
+    "joinVerify": "En el lobby, elige Mysteries y vincula tu cuenta con el código de tu perfil en la web.",
+    "stepsTitle": "Tus primeros pasos",
+    "stepsLede": "El camino más corto desde la lista de servidores hasta tu primera pócima.",
+    "differentTitle": "Lo que aquí funciona distinto",
+    "differentLede": "Reglas que sorprenden a quienes vienen de otros servidores de supervivencia.",
+    "starterTitle": "Tu bonificación inicial",
+    "starterLede": "Cuando vinculas tu cuenta, eliges un Sendero y una de dos bonificaciones. El Sendero solo orienta la bonificación: más adelante puedes beber la pócima de otro Sendero.",
+    "benefit": "Recibes",
+    "cost": "Coste",
+    "bestFor": "Ideal para",
+    "recommended": "Recomendada",
+    "starterWarning": "No puedes cambiar la bonificación después de confirmarla. Si te equivocaste siendo jugador nuevo, abre un ticket en Discord.",
+    "moreTitle": "Más ayuda",
+    "wikiTitle": "Wiki",
+    "wikiBody": "Cada sistema, con todo detalle.",
+    "helpTitle": "Ayuda",
+    "helpBody": "Vinculación de cuenta, recargas y dudas sobre el sitio.",
+    "discordTitle": "Discord",
+    "discordBody": "Pregunta a jugadores y al equipo.",
+    "rulesTitle": "Reglas",
+    "rulesBody": "Lo que está permitido y lo que no.",
+    "back": "Guía",
+    "readMore": "Leer más",
+    "readNext": "Sigue leyendo",
+    "warning": "Atención",
+    "tip": "Consejo",
+    "command": "Comando",
+    "purpose": "Qué hace"
+  },
+  "steps": [
+    {
+      "title": "Únete al servidor",
+      "description": "Añade mc.mysterria.net en Multijugador, acepta el paquete de recursos y elige Mysteries en el lobby.",
+      "topicId": "connect"
     },
-    "facts": [
-        {
-            "label": "CLIENTE",
-            "value": "Java recomendada",
-            "note": "Bedrock funciona mediante Geyser con una interfaz customizada limitada"
-        },
-        {
-            "label": "VERSIÓN",
-            "value": "26.1.2+",
-            "note": "Utiliza un cliente actualizado si el paquete de recursos falla"
-        },
-        {
-            "label": "REQUERIDO",
-            "value": "Acepta el paquete de recursos",
-            "note": "No son requeridos mods en el cliente"
-        }
-    ],
-    "expectations": [
-        {
-            "icon": "fa-solid fa-route",
-            "title": "No hay comandos de teletransporte",
-            "summary": "No hay /home, /spawn, /tpa, /rtp ni /back.",
-            "detail": "La distancia es un coste estratégico y la movilidad es una de las recompensas de Caminos como Door. Elige con cuidado dónde te estableceras."
-        },
-        {
-            "icon": "fa-solid fa-hourglass-half",
-            "title": "La progresión es deliberadamente larga",
-            "summary": "Las Secuencias iniciales tardan aproximadamente una semana; los niveles altos, meses.",
-            "detail": "Mysterria está diseñado en torno a un viaje de toda una temporada, no a alcanzar el poder máximo en un fin de semana."
-        },
-        {
-            "icon": "fa-solid fa-rotate",
-            "title": "El mundo cuenta con estaciones",
-            "summary": "Se realiza un reinicio completo aproximadamente cada seis meses.",
-            "detail": "El reinicio incluye el progreso Beyonder. Mantiene el mundo saludable y hace que unirse a mitad de temporada siga valiendo la pena."
-        },
-        {
-            "icon": "fa-solid fa-shield-halved",
-            "title": "La exploración suele ser segura",
-            "summary": "El PvP en zonas salvajes está desactivado y el griefing está prohibido.",
-            "detail": "El PvP solo existe en zonas anunciadas, Incursiones del Cosmos o en territorios de pueblos donde un propietario lo habilita deliberadamente."
-        },
-        {
-            "icon": "fa-solid fa-box-open",
-            "title": "Los cofres vanilla son botín mágico",
-            "summary": "Los cofres generados naturalmente se rellenan con el tiempo.",
-            "detail": "Aldeas, minas abandonadas, templos, naufragios, bastiones y otras estructuras son fuentes renovables de botín Beyonder."
-        }
-    ],
-    "tasks": [
-        {
-            "icon": "fa-solid fa-plug",
-            "title": "Únete al servidor",
-            "description": "Versiones, paquete de recursos, cuentas y verificación.",
-            "topicId": "conectar"
-        },
-        {
-            "icon": "fa-solid fa-scale-balanced",
-            "title": "Elegir mi bonificación inicial",
-            "description": "Entender Atajo, Determinación y el significado de elegir un Camino.",
-            "topicId": "starter-choice"
-        },
-        {
-            "icon": "fa-solid fa-flask",
-            "title": "Convertirse en Secuencia 9",
-            "description": "Receta, caldero, ingredientes, preparación y bebida.",
-            "topicId": "first-potion"
-        },
-        {
-            "icon": "fa-solid fa-box-open",
-            "title": "Encontrar recetas o ingredientes",
-            "description": "Cofres, concentración, criaturas, nodos y comercio.",
-            "topicId": "loot"
-        },
-        {
-            "icon": "fa-solid fa-arrow-trend-up",
-            "title": "Ascender mi Secuencia",
-            "description": "Actuación, rituales, Espiritualidad, Locura y progresión.",
-            "topicId": "progresion"
-        },
-        {
-            "icon": "fa-solid fa-dungeon",
-            "title": "Encuentra una mazmorra",
-            "description": "Usa /subspace, debilita Grietas, forma un grupo y entiende los cooldowns.",
-            "topicId": "activities"
-        },
-        {
-            "icon": "fa-solid fa-house-flag",
-            "title": "Únete o construye un pueblo",
-            "description": "Tierra protegida, juego en grupo, naciones y jugar en solitario.",
-            "topicId": "towns"
-        },
-        {
-            "icon": "fa-solid fa-wand-magic-sparkles",
-            "title": "Arreglar una interfaz personalizada faltante",
-            "description": "Limitaciones del paquete de recursos, la versión del cliente y Bedrock.",
-            "topicId": "troubleshooting"
-        }
-    ],
-    "firstHour": [
-        {
-            "title": "Conéctate y acepta el paquete de recursos",
-            "description": "Añade mc.mysterria.net, únete a Mysteries mediante el selector del vestíbulo y acepta el paquete del servidor.",
-            "topicId": "connect"
-        },
-        {
-            "title": "Regístrate solo si Minecraft lo solicita",
-            "description": "Las cuentas sin conexión usan /register y /login. Las cuentas premium oficiales se autentican automáticamente.",
-            "topicId": "connect"
-        },
-        {
-            "title": "Verifica tu cuenta de Minecraft",
-            "description": "Genera un código en tu perfil e introdúcelo en la ventana de verificación que aparece en el juego.",
-            "topicId": "connect"
-        },
-        {
-            "title": "Elige con cuidado tu bonificación inicial",
-            "description": "El Camino solo es para dirigir tu bonificación. Atajo y Determinación tienen costes muy distintos a largo plazo.",
-            "topicId": "starter-choice"
-        },
-        {
-            "title": "Elige vivir en sociedad o ser autosuficiente",
-            "description": "Pregunta por un pueblo que esté reclutando o empieza un ciclo de exploración en solitario.",
-            "topicId": "towns"
-        },
-        {
-            "title": "Esfuérzate para obtener tu primera poción",
-            "description": "Tu primera Secuencia necesita una receta, un caldero, ingredientes y una preparación correcta; nada más.",
-            "topicId": "first-potion"
-        }
-    ],
-    "starterChoices": [
-        {
-            "name": "Via del Atajo",
-            "eyebrow": "JUEGA CON HABILIDADES AHORA",
-            "benefit": "Secuencia 9 instantánea en el Camino seleccionado.",
-            "cost": "−10 % de Espiritualidad máxima para siempre, en cada Secuencia.",
-            "bestFor": "Jugadores que valoran un inicio inmediato más que el poder máximo a largo plazo."
-        },
-        {
-            "name": "Via de la Determinación",
-            "eyebrow": "APRENDE EL CICLO COMPLETO",
-            "benefit": "El siguiente cofre de botín contendrá una receta garantizada.",
-            "cost": "Ninguno.",
-            "bestFor": "Jugadores que quieren aprender a preparar pociones y conservar todo su potencial.",
-            "recommended": true
-        }
-    ],
-    "directions": [
-        {
-            "icon": "fa-solid fa-people-roof",
-            "title": "Únete a una pueblo establecido",
-            "eyebrow": "MENOS FRICCIÓN",
-            "description": "Pregunta en el chat o Discord por un pueblo que acepte miembros nuevos.",
-            "points": [
-                "Comparte calderos, recetas, ingredientes y tierra protegida.",
-                "Encuentra grupos para Guardianes, mazmorras, Beyonders Salvajes e Incursiones.",
-                "Usa una red de bases establecida en un mundo sin comandos de teletransporte."
-            ],
-            "topicId": "towns"
-        },
-        {
-            "icon": "fa-solid fa-compass",
-            "title": "Juega en solitario",
-            "eyebrow": "AUTODIRIGIDO",
-            "description": "Es totalmente viable, pero más lento y dependiente de la exploración.",
-            "points": [
-                "Abre cada cofre generado; el botín Beyonder se regenera.",
-                "Caza Criaturas Beyonder y toma nota de los nodos de recursos renovables.",
-                "Comercia materiales sobrantes y únete a grupos cuando un contenido específico lo requiera."
-            ],
-            "topicId": "loot"
-        }
-    ],
-    "categories": {
-        "start": "Empieza aquí",
-        "progression": "Progresión Beyonder",
-        "world": "Mundo y actividades",
-        "community": "Economía y sociedad",
-        "help": "Ayuda y referencias"
+    {
+      "title": "Inicia sesión",
+      "description": "Las cuentas oficiales de Minecraft inician sesión solas. Las demás se registran una vez con /register y luego usan /login.",
+      "topicId": "connect"
     },
-    "popularQuestions": [
+    {
+      "title": "Vincula tu cuenta",
+      "description": "Consigue un código en tu perfil del sitio web e introdúcelo en el juego. Así se abre el menú de bonificación inicial.",
+      "topicId": "connect"
+    },
+    {
+      "title": "Elige tu bonificación inicial",
+      "description": "Atajo te convierte en Trascendente ya, con un coste permanente. Determinación pone una fórmula en tu próximo cofre, sin coste.",
+      "topicId": "starter-choice"
+    },
+    {
+      "title": "Busca una ciudad o juega en solitario",
+      "description": "Pregunta en el chat o en Discord por una ciudad que acepte jugadores nuevos, o empieza a explorar por tu cuenta.",
+      "topicId": "towns"
+    },
+    {
+      "title": "Prepara tu primera pócima",
+      "description": "Encuentra una fórmula, construye un Caldero Mágico, reúne los ingredientes y prepárala. Bébela para convertirte en Trascendente de Secuencia 9.",
+      "topicId": "first-potion"
+    }
+  ],
+  "differences": [
+    {
+      "title": "No hay comandos de teletransporte",
+      "body": "No hay /home, /spawn, /tpa, /rtp ni /back. Viajar lleva tiempo, y algunos Senderos, como Door, son la forma de moverte más rápido. Elige con cuidado dónde te asientas."
+    },
+    {
+      "title": "El mundo abierto es seguro",
+      "body": "El PvP está desactivado en las zonas salvajes y el griefing va contra las reglas. Solo luchas contra otros jugadores en zonas donde entras a propósito y en ciudades que activan el PvP."
+    },
+    {
+      "title": "Todo cofre generado es botín",
+      "body": "Los cofres de aldeas, minas abandonadas, naufragios y otras estructuras guardan botín Trascendente y se rellenan con el tiempo. Los lugares que otros ya saquearon siguen valiendo una visita."
+    },
+    {
+      "title": "El progreso es lento a propósito",
+      "body": "Las primeras Secuencias llevan alrededor de una semana. Las más altas, meses."
+    },
+    {
+      "title": "Las temporadas terminan con un reinicio",
+      "body": "Cada temporada, llamada Época, termina con un reinicio completo del mundo y del progreso de cada Trascendente. La Época II empezó el 16 de mayo de 2026 y aún no se ha anunciado su final."
+    }
+  ],
+  "starterChoices": [
+    {
+      "name": "Vía del Atajo",
+      "benefit": "Te conviertes en Secuencia 9 del Sendero elegido al instante.",
+      "cost": "Tu Espiritualidad máxima es un 10 % menor en cada Secuencia, para siempre.",
+      "bestFor": "Jugadores que prefieren habilidades ya antes que todo su poder más adelante."
+    },
+    {
+      "name": "Vía de la Determinación",
+      "benefit": "El próximo cofre generado que abras tendrá una fórmula seguro.",
+      "cost": "Ninguno.",
+      "bestFor": "Jugadores que quieren aprender a preparar pócimas y conservar todo su poder.",
+      "recommended": true
+    }
+  ],
+  "categories": {
+    "start": "Empieza aquí",
+    "progression": "Convertirse en Trascendente",
+    "world": "Mundo y actividades",
+    "community": "Ciudades y comercio",
+    "help": "Ayuda"
+  },
+  "topics": [
+    {
+      "id": "connect",
+      "category": "start",
+      "title": "Cómo unirte",
+      "shortTitle": "Cómo unirte",
+      "summary": "Dónde conectarte y cómo vincular tu cuenta.",
+      "answer": "Añade mc.mysterria.net a tu lista de servidores, acepta el paquete de recursos y elige Mysteries en el lobby. Java necesita la versión 26.1.2 o posterior. Bedrock usa la misma dirección en el puerto 19132.",
+      "sections": [
         {
-            "question": "¿Cómo me teletransporto a casa?",
-            "topicId": "server-basics"
+          "title": "Datos del servidor",
+          "bullets": [
+            "Dirección: mc.mysterria.net o play.mysterria.net.",
+            "Java Edition: versión 26.1.2 o posterior, en el puerto predeterminado 25565. El servidor usa la 26.2. No hacen falta mods.",
+            "Bedrock Edition: la misma dirección, puerto 19132, en móvil o PC. Algunos menús personalizados se ven más sencillos.",
+            "Gratis para jugar."
+          ]
         },
         {
-            "question": "¿Por qué el juego se ve como vanilla?",
-            "topicId": "troubleshooting"
+          "title": "Conéctate",
+          "steps": [
+            "Abre Multijugador, elige Añadir servidor e introduce mc.mysterria.net.",
+            "Entra y acepta el paquete de recursos cuando Minecraft lo pida.",
+            "En el lobby, abre el selector de servidores y elige Mysteries.",
+            "Habla con los NPC del lobby antes de salir. Te explican lo básico."
+          ],
+          "warning": "Si todo se ve como Minecraft normal, el paquete de recursos no se cargó. Activa los paquetes de recursos del servidor para este servidor y actualiza tu cliente.",
+          "figures": [
+            {
+              "image": "ip",
+              "caption": "Añade la dirección del servidor"
+            },
+            {
+              "image": "join",
+              "caption": "El servidor en tu lista"
+            },
+            {
+              "image": "portal",
+              "caption": "Elige Mysteries en el lobby"
+            }
+          ]
         },
         {
-            "question": "¿Una vez escogido un Camino no puedo cambiar?",
-            "topicId": "starter-choice"
+          "title": "Regístrate e inicia sesión",
+          "paragraphs": [
+            "Las cuentas oficiales de Minecraft inician sesión automáticamente y se saltan este paso.",
+            "Las demás cuentas se registran una vez con /register <contraseña> <contraseña> y luego usan /login <contraseña> cada vez que entran.",
+            "¿Juegas sin una cuenta oficial? El equipo recomienda SKLauncher. No uses TLauncher: el equipo lo considera malware."
+          ]
         },
         {
-            "question": "¿Cómo me convierto en Secuencia 9?",
-            "topicId": "first-potion"
+          "title": "Vincula tu cuenta",
+          "steps": [
+            "Inicia sesión en el sitio web de Mysterria y abre tu perfil.",
+            "Genera un código de vinculación de Minecraft.",
+            "En el juego, escribe /verify e introduce el código en la ventana que se abre."
+          ],
+          "paragraphs": [
+            "Al vincularla se abre el menú de bonificación inicial. También desbloquea la tienda y te da un prefijo de verificado en el juego y un rol en Discord."
+          ],
+          "figures": [
+            {
+              "image": "verify",
+              "caption": "La ventana de vinculación en el juego"
+            }
+          ]
         },
         {
-            "question": "¿Dónde están los cofres de botín especiales?",
-            "topicId": "loot"
-        },
-        {
-            "question": "¿Por qué no avanza mi progreso de Actuación?",
-            "topicId": "progression"
-        },
-        {
-            "question": "¿Alguien puede matarme mientras exploro?",
-            "topicId": "server-basics"
-        },
-        {
-            "question": "¿Cómo localizo una mazmorra?",
-            "topicId": "activities"
+          "title": "COI Client (opcional)",
+          "paragraphs": [
+            "COI Client es nuestro propio mod opcional para Java, hecho para Fabric. Le da a Minecraft una interfaz Trascendente completa, con atajos de teclado para habilidades y efectos visuales de rituales. Todas las mecánicas funcionan también sin él."
+          ]
         }
-    ],
-    "topics": [
+      ],
+      "links": [
         {
-            "id": "connect",
-            "category": "start",
-            "icon": "fa-solid fa-plug",
-            "title": "Conéctate, regístrate y verifica",
-            "shortTitle": "Conectarse y verificar",
-            "summary": "Todo lo necesario para llegar a Mysteries con el cliente correcto y desbloquear tu bonificación inicial.",
-            "answer": "Únete a mc.mysterria.net con un cliente Java actualizado, acepta el paquete de recursos, selecciona Mysteries en el vestíbulo y verifica mediante tu perfil del sitio web.",
-            "tags": [
-                "ip",
-                "address",
-                "join",
-                "java",
-                "bedrock",
-                "geyser",
-                "register",
-                "login",
-                "verify",
-                "discord",
-                "resource pack",
-                "version",
-                "premium",
-                "offline"
-            ],
-            "sections": [
-                {
-                    "title": "Detalles del servidor",
-                    "bullets": [
-                        "Dirección: mc.mysterria.net.",
-                        "Versiones compatibles: 26.1.2 y posteriores.",
-                        "La Versión de Java ofrece la experiencia totalmente compatible; no requiere mods de cliente.",
-                        "Bedrock puede conectarse mediante Geyser, pero los iconos de Camino y algunas interfaces personalizadas podrían mostrarse incorrectamente."
-                    ]
-                },
-                {
-                    "title": "Conectarse",
-                    "steps": [
-                        "Abre Multijugador, añade mc.mysterria.net y únete al servidor.",
-                        "Acepta el paquete de recursos del servidor cuando Minecraft lo solicite.",
-                        "En el selector de servidores del vestíbulo, elige Mysteries.",
-                        "Lee el diálogo de los NPC del vestíbulo antes de salir: contienen información útil para orientarte."
-                    ],
-                    "warning": "Si todo parece Minecraft vanilla normal, rechazaste el paquete de recursos o el cliente Java es demasiado antiguo. Habilita los paquetes de recursos del servidor y actualiza el cliente."
-                },
-                {
-                    "title": "Registro de cuenta",
-                    "paragraphs": [
-                        "Las cuentas premium oficiales de Minecraft omiten el registro e inician sesión automáticamente.",
-                        "Las cuentas sin conexión se registran la primera vez con /register <password> <password> y luego usan /login <password> en futuras conexiones."
-                    ]
-                },
-                {
-                    "title": "Verificación de Discord",
-                    "steps": [
-                        "Inicia sesión en el sitio web de Mysterria y abre tu perfil.",
-                        "Genera un código de verificación de Minecraft.",
-                        "Introduce el código en la ventana de verificación que aparece en el juego.",
-                        "Tras confirmarlo, estarán disponibles el Camino para principiantes y el menú de bonificación inicial."
-                    ]
-                }
-            ],
-            "related": [
-                "starter-choice",
-                "troubleshooting",
-                "server-basics"
-            ]
+          "label": "Ayuda con la vinculación de cuenta",
+          "to": "/help#linking"
         },
         {
-            "id": "server-basics",
-            "category": "start",
-            "icon": "fa-solid fa-map",
-            "title": "Cómo funciona el mundo de Mysterria",
-            "shortTitle": "Conceptos básicos del mundo",
-            "summary": "Viajes, seguridad, muerte, reinicios estacionales y las reglas que difieren de los servidores de supervivencia convencionales.",
-            "answer": "Mysterria es un mundo estacional con límites, donde la distancia importa, explorar zonas salvajes es seguro y los cofres generados naturalmente ofrecen botín mágico renovable.",
-            "tags": [
-                "home",
-                "spawn",
-                "tpa",
-                "rtp",
-                "back",
-                "teleport",
-                "map",
-                "pvp",
-                "grief",
-                "death",
-                "keep inventory",
-                "reset",
-                "season",
-                "world border",
-                "safe"
-            ],
-            "sections": [
-                {
-                    "title": "Mapa y viajes",
-                    "paragraphs": [
-                        "El Mundo principal está limitado a 15 000 × 15 000 bloques. Existen el Nether y dimensiones especiales, pero la mayor parte del contenido Beyonder se encuentra en el Mundo principal."
-                    ],
-                    "warning": "No hay /home, /sethome, /spawn, /tpa, /rtp ni /back. Esto preserva el valor de planificar viajes y de Caminos de movilidad como Puerta."
-                },
-                {
-                    "title": "Seguridad y PvP",
-                    "bullets": [
-                        "El PvP en zonas salvajes está desactivado de forma predeterminada.",
-                        "El PvP se limita a áreas designadas y zonas de Incursión del Cosmos.",
-                        "Los propietarios de ciudades pueden habilitar deliberadamente el PvP para roles concretos dentro de sus reclamaciones.",
-                        "El griefing está prohibido y las tierras reclamadas por pueblos otorgan protección."
-                    ]
-                },
-                {
-                    "title": "Muerte",
-                    "paragraphs": [
-                        "Por lo demás, la muerte sigue las reglas vanilla: los objetos caen y no existe keep-inventory. Los Beyonder también obtienen una pequeña cantidad temporal de Locura."
-                    ],
-                    "tip": "Solo un jugador que porta una Singularidad sufre la penalización adicional de acomodación. Los jugadores normales no pierden progreso de Secuencia por una muerte normal."
-                },
-                {
-                    "title": "Reinicios por Temporada",
-                    "paragraphs": [
-                        "Aproximadamente cada seis meses se reinician el mundo y el progreso Beyonder. Esto mantiene el mapa saludable y permite competir a quienes se unen a mitad de temporada sin quedar atrás permanentemente."
-                    ]
-                }
-            ],
-            "related": [
-                "Pueblos",
-                "Actividades",
-                "progresion"
-            ]
+          "label": "COI Client",
+          "wiki": "guides/client-mod/"
         },
         {
-            "id": "Elección inicial",
-            "category": "Empezar",
-            "icon": "fa-solid fa-scale-balanced",
-            "title": "La Vía del principiante y la bonificación inicial",
-            "shortTitle": "Elección inicial",
-            "summary": "Qué cambia realmente la selección inicial de Vía y ell sacrificio permanente entre Atajo y Determinación.",
-            "answer": "La Via que selecciones no te convierte en Beyonder ni bloquea tu Camino futuro. Solo orienta una de dos bonificaciones iniciales.",
-            "tags": [
-                "Novato",
-                "bonus",
-                "Atajo",
-                "Determinación",
-                "Camino",
-                "Bloqueado",
-                "Volver a elegir",
-                "Magia",
-                "Secuencias 9",
-                "Espiritualidad",
-                "Receta Garantizada"
-            ],
-            "sections": [
-                {
-                    "title": "Tu Camino no queda bloqueado",
-                    "paragraphs": [
-                        "Solo te conviertes en parte de un Camino cuando bebes la pocion de Secuencia 9 correspondiente. Si el menú de principiante dice Tonto, pero luego bebes una pocion de Puerta, te conviertes en Puerta.",
-                        "/magic es un menú opcional de sugerencias. Ver un Camino allí no prueba que ya seas Beyonder."
-                    ]
-                },
-                {
-                    "title": "Via del Atajo",
-                    "paragraphs": [
-                        "Te conviertes en Secuencia 9 inmediatamente sin preparar la poción, pero pierdes permanentemente el 10 % de Espiritualidad máxima en cada Secuencia y nivel de Actuación."
-                    ],
-                    "warning": "La penalización de Espiritualidad es permanente. No se recupera al ascender ni al completar la Actuación."
-                },
-                {
-                    "title": "Via de la Determinación",
-                    "paragraphs": [
-                        "El contador de tus recetas fijado es colocado un punto por debajo del premio asegurado, de modo que el siguiente cofre de botín natural contendrá una receta. No tiene coste permanente."
-                    ],
-                    "tip": "Determinación enseña el ciclo normal receta → caldero → ingredientes → preparación y conserva todo el poder a largo plazo."
-                },
-                {
-                    "title": "Confirmación y errores",
-                    "paragraphs": [
-                        "Los jugadores no pueden volver a elegir después de confirmar. Si cometes un error genuino de jugador nuevo, abre un ticket de Discord; a veces el equipo concede un restablecimiento."
-                    ]
-                }
-            ],
-            "related": [
-                "Primera Poción",
-                "progresion",
-                "conectar"
-            ]
-        },
-        {
-            "id": "Primera poción",
-            "category": "progression",
-            "icon": "fa-solid fa-flask",
-            "title": "Prepara y bebe tu primera poción",
-            "shortTitle": "Primer poción",
-            "summary": "La receta completa de Secuencia 9 y el ciclo de preparación, sin mitos de la comunidad.",
-            "answer": "Para llegar a Secuencia 9: consigue una receta, construye un caldero, reúne sus ingredientes, prepara la pocion correctamente y bébela. Tu primera pócima no requiere Actuación, ritual ni coste de Locura.",
-            "tags": [
-                "Secuencia 9",
-                "pocion",
-                "Elaboracion",
-                "destilacion",
-                "Caldero",
-                "Receta",
-                "ingrediente",
-                "char",
-                "ritual",
-                "altar",
-                "expirar",
-                "Ranuras"
-            ],
-            "sections": [
-                {
-                    "title": "Lo que necesitas",
-                    "bullets": [
-                        "Una receta completa de Secuencia 9 o todas sus páginas de receta diferentes.",
-                        "Un Caldero Mágico construido con un Pergamino Diagrama de Altar.",
-                        "Ingredientes principales y suplementarios específicos del Camino y la Secuencia.",
-                        "Las Características de Beyonder pueden sustituir todos los ingredientes principales de una receta a la vez."
-                    ],
-                    "warning": "Los Altares Sacrificiales son para Bendiciones, no para preparar pociones. Sus planos se parecen a los de calderos."
-                },
-                {
-                    "title": "Orden de preparación",
-                    "steps": [
-                        "Coloca los ingredientes principales o Características Beyonder en las ranuras de la izquierda.",
-                        "Coloca los ingredientes suplementarios en las ranuras de la derecha.",
-                        "Coloca la receta en la ranura central.",
-                        "Mantén cada objeto en el mismo orden que muestra la receta.",
-                        "Si tiene éxito, bebe la pocion para convertirte en Secuencia 9."
-                    ],
-                    "tip": "Una preparación fallida no consume ingredientes. Los calderos de nivel superior mejoran la probabilidad de éxito en vez de reducir pérdidas."
-                },
-                {
-                    "title": "Ingredientes",
-                    "bullets": [
-                        "Hay ingredientes que solo aparecen en cofres de botín generados.",
-                        "Los ingredientes obtenibles como botín proceden solo de Criaturas Beyonder.",
-                        "Los ingredientes minables crecen como nodos distintos del mundo; haz clic derecho para recolectarlos."
-                    ]
-                },
-                {
-                    "title": "Expiración de las Pociones",
-                    "paragraphs": [
-                        "Una pocion dura dos días en tiempo real desde que existe. Prepárala cuando estés listo para beberla. Una pocion caducada se convierte, cuando es posible, en un Artefacto Sellado correspondiente, pero ya no proporciona el ascenso previsto."
-                    ]
-                }
-            ],
-            "related": [
-                "loot",
-                "Elección inicial",
-                "progression"
-            ]
-        },
-        {
-            "id": "loot",
-            "category": "progression",
-            "icon": "fa-solid fa-box-open",
-            "title": "Encuentra botín, recetas e ingredientes",
-            "shortTitle": "Botín y Fijación",
-            "summary": "De dónde proceden realmente los materiales mágicos y cómo la garantía de fijación reduce la mala suerte.",
-            "answer": "Cada cofre vanilla generado naturalmente es un contenedor renovable de botín Beyonder. Ábrelos repetidamente y fija la categoría de recompensa que necesitas en ese momento.",
-            "tags": [
-                "loot",
-                "Cofre",
-                "Contenedor",
-                "Receta",
-                "Pagina",
-                "ingrediente",
-                "Pergamino de Altar",
-                "Fijar",
-                "fijación",
-                "piedad",
-                "Garantizar",
-                "Beyonder Salvaje",
-                "Criatura",
-                "nodo",
-                "Esquirla de Energia"
-            ],
-            "sections": [
-                {
-                    "title": "Contenedores de botín",
-                    "paragraphs": [
-                        "Cofres de aldeas, minas abandonadas, mazmorras, templos, naufragios, tesoros enterrados, bastiones y portales en ruinas, todos ellos sirven. No existe un cofre Beyonder Especial."
-                    ],
-                    "tip": "El contenido se regenera con el tiempo. Las estructuras exploradas anteriormente siguen siendo valiosas y conviene volver a visitarlas."
-                },
-                {
-                    "title": "Fijación de Recompensas",
-                    "paragraphs": [
-                        "Elige una de cuatro categorías: Pociones, Recetas, Páginas o Pergaminos de Altar. Cada cofre elegible sin esa recompensa aumenta un contador visible; el cofre que alcanza el umbral, contendrá la recompensa garantizada."
-                    ],
-                    "warning": "Los ingredientes no pueden fijarse. Deben encontrarse en cofres, obtenerse de criaturas, cosecharse de nodos de recursos, intercambiarse o conseguirse mediante otros sistemas."
-                },
-                {
-                    "title": "Obtención dirigida",
-                    "bullets": [
-                        "Comercia con un Beyonder Salvaje pacífico para obtener bienes específicos de Camino.",
-                        "Usa /subspace y completa mazmorras para conseguir materiales repetibles.",
-                        "Caza Criaturas Beyonder para obtener ingredientes como botín y puntos de Actuación.",
-                        "Intercambia ingredientes sobrantes con un Aldeano sin profesión por Esquirlas de Energia.",
-                        "Revisa el inventario rotativo del Emporio Brillante."
-                    ]
-                }
-            ],
-            "related": [
-                "Primera Pocion",
-                "activitidades",
-                "economía"
-            ]
-        },
-        {
-            "id": "progression",
-            "category": "progression",
-            "icon": "fa-solid fa-arrow-trend-up",
-            "title": "Actuación, rituales, Espiritualidad y Locura",
-            "shortTitle": "Ascenso",
-            "summary": "Cómo funciona la progresión tras la Secuencia 9 y dónde consultar tu estado actual.",
-            "answer": "Después de convertirte en Beyonder, el ascenso combina Actuación de varias fuentes, la siguiente pocion y rituales cada vez más difíciles. Tu estado completo está en la interfaz de Camino del inventario.",
-            "tags": [
-                "Actuacion",
-                "Digestion",
-                "ritual",
-                "Espiritualidad",
-                "mana",
-                "Locura",
-                "mutación",
-                "Salud",
-                "Estadísticas",
-                "Estado",
-                "secuencia",
-                "Avanzar",
-                "Contrato",
-                "Botella"
-            ],
-            "sections": [
-                {
-                    "title": "Consulta tu personaje",
-                    "steps": [
-                        "Abre tu inventario.",
-                        "Haz clic en el icono de Camino de la esquina superior izquierda.",
-                        "Pasa el cursor sobre la cabeza de tu personaje en la interfaz."
-                    ],
-                    "tip": "Esto muestra la Secuencia, Actuación y Digestión, Espiritualidad y Locura. No hay comandos para mostrar el estado."
-                },
-                {
-                    "title": "Actuación y digestión",
-                    "paragraphs": [
-                        "Lanzar hechizos sin más no hace avanzar necesariamente la Actuación. Cada habilidad tiene un método de Actuación específico, y una Actuación exitosa muestra una notificación en la barra de acción."
-                    ],
-                    "bullets": [
-                        "Juego pasivo y métodos de Actuación específicos de habilidades.",
-                        "Frascos de Actuación y recompensas rotativas.",
-                        "Completar mazmorras para Actuación PvE.",
-                        "Incursiones del Cosmos para Actuación PvP."
-                    ],
-                    "warning": "Ninguna fuente de Actuación puede llegar al 100 % por sí sola. Combina varias fuentes."
-                },
-                {
-                    "title": "Rituales",
-                    "bullets": [
-                        "La Secuencia 9 nunca requiere un ritual.",
-                        "Para las Secuencias objetivo 8–6, los rituales son opcionales, pero omitirlos añade Locura estacional permanente.",
-                        "En la Secuencia objetivo 5 y superiores, el ritual es obligatorio."
-                    ]
-                },
-                {
-                    "title": "Espiritualidad y Locura",
-                    "paragraphs": [
-                        "La Espiritualidad alimenta las habilidades y se regenera con el tiempo. La Espiritualidad máxima aumenta con la Secuencia y el progreso de Actuación.",
-                        "La Locura tiene componentes temporales, permanentes y brutos. La muerte y los ascensos inseguros la añaden; el descanso y algunas mecánicas solo reducen las partes recuperables."
-                    ],
-                    "warning": "Una Locura elevada tiene efectos reales de juego y puede llevar a la Mutación. Toma en serio las advertencias de ascenso."
-                }
-            ],
-            "related": [
-                "first-potion",
-                "activities",
-                "advanced"
-            ]
-        },
-        {
-            "id": "activities",
-            "category": "world",
-            "icon": "fa-solid fa-dungeon",
-            "title": "Criaturas, Trascendentes Salvajes, mazmorras e Incursiones",
-            "shortTitle": "Actividades y mazmorras",
-            "summary": "Las principales actividades repetibles que proporcionan botín, progreso de Actuación y objetivos de grupo.",
-            "answer": "Usa /subspace para localizar mazmorras, caza Criaturas Trascendentes al explorar, comercia con Trascendentes Salvajes compatibles y entra en Incursiones del Cosmos solo tras comprobar el color de la zona.",
-            "tags": [
-                "dungeon",
-                "subspace",
-                "rift",
-                "party",
-                "cooldown",
-                "help card",
-                "creature",
-                "crimson moon",
-                "wild beyonder",
-                "guardian",
-                "incursion",
-                "pvp",
-                "black zone"
-            ],
-            "sections": [
-                {
-                    "title": "Mazmorras y Grietas",
-                    "steps": [
-                        "Usa /subspace para ver cada mazmorra, la ubicación de su Grieta, tu poder relativo y los enfriamientos.",
-                        "Ve a la Grieta y aporta Fragmentos de Energía si aún necesita debilitarse.",
-                        "Forma un grupo con /party y entra cuando esté disponible."
-                    ],
-                    "bullets": [
-                        "El botín real está disponible una vez por mazmorra cada tres días.",
-                        "Cada día hay dos intentos con Carta de Ayuda sin botín normal.",
-                        "Se permite ir con menos integrantes cuando el grupo restante no es demasiado poderoso, sin reducción de recompensa."
-                    ]
-                },
-                {
-                    "title": "Criaturas y la Luna Carmesí",
-                    "paragraphs": [
-                        "Las Criaturas Trascendentes proporcionan XP, puntos de Actuación e ingredientes de Sendero. Durante la Luna Carmesí, aproximadamente semanal, pescar se convierte en una fuente alternativa de botín valiosa pero más peligrosa."
-                    ]
-                },
-                {
-                    "title": "Trascendentes Salvajes y Guardianes",
-                    "paragraphs": [
-                        "La actitud de un Trascendente Salvaje depende de las relaciones entre Senderos. Los pacíficos ofrecen el comercio de ingredientes y recetas más dirigido del juego; los hostiles son combates serios. Los Guardianes protegen objetivos importantes y están diseñados para grupos."
-                    ]
-                },
-                {
-                    "title": "Incursiones del Cosmos",
-                    "paragraphs": [
-                        "Las Incursiones son objetivos PvP anunciados. Las zonas Verde y Amarilla ponen en riesgo principalmente los objetos transportados y equilibran el daño entre Secuencias. Las zonas Negras implican el grave riesgo de regresión de Secuencia."
-                    ],
-                    "warning": "Lee el color y las reglas de la zona antes de entrar. Entrar en una Incursión es una elección deliberada de PvP."
-                }
-            ],
-            "related": [
-                "loot",
-                "progression",
-                "server-basics"
-            ]
-        },
-        {
-            "id": "towns",
-            "category": "community",
-            "icon": "fa-solid fa-house-flag",
-            "title": "Ciudades, naciones, guerras y juego en solitario",
-            "shortTitle": "Ciudades y naciones",
-            "summary": "Cómo los asentamientos protegidos cambian el juego inicial y cómo es una ruta autosuficiente.",
-            "answer": "Unirse a una ciudad es el inicio social más rápido, mientras que jugar en solitario sigue siendo totalmente viable. Las ciudades proporcionan reclamaciones protegidas, infraestructura compartida, acceso a grupos y posteriormente ventajas pasivas.",
-            "tags": [
-                "town",
-                "lands",
-                "claim",
-                "nation",
-                "war",
-                "solo",
-                "join",
-                "settle",
-                "base",
-                "grief",
-                "role",
-                "perk"
-            ],
-            "sections": [
-                {
-                    "title": "Unirse a una ciudad",
-                    "paragraphs": [
-                        "Pregunta en el chat del juego o Discord por una ciudad que acepte recién llegados. Los jugadores establecidos pueden compartir recetas, ingredientes, calderos, conocimiento y grupos para contenido difícil."
-                    ],
-                    "tip": "En un mundo sin comandos de teletransporte, una ubicación útil para asentarse y vecinos con experiencia son ventajas considerables."
-                },
-                {
-                    "title": "Jugar en solitario",
-                    "steps": [
-                        "Elige una ubicación sensata para tu base y anota coordenadas importantes.",
-                        "Abre cada cofre generado y ajusta la concentración de recompensa a tu obstáculo actual.",
-                        "Caza criaturas, toma nota de nodos de recursos y usa los intercambios de Trascendentes Salvajes.",
-                        "Únete a grupos temporales de mazmorra o Incursión sin renunciar a tu independencia."
-                    ]
-                },
-                {
-                    "title": "Reclamaciones, niveles y naciones",
-                    "paragraphs": [
-                        "Las ciudades usan roles y reclamaciones al estilo Lands. Los niveles superiores desbloquean capacidad de población, requisitos de tesorería, ventajas pasivas y beneficios arquitectónicos. Las ciudades de nivel Dominio pueden formar Naciones."
-                    ]
-                },
-                {
-                    "title": "Guerras",
-                    "paragraphs": [
-                        "Las guerras son conflictos estructurados y voluntarios gestionados mediante sus propios comandos y reglas del servidor. La exploración normal de zonas salvajes sigue protegida fuera de contextos de combate designados."
-                    ]
-                }
-            ],
-            "related": [
-                "server-basics",
-                "economy",
-                "social"
-            ]
-        },
-        {
-            "id": "economy",
-            "category": "community",
-            "icon": "fa-solid fa-coins",
-            "title": "Monedas, Fragmentos de Energía y el Emporio",
-            "shortTitle": "Economía",
-            "summary": "Qué compran las distintas monedas y cómo el juego normal convierte materiales sobrantes en progreso útil.",
-            "answer": "Usa /wallet para Coppets, Licks y Verl d'or; convierte materiales mágicos no deseados en Fragmentos de Energía y consigue puntos de Emporio independientes mediante actividades comunitarias.",
-            "tags": [
-                "money",
-                "currency",
-                "wallet",
-                "coppet",
-                "lick",
-                "verl",
-                "energy shard",
-                "emporium",
-                "daily",
-                "vote",
-                "income",
-                "silk touch",
-                "sell"
-            ],
-            "sections": [
-                {
-                    "title": "Dinero y cartera",
-                    "paragraphs": [
-                        "Las monedas principales son Coppets, Licks y Verl d'or, gestionadas mediante /wallet. La evaluación de objetos es la principal fuente de ingresos, pero solo cuentan los minerales no renovables extraídos con Silk Touch."
-                    ]
-                },
-                {
-                    "title": "Fragmentos de Energía",
-                    "paragraphs": [
-                        "Intercambia ingredientes y recetas de Sendero sobrantes con una aldea necia sin profesión. Los Fragmentos de Energía financian intercambios de Trascendentes Salvajes, el debilitamiento de Grietas, mejoras de Órdenes Secretas y actividades estacionales."
-                    ]
-                },
-                {
-                    "title": "Emporio Brillante",
-                    "paragraphs": [
-                        "El Emporio rota bienes útiles, incluidas recetas de magia. Los puntos de Emporio son independientes del dinero normal y proceden de votos, rachas de inicio de sesión y reportes de errores aceptados."
-                    ],
-                    "commands": [
-                        {
-                            "command": "/emporium or /emp",
-                            "purpose": "Abrir el Emporio Brillante"
-                        },
-                        {
-                            "command": "/daily",
-                            "purpose": "Abrir el menú de recompensa diaria"
-                        },
-                        {
-                            "command": "/vote",
-                            "purpose": "Abrir la votación del servidor"
-                        },
-                        {
-                            "command": "/wallet",
-                            "purpose": "Guardar dinero, evaluar objetos y realizar pagos"
-                        }
-                    ]
-                }
-            ],
-            "related": [
-                "loot",
-                "towns",
-                "advanced"
-            ]
-        },
-        {
-            "id": "social",
-            "category": "community",
-            "icon": "fa-solid fa-people-group",
-            "title": "Mensajeros, Órdenes Secretas y juego social",
-            "shortTitle": "Sistemas sociales",
-            "summary": "Los sistemas de comunicación, entregas, grupos privados e infraestructura compartida.",
-            "answer": "Usa mensajes privados normales para conversar, Mensajeros para entregas físicas y Órdenes Secretas para grupos privados persistentes con sus propias mejoras y espacios.",
-            "tags": [
-                "courier",
-                "horn",
-                "send",
-                "message",
-                "msg",
-                "secret order",
-                "order",
-                "oc",
-                "invite",
-                "sos",
-                "group"
-            ],
-            "sections": [
-                {
-                    "title": "Mensajeros",
-                    "paragraphs": [
-                        "Los cuernos de mensajero invocan distintos tipos de mensajero para enviar objetos físicos. Las entregas tienen sus propias reglas de capacidad, distancia y seguridad, así que inspecciona el mensajero elegido antes de encomendar carga valiosa."
-                    ]
-                },
-                {
-                    "title": "Órdenes Secretas",
-                    "paragraphs": [
-                        "Las Órdenes son organizaciones privadas persistentes con miembros, oficiales, chat, mejoras y herramientas de emergencia. Con el tiempo pueden ofrecer opciones de movilidad como Invocación Instantánea y una Guarida Secreta."
-                    ],
-                    "commands": [
-                        {
-                            "command": "/o invite, /o kick",
-                            "purpose": "Gestionar miembros de la Orden"
-                        },
-                        {
-                            "command": "/o vice set/remove",
-                            "purpose": "Gestionar líderes adjuntos"
-                        },
-                        {
-                            "command": "/o sos",
-                            "purpose": "Usar el sistema de emergencia de la Orden"
-                        },
-                        {
-                            "command": "/oc",
-                            "purpose": "Abrir el chat privado de la Orden"
-                        }
-                    ]
-                },
-                {
-                    "title": "Mensajes privados",
-                    "commands": [
-                        {
-                            "command": "/msg, /pm, /w",
-                            "purpose": "Enviar un mensaje privado"
-                        },
-                        {
-                            "command": "/reply",
-                            "purpose": "Responder al último mensaje privado"
-                        }
-                    ]
-                }
-            ],
-            "related": [
-                "towns",
-                "economy",
-                "advanced"
-            ]
-        },
-        {
-            "id": "advanced",
-            "category": "world",
-            "icon": "fa-solid fa-star-of-life",
-            "title": "Sistemas avanzados y a largo plazo",
-            "shortTitle": "Sistemas avanzados",
-            "summary": "Un mapa conciso de los sistemas que cobran relevancia más adelante en una temporada.",
-            "answer": "Las Gracias, los Artefactos Sellados, las Iglesias, los Nombres Honoríficos, las Unicidades, las armas de fuego y otros sistemas especializados son capas a largo plazo, no requisitos para tus primeros días.",
-            "tags": [
-                "boon",
-                "sealed artifact",
-                "church",
-                "honorific name",
-                "uniqueness",
-                "sequence 0",
-                "firearm",
-                "beverage",
-                "battlepass",
-                "subscription",
-                "store",
-                "creator"
-            ],
-            "sections": [
-                {
-                    "title": "Gracias y Altares Sacrificiales",
-                    "paragraphs": [
-                        "Las Gracias son una vía de progresión independiente que avanza mediante Altares Sacrificiales. No sustituyen tu Sendero y sus altares no pueden preparar pócimas."
-                    ]
-                },
-                {
-                    "title": "Artefactos Sellados",
-                    "paragraphs": [
-                        "Los artefactos proporcionan efectos poderosos con inconvenientes asociados. Pueden proceder de fabricación, botín o pócimas caducadas, y deben evaluarse como intercambios, no como mejoras incondicionales."
-                    ]
-                },
-                {
-                    "title": "Iglesias y Nombres Honoríficos",
-                    "paragraphs": [
-                        "Las Iglesias son instituciones de juego avanzado construidas alrededor de fe, anclas, oración, tierra y ventajas variables. Los Nombres Honoríficos permiten comunicación ritual y se acortan a medida que su propietario asciende de Secuencia."
-                    ]
-                },
-                {
-                    "title": "Unicidad y Secuencia 0",
-                    "paragraphs": [
-                        "La Unicidad de un Sendero forma parte de la ruta hacia la Secuencia 0 y requiere acomodación. Portar una añade una penalización por muerte al progreso de acomodación."
-                    ]
-                },
-                {
-                    "title": "Apoyo opcional",
-                    "paragraphs": [
-                        "La tienda, el Pase de batalla premium y las suscripciones apoyan al servidor y ofrecen comodidad. Un jugador gratuito aún puede alcanzar todos los niveles de poder."
-                    ]
-                }
-            ],
-            "related": [
-                "progression",
-                "economy",
-                "social"
-            ]
-        },
-        {
-            "id": "troubleshooting",
-            "category": "help",
-            "icon": "fa-solid fa-screwdriver-wrench",
-            "title": "Solución de problemas de conexión e interfaz",
-            "shortTitle": "Solución de problemas",
-            "summary": "Respuestas rápidas para interfaces personalizadas ausentes, problemas de verificación, clientes incompatibles y limitaciones de Bedrock.",
-            "answer": "Las interfaces mágicas ausentes casi siempre significan que rechazaste el paquete de recursos o que el cliente Java necesita actualizarse. Bedrock tiene limitaciones inevitables de interfaz personalizada.",
-            "tags": [
-                "problem",
-                "broken",
-                "missing",
-                "vanilla",
-                "ui",
-                "interface",
-                "resource pack",
-                "verify",
-                "code",
-                "expired",
-                "bedrock",
-                "mobile",
-                "geyser",
-                "outdated client",
-                "connect"
-            ],
-            "sections": [
-                {
-                    "title": "El servidor parece vanilla",
-                    "steps": [
-                        "Edita la entrada del servidor y establece Paquetes de recursos del servidor en Activado.",
-                        "Vuelve a conectarte y acepta el paquete.",
-                        "Si sigue fallando silenciosamente, actualiza el cliente Java y vuelve a conectarte."
-                    ],
-                    "warning": "Los jugadores de Bedrock aún pueden ver iconos de Sendero ausentes o interfaces personalizadas renderizadas incorrectamente. Es una limitación conocida de Geyser."
-                },
-                {
-                    "title": "La verificación no se completó",
-                    "steps": [
-                        "Vuelve al perfil y genera un código nuevo.",
-                        "Introdúcelo en la ventana de verificación del juego.",
-                        "Si falló el inicio de sesión del sitio web de Discord, inténtalo de nuevo después de borrar las cookies del sitio.",
-                        "Abre un ticket de Discord si la cuenta sigue sin vincularse."
-                    ]
-                },
-                {
-                    "title": "No puedo conectarme",
-                    "bullets": [
-                        "Confirma que la dirección es exactamente mc.mysterria.net.",
-                        "Usa Minecraft 26.1.2 o posterior.",
-                        "Las cuentas sin conexión deben usar /login después de su primer registro."
-                    ]
-                }
-            ],
-            "related": [
-                "connect",
-                "commands",
-                "server-basics"
-            ]
-        },
-        {
-            "id": "commands",
-            "category": "help",
-            "icon": "fa-solid fa-terminal",
-            "title": "Referencia de comandos esenciales",
-            "shortTitle": "Comandos",
-            "summary": "Una lista concisa de comandos que los jugadores suelen necesitar, además de los comandos deliberadamente no disponibles.",
-            "answer": "La mayor parte de la información del personaje se consulta mediante interfaces de inventario. Los comandos abren principalmente menús, gestionan comunidades o permiten comunicarse.",
-            "tags": [
-                "command",
-                "magic",
-                "daily",
-                "vote",
-                "wallet",
-                "subspace",
-                "party",
-                "bounty",
-                "lands",
-                "claim",
-                "war",
-                "church",
-                "home",
-                "spawn",
-                "tpa"
-            ],
-            "sections": [
-                {
-                    "title": "Inicio y progresión",
-                    "commands": [
-                        {
-                            "command": "/register <pass> <pass>",
-                            "purpose": "Registrar una cuenta sin conexión una vez"
-                        },
-                        {
-                            "command": "/login <pass>",
-                            "purpose": "Iniciar sesión en una cuenta sin conexión"
-                        },
-                        {
-                            "command": "/magic",
-                            "purpose": "Abrir el complemento opcional de siguiente paso"
-                        },
-                        {
-                            "command": "/subspace",
-                            "purpose": "Explorar mazmorras, ubicaciones, poder y enfriamientos"
-                        },
-                        {
-                            "command": "/party",
-                            "purpose": "Crear o gestionar un grupo de mazmorra"
-                        },
-                        {
-                            "command": "/bounty",
-                            "purpose": "Abrir el menú de recompensas de Actuación"
-                        }
-                    ]
-                },
-                {
-                    "title": "Economía y comunidad",
-                    "commands": [
-                        {
-                            "command": "/wallet",
-                            "purpose": "Gestionar monedas, evaluación y pagos"
-                        },
-                        {
-                            "command": "/daily",
-                            "purpose": "Abrir recompensas diarias"
-                        },
-                        {
-                            "command": "/emporium or /emp",
-                            "purpose": "Abrir el Emporio Brillante"
-                        },
-                        {
-                            "command": "/vote",
-                            "purpose": "Abrir opciones de votación"
-                        },
-                        {
-                            "command": "/lands …",
-                            "purpose": "Gestionar ciudades, roles y reclamaciones"
-                        },
-                        {
-                            "command": "/claim and /unclaim",
-                            "purpose": "Reclamar o liberar el chunk actual"
-                        },
-                        {
-                            "command": "/wars",
-                            "purpose": "Abrir la gestión de guerras"
-                        }
-                    ]
-                },
-                {
-                    "title": "Comandos que no existen",
-                    "paragraphs": [
-                        "Deliberadamente no hay /home, /sethome, /spawn, /tpa, /rtp ni /back. Los viajes y la movilidad son parte de la progresión."
-                    ],
-                    "warning": "Consultar la Secuencia, Actuación, Espiritualidad y Locura no es un comando. Abre el inventario, haz clic en el icono de Sendero de la esquina superior izquierda y pasa el cursor sobre la cabeza de tu personaje."
-                }
-            ],
-            "related": [
-                "server-basics",
-                "activities",
-                "economy"
-            ]
+          "label": "Inicio rápido",
+          "wiki": "general/start/"
         }
-    ]
+      ],
+      "related": [
+        "starter-choice",
+        "troubleshooting",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "server-basics",
+      "category": "start",
+      "title": "Cómo funciona el mundo",
+      "shortTitle": "Lo básico del mundo",
+      "summary": "Viajes, seguridad, muerte y temporadas, y en qué se diferencian de otros servidores de supervivencia.",
+      "answer": "Mysterria es un único Mundo principal de 15.000 por 15.000 bloques, sin comandos de teletransporte. Las zonas salvajes son seguras y los cofres generados se rellenan con botín Trascendente.",
+      "sections": [
+        {
+          "title": "Mapa y viajes",
+          "paragraphs": [
+            "El Mundo principal mide 15.000 × 15.000 bloques. Existen el Nether y algunas dimensiones especiales, pero la mayor parte del contenido Trascendente está en el Mundo principal."
+          ],
+          "warning": "No hay /home, /sethome, /spawn, /tpa, /rtp ni /back, y no se añadirán. Algunos Senderos, como Door, te dan formas más rápidas de viajar."
+        },
+        {
+          "title": "Seguridad y PvP",
+          "bullets": [
+            "El PvP está desactivado en las zonas salvajes.",
+            "Con 50 o más jugadores conectados, las Incursiones del Cosmos abren zonas PvP en el mapa en vivo. Solo luchas allí si entras.",
+            "Los dueños de ciudades pueden activar el PvP para algunos roles dentro de sus tierras.",
+            "El griefing va contra las reglas, y las tierras reclamadas por ciudades protegen tu terreno."
+          ]
+        },
+        {
+          "title": "Muerte",
+          "paragraphs": [
+            "La muerte sigue las reglas vanilla: tus objetos caen y no hay keep-inventory. Los Trascendentes también ganan un poco de Locura temporal."
+          ],
+          "tip": "Fuera de las zonas de Incursión Negras, morir nunca te cuesta progreso de Secuencia."
+        },
+        {
+          "title": "Temporadas",
+          "paragraphs": [
+            "Cada temporada, llamada Época, termina con un reinicio completo del mundo y del progreso de cada Trascendente. La Época I terminó el 8 de mayo de 2026 y la Época II empezó el 16 de mayo de 2026. Aún no se ha anunciado cuándo terminará la Época II.",
+            "Un reinicio también borra las vinculaciones de cuenta, así que después tendrás que vincular tu cuenta otra vez.",
+            "Como nadie conserva su poder tras un reinicio, unirte a mitad de temporada sigue valiendo la pena."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Reglas del servidor",
+          "to": "/rules"
+        },
+        {
+          "label": "Incursiones del Cosmos",
+          "wiki": "guides/cosmos-incursions/"
+        },
+        {
+          "label": "Épocas y reinicios",
+          "to": "/help#epochs"
+        }
+      ],
+      "related": [
+        "towns",
+        "activities",
+        "progression"
+      ]
+    },
+    {
+      "id": "starter-choice",
+      "category": "start",
+      "title": "Tu bonificación inicial",
+      "shortTitle": "Bonificación inicial",
+      "summary": "Qué cambia tu primera elección de Sendero, y lo que ganas y pierdes con Atajo o Determinación.",
+      "answer": "El Sendero que eliges al empezar no te convierte en Trascendente ni te ata a él. Solo orienta una de dos bonificaciones iniciales.",
+      "sections": [
+        {
+          "title": "Tu Sendero no queda bloqueado",
+          "paragraphs": [
+            "Solo entras en un Sendero cuando bebes su pócima de Secuencia 9. Si aquí eliges Fool y más tarde bebes una pócima de Door, te conviertes en Trascendente de Door.",
+            "Eres Trascendente cuando aparece el icono del Sendero en la esquina superior izquierda de tu inventario.",
+            "/magic abre un asistente opcional que sugiere los siguientes pasos. Que aparezca un Sendero allí no significa que hayas entrado en él."
+          ]
+        },
+        {
+          "title": "Vía del Atajo",
+          "paragraphs": [
+            "Te conviertes en Secuencia 9 al instante, sin preparar nada. A cambio, tu Espiritualidad máxima es un 10 % menor en cada Secuencia, para siempre."
+          ],
+          "warning": "La penalización nunca desaparece. Ni ascender ni completar tu Actuación la elimina."
+        },
+        {
+          "title": "Vía de la Determinación",
+          "paragraphs": [
+            "El próximo cofre generado que abras tendrá una fórmula seguro. No tiene coste."
+          ],
+          "tip": "Determinación te enseña el ciclo normal de fórmula, caldero, ingredientes y preparación, y conservas todo tu poder."
+        },
+        {
+          "title": "Confirmar",
+          "paragraphs": [
+            "No puedes volver a elegir después de confirmar. Si cometiste un error real siendo jugador nuevo, abre un ticket en Discord. A veces el equipo puede restablecerlo."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Los 22 Senderos",
+          "to": "/pathways"
+        },
+        {
+          "label": "Senderos",
+          "wiki": "magic/pathways/"
+        }
+      ],
+      "related": [
+        "first-potion",
+        "progression",
+        "connect"
+      ]
+    },
+    {
+      "id": "first-potion",
+      "category": "progression",
+      "title": "Prepara tu primera pócima",
+      "shortTitle": "Primera pócima",
+      "summary": "Todo lo que necesitas para convertirte en Trascendente de Secuencia 9.",
+      "answer": "Encuentra una fórmula de Secuencia 9, construye un Caldero Mágico, reúne los ingredientes y prepárala. Bebe la pócima y serás Trascendente. La primera pócima no necesita ritual ni cuesta Locura.",
+      "sections": [
+        {
+          "title": "Lo que necesitas",
+          "bullets": [
+            "Una fórmula completa de Secuencia 9, o todas sus páginas. En el juego se llama receta.",
+            "Un Caldero Mágico, construido a partir del plano de un Pergamino de Altar.",
+            "Los ingredientes principales y suplementarios de la fórmula.",
+            "Las Características Trascendentes pueden sustituir todos los ingredientes principales de una fórmula a la vez."
+          ],
+          "warning": "Los Altares Sacrificiales son para Gracias, no para pócimas. Sus planos se parecen a los de los calderos, así que compruébalo antes de construir."
+        },
+        {
+          "title": "Preparación",
+          "steps": [
+            "Pon los ingredientes principales, o las Características Trascendentes, en las ranuras de la izquierda.",
+            "Pon los ingredientes suplementarios en las ranuras de la derecha.",
+            "Pon la fórmula en la ranura central.",
+            "Mantén cada objeto en el orden que muestra la fórmula.",
+            "Cuando la preparación salga bien, bebe la pócima."
+          ],
+          "tip": "Si la preparación falla, conservas tus ingredientes. Un caldero mejor aumenta tu probabilidad de éxito."
+        },
+        {
+          "title": "De dónde salen los ingredientes",
+          "bullets": [
+            "Algunos solo se encuentran en cofres generados.",
+            "Algunos solo los sueltan las Criaturas Trascendentes.",
+            "Algunos crecen como nodos en el mundo. Haz clic derecho en un nodo para recolectarlo."
+          ]
+        },
+        {
+          "title": "Las pócimas caducan",
+          "paragraphs": [
+            "Una pócima dura dos días en tiempo real desde que se prepara, así que prepárala cuando vayas a beberla. Una pócima caducada se convierte en un Artefacto Sellado cuando es posible, pero ya no te hace ascender."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Introducción a la magia",
+          "wiki": "magic/introduction/"
+        },
+        {
+          "label": "Botín",
+          "wiki": "magic/loot/"
+        }
+      ],
+      "related": [
+        "loot",
+        "starter-choice",
+        "progression"
+      ]
+    },
+    {
+      "id": "loot",
+      "category": "progression",
+      "title": "Encuentra botín e ingredientes",
+      "shortTitle": "Botín e ingredientes",
+      "summary": "De dónde salen las fórmulas y los ingredientes, y cómo la fijación vence a la mala suerte.",
+      "answer": "Cada cofre generado de forma natural es un cofre de botín Trascendente que se rellena con el tiempo. Ábrelos a menudo y fija la recompensa que más necesitas.",
+      "sections": [
+        {
+          "title": "Cofres de botín",
+          "paragraphs": [
+            "Cuentan los cofres de aldeas, minas abandonadas, mazmorras, templos, naufragios, tesoros enterrados, bastiones y portales en ruinas. No hay ningún cofre especial que brille."
+          ],
+          "tip": "Los cofres se rellenan con el tiempo, así que los lugares que ya saqueaste merecen otra visita."
+        },
+        {
+          "title": "Fijar una recompensa",
+          "paragraphs": [
+            "Elige una recompensa para fijar: pócimas, fórmulas, páginas de fórmula o Pergaminos de Altar. Cada cofre que no la da hace avanzar un contador, y el cofre que llena el contador te la da seguro."
+          ],
+          "warning": "No puedes fijar ingredientes. Encuéntralos en cofres, consíguelos de criaturas, recolecta nodos o comercia por ellos."
+        },
+        {
+          "title": "Otras fuentes",
+          "bullets": [
+            "Comercia con un Trascendente Salvaje pacífico para conseguir bienes de un Sendero concreto.",
+            "Haz mazmorras. /subspace las muestra.",
+            "Caza Criaturas Trascendentes para conseguir ingredientes y Actuación.",
+            "Cambia los ingredientes que te sobren a un aldeano sin profesión por Esquirlas de Energía.",
+            "Mira el Emporio Brillante. Su inventario rota."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Botín",
+          "wiki": "magic/loot/"
+        },
+        {
+          "label": "Trascendentes Salvajes",
+          "wiki": "magic/wild-beyonders/"
+        },
+        {
+          "label": "Criaturas Trascendentes",
+          "wiki": "magic/creatures/"
+        }
+      ],
+      "related": [
+        "first-potion",
+        "activities",
+        "economy"
+      ]
+    },
+    {
+      "id": "progression",
+      "category": "progression",
+      "title": "Asciende de Secuencia",
+      "shortTitle": "Ascender",
+      "summary": "Cómo subes después de la Secuencia 9 y dónde consultar tu estado.",
+      "answer": "Interpreta tu papel hasta digerir tu pócima y luego prepara la siguiente. Los rituales importan más en cada paso. Tu estado completo está en tu inventario.",
+      "sections": [
+        {
+          "title": "Consulta tu estado",
+          "steps": [
+            "Abre tu inventario.",
+            "Haz clic en el icono del Sendero en la esquina superior izquierda.",
+            "Pasa el cursor sobre la cabeza de tu personaje."
+          ],
+          "tip": "Ahí se ven tu Secuencia, tu Actuación, tu Espiritualidad y tu Locura. No hay ningún comando para esto."
+        },
+        {
+          "title": "Actuación",
+          "paragraphs": [
+            "Lanzar hechizos sin más no siempre cuenta. Cada Secuencia de cada Sendero tiene su propio método de Actuación que debes descubrir, y la barra de acción te avisa cuando la Actuación cuenta. La Actuación sale de:"
+          ],
+          "bullets": [
+            "tus habilidades, usadas como pide tu papel;",
+            "los Frascos de Actuación y los contratos (/bounty);",
+            "las mazmorras, para Actuación PvE;",
+            "las Incursiones del Cosmos, para Actuación PvP;",
+            "Mythic Bedwars, Duels y FFA, que llevan Actuación a tu personaje."
+          ],
+          "warning": "Ninguna fuente puede llenar tu Actuación por sí sola. Combina varias."
+        },
+        {
+          "title": "Rituales",
+          "bullets": [
+            "La Secuencia 9 nunca necesita ritual.",
+            "De la Secuencia 8 a la 6, los rituales son opcionales, pero saltarte uno añade Locura que dura toda la temporada.",
+            "Desde la Secuencia 5 en adelante, el ritual es obligatorio."
+          ]
+        },
+        {
+          "title": "Espiritualidad y Locura",
+          "paragraphs": [
+            "La Espiritualidad alimenta tus habilidades y se recupera con el tiempo. Tu máximo crece a medida que asciendes.",
+            "La Locura sube cuando mueres o asciendes sin seguridad. El descanso y algunas habilidades bajan parte de ella."
+          ],
+          "warning": "Con demasiada Locura pierdes el control. Por debajo de la Secuencia 6, eso acaba con tu personaje. Desde la Secuencia 6 en adelante te enfrentas a una Ordalía, y cómo la juegues decide cuánto progreso conservas. Una tercera pérdida de control en 14 días acaba con el personaje."
+        },
+        {
+          "title": "Puestos y tronos",
+          "paragraphs": [
+            "Cualquiera puede llegar a la Secuencia 4. Por encima, cada Sendero tiene un número limitado de puestos en cada Secuencia, y cuando están llenos una guerra de puestos decide quién ocupa uno.",
+            "La Secuencia 0 es un trono por Sendero, ocupado por su dios hasta que deja de jugar o termina la temporada."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Quién ocupa los tronos",
+          "to": "/ascension"
+        },
+        {
+          "label": "Actuación",
+          "wiki": "magic/acting/"
+        },
+        {
+          "label": "Espiritualidad",
+          "wiki": "magic/spirituality/"
+        },
+        {
+          "label": "Locura y mutación",
+          "wiki": "magic/mutation/"
+        },
+        {
+          "label": "Usurpación de puestos",
+          "wiki": "magic/usurpation/"
+        }
+      ],
+      "related": [
+        "first-potion",
+        "activities",
+        "advanced"
+      ]
+    },
+    {
+      "id": "activities",
+      "category": "world",
+      "title": "Mazmorras, criaturas e Incursiones",
+      "shortTitle": "Actividades",
+      "summary": "Las actividades repetibles que dan botín y Actuación.",
+      "answer": "Usa /subspace para encontrar mazmorras, caza Criaturas Trascendentes mientras exploras, comercia con Trascendentes Salvajes amistosos y mira el color de una zona antes de entrar en una Incursión.",
+      "sections": [
+        {
+          "title": "Mazmorras y Grietas",
+          "paragraphs": [
+            "Las Grietas se alzan en el mundo abierto como pilares de luz cambiante. Los jugadores vierten Fragmentos de Energía en una Grieta hasta que se abre a una mazmorra. Dentro tienes una sola vida."
+          ],
+          "steps": [
+            "Usa /subspace para ver cada mazmorra, su Grieta, tu poder frente a ella y tus enfriamientos.",
+            "Ve a la Grieta y añade Fragmentos de Energía si aún hay que debilitarla.",
+            "Forma un grupo con /party y entra."
+          ],
+          "bullets": [
+            "Botín completo una vez por mazmorra cada tres días.",
+            "Dos intentos con Carta de Ayuda al día, sin el botín habitual.",
+            "Se permiten grupos más pequeños, y reciben la recompensa completa."
+          ]
+        },
+        {
+          "title": "Criaturas y la Luna Carmesí",
+          "paragraphs": [
+            "Las Criaturas Trascendentes dan XP, Actuación e ingredientes. Más o menos una vez por semana sale una Luna Carmesí. Pescar bajo ella da mejor botín, pero es más peligroso."
+          ]
+        },
+        {
+          "title": "Trascendentes Salvajes y Guardianes",
+          "paragraphs": [
+            "El ánimo de un Trascendente Salvaje depende de cómo se relaciona su Sendero con el tuyo. Los pacíficos ofrecen los intercambios más específicos del juego. Los hostiles son combates difíciles.",
+            "Los Guardianes recorren el mundo abierto y están pensados para grupos. Cada muerte suelta una ficha que giras para conseguir botín raro."
+          ]
+        },
+        {
+          "title": "Incursiones del Cosmos",
+          "paragraphs": [
+            "Con 50 o más jugadores conectados, las Incursiones abren zonas PvP en lugares al azar del mapa en vivo. El color de una zona te dice lo que cuesta morir allí:"
+          ],
+          "bullets": [
+            "Verde: sueltas uno o dos objetos, y el daño se iguala.",
+            "Amarilla: sueltas más objetos, y el daño solo se iguala en parte.",
+            "Roja: sueltas todo lo que llevas.",
+            "Negra: si pierdes contra un jugador, puedes perder una Secuencia o la mitad de tu Actuación."
+          ],
+          "warning": "Entrar en una zona significa aceptar el PvP. Desconectarte no te salva: tu cuerpo se queda allí."
+        }
+      ],
+      "links": [
+        {
+          "label": "Mazmorras",
+          "wiki": "guides/dungeons/"
+        },
+        {
+          "label": "Incursiones del Cosmos",
+          "wiki": "guides/cosmos-incursions/"
+        },
+        {
+          "label": "Trascendentes Salvajes",
+          "wiki": "magic/wild-beyonders/"
+        },
+        {
+          "label": "Luna Carmesí",
+          "wiki": "magic/crimson-moon/"
+        },
+        {
+          "label": "Jefes",
+          "wiki": "guides/bosses/"
+        }
+      ],
+      "related": [
+        "loot",
+        "progression",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "towns",
+      "category": "community",
+      "title": "Ciudades, naciones y juego en solitario",
+      "shortTitle": "Ciudades",
+      "summary": "Lo que te da una ciudad, y cómo jugar por tu cuenta.",
+      "answer": "Unirte a una ciudad es el inicio más rápido, y jugar en solitario también funciona. Las ciudades te dan tierra protegida y gente para el contenido en grupo.",
+      "sections": [
+        {
+          "title": "Únete a una ciudad",
+          "paragraphs": [
+            "Pregunta en el chat o en Discord por una ciudad que acepte jugadores nuevos. Los miembros comparten fórmulas, ingredientes, calderos y conocimientos, y encuentran grupos para el contenido difícil."
+          ],
+          "tip": "Sin comandos de teletransporte, una ciudad bien situada y unos vecinos dispuestos a ayudar son una gran ventaja inicial."
+        },
+        {
+          "title": "Juega en solitario",
+          "steps": [
+            "Elige un sitio sensato para tu base y apunta las coordenadas importantes.",
+            "Abre cada cofre generado y fija la recompensa que más necesitas.",
+            "Caza criaturas y comercia con Trascendentes Salvajes.",
+            "Únete a grupos para mazmorras o Incursiones cuando los necesites."
+          ]
+        },
+        {
+          "title": "Tierras, niveles y naciones",
+          "paragraphs": [
+            "Las ciudades reclaman tierras y dan roles a sus miembros. Los niveles de ciudad más altos aumentan el límite de miembros y desbloquean ventajas pasivas. Las ciudades de nivel Dominio pueden formar naciones."
+          ]
+        },
+        {
+          "title": "Guerras",
+          "paragraphs": [
+            "Las guerras entre ciudades son voluntarias y siguen sus propias reglas y comandos. Fuera de ellas, las zonas salvajes siguen siendo seguras."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Ciudades",
+          "wiki": "guides/towns/"
+        },
+        {
+          "label": "Ventajas de ciudad",
+          "wiki": "guides/tperks/"
+        }
+      ],
+      "related": [
+        "server-basics",
+        "economy",
+        "social"
+      ]
+    },
+    {
+      "id": "economy",
+      "category": "community",
+      "title": "Dinero, Esquirlas de Energía y el Emporio",
+      "shortTitle": "Economía",
+      "summary": "Las monedas, y cómo convertir los materiales que te sobran en progreso.",
+      "answer": "Tu dinero (Coppets, Licks y Verl d'or) está en /wallet. Los materiales Trascendentes que te sobren se convierten en Esquirlas de Energía. Los puntos del Emporio se consiguen votando, con rachas de inicio de sesión y reportando errores.",
+      "sections": [
+        {
+          "title": "Dinero",
+          "paragraphs": [
+            "Las monedas son Coppets, Licks y Verl d'or, y se guardan en /wallet. La mayoría de los ingresos sale de la evaluación de objetos, que solo acepta minerales no renovables extraídos con Toque de seda."
+          ]
+        },
+        {
+          "title": "Esquirlas de Energía",
+          "paragraphs": [
+            "Cambia los ingredientes y las fórmulas que te sobren a un aldeano sin profesión por Esquirlas de Energía. Las gastas en intercambios con Trascendentes Salvajes, en debilitar Grietas, en mejoras de Órdenes Secretas y en eventos de temporada."
+          ]
+        },
+        {
+          "title": "Emporio Brillante",
+          "paragraphs": [
+            "El Emporio vende bienes que rotan, fórmulas incluidas. Usa sus propios puntos, que se ganan votando, con rachas de inicio de sesión y con reportes de errores aceptados."
+          ],
+          "commands": [
+            {
+              "command": "/emporium, /emp",
+              "purpose": "Abrir el Emporio Brillante"
+            },
+            {
+              "command": "/daily",
+              "purpose": "Abrir las recompensas diarias"
+            },
+            {
+              "command": "/vote",
+              "purpose": "Abrir la votación del servidor"
+            },
+            {
+              "command": "/wallet",
+              "purpose": "Guardar dinero, evaluar objetos y pagar a otros"
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Economía",
+          "wiki": "guides/economy/"
+        },
+        {
+          "label": "Esquirlas de Energía",
+          "wiki": "guides/shards/"
+        },
+        {
+          "label": "Emporio Brillante",
+          "wiki": "guides/emporium/"
+        }
+      ],
+      "related": [
+        "loot",
+        "towns",
+        "advanced"
+      ]
+    },
+    {
+      "id": "social",
+      "category": "community",
+      "title": "Órdenes Secretas, mensajeros y mensajes",
+      "shortTitle": "Órdenes y mensajeros",
+      "summary": "Cómo enviar objetos y mensajes, y cómo llevar un grupo privado.",
+      "answer": "Los mensajeros llevan objetos por ti, y las Órdenes Secretas son grupos privados permanentes con sus propias mejoras. Para hablar, los mensajes privados funcionan como siempre.",
+      "sections": [
+        {
+          "title": "Mensajeros",
+          "paragraphs": [
+            "Los cuernos de mensajero invocan mensajeros que llevan objetos por ti. Cada tipo tiene su propia capacidad y sus riesgos, así que revísalo antes de enviar algo valioso."
+          ]
+        },
+        {
+          "title": "Órdenes Secretas",
+          "paragraphs": [
+            "Las Órdenes son grupos privados con miembros, oficiales, un chat y mejoras. Los niveles más altos desbloquean formas de viajar, como Invocación Instantánea y una Guarida Secreta."
+          ],
+          "commands": [
+            {
+              "command": "/o invite, /o kick",
+              "purpose": "Gestionar miembros"
+            },
+            {
+              "command": "/o vice set, /o vice remove",
+              "purpose": "Gestionar vicelíderes"
+            },
+            {
+              "command": "/o sos",
+              "purpose": "Pedir ayuda a tu Orden"
+            },
+            {
+              "command": "/oc",
+              "purpose": "Abrir el chat de la Orden"
+            }
+          ]
+        },
+        {
+          "title": "Mensajes privados",
+          "commands": [
+            {
+              "command": "/msg, /pm, /w",
+              "purpose": "Enviar un mensaje privado"
+            },
+            {
+              "command": "/reply",
+              "purpose": "Responder al último mensaje privado"
+            }
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Órdenes Secretas",
+          "wiki": "guides/orders/"
+        },
+        {
+          "label": "Mensajeros",
+          "wiki": "guides/couriers/"
+        }
+      ],
+      "related": [
+        "towns",
+        "economy",
+        "advanced"
+      ]
+    },
+    {
+      "id": "advanced",
+      "category": "world",
+      "title": "Más adelante en la temporada",
+      "shortTitle": "Más adelante",
+      "summary": "Sistemas que importan cuando ya estás asentado. No los necesitas en tus primeros días.",
+      "answer": "Las Gracias, los Artefactos Sellados, las iglesias y el camino a la Secuencia 0 llegan después. No necesitas ninguno de ellos en tus primeros días.",
+      "sections": [
+        {
+          "title": "Gracias",
+          "paragraphs": [
+            "Una Gracia es una Secuencia que te presta un Dios Exterior. Va junto a tu Sendero con sus propios hechizos y su propia Actuación, y la subes con sacrificios en un Altar Sacrificial. Solo puedes tener una a la vez, y nunca sube por encima de tu propia Secuencia."
+          ]
+        },
+        {
+          "title": "Artefactos Sellados",
+          "paragraphs": [
+            "Los artefactos tienen efectos poderosos con inconvenientes. Se fabrican o se encuentran en el botín. Una pócima caducada también puede convertirse en uno. Valora el inconveniente antes de usar uno."
+          ]
+        },
+        {
+          "title": "Iglesias y Nombres Honoríficos",
+          "paragraphs": [
+            "En la Secuencia 4 puedes fundar una iglesia colocando su núcleo en el mundo. La oración de los miembros refuerza sus ventajas, y las iglesias rivales pueden entrar en guerra.",
+            "Tu Nombre Honorífico es una invocación de cinco líneas que permite a otros jugadores contactarte mediante un ritual."
+          ]
+        },
+        {
+          "title": "Unicidad y Secuencia 0",
+          "paragraphs": [
+            "El dios de cada Sendero ocupa un trono en la Secuencia 0. El camino hasta allí pasa por la Unicidad de tu Sendero y termina en un rito público.",
+            "Una Unicidad te llega con un 0 % de acomodación, y morir mientras la tienes te hace perder parte de ella."
+          ]
+        },
+        {
+          "title": "Tienda y Pase de batalla",
+          "paragraphs": [
+            "La tienda, el Pase de batalla premium y las suscripciones apoyan al servidor y añaden comodidad. Un jugador gratuito puede alcanzar igualmente todos los niveles de poder."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Dudas sobre una recarga",
+          "to": "/help#top-ups"
+        },
+        {
+          "label": "Quién ocupa los tronos",
+          "to": "/ascension"
+        },
+        {
+          "label": "Gracias",
+          "wiki": "magic/boons/"
+        },
+        {
+          "label": "Artefactos Sellados",
+          "wiki": "magic/sealed-artifacts/"
+        },
+        {
+          "label": "Iglesias",
+          "wiki": "magic/churches/"
+        },
+        {
+          "label": "Secuencia 0",
+          "wiki": "magic/sequence-zero/"
+        }
+      ],
+      "related": [
+        "progression",
+        "economy",
+        "social"
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "category": "help",
+      "title": "Solución de problemas",
+      "shortTitle": "Solución de problemas",
+      "summary": "Soluciones a los problemas más comunes de los jugadores nuevos, desde un paquete de recursos que falta hasta la vinculación de cuenta.",
+      "answer": "Si el juego se ve como Minecraft normal, el paquete de recursos no se cargó: actívalo y actualiza tu cliente. En Bedrock, algunos menús personalizados se ven más sencillos, y es normal.",
+      "sections": [
+        {
+          "title": "El servidor se ve como Minecraft normal",
+          "steps": [
+            "Edita el servidor en tu lista y pon Paquetes de recursos del servidor en Activado.",
+            "Vuelve a conectarte y acepta el paquete.",
+            "Si sigue sin cargarse, actualiza tu cliente de Java y vuelve a conectarte."
+          ],
+          "tip": "En Bedrock, algunos menús personalizados se ven más sencillos que en Java. Es normal."
+        },
+        {
+          "title": "La vinculación de cuenta no funcionó",
+          "steps": [
+            "Vuelve a tu perfil y genera un código nuevo.",
+            "Escribe /verify en el juego e introduce el código nuevo.",
+            "Si falló el inicio de sesión en el sitio web, borra las cookies del sitio y vuelve a intentarlo.",
+            "¿Sigue sin vincularse? Consulta Ayuda o abre un ticket en Discord."
+          ]
+        },
+        {
+          "title": "No puedo conectarme",
+          "bullets": [
+            "Comprueba la dirección: mc.mysterria.net o play.mysterria.net.",
+            "Java: usa la versión 26.1.2 o posterior, en el puerto 25565.",
+            "Bedrock: usa el puerto 19132.",
+            "Las cuentas sin conexión deben usar /login después de registrarse."
+          ]
+        }
+      ],
+      "links": [
+        {
+          "label": "Ayuda con la vinculación de cuenta",
+          "to": "/help#linking"
+        },
+        {
+          "label": "Ayuda para entrar",
+          "to": "/help#joining"
+        },
+        {
+          "label": "Inicio rápido",
+          "wiki": "general/start/"
+        }
+      ],
+      "related": [
+        "connect",
+        "commands",
+        "server-basics"
+      ]
+    },
+    {
+      "id": "commands",
+      "category": "help",
+      "title": "Comandos",
+      "shortTitle": "Comandos",
+      "summary": "Los comandos que más usarás, y los que no existen.",
+      "answer": "Casi todo lo de tu personaje está en menús, no en comandos. Los comandos sirven sobre todo para abrir esos menús o gestionar tu ciudad y tu grupo.",
+      "sections": [
+        {
+          "title": "Empezar y ascender",
+          "commands": [
+            {
+              "command": "/register <contraseña> <contraseña>",
+              "purpose": "Registrar una cuenta sin conexión, una sola vez"
+            },
+            {
+              "command": "/login <contraseña>",
+              "purpose": "Iniciar sesión en una cuenta sin conexión"
+            },
+            {
+              "command": "/verify",
+              "purpose": "Vincular tu cuenta con un código de tu perfil"
+            },
+            {
+              "command": "/magic",
+              "purpose": "Abrir el asistente opcional de siguientes pasos"
+            },
+            {
+              "command": "/subspace",
+              "purpose": "Ver las mazmorras, sus Grietas, tu poder y tus enfriamientos"
+            },
+            {
+              "command": "/party",
+              "purpose": "Crear o gestionar un grupo de mazmorra"
+            },
+            {
+              "command": "/bounty",
+              "purpose": "Abrir los contratos de Actuación"
+            },
+            {
+              "command": "/coi tide",
+              "purpose": "Ver la Marea de hoy y lo que cambia"
+            }
+          ]
+        },
+        {
+          "title": "Dinero y ciudades",
+          "commands": [
+            {
+              "command": "/wallet",
+              "purpose": "Guardar dinero, evaluar objetos y pagar a otros"
+            },
+            {
+              "command": "/daily",
+              "purpose": "Abrir las recompensas diarias"
+            },
+            {
+              "command": "/emporium, /emp",
+              "purpose": "Abrir el Emporio Brillante"
+            },
+            {
+              "command": "/vote",
+              "purpose": "Abrir la votación del servidor"
+            },
+            {
+              "command": "/lands",
+              "purpose": "Gestionar tu ciudad, sus roles y sus tierras"
+            },
+            {
+              "command": "/claim, /unclaim",
+              "purpose": "Reclamar o liberar el chunk donde estás"
+            },
+            {
+              "command": "/wars",
+              "purpose": "Abrir la gestión de guerras"
+            }
+          ]
+        },
+        {
+          "title": "Comandos que no existen",
+          "paragraphs": [
+            "No hay /home, /sethome, /spawn, /tpa, /rtp ni /back. Viajar forma parte del juego."
+          ],
+          "warning": "Ningún comando muestra tu Secuencia, Actuación, Espiritualidad o Locura. Abre tu inventario, haz clic en el icono del Sendero en la esquina superior izquierda y pasa el cursor sobre la cabeza de tu personaje."
+        }
+      ],
+      "links": [
+        {
+          "label": "Inicio rápido",
+          "wiki": "general/start/"
+        },
+        {
+          "label": "Mareas diarias",
+          "wiki": "guides/tides/"
+        }
+      ],
+      "related": [
+        "server-basics",
+        "activities",
+        "economy"
+      ]
+    }
+  ]
 }

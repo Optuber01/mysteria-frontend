@@ -42,7 +42,8 @@ export function useCurrency() {
     const {currentLanguage} = useI18n();
 
     // Follow the locale across a points-only boundary, so a reader switching
-    // into Ukrainian stops seeing USD prices and vice versa.
+    // into Ukrainian stops seeing USD prices and vice versa. Immediate, because the
+    // stored language can differ from the URL's on a first visit to /uk/store.
     watch(currentLanguage, (newLang, oldLang) => {
         const nowPoints = isPointsOnly(newLang);
         if (nowPoints === isPointsOnly(oldLang)) return;
@@ -52,7 +53,7 @@ export function useCurrency() {
         } else if (currentCurrency.value === 'POINTS') {
             currentCurrency.value = 'USD';
         }
-    });
+    }, {immediate: true});
 
     const setCurrency = (currency: CurrencyType) => {
         currentCurrency.value = currency;

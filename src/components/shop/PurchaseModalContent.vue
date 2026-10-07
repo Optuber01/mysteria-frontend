@@ -1,63 +1,94 @@
 <template>
-  <div v-if="item" class="purchase-ritual-modal">
-    <div class="purchase-item-summary">
-      <div class="summary-details">
-        <h4 class="item-name">{{ name }}</h4>
-        <div class="item-price-tag">
-          {{ t('pricePerUnit') || 'Price per unit' }}: {{ formattedPrice }}
-        </div>
+  <!-- The order before it is placed: how many, for whom, what it costs, and what is left. -->
+  <div v-if="item" class="buy-form">
+    <p class="buy-form__item">
+      <strong>{{ name }}</strong>
+      <span class="arc-muted">{{ t('shopPage.purchase.each') }}: {{ price.main(unitPrice) }}</span>
+    </p>
+
+    <div v-if="isBulkable" class="buy-form__field">
+      <label class="buy-form__label" for="buy-quantity">{{ t('shopPage.purchase.quantity') }}</label>
+      <div class="buy-form__stepper">
+        <button
+            :aria-label="t('shopPage.purchase.fewer')"
+            :disabled="amount <= 1"
+            class="arc-tile buy-form__step"
+            type="button"
+            @click="updateAmount(amount - 1)"
+        >
+          <span class="buy-form__minus" aria-hidden="true">−</span>
+        </button>
+        <input
+            id="buy-quantity"
+            :value="amount"
+            class="arc-field buy-form__qty"
+            inputmode="numeric"
+            min="1"
+            type="number"
+            @input="handleAmountInput"
+        >
+        <button
+            :aria-label="t('shopPage.purchase.more')"
+            class="arc-tile buy-form__step"
+            type="button"
+            @click="updateAmount(amount + 1)"
+        >
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        </button>
       </div>
     </div>
 
-    <div v-if="isBulkable" class="ritual-field">
-      <label class="ritual-label">{{ t('amount') || 'Amount' }}</label>
-      <div class="amount-stepper">
-        <button class="step-btn" @click="updateAmount(Math.max(1, amount - 1))">-</button>
-        <input :value="amount" class="amount-input" min="1" type="number" @input="handleAmountInput"/>
-        <button class="step-btn" @click="updateAmount(amount + 1)">+</button>
+    <label v-if="isGiftable" class="buy-form__check">
+      <input :checked="isGift" type="checkbox" @change="toggleGift">
+      <span>{{ t('shopPage.purchase.gift') }}</span>
+    </label>
+
+    <UserSelector
+        v-if="isGift"
+        :label="t('shopPage.purchase.recipient')"
+        :model-value="recipientId"
+        :placeholder="t('shopPage.purchase.recipientPlaceholder')"
+        @update:model-value="updateRecipient"
+    />
+
+    <dl class="arc-rows buy-form__sum">
+      <div class="arc-row">
+        <dt>{{ t('shopPage.purchase.total') }}</dt>
+        <dd>
+          <strong>{{ price.main(totalPrice) }}</strong>
+          <span v-if="price.inMarks(totalPrice)" class="arc-muted"> · {{ price.inMarks(totalPrice) }}</span>
+        </dd>
       </div>
-    </div>
-
-    <div v-if="isGiftable" class="ritual-field">
-      <div class="ritual-checkbox-field" @click="toggleGift">
-        <div :class="{ active: isGift }" class="ritual-checkbox">
-          <i v-if="isGift" class="fa-solid fa-check"></i>
-        </div>
-        <span class="ritual-label-inline">{{ t('buyAsGift') || 'Purchase as a gift' }}</span>
+      <div class="arc-row">
+        <dt>{{ t('shopPage.purchase.balance') }}</dt>
+        <dd>{{ balance ? price.marks(balance) : '…' }}</dd>
       </div>
-    </div>
-
-    <Transition name="ritual-fade">
-      <div v-if="isGift" class="ritual-field">
-        <UserSelector
-            :model-value="recipientId"
-            :label="t('recipient') || 'Recipient'"
-            :placeholder="t('searchRecipient') || 'Search by nickname...'"
-            @update:model-value="updateRecipient"
-        />
+      <div v-if="balance && !insufficientFunds" class="arc-row">
+        <dt>{{ t('shopPage.purchase.after') }}</dt>
+        <dd>{{ price.marks(balance.minus(totalPrice)) }}</dd>
       </div>
-    </Transition>
+    </dl>
 
-    <div class="total-ritual-price">
-      <span class="total-label">{{ t('totalCost') || 'Total Cost' }}:</span>
-      <span class="total-value">{{ formattedTotalPrice }}</span>
-    </div>
-
-    <div v-if="insufficientFunds" class="insufficient-funds-warning">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      {{ t('insufficientFundsMessage') }} {{ formattedMissingAmount }}
+    <div v-if="balance && insufficientFunds" class="buy-form__short" role="status">
+      <p>{{ shortText }}</p>
+      <p class="buy-form__short-links">
+        <a :href="price.topUpUrl.value" class="arc-link" target="_blank" rel="noopener noreferrer">
+          {{ t('shopPage.balance.topUp') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span>
+        </a>
+        <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link">{{ t('shopPage.balance.howTitle') }}</RouterLink>
+      </p>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed} from 'vue';
+import Decimal from 'decimal.js';
 import {useI18n} from '@/composables/useI18n';
-import {useCurrency} from '@/composables/useCurrency';
 import {useBalanceStore} from '@/stores/balance';
 import UserSelector from '@/components/shop/UserSelector.vue';
-import Decimal from 'decimal.js';
 import type {ServiceMarkdownDto, ServiceResponse} from '@/types/services';
+import {useStorePrice} from './useStorePrice';
 
 const props = defineProps<{
   item: ServiceResponse | ServiceMarkdownDto;
@@ -73,270 +104,173 @@ const emit = defineEmits<{
 }>();
 
 const {t} = useI18n();
-const {formatCurrency, currentCurrency} = useCurrency();
 const balanceStore = useBalanceStore();
+const price = useStorePrice();
 
 const name = computed(() => {
   if ('display_name' in props.item && props.item.display_name) return props.item.display_name;
   return props.item.name;
 });
 
-const price = computed(() => {
-  return new Decimal(props.item.price.toString());
-});
+const unitPrice = computed(() => new Decimal(props.item.price.toString()));
+const totalPrice = computed(() => unitPrice.value.mul(props.amount));
 
-const isBulkable = computed(() => {
-  if ('is_bulkable' in props.item) return props.item.is_bulkable;
-  return (props.item as ServiceMarkdownDto).isBulkable;
-});
+const isBulkable = computed(() => 'is_bulkable' in props.item
+    ? props.item.is_bulkable
+    : (props.item as ServiceMarkdownDto).isBulkable);
+const isGiftable = computed(() => 'is_giftable' in props.item
+    ? props.item.is_giftable
+    : (props.item as ServiceMarkdownDto).isGiftable);
 
-const isGiftable = computed(() => {
-  if ('is_giftable' in props.item) return props.item.is_giftable;
-  return (props.item as ServiceMarkdownDto).isGiftable;
-});
+const balance = computed(() => balanceStore.currentBalance?.amount ?? null);
+const insufficientFunds = computed(() => !balance.value || balance.value.lessThan(totalPrice.value));
+const shortText = computed(() => t('shopPage.purchase.short')
+    .replace('{amount}', price.marks(totalPrice.value.minus(balance.value ?? 0))));
 
-const formattedPrice = computed(() => {
-  if (currentCurrency.value === 'POINTS') {
-    return `${price.value.toString()} ${t('marks')}`;
-  }
-  return formatCurrency(price.value);
-});
-
-const totalPrice = computed(() => {
-  return price.value.mul(props.amount);
-});
-
-const formattedTotalPrice = computed(() => {
-  if (currentCurrency.value === 'POINTS') {
-    return `${totalPrice.value.toString()} ${t('marks')}`;
-  }
-  return formatCurrency(totalPrice.value);
-});
-
-const insufficientFunds = computed(() => {
-  if (!balanceStore.currentBalance) return true;
-  return balanceStore.currentBalance.amount.lessThan(totalPrice.value);
-});
-
-const missingAmount = computed(() => {
-  if (!insufficientFunds.value || !balanceStore.currentBalance) return new Decimal(0);
-  return totalPrice.value.minus(balanceStore.currentBalance.amount);
-});
-
-const formattedMissingAmount = computed(() => {
-  if (currentCurrency.value === 'POINTS') {
-    return `${missingAmount.value.toString()} ${t('marks')}`;
-  }
-  return formatCurrency(missingAmount.value);
-});
-
-const updateAmount = (val: number) => {
-  emit('update:amount', val);
-};
+const updateAmount = (val: number) => emit('update:amount', Math.max(1, val));
 
 const handleAmountInput = (e: Event) => {
   const val = parseInt((e.target as HTMLInputElement).value);
-  if (!isNaN(val)) {
-    updateAmount(Math.max(1, val));
-  }
+  if (!isNaN(val)) updateAmount(val);
 };
 
-const toggleGift = () => {
-  emit('update:isGift', !props.isGift);
-};
-
-const updateRecipient = (val: string) => {
-  emit('update:recipientId', val);
-};
+const toggleGift = () => emit('update:isGift', !props.isGift);
+const updateRecipient = (val: string) => emit('update:recipientId', val);
 </script>
 
 <style scoped>
-.purchase-ritual-modal {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+.buy-form {
+  display: grid;
+  gap: 20px;
 }
 
-.purchase-item-summary {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: rgb(var(--pm-ffffff) / 0.02);
-  border: 1px solid rgb(var(--pm-ffffff) / 0.05);
-  border-radius: 8px;
-}
-
-.item-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px;
-  color: rgb(var(--pm-ffffff));
-  margin: 0 0 4px 0;
-}
-
-.item-price-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--myst-gold);
-}
-
-.ritual-field {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ritual-label {
-  font-family: 'Playfair Display', serif;
-  font-size: 14px;
-  color: var(--myst-gold);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.ritual-checkbox-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.ritual-checkbox {
-  width: 20px;
-  height: 20px;
-  border: 1px solid rgb(var(--pm-c8b273) / 0.3);
-  background: rgb(var(--pm-ffffff) / 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--myst-gold);
-  font-size: 12px;
-  transition: all 0.3s;
-}
-
-.ritual-checkbox.active {
-  background: rgb(var(--pm-c8b273) / 0.1);
-  border-color: var(--myst-gold);
-}
-
-.ritual-label-inline {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: rgb(var(--pm-aaaaaa));
-}
-
-.amount-stepper {
-  display: flex;
-  align-items: center;
+.buy-form__item {
+  display: grid;
   gap: 4px;
-  width: fit-content;
-  border: 1px solid rgb(var(--pm-ffffff) / 0.1);
-  background: rgb(var(--pm-000000) / 0.2);
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.step-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(var(--pm-ffffff) / 0.05);
-  border: none;
-  color: rgb(var(--pm-ffffff));
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.step-btn:hover {
-  background: var(--myst-gold);
-  color: rgb(var(--pm-000000));
-}
-
-.amount-input {
-  width: 60px;
-  height: 32px;
-  background: transparent;
-  border: none;
-  color: rgb(var(--pm-ffffff));
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-}
-
-.amount-input::-webkit-inner-spin-button,
-.amount-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
   margin: 0;
 }
 
-.total-ritual-price {
-  margin-top: 8px;
-  padding: 16px;
-  border-top: 1px dashed rgb(var(--pm-ffffff) / 0.1);
+.buy-form__item strong {
+  font-size: var(--arc-fs-h4);
+  font-weight: 600;
+}
+
+.buy-form__item span {
+  font-size: var(--arc-fs-small);
+}
+
+.buy-form__field {
+  display: grid;
+  gap: 8px;
+}
+
+.buy-form__label {
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
+}
+
+.buy-form__stepper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 8px;
 }
 
-.total-label {
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  color: rgb(var(--pm-888888));
+.buy-form__step {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
 }
 
-.total-value {
-  font-family: 'JetBrains Mono', monospace;
+.buy-form__minus {
   font-size: 20px;
-  font-weight: 700;
-  color: var(--myst-gold);
+  line-height: 1;
 }
 
-.insufficient-funds-warning {
-  padding: 12px;
-  background: rgb(var(--pm-ef4444) / 0.1);
-  border-left: 3px solid rgb(var(--pm-ef4444));
-  color: rgb(var(--pm-f87171));
-  font-size: 13px;
-  display: flex;
+.buy-form__step:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buy-form__qty {
+  width: 84px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.buy-form__qty::-webkit-inner-spin-button,
+.buy-form__qty::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.buy-form__check {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-height: 32px;
+  cursor: pointer;
+  justify-self: start;
 }
 
-.ritual-fade-enter-active, .ritual-fade-leave-active {
-  transition: all 0.3s ease;
+.buy-form__check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--acc-solid);
 }
 
-.ritual-fade-enter-from, .ritual-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
+.buy-form__sum {
+  margin: 0;
+  border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.buy-form__sum .arc-row {
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 10px 0;
+}
+
+.buy-form__sum .arc-row:first-child {
+  border-top: 0;
+}
+
+.buy-form__sum dt {
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
+}
+
+.buy-form__sum dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.buy-form__sum strong {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.buy-form__short {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+  font-size: var(--arc-fs-small);
+}
+
+.buy-form__short p {
+  margin: 0;
+}
+
+.buy-form__short-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-weight: 600;
 }
 </style>
-
-<style>
-/* Colour literals of the scoped styles above, as theme tokens (RGB triplets, used as
-   rgb(var(--x) / alpha)): the dark values are the original literals, the light theme
-   re-points them. Global so teleported content (modals) resolves them too. */
-:root {
-    --pm-000000: 0 0 0;
-    --pm-888888: 136 136 136;
-    --pm-aaaaaa: 170 170 170;
-    --pm-c8b273: 200 178 115;
-    --pm-ef4444: 239 68 68;
-    --pm-f87171: 248 113 113;
-    --pm-ffffff: 255 255 255;
-}
-
-:root[data-theme="parchment"] {
-    --pm-000000: 255 255 255;
-    --pm-888888: 85 83 94;
-    --pm-aaaaaa: 85 83 94;
-    --pm-c8b273: 180 44 62;
-    --pm-ef4444: 195 5 30;
-    --pm-f87171: 178 48 56;
-    --pm-ffffff: 23 22 28;
-}
-</style>
-

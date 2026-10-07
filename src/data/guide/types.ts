@@ -1,47 +1,25 @@
 export type GuideCategory = "start" | "progression" | "world" | "community" | "help";
 
-export interface GuideFact {
-    label: string;
-    value: string;
-    note: string;
-}
-
-export interface GuideExpectation {
-    icon: string;
-    title: string;
-    summary: string;
-    detail: string;
-}
-
-export interface GuideTask {
-    icon: string;
-    title: string;
-    description: string;
-    topicId: string;
-}
+/** One of the screenshots in src/assets/images/guide/. */
+export type GuideImage = "ip" | "join" | "portal" | "verify";
 
 export interface GuideStep {
     title: string;
     description: string;
-    topicId?: string;
+    topicId: string;
+}
+
+export interface GuideDifference {
+    title: string;
+    body: string;
 }
 
 export interface GuideChoice {
     name: string;
-    eyebrow: string;
     benefit: string;
     cost: string;
     bestFor: string;
     recommended?: boolean;
-}
-
-export interface GuideDirection {
-    icon: string;
-    title: string;
-    eyebrow: string;
-    description: string;
-    points: string[];
-    topicId: string;
 }
 
 export interface GuideCommand {
@@ -49,29 +27,43 @@ export interface GuideCommand {
     purpose: string;
 }
 
+export interface GuideFigure {
+    image: GuideImage;
+    caption: string;
+}
+
+/**
+ * Where a topic goes deeper: a wiki page (`wiki`, a path under the wiki's locale root)
+ * or a page of this site (`to`, an unprefixed path such as "/help").
+ */
+export interface GuideLink {
+    label: string;
+    wiki?: string;
+    to?: string;
+}
+
 export interface GuideTopicSection {
     title: string;
     paragraphs?: string[];
-    bullets?: string[];
     steps?: string[];
+    bullets?: string[];
+    commands?: GuideCommand[];
     warning?: string;
     tip?: string;
-    commands?: GuideCommand[];
+    figures?: GuideFigure[];
 }
 
 export interface GuideTopic {
     id: string;
     category: GuideCategory;
-    icon: string;
     title: string;
     shortTitle: string;
     summary: string;
     answer: string;
-    tags: string[];
     sections: GuideTopicSection[];
+    links: GuideLink[];
     related: string[];
 }
-
 
 export type Jsonified<T> =
     T extends string ? string
@@ -81,72 +73,53 @@ export type Jsonified<T> =
 
 export interface GuideContent {
     ui: {
-        eyebrow: string;
         title: string;
         lede: string;
-        serverAddress: string;
-        copyAddress: string;
+        topics: string;
+        joinTitle: string;
+        joinLink: string;
+        copy: string;
         copied: string;
-        startJourney: string;
-        findAnswer: string;
-        quickFactsLabel: string;
-        expectationsEyebrow: string;
-        expectationsTitle: string;
-        expectationsLede: string;
-        tasksEyebrow: string;
-        tasksTitle: string;
-        tasksLede: string;
-        searchPlaceholder: string;
-        clearSearch: string;
-        searchResults: string;
-        noResults: string;
-        noResultsHint: string;
-        firstHourEyebrow: string;
-        firstHourTitle: string;
-        firstHourLede: string;
-        openStep: string;
-        starterEyebrow: string;
+        copyFailed: string;
+        copyHint: string;
+        copiedHint: string;
+        copyFailedHint: string;
+        javaName: string;
+        javaBody: string;
+        bedrockName: string;
+        bedrockBody: string;
+        joinVerify: string;
+        stepsTitle: string;
+        stepsLede: string;
+        differentTitle: string;
+        differentLede: string;
         starterTitle: string;
         starterLede: string;
         benefit: string;
         cost: string;
         bestFor: string;
         recommended: string;
-        important: string;
         starterWarning: string;
-        directionEyebrow: string;
-        directionTitle: string;
-        directionLede: string;
-        browseEyebrow: string;
-        browseTitle: string;
-        browseLede: string;
-        topics: string;
-        popularEyebrow: string;
-        popularTitle: string;
-        openTopic: string;
-        backToGuide: string;
-        quickAnswer: string;
-        onThisPage: string;
-        relatedTopics: string;
-        commonMistake: string;
-        usefulTip: string;
-        screenshotsLabel: string;
-        screenshotIp: string;
-        screenshotPortal: string;
-        screenshotJoin: string;
-        profileCta: string;
-        pathwaysCta: string;
-        fullRulesCta: string;
-        supportCta: string;
-        mobileBrowse: string;
+        moreTitle: string;
+        wikiTitle: string;
+        wikiBody: string;
+        helpTitle: string;
+        helpBody: string;
+        discordTitle: string;
+        discordBody: string;
+        rulesTitle: string;
+        rulesBody: string;
+        back: string;
+        readMore: string;
+        readNext: string;
+        warning: string;
+        tip: string;
+        command: string;
+        purpose: string;
     };
-    facts: GuideFact[];
-    expectations: GuideExpectation[];
-    tasks: GuideTask[];
-    firstHour: GuideStep[];
+    steps: GuideStep[];
+    differences: GuideDifference[];
     starterChoices: GuideChoice[];
-    directions: GuideDirection[];
     categories: Record<GuideCategory, string>;
-    popularQuestions: Array<{ question: string; topicId: string }>;
     topics: GuideTopic[];
 }

@@ -1,101 +1,106 @@
 <template>
-  <div class="staff-page">
-    <HeaderItem/>
+  <ArcPage :lede="t('staffOrder.lede')" :title="t('footer.linkStaff')">
+    <ArcState v-if="loading" kind="loading" :text="t('loading')"/>
 
-    <main class="order">
-      <div class="order-glow" aria-hidden="true"></div>
-      <div class="myst-shell order-inner">
-        <header class="order-head">
-          <p class="myst-eyebrow">{{ t('staffOrder.eyebrow') }}</p>
-          <h1 class="myst-h1">{{ t('staffOrder.title') }}</h1>
-          <p class="order-lede">{{ t('staffOrder.lede') }}</p>
+    <div v-else class="staff">
+      <p v-if="snapshot" class="arc-muted snapshot">{{ t('staffPage.snapshotNote') }}</p>
+
+      <section
+          v-for="(group, groupIndex) in memberGroups"
+          :key="group.position"
+          :aria-labelledby="`rank-${groupIndex}`"
+      >
+        <header class="rank__head">
+          <h2 :id="`rank-${groupIndex}`" class="arc-h3">{{ group.position }}</h2>
         </header>
 
-        <div v-if="loading" class="order-state">
-          <div class="order-spinner" aria-hidden="true"></div>
-          <p>{{ t('loading') }}</p>
-        </div>
-
-        <div v-else-if="error" class="order-state">
-          <p>{{ t('staffPage.loadError') }}</p>
-        </div>
-
-        <template v-else>
-          <section
-              v-for="(group, groupIndex) in memberGroups"
-              :key="group.position"
-              class="rank-section"
-          >
-            <div class="rank-head">
-              <h2>{{ group.position }}</h2>
-              <span class="rank-rule" aria-hidden="true"></span>
-              <span class="rank-count">{{ group.members.length }} {{ t('staffPage.members') }}</span>
-            </div>
-
-            <div class="member-grid">
-              <div
-                  v-for="member in group.members"
-                  :key="`${group.position}-${member.nickname}`"
-                  :class="['member-card', { crown: groupIndex === 0 }]"
-              >
-                <img
-                    v-if="member.avatarUrl"
-                    :alt="member.nickname"
-                    :src="member.avatarUrl"
-                    class="member-avatar"
-                    loading="lazy"
-                    referrerpolicy="no-referrer"
-                >
-                <div v-else aria-hidden="true" class="member-avatar member-initial">
-                  {{ member.nickname.charAt(0).toUpperCase() }}
-                </div>
-
-                <div class="member-copy">
-                  <h3>{{ member.nickname }}</h3>
-                  <p>{{ group.position }}</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div class="order-cta">
-            <p>{{ t('staffOrder.helpQuestion') }}</p>
-            <a
-                class="myst-btn-gold"
-                href="https://discord.com/invite/jc7GSxBWgb"
-                rel="noopener noreferrer"
-                target="_blank"
+        <ul class="arc-panel arc-grid members">
+          <li v-for="member in group.members" :key="`${group.position}-${member.nickname}`" class="member">
+            <img
+                v-if="member.avatarUrl"
+                :alt="member.nickname"
+                :src="member.avatarUrl"
+                class="member__avatar"
+                height="48"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                width="48"
             >
-              <IconDiscord aria-hidden="true"/>
-              {{ t('staffOrder.openTicket') }}
-            </a>
-          </div>
-        </template>
-      </div>
-    </main>
+            <span v-else aria-hidden="true" class="member__avatar member__initial">
+              {{ member.nickname.charAt(0).toUpperCase() }}
+            </span>
+            <span class="member__text">
+              <span class="member__name">{{ member.nickname }}</span>
+              <span v-if="member.also" class="arc-muted member__also">{{ member.also }}</span>
+            </span>
+          </li>
+        </ul>
+      </section>
+    </div>
 
-    <FooterItem/>
-  </div>
+    <aside class="arc-panel help">
+      <p>{{ t('staffOrder.helpQuestion') }}</p>
+      <a
+          class="arc-btn arc-btn--ghost arc-btn--sm"
+          href="https://discord.com/invite/jc7GSxBWgb"
+          rel="noopener noreferrer"
+          target="_blank"
+      >
+        <IconDiscord aria-hidden="true" class="arc-btn__icon"/>
+        {{ t('staffOrder.openTicket') }}
+        <span class="arc-sr">{{ t('header.newTab') }}</span>
+      </a>
+    </aside>
+  </ArcPage>
 </template>
 
 <script lang="ts" setup>
 import {computed, onMounted, ref} from "vue";
-import HeaderItem from "@/components/layout/HeaderItem.vue";
-import FooterItem from "@/components/layout/FooterItem.vue";
 import {useI18n} from "@/composables/useI18n";
 import {breadcrumbLd, useSeo} from "@/composables/useSeo";
+import {useAuthStore} from "@/stores/auth";
+import ArcPage from "@/components/arcana/ArcPage.vue";
+import ArcState from "@/components/arcana/ArcState.vue";
 import IconDiscord from "@/assets/icons/IconDiscord.vue";
-import {membersAPI} from "@/utils/api/staff";
 import type {StaffMember} from "@/types/staff";
 
-const {t} = useI18n();
+type ListedMember = StaffMember & {also?: string};
 
-const members = ref<StaffMember[]>([]);
+const {t} = useI18n();
+const authStore = useAuthStore();
+
+/*
+ * The live list needs a signed-in account (the API answers 403 to everyone else), so
+ * visitors get this snapshot of the Discord staff roles, taken 2026-10-07, until the
+ * endpoint is made public. Ranks run from the top down; names are Discord usernames.
+ */
+const SNAPSHOT: ListedMember[] = [
+  {position: 'Owner', nickname: 'ikeepca1m'},
+  {position: 'Leader', nickname: 'king_julien26'},
+  {position: 'Developer', nickname: 'djecka1337'},
+  {position: 'Developer', nickname: 'farmerjoe6262'},
+  {position: 'Developer', nickname: 'optuber'},
+  {position: 'Developer', nickname: 'ikeabird1', also: 'Eventer'},
+  {position: 'Emissary', nickname: 'tythecanasian'},
+  {position: 'Emissary', nickname: 'just_linaaa'},
+  {position: 'Emissary', nickname: 'curativeflame70', also: 'Translator'},
+  {position: 'Herald', nickname: 'canblisticchicn'},
+  {position: 'Herald', nickname: 'thecoolaids'},
+  {position: 'Herald', nickname: 'petrichormoths'},
+  {position: 'Herald', nickname: 'sashimi0628'},
+  {position: 'Designer', nickname: 'librarianoflotm'},
+  {position: 'Translator', nickname: 'roidelle4250'},
+  {position: 'Translator', nickname: 'ahealex', also: 'Tester'},
+  ...['_a_ce', 'chamonile', 'sombie.', '.moistjesus', 'phillip3235', 'delicousriceeater', '.taygan.', 'einlumian',
+    'penguins5997', 'lesouth03', 'fish713', 'sick_weeb'].map(nickname => ({position: 'Tester', nickname})),
+].map(member => ({avatarUrl: null, ...member}));
+
+const members = ref<ListedMember[]>([]);
 const loading = ref(true);
-const error = ref(false);
+const snapshot = ref(false);
 
 useSeo(() => ({
-  title: t("staffOrder.title"),
+  title: t("footer.linkStaff"),
   description: t("staffOrder.lede"),
   path: "/staff",
   jsonLd: [breadcrumbLd([{name: "Home", path: "/"}, {name: "Staff", path: "/staff"}])],
@@ -103,7 +108,7 @@ useSeo(() => ({
 
 interface MemberGroup {
   position: string;
-  members: StaffMember[];
+  members: ListedMember[];
 }
 
 const memberGroups = computed<MemberGroup[]>(() => {
@@ -119,249 +124,102 @@ const memberGroups = computed<MemberGroup[]>(() => {
   return groups;
 });
 
-onMounted(async () => {
+/*
+ * The shared API client would raise an error toast on the 403 on top of the page,
+ * so this asks for the list directly and falls back to the snapshot on any failure.
+ */
+const load = async () => {
+  loading.value = true;
   try {
-    const response = await membersAPI.getMembers(4);
-    members.value = response.data;
+    const token = authStore.currentToken;
+    const response = await fetch('/api/members?minPriority=4', {
+      headers: {Accept: 'application/json', ...(token ? {Authorization: `Bearer ${token}`} : {})},
+    });
+    if (!response.ok) throw new Error(`members ${response.status}`);
+    const data: unknown = await response.json();
+    if (!Array.isArray(data) || !data.length) throw new Error('members: empty');
+    members.value = data as StaffMember[];
+    snapshot.value = false;
   } catch {
-    error.value = true;
+    members.value = SNAPSHOT;
+    snapshot.value = true;
   } finally {
     loading.value = false;
   }
-});
+};
+
+onMounted(load);
 </script>
 
 <style scoped>
-.staff-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--myst-bg);
-  color: var(--myst-ink);
-}
-
-.order {
-  position: relative;
-  flex: 1 0 auto;
-  padding: 80px 24px 90px;
-  overflow: hidden;
-}
-
-.order-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200, 178, 115, 0.06), transparent 65%);
-}
-
-.order-inner {
-  position: relative;
-}
-
-.order-head {
-  margin-bottom: 70px;
-  text-align: center;
-}
-
-.order-head .myst-eyebrow {
-  margin-bottom: 14px;
-}
-
-.order-lede {
-  margin: 18px auto 0;
-  max-width: 58ch;
-  color: var(--myst-ink-muted);
-  font-size: 15.5px;
-  line-height: 1.7;
-}
-
-/* Rank sections */
-.rank-section {
-  margin-bottom: 56px;
-}
-
-.rank-head {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-.rank-head h2 {
-  margin: 0;
-  font-family: var(--myst-font-display);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--myst-offwhite);
-}
-
-.rank-rule {
-  height: 1px;
-  flex: 1;
-  background: linear-gradient(90deg, var(--myst-line-40), transparent);
-}
-
-.rank-count {
-  font-family: var(--myst-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--myst-ink-muted);
-  white-space: nowrap;
-}
-
-.member-grid {
+.staff {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-  gap: 16px;
+  gap: var(--arc-block-gap);
 }
 
-.member-card {
+.rank__head {
+  margin-bottom: var(--arc-group-gap);
+}
+
+.members {
+  --arc-grid-min: 250px;
+  margin: 0;
+  list-style: none;
+}
+
+.member {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
   min-width: 0;
-  padding: 20px 24px;
-  background: var(--myst-panel);
-  border: 1px solid var(--myst-line-16);
-  transition: border-color 0.25s ease, transform 0.25s ease;
 }
 
-.member-card:hover {
-  border-color: var(--myst-line-40);
-  transform: translateY(-3px);
-}
-
-.member-card.crown {
-  background: var(--myst-panel-warm);
-  border-color: var(--myst-line-35);
-}
-
-.member-avatar {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-  border-radius: 2px;
+.member__avatar {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--arc-r-md);
   object-fit: cover;
-  background: linear-gradient(135deg, #2a3050, #171a2c);
+  background: var(--arc-glass);
 }
 
-.member-card.crown .member-avatar {
-  border: 1px solid var(--myst-line-35);
-}
-
-.member-initial {
+.member__initial {
   display: grid;
   place-items: center;
-  color: var(--myst-gold);
-  font-family: var(--myst-font-display);
-  font-size: 20px;
-  font-weight: 700;
+  color: var(--acc-ink);
+  font-size: var(--arc-fs-h4);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
-.member-copy {
+.member__text {
+  display: grid;
   min-width: 0;
 }
 
-.member-copy h3 {
-  margin: 0 0 5px;
+.member__name {
   overflow-wrap: anywhere;
-  color: var(--myst-offwhite);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.25;
+  font-weight: 600;
 }
 
-.member-copy p {
-  margin: 0;
-  font-family: var(--myst-font-mono);
-  font-size: 9px;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--myst-ink-muted);
+.member__also {
+  font-size: var(--arc-fs-caption);
 }
 
-.member-card.crown .member-copy p {
-  color: var(--myst-gold);
+.snapshot {
+  margin: 0 0 var(--arc-group-gap);
+  font-size: var(--arc-fs-small);
 }
 
-/* Bottom CTA */
-.order-cta {
+.help {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
   flex-wrap: wrap;
-  margin-top: 70px;
-  padding: 26px 32px;
-  background: rgba(200, 178, 115, 0.03);
-  border: 1px solid var(--myst-line-18);
-}
-
-.order-cta p {
-  margin: 0;
-  color: var(--myst-ink-muted);
-  font-size: 14px;
-}
-
-.order-cta .myst-btn-gold {
-  padding: 12px 26px;
-  font-size: 11px;
-}
-
-/* States */
-.order-state {
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  padding: 64px 0;
-  color: var(--myst-ink-muted);
-  font-family: var(--myst-font-mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
 }
 
-.order-spinner {
-  width: 30px;
-  height: 30px;
-  border: 2px solid var(--myst-line-20);
-  border-top-color: var(--myst-gold);
-  border-radius: 50%;
-  animation: orderSpin 0.9s linear infinite;
-}
-
-@keyframes orderSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Light theme */
-:root[data-theme="parchment"] .order-glow {
-  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(180, 44, 62, 0.05), transparent 65%);
-}
-
-:root[data-theme="parchment"] .member-avatar {
-  background: #e4e1da;
-}
-
-:root[data-theme="parchment"] .order-cta {
-  background: var(--myst-wash);
-}
-
-@media (max-width: 640px) {
-  .order {
-    padding: 50px 20px 70px;
-  }
-
-  .order-head {
-    margin-bottom: 44px;
-  }
-
-  .member-grid {
-    grid-template-columns: 1fr;
-  }
+.help p {
+  margin: 0;
 }
 </style>

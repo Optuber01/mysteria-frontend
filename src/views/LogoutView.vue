@@ -1,15 +1,18 @@
 <template>
-  <div class="logout-container">
-    <button class="logout-button" @click="handleLogout">
-      {{ t("logout") }}
-    </button>
-  </div>
+  <ArcPage narrow :lede="t('logoutPage.lede')" :title="t('logout')">
+    <template #actions>
+      <button class="arc-btn arc-btn--solid" type="button" @click="handleLogout">
+        {{ t("logout") }}
+      </button>
+    </template>
+  </ArcPage>
 </template>
 
 <script lang="ts" setup>
 import {useAuthStore} from "@/stores/auth";
 import {useRouter} from "vue-router";
 import {useI18n} from "@/composables/useI18n";
+import ArcPage from "@/components/arcana/ArcPage.vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -24,18 +27,3 @@ const handleLogout = async () => {
   }
 };
 </script>
-
-<style scoped>
-.logout-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.logout-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
-</style>

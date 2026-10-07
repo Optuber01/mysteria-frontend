@@ -4,7 +4,7 @@
     beside the content on wide screens, a closed "contents" disclosure above it on phones.
     Entries are links (`to`) or in-page anchors (`href`); the current one is marked.
   -->
-  <nav class="arc-toc" :aria-label="label">
+  <nav ref="nav" class="arc-toc" :aria-label="label">
     <details class="arc-toc__fold" :open="wide || undefined">
       <summary class="arc-toc__summary">
         <span>{{ label }}</span>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref} from 'vue';
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from 'vue';
 import {RouterLink} from 'vue-router';
 
 export type TocItem = {id: string; label: string; to?: string; href?: string; mark?: string; sub?: boolean};
@@ -60,6 +60,22 @@ onMounted(() => {
   query.addEventListener('change', sync);
 });
 onUnmounted(() => query?.removeEventListener('change', sync));
+
+/*
+ * A long list scrolls inside its sticky column: keep the current entry in sight there,
+ * moving the list only (scrollIntoView would move the page too).
+ */
+const nav = ref<HTMLElement | null>(null);
+const revealCurrent = () => {
+  const box = nav.value;
+  const link = box?.querySelector<HTMLElement>('.is-current');
+  if (!box || !link || !wide.value || box.scrollHeight <= box.clientHeight) return;
+  const top = link.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+  if (top < box.scrollTop + 24) box.scrollTop = Math.max(0, top - 24);
+  else if (top + link.offsetHeight > box.scrollTop + box.clientHeight - 24) box.scrollTop = top + link.offsetHeight - box.clientHeight + 24;
+};
+watch(() => props.current, () => nextTick(revealCurrent));
+onMounted(() => nextTick(revealCurrent));
 </script>
 
 <style scoped>
@@ -69,6 +85,9 @@ onUnmounted(() => query?.removeEventListener('change', sync));
   max-height: calc(100vh - var(--site-header-stack, 106px) - 32px);
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* a quiet scrollbar shows there is more below when the list outgrows the window */
+  scrollbar-width: thin;
+  scrollbar-color: var(--arc-line) transparent;
 }
 
 .arc-toc__summary {

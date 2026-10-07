@@ -1,20 +1,17 @@
 <template>
-  <div class="choice-grid">
+  <!-- The two starter bonuses side by side; the one that keeps full power is marked. -->
+  <div class="guide-choices arc-grid">
     <article
         v-for="choice in choices"
         :key="choice.name"
-        class="choice-card"
-        :class="{ recommended: choice.recommended }"
+        class="guide-choice arc-panel"
+        :class="{'is-recommended': choice.recommended}"
     >
-      <div class="choice-card-head">
-        <div>
-          <span class="micro-label">{{ choice.eyebrow }}</span>
-          <h3>{{ choice.name }}</h3>
-        </div>
-        <span v-if="choice.recommended" class="recommended-tag">{{ ui.recommended }}</span>
-      </div>
-
-      <dl>
+      <header class="guide-choice__head">
+        <h3 class="arc-h4">{{ choice.name }}</h3>
+        <span v-if="choice.recommended" class="arc-tag arc-tag--acc">{{ ui.recommended }}</span>
+      </header>
+      <dl class="guide-choice__terms">
         <div>
           <dt>{{ ui.benefit }}</dt>
           <dd>{{ choice.benefit }}</dd>
@@ -42,126 +39,44 @@ defineProps<{
 </script>
 
 <style scoped>
-.choice-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+.guide-choices {
+  /* the two choices always share the row (auto-fit), never leave a third column empty */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
 }
 
-.choice-card {
-  position: relative;
-  padding: 28px;
-  border: 1px solid rgba(245, 245, 247, 0.14);
-  background: rgba(17, 19, 29, 0.78);
+.guide-choice.is-recommended {
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
 }
 
-.choice-card.recommended {
-  border-color: rgba(200, 178, 115, 0.5);
-  background: linear-gradient(145deg, rgba(200, 178, 115, 0.09), transparent 55%),
-  rgba(17, 19, 29, 0.86);
-}
-
-.choice-card-head {
+.guide-choice__head {
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  min-height: 66px;
+  gap: 10px;
 }
 
-.micro-label {
-  display: block;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
+.guide-choice__terms {
+  margin: 16px 0 0;
+}
+
+.guide-choice__terms > div {
+  padding: 12px 0;
+  border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.guide-choice__terms > div:last-child {
+  padding-bottom: 0;
+}
+
+.guide-choice__terms dt {
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-caption);
   font-weight: 600;
-  letter-spacing: 0.26em;
-  line-height: 1.4;
-  text-transform: uppercase;
-  color: var(--myst-gold);
 }
 
-h3 {
-  margin: 7px 0 0;
-  font-family: "Playfair Display", serif;
-  font-size: 26px;
-  font-weight: 600;
-}
-
-.recommended-tag {
-  padding: 5px 8px;
-  border: 1px solid rgba(200, 178, 115, 0.45);
-  color: var(--myst-gold);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 8px;
-  letter-spacing: 0.15em;
-  white-space: nowrap;
-}
-
-dl {
-  margin: 22px 0 0;
-}
-
-dl > div {
-  display: grid;
-  grid-template-columns: 122px 1fr;
-  gap: 16px;
-  padding: 14px 0;
-  border-top: 1px solid rgba(245, 245, 247, 0.09);
-}
-
-dt {
-  color: var(--myst-ink-muted);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-dd {
-  margin: 0;
-  color: var(--myst-ink);
-  font-size: 13px;
+.guide-choice__terms dd {
+  margin: 4px 0 0;
   line-height: 1.55;
-}
-
-:root[data-theme="parchment"] .choice-card {
-  border-color: var(--myst-line-20);
-  background: var(--myst-bg-2);
-}
-
-:root[data-theme="parchment"] .choice-card.recommended {
-  border-color: var(--myst-line-55);
-  background: linear-gradient(145deg, var(--myst-wash-strong), transparent 55%), var(--myst-bg-2);
-}
-
-:root[data-theme="parchment"] .recommended-tag {
-  border-color: var(--myst-line-55);
-}
-
-:root[data-theme="parchment"] dl > div {
-  border-top-color: var(--myst-line-14);
-}
-
-@media (max-width: 1024px) {
-  dl > div {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-}
-
-@media (max-width: 800px) {
-  .choice-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .choice-card {
-    padding: 22px;
-  }
-
-  .choice-card-head {
-    flex-direction: column;
-  }
 }
 </style>

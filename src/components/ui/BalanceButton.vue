@@ -17,21 +17,32 @@
   <Teleport to="body">
     <Transition name="ritual-fade">
       <div v-if="showCurrencyModal" class="modal-ritual-overlay" @click="closeCurrencyModal">
-        <div class="modal-ritual-content compact" @click.stop>
+        <div
+            aria-labelledby="balance-currency-title"
+            aria-modal="true"
+            class="modal-ritual-content compact"
+            role="dialog"
+            @click.stop
+            @keydown.esc="closeCurrencyModal"
+        >
           <div class="modal-ritual-header">
-            <h3 class="ritual-title">{{ t('currencySettings') }}</h3>
-            <button class="modal-ritual-close" @click="closeCurrencyModal">†</button>
+            <h2 id="balance-currency-title" class="ritual-title">{{ t('currencySettings') }}</h2>
+            <button :aria-label="t('close')" class="modal-ritual-close" type="button" @click="closeCurrencyModal">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
           </div>
 
           <div class="modal-ritual-body no-scrollbar">
             <div class="ritual-section">
-              <h4 class="ritual-section-title">{{ t('displayCurrency') }}</h4>
+              <h3 class="ritual-section-title">{{ t('displayCurrency') }}</h3>
               <p class="ritual-section-desc">{{ t('displayCurrencyDesc') }}</p>
               <div class="currency-ritual-grid">
                 <button
                     v-for="curr in currencies"
                     :key="curr.code"
+                    :aria-pressed="currentCurrency === curr.code"
                     :class="['currency-ritual-option', { active: currentCurrency === curr.code }]"
+                    type="button"
                     @click="selectCurrency(curr.code)"
                 >
                   <span v-if="curr.symbol" class="curr-symbol">{{ curr.symbol }}</span>
@@ -43,7 +54,7 @@
             </div>
 
             <div class="ritual-section">
-              <h4 class="ritual-section-title">{{ t('paymentConversionRates') }}</h4>
+              <h3 class="ritual-section-title">{{ t('paymentConversionRates') }}</h3>
               <div class="conversion-ledger">
                 <div class="ledger-row">
                   <span class="ledger-label">USD</span>
@@ -58,13 +69,14 @@
 
             <div v-if="usesRealCurrency" class="ritual-warning-box">
               <p class="warning-ritual-text">
-                † {{ t('donationWarning') }}
+                {{ t('donationWarning') }}
               </p>
             </div>
 
             <div class="modal-ritual-actions">
-              <a :href="topUpUrl" class="btn-ritual-primary" target="_blank">
+              <a :href="topUpUrl" class="arc-btn arc-btn--solid btn-ritual-primary" target="_blank" rel="noopener noreferrer">
                 {{ t('topUpBalance') }}
+                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
               </a>
             </div>
           </div>
@@ -148,294 +160,225 @@ const handleTopUpClick = () => {
 .balance-chip {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   padding: 8px 14px;
-  background: var(--myst-wash);
-  border: 1px solid var(--myst-line-28);
-  border-radius: 2px;
-  color: var(--myst-ink);
+  border: 0;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--acc) 8%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
+  color: var(--arc-ink);
   cursor: pointer;
-  transition: all 0.25s ease;
-  font-family: var(--myst-font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
+  font-family: var(--arc-body);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  transition: box-shadow .2s ease, background-color .2s ease;
 }
 
 .balance-chip:hover {
-  border-color: var(--myst-gold);
-  background: var(--myst-wash-strong);
+  background: color-mix(in oklab, var(--acc) 14%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
 }
 
 .chip-icon {
-  color: var(--myst-gold);
-  font-size: 15px;
+  width: 16px;
+  height: 16px;
+  color: var(--acc-ink);
 }
 
 .balance-chip.is-icon-only {
   width: 38px;
+  height: 36px;
   padding: 0;
   justify-content: center;
-  height: 36px;
 }
 
-/* Modal Ritual Styles - Compact */
+/* the currency sheet: the same dialog look as ModalItem */
 .modal-ritual-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
   padding: 20px;
+  background: color-mix(in oklab, var(--arc-bg) 72%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 .modal-ritual-content.compact {
-  background: #080a14;
-  border: 1px solid rgba(200, 178, 115, 0.2);
-  width: 100%;
-  max-width: 440px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  width: 100%;
+  max-width: 440px;
+  border-radius: var(--arc-r-lg);
+  background: var(--arc-pop);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line), 0 24px 70px var(--arc-shadow-strong);
+  color: var(--arc-ink);
 }
 
 .modal-ritual-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  padding: 16px 22px;
+  border-bottom: var(--arc-bw) solid var(--arc-line);
 }
 
 .ritual-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 18px;
-  color: var(--myst-gold);
   margin: 0;
+  font-family: var(--arc-display);
+  font-variation-settings: 'FLAR' 100;
+  font-size: var(--arc-fs-h4);
+  font-weight: 600;
 }
 
 .modal-ritual-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--arc-r-md);
   background: none;
-  border: none;
-  color: #444;
-  font-size: 20px;
+  color: var(--arc-muted);
+  font-size: 18px;
   cursor: pointer;
-  transition: color 0.3s;
 }
 
 .modal-ritual-close:hover {
-  color: var(--myst-gold);
+  background: var(--arc-glass);
+  color: var(--arc-ink);
 }
 
 .modal-ritual-body {
-  padding: 24px;
+  padding: 22px;
 }
 
 .ritual-section {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .ritual-section-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 14px;
-  color: #fff;
-  margin-bottom: 6px;
+  margin: 0 0 6px;
+  font-size: var(--arc-fs-body);
+  font-weight: 600;
 }
 
 .ritual-section-desc {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #666;
-  margin-bottom: 12px;
+  margin: 0 0 12px;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
 }
 
 .currency-ritual-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .currency-ritual-option {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 12px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  padding: 12px 6px;
+  border: 0;
+  border-radius: var(--arc-r-md);
+  background: var(--arc-glass);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+  color: var(--arc-ink);
+  font: inherit;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: box-shadow .2s ease, background-color .2s ease;
 }
 
 .currency-ritual-option:hover {
-  border-color: rgba(200, 178, 115, 0.3);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
 }
 
 .currency-ritual-option.active {
-  border-color: var(--myst-gold);
-  background: rgba(200, 178, 115, 0.05);
+  background: color-mix(in oklab, var(--acc) 10%, transparent);
+  box-shadow: inset 0 0 0 var(--arc-bw-accent) var(--acc-ink);
 }
 
 .curr-symbol {
   font-size: 18px;
-  color: #fff;
+  font-weight: 600;
 }
 
 .curr-icon {
-  font-size: 18px;
-  color: var(--myst-gold);
+  width: 18px;
+  height: 18px;
+  color: var(--acc-ink);
 }
 
 .curr-name {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #aaa;
+  font-size: var(--arc-fs-small);
+  font-weight: 600;
 }
 
 .curr-rate {
-  font-size: 8px;
-  color: #555;
+  color: var(--arc-muted);
+  font-size: 12px;
   text-align: center;
 }
 
 .conversion-ledger {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--arc-r-md);
+  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
 }
 
 .ledger-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-top: var(--arc-bw) solid var(--arc-line);
+  font-size: var(--arc-fs-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-row:first-child {
+  border-top: 0;
 }
 
 .ledger-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: #888;
-}
-
-.ledger-val {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--myst-gold);
+  color: var(--arc-muted);
 }
 
 .ritual-warning-box {
-  background: rgba(200, 178, 115, 0.03);
-  border-left: 2px solid var(--myst-gold);
-  padding: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
+  padding: 12px 14px;
+  border-left: var(--arc-bw-accent) solid var(--arc-line-acc);
 }
 
 .warning-ritual-text {
-  font-size: 11px;
-  color: #666;
-  line-height: 1.4;
   margin: 0;
+  color: var(--arc-muted);
+  font-size: var(--arc-fs-small);
+  line-height: 1.5;
 }
 
 .btn-ritual-primary {
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px;
-  background: var(--myst-gold);
-  color: #05070a;
-  text-decoration: none;
-  font-family: 'Playfair Display', serif;
-  font-size: 16px;
-  font-weight: 700;
-  transition: all 0.3s;
 }
 
-.btn-ritual-primary:hover {
-  background: #fff;
+.ritual-fade-enter-active,
+.ritual-fade-leave-active {
+  transition: opacity .25s ease;
 }
 
-.ritual-fade-enter-active, .ritual-fade-leave-active {
-  transition: all 0.4s ease;
-}
-
-.ritual-fade-enter-from, .ritual-fade-leave-to {
+.ritual-fade-enter-from,
+.ritual-fade-leave-to {
   opacity: 0;
-  transform: scale(0.95);
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* Light theme: the conversion modal as a paper sheet. */
-:root[data-theme="parchment"] .modal-ritual-overlay {
-  background: var(--myst-overlay);
-}
-
-:root[data-theme="parchment"] .modal-ritual-content.compact {
-  background: var(--myst-pop);
-  border-color: var(--myst-line-20);
-  box-shadow: 0 20px 60px var(--myst-shadow);
-}
-
-:root[data-theme="parchment"] .modal-ritual-header {
-  border-bottom-color: var(--myst-line-14);
-}
-
-:root[data-theme="parchment"] .modal-ritual-close,
-:root[data-theme="parchment"] .curr-name,
-:root[data-theme="parchment"] .curr-rate,
-:root[data-theme="parchment"] .ledger-label,
-:root[data-theme="parchment"] .ritual-section-desc,
-:root[data-theme="parchment"] .warning-ritual-text {
-  color: var(--myst-ink-muted);
-}
-
-:root[data-theme="parchment"] .modal-ritual-close:hover {
-  color: var(--myst-gold);
-}
-
-:root[data-theme="parchment"] .ritual-section-title,
-:root[data-theme="parchment"] .curr-symbol {
-  color: var(--myst-ink-strong);
-}
-
-:root[data-theme="parchment"] .currency-ritual-option {
-  background: var(--myst-bg-2);
-  border-color: var(--myst-line-16);
-}
-
-:root[data-theme="parchment"] .currency-ritual-option:hover {
-  border-color: var(--myst-line-40);
-}
-
-:root[data-theme="parchment"] .currency-ritual-option.active {
-  border-color: var(--myst-gold);
-  background: var(--myst-wash);
-}
-
-:root[data-theme="parchment"] .conversion-ledger {
-  background: var(--myst-surface-sunk);
-  border-color: var(--myst-line-14);
-}
-
-:root[data-theme="parchment"] .ledger-row {
-  border-bottom-color: var(--myst-line-12);
-}
-
-:root[data-theme="parchment"] .ritual-warning-box {
-  background: var(--myst-wash);
-}
-
-:root[data-theme="parchment"] .btn-ritual-primary {
-  color: var(--myst-on-gold);
-}
-
-:root[data-theme="parchment"] .btn-ritual-primary:hover {
-  background: var(--myst-gold-soft);
+@media (prefers-reduced-motion: reduce) {
+  .ritual-fade-enter-active,
+  .ritual-fade-leave-active {
+    transition: none;
+  }
 }
 </style>

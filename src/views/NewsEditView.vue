@@ -313,6 +313,7 @@ import {newsAPI} from '@/utils/api/news';
 import type {CreateNewsData, NewsArticle, UpdateNewsData} from '@/types/news';
 import MarkdownIt from 'markdown-it';
 import {PATHWAYS, getPathwayImageUrl, pathwayEmojiPlugin} from '@/utils/pathwayPlugin';
+import {vDompurifyHtml} from '@/directives/dompurifyHtml';
 
 const router = useRouter();
 const articles = ref<NewsArticle[]>([]);

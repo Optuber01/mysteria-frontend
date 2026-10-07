@@ -9,14 +9,6 @@
  * place; see i18n/weblate.json.
  */
 import type {Language} from "@/locales";
-import de from "./guide/de.json";
-import en from "./guide/en.json";
-import es from "./guide/es.json";
-import fr from "./guide/fr.json";
-import ro from "./guide/ro.json";
-import uk from "./guide/uk.json";
-import zhCN from "./guide/zh-CN.json";
-import zhTW from "./guide/zh-TW.json";
 import type {GuideContent, Jsonified} from "./guide/types";
 
 export type {
@@ -24,36 +16,51 @@ export type {
     GuideChoice,
     GuideCommand,
     GuideContent,
-    GuideDirection,
-    GuideExpectation,
-    GuideFact,
+    GuideDifference,
+    GuideFigure,
+    GuideImage,
+    GuideLink,
     GuideStep,
-    GuideTask,
     GuideTopic,
     GuideTopicSection,
 } from "./guide/types";
 
 /**
- * Re-narrows `category` from `string` back to `GuideCategory`. The parameter
- * type is what does the work: the whole tree is still shape-checked, so a
- * locale with a missing or misspelt field fails here.
+ * Re-narrows `category` and `image` from `string` back to their unions. The
+ * loader's type is what does the work: the whole tree is still shape-checked,
+ * so a locale with a missing or misspelt field fails to compile.
  */
-const asGuide = (raw: Jsonified<GuideContent>): GuideContent => raw as GuideContent;
+type Loader = () => Promise<{default: Jsonified<GuideContent>}>;
 
 /*
  * Total, not Partial: every locale has a guide, and typing it that way is the
  * only thing that will flag a locale added to `Language` but not translated
- * here. A Partial plus a `?? en` fallback silently accepted that instead.
+ * here. Each one is its own chunk, so a reader downloads only their language.
  */
-export const guideContent: Record<Language, GuideContent> = {
-    en: asGuide(en),
-    uk: asGuide(uk),
-    ro: asGuide(ro),
-    de: asGuide(de),
-    es: asGuide(es),
-    fr: asGuide(fr),
-    "zh-CN": asGuide(zhCN),
-    "zh-TW": asGuide(zhTW),
+const loaders: Record<Language, Loader> = {
+    en: () => import("./guide/en.json"),
+    uk: () => import("./guide/uk.json"),
+    ro: () => import("./guide/ro.json"),
+    de: () => import("./guide/de.json"),
+    es: () => import("./guide/es.json"),
+    fr: () => import("./guide/fr.json"),
+    "zh-CN": () => import("./guide/zh-CN.json"),
+    "zh-TW": () => import("./guide/zh-TW.json"),
 };
 
-export const guideFor = (language: Language): GuideContent => guideContent[language];
+const cache = new Map<Language, Promise<GuideContent>>();
+
+export const loadGuide = (language: Language): Promise<GuideContent> => {
+    let pending = cache.get(language);
+    if (!pending) {
+        pending = loaders[language]().then(module => module.default as GuideContent);
+        cache.set(language, pending);
+    }
+    return pending;
+};
+
+/* The wiki is translated too: English sits at its root, every other language under its own lower-cased code. */
+const WIKI = "https://wiki.mysterria.net/";
+
+export const wikiUrl = (path: string, language: Language): string =>
+    `${WIKI}${language === "en" ? "" : `${language.toLowerCase()}/`}${path}`;

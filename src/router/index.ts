@@ -72,7 +72,7 @@ const localizedRoutes: RouteRecordRaw[] = [
         name: "privacy",
         component: () => import("@/views/PrivacyView.vue"),
     },
-    // the service terms were folded into the Terms (their §5): old links land there
+    // the service terms were folded into the Terms (their §7): old links land there
     {
         path: "sla",
         redirect: to => ({path: `/${to.params.lang}/terms`, hash: "#service"}),
@@ -147,6 +147,11 @@ const localizedRoutes: RouteRecordRaw[] = [
         path: "news/:locale/:slug",
         name: "news-article-localized",
         component: () => import("@/views/NewsView.vue"),
+    },
+    {
+        // there is no services index: the catalogue is the store
+        path: "services",
+        redirect: to => `/${to.params.lang}/store`,
     },
     {
         path: "services/:slug",
@@ -236,8 +241,11 @@ const router = createRouter({
             // For hash links (e.g., #section), scroll to the element
             else if (to.hash) {
                 nextTick(() => {
+                    // land below the fixed header (HeaderItem publishes its height)
+                    const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--site-header-stack')) || 106;
                     resolve({
                         el: to.hash,
+                        top: header + 16,
                         behavior: 'smooth',
                     });
                 });
