@@ -46,7 +46,7 @@
             :title="nightLock && !isLight ? nightLock : isLight ? t('header.themeDark') : t('header.themeLight')"
             :aria-describedby="refusalShown ? 'theme-refusal' : undefined"
             class="theme-toggle"
-            :class="{'is-refused': refusalShown}"
+            :class="{'is-refused': refusalShake}"
             type="button"
             @click="toggleTheme"
         >
@@ -60,7 +60,9 @@
           </svg>
         </button>
           <!-- the page is keeping the night (the Darkness drawn): why the light will not come -->
-          <span v-if="refusalShown" id="theme-refusal" class="theme-refusal" role="status">{{ nightLock }}</span>
+          <Transition :css="false" @enter="refusalIn" @leave="refusalOut">
+            <span v-if="refusalShown" id="theme-refusal" class="theme-refusal" role="status">{{ nightLock }}</span>
+          </Transition>
         </span>
         <NotificationBell v-if="isAuthenticated" class="desktop-only"/>
         <AuthButton class="desktop-only"/>
@@ -170,17 +172,54 @@ const route = useRoute();
 const {t} = useI18n();
 const {unprefixedPath} = useLocalePath();
 const authStore = useAuthStore();
-const {isLight, toggleTheme, nightLock, refused} = useTheme();
-/* A refused switch shows its reason under the button for a moment. */
+const {isLight, toggleTheme, nightLock, refused, nightFalls} = useTheme();
+/*
+ * The reason the light is refused, under the button: each press of the button while the
+ * night is kept shows it or puts it away again (the icon gives a small shake), and it
+ * also comes up when the page brings the night itself. Either way it fades out on its own.
+ */
 const refusalShown = ref(false);
+const refusalShake = ref(false);
 let refusalTimer = 0;
-watch(refused, () => {
-  refusalShown.value = true;
+let shakeTimer = 0;
+onUnmounted(() => {
   clearTimeout(refusalTimer);
-  refusalTimer = window.setTimeout(() => (refusalShown.value = false), 3200);
+  clearTimeout(shakeTimer);
 });
+function showRefusal(shown: boolean) {
+  refusalShown.value = shown;
+  clearTimeout(refusalTimer);
+}
+watch(refused, () => {
+  showRefusal(!refusalShown.value);
+  refusalShake.value = false;
+  clearTimeout(shakeTimer);
+  requestAnimationFrame(() => {
+    refusalShake.value = true;
+    shakeTimer = window.setTimeout(() => (refusalShake.value = false), 450);
+  });
+});
+watch(nightFalls, () => showRefusal(true));
+/*
+ * Its fade runs on the Web Animations API, not a CSS transition: a theme switch suspends
+ * every transition on the page for a frame (useTheme), which left it stuck unseen.
+ */
+const quiet = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function refusalIn(el: Element, done: () => void) {
+  const frames = quiet() ? [{opacity: 0}, {opacity: 1}] : [{opacity: 0, transform: 'translateY(-6px)', filter: 'blur(4px)'}, {opacity: 1, transform: 'none', filter: 'blur(0)'}];
+  el.animate(frames, {duration: quiet() ? 200 : 600, easing: 'cubic-bezier(.2, .8, .2, 1)'}).finished.then(() => {
+    done();
+    // it stays a while once fully in, then sinks away on its own
+    clearTimeout(refusalTimer);
+    refusalTimer = window.setTimeout(() => (refusalShown.value = false), 5000);
+  }, done);
+}
+function refusalOut(el: Element, done: () => void) {
+  const frames = quiet() ? [{opacity: 0}] : [{opacity: 0, transform: 'translateY(-6px)', filter: 'blur(4px)'}];
+  el.animate(frames, {duration: quiet() ? 200 : 450, easing: 'ease', fill: 'forwards'}).finished.then(done, done);
+}
 watch(nightLock, lock => {
-  if (!lock) refusalShown.value = false;
+  if (!lock) showRefusal(false);
 });
 const isMobileNavOpen = ref(false);
 const navigationRef = ref<HTMLElement | null>(null);
@@ -631,13 +670,10 @@ onUnmounted(() => {
   text-align: center;
   text-shadow: 0 0 14px color-mix(in oklab, var(--acc, #98a2ff) 50%, transparent);
   text-transform: none;
-  animation: theme-refusal-in .7s cubic-bezier(.2, .8, .2, 1) both;
   pointer-events: none;
 }
 
-@keyframes theme-refusal-in {
-  from { opacity: 0; transform: translateY(-6px); filter: blur(4px); }
-}
+/* it comes up out of the dark and sinks back into it (refusalIn / refusalOut) */
 
 /* the button gives a small shake as the light is turned away */
 .theme-toggle.is-refused .theme-toggle__icon {
@@ -651,10 +687,10 @@ onUnmounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .theme-refusal,
   .theme-toggle.is-refused .theme-toggle__icon {
     animation: none;
   }
+
 }
 
 .theme-toggle {

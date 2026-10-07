@@ -32,7 +32,7 @@ import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
 import {useI18n} from '@/composables/useI18n';
-import {lockNight, useTheme} from '@/composables/useTheme';
+import {announceNight, lockNight, useTheme} from '@/composables/useTheme';
 import {useConceptFonts} from './useConceptFonts';
 import ArcanaHero from './ArcanaHero.vue';
 import ProgressionStory from './progression/ProgressionStory.vue';
@@ -66,7 +66,13 @@ watch([() => hasDrawn.value && card.value.id === 'darkness', () => t('home.arcan
     return;
   }
   lockNight(t('home.arcana.night'));
-  if (theme.value === 'parchment') nightFall = window.setTimeout(() => setTheme('dark'), 750);
+  // on paper the night falls once the card has landed, and the line under the button says why
+  if (theme.value === 'parchment') {
+    nightFall = window.setTimeout(() => {
+      setTheme('dark');
+      nightFall = window.setTimeout(announceNight, 350);
+    }, 750);
+  }
 }, {immediate: true});
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
 const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));

@@ -63,13 +63,20 @@ function switchTo(next: Theme) {
 /*
  * A page can keep the night: while locked, switching to the light theme is refused and the
  * header shows the reason (the homepage holds it while the drawn card is the Darkness).
- * `refused` counts the refusals, so the header can answer each one.
+ * `refused` counts the refusals, so the header can answer each one; `nightFalls` counts the
+ * times the page itself brought the night (the Darkness drawn on paper), so it says why.
  */
 const nightLock = ref<string | null>(null);
 const refused = ref(0);
+const nightFalls = ref(0);
 
 export function lockNight(reason: string | null) {
     nightLock.value = reason;
+}
+
+/** The page is bringing the night: the header shows the lock's reason as it falls. */
+export function announceNight() {
+    nightFalls.value++;
 }
 
 export function useTheme() {
@@ -91,5 +98,5 @@ export function useTheme() {
 
     const toggleTheme = () => setTheme(isLight.value ? "dark" : "parchment");
 
-    return {theme, isLight, setTheme, toggleTheme, nightLock, refused};
+    return {theme, isLight, setTheme, toggleTheme, nightLock, refused, nightFalls};
 }
