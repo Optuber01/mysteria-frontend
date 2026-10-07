@@ -672,9 +672,11 @@ function updatePose() {
 
   frontCover.rotation.y = -Math.PI * 0.985 * opening;
   leftPages.rotation.y = -Math.PI * pageOpening;
-  // the other way: the right page folds over onto the left one, then the back cover over both
-  rightPages.rotation.y = Math.PI * clamp01(backFold / 0.9);
-  backCover.rotation.y = Math.PI * 0.985 * backFold;
+  // the other way: the right page folds over onto the left one, then the back cover over both.
+  // The same turn as the front cover's (negative): the half lifts towards the reader and over,
+  // never back through the pages behind it.
+  rightPages.rotation.y = -Math.PI * clamp01(backFold / 0.9);
+  backCover.rotation.y = -Math.PI * 0.985 * backFold;
   render();
 }
 

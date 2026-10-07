@@ -5,7 +5,7 @@
     from the hero, which measures where the deck's pivot is and sets
     --moon-x/--moon-y/--moon-r and --city-* (all px, relative to the hero box).
   -->
-  <div ref="rootRef" class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true">
+  <div ref="rootRef" class="night" :class="{'is-risen': risen && moonReady}" aria-hidden="true" data-recolour>
     <!-- Everything that is far away: on the way down to the brewery it falls behind the page. -->
     <div ref="viewRef" class="night__view">
       <picture>

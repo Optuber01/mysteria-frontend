@@ -11,7 +11,7 @@
     @click.capture="swallowClick"
   >
     <div class="book-scene__box" :style="boxStyle">
-      <div class="book-scene__glow" :style="{ opacity: glow.toFixed(4) }" aria-hidden="true" />
+      <div class="book-scene__glow" :style="{ opacity: glow.toFixed(4) }" aria-hidden="true" data-recolour />
       <div class="book-scene__rig" :style="{ opacity: entrance.toFixed(4) }">
         <VanillaBookRig
           :progress="rigProgress"

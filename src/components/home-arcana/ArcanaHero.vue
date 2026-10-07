@@ -59,7 +59,7 @@
             @pointerup="onStageRelease"
             @pointercancel="onStageRelease"
         >
-          <i class="arc-stage__backlight" aria-hidden="true"></i>
+          <i class="arc-stage__backlight" aria-hidden="true" data-recolour></i>
           <svg class="arc-stage__orbit" :viewBox="`0 0 200 200`" aria-hidden="true">
             <circle cx="100" cy="100" r="99" fill="none" stroke="currentColor" stroke-width=".35" opacity=".5"/>
             <g stroke="currentColor" stroke-width=".5" opacity=".55">

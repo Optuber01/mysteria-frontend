@@ -60,15 +60,47 @@ export function ensurePathwayData() {
 }
 
 /*
- * The re-theme. A new accent restyles every element on the page in one go (a few hundred
- * ms on a laptop), so it must never land mid-animation, and easing --acc itself would pay
- * that every frame. Where View Transitions exist, the switch happens once under a snapshot
- * and the old and new pages crossfade on the compositor (no repaint per frame); elsewhere
- * the colours switch at once and the ambient wash crossfades (ArcanaHome).
+ * The re-theme. A new accent restyles every element on the page in one go, so it must never
+ * land mid-animation, and easing --acc itself would pay that every frame (80-270 ms a frame
+ * on a laptop; easing each element's colours instead cost a second a frame). So the accent
+ * switches once under a View Transition, and the old and new page crossfade on the compositor.
+ *
+ * Chrome clears :hover inside everything a View Transition captures, so capturing the whole
+ * page dropped the hovered card or button for the length of the crossfade (it fell back and
+ * jumped up again). The page is captured region by region instead (header, each section,
+ * footer...), all but the one under the hand: that region stays live and keeps its hover.
+ * Its decorative layers whose accent lives in gradients (`data-recolour`, none of them
+ * hoverable) still crossfade; its own colours switch as the card lands.
  */
 type Recolour = {finished: Promise<void>; skipTransition?: () => void};
 type TransitionDocument = Document & {startViewTransition?: (update: () => Promise<void>) => Recolour};
 let recolour: Recolour | null = null;
+
+const REGIONS = '.concept-arcana > :not(.arc-main), .concept-arcana > .arc-main > *';
+
+/** Names what the crossfade captures (only what is on screen); returns how to unname it. */
+function nameRegions(): () => void {
+  const named: HTMLElement[] = [];
+  const vh = window.innerHeight;
+  const onScreen = (el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < vh && r.width > 0 && r.height > 0;
+  };
+  const name = (el: HTMLElement) => {
+    el.style.setProperty('view-transition-name', `arc-region-${named.length}`);
+    named.push(el);
+  };
+  const hovered = [...document.querySelectorAll<HTMLElement>(':hover')].at(-1) ?? null;
+  document.querySelectorAll<HTMLElement>(REGIONS).forEach(region => {
+    if (!onScreen(region)) return;
+    if (hovered && region.contains(hovered)) {
+      region.querySelectorAll<HTMLElement>('[data-recolour]').forEach(el => onScreen(el) && name(el));
+    } else {
+      name(region);
+    }
+  });
+  return () => named.forEach(el => el.style.removeProperty('view-transition-name'));
+}
 
 function crossfade(update: () => void): Promise<void> {
   const doc = document as TransitionDocument;
@@ -78,8 +110,9 @@ function crossfade(update: () => void): Promise<void> {
     return Promise.resolve();
   }
   const root = document.documentElement;
-  // Selects this crossfade's own timing (ArcanaHome), apart from the theme switch's.
+  // Selects this crossfade's own timing (ArcanaHome), and leaves the root itself uncaptured.
   root.classList.add('arc-recolour');
+  const unname = nameRegions();
   let transition: Recolour;
   try {
     transition = doc.startViewTransition(() => {
@@ -87,18 +120,19 @@ function crossfade(update: () => void): Promise<void> {
       return nextTick();
     });
   } catch {
+    unname();
     root.classList.remove('arc-recolour');
     update();
     return Promise.resolve();
   }
   recolour = transition;
-  const done = transition.finished.catch(() => undefined).then(() => {
+  return transition.finished.catch(() => undefined).then(() => {
+    unname();
     if (recolour === transition) {
       recolour = null;
       root.classList.remove('arc-recolour');
     }
   });
-  return done;
 }
 
 /** A newer draw cuts in: the crossfade still running jumps to its end (the new colours). */

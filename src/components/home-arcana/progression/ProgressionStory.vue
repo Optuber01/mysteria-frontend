@@ -11,13 +11,13 @@
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
         <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="sync">
       </div>
-      <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
+      <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" data-recolour />
       <!--
         Decorative: the Pathway's sigil, drawn in behind him at the awakening like a ritual
         circle (two rings traced round, then the sigil kindles inside them and slowly turns).
         Before a draw, and for a Boon, it is the Fool's, in the page's accent (the example).
       -->
-      <div class="progression__sigil" :class="{ 'is-lit': sigilLit, 'is-example': sigilExample }" :style="dress.sigil" aria-hidden="true" data-sweep-ignore>
+      <div class="progression__sigil" :class="{ 'is-lit': sigilLit, 'is-example': sigilExample }" :style="dress.sigil" aria-hidden="true" data-sweep-ignore data-recolour>
         <i class="progression__sigil-halo" />
         <i class="progression__sigil-turn"><i class="progression__sigil-art" :style="{ '--sigil': `url(${sigilSrc})` }" /></i>
       </div>
@@ -28,7 +28,7 @@
       <div class="progression__vignette" aria-hidden="true" />
       <!-- the dark closing in on the drink, with the heart's beat in it -->
       <div class="progression__dread" :class="{ 'is-lit': dreadLit }" :style="dress.dread" aria-hidden="true" data-sweep-ignore />
-      <div class="progression__burst" :style="dress.burst" aria-hidden="true" />
+      <div class="progression__burst" :style="dress.burst" aria-hidden="true" data-recolour />
 
       <!-- The title card: it rides in with the room and hands over to the first chapter in the same column. -->
       <header class="progression__heading" :style="dress.heading">

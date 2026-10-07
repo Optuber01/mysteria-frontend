@@ -1,6 +1,6 @@
 <template>
   <section id="future" class="arc-section arc-future" aria-labelledby="arc-future-title">
-    <div class="arc-future__sky" aria-hidden="true">
+    <div class="arc-future__sky" aria-hidden="true" data-recolour>
       <img :src="sky" alt="" loading="lazy" decoding="sync" width="1920" height="1009">
     </div>
 

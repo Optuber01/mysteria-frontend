@@ -139,10 +139,15 @@ onUnmounted(() => {
 }
 
 /* The accent crossfade: slower and softer than the theme switch's (main.css). */
-:root.arc-recolour::view-transition-old(root),
-:root.arc-recolour::view-transition-new(root) {
+:root.arc-recolour::view-transition-old(*),
+:root.arc-recolour::view-transition-new(*) {
   animation-duration: .65s;
   animation-timing-function: cubic-bezier(.4, 0, .2, 1);
+}
+
+/* the page is captured region by region, not whole (useArcana: crossfade) */
+:root.arc-recolour {
+  view-transition-name: none;
 }
 
 /* clicks reach the page under the crossfade, so the next card can be drawn during it */
