@@ -595,7 +595,11 @@ function sizeViewer() {
 let projector: THREE.Vector3 | null = null;
 let edge: THREE.Vector3 | null = null;
 
-/* Where his head is (for the name tag over it): the hat layer's top, 8.5 texels above the neck. */
+/*
+ * Where his head would be standing upright (for the name tag over it, which the game keeps
+ * centred over the player whatever the head does): the hat layer's top, 8.5 texels above
+ * the neck, measured on the body, so the tag rises with him but does not swing as he drinks.
+ */
 let crown: THREE.Vector3 | null = null;
 let neck: THREE.Vector3 | null = null;
 let lastHead = '';
@@ -603,9 +607,10 @@ function emitHead(): void {
   if (!viewer || !three || !ready.value) return;
   crown ??= new three.Vector3();
   neck ??= new three.Vector3();
-  const head = viewer.playerObject.skin.head;
-  head.localToWorld(crown.set(0, 8.5, 0)).project(viewer.camera);
-  head.localToWorld(neck.set(0, 0, 0)).project(viewer.camera);
+  const { skin } = viewer.playerObject;
+  const pivot = skin.head.position;
+  skin.localToWorld(crown.set(pivot.x, pivot.y + 8.5, pivot.z)).project(viewer.camera);
+  skin.localToWorld(neck.copy(pivot)).project(viewer.camera);
   const x = (crown.x * 0.5 + 0.5) * hostW;
   const y = (0.5 - crown.y * 0.5) * hostH;
   const size = Math.hypot((crown.x - neck.x) * 0.5 * hostW, (crown.y - neck.y) * 0.5 * hostH);

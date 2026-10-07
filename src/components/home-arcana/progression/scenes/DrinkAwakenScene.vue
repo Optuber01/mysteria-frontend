@@ -201,9 +201,11 @@ watch([wanted, inSight], ([next, seen]) => {
 }, { immediate: true });
 
 /*
- * The name tag, as the game shows it over a player: pixel text on a faint plate, just over
- * the head and scaled with it (one font texel is 1/14 of the head's height on screen), so
- * it follows him as he bows, drinks and rises.
+ * The name tag, as the game shows it over a player: pixel text on a faint plate, centred
+ * over him and moving with him. Its size is set once from his box (his head is ~0.185 of
+ * it; one font texel is ~1/22 of the head, a touch under the game's 1/20), never from the
+ * head on screen: that grows and shrinks with every step and lean, and the rounded texel
+ * size then jumped. It sits four texels over the crown, clear of the hood as he rises.
  */
 const head = ref<HeadPosition | null>(null);
 const tag = computed(() => {
@@ -211,16 +213,17 @@ const tag = computed(() => {
   const canvas = drawNametag(worn.value.name);
   return { src: canvas.toDataURL(), w: canvas.width, h: canvas.height };
 });
+const tagUnit = computed(() => Math.max(2, Math.round((props.layout?.player.h ?? 600) / 119)));
 const tagStyle = computed<CSSProperties>(() => {
   const h = head.value;
   const t = tag.value;
-  if (!h || !t) return { visibility: 'hidden' };
-  const unit = Math.max(2, Math.round(h.size / 14));
+  const box = props.layout?.player;
+  if (!h || !t || !box) return { visibility: 'hidden' };
+  const unit = tagUnit.value;
   return {
-    left: `${(h.x - (t.w * unit) / 2).toFixed(1)}px`,
-    top: `${(h.y - h.size * 0.2 - t.h * unit).toFixed(1)}px`,
     width: `${t.w * unit}px`,
     height: `${t.h * unit}px`,
+    transform: `translate3d(${(h.x - (t.w * unit) / 2).toFixed(1)}px, ${(h.y - (4 + t.h) * unit).toFixed(1)}px, 0)`,
   };
 });
 
@@ -729,6 +732,8 @@ const sceneVars = computed(() => {
 /* The name over his head, drawn texel by texel (pixelFont.ts), crisp at any size. */
 .drink-scene__nametag {
   position: absolute;
+  top: 0;
+  left: 0;
   max-width: none;
   image-rendering: pixelated;
   opacity: 0;
