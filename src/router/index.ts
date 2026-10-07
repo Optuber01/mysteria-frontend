@@ -72,10 +72,15 @@ const localizedRoutes: RouteRecordRaw[] = [
         name: "privacy",
         component: () => import("@/views/PrivacyView.vue"),
     },
+    // the service terms were folded into the Terms (their §5): old links land there
     {
         path: "sla",
-        name: "sla",
-        component: () => import("@/views/SLAView.vue"),
+        redirect: to => ({path: `/${to.params.lang}/terms`, hash: "#service"}),
+    },
+    {
+        path: "help",
+        name: "help",
+        component: () => import("@/views/HelpView.vue"),
     },
     {
         path: "guide/:topic?",
@@ -92,17 +97,20 @@ const localizedRoutes: RouteRecordRaw[] = [
         name: "ascension",
         component: () => import("@/views/AscensionView.vue"),
     },
+    // the wiki is its own site; the old in-app path goes straight there (vercel.json too)
     {
         path: "wiki",
-        redirect: () => {
-            window.open("https://wiki.mysterria.net/", "_blank");
-            return "/";
+        name: "wiki",
+        component: () => import("@/views/HelpView.vue"),
+        beforeEnter: () => {
+            window.location.replace("https://wiki.mysterria.net/");
+            return false;
         },
     },
+    // the old name of the guide's joining page
     {
         path: "game",
-        name: "game",
-        component: () => import("@/views/GuideView.vue"),
+        redirect: to => `/${to.params.lang}/guide/connect`,
     },
     {
         path: "logout",

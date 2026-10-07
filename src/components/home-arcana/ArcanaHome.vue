@@ -85,14 +85,7 @@ const themeStyle = computed(() => ({
   '--acc-fill': fillAccent(card.value.accent),
 }));
 
-/* The header's mobile drawer is teleported to <body>, so the accent and the page's one font ride there too. */
-const DRAWER_FONT = "'Commissioner', 'Segoe UI', system-ui, sans-serif";
-document.body.style.setProperty('--drawer-font', DRAWER_FONT);
-watch(() => card.value.accent, accent => {
-  document.body.style.setProperty('--acc', accent);
-  document.body.style.setProperty('--acc-deep', inkAccent(accent));
-  document.body.style.setProperty('--acc-fill', fillAccent(accent));
-}, {immediate: true});
+/* (the accent on <body>, which the header's teleported drawer reads too, is set site-wide in App.vue) */
 
 /*
  * Chapters well outside the viewport hold their looping animations still: drifting fog,
@@ -159,28 +152,11 @@ onUnmounted(() => {
   lockNight(null);
   offscreenObserver?.disconnect();
   document.querySelector('.concept-arcana > .arc-main')?.removeEventListener('animationstart', onLoopStart);
-  document.body.style.removeProperty('--acc');
-  document.body.style.removeProperty('--acc-deep');
-  document.body.style.removeProperty('--acc-fill');
-  document.body.style.removeProperty('--drawer-font');
 });
 </script>
 
 <style>
-/*
- * Registered as a colour so color-mix() and transitions on the properties that read it
- * interpolate. The accent itself is NOT transitioned page-wide (that restyles and repaints
- * every element each frame for over a second). A draw switches it once, after the card has
- * landed, under a View Transition: the old and new pages crossfade as two composited
- * snapshots (useArcana). Without View Transitions it switches at once while the ambient
- * wash crossfades and a few key elements (labels, solid buttons) ease their own colours.
- */
-@property --acc {
-  syntax: '<color>';
-  inherits: true;
-  /* NEUTRAL_ACCENT in arcana-data.ts: the page before the visitor draws */
-  initial-value: #e45a64;
-}
+/* (the tokens, the accent's @property and the site-wide pieces live in assets/arcana.css) */
 
 /* The accent crossfade: slower and softer than the theme switch's (main.css). */
 :root.arc-recolour::view-transition-old(*),
@@ -199,171 +175,11 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-.concept-arcana,
-body:has(.concept-arcana) {
-  --arc-bg: #0b0b0e;
-  --arc-surface: #15151b;
-  --arc-line: rgba(255, 255, 255, .09);
-  --arc-ink: #efeef3;
-  --arc-muted: #a7a6b2;
-  --arc-on-acc: #0b0b0e;
-  /* the page itself, for chapters that paint their own room over it */
-  --arc-page: var(--arc-bg);
-  /* The accent where it colours text or hairlines, and where it fills a solid control
-     (its label in --arc-on-acc). Dark: the accent itself. Light: --acc-deep (see below). */
-  --acc-ink: var(--acc);
-  --acc-solid: var(--acc);
-  /* faint fill for ghost controls, and the shadow under raised pieces */
-  --arc-glass: rgba(255, 255, 255, .04);
-  --arc-shadow: rgba(0, 0, 0, .55);
-  --arc-shadow-strong: rgba(0, 0, 0, .7);
-  /* the face of small accent-edged tokens (step numbers, chapter cards), and status text */
-  --arc-chip-bg: #0e0e12;
-  /* raised cards that hold a photo (world chapter): top and foot of their face */
-  --arc-card: #131318;
-  --arc-card-2: #0f0f13;
-  /* tooltips and pop-outs that float over the page */
-  --arc-pop: rgba(15, 15, 19, .96);
-  --arc-ok: #86efac;
-  --arc-bad: #ffb3a8;
-  /* one family across the page: Commissioner, flared for headings (FLAR 100), plain for the rest */
-  --arc-display: 'Commissioner', 'Segoe UI', system-ui, sans-serif;
-  --arc-body: var(--arc-display);
-  --arc-caps: var(--arc-display);
-  --arc-mono: var(--arc-display);
-
-  /*
-   * One system for every chapter (the spec: /tmp/arcana-design-spec.md).
-   * Container: every section's content sits between the same two edges.
-   */
-  --arc-container: 1320px;
-  --arc-gutter: clamp(18px, 4vw, 64px);
+.concept-arcana {
   /* the strip under the hero's deck, before the potion story's room comes up over the city */
   --roof-h: clamp(96px, 15vh, 168px);
   /* the potion story's foot: where its room deepens into the page the next section opens on */
   --room-foot: clamp(180px, 24vh, 280px);
-  /* The content edge inside a full-width box, for left/right/padding-inline (whose % is the
-     full-width containing block): the header bar, the potion story, the footer. */
-  --arc-edge: max(var(--arc-gutter), (100% - var(--arc-container)) / 2);
-  /* rhythm: section padding (top and bottom), groups inside a section, head -> content */
-  --arc-section-pad: clamp(64px, 6vw, 96px);
-  --arc-block-gap: clamp(56px, 5.5vw, 96px);
-  --arc-head-gap: clamp(32px, 3.5vw, 52px);
-  --arc-group-gap: clamp(20px, 2.2vw, 32px);
-  --arc-grid-gap: clamp(12px, 1.4vw, 20px);
-  /* radii: tokens and chips, controls and rows, surfaces and photos */
-  --arc-r-sm: 6px;
-  --arc-r-md: 12px;
-  --arc-r-lg: 18px;
-  --arc-radius: var(--arc-r-lg);
-  --arc-radius-lg: var(--arc-r-lg);
-  /* lines: every hairline, and the one accent width (selected states, accent strokes) */
-  --arc-bw: 1px;
-  --arc-bw-accent: 2px;
-  --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
-  --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
-  /* the card fill: every raised surface on the page */
-  --arc-raised: color-mix(in oklab, var(--arc-surface) 88%, transparent);
-  /* one button family */
-  --arc-btn-h: 48px;
-  --arc-btn-h-sm: 40px;
-  --arc-btn-fs: 15.5px;
-  /* one focus ring */
-  --arc-focus-w: 2px;
-  --arc-focus-off: 3px;
-  /* type */
-  --arc-fs-display: clamp(36px, 4.8vw, 68px);
-  --arc-fs-h2: clamp(28px, 3vw, 42px);
-  --arc-fs-h3: clamp(24px, 2.3vw, 34px);
-  --arc-fs-h4: clamp(19px, 1.45vw, 22px);
-  --arc-fs-lede: clamp(16px, 1.15vw, 18px);
-  --arc-fs-body: clamp(15px, 1.05vw, 16px);
-  --arc-fs-small: 14px;
-  --arc-fs-caption: 13px;
-
-  /* upstream tokens, re-pointed at this concept (header, footer, chips, drawer) */
-  --myst-bg: #0b0b0e;
-  --myst-bg-2: #15151b;
-  --myst-bg-deep: #0b0b0e;
-  --myst-ink: #efeef3;
-  --myst-ink-muted: #a7a6b2;
-  --myst-ink-strong: #ffffff;
-  --myst-offwhite: #efeef3;
-  --myst-gold: var(--acc);
-  --myst-gold-soft: var(--acc);
-  --myst-on-gold: #0b0b0e;
-  --myst-line-10: rgba(255, 255, 255, .07);
-  --myst-line-12: rgba(255, 255, 255, .08);
-  --myst-line-14: rgba(255, 255, 255, .09);
-  --myst-line-16: rgba(255, 255, 255, .1);
-  --myst-line-18: rgba(255, 255, 255, .11);
-  --myst-line-20: rgba(255, 255, 255, .12);
-  --myst-line-28: color-mix(in srgb, var(--acc) 30%, transparent);
-  --myst-line-35: color-mix(in srgb, var(--acc) 38%, transparent);
-  --myst-line-40: color-mix(in srgb, var(--acc) 44%, transparent);
-  --myst-line-55: color-mix(in srgb, var(--acc) 58%, transparent);
-  --myst-wash: color-mix(in srgb, var(--acc) 8%, transparent);
-  --myst-wash-strong: color-mix(in srgb, var(--acc) 15%, transparent);
-  --myst-panel: linear-gradient(160deg, rgba(22, 22, 28, .7), rgba(11, 11, 14, .9));
-  --myst-panel-strong: linear-gradient(165deg, rgba(24, 24, 30, .9), rgba(11, 11, 14, .96));
-  --myst-font-display: var(--arc-display);
-  --myst-font-body: var(--arc-body);
-  --myst-font-mono: var(--arc-caps);
-}
-
-/*
- * Light theme (<html data-theme="parchment">, the header's sun/moon switch): bone paper,
- * ink text. The pathway accents are made for the dark page; on paper the accent keeps
- * tinting washes and fills, while text, hairlines and solid controls use --acc-deep,
- * the same hue deepened to >= 5.3:1 on the paper for every card (accentInk.ts). No gold:
- * upstream's parchment tokens are gold-tinted, so every one of them is re-pointed here.
- */
-:root[data-theme="parchment"] .concept-arcana,
-:root[data-theme="parchment"] body:has(.concept-arcana) {
-  --arc-bg: #efede8;
-  --arc-surface: #f8f7f4;
-  --arc-line: rgba(28, 24, 36, .13);
-  --arc-ink: #17161c;
-  --arc-muted: #55535e;
-  --arc-on-acc: #ffffff;
-  --acc-ink: var(--acc-deep, var(--acc));
-  /* solid fills: near-black for the accents that deepen into olive (Sun, Death, Second Law) */
-  --acc-solid: var(--acc-fill, var(--acc-deep, var(--acc)));
-  --arc-glass: rgba(28, 24, 36, .035);
-  --arc-shadow: rgba(46, 36, 58, .16);
-  --arc-shadow-strong: rgba(40, 30, 52, .34);
-  --arc-chip-bg: #fbfaf7;
-  --arc-card: #f8f7f4;
-  --arc-card-2: #f5f3ef;
-  --arc-pop: rgba(251, 250, 247, .97);
-  --arc-ok: #17703a;
-  --arc-bad: #b2322b;
-
-  --myst-bg: #efede8;
-  --myst-bg-2: #f8f7f4;
-  --myst-bg-deep: #efede8;
-  --myst-ink: #17161c;
-  --myst-ink-muted: #55535e;
-  --myst-ink-strong: #0b0b0e;
-  --myst-offwhite: #17161c;
-  --myst-gold: var(--acc-ink);
-  --myst-gold-soft: var(--acc-ink);
-  --myst-on-gold: #ffffff;
-  --myst-line-10: rgba(28, 24, 36, .08);
-  --myst-line-12: rgba(28, 24, 36, .09);
-  --myst-line-14: rgba(28, 24, 36, .11);
-  --myst-line-16: rgba(28, 24, 36, .12);
-  --myst-line-18: rgba(28, 24, 36, .13);
-  --myst-line-20: rgba(28, 24, 36, .14);
-  --myst-line-28: color-mix(in srgb, var(--acc-ink) 30%, transparent);
-  --myst-line-35: color-mix(in srgb, var(--acc-ink) 38%, transparent);
-  --myst-line-40: color-mix(in srgb, var(--acc-ink) 44%, transparent);
-  --myst-line-55: color-mix(in srgb, var(--acc-ink) 58%, transparent);
-  --myst-wash: color-mix(in srgb, var(--acc) 12%, transparent);
-  --myst-wash-strong: color-mix(in srgb, var(--acc) 22%, transparent);
-  --myst-panel: linear-gradient(160deg, rgba(255, 255, 255, .7), rgba(239, 237, 232, .92));
-  --myst-panel-strong: linear-gradient(165deg, rgba(255, 255, 255, .92), rgba(239, 237, 232, .97));
-  --myst-green: #17703a;
 }
 
 /*
@@ -372,18 +188,6 @@ body:has(.concept-arcana) {
  * closing in on him as he drinks, and the blackout before the flash (ProgressionStory).
  */
 
-/*
- * Light theme: on this page the bar is near-solid paper (its 78% glass went grey over the
- * hero's night and the story's dread), so it reads as one bar over every section.
- */
-:root[data-theme="parchment"] .concept-arcana .header-stack.is-overlay .site-header::before {
-  background: color-mix(in srgb, var(--myst-bg) 95%, transparent);
-}
-
-body:has(.concept-arcana) {
-  background-color: var(--arc-bg);
-}
-
 .concept-arcana {
   position: relative;
   min-height: 100vh;
@@ -391,134 +195,6 @@ body:has(.concept-arcana) {
   color: var(--arc-ink);
   font-family: var(--arc-body);
   font-synthesis: none;
-}
-
-/* From 1280px the gutter is the spec's full 64px. */
-@media (min-width: 1280px) {
-  .concept-arcana {
-    --arc-gutter: 64px;
-  }
-}
-
-.concept-arcana ::selection {
-  background: var(--acc-solid);
-  color: var(--arc-on-acc);
-}
-
-/* the brand mark in its own colours, crisp: no gold glow, no greyscale wash */
-.concept-arcana .header-stack .brand-mark,
-.concept-arcana .footer-brand img,
-body:has(.concept-arcana) .mobile-nav .brand-mark {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45));
-}
-
-.concept-arcana .header-stack .brand-tagline {
-  margin-top: 5px;
-  font-family: var(--arc-body);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: .26em;
-  color: var(--arc-muted);
-}
-
-.concept-arcana .header-stack .season-bar {
-  background-image: linear-gradient(90deg, transparent, color-mix(in srgb, var(--acc) 16%, transparent), transparent);
-}
-
-/* the language code: upstream sets it in a mono face the page doesn't use */
-.concept-arcana .header-stack .lang-label,
-.concept-arcana .header-stack .lang-option-short {
-  font-family: var(--arc-caps);
-}
-
-.concept-arcana .header-stack .brand-name {
-  font-weight: 600;
-  font-size: 17px;
-  letter-spacing: .02em;
-}
-
-/*
- * The shared header and footer, on this page only: their content runs between the page's
- * own two edges, and their controls join the page's family (one height, one radius, the
- * page's focus ring, the tabs' 2px accent underline for the current page).
- */
-.concept-arcana .header-stack .header-grid {
-  max-width: calc(var(--arc-container) + 2 * var(--arc-gutter));
-  padding-inline: var(--arc-gutter);
-}
-
-/* every control in the bar, the menu button included, at the page's card radius (as in the drawer) */
-.concept-arcana .header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip, .mobile-nav-toggle) {
-  min-height: 36px;
-  border-radius: 10px;
-}
-
-.concept-arcana .header-stack .header-actions .ip-chip {
-  padding-block: 0;
-}
-
-.concept-arcana .header-stack .header-actions .login-button {
-  padding-block: 0;
-}
-
-.concept-arcana .header-stack .header-actions .theme-toggle {
-  width: 36px;
-  height: 36px;
-}
-
-.concept-arcana .header-stack .nav-underline {
-  height: var(--arc-bw-accent);
-  border-radius: 1px;
-  background: var(--acc-ink);
-}
-
-.concept-arcana .header-stack :is(a, button):focus-visible,
-.concept-arcana > .site-footer a:focus-visible {
-  border-radius: 10px;
-  outline: var(--arc-focus-w) solid var(--arc-ink);
-  outline-offset: var(--arc-focus-off);
-}
-
-/*
- * Light theme: the bar floats over the hero's rose haze, where the accent and the green,
- * tuned for plain paper, drop under 4.5:1. Its small coloured text is inked a step deeper.
- */
-:root[data-theme="parchment"] .concept-arcana .header-stack :is(.season-headline, .lang-label) {
-  color: color-mix(in oklab, var(--acc-ink) 62%, var(--arc-ink));
-}
-
-/* deep enough to hold 4.5:1 wherever the bar's glass lies */
-:root[data-theme="parchment"] .concept-arcana .header-stack .chip-players {
-  color: #08401d;
-}
-
-/* the footer is part of the page: no band of its own, a hairline at the content's width */
-.concept-arcana > .site-footer {
-  border-top: 0;
-  background: transparent;
-}
-
-.concept-arcana > .site-footer.full {
-  padding: 0 var(--arc-gutter) 36px;
-}
-
-.concept-arcana > .site-footer .footer-shell {
-  max-width: var(--arc-container);
-  padding-top: clamp(40px, 4vw, 56px);
-  border-top: var(--arc-bw) solid var(--arc-line);
-}
-
-.concept-arcana > .site-footer .footer-columns {
-  border-bottom-color: var(--arc-line);
-}
-
-/* over the page's wash (not a solid band) the faded small print needs the full muted ink */
-.concept-arcana > .site-footer :is(.footer-copy, .footer-legal a) {
-  color: var(--arc-muted);
-}
-
-.concept-arcana > .site-footer .footer-legal a:hover {
-  color: var(--acc-ink);
 }
 
 /* ---------- ambient layer ---------- */
@@ -621,27 +297,6 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 }
 
 /* ---------- shared building blocks ---------- */
-.concept-arcana .arc-shell {
-  width: 100%;
-  max-width: var(--arc-container);
-  margin: 0 auto;
-}
-
-.concept-arcana .arc-section {
-  position: relative;
-  padding: var(--arc-section-pad) var(--arc-gutter);
-  scroll-margin-top: var(--site-header-stack, 106px);
-}
-
-.concept-arcana .arc-sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
 .concept-arcana .arc-label {
   margin: 0;
   font-family: var(--arc-caps);
@@ -654,53 +309,6 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 }
 
 /* ---------- one button family: solid, ghost, and the field/tile (copy address, downloads) ---------- */
-.concept-arcana .arc-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: var(--arc-btn-h);
-  padding: 0 22px;
-  border: 0;
-  border-radius: var(--arc-r-md);
-  font-family: var(--arc-body);
-  font-size: var(--arc-btn-fs);
-  font-weight: 600;
-  line-height: 1.2;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform .3s cubic-bezier(.2, .8, .2, 1), filter .2s, background-color .25s ease, box-shadow .25s ease;
-}
-
-.concept-arcana .arc-btn--sm {
-  min-height: var(--arc-btn-h-sm);
-  padding: 0 16px;
-  font-size: 15px;
-}
-
-.concept-arcana .arc-btn--solid {
-  background: var(--acc-solid);
-  color: var(--arc-on-acc);
-  box-shadow: 0 10px 30px color-mix(in oklab, var(--acc-solid) 30%, transparent);
-}
-
-.concept-arcana .arc-btn--solid:hover {
-  color: var(--arc-on-acc);
-  filter: brightness(1.08);
-}
-
-.concept-arcana .arc-btn--ghost {
-  background: var(--arc-glass);
-  color: var(--arc-ink);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
-}
-
-.concept-arcana .arc-btn--ghost:hover {
-  color: var(--arc-ink);
-  background: color-mix(in oklab, var(--acc) 12%, transparent);
-  box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
-}
-
 /* hover lifts every interactive surface by the same 2px; a press sets it down */
 .concept-arcana .arc-btn:hover,
 .concept-arcana .arc-tile:hover {
@@ -712,23 +320,6 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
 .concept-arcana .arc-ip:active {
   transform: scale(.98);
   transition-duration: .08s;
-}
-
-.concept-arcana .arc-btn:disabled {
-  opacity: .55;
-  cursor: progress;
-  transform: none;
-}
-
-/* one focus ring for the whole page (low specificity: things that tilt draw it themselves) */
-.concept-arcana :where(a, button, [tabindex], summary):focus-visible {
-  outline: var(--arc-focus-w) solid var(--arc-ink);
-  outline-offset: var(--arc-focus-off);
-}
-
-.concept-arcana .arc-btn__icon {
-  width: 18px;
-  height: 18px;
 }
 
 /* the field/tile look: a quiet hairline that turns accent on hover */

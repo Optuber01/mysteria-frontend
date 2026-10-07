@@ -7,6 +7,7 @@
   "navNews": "新聞",
   "navServices": "服務",
   "header": {
+    "newTab": "在新分頁中開啟",
     "skip": "跳到正文",
     "tagline": "灰霧之外",
     "languageLabel": "語言",
@@ -19,6 +20,7 @@
     "seasonLink": "閱讀公告"
   },
   "footer": {
+    "linkHelp": "幫助與支援",
     "disclaimer": "本站為受《詭秘之主》啟發的非官方同人專案，與原作者及 Mojang 均無關聯。",
     "playHeading": "遊玩",
     "serverHeading": "伺服器",

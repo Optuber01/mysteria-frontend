@@ -3,21 +3,16 @@
   <!-- first stop for the keyboard: past the header to the page itself (WCAG 2.4.1) -->
   <a class="skip-link" href="#main-content" @click.prevent="skipToMain">{{ t('header.skip') }}</a>
   <div class="app">
-    <!-- The homepage paints its own light canvas; the shared dark one would only
-         sit hidden underneath it. -->
-    <MysticBackground v-if="showSiteChrome"/>
     <NotificationContainer/>
 
     <!-- Main Content -->
     <RouterView/>
   </div>
-  <div v-if="showSiteChrome" ref="cursor" class="cursor-background"></div>
 </template>
 
 <script lang="ts" setup>
 import NotificationContainer from "@/components/ui/NotificationContainer.vue";
-import MysticBackground from "@/components/ui/MysticBackground.vue";
-import {computed, onMounted, onUnmounted, ref, watch} from "vue";
+import {onMounted, watch} from "vue";
 import {RouterView, useRoute} from "vue-router";
 import {useBalanceWatcher} from "@/stores/balance";
 import {useUserWatcher} from "./stores/user";
@@ -27,6 +22,8 @@ import {useAccountNotificationsWatcher} from "./stores/notifications";
 import {Analytics} from '@vercel/analytics/vue';
 import {applyTheme, readSavedTheme} from "@/composables/useTheme";
 import {useI18n} from "@/composables/useI18n";
+import {useArcana} from "@/components/home-arcana/useArcana";
+import {fillAccent, inkAccent} from "@/components/home-arcana/accentInk";
 
 useUserWatcher();
 useBalanceWatcher();
@@ -44,14 +41,17 @@ function skipToMain() {
   main.scrollIntoView({block: 'start', behavior: 'instant'});
 }
 const route = useRoute();
-const isHome = computed(() => route.name === "home");
 /*
- * On a fresh load the first paint comes before the router has resolved the URL
- * (no match, no name yet), which read as "not home" and flashed the shared
- * background and the gold cursor glow over the homepage. Neither shows until
- * the route is known.
+ * The drawn card's accent colours every page (assets/arcana.css: --acc), the neutral
+ * crimson before a draw. On paper text and solid controls use it deepened for contrast.
  */
-const showSiteChrome = computed(() => route.matched.length > 0 && !isHome.value);
+const {card} = useArcana();
+watch(() => card.value.accent, accent => {
+  const style = document.body.style;
+  style.setProperty('--acc', accent);
+  style.setProperty('--acc-deep', inkAccent(accent));
+  style.setProperty('--acc-fill', fillAccent(accent));
+}, {immediate: true});
 
 // Force scroll to top on every route change.
 // `behavior: "instant"` overrides the global `scroll-behavior: smooth`, which
@@ -64,43 +64,9 @@ watch(() => route.path, () => {
   });
 }, {immediate: false});
 
-const cursor = ref<HTMLDivElement | null>(null);
-const cursorSize = 50;
-let rafId: number | null = null;
-let pointerX = 0;
-let pointerY = 0;
-
-/*
- * The glow is a fixed-position layer, so it only needs viewport coordinates.
- * Reading scrollHeight here (as the page-coordinate version did) forced a full
- * layout on every single mousemove frame, which showed up as sluggish scrolling
- * and hover feedback across the whole site.
- */
-const paintCursor = () => {
-  rafId = null;
-  const element = cursor.value;
-  if (!element) return;
-  element.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
-};
-
-const updateCursorPosition = (event: MouseEvent) => {
-  if (!cursor.value) return;
-  const halfSize = cursorSize / 2;
-  pointerX = event.clientX - halfSize;
-  pointerY = event.clientY - halfSize;
-  if (!rafId) rafId = requestAnimationFrame(paintCursor);
-};
-
 onMounted(() => {
   // The saved light/dark choice (index.html already applied it before first paint).
   applyTheme(readSavedTheme());
-
-  document.addEventListener("mousemove", updateCursorPosition);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("mousemove", updateCursorPosition);
-  if (rafId) cancelAnimationFrame(rafId);
 });
 </script>
 
@@ -108,34 +74,6 @@ onUnmounted(() => {
 .app {
   min-height: 100vh;
   position: relative;
-}
-
-.cursor-background {
-  /* fixed, not absolute: the glow tracks the pointer in viewport space, so it
-     never has to be re-positioned against the document height while scrolling,
-     and the blurred layer stays 50px instead of page-tall. */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 50px;
-  height: 50px;
-  background-color: var(--myst-gold);
-  filter: blur(20px);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: -2;
-  opacity: 0.3;
-  will-change: transform;
-}
-
-:root[data-theme="parchment"] .cursor-background {
-  opacity: 0.12;
-}
-
-@media (max-width: 576px) {
-  .cursor-background {
-    display: none;
-  }
 }
 
 @keyframes spin {

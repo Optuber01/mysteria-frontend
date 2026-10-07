@@ -7,6 +7,7 @@
   "navNews": "News",
   "navServices": "Services",
   "header": {
+    "newTab": "Opens in a new tab",
     "skip": "Skip to content",
     "tagline": "Beyond the Fog",
     "languageLabel": "Language",
@@ -19,6 +20,7 @@
     "seasonLink": "Read the announcement"
   },
   "footer": {
+    "linkHelp": "Help and support",
     "disclaimer": "An unofficial fan project inspired by Lord of the Mysteries. Not affiliated with the author or Mojang.",
     "playHeading": "Play",
     "serverHeading": "Server",

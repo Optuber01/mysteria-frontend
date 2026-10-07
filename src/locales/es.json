@@ -7,6 +7,7 @@
   "navNews": "Noticias",
   "navServices": "Servicios",
   "header": {
+    "newTab": "Se abre en una pestaña nueva",
     "skip": "Saltar al contenido",
     "tagline": "Más allá de la Niebla",
     "languageLabel": "Idioma",
@@ -19,6 +20,7 @@
     "seasonLink": "Leer el anuncio"
   },
   "footer": {
+    "linkHelp": "Ayuda y soporte",
     "disclaimer": "Proyecto no oficial de fans inspirado en Lord of the Mysteries. No está afiliado al autor ni a Mojang.",
     "playHeading": "Jugar",
     "serverHeading": "Servidor",

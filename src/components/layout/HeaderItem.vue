@@ -33,6 +33,12 @@
           {{ link.title }}
           <span v-if="isActive(link)" class="nav-underline" aria-hidden="true"></span>
         </RouterLink>
+        <!-- the wiki is a site of its own: players asked where it was -->
+        <a class="nav-link nav-link--out" href="https://wiki.mysterria.net/" target="_blank" rel="noopener noreferrer">
+          {{ t('navWiki') }}
+          <i class="fa-solid fa-arrow-up-right-from-square nav-link__out" aria-hidden="true"></i>
+          <span class="arc-sr">{{ t('header.newTab') }}</span>
+        </a>
       </nav>
 
       <div class="header-actions">
@@ -227,9 +233,9 @@ const navigationRef = ref<HTMLElement | null>(null);
 
 const isAuthenticated = computed(() => authStore.isAuthenticated);
 
+/* (the brand mark is the way home, as on every page) */
 const navigationLinks = computed<NavLink[]>(() => [
-  {path: "/", title: t("navHome")},
-  {path: "/guide", title: t("navGame")},
+  {path: "/guide", title: t("navGame"), matches: ["/help"]},
   {path: "/pathways", title: t("navPathways")},
   {path: "/store", title: t("navShop"), matches: ["/services"]},
   {path: "/rules", title: t("navRules")},
@@ -362,6 +368,17 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.nav-link--out {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link__out {
+  font-size: .7em;
+  opacity: .7;
+}
+
 .header-stack {
   display: contents;
 }

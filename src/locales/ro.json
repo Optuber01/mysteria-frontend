@@ -7,6 +7,7 @@
   "navNews": "Noutăți",
   "navServices": "Servicii",
   "header": {
+    "newTab": "Se deschide într-o filă nouă",
     "skip": "Sari la conținut",
     "tagline": "Dincolo de Ceața Cenușie",
     "languageLabel": "Limbă",
@@ -19,6 +20,7 @@
     "seasonLink": "Citește anunțul"
   },
   "footer": {
+    "linkHelp": "Ajutor și suport",
     "disclaimer": "Un proiect neoficial creat de fani, inspirat de Lord of the Mysteries. Nu este afiliat cu autorul sau Mojang.",
     "playHeading": "Joacă",
     "serverHeading": "Server",

@@ -1,0 +1,809 @@
+/*
+ * The site's one design system: the homepage's language (the "arcana" look), for every page.
+ *
+ *  - tokens: one palette for the dark page and the paper (light) theme, one type scale,
+ *    one rhythm, three radii, one hairline and one accent width, one focus ring;
+ *  - the drawn card's accent (--acc) colours every page; before a draw it is the neutral
+ *    crimson (App.vue sets it, accentInk.ts deepens it for text on paper);
+ *  - the old "myst" tokens of main.css are re-pointed here, so any page not yet rebuilt
+ *    already sits in the same palette and type;
+ *  - shared pieces: the page shell, page head, panels, rows, tags, tables, prose, buttons
+ *    (src/components/arcana/ for the ones with behaviour).
+ *
+ * Rules of the language: one family (Commissioner, flared for headings), no serif, no
+ * gold, no pills (tags and tabs are square-cornered or underlined), no eyebrow labels over
+ * headings, quiet copy.
+ */
+
+/* ---------- the face: self-hosted Commissioner (SIL OFL, OFL.txt beside the files) ---------- */
+@font-face {
+    font-family: 'Commissioner';
+    font-style: normal;
+    font-weight: 400 800;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url('./fonts/commissioner/commissioner-cyrillic.woff2') format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: 'Commissioner';
+    font-style: normal;
+    font-weight: 400 800;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url('./fonts/commissioner/commissioner-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Commissioner';
+    font-style: normal;
+    font-weight: 400 800;
+    font-stretch: 100%;
+    font-display: swap;
+    src: url('./fonts/commissioner/commissioner-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- tokens: the dark page ---------- */
+@property --acc {
+    syntax: '<color>';
+    inherits: true;
+    /* NEUTRAL_ACCENT in home-arcana/arcana-data.ts: the site before a card is drawn */
+    initial-value: #e45a64;
+}
+
+:root {
+    /* Chinese has no Commissioner glyphs: the system's own CJK sans carries it (:lang below) */
+    --arc-cjk: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', 'Noto Sans CJK SC';
+    --arc-display: 'Commissioner', var(--arc-cjk), 'Segoe UI', system-ui, sans-serif;
+    --arc-body: var(--arc-display);
+    --arc-caps: var(--arc-display);
+    --arc-mono: var(--arc-display);
+
+    --arc-bg: #0b0b0e;
+    --arc-surface: #15151b;
+    --arc-line: rgba(255, 255, 255, .09);
+    --arc-ink: #efeef3;
+    --arc-muted: #a7a6b2;
+    --arc-on-acc: #0b0b0e;
+    /* the page itself, for chapters that paint their own room over it */
+    --arc-page: var(--arc-bg);
+    /* the accent where it colours text or hairlines, and where it fills a solid control */
+    --acc-ink: var(--acc);
+    --acc-solid: var(--acc);
+    --arc-glass: rgba(255, 255, 255, .04);
+    --arc-shadow: rgba(0, 0, 0, .55);
+    --arc-shadow-strong: rgba(0, 0, 0, .7);
+    --arc-chip-bg: #0e0e12;
+    --arc-card: #131318;
+    --arc-card-2: #0f0f13;
+    --arc-pop: rgba(15, 15, 19, .96);
+    --arc-ok: #86efac;
+    --arc-bad: #ffb3a8;
+    --arc-warn: #f5c56b;
+
+    /* container: every page's content sits between the same two edges */
+    --arc-container: 1320px;
+    --arc-gutter: clamp(18px, 4vw, 64px);
+    --arc-edge: max(var(--arc-gutter), (100% - var(--arc-container)) / 2);
+    /* rhythm: section padding, groups inside a section, head -> content */
+    --arc-section-pad: clamp(64px, 6vw, 96px);
+    --arc-block-gap: clamp(56px, 5.5vw, 96px);
+    --arc-head-gap: clamp(32px, 3.5vw, 52px);
+    --arc-group-gap: clamp(20px, 2.2vw, 32px);
+    --arc-grid-gap: clamp(12px, 1.4vw, 20px);
+    /* inside a panel */
+    --arc-pad: clamp(18px, 2vw, 28px);
+    /* radii: tokens and tags, controls and rows, surfaces and photos */
+    --arc-r-sm: 6px;
+    --arc-r-md: 12px;
+    --arc-r-lg: 18px;
+    --arc-radius: var(--arc-r-lg);
+    --arc-radius-lg: var(--arc-r-lg);
+    /* lines: every hairline, and the one accent width (selected states, accent strokes) */
+    --arc-bw: 1px;
+    --arc-bw-accent: 2px;
+    --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
+    --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
+    /* every raised surface */
+    --arc-raised: color-mix(in oklab, var(--arc-surface) 88%, transparent);
+    /* one button family */
+    --arc-btn-h: 48px;
+    --arc-btn-h-sm: 40px;
+    --arc-btn-fs: 15.5px;
+    /* one focus ring */
+    --arc-focus-w: 2px;
+    --arc-focus-off: 3px;
+    /* type */
+    --arc-fs-display: clamp(36px, 4.8vw, 68px);
+    --arc-fs-h1: clamp(34px, 4vw, 56px);
+    --arc-fs-h2: clamp(28px, 3vw, 42px);
+    --arc-fs-h3: clamp(24px, 2.3vw, 34px);
+    --arc-fs-h4: clamp(19px, 1.45vw, 22px);
+    --arc-fs-lede: clamp(16px, 1.15vw, 18px);
+    --arc-fs-body: clamp(15px, 1.05vw, 16px);
+    --arc-fs-small: 14px;
+    --arc-fs-caption: 13px;
+    --arc-measure: 68ch;
+
+    /* the old tokens, re-pointed (pages and pieces not yet rebuilt, the header, the drawer) */
+    --myst-bg: #0b0b0e;
+    --myst-bg-2: #15151b;
+    --myst-bg-deep: #0b0b0e;
+    --myst-ink: #efeef3;
+    --myst-ink-muted: #a7a6b2;
+    --myst-ink-strong: #ffffff;
+    --myst-offwhite: #efeef3;
+    --myst-gold: var(--acc);
+    --myst-gold-soft: var(--acc);
+    --myst-on-gold: #0b0b0e;
+    --myst-line-10: rgba(255, 255, 255, .07);
+    --myst-line-12: rgba(255, 255, 255, .08);
+    --myst-line-14: rgba(255, 255, 255, .09);
+    --myst-line-16: rgba(255, 255, 255, .1);
+    --myst-line-18: rgba(255, 255, 255, .11);
+    --myst-line-20: rgba(255, 255, 255, .12);
+    --myst-line-28: color-mix(in srgb, var(--acc) 30%, transparent);
+    --myst-line-35: color-mix(in srgb, var(--acc) 38%, transparent);
+    --myst-line-40: color-mix(in srgb, var(--acc) 44%, transparent);
+    --myst-line-55: color-mix(in srgb, var(--acc) 58%, transparent);
+    --myst-wash: color-mix(in srgb, var(--acc) 8%, transparent);
+    --myst-wash-strong: color-mix(in srgb, var(--acc) 15%, transparent);
+    --myst-panel: linear-gradient(160deg, rgba(22, 22, 28, .7), rgba(11, 11, 14, .9));
+    --myst-panel-strong: linear-gradient(165deg, rgba(24, 24, 30, .9), rgba(11, 11, 14, .96));
+    --myst-font-display: var(--arc-display);
+    --myst-font-body: var(--arc-body);
+    --myst-font-mono: var(--arc-caps);
+    --font-primary: var(--arc-body);
+    --font-display: var(--arc-display);
+}
+
+:root:lang(zh-Hant) {
+    --arc-cjk: 'PingFang TC', 'Hiragino Sans CNS', 'Microsoft JhengHei', 'Noto Sans TC', 'Noto Sans CJK TC';
+}
+
+@media (min-width: 1280px) {
+    :root {
+        --arc-gutter: 64px;
+    }
+}
+
+/*
+ * Light theme (<html data-theme="parchment">): bone paper, ink text. On paper the accent
+ * keeps tinting washes and fills, while text, hairlines and solid controls use --acc-deep,
+ * the same hue deepened to >= 5.3:1 on the paper for every card (accentInk.ts). No gold.
+ */
+:root[data-theme="parchment"] {
+    --arc-bg: #efede8;
+    --arc-surface: #f8f7f4;
+    --arc-line: rgba(28, 24, 36, .13);
+    --arc-ink: #17161c;
+    --arc-muted: #55535e;
+    --arc-on-acc: #ffffff;
+    --acc-ink: var(--acc-deep, var(--acc));
+    /* near-black for the accents that deepen into olive (Sun, Death...) */
+    --acc-solid: var(--acc-fill, var(--acc-deep, var(--acc)));
+    --arc-glass: rgba(28, 24, 36, .035);
+    --arc-shadow: rgba(46, 36, 58, .16);
+    --arc-shadow-strong: rgba(40, 30, 52, .34);
+    --arc-chip-bg: #fbfaf7;
+    --arc-card: #f8f7f4;
+    --arc-card-2: #f5f3ef;
+    --arc-pop: rgba(251, 250, 247, .97);
+    --arc-ok: #17703a;
+    --arc-bad: #b2322b;
+    --arc-warn: #8a5a00;
+
+    --myst-bg: #efede8;
+    --myst-bg-2: #f8f7f4;
+    --myst-bg-deep: #efede8;
+    --myst-ink: #17161c;
+    --myst-ink-muted: #55535e;
+    --myst-ink-strong: #0b0b0e;
+    --myst-offwhite: #17161c;
+    --myst-gold: var(--acc-ink);
+    --myst-gold-soft: var(--acc-ink);
+    --myst-on-gold: #ffffff;
+    --myst-line-10: rgba(28, 24, 36, .08);
+    --myst-line-12: rgba(28, 24, 36, .09);
+    --myst-line-14: rgba(28, 24, 36, .11);
+    --myst-line-16: rgba(28, 24, 36, .12);
+    --myst-line-18: rgba(28, 24, 36, .13);
+    --myst-line-20: rgba(28, 24, 36, .14);
+    --myst-line-28: color-mix(in srgb, var(--acc-ink) 30%, transparent);
+    --myst-line-35: color-mix(in srgb, var(--acc-ink) 38%, transparent);
+    --myst-line-40: color-mix(in srgb, var(--acc-ink) 44%, transparent);
+    --myst-line-55: color-mix(in srgb, var(--acc-ink) 58%, transparent);
+    --myst-wash: color-mix(in srgb, var(--acc) 12%, transparent);
+    --myst-wash-strong: color-mix(in srgb, var(--acc) 22%, transparent);
+    --myst-panel: linear-gradient(160deg, rgba(255, 255, 255, .7), rgba(239, 237, 232, .92));
+    --myst-panel-strong: linear-gradient(165deg, rgba(255, 255, 255, .92), rgba(239, 237, 232, .97));
+    --myst-green: #17703a;
+}
+
+/* ---------- the page ---------- */
+html,
+body {
+    background-color: var(--arc-bg);
+}
+
+body {
+    color: var(--arc-ink);
+    font-family: var(--arc-body);
+    font-synthesis: none;
+}
+
+::selection {
+    background: var(--acc-solid);
+    color: var(--arc-on-acc);
+}
+
+/* one focus ring for the site (low specificity: pieces that tilt or lift draw their own) */
+:where(a, button, [tabindex], summary, input, select, textarea):focus-visible {
+    outline: var(--arc-focus-w) solid var(--arc-ink);
+    outline-offset: var(--arc-focus-off);
+}
+
+/* ---------- the shared header, the same bar on every page ---------- */
+.header-stack .header-grid {
+    max-width: calc(var(--arc-container) + 2 * var(--arc-gutter));
+    padding-inline: var(--arc-gutter);
+}
+
+.header-stack .brand-mark,
+.footer-brand img,
+.mobile-nav .brand-mark {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45));
+}
+
+.header-stack .brand-name {
+    font-family: var(--arc-display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: .02em;
+}
+
+.header-stack .brand-tagline {
+    margin-top: 5px;
+    font-family: var(--arc-body);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: .26em;
+    color: var(--arc-muted);
+}
+
+.header-stack .lang-label,
+.header-stack .lang-option-short {
+    font-family: var(--arc-caps);
+}
+
+/* every control in the bar, the menu button included, at the card radius */
+.header-stack .header-actions :is(.ip-chip, .lang-ritual-trigger, .theme-toggle, .login-button, .profile-chip, .mobile-nav-toggle) {
+    min-height: 36px;
+    border-radius: 10px;
+}
+
+.header-stack .header-actions :is(.ip-chip, .login-button) {
+    padding-block: 0;
+}
+
+.header-stack .header-actions .theme-toggle {
+    width: 36px;
+    height: 36px;
+}
+
+.header-stack .nav-underline {
+    height: var(--arc-bw-accent);
+    border-radius: 1px;
+    background: var(--acc-ink);
+}
+
+.header-stack :is(a, button):focus-visible,
+.site-footer a:focus-visible {
+    border-radius: 10px;
+    outline: var(--arc-focus-w) solid var(--arc-ink);
+    outline-offset: var(--arc-focus-off);
+}
+
+/* on paper the bar is near-solid paper, one bar over every page */
+:root[data-theme="parchment"] .header-stack.is-overlay .site-header::before {
+    background: color-mix(in srgb, var(--myst-bg) 95%, transparent);
+}
+
+:root[data-theme="parchment"] .header-stack :is(.season-headline, .lang-label) {
+    color: color-mix(in oklab, var(--acc-ink) 62%, var(--arc-ink));
+}
+
+/* deep enough to hold 4.5:1 wherever the bar's glass lies */
+:root[data-theme="parchment"] .header-stack .chip-players {
+    color: #08401d;
+}
+
+/* ---------- the shared footer: part of the page, a hairline at the content's width ---------- */
+.site-footer {
+    position: relative;
+    z-index: 1;
+    border-top: 0;
+    background: transparent;
+}
+
+.site-footer.full {
+    padding: 0 var(--arc-gutter) 36px;
+}
+
+.site-footer .footer-shell {
+    max-width: var(--arc-container);
+    padding-top: clamp(40px, 4vw, 56px);
+    border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.site-footer .footer-columns {
+    border-bottom-color: var(--arc-line);
+}
+
+.site-footer :is(.footer-copy, .footer-legal a) {
+    color: var(--arc-muted);
+}
+
+.site-footer .footer-legal a:hover {
+    color: var(--acc-ink);
+}
+
+/* ---------- layout ---------- */
+.arc-shell {
+    width: 100%;
+    max-width: var(--arc-container);
+    margin: 0 auto;
+}
+
+.arc-section {
+    position: relative;
+    padding: var(--arc-section-pad) var(--arc-gutter);
+    scroll-margin-top: var(--site-header-stack, 106px);
+}
+
+/* a page's main column (ArcPage): under the header, between the site's edges */
+.arc-page {
+    position: relative;
+    z-index: 1;
+    min-height: 60vh;
+    padding: calc(var(--site-header-stack, 106px) + clamp(28px, 4vw, 56px)) var(--arc-gutter) var(--arc-section-pad);
+}
+
+.arc-page > .arc-shell > * + * {
+    margin-top: var(--arc-block-gap);
+}
+
+/* a two-column page: a sticky contents column and the content */
+.arc-split {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .arc-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.arc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--arc-grid-min, 280px)), 1fr));
+    gap: var(--arc-grid-gap);
+}
+
+.arc-stack > * + * {
+    margin-top: var(--arc-group-gap);
+}
+
+.arc-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ---------- type ---------- */
+.arc-h1,
+.arc-h2,
+.arc-h3,
+.arc-h4 {
+    margin: 0;
+    font-family: var(--arc-display);
+    font-variation-settings: 'FLAR' 100;
+    font-weight: 600;
+    color: var(--arc-ink);
+    text-wrap: balance;
+}
+
+.arc-h1 { font-size: var(--arc-fs-h1); line-height: 1.04; letter-spacing: -0.025em; }
+.arc-h2 { font-size: var(--arc-fs-h2); line-height: 1.08; letter-spacing: -0.02em; }
+.arc-h3 { font-size: var(--arc-fs-h3); line-height: 1.12; letter-spacing: -0.015em; }
+.arc-h4 { font-size: var(--arc-fs-h4); line-height: 1.25; letter-spacing: -0.01em; }
+
+.arc-lede {
+    margin: 0;
+    max-width: var(--arc-measure);
+    font-size: var(--arc-fs-lede);
+    line-height: 1.6;
+    color: var(--arc-muted);
+    text-wrap: pretty;
+}
+
+.arc-muted {
+    color: var(--arc-muted);
+}
+
+.arc-accent {
+    color: var(--acc-ink);
+}
+
+/* a quiet text link: ink, the accent on hover, an underline that stays */
+.arc-link {
+    color: var(--arc-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--arc-line-acc);
+    text-underline-offset: .2em;
+    transition: color .2s ease, text-decoration-color .2s ease;
+}
+
+.arc-link:hover {
+    color: var(--acc-ink);
+    text-decoration-color: currentColor;
+}
+
+/* ---------- surfaces ---------- */
+.arc-panel {
+    position: relative;
+    padding: var(--arc-pad);
+    border-radius: var(--arc-r-lg);
+    background: var(--arc-raised);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.arc-panel--flush {
+    padding: 0;
+    overflow: hidden;
+}
+
+/* a panel that leads somewhere: lifts and edges in the accent on hover */
+.arc-panel--link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    transition: box-shadow .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.arc-panel--link:hover {
+    color: inherit;
+    transform: translateY(-2px);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+/* rows in a list: hairlines between, never boxes in boxes */
+.arc-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.arc-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 52px;
+    padding: 12px 0;
+    border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.arc-rows > .arc-row:first-child {
+    border-top: 0;
+}
+
+/* a small square-cornered label (never a pill) */
+.arc-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+    padding: 2px 8px;
+    border-radius: var(--arc-r-sm);
+    background: var(--arc-glass);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+    color: var(--arc-muted);
+    font-size: var(--arc-fs-caption);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.arc-tag--acc {
+    color: var(--acc-ink);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
+    background: color-mix(in oklab, var(--acc) 8%, transparent);
+}
+
+.arc-tag--ok { color: var(--arc-ok); }
+.arc-tag--bad { color: var(--arc-bad); }
+
+/* tables: hairline rows, quiet heads, numbers aligned */
+.arc-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--arc-r-lg);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.arc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--arc-fs-small);
+}
+
+.arc-table :is(th, td) {
+    padding: 12px 16px;
+    border-top: var(--arc-bw) solid var(--arc-line);
+    text-align: left;
+    vertical-align: top;
+}
+
+.arc-table thead th {
+    border-top: 0;
+    color: var(--arc-muted);
+    font-size: var(--arc-fs-caption);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.arc-table .is-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- one button family: solid, ghost, and the field/tile ---------- */
+.arc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: var(--arc-btn-h);
+    padding: 0 22px;
+    border: 0;
+    border-radius: var(--arc-r-md);
+    font-family: var(--arc-body);
+    font-size: var(--arc-btn-fs);
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .3s cubic-bezier(.2, .8, .2, 1), filter .2s, background-color .25s ease, box-shadow .25s ease;
+}
+
+.arc-btn--sm {
+    min-height: var(--arc-btn-h-sm);
+    padding: 0 16px;
+    font-size: 15px;
+}
+
+.arc-btn--solid {
+    background: var(--acc-solid);
+    color: var(--arc-on-acc);
+    box-shadow: 0 10px 30px color-mix(in oklab, var(--acc-solid) 30%, transparent);
+}
+
+.arc-btn--solid:hover {
+    color: var(--arc-on-acc);
+    filter: brightness(1.08);
+}
+
+.arc-btn--ghost {
+    background: var(--arc-glass);
+    color: var(--arc-ink);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-acc);
+}
+
+.arc-btn--ghost:hover {
+    color: var(--arc-ink);
+    background: color-mix(in oklab, var(--acc) 12%, transparent);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+/* hover lifts every interactive surface by the same 2px; a press sets it down */
+.arc-btn:hover,
+.arc-tile:hover {
+    transform: translateY(-2px);
+}
+
+.arc-btn:active,
+.arc-tile:active {
+    transform: scale(.98);
+    transition-duration: .08s;
+}
+
+.arc-btn:disabled,
+.arc-btn[aria-disabled="true"] {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.arc-btn__icon {
+    width: 18px;
+    height: 18px;
+}
+
+.arc-tile {
+    border: 0;
+    border-radius: var(--arc-r-md);
+    background: var(--arc-glass);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+    color: var(--arc-ink);
+    transition: box-shadow .25s ease, background-color .25s ease, transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.arc-tile:hover {
+    color: var(--arc-ink);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line-hot);
+}
+
+/* ---------- fields ---------- */
+.arc-field {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: var(--arc-r-md);
+    background: var(--arc-glass);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+    color: var(--arc-ink);
+    font: inherit;
+}
+
+.arc-field::placeholder {
+    color: var(--arc-muted);
+}
+
+.arc-field:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 var(--arc-bw-accent) var(--acc-ink);
+}
+
+/* ---------- long text: news posts, legal pages, guide sections, item descriptions ---------- */
+.arc-prose {
+    max-width: var(--arc-measure);
+    font-size: var(--arc-fs-body);
+    line-height: 1.7;
+    color: var(--arc-ink);
+}
+
+.arc-prose > * + * {
+    margin-top: 1em;
+}
+
+.arc-prose :is(h2, h3, h4) {
+    margin-top: 1.9em;
+    margin-bottom: 0;
+    font-family: var(--arc-display);
+    font-variation-settings: 'FLAR' 100;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+}
+
+.arc-prose h2 { font-size: clamp(24px, 2.2vw, 30px); }
+.arc-prose h3 { font-size: clamp(20px, 1.7vw, 24px); }
+.arc-prose h4 { font-size: var(--arc-fs-h4); }
+
+.arc-prose :is(h2, h3, h4) + * {
+    margin-top: .6em;
+}
+
+.arc-prose p {
+    margin-bottom: 0;
+    color: color-mix(in oklab, var(--arc-ink) 86%, var(--arc-muted));
+}
+
+.arc-prose a {
+    color: var(--arc-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--arc-line-acc);
+    text-underline-offset: .2em;
+}
+
+.arc-prose a:hover {
+    color: var(--acc-ink);
+    text-decoration-color: currentColor;
+}
+
+.arc-prose :is(ul, ol) {
+    margin-bottom: 0;
+    padding-left: 1.3em;
+}
+
+.arc-prose li + li {
+    margin-top: .4em;
+}
+
+.arc-prose li::marker {
+    color: var(--acc-ink);
+}
+
+.arc-prose strong {
+    font-weight: 650;
+    color: var(--arc-ink);
+}
+
+.arc-prose blockquote {
+    margin-inline: 0;
+    padding: 4px 0 4px 18px;
+    border-left: var(--arc-bw-accent) solid var(--arc-line-acc);
+    color: var(--arc-muted);
+}
+
+.arc-prose code {
+    padding: 1px 6px;
+    border-radius: var(--arc-r-sm);
+    background: var(--arc-glass);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+    font-size: .92em;
+}
+
+.arc-prose pre {
+    overflow-x: auto;
+    padding: 14px 16px;
+    border-radius: var(--arc-r-md);
+    background: var(--arc-chip-bg);
+    box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
+}
+
+.arc-prose pre code {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.arc-prose img,
+.arc-prose video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--arc-r-lg);
+}
+
+.arc-prose hr {
+    border: 0;
+    border-top: var(--arc-bw) solid var(--arc-line);
+}
+
+.arc-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--arc-fs-small);
+}
+
+.arc-prose :is(th, td) {
+    padding: 10px 12px;
+    border-top: var(--arc-bw) solid var(--arc-line);
+    text-align: left;
+    vertical-align: top;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .arc-btn,
+    .arc-tile,
+    .arc-panel--link {
+        transition: none;
+    }
+
+    .arc-btn:hover,
+    .arc-tile:hover,
+    .arc-panel--link:hover {
+        transform: none;
+    }
+}

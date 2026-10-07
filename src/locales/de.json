@@ -7,6 +7,7 @@
   "navNews": "Neuigkeiten",
   "navServices": "Dienste",
   "header": {
+    "newTab": "Öffnet sich in einem neuen Tab",
     "skip": "Zum Inhalt springen",
     "tagline": "Jenseits des Nebels",
     "languageLabel": "Sprache",
@@ -19,6 +20,7 @@
     "seasonLink": "Ankündigung lesen"
   },
   "footer": {
+    "linkHelp": "Hilfe und Support",
     "disclaimer": "Ein inoffizielles Fanprojekt, inspiriert von Lord of the Mysteries. Nicht mit dem Autor oder Mojang verbunden.",
     "playHeading": "Spielen",
     "serverHeading": "Server",

@@ -2,6 +2,8 @@
 // Regenerate with `npm run build:icons` after adding or removing an icon.
 import "./assets/fontawesome-subset.css";
 import "./assets/main.css";
+// the site's design system, after the old sheet so its tokens win (see the file's header)
+import "./assets/arcana.css";
 
 import {createApp} from "vue";
 import {createPinia} from "pinia";

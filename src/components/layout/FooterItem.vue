@@ -18,6 +18,7 @@
           <RouterLink :to="$lp('/pathways')">{{ t('navPathways') }}</RouterLink>
           <RouterLink :to="$lp('/ascension')">{{ t('footer.linkSeats') }}</RouterLink>
           <RouterLink :to="$lp('/guide/commands')">{{ t('footer.linkCommands') }}</RouterLink>
+          <RouterLink :to="$lp('/help')">{{ t('footer.linkHelp') }}</RouterLink>
         </div>
 
         <div class="footer-column footer-column--server">
@@ -57,7 +58,6 @@
           <template v-else>
             <RouterLink :to="$lp('/terms')">{{ t('termsViewTitle') }}</RouterLink>
             <RouterLink :to="$lp('/privacy')">{{ t('privacyViewTitle') }}</RouterLink>
-            <RouterLink :to="$lp('/sla')">{{ t('slaViewTitle') }}</RouterLink>
           </template>
         </nav>
       </div>
@@ -70,7 +70,8 @@ import {useI18n} from "@/composables/useI18n";
 import {SERVER_IP} from "@/composables/useServer";
 import logo from "@/assets/icons/sources/IconLogo-128.webp";
 
-withDefaults(defineProps<{ variant?: "full" | "slim" }>(), {variant: "slim"});
+// every page carries the full footer (its links reach Terms, Privacy, Ascension and the community); "slim" stays for tools
+withDefaults(defineProps<{ variant?: "full" | "slim" }>(), {variant: "full"});
 
 const {t} = useI18n();
 const year = new Date().getFullYear();
