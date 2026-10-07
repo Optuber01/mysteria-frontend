@@ -5,7 +5,6 @@
  * index.html applies the saved value with an inline script before the first
  * paint, so nothing here has to run for a returning visitor to see the right
  * colours; this module only reads that attribute and changes it on request.
- * MysticBackground (non-home pages) reads the same key.
  */
 
 import {computed, ref} from "vue";

@@ -2,6 +2,10 @@ import type {VercelRequest, VercelResponse} from '@vercel/node';
 import {createRequire} from 'node:module';
 
 const require = createRequire(import.meta.url);
+
+// The Boons ride beside the 22 Pathways and aren't counted among them
+// (src/data/pathways.ts boonPathwayIds; this function doesn't bundle src/).
+const BOON_IDS = new Set(['aeon', 'chaos', 'chaosmist', 'condenser', 'devouring', 'edict', 'everlasting', 'patriarch', 'secondlaw', 'sublunary']);
 const pathwayData = require('../src/assets/sources/pathway-abilities.json') as {
     pathways: Array<{
         id: string;
@@ -212,7 +216,7 @@ function generatePathwayHTML(pathwayId: string | undefined, baseUrl: string, loc
 
     const slots = {
         name,
-        count: pathwayData.pathways.length,
+        count: pathwayData.pathways.filter((p: {id: string}) => !BOON_IDS.has(p.id)).length,
         first: firstRung?.sequence ?? '',
         firstSeq: firstSequence,
         final: finalRung?.sequence ?? '',
@@ -225,8 +229,8 @@ function generatePathwayHTML(pathwayId: string | undefined, baseUrl: string, loc
 
     const pageUrl = `${localeBase(baseUrl, locale)}/pathways${pathwayId ? `/${pathwayId}` : ''}`;
     const imageName = pathwayId ? (PATHWAY_IMAGE_ALIASES[pathwayId] || pathwayId) : '';
-    const hasImage = imageName && ['abyss', 'chained', 'darkness', 'death', 'demoness', 'door', 'emperor', 'error', 'eternalaeon', 'fool', 'fortune', 'giant', 'hanged', 'hermit', 'justiciar', 'moon', 'mother', 'paragon', 'patriarch', 'priest', 'sublunary', 'sun', 'tower', 'tyrant', 'visionary'].includes(imageName);
-    const imageUrl = hasImage ? `${baseUrl}/pathways/${imageName}.webp` : `${baseUrl}/banner.webp`;
+    const hasImage = imageName && ['abyss', 'chained', 'chaos', 'chaosmist', 'condenser', 'darkness', 'death', 'demoness', 'devouring', 'door', 'edict', 'emperor', 'error', 'eternalaeon', 'everlasting', 'fool', 'fortune', 'giant', 'hanged', 'hermit', 'justiciar', 'moon', 'mother', 'paragon', 'patriarch', 'priest', 'secondlaw', 'sublunary', 'sun', 'tower', 'tyrant', 'visionary'].includes(imageName);
+    const imageUrl = hasImage ? `${baseUrl}/pathway-art/og/${imageName}.webp` : `${baseUrl}/banner.webp`;
 
     const sigilAlt = fill(pathway ? copy.pathwaySigilAlt : copy.pathwayIndexAlt, {name});
 

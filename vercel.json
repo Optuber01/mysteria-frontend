@@ -175,15 +175,7 @@
       "destination": "/index.html"
     },
     {
-      "source": "/wiki",
-      "destination": "/index.html"
-    },
-    {
       "source": "/profile/:path*",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/users",
       "destination": "/index.html"
     },
     {
@@ -351,17 +343,6 @@
         }
       ],
       "destination": "/api/meta-proxy?path=privacy&lang=:lang"
-    },
-    {
-      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/sla",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|SkypeUriPreview|pinterest|reddit).*"
-        }
-      ],
-      "destination": "/api/meta-proxy?path=sla&lang=:lang"
     },
     {
       "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)",
@@ -584,12 +565,12 @@
     },
     {
       "source": "/sla",
-      "destination": "/en/sla",
+      "destination": "/en/terms#service",
       "permanent": true
     },
     {
       "source": "/sla/:path*",
-      "destination": "/en/sla/:path*",
+      "destination": "/en/terms#service",
       "permanent": true
     },
     {
@@ -603,23 +584,13 @@
       "permanent": true
     },
     {
-      "source": "/wiki",
-      "destination": "/en/wiki",
-      "permanent": true
-    },
-    {
-      "source": "/wiki/:path*",
-      "destination": "/en/wiki/:path*",
-      "permanent": true
-    },
-    {
       "source": "/game",
-      "destination": "/en/game",
+      "destination": "/en/guide/connect",
       "permanent": true
     },
     {
       "source": "/game/:path*",
-      "destination": "/en/game/:path*",
+      "destination": "/en/guide/connect",
       "permanent": true
     },
     {
@@ -724,7 +695,7 @@
     },
     {
       "source": "/services",
-      "destination": "/en/services",
+      "destination": "/en/store",
       "permanent": true
     },
     {
@@ -740,6 +711,46 @@
     {
       "source": "/tools/:path*",
       "destination": "/en/tools/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/wiki",
+      "destination": "https://wiki.mysterria.net/",
+      "permanent": true
+    },
+    {
+      "source": "/wiki/:path*",
+      "destination": "https://wiki.mysterria.net/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/wiki",
+      "destination": "https://wiki.mysterria.net/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/wiki/:path*",
+      "destination": "https://wiki.mysterria.net/",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/sla",
+      "destination": "/:lang/terms#service",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/sla/:path*",
+      "destination": "/:lang/terms#service",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/game",
+      "destination": "/:lang/guide/connect",
+      "permanent": true
+    },
+    {
+      "source": "/:lang(en|uk|ro|de|es|fr|zh-CN|zh-TW)/game/:path*",
+      "destination": "/:lang/guide/connect",
       "permanent": true
     }
   ]

@@ -522,19 +522,6 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Simplified background - no complex animations */
-.myst-fog {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-            circle at 50% 50%,
-            color-mix(in srgb, var(--myst-gold) 3%, transparent),
-            transparent 70%
-    );
-    opacity: 0.3;
-    pointer-events: none;
-}
-
 .fade-section {
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -964,7 +951,6 @@ html[lang^="zh"] body {
 html[lang^="zh"] .eyebrow,
 html[lang^="zh"] .section-eyebrow,
 html[lang^="zh"] .brand-tagline,
-html[lang^="zh"] .season-headline,
 html[lang^="zh"] .mobile-section-label {
     letter-spacing: 0.08em;
 }
@@ -972,8 +958,7 @@ html[lang^="zh"] .mobile-section-label {
 /* Chinese has no case, so uppercasing is a no-op that only breaks any Latin
    brand words sitting inside the same label. */
 html[lang^="zh"] .eyebrow,
-html[lang^="zh"] .section-eyebrow,
-html[lang^="zh"] .season-headline {
+html[lang^="zh"] .section-eyebrow {
     text-transform: none;
 }
 

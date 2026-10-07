@@ -1,17 +1,5 @@
 <template>
   <div ref="stackRef" :class="['header-stack', {'is-overlay': overlay, 'is-at-top': overlay && isAtTop}]">
-  <!-- Season announcement, shown above the header on the pages that ask for it -->
-  <div v-if="showAnnouncement && announcement && !announcementDismissed" class="season-bar">
-    <span class="season-headline">{{ announcement.headline }}</span>
-    <span class="season-divider" aria-hidden="true">†</span>
-    <RouterLink v-if="announcement.to" :to="$lp(announcement.to)" class="season-link">
-      {{ announcement.linkLabel }} →
-    </RouterLink>
-    <button :aria-label="t('contentLanguageNotice.dismiss')" class="season-dismiss" type="button" @click="dismissAnnouncement">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-  </div>
-
   <header :class="['site-header', {'is-authed': isAuthenticated}]">
     <div class="header-grid">
       <RouterLink :to="$lp('/')" class="brand" @click="closeMobileNav">
@@ -157,7 +145,6 @@ import IconWiki from "@/assets/icons/IconWiki.vue";
 import IconDiscord from "@/assets/icons/IconDiscord.vue";
 import {useI18n} from "@/composables/useI18n";
 import {useLocalePath} from "@/composables/useLocalePath";
-import {SEASON_ANNOUNCEMENT_SLUG} from "@/constants/season";
 import {useAuthStore} from "@/stores/auth";
 import {useTheme} from "@/composables/useTheme";
 import logo from "@/assets/icons/sources/IconLogo-128.webp";
@@ -170,10 +157,9 @@ interface NavLink {
 }
 
 const props = withDefaults(defineProps<{
-  showAnnouncement?: boolean;
   /** Fixed over the page and transparent until scrolled; used by the homepage hero. */
   overlay?: boolean;
-}>(), {showAnnouncement: false, overlay: false});
+}>(), {overlay: false});
 
 const route = useRoute();
 const {t} = useI18n();
@@ -241,38 +227,6 @@ const navigationLinks = computed<NavLink[]>(() => [
   {path: "/rules", title: t("navRules")},
   {path: "/news", title: t("navNews")},
 ]);
-
-const announcement = computed(() => {
-  const headline = t("header.seasonHeadline");
-  if (!headline || headline === "header.seasonHeadline") return null;
-  return {
-    headline,
-    linkLabel: t("header.seasonLink"),
-    to: SEASON_ANNOUNCEMENT_SLUG ? `/news/${SEASON_ANNOUNCEMENT_SLUG}` : "/news",
-  };
-});
-
-/* The bar is copy-driven; dismissal is keyed to the copy so a new announcement
-   shows again for people who dismissed the previous one. */
-const ANNOUNCEMENT_KEY = "myst-season-bar-dismissed";
-const announcementDismissed = ref(false);
-
-const announcementId = computed(() => announcement.value?.headline ?? "");
-
-try {
-  announcementDismissed.value = localStorage.getItem(ANNOUNCEMENT_KEY) === announcementId.value;
-} catch {
-  announcementDismissed.value = false;
-}
-
-const dismissAnnouncement = () => {
-  announcementDismissed.value = true;
-  try {
-    localStorage.setItem(ANNOUNCEMENT_KEY, announcementId.value);
-  } catch {
-    // Storage unavailable - the bar simply returns on the next visit.
-  }
-};
 
 const servicesLinks = computed(() => [
   {
@@ -349,7 +303,7 @@ onMounted(() => {
   readScroll();
   window.addEventListener("scroll", onScroll, {passive: true});
   // Pages under an overlay header offset their content by its live height,
-  // which changes when the announcement bar is shown or dismissed.
+  // which changes with the viewport.
   const setStack = (height: number) => document.documentElement.style.setProperty("--site-header-stack", `${Math.round(height)}px`);
   // Measured once now, before the first paint, so the page never lays out under a guessed height.
   if (stackRef.value) setStack(stackRef.value.getBoundingClientRect().height);
@@ -406,8 +360,7 @@ onUnmounted(() => {
   -webkit-backdrop-filter: none;
 }
 
-.header-stack.is-overlay .site-header::before,
-.header-stack.is-overlay .season-bar::before {
+.header-stack.is-overlay .site-header::before {
   position: absolute;
   z-index: -1;
   inset: 0;
@@ -426,93 +379,8 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(14px);
 }
 
-/* Upstream's bar scrolls away with the page; fixed here, it needs a backing so content
-   doesn't show through it. The backing repeats the bar's own tint on top of the fill. */
-.header-stack.is-overlay .season-bar::before {
-  background-image: inherit;
-  background-color: color-mix(in srgb, var(--myst-bg) 94%, transparent);
-}
-
-.header-stack.is-overlay.is-at-top .site-header::before,
-.header-stack.is-overlay.is-at-top .season-bar::before {
+.header-stack.is-overlay.is-at-top .site-header::before {
   opacity: 0;
-}
-
-/* ---- Season announcement ---- */
-.season-bar {
-  position: relative;
-  z-index: 1001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 14px;
-  flex-wrap: wrap;
-  padding: 9px 16px;
-  background: linear-gradient(90deg, rgba(200, 178, 115, 0), rgba(200, 178, 115, 0.12), rgba(200, 178, 115, 0));
-  border-bottom: 1px solid var(--myst-line-18);
-}
-
-.season-headline,
-.season-link {
-  font-family: var(--myst-font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.season-headline {
-  letter-spacing: 0.28em;
-  color: var(--myst-gold);
-}
-
-.season-divider {
-  color: var(--myst-line-40);
-  font-size: 10px;
-}
-
-.season-link {
-  letter-spacing: 0.2em;
-  color: var(--myst-ink-muted);
-}
-
-.season-link:hover {
-  color: var(--myst-gold);
-}
-
-.season-dismiss {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--myst-line-40);
-  font-size: 12px;
-  transition: color 0.25s ease;
-}
-
-.season-dismiss:hover {
-  color: var(--myst-gold);
-}
-
-/* On narrow screens the headline and the link always take a line each, so the bar's
-   height never depends on whether its font has arrived (the hero is laid out under it). */
-@media (max-width: 640px) {
-  .season-bar {
-    flex-direction: column;
-    gap: 4px;
-    padding-right: 40px;
-    padding-left: 40px;
-  }
-
-  .season-divider {
-    display: none;
-  }
 }
 
 /* ---- Header shell ---- */
@@ -1065,11 +933,6 @@ onUnmounted(() => {
 /* on paper the gold mark is inked, as on the homepage */
 :where(:root[data-theme="parchment"]) .brand-mark {
   filter: grayscale(1) brightness(.4) contrast(1.3) drop-shadow(0 0 6px rgba(180, 44, 62, .3));
-}
-
-/* :where() keeps this below the homepage's own season-bar tint */
-:where(:root[data-theme="parchment"]) .season-bar {
-  background: linear-gradient(90deg, transparent, rgba(180, 44, 62, .1), transparent);
 }
 
 :root[data-theme="parchment"] .mobile-nav-backdrop {
