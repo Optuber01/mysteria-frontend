@@ -31,6 +31,8 @@ import {computed, onMounted, onUnmounted, watch} from 'vue';
 import HeaderItem from '@/components/layout/HeaderItem.vue';
 import FooterItem from '@/components/layout/FooterItem.vue';
 import DailyBonusCat from '@/components/ui/DailyBonusCat.vue';
+import {useI18n} from '@/composables/useI18n';
+import {lockNight, useTheme} from '@/composables/useTheme';
 import {useConceptFonts} from './useConceptFonts';
 import ArcanaHero from './ArcanaHero.vue';
 import ProgressionStory from './progression/ProgressionStory.vue';
@@ -45,7 +47,25 @@ import grain from './assets/grain.png';
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&display=swap');
 
-const {card, hasDrawn} = useArcana();
+const {card, hasDrawn, nameOf} = useArcana();
+const {t} = useI18n();
+const {theme, setTheme} = useTheme();
+
+/*
+ * The Darkness keeps the night: while it is the drawn card the light theme is refused
+ * (the header says why), and drawing it on paper lets the night fall once the card has
+ * landed and the page has taken its colour. Another card, or leaving the page, frees it.
+ */
+let nightFall = 0;
+watch([() => hasDrawn.value && card.value.id === 'darkness', () => t('home.arcana.night')], ([dark]) => {
+  clearTimeout(nightFall);
+  if (!dark) {
+    lockNight(null);
+    return;
+  }
+  lockNight(t('home.arcana.night').replace('{name}', nameOf('darkness')));
+  if (theme.value === 'parchment') nightFall = window.setTimeout(() => setTheme('dark'), 750);
+}, {immediate: true});
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */
 const themeKey = computed(() => (hasDrawn.value ? card.value.id : 'undrawn'));
 
@@ -113,6 +133,8 @@ function onLoopStart(event: Event) {
 }
 
 onUnmounted(() => {
+  clearTimeout(nightFall);
+  lockNight(null);
   offscreenObserver?.disconnect();
   document.querySelector('.concept-arcana > .arc-main')?.removeEventListener('animationstart', onLoopStart);
   document.body.style.removeProperty('--acc');
@@ -163,7 +185,7 @@ body:has(.concept-arcana) {
   --arc-ink: #efeef3;
   --arc-muted: #a7a6b2;
   --arc-on-acc: #0b0b0e;
-  /* the page itself, for chapters that keep their own dark room inside a light page */
+  /* the page itself, for chapters that paint their own room over it */
   --arc-page: var(--arc-bg);
   /* The accent where it colours text or hairlines, and where it fills a solid control
      (its label in --arc-on-acc). Dark: the accent itself. Light: --acc-deep (see below). */
@@ -323,54 +345,14 @@ body:has(.concept-arcana) {
 }
 
 /*
- * The potion story stays a dark room in the light theme: its brewery, blackout and
- * heartbeat are made of darkness. On paper it is a deep warm ink rather than the night
- * page's black, with the dark palette's light text. It has no edges: its top deepens from
- * the paper into the room over a short stretch, its foot back into the paper
- * (ProgressionStory, --room-in and --room-foot).
+ * The potion story follows the theme like every other section: on paper it is a lamplit
+ * room in the page's own colours, its text in ink. Only its darkness stays dark: the dread
+ * closing in on him as he drinks, and the blackout before the flash (ProgressionStory).
  */
-:root[data-theme="parchment"] .concept-arcana .progression {
-  --arc-bg: #1a1519;
-  --arc-surface: #241e23;
-  --arc-line: rgba(255, 255, 255, .09);
-  --arc-ink: #efeef3;
-  --arc-muted: #aaa5ae;
-  --arc-on-acc: #1a1519;
-  --acc-ink: var(--acc);
-  --acc-solid: var(--acc);
-  --arc-glass: rgba(255, 255, 255, .04);
-  --arc-shadow: rgba(0, 0, 0, .55);
-  --arc-shadow-strong: rgba(0, 0, 0, .7);
-  --arc-chip-bg: #1d181c;
-  --arc-card: #211b20;
-  --arc-card-2: #1c171b;
-  --arc-pop: rgba(33, 27, 32, .96);
-  --arc-ok: #86efac;
-  --arc-bad: #ffb3a8;
-  /* tokens built from the ones above resolve where they are declared: re-derive them here */
-  --arc-line-acc: color-mix(in oklab, var(--acc-ink) 42%, transparent);
-  --arc-line-hot: color-mix(in oklab, var(--acc-ink) 70%, transparent);
-  --arc-raised: color-mix(in oklab, var(--arc-surface) 88%, transparent);
-}
-
-/* the stacked story (ProgressionStory's fallback, no dissolve): its foot fades into the paper inside its padding */
-@media (max-height: 590px), (prefers-reduced-motion: reduce) {
-  :root[data-theme="parchment"] .concept-arcana .progression::after {
-    position: absolute;
-    z-index: 30;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    height: calc(clamp(64px, 12vw, 96px) + 40px);
-    pointer-events: none;
-    content: '';
-    background: linear-gradient(0deg, var(--arc-page), color-mix(in srgb, var(--arc-page) 55%, transparent) 40%, transparent);
-  }
-}
 
 /*
- * Light theme: over the dark room the bar's 78% paper glass turned a muddy grey. On this
- * page it is near-solid paper, so it reads as the same bar over the hero, the room and the page.
+ * Light theme: on this page the bar is near-solid paper (its 78% glass went grey over the
+ * hero's night and the story's dread), so it reads as one bar over every section.
  */
 :root[data-theme="parchment"] .concept-arcana .header-stack.is-overlay .site-header::before {
   background: color-mix(in srgb, var(--myst-bg) 95%, transparent);
@@ -483,7 +465,7 @@ body:has(.concept-arcana) .mobile-nav .brand-mark {
   color: color-mix(in oklab, var(--acc-ink) 62%, var(--arc-ink));
 }
 
-/* deep enough to hold 4.5:1 where the bar's glass lies over the potion story's dark room */
+/* deep enough to hold 4.5:1 wherever the bar's glass lies */
 :root[data-theme="parchment"] .concept-arcana .header-stack .chip-players {
   color: #08401d;
 }

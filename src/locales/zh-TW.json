@@ -570,6 +570,7 @@
   },
   "home": {
     "arcana": {
+      "night": "{name}守著長夜。抽取其他途徑，光才會回來。",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

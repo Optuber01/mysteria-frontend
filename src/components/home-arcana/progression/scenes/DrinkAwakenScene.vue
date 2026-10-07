@@ -655,7 +655,7 @@ const sceneVars = computed(() => {
 }
 
 .reading-card:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--acc) 70%, #efeef3);
+  outline: 2px solid color-mix(in oklab, var(--acc-ink) 70%, var(--arc-ink));
   outline-offset: 5px;
 }
 
@@ -773,9 +773,9 @@ const sceneVars = computed(() => {
   will-change: left, top, opacity;
 }
 
-/* keyboard only: a quiet accent ring, no glow (the story stays a dark room in either theme) */
+/* keyboard only: a quiet accent ring, no glow (in ink on paper) */
 .potion:focus-visible {
-  outline: 1.5px solid color-mix(in oklab, var(--acc) 80%, #efeef3);
+  outline: 1.5px solid color-mix(in oklab, var(--acc-ink) 80%, var(--arc-ink));
   outline-offset: 4px;
 }
 
@@ -810,7 +810,6 @@ const sceneVars = computed(() => {
   position: absolute;
   width: max-content;
   white-space: nowrap;
-  /* the potion story is a dark room in either theme */
   color: color-mix(in oklab, var(--acc) 30%, #efeef3);
   font: 400 clamp(26px, 3.4vw, 54px)/1 var(--arc-caps);
   letter-spacing: 0.08em;
@@ -819,6 +818,12 @@ const sceneVars = computed(() => {
   text-shadow: -2px 0 color-mix(in oklab, var(--acc) 60%, transparent), 2px 0 rgba(169, 198, 214, 0.3), 0 0 18px rgba(0, 0, 0, 0.8);
   animation: whisper-shiver 0.9s steps(3) infinite;
   will-change: transform, opacity;
+}
+
+/* on paper the voices are ink, their double image a faint halo of the page */
+:root[data-theme="parchment"] .whisper {
+  color: color-mix(in oklab, var(--acc-ink) 45%, #1d1a1f);
+  text-shadow: -2px 0 color-mix(in oklab, var(--acc) 45%, transparent), 2px 0 rgba(70, 92, 112, 0.25), 0 0 16px rgba(239, 237, 232, 0.9);
 }
 
 

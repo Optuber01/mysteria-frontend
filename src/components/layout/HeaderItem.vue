@@ -40,10 +40,13 @@
 
         <!-- Always in the bar: compact (language code only) and the one way to switch at every width. -->
         <LanguageSelector class="header-lang"/>
+        <span class="theme-toggle-wrap">
         <button
             :aria-label="isLight ? t('header.themeDark') : t('header.themeLight')"
-            :title="isLight ? t('header.themeDark') : t('header.themeLight')"
+            :title="nightLock && !isLight ? nightLock : isLight ? t('header.themeDark') : t('header.themeLight')"
+            :aria-describedby="refusalShown ? 'theme-refusal' : undefined"
             class="theme-toggle"
+            :class="{'is-refused': refusalShown}"
             type="button"
             @click="toggleTheme"
         >
@@ -56,6 +59,9 @@
             <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.55 1.55M17.15 17.15l1.55 1.55M5.3 18.7l1.55-1.55M17.15 6.85l1.55-1.55"/>
           </svg>
         </button>
+          <!-- the page is keeping the night (the Darkness drawn): why the light will not come -->
+          <span v-if="refusalShown" id="theme-refusal" class="theme-refusal" role="status">{{ nightLock }}</span>
+        </span>
         <NotificationBell v-if="isAuthenticated" class="desktop-only"/>
         <AuthButton class="desktop-only"/>
 
@@ -164,7 +170,18 @@ const route = useRoute();
 const {t} = useI18n();
 const {unprefixedPath} = useLocalePath();
 const authStore = useAuthStore();
-const {isLight, toggleTheme} = useTheme();
+const {isLight, toggleTheme, nightLock, refused} = useTheme();
+/* A refused switch shows its reason under the button for a moment. */
+const refusalShown = ref(false);
+let refusalTimer = 0;
+watch(refused, () => {
+  refusalShown.value = true;
+  clearTimeout(refusalTimer);
+  refusalTimer = window.setTimeout(() => (refusalShown.value = false), 3200);
+});
+watch(nightLock, lock => {
+  if (!lock) refusalShown.value = false;
+});
 const isMobileNavOpen = ref(false);
 const navigationRef = ref<HTMLElement | null>(null);
 
@@ -587,6 +604,55 @@ onUnmounted(() => {
 }
 
 /* ---- Light/dark switch: a square the height of the language control beside it ---- */
+.theme-toggle-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* the reason the light is refused: a small dark slip under the button */
+.theme-refusal {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 5;
+  width: max-content;
+  max-width: min(260px, 70vw);
+  padding: 8px 11px;
+  border-radius: 6px;
+  background: #121116;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .08);
+  color: #e9e8ee;
+  font-size: 12.5px;
+  line-height: 1.4;
+  letter-spacing: normal;
+  text-transform: none;
+  animation: theme-refusal-in .22s ease both;
+  pointer-events: none;
+}
+
+@keyframes theme-refusal-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+
+/* the button gives a small shake as the light is turned away */
+.theme-toggle.is-refused .theme-toggle__icon {
+  animation: theme-refused .42s ease;
+}
+
+@keyframes theme-refused {
+  20% { transform: rotate(-14deg); }
+  45% { transform: rotate(10deg); }
+  70% { transform: rotate(-5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-refusal,
+  .theme-toggle.is-refused .theme-toggle__icon {
+    animation: none;
+  }
+}
+
 .theme-toggle {
   display: inline-grid;
   place-items: center;

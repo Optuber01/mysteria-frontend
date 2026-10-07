@@ -570,6 +570,7 @@
   },
   "home": {
     "arcana": {
+      "night": "{name} keeps the night. Draw another Pathway to let the light back in.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

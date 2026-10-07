@@ -570,6 +570,7 @@
   },
   "home": {
     "arcana": {
+      "night": "{name} garde la nuit. Tire une autre Voie pour laisser revenir la lumière.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

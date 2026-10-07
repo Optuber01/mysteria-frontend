@@ -60,11 +60,27 @@ function switchTo(next: Theme) {
     else commit();
 }
 
+/*
+ * A page can keep the night: while locked, switching to the light theme is refused and the
+ * header shows the reason (the homepage holds it while the drawn card is the Darkness).
+ * `refused` counts the refusals, so the header can answer each one.
+ */
+const nightLock = ref<string | null>(null);
+const refused = ref(0);
+
+export function lockNight(reason: string | null) {
+    nightLock.value = reason;
+}
+
 export function useTheme() {
     const isLight = computed(() => theme.value === "parchment");
 
     const setTheme = (next: Theme) => {
         if (next === theme.value) return;
+        if (next === "parchment" && nightLock.value) {
+            refused.value++;
+            return;
+        }
         try {
             localStorage.setItem(THEME_STORAGE_KEY, next);
         } catch {
@@ -75,5 +91,5 @@ export function useTheme() {
 
     const toggleTheme = () => setTheme(isLight.value ? "dark" : "parchment");
 
-    return {theme, isLight, setTheme, toggleTheme};
+    return {theme, isLight, setTheme, toggleTheme, nightLock, refused};
 }

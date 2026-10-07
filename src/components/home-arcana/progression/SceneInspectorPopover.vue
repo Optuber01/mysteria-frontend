@@ -100,9 +100,9 @@ onUnmounted(() => cleanup?.());
 
 <style scoped>
 /*
- * A note pinned to the exhibit. It is teleported to <body>, outside the potion
- * story, so it brings its own colours: the story is a dark room in both themes,
- * and the page's --arc-ink turns dark in the light one.
+ * A note pinned to the exhibit: a dark slip in either theme, so it stands off the
+ * room behind it. It is teleported to <body>, outside the potion story, so it brings
+ * its own colours.
  */
 .inspector {
   --ins-bg: #16161c;

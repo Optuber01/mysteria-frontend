@@ -570,6 +570,7 @@
   },
   "home": {
     "arcana": {
+      "night": "{name} hält die Nacht. Zieh einen anderen Pfad, um das Licht zurückzuholen.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

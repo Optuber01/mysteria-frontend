@@ -1014,6 +1014,11 @@ onUnmounted(() => {
   text-shadow: 0 10px 60px rgba(0, 0, 0, 0.6);
 }
 
+/* on paper the heading needs no shadow to stand off the room */
+:root[data-theme="parchment"] .progression__heading h2 {
+  text-shadow: none;
+}
+
 /* ---- chapter copy + stage ---- */
 .progression__layout {
   position: absolute;
@@ -1054,7 +1059,7 @@ onUnmounted(() => {
 }
 
 .chapter-copy h3 em {
-  color: var(--acc);
+  color: var(--acc-ink);
   font-style: normal;
 }
 
@@ -1552,7 +1557,7 @@ onUnmounted(() => {
   }
 
   .progression-static h3 em {
-    color: var(--acc);
+    color: var(--acc-ink);
     font-style: normal;
   }
 
