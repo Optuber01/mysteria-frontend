@@ -55,9 +55,21 @@
         :holding="holding"
         :level="level"
         :accent="card.accent"
+        :skin="worn.url"
+        :slim="worn.slim"
         :label="tp(`player.${playerMode}`)"
         @bottle="onBottle"
       />
+      <!-- his name over his head, as in game: shown while the hand is on him (a tap on touch) -->
+      <span
+        class="drink-scene__hit"
+        :class="{ 'is-on': nameable }"
+        aria-hidden="true"
+        @pointerenter="onPlayerEnter"
+        @pointerleave="onPlayerLeave"
+        @click="onPlayerTap"
+      />
+      <span class="drink-scene__nametag" :class="{ 'is-shown': nameable && tagShown }" aria-hidden="true">{{ worn.name }}</span>
     </div>
 
     <!-- the potion's own light, on his face and hands -->
@@ -100,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import type { CSSProperties } from 'vue';
 
@@ -111,6 +123,8 @@ import SceneParticles from './SceneParticles.vue';
 import ArcanaBack from '../../ArcanaBack.vue';
 import ArcanaFace from '../../ArcanaFace.vue';
 import { useArcana } from '../../useArcana';
+import { DEFAULT_SKIN, usePlayerSkin } from '../playerSkin';
+import type { PlayerSkin } from '../playerSkin';
 import { useProgressionCopy } from './useProgressionCopy';
 import type { StageLayout } from '../layout';
 import { T, awakenAt, blackoutAt, clamp01, ease, eyesAt, flashAt, gulpPulse, gulpsTaken, lerp, riskAt, shockAt, smooth, span, spiritAt, veinGlowAt, veinSpreadAt } from '../timeline';
@@ -163,6 +177,43 @@ const shock = computed(() => (final.value ? 0 : shockAt(g.value)));
 /* ---------------- player ---------------- */
 const playerMode = computed<'drink' | 'advance'>(() => (final.value || g.value >= T.flash ? 'advance' : 'drink'));
 const emerge = computed(() => at(T.playerIn));
+
+/*
+ * The skin he wears: the visitor's own (premium Java accounts, see playerSkin.ts) or
+ * Optuber's. A new one is only put on while he is out of sight, never in front of them.
+ */
+const wanted = usePlayerSkin(() => props.warm);
+const worn = ref<PlayerSkin>(DEFAULT_SKIN);
+const inSight = computed(() => props.active && emerge.value > 0.01);
+watch([wanted, inSight], ([next, seen]) => {
+  if (!seen) worn.value = next;
+}, { immediate: true });
+
+/* The name tag: while he stands there to be looked at (not in the fog, not at the flash). */
+const nameable = computed(() => props.active && emerge.value > 0.6);
+const hovering = ref(false);
+const tapped = ref(false);
+const tagShown = computed(() => hovering.value || tapped.value);
+let tapTimer = 0;
+function onPlayerEnter(event: PointerEvent) {
+  if (event.pointerType === 'mouse') hovering.value = true;
+}
+function onPlayerLeave(event: PointerEvent) {
+  if (event.pointerType === 'mouse') hovering.value = false;
+}
+function onPlayerTap(event: MouseEvent) {
+  if ((event as PointerEvent).pointerType === 'mouse') return;
+  tapped.value = !tapped.value;
+  clearTimeout(tapTimer);
+  if (tapped.value) tapTimer = window.setTimeout(() => (tapped.value = false), 2600);
+}
+watch(nameable, (on) => {
+  if (!on) {
+    hovering.value = false;
+    tapped.value = false;
+  }
+});
+onBeforeUnmount(() => clearTimeout(tapTimer));
 const reach = computed(() => beat(T.reach));
 const regard = computed(() => beat(T.regard));
 const lift = computed(() => beat(T.raise));
@@ -624,6 +675,44 @@ const sceneVars = computed(() => {
   min-width: 0;
   pointer-events: none;
   will-change: transform, opacity;
+}
+
+/* his body, from the crown to the feet (layout.ts PLAYER_FRAME): where the hand finds him */
+.drink-scene__hit {
+  position: absolute;
+  left: 33%;
+  width: 34%;
+  top: 6%;
+  height: 74%;
+  pointer-events: none;
+}
+
+.drink-scene__hit.is-on {
+  pointer-events: auto;
+}
+
+/*
+ * The name over his head, as the game draws it: plain light text on a square, faintly dark
+ * plate (no rounding, no border), fading in. The story is a dark room in either theme.
+ */
+.drink-scene__nametag {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  padding: 3px 8px 4px;
+  background: rgba(0, 0, 0, .42);
+  color: #f4f4f6;
+  font: 500 clamp(13px, 1.05vw, 16px)/1.2 var(--arc-body, system-ui, sans-serif);
+  letter-spacing: .01em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, calc(-100% - 10px));
+  transition: opacity .32s ease;
+  pointer-events: none;
+}
+
+.drink-scene__nametag.is-shown {
+  opacity: 1;
 }
 
 /* ---------- potion ---------- */

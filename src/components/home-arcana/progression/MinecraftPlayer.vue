@@ -75,6 +75,10 @@ const props = withDefaults(
     accent?: string;
     /** A dark frock coat and top hat over the skin, built from its own boxes. */
     costume?: boolean;
+    /** The skin to wear (a 64 x 64 texture, cross-origin readable); Optuber's by default. */
+    skin?: string;
+    /** Its arms are the slim (3 px) model. */
+    slim?: boolean;
     label?: string;
   }>(),
   {
@@ -98,6 +102,8 @@ const props = withDefaults(
     level: 1,
     accent: '#a78bfa',
     costume: false,
+    skin: playerSkinUrl,
+    slim: false,
     label: '',
   },
 );
@@ -633,6 +639,15 @@ function requestRender() {
   });
 }
 
+/** Puts on the skin asked for; one that will not load leaves Optuber's on. */
+async function wear(instance: SkinViewer) {
+  try {
+    await instance.loadSkin(props.skin, { model: props.slim ? 'slim' : 'default' });
+  } catch {
+    await instance.loadSkin(playerSkinUrl, { model: 'default' });
+  }
+}
+
 async function createViewer() {
   if (viewerCreationStarted || disposed || !canvas.value || !host.value) return;
   viewerCreationStarted = true;
@@ -667,7 +682,7 @@ async function createViewer() {
     resizeObserver = new ResizeObserver(sizeViewer);
     resizeObserver.observe(host.value);
 
-    await instance.loadSkin(playerSkinUrl, { model: 'default' });
+    await wear(instance);
     if (disposed || !viewer) return;
     if (props.costume) dress(instance);
     makeBottle(instance);
@@ -706,6 +721,12 @@ onMounted(() => {
 });
 
 watch(() => props.armed, maybeCreateViewer);
+// a different visitor's skin, once the model is up (the scene only swaps it while he is out of sight)
+watch(() => [props.skin, props.slim] as const, async () => {
+  if (!viewer || !ready.value) return;
+  await wear(viewer);
+  requestRender();
+});
 watch(() => [props.glow, props.shade] as const, () => {
   applyLighting();
   requestRender();
