@@ -570,7 +570,7 @@
   },
   "home": {
     "arcana": {
-      "night": "{name} guarda la noche. Saca otro Sendero para que vuelva la luz.",
+      "night": "A quien camina en la Oscuridad se le niega la luz.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

@@ -570,7 +570,7 @@
   },
   "home": {
     "arcana": {
-      "night": "{name} hält die Nacht. Zieh einen anderen Pfad, um das Licht zurückzuholen.",
+      "night": "Wer im Dunkel wandelt, dem bleibt das Licht verwehrt.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

@@ -570,7 +570,7 @@
   },
   "home": {
     "arcana": {
-      "night": "{name} garde la nuit. Tire une autre Voie pour laisser revenir la lumière.",
+      "night": "À qui marche dans les Ténèbres, la lumière est refusée.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

@@ -610,29 +610,33 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-/* the reason the light is refused: a small dark slip under the button */
+/*
+ * The reason the light is refused, in the world's own voice: no box, a line of pale
+ * night-light on a soft pool of shadow under the button, coming up out of the dark.
+ */
 .theme-refusal {
   position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
+  top: calc(100% + 8px);
+  right: -18px;
   z-index: 5;
   width: max-content;
-  max-width: min(260px, 70vw);
-  padding: 8px 11px;
-  border-radius: 6px;
-  background: #121116;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .08);
-  color: #e9e8ee;
-  font-size: 12.5px;
-  line-height: 1.4;
-  letter-spacing: normal;
+  max-width: min(300px, 74vw);
+  padding: 14px 24px 16px;
+  background: radial-gradient(closest-side, rgba(6, 6, 12, .92), rgba(6, 6, 12, .7) 55%, transparent);
+  color: color-mix(in oklab, var(--acc, #98a2ff) 45%, #eceaf4);
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.45;
+  letter-spacing: .02em;
+  text-align: center;
+  text-shadow: 0 0 14px color-mix(in oklab, var(--acc, #98a2ff) 50%, transparent);
   text-transform: none;
-  animation: theme-refusal-in .22s ease both;
+  animation: theme-refusal-in .7s cubic-bezier(.2, .8, .2, 1) both;
   pointer-events: none;
 }
 
 @keyframes theme-refusal-in {
-  from { opacity: 0; transform: translateY(-4px); }
+  from { opacity: 0; transform: translateY(-6px); filter: blur(4px); }
 }
 
 /* the button gives a small shake as the light is turned away */

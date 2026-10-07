@@ -570,7 +570,7 @@
   },
   "home": {
     "arcana": {
-      "night": "{name} keeps the night. Draw another Pathway to let the light back in.",
+      "night": "Those who walk in Darkness are denied the light.",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",

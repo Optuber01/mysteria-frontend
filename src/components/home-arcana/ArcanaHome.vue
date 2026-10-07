@@ -47,7 +47,9 @@ import grain from './assets/grain.png';
 
 useConceptFonts('https://fonts.googleapis.com/css2?family=Commissioner:wght,FLAR@400..800,0..100&display=swap');
 
-const {card, hasDrawn, nameOf} = useArcana();
+const {card, hasDrawn, draw} = useArcana();
+// development only: draw any card from a script (the sky's checker, tools/r43-check)
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as Window & {__mysterriaDraw?: (id: string) => Promise<void>}).__mysterriaDraw = id => draw(id);
 const {t} = useI18n();
 const {theme, setTheme} = useTheme();
 
@@ -63,7 +65,7 @@ watch([() => hasDrawn.value && card.value.id === 'darkness', () => t('home.arcan
     lockNight(null);
     return;
   }
-  lockNight(t('home.arcana.night').replace('{name}', nameOf('darkness')));
+  lockNight(t('home.arcana.night'));
   if (theme.value === 'parchment') nightFall = window.setTimeout(() => setTheme('dark'), 750);
 }, {immediate: true});
 /** Undrawn, the page wears the neutral accent; the first draw crossfades into the card's. */

@@ -570,7 +570,7 @@
   },
   "home": {
     "arcana": {
-      "night": "{name}守着长夜。抽取其他途径，光才会回来。",
+      "night": "行于黑暗者，不得见光。",
       "ip": {
         "copy": "Copy",
         "copied": "Copied",
