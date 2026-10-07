@@ -9,7 +9,7 @@
     <div ref="stickyRef" class="progression__sticky">
       <!-- Decorative: bleeds past the edges on purpose while it slowly zooms. -->
       <div class="progression__backdrop" :style="dress.backdrop" aria-hidden="true" data-sweep-ignore>
-        <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="async">
+        <img ref="backdropRef" :src="breweryScene" alt="" width="1920" height="1017" loading="lazy" decoding="sync">
       </div>
       <div class="progression__hearth" :style="dress.hearth" aria-hidden="true" />
       <!--

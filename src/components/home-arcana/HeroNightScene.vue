@@ -10,7 +10,9 @@
     <div ref="viewRef" class="night__view">
       <picture>
         <source media="(max-width: 720px)" :srcset="skySmall">
-        <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="async" width="1920" height="1080">
+        <!-- sync: Chrome frees decoded images while the tab is hidden; async ones were then
+             drawn missing for a few frames on the way back, the scene flickering in -->
+        <img class="night__sky" :src="sky" alt="" fetchpriority="high" decoding="sync" width="1920" height="1080">
       </picture>
       <i class="night__tint"></i>
 
@@ -18,7 +20,7 @@
         <div class="night__moon-rise">
           <i class="night__moon-glow"></i>
           <i class="night__moon-corona"></i>
-          <img ref="moonRef" class="night__moon-disc" :src="moon" alt="" decoding="async" width="640" height="640" @load="moonReady = true" @error="moonReady = true">
+          <img ref="moonRef" class="night__moon-disc" :src="moon" alt="" decoding="sync" width="640" height="640" @load="moonReady = true" @error="moonReady = true">
           <i class="night__moon-rim"></i>
         </div>
       </div>
@@ -28,7 +30,7 @@
 
       <picture>
         <source media="(max-width: 720px)" :srcset="citySmall">
-        <img class="night__city" :src="city" alt="" decoding="async" width="1920" height="1080">
+        <img class="night__city" :src="city" alt="" decoding="sync" width="1920" height="1080">
       </picture>
       <i class="night__moonlight" :style="{'--city-mask': `url(${city})`}"></i>
       <!-- light theme: mist laid over the buildings themselves, so they stay solid in front of the moon -->
