@@ -202,18 +202,18 @@ watch([wanted, inSight], ([next, seen]) => {
 
 /*
  * The name tag, as the game shows it over a player: pixel text on a faint plate, centred
- * over him and moving with him. Its size is set once from his box (his head is ~0.185 of
- * it; one font texel is ~1/22 of the head, a touch under the game's 1/20), never from the
+ * over him and moving with him, quieter than the game's (soft ink, a fainter plate). Its size
+ * is set once from his box (one font texel is ~1/30 of his head), never from the
  * head on screen: that grows and shrinks with every step and lean, and the rounded texel
- * size then jumped. It sits four texels over the crown, clear of the hood as he rises.
+ * size then jumped. It sits seven texels over the crown, clear of the hood as he rises.
  */
 const head = ref<HeadPosition | null>(null);
 const tag = computed(() => {
   if (typeof document === 'undefined') return null;
-  const canvas = drawNametag(worn.value.name);
+  const canvas = drawNametag(worn.value.name, 'rgba(0, 0, 0, .18)', '#e4e2ea');
   return { src: canvas.toDataURL(), w: canvas.width, h: canvas.height };
 });
-const tagUnit = computed(() => Math.max(2, Math.round((props.layout?.player.h ?? 600) / 119)));
+const tagUnit = computed(() => Math.max(2, Math.round((props.layout?.player.h ?? 600) / 160)));
 const tagStyle = computed<CSSProperties>(() => {
   const h = head.value;
   const t = tag.value;
@@ -223,7 +223,7 @@ const tagStyle = computed<CSSProperties>(() => {
   return {
     width: `${t.w * unit}px`,
     height: `${t.h * unit}px`,
-    transform: `translate3d(${(h.x - (t.w * unit) / 2).toFixed(1)}px, ${(h.y - (4 + t.h) * unit).toFixed(1)}px, 0)`,
+    transform: `translate3d(${(h.x - (t.w * unit) / 2).toFixed(1)}px, ${(h.y - (7 + t.h) * unit).toFixed(1)}px, 0)`,
   };
 });
 
@@ -742,7 +742,7 @@ const sceneVars = computed(() => {
 }
 
 .drink-scene__nametag.is-shown {
-  opacity: 1;
+  opacity: .72;
 }
 
 /* ---------- potion ---------- */
