@@ -28,8 +28,9 @@
       <ol class="arc-rows guide-steps">
         <li v-for="(step, index) in steps" :key="step.title" class="arc-row guide-step" :class="{'is-done': isDone(index)}">
           <button type="button" class="guide-step__toggle" :aria-pressed="isDone(index)" @click="toggleStep(index)">
+            <!-- the tick is always there, so it can draw in and out (aria-pressed says the state) -->
             <span class="guide-step__check" aria-hidden="true">
-              <i v-if="isDone(index)" class="fa-solid fa-check"></i>
+              <i class="fa-solid fa-check"></i>
             </span>
             <span class="guide-step__n" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span>
             <span class="guide-step__text">
@@ -73,9 +74,11 @@
         <span class="guide-search__count" aria-live="polite">{{ visibleCards.length }} {{ t('guidePage.topicsCount') }}</span>
       </div>
 
-      <p v-if="query && !visibleCards.length" class="guide-empty">{{ t('guidePage.noTopics') }}</p>
+      <ArcCollapse :open="!!query && !visibleCards.length" lazy>
+        <p class="guide-empty">{{ t('guidePage.noTopics') }}</p>
+      </ArcCollapse>
 
-      <ul class="arc-grid guide-cards">
+      <ArcList class="arc-grid guide-cards">
         <li v-for="card in visibleCards" :key="card.topicId">
           <RouterLink :to="$lp(`/guide/${card.topicId}`)" class="arc-panel arc-panel--link guide-card">
             <i :class="card.icon" class="guide-card__icon" aria-hidden="true"></i>
@@ -86,7 +89,7 @@
             <i class="fa-solid fa-arrow-right guide-card__arrow" aria-hidden="true"></i>
           </RouterLink>
         </li>
-      </ul>
+      </ArcList>
     </section>
 
     <section class="guide-block" aria-labelledby="guide-popular-title">
@@ -119,6 +122,8 @@
 
 <script lang="ts" setup>
 import {computed, ref} from "vue";
+import ArcCollapse from "@/components/arcana/ArcCollapse.vue";
+import ArcList from "@/components/arcana/ArcList.vue";
 import GuideChoiceComparison from "./GuideChoiceComparison.vue";
 import GuideCoiLinks from "./GuideCoiLinks.vue";
 import GuideJoin from "./GuideJoin.vue";
@@ -326,12 +331,23 @@ const visibleCards = computed(() => (query.value ? searchCards.value : taskCards
   box-shadow: inset 0 0 0 var(--arc-bw-accent) var(--arc-line-hot);
   color: var(--arc-on-acc);
   font-size: 13px;
-  transition: background-color .2s ease, box-shadow .2s ease;
+  transition: background-color var(--arc-dur-1) var(--arc-ease), box-shadow var(--arc-dur-1) var(--arc-ease);
+}
+
+.guide-step__check i {
+  opacity: 0;
+  transform: scale(.5);
+  transition: opacity var(--arc-dur-1) var(--arc-ease), transform var(--arc-dur-2) var(--arc-ease);
 }
 
 .guide-step.is-done .guide-step__check {
   background: var(--acc-solid);
   box-shadow: none;
+}
+
+.guide-step.is-done .guide-step__check i {
+  opacity: 1;
+  transform: none;
 }
 
 .guide-step__toggle:hover .guide-step__check {
@@ -351,6 +367,7 @@ const visibleCards = computed(() => (query.value ? searchCards.value : taskCards
 
 .guide-step__text strong {
   font-weight: 600;
+  transition: color var(--arc-dur-1) var(--arc-ease);
 }
 
 .guide-step__text > span {

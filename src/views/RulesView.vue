@@ -48,23 +48,25 @@
                   <h3 class="rule__title">{{ rule.title }}</h3>
                   <p>{{ rule.content }}</p>
 
-                  <div v-if="rule.ladder && openLadder.has(rule.id)" :id="`ladder-${rule.id}`" class="arc-table-wrap ladder">
-                    <table class="arc-table">
-                      <caption class="arc-sr">{{ t('rulesPage.ladderHeading') }}</caption>
-                      <thead>
-                      <tr>
-                        <th scope="col">{{ t('rulesPage.ladderCase') }}</th>
-                        <th scope="col">{{ t('rulesPage.ladderCost') }}</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      <tr v-for="(step, index) in rule.ladder" :key="index">
-                        <td>{{ step.case }}</td>
-                        <td :class="['ladder__cost', `tone-${toneFor(step.warns)}`]">{{ warnLabel(step.warns) }}</td>
-                      </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                  <ArcCollapse v-if="rule.ladder" :id="`ladder-${rule.id}`" :open="openLadder.has(rule.id)" lazy>
+                    <div class="arc-table-wrap ladder">
+                      <table class="arc-table">
+                        <caption class="arc-sr">{{ t('rulesPage.ladderHeading') }}</caption>
+                        <thead>
+                        <tr>
+                          <th scope="col">{{ t('rulesPage.ladderCase') }}</th>
+                          <th scope="col">{{ t('rulesPage.ladderCost') }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="(step, index) in rule.ladder" :key="index">
+                          <td>{{ step.case }}</td>
+                          <td :class="['ladder__cost', `tone-${toneFor(step.warns)}`]">{{ warnLabel(step.warns) }}</td>
+                        </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </ArcCollapse>
                 </div>
 
                 <div v-if="hasCost(rule)" class="rule__cost">
@@ -155,6 +157,7 @@ import {breadcrumbLd, useSeo} from "@/composables/useSeo";
 import {useAuthStore} from "@/stores/auth";
 import ArcPage from "@/components/arcana/ArcPage.vue";
 import ArcTabs from "@/components/arcana/ArcTabs.vue";
+import ArcCollapse from "@/components/arcana/ArcCollapse.vue";
 import ArcToc, {type TocGroup} from "@/components/arcana/ArcToc.vue";
 import DailyBonusCat from "@/components/ui/DailyBonusCat.vue";
 import IconDiscord from "@/assets/icons/IconDiscord.vue";
@@ -506,7 +509,7 @@ watch(isPrivilegedUser, privileged => {
 
 .cost__chevron {
   font-size: 11px;
-  transition: transform .2s ease;
+  transition: transform var(--arc-dur-2) var(--arc-ease);
 }
 
 .cost--button[aria-expanded="true"] .cost__chevron {
@@ -566,12 +569,6 @@ watch(isPrivilegedUser, privileged => {
 
   .chapter__head h2 {
     gap: 12px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cost__chevron {
-    transition: none;
   }
 }
 </style>

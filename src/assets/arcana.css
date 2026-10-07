@@ -121,6 +121,14 @@ body {
     /* one focus ring */
     --arc-focus-w: 2px;
     --arc-focus-off: 3px;
+    /*
+     * one motion for everything that opens and closes (the homepage's rung panel uses the
+     * same curve): -1 for fades and small moves, -2 for a region's height and a dialog.
+     * Reduced motion sets both to 0, so every transition built on them is instant.
+     */
+    --arc-dur-1: 160ms;
+    --arc-dur-2: 240ms;
+    --arc-ease: cubic-bezier(.2, .8, .2, 1);
     /* type */
     --arc-fs-display: clamp(36px, 4.8vw, 68px);
     --arc-fs-h1: clamp(34px, 4vw, 56px);
@@ -802,6 +810,238 @@ body {
     border-top: var(--arc-bw) solid var(--arc-line);
     text-align: left;
     vertical-align: top;
+}
+
+/* ---------- motion: everything that opens and closes, in one timing ---------- */
+
+/*
+ * A region that opens under its trigger (ArcCollapse.vue). Its height eases between nothing
+ * and its content (one grid row going 0fr to 1fr, so nothing is measured) while the content
+ * fades and rises into place; closing runs the same way back, and a second click mid-way
+ * turns it round from where it is. Shut, it is visibility: hidden: its contents leave the
+ * tab order and the accessibility tree as with `hidden`, once the close has played.
+ */
+.arc-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows var(--arc-dur-2) var(--arc-ease), visibility 0s linear var(--arc-dur-2);
+}
+
+.arc-collapse.is-open {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition: grid-template-rows var(--arc-dur-2) var(--arc-ease), visibility 0s;
+}
+
+/* while it moves, its layout and paint stay its own (it clips its content then anyway) */
+.arc-collapse.is-moving {
+    contain: layout paint;
+}
+
+/*
+ * The same for a <details>: give it .arc-details and wrap everything after its <summary>
+ * in one .arc-details__body. The browser opens and shuts it as ever (the summary's state
+ * changes at once); only its content box is eased, so where ::details-content isn't
+ * supported it simply opens and shuts.
+ */
+.arc-details::details-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--arc-dur-2) var(--arc-ease), content-visibility var(--arc-dur-2) allow-discrete;
+}
+
+.arc-details[open]::details-content {
+    grid-template-rows: 1fr;
+}
+
+.arc-collapse__inner,
+.arc-details__body {
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--arc-dur-1) var(--arc-ease);
+}
+
+.arc-collapse__inner > *,
+.arc-details__body > * {
+    transform: translateY(6px);
+    transition: transform var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-collapse.is-open > .arc-collapse__inner,
+.arc-details[open] > .arc-details__body {
+    opacity: 1;
+    transition: opacity var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-collapse.is-open > .arc-collapse__inner > *,
+.arc-details[open] > .arc-details__body > * {
+    transform: none;
+}
+
+/* open and at rest, nothing inside is clipped (focus rings, shadows) */
+.arc-collapse.is-open:not(.is-moving) > .arc-collapse__inner {
+    overflow: visible;
+}
+
+.arc-details[open] > .arc-details__body {
+    overflow: visible;
+    transition: opacity var(--arc-dur-2) var(--arc-ease), overflow 0s var(--arc-dur-2) allow-discrete;
+}
+
+/*
+ * A card or menu that floats from its trigger: it fades in as it lifts away from the
+ * trigger's side (--up when it opens upwards) and goes back the way it came. It stays in
+ * the page while shut (hidden from pointer, keyboard and screen reader alike), so a click
+ * mid-way reverses it instead of starting over.
+ */
+.arc-popover {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(var(--arc-popover-y, -6px)) scale(.98);
+    transform-origin: var(--arc-popover-origin, top);
+    transition:
+        opacity var(--arc-dur-1) var(--arc-ease),
+        transform var(--arc-dur-1) var(--arc-ease),
+        visibility 0s linear var(--arc-dur-1);
+}
+
+.arc-popover.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+    transition:
+        opacity var(--arc-dur-1) var(--arc-ease),
+        transform var(--arc-dur-2) var(--arc-ease),
+        visibility 0s;
+}
+
+.arc-popover--up {
+    --arc-popover-y: 6px;
+    --arc-popover-origin: bottom;
+}
+
+/* the same for something shown with v-if: <Transition name="arc-fade"> */
+.arc-fade-enter-active {
+    transition: opacity var(--arc-dur-1) var(--arc-ease), transform var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-fade-leave-active {
+    transition: opacity var(--arc-dur-1) var(--arc-ease), transform var(--arc-dur-1) var(--arc-ease);
+    pointer-events: none;
+}
+
+.arc-fade-enter-from,
+.arc-fade-leave-to {
+    opacity: 0;
+    transform: translateY(var(--arc-popover-y, -4px));
+}
+
+/*
+ * Content that changes in place (a tab's list, search results, loading to loaded): the old
+ * fades as the new rises in over it, both in one grid cell, so the box never holds the two
+ * one above the other. ArcSwap.vue does this and eases the box's height too.
+ */
+.arc-swap {
+    display: grid;
+}
+
+.arc-swap > * {
+    grid-area: 1 / 1;
+    align-self: start;
+    min-width: 0;
+}
+
+/* a box easing its height (easeHeight.ts) shows only what fits it so far */
+.arc-swap.is-resizing,
+.arc-list.is-resizing {
+    overflow: clip;
+}
+
+.arc-swap-enter-active {
+    transition: opacity var(--arc-dur-2) var(--arc-ease) calc(var(--arc-dur-1) / 2), transform var(--arc-dur-2) var(--arc-ease) calc(var(--arc-dur-1) / 2);
+}
+
+.arc-swap-leave-active {
+    transition: opacity var(--arc-dur-1) var(--arc-ease);
+    pointer-events: none;
+}
+
+.arc-swap-enter-from {
+    opacity: 0;
+    transform: translateY(6px);
+}
+
+.arc-swap-leave-to {
+    opacity: 0;
+}
+
+/* a filtered list (ArcList.vue): what goes fades out where it stood, the rest glide over */
+.arc-list {
+    position: relative;
+    /* while its height eases, a grid's rows keep their own size */
+    align-content: start;
+}
+
+.arc-list-move {
+    transition: transform var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-list-enter-active {
+    transition: opacity var(--arc-dur-2) var(--arc-ease), transform var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-list-leave-active {
+    transition: opacity var(--arc-dur-1) var(--arc-ease), transform var(--arc-dur-1) var(--arc-ease);
+    pointer-events: none;
+}
+
+.arc-list-enter-from,
+.arc-list-leave-to {
+    opacity: 0;
+    transform: scale(.97);
+}
+
+/*
+ * A dialog (<Transition name="arc-dialog"> around its backdrop): the backdrop fades and
+ * the [role="dialog"] panel rises into place; closing is quicker and goes back down.
+ */
+.arc-dialog-enter-active {
+    transition: opacity var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-dialog-leave-active {
+    transition: opacity var(--arc-dur-1) var(--arc-ease);
+}
+
+.arc-dialog-enter-active [role="dialog"] {
+    transition: transform var(--arc-dur-2) var(--arc-ease);
+}
+
+.arc-dialog-leave-active [role="dialog"] {
+    transition: transform var(--arc-dur-1) var(--arc-ease);
+}
+
+.arc-dialog-enter-from,
+.arc-dialog-leave-to {
+    opacity: 0;
+}
+
+.arc-dialog-enter-from [role="dialog"],
+.arc-dialog-leave-to [role="dialog"] {
+    transform: translateY(10px) scale(.98);
+}
+
+/* reduced motion: every open and close above is instant, with no movement */
+@media (prefers-reduced-motion: reduce) {
+    :root,
+    body {
+        --arc-dur-1: 0ms;
+        --arc-dur-2: 0ms;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

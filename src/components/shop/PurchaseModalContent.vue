@@ -43,13 +43,16 @@
       <span>{{ t('shopPage.purchase.gift') }}</span>
     </label>
 
-    <UserSelector
-        v-if="isGift"
-        :label="t('shopPage.purchase.recipient')"
-        :model-value="recipientId"
-        :placeholder="t('shopPage.purchase.recipientPlaceholder')"
-        @update:model-value="updateRecipient"
-    />
+    <!-- a gift opens the recipient field under the box; the fold takes the form's gap with it -->
+    <ArcCollapse v-if="isGiftable" :open="isGift" class="buy-form__fold" lazy>
+      <UserSelector
+          class="buy-form__unfolded"
+          :label="t('shopPage.purchase.recipient')"
+          :model-value="recipientId"
+          :placeholder="t('shopPage.purchase.recipientPlaceholder')"
+          @update:model-value="updateRecipient"
+      />
+    </ArcCollapse>
 
     <dl class="arc-rows buy-form__sum">
       <div class="arc-row">
@@ -69,21 +72,24 @@
       </div>
     </dl>
 
-    <div v-if="balance && insufficientFunds" class="buy-form__short" role="status">
-      <p>{{ shortText }}</p>
-      <p class="buy-form__short-links">
-        <a :href="price.topUpUrl.value" class="arc-link" target="_blank" rel="noopener noreferrer">
-          {{ t('shopPage.balance.topUp') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span>
-        </a>
-        <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link">{{ t('shopPage.balance.howTitle') }}</RouterLink>
-      </p>
-    </div>
+    <ArcCollapse :open="!!balance && insufficientFunds" class="buy-form__fold" lazy>
+      <div class="buy-form__short buy-form__unfolded" role="status">
+        <p>{{ shortText }}</p>
+        <p class="buy-form__short-links">
+          <a :href="price.topUpUrl.value" class="arc-link" target="_blank" rel="noopener noreferrer">
+            {{ t('shopPage.balance.topUp') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span>
+          </a>
+          <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link">{{ t('shopPage.balance.howTitle') }}</RouterLink>
+        </p>
+      </div>
+    </ArcCollapse>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed} from 'vue';
 import Decimal from 'decimal.js';
+import ArcCollapse from '@/components/arcana/ArcCollapse.vue';
 import {useI18n} from '@/composables/useI18n';
 import {useBalanceStore} from '@/stores/balance';
 import UserSelector from '@/components/shop/UserSelector.vue';
@@ -142,6 +148,15 @@ const updateRecipient = (val: string) => emit('update:recipientId', val);
 .buy-form {
   display: grid;
   gap: 20px;
+}
+
+/* a shut fold takes no room: it draws back over the gap before it, and its content keeps it */
+.buy-form__fold {
+  margin-top: -20px;
+}
+
+.buy-form__unfolded {
+  margin-top: 20px;
 }
 
 .buy-form__item {

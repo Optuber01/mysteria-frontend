@@ -46,29 +46,32 @@
       {{ setupText[0] }}<RouterLink :to="$lp('/profile')" class="arc-link">{{ t('shopPage.balance.setupLink') }}</RouterLink>{{ setupText[1] }}
     </p>
 
-    <div v-show="open" id="shop-balance-steps" class="shop-balance__how">
-      <ol class="arc-rows shop-balance__steps">
-        <template v-if="provider === 'bmc'">
-          <li class="arc-row">{{ bmcStep }}</li>
-          <li class="arc-row">{{ nameStep }}</li>
-        </template>
-        <li v-else class="arc-row">{{ t('shopPage.balance.stepDonatello') }}</li>
-        <li class="arc-row">{{ t('shopPage.balance.stepCredited') }}</li>
-        <li class="arc-row">
-          <span>
-            {{ missingText[0] }}<a :href="STORE_DISCORD" class="arc-link" target="_blank" rel="noopener noreferrer">{{ t('shopPage.balance.missingLink') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span></a>{{ missingText[1] }}
-          </span>
-        </li>
-      </ol>
-      <!-- on wide screens this link already sits in the bar -->
-      <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link shop-balance__more is-narrow">{{ t('shopPage.balance.more') }}</RouterLink>
-    </div>
+    <ArcCollapse id="shop-balance-steps" :open="open">
+      <div class="shop-balance__how">
+        <ol class="arc-rows shop-balance__steps">
+          <template v-if="provider === 'bmc'">
+            <li class="arc-row">{{ bmcStep }}</li>
+            <li class="arc-row">{{ nameStep }}</li>
+          </template>
+          <li v-else class="arc-row">{{ t('shopPage.balance.stepDonatello') }}</li>
+          <li class="arc-row">{{ t('shopPage.balance.stepCredited') }}</li>
+          <li class="arc-row">
+            <span>
+              {{ missingText[0] }}<a :href="STORE_DISCORD" class="arc-link" target="_blank" rel="noopener noreferrer">{{ t('shopPage.balance.missingLink') }}<span class="arc-sr"> ({{ t('shopPage.newTab') }})</span></a>{{ missingText[1] }}
+            </span>
+          </li>
+        </ol>
+        <!-- on wide screens this link already sits in the bar -->
+        <RouterLink :to="$lp('/help') + '#top-ups'" class="arc-link shop-balance__more is-narrow">{{ t('shopPage.balance.more') }}</RouterLink>
+      </div>
+    </ArcCollapse>
   </section>
 </template>
 
 <script setup lang="ts">
 import {computed, ref} from 'vue';
 import IconMark from '@/assets/icons/IconMark.vue';
+import ArcCollapse from '@/components/arcana/ArcCollapse.vue';
 import {useI18n} from '@/composables/useI18n';
 import {useAuthStore} from '@/stores/auth';
 import {useBalanceStore} from '@/stores/balance';
@@ -191,7 +194,7 @@ const signIn = () => authStore.openDiscordAuth();
 .shop-balance__toggle i {
   color: var(--arc-muted);
   font-size: 11px;
-  transition: transform .25s ease;
+  transition: transform var(--arc-dur-2) var(--arc-ease);
 }
 
 .shop-balance__toggle[aria-expanded="true"] i {
@@ -276,12 +279,6 @@ const signIn = () => authStore.openDiscordAuth();
   .shop-balance__setup,
   .shop-balance__how {
     padding-inline: 14px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .shop-balance__toggle i {
-    transition: none;
   }
 }
 </style>

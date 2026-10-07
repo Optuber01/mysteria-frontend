@@ -1,6 +1,7 @@
 <template>
   <Teleport to="body">
-    <Transition name="arc-modal">
+    <!-- the shared dialog motion (arcana.css): the backdrop fades, the panel rises in and sinks back -->
+    <Transition name="arc-dialog">
       <div v-if="localShow" class="arc-modal" @click="handleOverlayClick">
         <div
             ref="panel"
@@ -247,35 +248,6 @@ defineExpose({
 
   .arc-modal__foot > :deep(*) {
     flex: 1 1 auto;
-  }
-}
-
-.arc-modal-enter-active,
-.arc-modal-leave-active {
-  transition: opacity .25s ease;
-}
-
-.arc-modal-enter-active .arc-modal__panel,
-.arc-modal-leave-active .arc-modal__panel {
-  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
-}
-
-.arc-modal-enter-from,
-.arc-modal-leave-to {
-  opacity: 0;
-}
-
-.arc-modal-enter-from .arc-modal__panel,
-.arc-modal-leave-to .arc-modal__panel {
-  transform: translateY(10px) scale(.98);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .arc-modal-enter-active,
-  .arc-modal-leave-active,
-  .arc-modal-enter-active .arc-modal__panel,
-  .arc-modal-leave-active .arc-modal__panel {
-    transition: none;
   }
 }
 </style>

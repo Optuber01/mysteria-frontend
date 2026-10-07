@@ -11,23 +11,22 @@
       <i :class="{ open: isOpen }" aria-hidden="true" class="fa-solid fa-chevron-down lang-caret"></i>
     </button>
 
-    <Transition name="lang-menu">
-      <ul v-if="isOpen" class="lang-menu" role="listbox">
-        <li v-for="code in LANGUAGES" :key="code" role="none">
-          <button
-              :aria-selected="code === currentLanguage"
-              :class="{ active: code === currentLanguage }"
-              class="lang-option"
-              role="option"
-              @click="choose(code)"
-          >
-            <span class="lang-option-short">{{ LOCALES[code].short }}</span>
-            <span class="lang-option-name">{{ LOCALES[code].nativeName }}</span>
-            <i v-if="code === currentLanguage" aria-hidden="true" class="fa-solid fa-check lang-check"></i>
-          </button>
-        </li>
-      </ul>
-    </Transition>
+    <!-- kept in the page while shut (hidden from all), so it eases out as it eased in -->
+    <ul class="lang-menu arc-popover" :class="{'is-open': isOpen}" role="listbox" :aria-label="t('header.languageLabel')">
+      <li v-for="code in LANGUAGES" :key="code" role="none">
+        <button
+            :aria-selected="code === currentLanguage"
+            :class="{ active: code === currentLanguage }"
+            class="lang-option"
+            role="option"
+            @click="choose(code)"
+        >
+          <span class="lang-option-short">{{ LOCALES[code].short }}</span>
+          <span class="lang-option-name">{{ LOCALES[code].nativeName }}</span>
+          <i v-if="code === currentLanguage" aria-hidden="true" class="fa-solid fa-check lang-check"></i>
+        </button>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -116,7 +115,7 @@ onBeforeUnmount(() => {
 .lang-caret {
   font-size: 8px;
   color: color-mix(in srgb, var(--myst-ink-muted) 75%, transparent);
-  transition: transform 0.25s ease;
+  transition: transform var(--arc-dur-2) var(--arc-ease);
 }
 
 .lang-caret.open {
@@ -130,6 +129,7 @@ onBeforeUnmount(() => {
   right: 0;
   z-index: 1200;
   min-width: 168px;
+  --arc-popover-origin: top right;
   margin: 0;
   padding: 4px;
   list-style: none;
@@ -188,17 +188,6 @@ onBeforeUnmount(() => {
 .lang-check {
   font-size: 9px;
   color: var(--myst-gold);
-}
-
-.lang-menu-enter-active,
-.lang-menu-leave-active {
-  transition: opacity 0.16s ease, transform 0.16s ease;
-}
-
-.lang-menu-enter-from,
-.lang-menu-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
 }
 
 /* Light theme */

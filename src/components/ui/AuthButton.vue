@@ -25,40 +25,39 @@
           <i class="fa-solid fa-eye"></i>
         </button>
 
-        <Transition name="registry-menu">
-          <div v-if="isDropdownOpen" class="registry-menu">
-            <p class="registry-heading">Registry</p>
+        <!-- kept in the page while shut (hidden from all), so it eases out as it eased in -->
+        <div class="registry-menu arc-popover" :class="{'is-open': isDropdownOpen}">
+          <p class="registry-heading">Registry</p>
 
-            <RouterLink v-if="canManageNews" :to="$lp('/edit/news')" class="registry-item" @click="closeDropdown">
-              <i class="fa-solid fa-pen-nib"></i>
-              <span><strong>Archives</strong><small>Edit news &amp; lore</small></span>
+          <RouterLink v-if="canManageNews" :to="$lp('/edit/news')" class="registry-item" @click="closeDropdown">
+            <i class="fa-solid fa-pen-nib"></i>
+            <span><strong>Archives</strong><small>Edit news &amp; lore</small></span>
+          </RouterLink>
+
+          <RouterLink v-if="canManageShop" :to="$lp('/edit/services')" class="registry-item" @click="closeDropdown">
+            <i class="fa-solid fa-gem"></i>
+            <span><strong>Reliquary</strong><small>Manage services</small></span>
+          </RouterLink>
+
+          <RouterLink v-if="canTuneBalance" :to="$lp('/tools/balance')" class="registry-item" @click="closeDropdown">
+            <i class="fa-solid fa-scale-balanced"></i>
+            <span><strong>Observatory</strong><small>Balance tuning</small></span>
+          </RouterLink>
+
+          <RouterLink v-if="canManageCommissions" :to="$lp('/admin/commissions')" class="registry-item"
+                      @click="closeDropdown">
+            <i class="fa-solid fa-scroll"></i>
+            <span><strong>Commissions</strong><small>Review requests</small></span>
+          </RouterLink>
+
+          <template v-if="canAccessAdmin">
+            <div class="registry-divider" aria-hidden="true"></div>
+            <RouterLink :to="$lp('/admin')" class="registry-item" @click="closeDropdown">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span><strong>Full registry</strong><small>Admin dashboard</small></span>
             </RouterLink>
-
-            <RouterLink v-if="canManageShop" :to="$lp('/edit/services')" class="registry-item" @click="closeDropdown">
-              <i class="fa-solid fa-gem"></i>
-              <span><strong>Reliquary</strong><small>Manage services</small></span>
-            </RouterLink>
-
-            <RouterLink v-if="canTuneBalance" :to="$lp('/tools/balance')" class="registry-item" @click="closeDropdown">
-              <i class="fa-solid fa-scale-balanced"></i>
-              <span><strong>Observatory</strong><small>Balance tuning</small></span>
-            </RouterLink>
-
-            <RouterLink v-if="canManageCommissions" :to="$lp('/admin/commissions')" class="registry-item"
-                        @click="closeDropdown">
-              <i class="fa-solid fa-scroll"></i>
-              <span><strong>Commissions</strong><small>Review requests</small></span>
-            </RouterLink>
-
-            <template v-if="canAccessAdmin">
-              <div class="registry-divider" aria-hidden="true"></div>
-              <RouterLink :to="$lp('/admin')" class="registry-item" @click="closeDropdown">
-                <i class="fa-solid fa-shield-halved"></i>
-                <span><strong>Full registry</strong><small>Admin dashboard</small></span>
-              </RouterLink>
-            </template>
-          </div>
-        </Transition>
+          </template>
+        </div>
       </div>
 
       <button class="icon-button" :title="t('logout')" @click="handleLogout">
@@ -227,6 +226,7 @@ onUnmounted(() => window.removeEventListener("click", handleClickOutside));
   top: calc(100% + 12px);
   right: 0;
   min-width: 280px;
+  --arc-popover-origin: top right;
   padding: 8px;
   background: var(--myst-bg-deep);
   border: 1px solid var(--myst-line-20);
@@ -290,17 +290,6 @@ onUnmounted(() => window.removeEventListener("click", handleClickOutside));
   height: 1px;
   margin: 8px 12px;
   background: var(--myst-line-12);
-}
-
-.registry-menu-enter-active,
-.registry-menu-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.registry-menu-enter-from,
-.registry-menu-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
 }
 
 /* Mobile drawer variant */

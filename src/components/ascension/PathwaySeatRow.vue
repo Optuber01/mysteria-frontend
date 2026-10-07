@@ -65,28 +65,31 @@
       </button>
     </div>
 
-    <div v-if="withHolders" :id="panelId" class="asc-holders" role="region" :aria-label="panelLabel" :hidden="!open">
-      <ol class="asc-holders__rungs">
-        <li v-for="seat in row.seats" :key="seat.sequence" :class="{'is-throne': seat.sequence === 0}">
-          <h3 class="asc-holders__title">
-            <b>{{ seat.sequence }}</b> {{ seat.rank }}
-            <span>{{ seat.rung }}</span>
-          </h3>
-          <ul class="asc-holders__names">
-            <li v-for="name in seat.holders ?? []" :key="name" class="arc-tag" :class="{'arc-tag--acc': seat.sequence === 0}">{{ name }}</li>
-            <li v-if="seat.limit !== null && seat.limit > (seat.count ?? 0)" class="asc-holders__open">
-              {{ openSeats(seat.limit - (seat.count ?? 0)) }}
-            </li>
-            <li v-else-if="seat.limit === null && !seat.holders?.length" class="asc-holders__none">{{ t('ascensionPage.nobody') }}</li>
-          </ul>
-        </li>
-      </ol>
-    </div>
+    <ArcCollapse v-if="withHolders" :id="panelId" :open="open" role="region" :aria-label="panelLabel">
+      <div class="asc-holders">
+        <ol class="asc-holders__rungs">
+          <li v-for="seat in row.seats" :key="seat.sequence" :class="{'is-throne': seat.sequence === 0}">
+            <h3 class="asc-holders__title">
+              <b>{{ seat.sequence }}</b> {{ seat.rank }}
+              <span>{{ seat.rung }}</span>
+            </h3>
+            <ul class="asc-holders__names">
+              <li v-for="name in seat.holders ?? []" :key="name" class="arc-tag" :class="{'arc-tag--acc': seat.sequence === 0}">{{ name }}</li>
+              <li v-if="seat.limit !== null && seat.limit > (seat.count ?? 0)" class="asc-holders__open">
+                {{ openSeats(seat.limit - (seat.count ?? 0)) }}
+              </li>
+              <li v-else-if="seat.limit === null && !seat.holders?.length" class="asc-holders__none">{{ t('ascensionPage.nobody') }}</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </ArcCollapse>
   </li>
 </template>
 
 <script setup lang="ts">
 import {computed, ref} from 'vue';
+import ArcCollapse from '@/components/arcana/ArcCollapse.vue';
 import {useI18n} from '@/composables/useI18n';
 import {sigilThumb} from '@/components/home-arcana/arcana-data';
 import type {PathwayRow, SeatCell} from './types';
@@ -289,7 +292,7 @@ const openSeats = (n: number) =>
 
 .asc-row__toggle i {
   font-size: 11px;
-  transition: transform .25s ease;
+  transition: transform var(--arc-dur-2) var(--arc-ease);
 }
 
 .is-open .asc-row__toggle {
@@ -307,10 +310,6 @@ const openSeats = (n: number) =>
   border-radius: var(--arc-r-lg);
   background: color-mix(in oklab, var(--acc) 5%, var(--arc-raised));
   box-shadow: inset 0 0 0 var(--arc-bw) var(--arc-line);
-}
-
-.asc-holders[hidden] {
-  display: none;
 }
 
 /* one hairline row per rung: the rung on the left, its holders on the right */
@@ -463,12 +462,6 @@ const openSeats = (n: number) =>
 
   .asc-holders__rungs > li {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .asc-row__toggle i {
-    transition: none;
   }
 }
 </style>

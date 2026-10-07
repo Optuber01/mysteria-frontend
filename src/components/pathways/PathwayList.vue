@@ -28,52 +28,64 @@
       </div>
     </div>
 
-    <!-- browsing: one tab of tiles -->
-    <div v-if="!query" id="pw-grid" role="tabpanel" :aria-label="kind === 'boon' ? ui.tabBoons : ui.tabCore">
-      <p v-if="kind === 'boon'" class="pw-list__note arc-muted">{{ ui.boonsNote }}</p>
-      <ul class="pw-grid">
-        <li v-for="item in shown" :key="item.card.id">
-          <PathwayTile v-bind="item"/>
-        </li>
-      </ul>
-    </div>
+    <!-- browsing, a tab, or searching: the old view fades as the new one comes up over it -->
+    <ArcSwap>
+      <!-- browsing: one tab of tiles -->
+      <ArcSwap v-if="!query" id="pw-grid" role="tabpanel" :aria-label="kind === 'boon' ? ui.tabBoons : ui.tabCore">
+        <div :key="kind">
+          <p v-if="kind === 'boon'" class="pw-list__note arc-muted">{{ ui.boonsNote }}</p>
+          <ul class="pw-grid">
+            <li v-for="item in shown" :key="item.card.id">
+              <PathwayTile v-bind="item"/>
+            </li>
+          </ul>
+        </div>
+      </ArcSwap>
 
-    <!-- searching: matching Pathways, then matching abilities -->
-    <div v-else class="pw-results" aria-live="polite">
-      <p v-if="!pathwayHits.length && !abilityHits.length" class="pw-results__none">{{ fill(ui.noResults, {query}) }}</p>
-      <section v-if="pathwayHits.length" aria-labelledby="pw-hits-pathways">
-        <h2 id="pw-hits-pathways" class="arc-h4 pw-results__head">
-          {{ ui.resultsPathways }} <span class="arc-muted">{{ pathwayHits.length }}</span>
-        </h2>
-        <ul class="pw-grid">
-          <li v-for="item in pathwayHits" :key="item.card.id">
-            <PathwayTile v-bind="item"/>
-          </li>
-        </ul>
-      </section>
-      <section v-if="abilityHits.length" aria-labelledby="pw-hits-abilities">
-        <h2 id="pw-hits-abilities" class="arc-h4 pw-results__head">
-          {{ ui.resultsAbilities }} <span class="arc-muted">{{ abilityHits.length }}</span>
-        </h2>
-        <ul class="arc-rows pw-hits">
-          <li v-for="hit in abilityHits.slice(0, LIMIT)" :key="hit.key" class="arc-row">
-            <RouterLink :to="$lp(`/pathways/${hit.pathwayId}#seq-${hit.sequence}`)" class="pw-hit">
-              <span class="pw-hit__name">{{ hit.name }}</span>
-              <span class="pw-hit__where arc-muted">{{ hit.pathwayName }} · {{ fill(ui.sequence, {n: hit.sequence}) }}</span>
-              <span class="pw-hit__text arc-muted">{{ hit.description }}</span>
-            </RouterLink>
-          </li>
-        </ul>
-        <p v-if="abilityHits.length > LIMIT" class="pw-results__more arc-muted">
-          {{ fill(ui.moreResults, {shown: LIMIT, total: abilityHits.length}) }}
-        </p>
-      </section>
-    </div>
+      <!-- searching: matching Pathways, then matching abilities; each list eases as the words change -->
+      <div v-else class="pw-results" aria-live="polite">
+        <!-- a kind of result coming or going changes the layout: that eases as one swap -->
+        <ArcSwap>
+          <div :key="resultShape" class="pw-results__body">
+            <p v-if="!pathwayHits.length && !abilityHits.length" class="pw-results__none">{{ fill(ui.noResults, {query}) }}</p>
+            <section v-if="pathwayHits.length" aria-labelledby="pw-hits-pathways">
+              <h2 id="pw-hits-pathways" class="arc-h4 pw-results__head">
+                {{ ui.resultsPathways }} <span class="arc-muted">{{ pathwayHits.length }}</span>
+              </h2>
+              <ArcList class="pw-grid">
+                <li v-for="item in pathwayHits" :key="item.card.id">
+                  <PathwayTile v-bind="item"/>
+                </li>
+              </ArcList>
+            </section>
+            <section v-if="abilityHits.length" aria-labelledby="pw-hits-abilities">
+              <h2 id="pw-hits-abilities" class="arc-h4 pw-results__head">
+                {{ ui.resultsAbilities }} <span class="arc-muted">{{ abilityHits.length }}</span>
+              </h2>
+              <ArcList class="arc-rows pw-hits">
+                <li v-for="hit in abilityHits.slice(0, LIMIT)" :key="hit.key" class="arc-row">
+                  <RouterLink :to="$lp(`/pathways/${hit.pathwayId}#seq-${hit.sequence}`)" class="pw-hit">
+                    <span class="pw-hit__name">{{ hit.name }}</span>
+                    <span class="pw-hit__where arc-muted">{{ hit.pathwayName }} · {{ fill(ui.sequence, {n: hit.sequence}) }}</span>
+                    <span class="pw-hit__text arc-muted">{{ hit.description }}</span>
+                  </RouterLink>
+                </li>
+              </ArcList>
+              <p v-if="abilityHits.length > LIMIT" class="pw-results__more arc-muted">
+                {{ fill(ui.moreResults, {shown: LIMIT, total: abilityHits.length}) }}
+              </p>
+            </section>
+          </div>
+        </ArcSwap>
+      </div>
+    </ArcSwap>
   </div>
 </template>
 
 <script setup lang="ts">
 import {computed, ref} from 'vue';
+import ArcList from '@/components/arcana/ArcList.vue';
+import ArcSwap from '@/components/arcana/ArcSwap.vue';
 import ArcTabs from '@/components/arcana/ArcTabs.vue';
 import {BOON_CARDS, CORE_CARDS, type ArcanaCard, type PathwaysModule} from '@/components/home-arcana/arcana-data';
 import {useI18n} from '@/composables/useI18n';
@@ -158,6 +170,9 @@ const abilityHits = computed(() => {
   const byText = index.value.filter(entry => !entry.nameLc.includes(needle.value) && entry.textLc.includes(needle.value));
   return [...byName, ...byText];
 });
+
+/** Which kinds of result there are: a change here re-lays the results out. */
+const resultShape = computed(() => `${pathwayHits.value.length > 0}-${abilityHits.value.length > 0}`);
 </script>
 
 <style scoped>
@@ -246,7 +261,7 @@ const abilityHits = computed(() => {
   min-width: 0;
 }
 
-.pw-results {
+.pw-results__body {
   display: grid;
   gap: var(--arc-head-gap);
 }

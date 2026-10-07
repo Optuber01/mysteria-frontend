@@ -28,11 +28,16 @@
       </span>
     </button>
 
-    <Transition name="staff-card">
-      <div v-show="isOpen" :id="cardId" ref="cardEl" class="staff-chip__card" :style="{translate: `${shift}px 0`}">
-        <StaffMemberCard :member="member" :about="about"/>
-      </div>
-    </Transition>
+    <!-- kept in the page while shut (hidden from all), so it can ease out as it eased in -->
+    <div
+        :id="cardId"
+        ref="cardEl"
+        class="staff-chip__card arc-popover"
+        :class="{'is-open': isOpen, 'arc-popover--up': above}"
+        :style="{translate: `${shift}px 0`}"
+    >
+      <StaffMemberCard :member="member" :about="about"/>
+    </div>
   </li>
 </template>
 
@@ -131,11 +136,15 @@ onBeforeUnmount(clearTimers);
 <style scoped>
 .staff-chip {
   position: relative;
+  z-index: 0;
   min-width: 0;
+  /* a closing card stays over its neighbours until it has faded */
+  transition: z-index 0s linear var(--arc-dur-1);
 }
 
 .staff-chip.is-open {
   z-index: 5;
+  transition-delay: 0s;
 }
 
 .staff-chip__btn {
@@ -187,33 +196,5 @@ onBeforeUnmount(clearTimers);
 .staff-chip.is-above .staff-chip__card {
   top: auto;
   bottom: calc(100% + 8px);
-}
-
-.staff-card-enter-active,
-.staff-card-leave-active {
-  transition: opacity .16s ease, transform .2s cubic-bezier(.2, .8, .2, 1);
-}
-
-.staff-card-enter-from,
-.staff-card-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.staff-chip.is-above .staff-card-enter-from,
-.staff-chip.is-above .staff-card-leave-to {
-  transform: translateY(4px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .staff-card-enter-active,
-  .staff-card-leave-active {
-    transition: opacity .12s linear;
-  }
-
-  .staff-card-enter-from,
-  .staff-card-leave-to {
-    transform: none;
-  }
 }
 </style>

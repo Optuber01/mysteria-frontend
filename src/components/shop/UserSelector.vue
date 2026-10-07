@@ -26,21 +26,23 @@
       </span>
     </div>
 
-    <ul v-if="userOptions.length > 0" :id="listId" class="recipient__results" role="listbox" :aria-label="label">
-      <li v-for="user in userOptions" :key="user.value" role="presentation">
-        <button
-            :aria-selected="modelValue === user.value"
-            :class="{'is-selected': modelValue === user.value}"
-            class="recipient__option"
-            role="option"
-            type="button"
-            @click="handleUserSelect(user.value)"
-        >
-          <span>{{ user.label }}</span>
-          <span v-if="user.description" class="recipient__desc">{{ user.description }}</span>
-        </button>
-      </li>
-    </ul>
+    <Transition name="arc-fade">
+      <ul v-if="userOptions.length > 0" :id="listId" class="recipient__results" role="listbox" :aria-label="label">
+        <li v-for="user in userOptions" :key="user.value" role="presentation">
+          <button
+              :aria-selected="modelValue === user.value"
+              :class="{'is-selected': modelValue === user.value}"
+              class="recipient__option"
+              role="option"
+              type="button"
+              @click="handleUserSelect(user.value)"
+          >
+            <span>{{ user.label }}</span>
+            <span v-if="user.description" class="recipient__desc">{{ user.description }}</span>
+          </button>
+        </li>
+      </ul>
+    </Transition>
 
     <p v-if="!isLoading && !isUserSelected && searchQuery.length >= 2 && userOptions.length === 0" class="recipient__note" role="status">
       {{ t('noUsersFound') }}

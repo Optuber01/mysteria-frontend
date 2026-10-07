@@ -26,7 +26,8 @@
     <ArcTabs :model-value="filter" :tabs="tabs" :label="t('newsPage.filterLabel')" controls="news-entries"
              @update:model-value="id => setFilter(id as NewsFilter)"/>
 
-    <div id="news-entries" role="tabpanel" :aria-label="currentLabel" :aria-busy="status === 'loading' || waiting">
+    <!-- a tab, a search or the archive arriving: the old content fades as the new comes up over it -->
+    <ArcSwap id="news-entries" role="tabpanel" :aria-label="currentLabel" :aria-busy="status === 'loading' || waiting">
       <ArcState v-if="status === 'loading'" kind="loading" :text="t('newsPage.loading')"/>
       <ArcState v-else-if="status === 'error'" kind="error" :text="t('newsPage.error')"
                 :retry-label="t('newsPage.retry')" @retry="reload"/>
@@ -40,29 +41,34 @@
                 @retry="otherTabsHaveMatches ? setFilter('all') : clear()"/>
       <ArcState v-else-if="!groups.length" kind="empty" :text="t('newsPage.empty')"/>
 
-      <template v-else>
+      <div v-else :key="`${filter}|${term}`">
         <NewsLatest v-if="latestChangelog && showLatest" :entry="latestChangelog" :language="language"
                     class="news-index__latest"/>
 
-        <section v-for="group in groups" :key="group.key" class="news-index__month">
-          <h2 class="arc-h4 news-index__month-title">{{ group.label }}</h2>
-          <ul class="arc-rows">
-            <NewsEntryRow v-for="entry in group.entries" :key="entry.id" :entry="entry"/>
-          </ul>
-        </section>
+        <!-- "Show more": the new months and rows fade in, and the list eases to its new length -->
+        <ArcList tag="div">
+          <section v-for="group in groups" :key="group.key" class="news-index__month">
+            <h2 class="arc-h4 news-index__month-title">{{ group.label }}</h2>
+            <TransitionGroup name="arc-list" tag="ul" class="arc-rows">
+              <NewsEntryRow v-for="entry in group.entries" :key="entry.id" :entry="entry"/>
+            </TransitionGroup>
+          </section>
+        </ArcList>
 
         <div v-if="canShowMore" class="news-index__more">
           <button type="button" class="arc-btn arc-btn--ghost" @click="showMore">{{ t('newsPage.showMore') }}</button>
         </div>
-      </template>
-    </div>
+      </div>
+    </ArcSwap>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed, onBeforeUnmount, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
+import ArcList from '@/components/arcana/ArcList.vue';
 import ArcState from '@/components/arcana/ArcState.vue';
+import ArcSwap from '@/components/arcana/ArcSwap.vue';
 import ArcTabs from '@/components/arcana/ArcTabs.vue';
 import {useI18n} from '@/composables/useI18n';
 import type {ArticleLocale} from '@/locales';

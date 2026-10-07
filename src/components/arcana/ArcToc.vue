@@ -5,31 +5,34 @@
     Entries are links (`to`) or in-page anchors (`href`); the current one is marked.
   -->
   <nav ref="nav" class="arc-toc" :aria-label="label">
-    <details class="arc-toc__fold" :open="wide || undefined">
+    <details class="arc-toc__fold arc-details" :open="wide || undefined">
       <summary class="arc-toc__summary">
         <span>{{ label }}</span>
         <span v-if="currentLabel" class="arc-toc__current">{{ currentLabel }}</span>
         <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
       </summary>
-      <template v-for="group in groups" :key="group.title ?? 'all'">
-        <p v-if="group.title" class="arc-toc__group">{{ group.title }}</p>
-        <ul class="arc-toc__list">
-          <li v-for="item in group.items" :key="item.id">
-            <component
-                :is="item.to ? RouterLink : 'a'"
-                :to="item.to"
-                :href="item.to ? undefined : item.href ?? `#${item.id}`"
-                class="arc-toc__link"
-                :class="{'is-current': item.id === current, 'is-sub': item.sub}"
-                :aria-current="item.id === current ? (item.to ? 'page' : 'location') : undefined"
-                @click="$emit('pick', item.id)"
-            >
-              <span v-if="item.mark" class="arc-toc__mark">{{ item.mark }}</span>
-              <span class="arc-toc__text">{{ item.label }}</span>
-            </component>
-          </li>
-        </ul>
-      </template>
+      <!-- one box for everything under the summary, so the fold can ease open and shut -->
+      <div class="arc-details__body arc-toc__body">
+        <template v-for="group in groups" :key="group.title ?? 'all'">
+          <p v-if="group.title" class="arc-toc__group">{{ group.title }}</p>
+          <ul class="arc-toc__list">
+            <li v-for="item in group.items" :key="item.id">
+              <component
+                  :is="item.to ? RouterLink : 'a'"
+                  :to="item.to"
+                  :href="item.to ? undefined : item.href ?? `#${item.id}`"
+                  class="arc-toc__link"
+                  :class="{'is-current': item.id === current, 'is-sub': item.sub}"
+                  :aria-current="item.id === current ? (item.to ? 'page' : 'location') : undefined"
+                  @click="$emit('pick', item.id)"
+              >
+                <span v-if="item.mark" class="arc-toc__mark">{{ item.mark }}</span>
+                <span class="arc-toc__text">{{ item.label }}</span>
+              </component>
+            </li>
+          </ul>
+        </template>
+      </div>
     </details>
   </nav>
 </template>
@@ -188,19 +191,15 @@ onMounted(() => nextTick(revealCurrent));
   .arc-toc__summary i {
     margin-left: auto;
     color: var(--arc-muted);
-    transition: transform .25s ease;
+    transition: transform var(--arc-dur-2) var(--arc-ease);
   }
 
   .arc-toc__fold[open] .arc-toc__summary i {
     transform: rotate(180deg);
   }
 
-  .arc-toc__fold[open] > :not(summary) {
-    margin-inline: 8px;
-  }
-
-  .arc-toc__fold[open] > .arc-toc__list:last-child {
-    padding-bottom: 8px;
+  .arc-toc__body {
+    padding: 0 8px 8px;
   }
 
   .arc-toc__group {
