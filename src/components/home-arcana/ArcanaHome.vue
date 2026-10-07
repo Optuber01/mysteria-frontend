@@ -120,7 +120,20 @@ function holdLoops(section: Element, offscreen: boolean) {
   held.set(section, [...loops]);
 }
 
+/*
+ * Keyboard focus never lands out of sight (WCAG 2.4.11): leaving the pinned potion story,
+ * the browser left the next stop (the ring's tabs) below the fold. Anything the keyboard
+ * focuses entirely off screen is brought into view.
+ */
+function revealFocus(event: FocusEvent) {
+  const el = event.target;
+  if (!(el instanceof HTMLElement) || !el.matches(':focus-visible')) return;
+  const r = el.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > window.innerHeight) el.scrollIntoView({block: 'center', behavior: 'instant'});
+}
+
 onMounted(() => {
+  document.addEventListener('focusin', revealFocus);
   // The pathway data is ~1.3 MB: fetch it once the first screen has settled.
   const idle = (window as Window & {requestIdleCallback?: (cb: () => void, opts?: {timeout: number}) => number}).requestIdleCallback;
   if (idle) idle(() => void ensurePathwayData(), {timeout: 1500});
@@ -141,6 +154,7 @@ function onLoopStart(event: Event) {
 }
 
 onUnmounted(() => {
+  document.removeEventListener('focusin', revealFocus);
   clearTimeout(nightFall);
   lockNight(null);
   offscreenObserver?.disconnect();

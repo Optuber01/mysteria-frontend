@@ -7,6 +7,7 @@
   "navNews": "Новини",
   "navServices": "Сервіси",
   "header": {
+    "skip": "Перейти до вмісту",
     "tagline": "За межами Туману",
     "languageLabel": "Мова",
     "navLabel": "Головне меню",
@@ -31,6 +32,7 @@
     "linkCompanion": "Мод COI Client"
   },
   "homePage": {
+    "seoTitle": "Mysterria - Minecraft-сервер за Lord of the Mysteries",
     "heroEyebrowBefore": "Minecraft-сервер за",
     "heroEyebrowBrand": "Володарем Таємниць",
     "heroEyebrowAfter": "",

@@ -108,8 +108,8 @@ const glow = computed(() => entrance.value * (0.55 + readT.value * 0.45));
  * The reader's hand. Once the cover faces them, until the cauldron comes up under the book,
  * they can fold it shut either way, as on paper: drag right and the left half closes over
  * (the front cover shows), drag left and the right half closes over (the back shows); one
- * drag runs front, open, back. A tap on either shut cover opens it, and on release it falls
- * to the nearest rest. When the brew needs the open pages, or the scroll catches up with
+ * drag runs front, open, back. A tap on either shut cover opens it, a tap on an open book's
+ * outer edge closes it that way, and on release a drag falls to the nearest rest. When the brew needs the open pages, or the scroll catches up with
  * the hand, the scroll takes the book back.
  */
 /** How far the scroll has the book shut on its front cover (1) or open (0). */
@@ -182,10 +182,23 @@ function letGo(event: PointerEvent) {
   const flick = press.vx;
   press = null;
   if (!dragging.value) {
+    if (event.type !== 'pointerup') return;
     // a tap on either shut cover opens it
-    if (event.type === 'pointerup' && Math.abs(heldFold.value ?? 0) > 0.5) {
+    if (Math.abs(heldFold.value ?? 0) > 0.5) {
       dragged = true;
       animate(hand, 0, 620);
+      return;
+    }
+    // and a tap on an open book's outer edge closes it that way: the click that does what the
+    // drag does (WCAG 2.5.7). The entries on the pages keep their own taps.
+    const box = (event.currentTarget as Element).querySelector('.book-scene__box')?.getBoundingClientRect();
+    if (!box || (event.target instanceof Element && event.target.closest('.book-hotspot'))) return;
+    const x = (event.clientX - box.left) / box.width;
+    if (x < 0.22 || x > 0.78) {
+      if (weight.value === 0) hand.value = scrollFold.value;
+      weight.value = 1;
+      dragged = true;
+      animate(hand, x < 0.22 ? 1 : -1, 680);
     }
     return;
   }

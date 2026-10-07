@@ -225,12 +225,12 @@
     >
       <ul class="world-strip__track">
         <li v-for="item in gallery" :key="item.id" class="world-strip__item" :aria-hidden="item.copy || undefined">
-          <!-- opens the shot full size, with a link to the post it came from -->
+          <!-- opens the shot full size, with a link to the post it came from; named by what it
+               shows (the place, then the credit and season), so voice control can say it -->
           <button
               type="button"
               class="world-strip__open"
               :tabindex="item.copy ? -1 : undefined"
-              :aria-label="t('home.world.gallery.open').replace('{place}', item.shot.place).replace('{author}', item.shot.author)"
               @click="openShot(item.index)"
           >
             <WorldPhoto :shot="item.shot" :alt="item.copy ? '' : item.shot.place" sizes="360px" :eager="stripWarm" epoch/>
@@ -855,6 +855,8 @@ onUnmounted(() => {
 .sys__link {
   display: inline-flex;
   align-items: center;
+  /* a finger-sized target (WCAG 2.5.8: at least 24px) */
+  min-height: 24px;
   gap: 8px;
   font-size: var(--arc-fs-small);
   font-weight: 600;

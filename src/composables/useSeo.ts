@@ -131,15 +131,21 @@ function resolveAlternates(
  * articles, the active locale).
  */
 export function useSeo(source: () => SeoInput) {
-    const {currentLanguage} = useI18n();
+    const {currentLanguage, t} = useI18n();
 
     const stop = watchEffect(() => {
         const seo = source();
         const language = currentLanguage.value;
 
-        const title = seo.title ? `${seo.title}${TITLE_SUFFIX}` : `${SITE_NAME} - Lord of the Mysteries Minecraft Server`;
+        // the home page owns the bare brand title, in the reader's language
+        const title = seo.title ? `${seo.title}${TITLE_SUFFIX}` : t("homePage.seoTitle");
         const description = trimDescription(seo.description);
-        const canonical = absolute(seo.path ?? window.location.pathname);
+        /*
+         * The canonical is this page in this language. Pages pass their path without the
+         * locale (`/news`); that bare URL only redirects, so every language's page
+         * declared another page canonical and contradicted its own hreflang set.
+         */
+        const canonical = absolute(localePath(stripLocale(seo.path ?? window.location.pathname), language));
         const image = absolute(seo.image ?? DEFAULT_IMAGE);
         const type = seo.type ?? "website";
 

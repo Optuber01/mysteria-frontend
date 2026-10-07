@@ -7,6 +7,7 @@
   "navNews": "Actualités",
   "navServices": "Services",
   "header": {
+    "skip": "Aller au contenu",
     "tagline": "Au-delà de la Brume",
     "languageLabel": "Langue",
     "navLabel": "Principal",
@@ -31,6 +32,7 @@
     "linkCompanion": "Mod COI Client"
   },
   "homePage": {
+    "seoTitle": "Mysterria - Serveur Minecraft Lord of the Mysteries",
     "heroEyebrowBefore": "Un",
     "heroEyebrowBrand": "Lord of the Mysteries",
     "heroEyebrowAfter": "serveur Minecraft",

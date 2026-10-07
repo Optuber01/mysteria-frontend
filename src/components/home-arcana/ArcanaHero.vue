@@ -7,8 +7,7 @@
       <div ref="introRef" class="arc-hero__intro" :class="{'is-ready': fontsReady}">
         <!-- two lines, each kept on one line: the whole title scales down to fit the column (fitTitle) -->
         <h1 id="arc-hero-title" class="arc-hero__title" :style="{'--fit': titleFit}">
-          <span><span ref="leadRef" class="arc-hero__title-line">{{ titleA }}</span></span>
-          <span class="arc-hero__title-accent"><span ref="accentRef" class="arc-hero__title-line">{{ titleB }}</span></span>
+          <span><span ref="leadRef" class="arc-hero__title-line">{{ titleA }}</span></span>{{ ' ' }}<span class="arc-hero__title-accent"><span ref="accentRef" class="arc-hero__title-line">{{ titleB }}</span></span>
         </h1>
       </div>
 
@@ -20,14 +19,15 @@
             {{ t('home.arcana.hero.join') }}
             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
           </RouterLink>
-          <RouterLink :to="$lp(changelogLink)" class="arc-btn arc-btn--ghost arc-hero__news" :aria-label="changelogAria">
+          <!-- named by what it shows, date included (WCAG 2.5.3: the name holds the visible label) -->
+          <RouterLink :to="$lp(changelogLink)" class="arc-btn arc-btn--ghost arc-hero__news">
             {{ t('home.arcana.hero.changelog') }}
             <!-- The date's room is kept while the post loads, so the button never resizes. -->
             <span
                 v-if="changelogDate || !newsSettled"
                 class="arc-hero__news-date"
                 :class="{'is-shown': changelogDate}"
-                aria-hidden="true"
+                :aria-hidden="changelogDate ? undefined : 'true'"
             >{{ changelogDate }}</span>
           </RouterLink>
         </div>
@@ -207,12 +207,6 @@ const changelogDay = (options: Intl.DateTimeFormatOptions) => {
   return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString(intlLocale.value, options) : '';
 };
 const changelogDate = computed(() => changelogDay({month: 'short', day: 'numeric'}));
-const changelogAria = computed(() => {
-  const label = t('home.arcana.hero.changelog');
-  const long = changelogDay({day: 'numeric', month: 'long', year: 'numeric'});
-  return long ? `${label}, ${long}` : label;
-});
-
 /* ---------------- deck state ---------------- */
 const shuffled = <T, >(list: T[]): T[] => {
   const out = list.slice();

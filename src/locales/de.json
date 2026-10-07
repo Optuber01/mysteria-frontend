@@ -7,6 +7,7 @@
   "navNews": "Neuigkeiten",
   "navServices": "Dienste",
   "header": {
+    "skip": "Zum Inhalt springen",
     "tagline": "Jenseits des Nebels",
     "languageLabel": "Sprache",
     "navLabel": "Hauptnavigation",
@@ -31,6 +32,7 @@
     "linkCompanion": "COI-Client-Mod"
   },
   "homePage": {
+    "seoTitle": "Mysterria - Lord of the Mysteries Minecraft-Server",
     "heroEyebrowBefore": "Ein",
     "heroEyebrowBrand": "The Circle of Imagination",
     "heroEyebrowAfter": "Minecraft-Server",

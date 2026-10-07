@@ -7,6 +7,7 @@
   "navNews": "Noutăți",
   "navServices": "Servicii",
   "header": {
+    "skip": "Sari la conținut",
     "tagline": "Dincolo de Ceața Cenușie",
     "languageLabel": "Limbă",
     "navLabel": "Principal",
@@ -31,6 +32,7 @@
     "linkCompanion": "Modul COI Client"
   },
   "homePage": {
+    "seoTitle": "Mysterria - Server de Minecraft Lord of the Mysteries",
     "heroEyebrowBefore": "A",
     "heroEyebrowBrand": "Lord of the Mysteries",
     "heroEyebrowAfter": "server Minecraft",

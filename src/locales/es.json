@@ -7,6 +7,7 @@
   "navNews": "Noticias",
   "navServices": "Servicios",
   "header": {
+    "skip": "Saltar al contenido",
     "tagline": "Más allá de la Niebla",
     "languageLabel": "Idioma",
     "navLabel": "Principal",
@@ -31,6 +32,7 @@
     "linkCompanion": "Mod COI Client"
   },
   "homePage": {
+    "seoTitle": "Mysterria - Servidor de Minecraft de Lord of the Mysteries",
     "heroEyebrowBefore": "Un servidor de Minecraft de",
     "heroEyebrowBrand": "Lord of the Mysteries",
     "heroEyebrowAfter": "Servidor de Minecraft",

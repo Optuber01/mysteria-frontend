@@ -1,5 +1,7 @@
 <template>
   <Analytics/>
+  <!-- first stop for the keyboard: past the header to the page itself (WCAG 2.4.1) -->
+  <a class="skip-link" href="#main-content" @click.prevent="skipToMain">{{ t('header.skip') }}</a>
   <div class="app">
     <!-- The homepage paints its own light canvas; the shared dark one would only
          sit hidden underneath it. -->
@@ -24,6 +26,7 @@ import {useDailyBonusWatcher} from "./stores/dailyBonus";
 import {useAccountNotificationsWatcher} from "./stores/notifications";
 import {Analytics} from '@vercel/analytics/vue';
 import {applyTheme, readSavedTheme} from "@/composables/useTheme";
+import {useI18n} from "@/composables/useI18n";
 
 useUserWatcher();
 useBalanceWatcher();
@@ -31,6 +34,15 @@ useServicesWatcher();
 useDailyBonusWatcher();
 useAccountNotificationsWatcher();
 
+const {t} = useI18n();
+/* Every page has one <main>: focus it (it takes focus only from here) and bring it into view. */
+function skipToMain() {
+  const main = document.querySelector<HTMLElement>('main');
+  if (!main) return;
+  if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+  main.focus({preventScroll: true});
+  main.scrollIntoView({block: 'start', behavior: 'instant'});
+}
 const route = useRoute();
 const isHome = computed(() => route.name === "home");
 /*

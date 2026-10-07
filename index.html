@@ -69,9 +69,16 @@
 
     <!-- Inter (body), Playfair Display (headings), JetBrains Mono (labels), one
          request so the Cyrillic subsets come along for the Ukrainian locale. -->
+    <!-- Not render-blocking: the page paints in the fallback faces and swaps them in
+         (media=print until loaded). Without scripts it loads as a normal stylesheet. -->
     <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap"
-            rel="stylesheet">
+            rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript>
+        <link
+                href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap"
+                rel="stylesheet">
+    </noscript>
 
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://api.mysterria.net">
@@ -93,7 +100,7 @@
 
     <!-- No custom font loading script needed - Inter loads fast with display=swap -->
 
-    <title>Mysterria - Lord of The Mysteries Minecraft Server</title>
+    <title>Mysterria - Lord of the Mysteries Minecraft Server</title>
 </head>
 <body>
 <div id="app"></div>

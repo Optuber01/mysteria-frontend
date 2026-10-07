@@ -2,7 +2,7 @@
   <div ref="rootRef" class="lang-ritual-selector">
     <button
         :aria-expanded="isOpen"
-        :aria-label="t('header.languageLabel')"
+        :aria-label="`${LOCALES[currentLanguage].short}, ${t('header.languageLabel')}`"
         aria-haspopup="listbox"
         class="lang-ritual-trigger"
         @click="isOpen = !isOpen"

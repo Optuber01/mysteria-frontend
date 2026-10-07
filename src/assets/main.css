@@ -976,3 +976,29 @@ html[lang^="zh"] .section-eyebrow,
 html[lang^="zh"] .season-headline {
     text-transform: none;
 }
+
+/* The skip link: out of sight until the keyboard reaches it, then a plain tab at the top left. */
+.skip-link {
+    position: fixed;
+    top: 8px;
+    left: 8px;
+    z-index: 10000;
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: #0b0b0e;
+    color: #f4f4f6;
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-160%);
+}
+
+.skip-link:focus-visible {
+    transform: none;
+    outline: 2px solid #f4f4f6;
+    outline-offset: 2px;
+}
+
+/* the page itself, when the skip link sends focus there, shows no ring of its own */
+main:focus {
+    outline: none;
+}

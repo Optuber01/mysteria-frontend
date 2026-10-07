@@ -18,7 +18,7 @@
         class="reading-card"
         :class="{ 'is-open': c.open }"
         :style="c.style"
-        v-bind="c.open ? { to: $lp(`/pathways/${pathwayId}`), 'aria-label': tp('drink.cardLink') } : { 'aria-hidden': 'true' }"
+        v-bind="c.open ? { to: $lp(`/pathways/${pathwayId}`) } : { 'aria-hidden': 'true' }"
         @pointermove="onCardPointer"
         @pointerleave="onCardLeave"
       >
@@ -30,6 +30,8 @@
             <span class="reading-card__sheen" aria-hidden="true" />
           </span>
         </span>
+        <!-- named by the face it shows, then where it leads (WCAG 2.5.3) -->
+        <span v-if="c.open" class="arc-sr">{{ tp('drink.cardLink') }}</span>
       </component>
     </div>
 

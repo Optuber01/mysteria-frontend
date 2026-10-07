@@ -8,6 +8,8 @@
       class="inspector"
       :class="{ 'inspector--instant': reducedMotion, 'is-positioned': positioned }"
       role="tooltip"
+      @mouseenter="emit('hover', true)"
+      @mouseleave="emit('hover', false)"
     >
       <strong>{{ title }}</strong>
       <p>{{ description }}</p>
@@ -30,6 +32,9 @@ const props = defineProps<{
   title?: string;
   description?: string;
 }>();
+
+/* The pointer is on the note: it stays while it is read (WCAG 1.4.13, hoverable). */
+const emit = defineEmits<{ (e: 'hover', on: boolean): void }>();
 
 const popoverRef = ref<HTMLElement | null>(null);
 const arrowRef = ref<HTMLElement | null>(null);
@@ -122,7 +127,6 @@ onUnmounted(() => cleanup?.());
   background: var(--ins-bg);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
   font-family: var(--arc-body, system-ui, sans-serif);
-  pointer-events: none;
 }
 .inspector.is-positioned { visibility: visible; }
 .inspector strong { display: block; color: var(--ins-ink); font-size: 15px; font-weight: 600; line-height: 1.3; }

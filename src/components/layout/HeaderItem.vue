@@ -15,7 +15,8 @@
   <header :class="['site-header', {'is-authed': isAuthenticated}]">
     <div class="header-grid">
       <RouterLink :to="$lp('/')" class="brand" @click="closeMobileNav">
-        <img :src="logo" alt="Mysterria" class="brand-mark" width="38" height="38">
+        <!-- the name beside it names the link: the mark itself is decoration -->
+        <img :src="logo" alt="" class="brand-mark" width="38" height="38">
         <span class="brand-words">
           <span class="brand-name">Mysterria</span>
           <span class="brand-tagline">{{ t('header.tagline') }}</span>

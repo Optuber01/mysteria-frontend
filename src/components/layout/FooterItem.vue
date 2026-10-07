@@ -149,6 +149,8 @@ const year = new Date().getFullYear();
 .footer-column a {
   display: flex;
   align-items: center;
+  /* a finger-sized target (WCAG 2.5.8: at least 24px) */
+  min-height: 24px;
   gap: 10px;
   font-size: 14px;
   color: var(--myst-ink-muted);

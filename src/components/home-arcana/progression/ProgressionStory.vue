@@ -77,7 +77,7 @@
               :hidden="departed"
               @anchors="bookAnchors = $event"
               @inspect="(id, el) => showDetail(id, 'book', el)"
-              @clear-inspect="clearDetail"
+              @clear-inspect="releaseDetail"
             />
           </div>
           <div class="scene-window scene-window--altar" :style="altarWindowStyle" :aria-hidden="altarOpacity < 0.5">
@@ -88,7 +88,7 @@
               :anchors="bookAnchors"
               :book-transform="bookTransform"
               @inspect="(id, el) => showDetail(id, 'altar', el)"
-              @clear-inspect="clearDetail"
+              @clear-inspect="releaseDetail"
             />
           </div>
           <div class="scene-window scene-window--drink" :style="drinkWindowStyle" :aria-hidden="drinkOpacity < 0.5">
@@ -98,7 +98,7 @@
               :active="drinkOpacity > 0.5"
               :warm="progress >= T.brewIn[0] || near && progress > 0.1"
               @inspect="(id, el) => showDetail(id, 'drink', el)"
-              @clear-inspect="clearDetail"
+              @clear-inspect="releaseDetail"
             />
           </div>
 
@@ -109,6 +109,7 @@
             :boundary="stageRef"
             :title="activeDetail?.label"
             :description="activeDetail?.detail"
+            @hover="holdDetail"
           />
         </div>
       </div>
@@ -484,14 +485,30 @@ watch(currentId, () => clearDetail());
 
 function showDetail(id: string, scene: DetailScene, anchor: HTMLElement) {
   if (!resolveDetail(id) || !anchor) return;
+  clearTimeout(releaseTimer);
   activeDetailId.value = id;
   inspectorAnchor.value = anchor;
   inspectorScene.value = scene;
 }
 function clearDetail() {
+  clearTimeout(releaseTimer);
   activeDetailId.value = null;
   inspectorAnchor.value = null;
   inspectorScene.value = null;
+}
+/*
+ * The hand leaving what it pointed at closes the note a moment later, not at once, so the
+ * pointer can cross onto the note and read it there (it stays while hovered); Escape and a
+ * click elsewhere still close it at once (WCAG 1.4.13).
+ */
+let releaseTimer = 0;
+function releaseDetail() {
+  clearTimeout(releaseTimer);
+  releaseTimer = window.setTimeout(clearDetail, 350);
+}
+function holdDetail(on: boolean) {
+  if (on) clearTimeout(releaseTimer);
+  else releaseDetail();
 }
 function onStageClick(event: MouseEvent) {
   if (!(event.target instanceof HTMLElement) || !event.target.closest('button')) clearDetail();
@@ -650,6 +667,7 @@ onMounted(() => {
   measureStage();
 });
 onUnmounted(() => {
+  clearTimeout(releaseTimer);
   cancelPrewarm?.();
   observer?.disconnect();
   nearObserver?.disconnect();
